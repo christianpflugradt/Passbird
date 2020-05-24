@@ -1,0 +1,6 @@
+<FindBugsFilter>
+    <Match><Bug pattern="DM_CONVERT_CASE"/></Match>
+    <Match><Bug pattern="DM_EXIT"/></Match>
+    <Match><Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"/></Match><!-- try with resources false positive -->
+    <Match><Bug pattern="UPM_UNCALLED_PRIVATE_METHOD"/></Match>
+</FindBugsFilter>

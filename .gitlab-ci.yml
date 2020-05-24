@@ -1,0 +1,132 @@
+image: openjdk:11
+
+stages:
+  - check
+  - test
+  - report
+  - release
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+after_script:
+  - echo "done"
+
+compile:
+  stage: check
+  script: ./gradlew compileJava compileTestJava
+
+pmd:
+  stage: check
+  script: ./gradlew pmdMain
+  artifacts:
+    when: always
+    paths:
+      - build/reports/pmd/*
+    expire_in: 1 week
+
+checkstyle:
+  stage: check
+  script: ./gradlew checkstyleMain
+  artifacts:
+    when: always
+    paths:
+      - build/reports/checkstyle/*
+    expire_in: 1 week
+
+spotbugs:
+  stage: check
+  script: ./gradlew spotbugsMain
+  artifacts:
+    when: always
+    paths:
+      - build/reports/spotbugs/*
+    expire_in: 1 week
+
+unit-tests:
+  stage: test
+  script: ./gradlew unittests
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/unittests/**TEST-*.xml
+    paths:
+      - build/reports/tests/unittests/*
+      - build/jacoco/*
+    expire_in: 1 week
+
+integration-tests:
+  stage: test
+  script: ./gradlew integrationtests
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/integrationtests/**TEST-*.xml
+    paths:
+      - build/reports/tests/integrationtests/*
+      - build/jacoco/*
+    expire_in: 1 week
+
+architecture-tests:
+  stage: test
+  script: ./gradlew architecturetests
+  artifacts:
+    when: always
+    reports:
+      junit: build/test-results/architecturetests/**TEST-*.xml
+    paths:
+      - build/reports/tests/architecturetests/*
+      - build/jacoco/*
+    expire_in: 1 week
+
+test-coverage-verification:
+  stage: report
+  script: ./gradlew jacocoTestCoverageVerification
+
+test-coverage-report:
+  stage: report
+  script: ./gradlew jacocoTestReport
+  artifacts:
+    when: always
+    paths:
+      - build/reports/jacoco/test/html/*
+    expire_in: 1 week
+
+licences:
+  stage: release
+  script: ./gradlew downloadLicenses
+  artifacts:
+    when: always
+    paths:
+      - build/reports/license/*
+    expire_in: 1 week
+  only:
+    - tags
+
+semver:
+  stage: release
+  image: node:13
+  before_script:
+    - npm install @semantic-release/gitlab
+    - cat $SEM_RELEASE_OPTIONS > .releaserc.yml
+  script: npx semantic-release -t \${version}
+  only:
+    - master
+
+publish:
+  stage: release
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+  script:
+    - ./gradlew -Pversion=$CI_COMMIT_REF_NAME jar
+    - eval "$SSH_COPY"
+  artifacts:
+    paths:
+      - build/libs/*
+    expire_in: 1 week
+  only:
+    - tags

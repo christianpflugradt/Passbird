@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+    <suppress checks="AvoidStaticImport"/>
+    <suppress checks="CustomImportOrder"/>
+    <suppress checks="EmptyLineSeparator"/>
+    <suppress checks="ImportOrder"/>
+    <suppress checks="JavadocPackage"/>
+    <suppress checks="JavadocVariable"/>
+    <suppress checks="LambdaParameterName"/>
+    <suppress checks="MemberName"/>
+    <suppress checks="MissingJavadocMethod"/>
+    <suppress checks="MissingJavadocType"/>
+    <suppress checks="MissingJavadocType"/>
+    <suppress checks="WriteTag"/>
+</suppressions>

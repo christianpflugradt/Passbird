@@ -1,0 +1,139 @@
+plugins {
+    id 'java'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'com.github.hierynomus.license' version '0.15.0'
+    id 'pmd'
+    id 'com.github.spotbugs' version '4.1.0'
+}
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+pmd {
+    consoleOutput = true
+    maxFailures = 0
+    ruleSets = []
+    ruleSetConfig = resources.text.fromFile(rootProject.file("config/pmd/ruleset.xml"))
+}
+
+checkstyle {
+    maxWarnings = 0
+    maxErrors = 0
+    configFile = project(':').file('config/checkstyle/checkstyle.xml')
+    configProperties = ["checkstyle.suppressions.file" : project(':').file('config/checkstyle/suppressions.xml')]
+    toolVersion = '8.32'
+}
+
+spotbugs {
+    showProgress = true
+    effort = "max"
+    reportLevel = "low"
+    excludeFilter = rootProject.file("config/spotbugs/excludes.xml")
+}
+
+spotbugsMain {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
+jacocoTestReport {
+    executionData.from = files('build/jacoco/unittests.exec', 'build/jacoco/integrationtests.exec')
+}
+
+jacocoTestCoverageVerification {
+    violationRules {[
+        rule {
+            limit {
+                counter = 'INSTRUCTION'
+                value = 'COVEREDRATIO'
+                minimum = 0.95
+            }
+            failOnViolation true
+        },
+        rule {
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.90
+            }
+            failOnViolation true
+        }]
+    }
+}
+
+task architecturetests(type: Test, group: 'Verification') {
+    useJUnitPlatform()
+    include '**/*TestArch.class'
+    testLogging {
+        events "passed", "failed"
+    }
+}
+
+task unittests(type: Test, group: 'Verification') {
+    useJUnitPlatform()
+    include '**/*Test.class'
+    testLogging {
+        events "passed", "failed"
+    }
+}
+
+task integrationtests(type: Test, group: 'Verification') {
+    useJUnitPlatform()
+    include '**/*TestIT.class'
+    testLogging {
+        events "passed", "failed"
+    }
+}
+
+task checkAll() {
+    dependsOn checkstyleMain
+    dependsOn pmdMain
+    dependsOn spotbugsMain
+    dependsOn unittests
+    dependsOn integrationtests
+    dependsOn architecturetests
+    dependsOn jacocoTestCoverageVerification
+    dependsOn jacocoTestReport
+    tasks.findByName('jacocoTestReport').mustRunAfter 'unittests'
+    tasks.findByName('jacocoTestReport').mustRunAfter 'integrationtests'
+}
+
+dependencies {
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.0'
+    compile 'io.vavr:vavr:0.10.2'
+    compile 'com.google.inject:guice:4.2.3'
+    compile 'com.google.inject.extensions:guice-assistedinject:4.2.3'
+    implementation("com.google.guava:guava:29.0-jre")
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.12'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
+    testCompile 'org.mockito:mockito-junit-jupiter:3.3.3'
+    testCompile 'org.mockito:mockito-core:3.3.3'
+    testCompile 'org.assertj:assertj-core:3.16.1'
+    testImplementation 'org.awaitility:awaitility:4.0.2'
+    testImplementation 'com.tngtech.archunit:archunit:0.13.1'
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "de.pflugradts.pwman3.Main",
+       'Implementation-Version': version && !version.empty ? version : 'snapshot'
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
