@@ -4,10 +4,10 @@
 
 PwMan3 is a terminal based password manager written in Java. It works completely offline and encrypts all passwords using a AES/CBC/PKCS5Padding Cipher initialized with a JCEKS (Java Cryptography Extension KeyStore).
 
-Check the [FAQ](#faq) at the bottom if you are wondering whether PwMan3 is the right tool for you.
+Check the FAQ at the bottom if you are wondering whether PwMan3 is the right tool for you.
 
 ## Downloading PwMan3 ##
-The latest version of PwMan3 can be downloaded as a jar file via [this link](https://pflugradts.de/downloads/pwman3.jar "pwman3.jar latest version").
+The latest version of PwMan3 can be downloaded [at my website](https://pflugradts.de/tools/pwman3 "get PwMan3").
 
 You may also choose to build PwMan3 yourself by cloning this project and running the jar task with Gradle.
 
@@ -106,4 +106,4 @@ Of course! For example I use separate password databases for personal and occupa
 No. The core characteristic of PwMan3 is its gui-less nature. If you want a gui, use one of the popular gui-based password managers such as Keepass.
 
 #### Can you implement feature xyz? ####
-It depends. If I think that feature is useful and it fits with PwMan3 I might implement it. Why don't you open a Gitlab Issue for it? :-)
+It depends. If I think that feature is useful and it fits with PwMan3 I might implement it. Why don't you open a [Gitlab Issue](https://gitlab.com/christianpflugradt/pwman3/-/issues) for it? :-)
