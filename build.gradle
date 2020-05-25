@@ -46,6 +46,10 @@ spotbugsMain {
 
 jacocoTestReport {
     executionData.from = files('build/jacoco/unittests.exec', 'build/jacoco/integrationtests.exec')
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
 }
 
 jacocoTestCoverageVerification {

@@ -1,6 +1,6 @@
 # PwMan3 #
 
-[![pipeline status](https://gitlab.com/christianpflugradt/pwman3/badges/master/pipeline.svg)](https://gitlab.com/christianpflugradt/pwman3/-/commits/master)
+[![pipeline status](https://gitlab.com/christianpflugradt/pwman3/badges/master/pipeline.svg)](https://gitlab.com/christianpflugradt/pwman3/-/commits/master) [![coverage report](https://gitlab.com/christianpflugradt/pwman3/badges/master/coverage.svg)](https://gitlab.com/christianpflugradt/pwman3/-/commits/master)
 
 PwMan3 is a terminal based password manager written in Java. It works completely offline and encrypts all passwords using a AES/CBC/PKCS5Padding Cipher initialized with a JCEKS (Java Cryptography Extension KeyStore).
 
@@ -59,8 +59,8 @@ The general usage info will be given below and is also available in PwMan3 by pr
         c[key] (custom set) like set but prompts the user to input a new password
         v[key] (view) prints the password for that key to the console
         d[key] (discard) removes key and password from the database
-        e[file] (export) exports the password database as a human readable json file to the specified directory
-        i[file] (import) imports a json file containing passwords into the database from the specified directory
+        e[directory] (export) exports the password database as a human readable json file to the specified directory
+        i[directory] (import) imports a json file containing passwords into the database from the specified directory
         l (list) nonparameterized, lists all keys in the database
         h (help) nonparameterized, prints this help
         q (quit) quits pwman3 application
@@ -97,7 +97,7 @@ Long answer: I am not a security expert and PwMan3 has not been reviewed. PwMan3
 Without the correct master password you cannot decrypt your password database. There is no way to bypass this protection. The only thing you can do is to try and find out your password via brute force. PwMan3 terminates after 3 wrong attempts so if the program is still running after 3 guesses, you have guessed correctly. I am not aware of any way to protect against brute force attacks by the way, since an attacker could simply brute force the keystore itself instead of using PwMan3 to find out the correct password. The best protection is a secure password that would take a long time to guess, and to keep your keystore file safe.
 
 #### Why is it named PwMan3? ####
-PwMan is short for Password Manager. To explain the *3*, a bit of history: In 2010 felt a need for a password manager that could be worked with using only a keyboard and without memorizing lots of shortcuts. Thus a tool emerged and it was titled PwMan in lack of a better name. That tool had a very basic hard coded encryption and lacked many features such as import/export or erasing the clipboard. About 2014 I felt continueing to use PwMan was not appropriate anymore given that I started using it for work related passwords. I did some research how to implement a better encryption and decided to go with javax.crypto.Cipher and a KeyStore. Completely rewritten PwMan2 was born. It served me well over the years but it had a few minor bugs I never fixed and the code base was not as well structured as I wanted it to be. So in early 2020 I decided it should get a complete rewrite again. PwMan3 comes with a configuration file, a routine to automatically set up the keystore, all known bugs fixed, a healthy architecture with over 90% test coverage and an automated release process supported by quality assurance tools.
+PwMan is short for Password Manager. To explain the *3*, a bit of history: In 2010 I felt a need for a password manager that could be worked with using only a keyboard and without memorizing lots of shortcuts. Thus a tool emerged and it was titled PwMan in lack of a better name. That tool had a very basic hard coded encryption and lacked many features such as import/export or erasing the clipboard. About 2014 I felt continueing to use PwMan was not appropriate anymore given that I started using it for work related passwords. I did some research how to implement a better encryption and decided to go with javax.crypto.Cipher and a KeyStore. Completely rewritten PwMan2 was born. It served me well over the years but it had a few minor bugs I never fixed and the code base was not as well structured as I wanted it to be. So in early 2020 I decided it should get a complete rewrite again. PwMan3 comes with a configuration file, a routine to automatically set up the keystore, all known bugs fixed, a healthy architecture with over 90% test coverage and an automated release process supported by quality assurance tools.
 
 #### Can I run multiple instances of PwMan3? ####
 Of course! For example I use separate password databases for personal and occupational passwords. You can run them in different terminal windows at the same time and the instances won't be aware of each other.
