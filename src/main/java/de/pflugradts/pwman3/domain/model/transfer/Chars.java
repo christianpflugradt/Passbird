@@ -8,6 +8,11 @@ import lombok.ToString;
 import static de.pflugradts.pwman3.application.util.AsciiUtils.MAX_ASCII_VALUE;
 import static de.pflugradts.pwman3.application.util.AsciiUtils.MIN_ASCII_VALUE;
 
+/**
+ * <p>A Chars is used to represent data send to or received from external interfaces that uses char[].</p>
+ * <p>A Chars can be constructed from and converted to a {@link Bytes}
+ * which is basic structure used to represent data.</p>
+ */
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode
 @ToString

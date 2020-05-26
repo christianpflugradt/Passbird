@@ -4,6 +4,10 @@ import de.pflugradts.pwman3.domain.model.ddd.ValueObject;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
+/**
+ * An Input represents data given by the user through the
+ * {@link de.pflugradts.pwman3.application.UserInterfaceAdapterPort UserInterface}.
+ */
 @RequiredArgsConstructor(staticName = "of")
 @Value
 @SuppressWarnings("checkstyle:VisibilityModifier")
@@ -12,7 +16,7 @@ public class Input implements ValueObject {
     Bytes bytes;
 
     public static Input empty() {
-        return Input.of(Bytes.of(new byte[0]));
+        return Input.of(Bytes.of());
     }
 
     public char getCommandChar() {
