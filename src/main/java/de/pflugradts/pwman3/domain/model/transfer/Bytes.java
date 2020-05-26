@@ -11,6 +11,14 @@ import java.util.NoSuchElementException;
 import static de.pflugradts.pwman3.application.util.AsciiUtils.MAX_ASCII_VALUE;
 import static de.pflugradts.pwman3.application.util.AsciiUtils.MIN_ASCII_VALUE;
 
+/**
+ * <p>A Bytes is the basic structure to represent information.</p>
+ * <p>Any content, be it public or sensitive data, should always be represented as Bytes.
+ * A Bytes can be constructed from and converted to other data structures such as String, byte[] or
+ * {@link Chars}. Sensitive data should never be converted to String unless it's inevitable.</p>
+ * <p>A {@link de.pflugradts.pwman3.application.security.CryptoProvider CryptoProvider} can encrypt/decrypt a Bytes.
+ * On an unencrypted Bytes {@link #scramble()} should always be called after using it.</p>
+ */
 @EqualsAndHashCode(of = "byteArray")
 @ToString(of = "byteArray")
 @SuppressWarnings("PMD.TooManyMethods")

@@ -14,6 +14,10 @@ import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A PasswordEntry represents a {@link Key} and an associated {@link Password} stored in the
+ * {@link de.pflugradts.pwman3.application.PasswordStoreAdapterPort PasswordStore}.
+ */
 @EqualsAndHashCode(of = "key")
 @ToString(of = "key")
 public class PasswordEntry implements AggregateRoot {

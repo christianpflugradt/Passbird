@@ -3,6 +3,10 @@ package de.pflugradts.pwman3.domain.model.transfer;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 
+/**
+ * An Output represents data sent to the user through the
+ * {@link de.pflugradts.pwman3.application.UserInterfaceAdapterPort UserInterface}.
+ */
 @RequiredArgsConstructor(staticName = "of")
 @Value
 @SuppressWarnings("checkstyle:VisibilityModifier")

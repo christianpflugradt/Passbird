@@ -11,6 +11,9 @@ import java.security.KeyStore;
 import java.util.Objects;
 import static de.pflugradts.pwman3.application.util.CryptoUtils.JCEKS_KEYSTORE;
 
+/**
+ * Wraps static methods that interact with the operating system.
+ */
 public class SystemOperation {
 
     public boolean isConsoleAvailable() {

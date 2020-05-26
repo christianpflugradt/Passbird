@@ -6,6 +6,9 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+/**
+ * A Key identifies a {@link Password}.
+ */
 @EqualsAndHashCode
 final class Key implements DomainEntity {
 

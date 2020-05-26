@@ -6,6 +6,10 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
+/**
+ * A Password is stored in the {@link de.pflugradts.pwman3.application.PasswordStoreAdapterPort PasswordStore}.
+ * It is identified by a {@link Key}.
+ */
 @EqualsAndHashCode
 final class Password implements DomainEntity {
 
