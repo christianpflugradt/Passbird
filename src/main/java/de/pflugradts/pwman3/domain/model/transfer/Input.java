@@ -29,6 +29,10 @@ public class Input implements ValueObject {
                 : Bytes.empty();
     }
 
+    public boolean isEmpty() {
+        return bytes.isEmpty();
+    }
+
     public void invalidate() {
         getBytes().scramble();
     }

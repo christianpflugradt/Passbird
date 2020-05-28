@@ -1,21 +1,26 @@
 package de.pflugradts.pwman3.application.configuration;
 
 import com.google.inject.Singleton;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@Builder
 @Data
 @NoArgsConstructor
 @Singleton
 public class Configuration implements UpdatableConfiguration {
 
+    private static final int DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS = 10;
+    private static final int DEFAULT_PASSWORD_LENGTH = 20;
+
     private transient boolean template;
-    private Application application;
-    private Adapter adapter;
+    private Application application = new Application();
+    private Adapter adapter = new Adapter();
+
+    static Configuration createTemplate() {
+        final var configuration = new Configuration();
+        configuration.template = true;
+        return configuration;
+    }
 
     @Override
     public void updateDirectory(final String directory) {
@@ -23,76 +28,61 @@ public class Configuration implements UpdatableConfiguration {
         adapter.passwordStore.location = directory;
     }
 
-    @AllArgsConstructor
-    @Builder
     @Data
     @NoArgsConstructor
     public static class Application implements ReadableConfiguration.Application {
-        private Password password;
+        private boolean verifyLicenseFilesExist = true;
+        private Password password = new Password();
     }
 
-    @AllArgsConstructor
-    @Builder
     @Data
     @NoArgsConstructor
     public static class Password implements ReadableConfiguration.Password {
-        private int length;
-        private boolean specialCharacters;
-        private boolean promptOnRemoval;
+        private int length = DEFAULT_PASSWORD_LENGTH;
+        private boolean specialCharacters = true;
+        private boolean promptOnRemoval = true;
     }
 
-    @AllArgsConstructor
-    @Builder
     @Data
     @NoArgsConstructor
     public static class Adapter implements ReadableConfiguration.Adapter {
-        private Clipboard clipboard;
-        private KeyStore keyStore;
-        private PasswordStore passwordStore;
-        private UserInterface userInterface;
+        private Clipboard clipboard = new Clipboard();
+        private KeyStore keyStore = new KeyStore();
+        private PasswordStore passwordStore = new PasswordStore();
+        private UserInterface userInterface = new UserInterface();
     }
 
-    @AllArgsConstructor
-    @Builder
     @Data
     @NoArgsConstructor
     public static class Clipboard implements ReadableConfiguration.Clipboard {
-        private ClipboardReset reset;
+        private ClipboardReset reset = new ClipboardReset();
     }
 
-    @AllArgsConstructor
-    @Builder
     @Data
     @NoArgsConstructor
     public static class ClipboardReset implements ReadableConfiguration.ClipboardReset {
-        private boolean enabled;
-        private int delaySeconds;
+        private boolean enabled = true;
+        private int delaySeconds = DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS;
     }
 
-    @AllArgsConstructor
-    @Builder
     @Data
     @NoArgsConstructor
     public static class PasswordStore implements ReadableConfiguration.PasswordStore {
-        private String location;
-        private boolean verifySignature;
-        private boolean verifyChecksum;
+        private String location = "";
+        private boolean verifySignature = true;
+        private boolean verifyChecksum = true;
     }
 
-    @AllArgsConstructor
-    @Builder
     @Data
     @NoArgsConstructor
     public static class KeyStore implements ReadableConfiguration.KeyStore {
-        private String location;
+        private String location = "";
     }
 
-    @AllArgsConstructor
-    @Builder
     @Data
     @NoArgsConstructor
     public static class UserInterface implements ReadableConfiguration.UserInterface {
-        private boolean secureInput;
+        private boolean secureInput = true;
     }
 
 }

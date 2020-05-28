@@ -4,6 +4,7 @@ stages:
   - check
   - test
   - report
+  - license
   - release
 
 before_script:
@@ -99,8 +100,8 @@ test-coverage-report:
       - build/reports/jacoco/test/html/*
     expire_in: 1 week
 
-licences:
-  stage: release
+licenses:
+  stage: license
   script: ./gradlew downloadLicenses
   artifacts:
     when: always
@@ -128,6 +129,9 @@ publish:
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
+    - mkdir src/main/resources
+    - cp LICENSE src/main/resources/pwman3-license.txt
+    - cp build/reports/license/dependency-license.html src/main/resources/pwman3-licenses-3rdparty.html
   script:
     - ./gradlew -Pversion=$CI_COMMIT_REF_NAME jar
     - eval "$SSH_COPY"

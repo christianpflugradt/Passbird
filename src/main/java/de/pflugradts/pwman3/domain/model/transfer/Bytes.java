@@ -57,6 +57,10 @@ public class Bytes implements ValueObject, Iterable<Byte> {
         return byteArray.length;
     }
 
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
     public byte getByte(final int index) {
         return byteArray[index];
     }

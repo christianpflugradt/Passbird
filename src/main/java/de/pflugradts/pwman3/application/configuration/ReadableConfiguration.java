@@ -13,6 +13,7 @@ public interface ReadableConfiguration {
     Adapter getAdapter();
 
     interface Application {
+        boolean isVerifyLicenseFilesExist();
         Password getPassword();
     }
 

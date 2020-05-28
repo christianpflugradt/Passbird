@@ -1,6 +1,7 @@
 package de.pflugradts.pwman3.application.util;
 
 import java.io.File;
+import java.net.URI;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import static org.mockito.BDDMockito.given;
@@ -32,6 +33,16 @@ public class FileFaker {
 
     public FileFaker withParentFile(final File parentFile) {
         given(file.getParentFile()).willReturn(parentFile);
+        return this;
+    }
+
+    public FileFaker withName(final String name) {
+        given(file.getName()).willReturn(name);
+        return this;
+    }
+
+    public FileFaker withUri(final URI uri) {
+        given(file.toURI()).willReturn(uri);
         return this;
     }
 
