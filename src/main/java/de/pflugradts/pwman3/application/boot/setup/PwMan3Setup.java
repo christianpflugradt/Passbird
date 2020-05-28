@@ -102,9 +102,7 @@ public class PwMan3Setup implements Bootable {
     }
 
     private boolean inputEqualsAndIsNotEmpty(final Input input, final Input inputRepeated) {
-        return Objects.nonNull(input)
-                && Objects.equals(input, inputRepeated)
-                && !Objects.equals(input, Input.empty());
+        return Objects.nonNull(input) && !input.isEmpty() && Objects.equals(input, inputRepeated);
     }
 
     private void createKeyStore(final String directory, final Input password) {

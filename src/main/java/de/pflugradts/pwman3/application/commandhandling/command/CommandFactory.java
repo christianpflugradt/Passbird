@@ -12,7 +12,7 @@ public class CommandFactory {
             case DISCARD: return new DiscardCommand(input);
             case EXPORT: return new ExportCommand(input);
             case GET: return new GetCommand(input);
-            case HELP: return new HelpCommand();
+            case HELP: return new HelpCommand(input);
             case IMPORT: return new ImportCommand(input);
             case LIST: return new ListCommand();
             case QUIT: return new QuitCommand();

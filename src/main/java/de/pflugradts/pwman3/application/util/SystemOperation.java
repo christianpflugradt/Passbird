@@ -2,8 +2,10 @@ package de.pflugradts.pwman3.application.util;
 
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.control.Try;
+import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -26,6 +28,10 @@ public class SystemOperation {
         return Try.of(() -> System.console().readPassword());
     }
 
+    public Try<Path> getPath(final File file) {
+        return Try.of(file::toPath);
+    }
+
     public Try<Path> getPath(final String uri) {
         return Try.of(() -> Paths.get(uri));
     }
@@ -42,8 +48,8 @@ public class SystemOperation {
         return Try.of(() -> Files.newOutputStream(path));
     }
 
-    public Try<Void> writeBytesToFile(final Path path, final Bytes bytes) {
-        return Try.run(() -> Files.write(path, bytes.toByteArray()));
+    public Try<Path> writeBytesToFile(final Path path, final Bytes bytes) {
+        return Try.of(() -> Files.write(path, bytes.toByteArray()));
     }
 
     public Try<Bytes> readBytesFromFile(final Path path) {
@@ -53,6 +59,27 @@ public class SystemOperation {
     public void copyToClipboard(final String text) {
         final var selection = new StringSelection(text);
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+    }
+
+    public Try<Bytes> getResourceAsBytes(final String resource) {
+        return Try.of(() -> Bytes.of(Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(resource)
+                .readAllBytes()));
+    }
+
+    public Try<Void> openFile(final File file) {
+        return Try.run(() -> {
+            if (file.getName().endsWith(".html")) {
+                getDesktop().browse(file.toURI());
+            } else {
+                getDesktop().open(file);
+            }
+        });
+    }
+
+    Desktop getDesktop() {
+        return Desktop.getDesktop();
     }
 
     public void exit() {

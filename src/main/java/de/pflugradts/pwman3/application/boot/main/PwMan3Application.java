@@ -39,7 +39,7 @@ public class PwMan3Application implements Bootable {
     }
 
     private boolean isSigTerm(final Input input) {
-        return input.getData().equals(Bytes.empty()) && input.getCommandChar() == INTERRUPT;
+        return input.getData().isEmpty() && input.getCommandChar() == INTERRUPT;
     }
 
 }

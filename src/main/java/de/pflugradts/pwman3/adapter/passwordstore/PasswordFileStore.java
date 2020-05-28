@@ -111,7 +111,7 @@ public class PasswordFileStore implements PasswordStoreAdapterPort {
                 : bytes;
     }
 
-    private Try<Void> writeToDisk(final Bytes bytes) {
+    private Try<Path> writeToDisk(final Bytes bytes) {
         return systemOperation.writeBytesToFile(
                 getFilePath(),
                 cryptoProvider.encrypt(bytes).getOrElse(Bytes.empty()));

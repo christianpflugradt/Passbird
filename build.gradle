@@ -106,6 +106,7 @@ task checkAll() {
     dependsOn architecturetests
     dependsOn jacocoTestCoverageVerification
     dependsOn jacocoTestReport
+    dependsOn tasks.findByName('downloadLicenses')
     tasks.findByName('jacocoTestReport').mustRunAfter 'unittests'
     tasks.findByName('jacocoTestReport').mustRunAfter 'integrationtests'
 }

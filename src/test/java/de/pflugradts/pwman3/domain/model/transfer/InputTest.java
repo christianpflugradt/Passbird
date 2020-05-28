@@ -45,7 +45,7 @@ class InputTest {
     @Test
     void shouldGetData_ReturnEmptyBytesOnInputWithoutData() {
         // given / when / then
-        assertThat(Input.empty().getData()).isEqualTo(Bytes.empty());
+        assertThat(Input.empty().getData()).isEmpty();
     }
 
     @Test
@@ -80,8 +80,8 @@ class InputTest {
         void shouldInstantiateEmptyInput() {
             // given / when / then
             assertThat(Input.empty()).isNotNull()
-                    .extracting(Input::getBytes)
-                    .isNotNull().isEqualTo(Bytes.empty());
+                    .extracting(Input::getBytes).isNotNull()
+                    .extracting(Bytes::isEmpty).isEqualTo(true);
         }
 
     }
