@@ -86,8 +86,7 @@ test-coverage-verification:
 test-coverage-report:
   stage: report
   before_script:
-    - apt-get update
-    - apt-get install -y libxml2-utils
+    - apt-get update && apt-get install -y libxml2-utils
   script:
     - ./gradlew jacocoTestReport
     - missed=$(xmllint --xpath 'string(/report/counter[@type="INSTRUCTION"]/@missed)' build/reports/jacoco/test/jacocoTestReport.xml)

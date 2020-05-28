@@ -4,10 +4,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.pflugradts.pwman3.application.ClipboardAdapterPort;
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
+import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
 import io.vavr.control.Try;
-import java.awt.Toolkit;
-import java.awt.datatransfer.StringSelection;
 import java.util.Objects;
 
 @Singleton
@@ -16,6 +15,8 @@ public class ClipboardService implements ClipboardAdapterPort {
     private static final long MILLI_SECONDS = 1000L;
 
     @Inject
+    private SystemOperation systemOperation;
+    @Inject
     private ReadableConfiguration configuration;
 
     private Thread cleanerThread;
@@ -23,13 +24,8 @@ public class ClipboardService implements ClipboardAdapterPort {
     @Override
     public void post(final Output output) {
         this.terminateCleaner();
-        this.textToClipboard(output.getBytes().asString());
+        systemOperation.copyToClipboard(output.getBytes().asString());
         this.scheduleCleaner();
-    }
-
-    private void textToClipboard(final String text) {
-        final var selection = new StringSelection(text);
-        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
     }
 
     private void terminateCleaner() {
@@ -42,7 +38,7 @@ public class ClipboardService implements ClipboardAdapterPort {
         if (isResetEnabledInConfiguration()) {
             cleanerThread = new Thread(() -> {
                 sleep();
-                textToClipboard("");
+                systemOperation.copyToClipboard("");
             });
             cleanerThread.start();
         }

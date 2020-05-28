@@ -2,6 +2,8 @@ package de.pflugradts.pwman3.application.util;
 
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.control.Try;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -46,6 +48,11 @@ public class SystemOperation {
 
     public Try<Bytes> readBytesFromFile(final Path path) {
         return Try.of(() -> Bytes.of(Files.readAllBytes(path)));
+    }
+
+    public void copyToClipboard(final String text) {
+        final var selection = new StringSelection(text);
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
     }
 
     public void exit() {

@@ -37,7 +37,7 @@ class FailureHandlingTestIT {
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.acceptChecksumFailure(Byte.valueOf("0"), Byte.valueOf("0"));
+        failureCollector.collectChecksumFailure(Byte.valueOf("0"), Byte.valueOf("0"));
         final var actual = new String(outputStream.toByteArray());
 
         // then
@@ -50,7 +50,7 @@ class FailureHandlingTestIT {
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.acceptDecryptionFailure(Bytes.empty(), new RuntimeException());
+        failureCollector.collectDecryptionFailure(Bytes.empty(), new RuntimeException());
         final var actual = new String(outputStream.toByteArray());
 
         // then
@@ -63,7 +63,7 @@ class FailureHandlingTestIT {
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.acceptEncryptionFailure(Bytes.empty(), new RuntimeException());
+        failureCollector.collectEncryptionFailure(Bytes.empty(), new RuntimeException());
         final var actual = new String(outputStream.toByteArray());
 
         // then
@@ -76,7 +76,7 @@ class FailureHandlingTestIT {
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.acceptExportFailure(new RuntimeException());
+        failureCollector.collectExportFailure(new RuntimeException());
         final var actual = new String(outputStream.toByteArray());
 
         // then
@@ -89,7 +89,7 @@ class FailureHandlingTestIT {
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.acceptImportFailure(new RuntimeException());
+        failureCollector.collectImportFailure(new RuntimeException());
         final var actual = new String(outputStream.toByteArray());
 
         // then
@@ -102,7 +102,7 @@ class FailureHandlingTestIT {
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.acceptInputFailure(new RuntimeException());
+        failureCollector.collectInputFailure(new RuntimeException());
         final var actual = new String(outputStream.toByteArray());
 
         // then
@@ -115,7 +115,7 @@ class FailureHandlingTestIT {
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.acceptReadPasswordDatabaseFailure(mock(Path.class), new RuntimeException());
+        failureCollector.collectReadPasswordDatabaseFailure(mock(Path.class), new RuntimeException());
         final var actual = new String(outputStream.toByteArray());
 
         // then
@@ -128,7 +128,7 @@ class FailureHandlingTestIT {
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.acceptSignatureCheckFailure(Bytes.empty());
+        failureCollector.collectSignatureCheckFailure(Bytes.empty());
         final var actual = new String(outputStream.toByteArray());
 
         // then
@@ -141,7 +141,7 @@ class FailureHandlingTestIT {
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.acceptWritePasswordDatabaseFailure(mock(Path.class), new RuntimeException());
+        failureCollector.collectWritePasswordDatabaseFailure(mock(Path.class), new RuntimeException());
         final var actual = new String(outputStream.toByteArray());
 
         // then

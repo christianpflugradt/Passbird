@@ -20,6 +20,18 @@ class CharsTest {
     }
 
     @Test
+    void shouldConvertEmptyCharsToBytes() {
+        // given
+        final var givenChars = Chars.of();
+
+        // when
+        final var actual = givenChars.toBytes();
+
+        // then
+        assertThat(actual).isNotNull().isEqualTo(Bytes.empty());
+    }
+
+    @Test
     void shouldConvertToBytes_ScrambleChars() {
         // given
         final var givenCharArray = new char[]{'a', 'b', 'c'};
@@ -38,6 +50,18 @@ class CharsTest {
     void shouldConvertToCharArray() {
         // given
         final var givenCharArray = new char[]{'a', 'b', 'c'};
+
+        // when
+        final var actual = Chars.of(givenCharArray).toCharArray();
+
+        // then
+        assertThat(actual).isNotNull().isEqualTo(givenCharArray);
+    }
+
+    @Test
+    void shouldConvertEmptyCharsToCharArray() {
+        // given
+        final var givenCharArray = new char[]{};
 
         // when
         final var actual = Chars.of(givenCharArray).toCharArray();

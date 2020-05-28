@@ -1,4 +1,4 @@
-# 5. Verify Architecture with ArchUnit
+# 5. verify Architecture with ArchUnit
 
 Date: 2020-05-26
 

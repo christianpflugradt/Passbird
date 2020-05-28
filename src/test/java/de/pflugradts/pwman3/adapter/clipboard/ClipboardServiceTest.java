@@ -1,28 +1,25 @@
 package de.pflugradts.pwman3.adapter.clipboard;
 
-import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
 import de.pflugradts.pwman3.application.configuration.Configuration;
+import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
-import java.awt.Toolkit;
-import java.awt.datatransfer.DataFlavor;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
-@Disabled // clipboard not accessible in headless environment
-class ClipboardServiceTestIT {
+class ClipboardServiceTest {
 
-    @Spy
+    @Mock
     private SystemOperation systemOperation;
     @Mock
     private Configuration configuration;
@@ -41,11 +38,7 @@ class ClipboardServiceTestIT {
         clipboardService.post(Output.of(Bytes.of(message)));
 
         // then
-        final var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        await().atMost(2, TimeUnit.SECONDS).untilAsserted(() ->
-                assertThat(clipboard.getData(DataFlavor.stringFlavor))
-                        .isNotNull().isEqualTo(message)
-        );
+        then(systemOperation).should().copyToClipboard(message);
     }
 
     @Test
@@ -62,14 +55,9 @@ class ClipboardServiceTestIT {
         clipboardService.post(Output.of(Bytes.of(message)));
 
         // then
-        final var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        then(systemOperation).should().copyToClipboard(message);
         await().atMost(2, TimeUnit.SECONDS).untilAsserted(() ->
-                assertThat(clipboard.getData(DataFlavor.stringFlavor))
-                        .isNotNull().isEqualTo(message)
-        );
-        await().atMost(2, TimeUnit.SECONDS).untilAsserted(() ->
-                assertThat(clipboard.getData(DataFlavor.stringFlavor))
-                        .isNotNull().isEqualTo("")
+                then(systemOperation).should().copyToClipboard(message)
         );
     }
 
@@ -92,14 +80,11 @@ class ClipboardServiceTestIT {
         Thread.sleep(almostASecond);
 
         // then
-        final var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        then(systemOperation).should().copyToClipboard(message);
+        then(systemOperation).should(never()).copyToClipboard(eq(""));
+        then(systemOperation).should().copyToClipboard(anotherMessage);
         await().atMost(2, TimeUnit.SECONDS).untilAsserted(() ->
-                assertThat(clipboard.getData(DataFlavor.stringFlavor))
-                        .isNotNull().isEqualTo(anotherMessage)
-        );
-        await().atMost(2, TimeUnit.SECONDS).untilAsserted(() ->
-                assertThat(clipboard.getData(DataFlavor.stringFlavor))
-                        .isNotNull().isEqualTo("")
+                then(systemOperation).should().copyToClipboard(eq(""))
         );
     }
 

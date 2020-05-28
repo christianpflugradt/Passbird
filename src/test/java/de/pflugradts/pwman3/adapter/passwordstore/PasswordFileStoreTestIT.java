@@ -86,6 +86,17 @@ class PasswordFileStoreTestIT {
                 .containsExactlyInAnyOrder(passwordEntry1, passwordEntry2, passwordEntry3);
     }
 
+    @Test
+    void shouldUseEmptyPasswordDatabase_Roundtrip() {
+        // when / then
+        passwordFileStore.sync(Stream::empty);
+        final var actual = passwordFileStore.restore();
+
+        // then
+        assertThat(actual).isNotNull().extracting(Supplier::get).isNotNull();
+        assertThat(actual.get().collect(Collectors.toList())).isEmpty();
+    }
+
     private PasswordFileStore setupPasswordFileStore() {
         return new PasswordFileStore(
                 new SystemOperation(),

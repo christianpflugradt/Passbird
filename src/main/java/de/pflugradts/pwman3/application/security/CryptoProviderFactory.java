@@ -54,7 +54,7 @@ public class CryptoProviderFactory {
     private Chars receiveLogin() {
         return userInterfaceAdapterPort
                 .receiveSecurely(Output.of(Bytes.of("Enter key: ")))
-                .onFailure(failureCollector::acceptInputFailure)
+                .onFailure(failureCollector::collectInputFailure)
                 .getOrElse(Input.empty())
                 .getBytes()
                 .toChars();
