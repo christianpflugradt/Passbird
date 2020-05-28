@@ -29,43 +29,43 @@ public class FailureCollector {
     @Inject
     private FailureHandler failureHandler;
 
-    public void acceptChecksumFailure(final Byte actualChecksum, final Byte expectedChecksum) {
-        accept(new ChecksumFailure(actualChecksum, expectedChecksum));
+    public void collectChecksumFailure(final Byte actualChecksum, final Byte expectedChecksum) {
+        collect(new ChecksumFailure(actualChecksum, expectedChecksum));
     }
 
-    public void acceptDecryptionFailure(final Bytes bytes, final Throwable throwable) {
-        accept(new DecryptionFailure(bytes, throwable));
+    public void collectDecryptionFailure(final Bytes bytes, final Throwable throwable) {
+        collect(new DecryptionFailure(bytes, throwable));
     }
 
-    public void acceptEncryptionFailure(final Bytes bytes, final Throwable throwable) {
-        accept(new EncryptionFailure(bytes, throwable));
+    public void collectEncryptionFailure(final Bytes bytes, final Throwable throwable) {
+        collect(new EncryptionFailure(bytes, throwable));
     }
 
-    public void acceptExportFailure(final Throwable throwable) {
-        accept(new ExportFailure(throwable));
+    public void collectExportFailure(final Throwable throwable) {
+        collect(new ExportFailure(throwable));
     }
 
-    public void acceptImportFailure(final Throwable throwable) {
-        accept(new ImportFailure(throwable));
+    public void collectImportFailure(final Throwable throwable) {
+        collect(new ImportFailure(throwable));
     }
 
-    public void acceptInputFailure(final Throwable throwable) {
-        accept(new InputFailure(throwable));
+    public void collectInputFailure(final Throwable throwable) {
+        collect(new InputFailure(throwable));
     }
 
-    public void acceptReadPasswordDatabaseFailure(final Path path, final Throwable throwable) {
-        accept(new ReadPasswordDatabaseFailure(path, throwable));
+    public void collectReadPasswordDatabaseFailure(final Path path, final Throwable throwable) {
+        collect(new ReadPasswordDatabaseFailure(path, throwable));
     }
 
-    public void acceptSignatureCheckFailure(final Bytes actualSignature) {
-        accept(new SignatureCheckFailure(actualSignature));
+    public void collectSignatureCheckFailure(final Bytes actualSignature) {
+        collect(new SignatureCheckFailure(actualSignature));
     }
 
-    public void acceptWritePasswordDatabaseFailure(final Path path, final Throwable throwable) {
-        accept(new WritePasswordDatabaseFailure(path, throwable));
+    public void collectWritePasswordDatabaseFailure(final Path path, final Throwable throwable) {
+        collect(new WritePasswordDatabaseFailure(path, throwable));
     }
 
-    private void accept(final Failure failure) {
+    private void collect(final Failure failure) {
         getEventBus().post(failure);
     }
 

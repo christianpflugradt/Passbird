@@ -55,7 +55,7 @@ public class PwMan3Setup implements Bootable {
 
     private boolean continueRoute() {
         return userInterfaceAdapterPort.receive()
-                .onFailure(failureCollector::acceptInputFailure)
+                .onFailure(failureCollector::collectInputFailure)
                 .getOrElse(Input.empty())
                 .getCommandChar() == 'c';
     }
@@ -91,10 +91,10 @@ public class PwMan3Setup implements Bootable {
                 setupGuide.sendNonMatchingInputs();
             }
             input = userInterfaceAdapterPort.receiveSecurely(Output.of(Bytes.of("first input: ")))
-                    .onFailure(failureCollector::acceptInputFailure)
+                    .onFailure(failureCollector::collectInputFailure)
                     .getOrElse(Input.empty());
             inputRepeated = userInterfaceAdapterPort.receiveSecurely(Output.of(Bytes.of("second input: ")))
-                    .onFailure(failureCollector::acceptInputFailure)
+                    .onFailure(failureCollector::collectInputFailure)
                     .getOrElse(Input.empty());
         }
         userInterfaceAdapterPort.sendLineBreak();
@@ -117,7 +117,7 @@ public class PwMan3Setup implements Bootable {
         var directory = source;
         while (!isValidDirectory(directory)) {
             directory = userInterfaceAdapterPort.receive(Output.of(Bytes.of("your input: ")))
-                    .onFailure(failureCollector::acceptInputFailure)
+                    .onFailure(failureCollector::collectInputFailure)
                     .getOrElse(Input.empty()).getBytes().asString();
         }
         return directory;

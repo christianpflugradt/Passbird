@@ -13,6 +13,8 @@ import de.pflugradts.pwman3.domain.model.transfer.Output;
 @Singleton
 public class PwMan3Application implements Bootable {
 
+    public static final char INTERRUPT = 0x03;
+
     @Inject
     private FailureCollector failureCollector;
     @Inject
@@ -23,14 +25,21 @@ public class PwMan3Application implements Bootable {
     @Override
     public void boot() {
         userInterfaceAdapterPort.sendLineBreak();
-        while (true) {
-            inputHandler.handleInput(
-                    userInterfaceAdapterPort
-                            .receive(Output.of(Bytes.of("Enter command: ")))
-                            .onFailure(failureCollector::acceptInputFailure)
-                            .getOrElse(Input.empty())
-            );
+        Input input;
+        while (!isSigTerm(input = receiveInput())) {
+            inputHandler.handleInput(input);
         }
+    }
+
+    private Input receiveInput() {
+        return userInterfaceAdapterPort
+                .receive(Output.of(Bytes.of("Enter command: ")))
+                .onFailure(failureCollector::collectInputFailure)
+                .getOrElse(Input.empty());
+    }
+
+    private boolean isSigTerm(final Input input) {
+        return input.getData().equals(Bytes.empty()) && input.getCommandChar() == INTERRUPT;
     }
 
 }

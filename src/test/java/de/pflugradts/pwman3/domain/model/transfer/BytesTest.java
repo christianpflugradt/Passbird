@@ -193,6 +193,63 @@ class BytesTest {
     }
 
     @Nested
+    class InstantiationFromEmptySourceTest {
+
+        @Test
+        void shouldInstantiateFromEmptyByteArray() {
+            // given
+            final var givenBytes = new byte[]{};
+            final var expectedBytes = Bytes.empty();
+
+            // when
+            final var actual = Bytes.of(givenBytes);
+
+            // then
+            assertThat(actual).isNotNull().isEqualTo(expectedBytes);
+        }
+
+        @Test
+        void shouldInstantiateFromEmptyCharArray() {
+            // given
+            final var givenChars = new char[]{};
+            final var expectedBytes = Bytes.empty();
+
+            // when
+            final var actual = Chars.of(givenChars).toBytes();
+
+            // then
+            assertThat(actual).isNotNull().isEqualTo(expectedBytes);
+        }
+
+        @Test
+        void shouldInstantiateFromEmptyByteList() {
+            // given
+            final List<Byte> givenBytes = Collections.emptyList();
+            final var expectedBytes = Bytes.empty();
+
+            // when
+            final var actual = Bytes.of(givenBytes);
+
+            // then
+            assertThat(actual).isNotNull().isEqualTo(expectedBytes);
+        }
+
+        @Test
+        void shouldInstantiateFromEmptyString() {
+            // given
+            final var givenString = "";
+            final var expectedBytes = Bytes.empty();
+
+            // when
+            final var actual = Bytes.of(givenString);
+
+            // then
+            assertThat(actual).isNotNull().isEqualTo(expectedBytes);
+        }
+
+    }
+
+    @Nested
     class TransformationTest {
 
         @Test
@@ -251,6 +308,47 @@ class BytesTest {
             assertThat(actual).isNotNull()
                     .isEqualTo(clonedBytes)
                     .isNotSameAs(clonedBytes);
+        }
+
+    }
+
+    @Nested
+    class TransformEmptyBytesTest {
+
+        @Test
+        void shouldTransformToByteArray() {
+            // given
+            final var bytes = Bytes.empty();
+
+            // when
+            final var actual = bytes.toByteArray();
+
+            // then
+            assertThat(actual).isNotNull().isEmpty();
+        }
+
+        @Test
+        void shouldTransformToCharArray() {
+            // given
+            final var bytes = Bytes.empty();
+
+            // when
+            final var actual = bytes.toChars();
+
+            // then
+            assertThat(actual).isNotNull().extracting(Chars::toCharArray).isEqualTo(new char[]{});
+        }
+
+        @Test
+        void shouldTransformToString() {
+            // given
+            final var bytes = Bytes.empty();
+
+            // when
+            final var actual = bytes.asString();
+
+            // then
+            assertThat(actual).isNotNull().isEmpty();
         }
 
     }

@@ -23,7 +23,7 @@ public class CustomSetCommandHandler implements CommandHandler {
     private void handleCustomSetCommand(final CustomSetCommand customSetCommand) {
         final var secureInput = userInterfaceAdapterPort
                 .receiveSecurely(Output.of(Bytes.of("Enter custom password: ")))
-                .onFailure(failureCollector::acceptInputFailure)
+                .onFailure(failureCollector::collectInputFailure)
                 .getOrElse(Input.empty());
         passwordService.putPasswordEntry(customSetCommand.getArgument(), secureInput.getBytes());
         customSetCommand.invalidateInput();

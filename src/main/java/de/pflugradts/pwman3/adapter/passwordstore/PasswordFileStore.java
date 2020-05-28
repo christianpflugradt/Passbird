@@ -48,7 +48,7 @@ public class PasswordFileStore implements PasswordStoreAdapterPort {
     public Supplier<Stream<PasswordEntry>> restore() {
         final var passwordEntries = new ArrayDeque<PasswordEntry>();
         final var bytes = readFromDisk()
-                .onFailure(throwable -> failureCollector.acceptReadPasswordDatabaseFailure(getFilePath(), throwable));
+                .onFailure(throwable -> failureCollector.collectReadPasswordDatabaseFailure(getFilePath(), throwable));
         if (bytes.isSuccess()) {
             final var byteArray = bytes.get().toByteArray();
             if (byteArray.length > 0) {
@@ -71,7 +71,7 @@ public class PasswordFileStore implements PasswordStoreAdapterPort {
         final byte[] actualSignature = new byte[signatureSize()];
         ByteArrayUtils.copyBytes(Bytes.of(bytes), actualSignature, 0);
         if (!Arrays.equals(expectedSignature, actualSignature)) {
-            failureCollector.acceptSignatureCheckFailure(Bytes.of(actualSignature));
+            failureCollector.collectSignatureCheckFailure(Bytes.of(actualSignature));
         }
     }
 
@@ -82,7 +82,7 @@ public class PasswordFileStore implements PasswordStoreAdapterPort {
                 : 0x0;
         final var actualCheckSum = bytes[bytes.length - 1];
         if (!Objects.equals(expectedChecksum, actualCheckSum)) {
-            failureCollector.acceptChecksumFailure(actualCheckSum, expectedChecksum);
+            failureCollector.collectChecksumFailure(actualCheckSum, expectedChecksum);
         }
     }
 
@@ -101,7 +101,7 @@ public class PasswordFileStore implements PasswordStoreAdapterPort {
                         : 0x0};
         ByteArrayUtils.copyBytes(checksumBytes, bytes, offset, checksumBytes());
         writeToDisk(Bytes.of(bytes))
-                .onFailure(throwable -> failureCollector.acceptWritePasswordDatabaseFailure(getFilePath(), throwable));
+                .onFailure(throwable -> failureCollector.collectWritePasswordDatabaseFailure(getFilePath(), throwable));
     }
 
     private Try<Bytes> readFromDisk() {

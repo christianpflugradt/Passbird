@@ -86,7 +86,7 @@ class PasswordImportExportServiceTest {
         importExportService.imp(URI);
 
         // then
-        then(failureCollector).should().acceptImportFailure(failure);
+        then(failureCollector).should().collectImportFailure(failure);
         then(passwordService).shouldHaveNoInteractions();
     }
 
@@ -133,7 +133,7 @@ class PasswordImportExportServiceTest {
         importExportService.exp(URI);
 
         // then
-        then(failureCollector).should().acceptExportFailure(failure);
+        then(failureCollector).should().collectExportFailure(failure);
     }
 
 }

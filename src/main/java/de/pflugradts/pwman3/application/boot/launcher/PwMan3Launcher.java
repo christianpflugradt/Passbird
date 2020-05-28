@@ -27,6 +27,7 @@ public class PwMan3Launcher implements Bootable {
 
     @Override
     public void boot() {
+        sendLicenseNotice();
         sendBanner();
         guiceInjector.create(keystoreExists()
                 ? new ApplicationModule()
@@ -51,6 +52,15 @@ public class PwMan3Launcher implements Bootable {
 
     private String getKeyStoreLocation() {
         return configuration.getAdapter().getKeyStore().getLocation();
+    }
+
+    private void sendLicenseNotice() {
+        userInterfaceAdapterPort.sendLineBreak();
+        userInterfaceAdapterPort.send(Output.of(Bytes.of(
+                "\t(c) 2020 Christian Pflugradt, all rights reserved")));
+        userInterfaceAdapterPort.send(Output.of(Bytes.of(
+                "\tThis software is licensed under the Apache License Version 2.0 (APLv2)")));
+        userInterfaceAdapterPort.sendLineBreak();
     }
 
     @SuppressWarnings("checkstyle:MagicNumber")

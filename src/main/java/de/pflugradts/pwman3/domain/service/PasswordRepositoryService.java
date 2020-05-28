@@ -69,14 +69,14 @@ public class PasswordRepositoryService implements PasswordService {
     private Bytes encrypted(final Bytes bytes) {
         return cryptoProvider
                 .encrypt(bytes)
-                .onFailure(throwable -> failureCollector.acceptEncryptionFailure(bytes, throwable))
+                .onFailure(throwable -> failureCollector.collectEncryptionFailure(bytes, throwable))
                 .getOrElse(Bytes.empty());
     }
 
     private Bytes decrypted(final Bytes bytes) {
         return cryptoProvider
                 .decrypt(bytes)
-                .onFailure(throwable -> failureCollector.acceptDecryptionFailure(bytes, throwable))
+                .onFailure(throwable -> failureCollector.collectDecryptionFailure(bytes, throwable))
                 .getOrElse(Bytes.empty());
     }
 

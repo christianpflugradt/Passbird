@@ -19,7 +19,7 @@ public class PasswordImportExportService implements ImportExportService {
     public void imp(final String uri) {
         exchangeFactory.createPasswordExchange(uri)
                 .receive()
-                .onFailure(failureCollector::acceptImportFailure)
+                .onFailure(failureCollector::collectImportFailure)
                 .onSuccess(result -> result.forEach(
                     passwordEntry -> passwordService.putPasswordEntry(passwordEntry._1, passwordEntry._2)));
     }
@@ -30,7 +30,7 @@ public class PasswordImportExportService implements ImportExportService {
                 passwordService
                         .findAllKeys()
                         .map(this::retrievePasswordEntryTuple))
-                .onFailure(failureCollector::acceptExportFailure);
+                .onFailure(failureCollector::collectExportFailure);
     }
 
     private Tuple2<Bytes, Bytes> retrievePasswordEntryTuple(final Bytes keyBytes) {
