@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.Objects;
 import static de.pflugradts.pwman3.application.util.CryptoUtils.JCEKS_KEYSTORE;
 
@@ -28,12 +29,23 @@ public class SystemOperation {
         return Try.of(() -> System.console().readPassword());
     }
 
+    public Try<Path> resolvePath(final String directory, final String fileName) {
+        return Try.of(() -> Paths.get(directory).resolve(fileName));
+    }
+
+    public Try<File> resolvePathToFile(final String directory, final String fileName) {
+        return Try.of(() -> Paths.get(directory).resolve(fileName).toFile());
+    }
+
     public Try<Path> getPath(final File file) {
         return Try.of(file::toPath);
     }
 
-    public Try<Path> getPath(final String uri) {
-        return Try.of(() -> Paths.get(uri));
+    public Try<Path> getPath(final String... uri) {
+        return Try.of(() -> uri.length > 1
+                    ? Paths.get(uri[0], Arrays.copyOfRange(uri, 1, uri.length))
+                    : Paths.get(uri[0])
+        );
     }
 
     public Try<KeyStore> getJceksInstance() {

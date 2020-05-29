@@ -36,7 +36,7 @@ class ImportCommandTestIT {
     @Test
     void shouldHandleImportCommand() {
         // given
-        final var args = "/tmp";
+        final var args = "tmp";
         final var bytes = Bytes.of("i" + args);
         final var reference = bytes.copy();
 

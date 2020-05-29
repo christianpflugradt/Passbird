@@ -41,7 +41,7 @@ class MainTest {
     @Test
     void shouldSetSystemPropertyAndBootLauncher() {
         // given
-        final var configurationDirectory = "/tmp";
+        final var configurationDirectory = "tmp";
         final var expectedBootable = mock(PwMan3Launcher.class);
         setupInjectorWithCapture(expectedBootable);
 
@@ -72,7 +72,7 @@ class MainTest {
         setupInjector();
 
         // when
-        main.boot("/tmp", "/dev/null");
+        main.boot("tmp", "/dev/null");
 
         // then
         assertThat(System.getProperty(CONFIGURATION_SYSTEM_PROPERTY)).isNullOrEmpty();

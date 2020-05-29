@@ -35,7 +35,8 @@ class KeyStoreServiceTest {
         final var mockedSystemOperation = SystemOperationFaker.faker()
                 .fakeSystemOperation()
                 .withKeyStoreUnavailable().fake();
-        final var actual = setupKeyStoreService(mockedSystemOperation).storeKey(Chars.of("password".toCharArray()), Paths.get(""));
+        final var actual = setupKeyStoreService(mockedSystemOperation)
+                .storeKey(Chars.of("password".toCharArray()), Paths.get(""));
 
         // then
         assertThat(actual.isFailure()).isTrue();
@@ -47,7 +48,8 @@ class KeyStoreServiceTest {
         final var mockedSystemOperation = SystemOperationFaker.faker()
                 .fakeSystemOperation()
                 .withKeyStoreUnavailable().fake();
-        final var actual = setupKeyStoreService(mockedSystemOperation).loadKey(Chars.of("password".toCharArray()), Paths.get(""));
+        final var actual = setupKeyStoreService(mockedSystemOperation)
+                .loadKey(Chars.of("password".toCharArray()), Paths.get(""));
 
         // then
         assertThat(actual.isFailure()).isTrue();

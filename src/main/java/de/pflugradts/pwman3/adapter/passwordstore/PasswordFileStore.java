@@ -13,7 +13,6 @@ import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Objects;
@@ -48,7 +47,8 @@ public class PasswordFileStore implements PasswordStoreAdapterPort {
     public Supplier<Stream<PasswordEntry>> restore() {
         final var passwordEntries = new ArrayDeque<PasswordEntry>();
         final var bytes = readFromDisk()
-                .onFailure(throwable -> failureCollector.collectReadPasswordDatabaseFailure(getFilePath(), throwable));
+                .onFailure(throwable ->
+                        failureCollector.collectDecryptPasswordDatabaseFailure(getFilePath(), throwable));
         if (bytes.isSuccess()) {
             final var byteArray = bytes.get().toByteArray();
             if (byteArray.length > 0) {
@@ -101,14 +101,15 @@ public class PasswordFileStore implements PasswordStoreAdapterPort {
                         : 0x0};
         ByteArrayUtils.copyBytes(checksumBytes, bytes, offset, checksumBytes());
         writeToDisk(Bytes.of(bytes))
-                .onFailure(throwable -> failureCollector.collectWritePasswordDatabaseFailure(getFilePath(), throwable));
+                .onFailure(throwable ->
+                        failureCollector.collectWritePasswordDatabaseFailure(getFilePath(), throwable));
     }
 
     private Try<Bytes> readFromDisk() {
         final var bytes = systemOperation.readBytesFromFile(getFilePath());
         return bytes.isSuccess()
                 ? cryptoProvider.decrypt(bytes.get())
-                : bytes;
+                : Try.of(Bytes::empty);
     }
 
     private Try<Path> writeToDisk(final Bytes bytes) {
@@ -132,7 +133,10 @@ public class PasswordFileStore implements PasswordStoreAdapterPort {
     }
 
     private Path getFilePath() {
-        return Paths.get(configuration.getAdapter().getPasswordStore().getLocation()).resolve(DATABASE_FILENAME);
+        return systemOperation.resolvePath(
+                configuration.getAdapter().getPasswordStore().getLocation(),
+                DATABASE_FILENAME
+        ).getOrNull();
     }
 
     @SuppressWarnings("checkstyle:MagicNumber")

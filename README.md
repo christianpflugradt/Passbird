@@ -37,8 +37,8 @@ Once set up PwMan3 will create a PwMan3.yml with various configuration parameter
  * **adapter.clipboard.reset.delaySeconds**: specifies after how many seconds clipboard will be cleared if clipboard reset is enabled (default: 10)
  * **adapter.keyStore.location**: contains path to directory where PwMan3.ks keystore file is stored (no default, specified in setup)
  * **adapter.passwordStore.location**: contains path to directory where PwMan3.pw database file is stored (no default, specified in setup)
- * **adapter.passwordStore.verifySignature**: not yet functional
- * **adapter.passwordStore.verifyChecksum**: not yet functional
+ * **adapter.passwordStore.verifySignature**: terminates PwMan3 if the password database signature does not match (default: true)
+ * **adapter.passwordStore.verifyChecksum**: terminates PwMan3 if the password database checksum does not match (default: true)
  * **adapter.userInterface.secureInput**: specifies whether your master password and custom passwords will use secure input where the characters you input will not be displayed in your terminal (default: true)
 
 You may adjust the configuration parameters to your needs by editing the yml file with a text editor. The configuration file must retain a valid yaml format and set all configuration parameters or PwMan3 might not be able to read it.
@@ -64,6 +64,9 @@ The general usage info will be given below and is also available in PwMan3 by pr
         l (list) nonparameterized, lists all keys in the database
         h (help) nonparameterized, prints this help
         q (quit) quits pwman3 application
+
+        type 'hlicense' to view license for PwMan3
+        type 'h3rdparty' to view a list of 3rd party libraries and their licenses
 
 PwMan3 updates the physical database file immediately after every action. As of now there is no backup function and each action is irrevocable, so think carefully before you delete or overwrite a stored password. You might want to backup the password database file and keystore file from time to time.
 

@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import de.pflugradts.pwman3.application.KeyStoreAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.boot.Bootable;
-import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
 import de.pflugradts.pwman3.application.configuration.ConfigurationSync;
+import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
 import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
@@ -13,7 +13,6 @@ import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
 import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Optional;
 import static de.pflugradts.pwman3.application.configuration.ReadableConfiguration.KEYSTORE_FILENAME;
@@ -106,9 +105,11 @@ public class PwMan3Setup implements Bootable {
     }
 
     private void createKeyStore(final String directory, final Input password) {
-        keyStoreAdapterPort.storeKey(password.getBytes().toChars(), Paths.get(directory).resolve(KEYSTORE_FILENAME))
-                .onSuccess(setupGuide::sendCreateKeyStoreSucceeded)
-                .onFailure(setupGuide::sendCreateKeyStoreFailed);
+        keyStoreAdapterPort.storeKey(
+                password.getBytes().toChars(),
+                systemOperation.resolvePath(directory, KEYSTORE_FILENAME).getOrNull())
+            .onSuccess(setupGuide::sendCreateKeyStoreSucceeded)
+            .onFailure(setupGuide::sendCreateKeyStoreFailed);
     }
 
     private String verifyValidDirectory(final String source) {

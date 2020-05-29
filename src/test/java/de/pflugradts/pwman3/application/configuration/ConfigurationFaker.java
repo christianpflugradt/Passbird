@@ -11,6 +11,8 @@ public class ConfigurationFaker {
     private boolean isTemplate = false;
     private String passwordStoreLocation;
     private String keyStoreLocation;
+    private boolean isVerifyChecksum;
+    private boolean isVerifySignature;
     private boolean isClipboardResetEnabled = false;
     private int clipboardResetDelaySeconds = 10;
     private boolean isSecureInput = false;
@@ -82,6 +84,16 @@ public class ConfigurationFaker {
         return this;
     }
 
+    public ConfigurationFaker withVerifyChecksumEnabled() {
+        this.isVerifyChecksum = true;
+        return this;
+    }
+
+    public ConfigurationFaker withVerifySignatureEnabled() {
+        this.isVerifySignature = true;
+        return this;
+    }
+
     public ReadableConfiguration fake() {
         final var adapter = mock(Configuration.Adapter.class);
         final var application = mock(Configuration.Application.class);
@@ -128,6 +140,8 @@ public class ConfigurationFaker {
     private Configuration.PasswordStore givenPasswordStoreAdapter() {
         final var passwordStore = mock(Configuration.PasswordStore.class);
         lenient().when(passwordStore.getLocation()).thenReturn(passwordStoreLocation);
+        lenient().when(passwordStore.isVerifyChecksum()).thenReturn(isVerifyChecksum);
+        lenient().when(passwordStore.isVerifySignature()).thenReturn(isVerifySignature);
         return passwordStore;
     }
 

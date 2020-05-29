@@ -46,7 +46,7 @@ class ReadableConfigurationTestIT {
         assertThat(configuration.isTemplate()).isTrue();
 
         // now persist configuration to file system
-        new ConfigurationSyncService(configuration).sync(tempConfigurationDirectory);
+        new ConfigurationSyncService(configuration, systemOperation).sync(tempConfigurationDirectory);
 
         // now load the persisted configuration and ensure the given configuration directory has been persisted too
         final var loadedConfiguration = configurationFactory.loadConfiguration();

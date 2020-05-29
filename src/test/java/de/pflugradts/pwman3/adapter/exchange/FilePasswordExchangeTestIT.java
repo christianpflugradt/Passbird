@@ -1,6 +1,7 @@
 package de.pflugradts.pwman3.adapter.exchange;
 
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
+import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.Tuple2;
 import java.io.File;
@@ -23,7 +24,10 @@ class FilePasswordExchangeTestIT {
         tempExchangeDirectory = UUID.randomUUID().toString();
         exchangeFile = tempExchangeDirectory + File.separator + ReadableConfiguration.EXCHANGE_FILENAME;
         assertThat(new File(tempExchangeDirectory).mkdir()).isTrue();
-        filePasswordExchange = new FilePasswordExchange(new PasswordEntryTransformer(), tempExchangeDirectory);
+        filePasswordExchange = new FilePasswordExchange(
+                new PasswordEntryTransformer(),
+                new SystemOperation(),
+                tempExchangeDirectory);
     }
 
     @AfterEach
