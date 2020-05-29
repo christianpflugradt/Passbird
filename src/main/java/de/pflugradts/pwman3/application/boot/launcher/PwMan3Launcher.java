@@ -67,7 +67,6 @@ public class PwMan3Launcher implements Bootable {
         userInterfaceAdapterPort.send(Output.of(Bytes.of(
                 "\tThis software is licensed under the Apache License, Version 2.0 (APLv2)\n"
                         + "\tYou may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0")));
-        userInterfaceAdapterPort.sendLineBreak();
     }
 
     @SuppressWarnings("checkstyle:MagicNumber")

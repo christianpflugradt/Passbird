@@ -3,8 +3,8 @@ package de.pflugradts.pwman3.application.boot.setup;
 import de.pflugradts.pwman3.application.KeyStoreAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPortFaker;
-import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
 import de.pflugradts.pwman3.application.configuration.Configuration;
+import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
 import de.pflugradts.pwman3.application.configuration.ConfigurationSync;
 import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.application.util.FileFaker;
@@ -26,6 +26,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -57,7 +58,7 @@ class PwMan3SetupTest {
     @Test
     void shouldRunConfigTemplateRoute() {
         // given
-        final var configurationDirectory = "/tmp";
+        final var configurationDirectory = "tmp";
         final var confirmInput = InputFaker.faker().fakeInput().withMessage("c").fake();
         final var password = InputFaker.faker().fakeInput().withMessage("p4s5w0rD").fake();
         ConfigurationFaker.faker()
@@ -112,7 +113,7 @@ class PwMan3SetupTest {
     @Test
     void shouldRunConfigKeyStoreRoute() {
         // given
-        final var configurationDirectory = "/tmp";
+        final var configurationDirectory = "tmp";
         final var confirmInput = InputFaker.faker().fakeInput().withMessage("c").fake();
         final var password = InputFaker.faker().fakeInput().withMessage("p4s5w0rD").fake();
         ConfigurationFaker.faker()
@@ -142,7 +143,7 @@ class PwMan3SetupTest {
     @Test
     void shouldAbortUnconfirmedConfigKeyStoreRoute() {
         // given
-        final var configurationDirectory = "/tmp";
+        final var configurationDirectory = "tmp";
         final var confirmInput = InputFaker.faker().fakeInput().withMessage("n").fake();
         ConfigurationFaker.faker()
                 .forInstance(configuration)
@@ -167,7 +168,7 @@ class PwMan3SetupTest {
         // given
         MockitoAnnotations.initMocks(this);
         final var invalidConfigurationDirectory = "/dev/null";
-        final var validDirectory = InputFaker.faker().fakeInput().withMessage("/tmp").fake();
+        final var validDirectory = InputFaker.faker().fakeInput().withMessage("tmp").fake();
         final var confirmInput = InputFaker.faker().fakeInput().withMessage("c").fake();
         final var password = InputFaker.faker().fakeInput().withMessage("p4s5w0rD").fake();
         ConfigurationFaker.faker()
@@ -196,7 +197,7 @@ class PwMan3SetupTest {
     @Test
     void shouldCreateKeystoreWithMatchingPasswordInput() {
         // given
-        final var configurationDirectory = "/tmp";
+        final var configurationDirectory = "tmp";
         final var confirmInput = InputFaker.faker().fakeInput()
                 .withMessage("c").fake();
         final var passwordMismatch1 = InputFaker.faker().fakeInput().withMessage("bassword").fake();
@@ -233,6 +234,7 @@ class PwMan3SetupTest {
     }
 
     private void givenValidDirectory(final String directory) {
+        given(systemOperation.resolvePath(eq(directory), anyString())).willCallRealMethod();
         final var parent = FileFaker.faker()
                 .fakeFile()
                 .withDirectoryProperty(true)

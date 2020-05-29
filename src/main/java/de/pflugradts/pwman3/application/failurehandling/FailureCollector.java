@@ -9,7 +9,7 @@ import de.pflugradts.pwman3.application.failurehandling.failure.ExportFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.Failure;
 import de.pflugradts.pwman3.application.failurehandling.failure.ImportFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.InputFailure;
-import de.pflugradts.pwman3.application.failurehandling.failure.ReadPasswordDatabaseFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.DecryptPasswordDatabaseFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.SignatureCheckFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.WritePasswordDatabaseFailure;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
@@ -53,8 +53,8 @@ public class FailureCollector {
         collect(new InputFailure(throwable));
     }
 
-    public void collectReadPasswordDatabaseFailure(final Path path, final Throwable throwable) {
-        collect(new ReadPasswordDatabaseFailure(path, throwable));
+    public void collectDecryptPasswordDatabaseFailure(final Path path, final Throwable throwable) {
+        collect(new DecryptPasswordDatabaseFailure(path, throwable));
     }
 
     public void collectSignatureCheckFailure(final Bytes actualSignature) {

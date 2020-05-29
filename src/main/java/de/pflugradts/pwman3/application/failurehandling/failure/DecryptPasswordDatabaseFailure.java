@@ -6,7 +6,7 @@ import java.nio.file.Path;
 
 @Value
 @SuppressWarnings("checkstyle:VisibilityModifier")
-public class ReadPasswordDatabaseFailure implements Failure {
+public class DecryptPasswordDatabaseFailure implements Failure {
     Path path;
     Throwable throwable;
 }

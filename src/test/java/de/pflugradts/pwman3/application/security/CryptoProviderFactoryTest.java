@@ -49,7 +49,7 @@ class CryptoProviderFactoryTest {
     void shouldCreateCryptoProvider() {
         // given
         final var correctPassword = Input.of(Bytes.of("letmein"));
-        final var keyStoreDirectory = "/tmp";
+        final var keyStoreDirectory = "tmp";
         final var keyStoreFilePath = PathFaker.faker().fakePath().fake();
         final var keyStoreDirPath = PathFaker.faker()
                 .fakePath()
@@ -77,7 +77,7 @@ class CryptoProviderFactoryTest {
         // given
         final var incorrectPassword = Input.of(Bytes.of("letmeout"));
         final var correctPassword = Input.of(Bytes.of("letmein"));
-        final var keyStoreDirectory = "/tmp";
+        final var keyStoreDirectory = "tmp";
         final var keyStoreFilePath = PathFaker.faker().fakePath().fake();
         final var keyStoreDirPath = PathFaker.faker()
                 .fakePath()
@@ -105,7 +105,7 @@ class CryptoProviderFactoryTest {
     void shouldCreateCryptoProvider_TerminateApplicationAfter3FailedAttempts() {
         // given
         final var incorrectPassword = Input.of(Bytes.of("letmeout"));
-        final var keyStoreDirectory = "/tmp";
+        final var keyStoreDirectory = "tmp";
         final var keyStoreFilePath = PathFaker.faker().fakePath().fake();
         final var keyStoreDirPath = PathFaker.faker()
                 .fakePath()

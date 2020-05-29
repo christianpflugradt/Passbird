@@ -1,6 +1,11 @@
 package de.pflugradts.pwman3.application.failurehandling;
 
+import de.pflugradts.pwman3.application.boot.Bootable;
+import de.pflugradts.pwman3.application.configuration.Configuration;
+import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
+import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import io.vavr.control.Try;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -8,10 +13,28 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 
+@ExtendWith(MockitoExtension.class)
 class FailureHandlingTestIT {
+
+    @Mock
+    private Bootable bootable;
+    @Mock
+    private Configuration configuration;
+    @Mock
+    private SystemOperation systemOperation;
+    @InjectMocks
+    private FailureHandler failureHandler;
 
     private FailureCollector failureCollector;
     private ByteArrayOutputStream outputStream;
@@ -19,7 +42,7 @@ class FailureHandlingTestIT {
 
     @BeforeEach
     private void setup() {
-        failureCollector = new FailureCollector(null, new FailureHandler());
+        failureCollector = new FailureCollector(null, failureHandler);
         outputStream = new ByteArrayOutputStream();
         printStream = new PrintStream(outputStream);
         System.setErr(printStream);
@@ -32,9 +55,12 @@ class FailureHandlingTestIT {
     }
 
     @Test
-    void shouldHandleChecksumFailure() {
+    void shouldHandleChecksumFailure_Strict() {
         // given
         assertThat(outputStream.toByteArray()).isEmpty();
+        ConfigurationFaker.faker()
+                .forInstance(configuration)
+                .withVerifyChecksumEnabled().fake();
 
         // when
         failureCollector.collectChecksumFailure(Byte.valueOf("0"), Byte.valueOf("0"));
@@ -42,6 +68,22 @@ class FailureHandlingTestIT {
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("checksum");
+        then(bootable).should().terminate(systemOperation);
+    }
+
+    @Test
+    void shouldHandleChecksumFailure_Lenient() {
+        // given
+        assertThat(outputStream.toByteArray()).isEmpty();
+        ConfigurationFaker.faker().forInstance(configuration).fake();
+
+        // when
+        failureCollector.collectChecksumFailure(Byte.valueOf("0"), Byte.valueOf("0"));
+        final var actual = new String(outputStream.toByteArray());
+
+        // then
+        assertThat(actual).isNotNull().containsIgnoringCase("checksum");
+        then(bootable).should(never()).terminate(systemOperation);
     }
 
     @Test
@@ -110,22 +152,28 @@ class FailureHandlingTestIT {
     }
 
     @Test
-    void shouldHandleReadPasswordDatabaseFailure() {
+    void shouldHandleDecryptPasswordDatabaseFailure() {
         // given
         assertThat(outputStream.toByteArray()).isEmpty();
+        ConfigurationFaker.faker().forInstance(configuration).fake();
+        given(systemOperation.resolvePath(any(), any())).willReturn(Try.success(mock(Path.class)));
 
         // when
-        failureCollector.collectReadPasswordDatabaseFailure(mock(Path.class), new RuntimeException());
+        failureCollector.collectDecryptPasswordDatabaseFailure(mock(Path.class), new RuntimeException());
         final var actual = new String(outputStream.toByteArray());
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("database");
+        then(bootable).should().terminate(systemOperation);
     }
 
     @Test
-    void shouldHandleSignatureCheckFailure() {
+    void shouldHandleSignatureCheckFailure_Strict() {
         // given
         assertThat(outputStream.toByteArray()).isEmpty();
+        ConfigurationFaker.faker()
+                .forInstance(configuration)
+                .withVerifySignatureEnabled().fake();
 
         // when
         failureCollector.collectSignatureCheckFailure(Bytes.empty());
@@ -133,6 +181,22 @@ class FailureHandlingTestIT {
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("signature");
+        then(bootable).should().terminate(systemOperation);
+    }
+
+    @Test
+    void shouldHandleSignatureCheckFailure_Lenient() {
+        // given
+        assertThat(outputStream.toByteArray()).isEmpty();
+        ConfigurationFaker.faker().forInstance(configuration).fake();
+
+        // when
+        failureCollector.collectSignatureCheckFailure(Bytes.empty());
+        final var actual = new String(outputStream.toByteArray());
+
+        // then
+        assertThat(actual).isNotNull().containsIgnoringCase("signature");
+        then(bootable).should(never()).terminate(systemOperation);
     }
 
     @Test

@@ -106,7 +106,7 @@ class PwMan3LauncherTest {
     }
 
     private void setupKeyStoreFileMock(boolean keyStoreExists) {
-        final var keystoreDirectory = "/tmp";
+        final var keystoreDirectory = "tmp";
         final var keystoreFile = FileFaker.faker()
                 .fakeFile()
                 .withExistsProperty(keyStoreExists).fake();
