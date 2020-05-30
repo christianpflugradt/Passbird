@@ -3,6 +3,7 @@ package de.pflugradts.pwman3.domain.service;
 import com.google.inject.Inject;
 import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.application.security.CryptoProvider;
+import de.pflugradts.pwman3.application.util.BytesComparator;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
@@ -59,7 +60,8 @@ public class PasswordRepositoryService implements PasswordService {
         return passwordEntryRepository
                 .findAll()
                 .map(PasswordEntry::viewKey)
-                .map(this::decrypted);
+                .map(this::decrypted)
+                .sorted(new BytesComparator());
     }
 
     private Optional<PasswordEntry> find(final Bytes keyBytes) {
