@@ -8,8 +8,7 @@ import de.pflugradts.pwman3.application.util.ByteArrayUtils;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
 import de.pflugradts.pwman3.domain.service.PasswordService;
-
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ListCommandHandler implements CommandHandler {
@@ -21,20 +20,20 @@ public class ListCommandHandler implements CommandHandler {
 
     @Subscribe
     private void handleListCommand(final ListCommand listCommand) {
-        userInterfaceAdapterPort.send(Output.of(join(passwordService.findAllKeys().collect(Collectors.toSet()))));
+        userInterfaceAdapterPort.send(Output.of(join(passwordService.findAllKeys().collect(Collectors.toList()))));
         userInterfaceAdapterPort.sendLineBreak();
     }
 
-    private Bytes join(final Set<Bytes> keyBytesSet) {
-        if (keyBytesSet.isEmpty()) {
+    private Bytes join(final List<Bytes> keyBytesList) {
+        if (keyBytesList.isEmpty()) {
             return Bytes.of("database is empty");
         } else {
-            final int count = keyBytesSet.stream()
+            final int count = keyBytesList.stream()
                     .map(Bytes::size)
-                    .reduce((keyBytesSet.size() - 1) * 2, Integer::sum);
+                    .reduce((keyBytesList.size() - 1) * 2, Integer::sum);
             final byte[] bytes = new byte[count];
             int index = 0;
-            for (final Bytes keyBytes : keyBytesSet) {
+            for (final Bytes keyBytes : keyBytesList) {
                 ByteArrayUtils.copyBytes(keyBytes, bytes, index);
                 index += keyBytes.size();
                 if (index < count) {

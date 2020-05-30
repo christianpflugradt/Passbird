@@ -178,17 +178,17 @@ class PasswordRepositoryServiceTest {
     }
 
     @Test
-    void shouldFindAllKeys() {
+    void shouldFindAllKeysAlphabetically() {
         // given
-        final var key1 = Bytes.of("Key1");
+        final var key1 = Bytes.of("abc");
         final var passwordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withKeyBytes(key1).fake();
-        final var key2 = Bytes.of("Key2");
+        final var key2 = Bytes.of("xyz");
         final var passwordEntry2 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withKeyBytes(key2).fake();
-        final var key3 = Bytes.of("Key3");
+        final var key3 = Bytes.of("hij");
         final var passwordEntry3 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withKeyBytes(key3).fake();
@@ -201,7 +201,7 @@ class PasswordRepositoryServiceTest {
         final var actual = passwordService.findAllKeys();
 
         // then
-        assertThat(actual).containsExactlyInAnyOrder(key1, key2, key3);
+        assertThat(actual).containsExactly(key1, key3, key2);
     }
 
 }

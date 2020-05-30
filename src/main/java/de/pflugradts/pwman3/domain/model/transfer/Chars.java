@@ -27,7 +27,7 @@ public class Chars {
     public static void scramble(char... chars) {
         final var random = new SecureRandom();
         for (int i = 0; i < chars.length; i++) {
-            chars[i] = (char) (random.nextInt(MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE);
+            chars[i] = (char) (random.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE);
         }
     }
 

@@ -78,7 +78,7 @@ public class Bytes implements ValueObject, Iterable<Byte> {
     public void scramble() {
         final var random = new SecureRandom();
         for (int i = 0; i < byteArray.length; i++) {
-            byteArray[i] = (byte) (random.nextInt(MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE);
+            byteArray[i] = (byte) (random.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE);
         }
     }
 
