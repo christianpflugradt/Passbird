@@ -20,6 +20,7 @@ public interface ReadableConfiguration {
     interface Password {
         int getLength();
         boolean isSpecialCharacters();
+        boolean isPromptOnRemoval();
     }
 
     interface Adapter {

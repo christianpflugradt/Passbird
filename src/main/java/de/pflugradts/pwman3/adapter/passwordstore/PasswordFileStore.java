@@ -57,8 +57,8 @@ public class PasswordFileStore implements PasswordStoreAdapterPort {
                 int offset = signatureSize();
                 while (!EOF.equals(ByteArrayUtils.readInt(byteArray, offset))) {
                     final Tuple2<PasswordEntry, Integer> result = passwordEntryTransformer.transform(byteArray, offset);
-                    passwordEntries.add(result._1);
-                    offset = result._2;
+                    passwordEntries.add(result._1());
+                    offset = result._2();
                 }
                 return passwordEntries::stream;
             }

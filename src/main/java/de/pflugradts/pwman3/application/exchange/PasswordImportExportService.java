@@ -5,6 +5,7 @@ import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.service.PasswordService;
 import io.vavr.Tuple2;
+import java.util.stream.Stream;
 
 public class PasswordImportExportService implements ImportExportService {
 
@@ -16,16 +17,24 @@ public class PasswordImportExportService implements ImportExportService {
     private PasswordService passwordService;
 
     @Override
-    public void imp(final String uri) {
-        exchangeFactory.createPasswordExchange(uri)
+    public Stream<Bytes> peekImportKeyBytes(final String uri) {
+        return exchangeFactory.createPasswordExchange(uri)
                 .receive()
                 .onFailure(failureCollector::collectImportFailure)
-                .onSuccess(result -> result.forEach(
-                    passwordEntry -> passwordService.putPasswordEntry(passwordEntry._1, passwordEntry._2)));
+                .getOrElse(Stream::empty)
+                .map(Tuple2::_1);
     }
 
     @Override
-    public void exp(final String uri) {
+    public void importPasswordEntries(final String uri) {
+        exchangeFactory.createPasswordExchange(uri)
+                .receive()
+                .onFailure(failureCollector::collectImportFailure)
+                .onSuccess(passwordService::putPasswordEntries);
+    }
+
+    @Override
+    public void exportPasswordEntries(final String uri) {
         exchangeFactory.createPasswordExchange(uri).send(
                 passwordService
                         .findAllKeys()

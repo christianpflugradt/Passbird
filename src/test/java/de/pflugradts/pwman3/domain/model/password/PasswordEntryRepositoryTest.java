@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
@@ -129,7 +128,6 @@ class PasswordEntryRepositoryTest {
 
         // then
         then(domainEventRegistry).should().register(givenPasswordEntry);
-        then(passwordStoreAdapterPort).should().sync(any());
         assertThat(repository.findAll()).isNotNull().asList().hasSize(1);
         assertThat(repository.findAll().findAny()).isNotNull().contains(givenPasswordEntry);
     }
@@ -149,7 +147,6 @@ class PasswordEntryRepositoryTest {
         repository.delete(givenPasswordEntry);
 
         // then
-        then(passwordStoreAdapterPort).should().sync(any());
         assertThat(repository.findAll()).isNotNull().isEmpty();
     }
 

@@ -60,7 +60,6 @@ class DomainEventHandlerTestIT {
 
         // then
         then(userInterfaceAdapterPort).should().send(captor.capture());
-        then(userInterfaceAdapterPort).should().sendLineBreak();
         assertThat(captor.getValue()).isNotNull()
                 .extracting(Output::getBytes).isNotNull()
                 .extracting(Bytes::asString).isNotNull()
@@ -81,7 +80,6 @@ class DomainEventHandlerTestIT {
 
         // then
         then(userInterfaceAdapterPort).should().send(captor.capture());
-        then(userInterfaceAdapterPort).should().sendLineBreak();
         assertThat(captor.getValue()).isNotNull()
                 .extracting(Output::getBytes).isNotNull()
                 .extracting(Bytes::asString).isNotNull()
@@ -103,7 +101,6 @@ class DomainEventHandlerTestIT {
         // then
         then(passwordEntryRepository).should().delete(giverPasswordEntry);
         then(userInterfaceAdapterPort).should().send(captor.capture());
-        then(userInterfaceAdapterPort).should().sendLineBreak();
         assertThat(captor.getValue()).isNotNull()
                 .extracting(Output::getBytes).isNotNull()
                 .extracting(Bytes::asString).isNotNull()
@@ -124,7 +121,6 @@ class DomainEventHandlerTestIT {
 
         // then
         then(userInterfaceAdapterPort).should().send(captor.capture());
-        then(userInterfaceAdapterPort).should().sendLineBreak();
         assertThat(captor.getValue()).isNotNull()
                 .extracting(Output::getBytes).isNotNull()
                 .extracting(Bytes::asString).isNotNull()

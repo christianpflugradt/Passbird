@@ -96,6 +96,7 @@ class BytesComparatorTest {
 
     }
 
+    @Nested
     class LettersTest {
 
         @Test

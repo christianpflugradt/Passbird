@@ -49,6 +49,32 @@ class PasswordImportExportServiceTest {
     }
 
     @Test
+    void shouldPeekImportKeyBytes() {
+        // given
+        final var passwordEntry1 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withKeyBytes(Bytes.of("key1"))
+                .withPasswordBytes(Bytes.of("password1")).fake();
+        final var passwordEntry2 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withKeyBytes(Bytes.of("key2"))
+                .withPasswordBytes(Bytes.of("password2")).fake();
+        final var exchangeAdapterPort = mock(ExchangeAdapterPort.class);
+        ExchangeAdapterPortFaker.faker()
+                .forInstance(exchangeAdapterPort)
+                .usingFactory(exchangeFactory)
+                .withPasswordEntries(passwordEntry1, passwordEntry2).fake();
+
+        // when
+        final var actual = importExportService.peekImportKeyBytes(URI);
+
+        // then
+        then(exchangeFactory).should().createPasswordExchange(URI);
+        then(passwordService).shouldHaveNoInteractions();
+        assertThat(actual).containsExactlyInAnyOrder(passwordEntry1.viewKey(), passwordEntry2.viewKey());
+    }
+
+    @Test
     void shouldImportPasswords() {
         // given
         final var passwordEntry1 = PasswordEntryFaker.faker()
@@ -66,12 +92,15 @@ class PasswordImportExportServiceTest {
                 .withPasswordEntries(passwordEntry1, passwordEntry2).fake();
 
         // when
-        importExportService.imp(URI);
+        importExportService.importPasswordEntries(URI);
 
         // then
         then(exchangeFactory).should().createPasswordExchange(URI);
-        then(passwordService).should().putPasswordEntry(passwordEntry1.viewKey(), passwordEntry1.viewPassword());
-        then(passwordService).should().putPasswordEntry(passwordEntry2.viewKey(), passwordEntry2.viewPassword());
+        then(passwordService).should().putPasswordEntries(captor.capture());
+        assertThat(captor.getValue().collect(Collectors.toList()))
+                .containsExactly(
+                        new Tuple2<>(passwordEntry1.viewKey(), passwordEntry1.viewPassword()),
+                        new Tuple2<>(passwordEntry2.viewKey(), passwordEntry2.viewPassword()));
     }
 
     @Test
@@ -83,7 +112,7 @@ class PasswordImportExportServiceTest {
                 .withReceiveFailure(failure).fake();
 
         // when
-        importExportService.imp(URI);
+        importExportService.importPasswordEntries(URI);
 
         // then
         then(failureCollector).should().collectImportFailure(failure);
@@ -110,7 +139,7 @@ class PasswordImportExportServiceTest {
                 .usingFactory(exchangeFactory).fake();
 
         // when
-        importExportService.exp(URI);
+        importExportService.exportPasswordEntries(URI);
 
         // then
         then(exchangeFactory).should().createPasswordExchange(URI);
@@ -130,7 +159,7 @@ class PasswordImportExportServiceTest {
                 .withSendFailure(failure).fake();
 
         // when
-        importExportService.exp(URI);
+        importExportService.exportPasswordEntries(URI);
 
         // then
         then(failureCollector).should().collectExportFailure(failure);

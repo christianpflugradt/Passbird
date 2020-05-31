@@ -1,5 +1,6 @@
 package de.pflugradts.pwman3.application.commandhandling;
 
+import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.ExportCommandHandler;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
@@ -23,6 +24,8 @@ class ExportCommandTestIT {
 
     @Mock
     private ImportExportService importExportService;
+    @Mock
+    private UserInterfaceAdapterPort userInterfaceAdapterPort;
     @InjectMocks
     private ExportCommandHandler exportCommandHandler;
 
@@ -45,7 +48,7 @@ class ExportCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(importExportService).should().exp(args);
+        then(importExportService).should().exportPasswordEntries(args);
         assertThat(bytes).isNotEqualTo(reference);
     }
 

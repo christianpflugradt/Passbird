@@ -59,4 +59,21 @@ class DomainEventRegistryTest {
         assertThat(aggregate.getDomainEvents()).isNotNull().isEmpty();
     }
 
+    @Test
+    void shouldDeregisterAggregate() {
+        // given
+        final var aggregate = PasswordEntryFaker.faker().fakePasswordEntry().fake();
+        final var domainEvent1 = new PasswordEntryCreated(aggregate);
+        aggregate.registerDomainEvent(domainEvent1);
+        domainEventRegistry.register(aggregate);
+
+        // when
+        domainEventRegistry.deregister(aggregate);
+        domainEventRegistry.processEvents();
+
+        // then
+        then(eventBus).shouldHaveNoInteractions();
+        assertThat(aggregate.getDomainEvents()).contains(domainEvent1);
+    }
+
 }

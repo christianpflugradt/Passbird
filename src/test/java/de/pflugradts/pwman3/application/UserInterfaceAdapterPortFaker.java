@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -27,6 +28,11 @@ public class UserInterfaceAdapterPortFaker {
 
     public UserInterfaceAdapterPortFaker forInstance(final UserInterfaceAdapterPort userInterfaceAdapterPort) {
         this.userInterfaceAdapterPort = userInterfaceAdapterPort;
+        return this;
+    }
+
+    public UserInterfaceAdapterPortFaker withReceiveConfirmation(final boolean confirmed) {
+        given(userInterfaceAdapterPort.receiveConfirmation(any(Output.class))).willReturn(confirmed);
         return this;
     }
 
