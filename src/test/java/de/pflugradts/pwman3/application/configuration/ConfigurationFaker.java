@@ -18,6 +18,7 @@ public class ConfigurationFaker {
     private boolean isSecureInput = false;
     private int passwordLength = 20;
     private boolean hasSpecialCharacters = false;
+    private boolean isPromptOnRemoval = false;
     private Configuration configuration;
 
     public static ConfigurationFaker faker() {
@@ -84,6 +85,11 @@ public class ConfigurationFaker {
         return this;
     }
 
+    public ConfigurationFaker withPromptOnRemovalEnabled() {
+        this.isPromptOnRemoval = true;
+        return this;
+    }
+
     public ConfigurationFaker withVerifyChecksumEnabled() {
         this.isVerifyChecksum = true;
         return this;
@@ -134,6 +140,7 @@ public class ConfigurationFaker {
         final var passwordProvider = mock(Configuration.Password.class);
         lenient().when(passwordProvider.getLength()).thenReturn(passwordLength);
         lenient().when(passwordProvider.isSpecialCharacters()).thenReturn(hasSpecialCharacters);
+        lenient().when(passwordProvider.isPromptOnRemoval()).thenReturn(isPromptOnRemoval);
         return passwordProvider;
     }
 

@@ -24,8 +24,8 @@ public class GetCommandHandler implements CommandHandler {
             passwordBytes -> clipboardAdapterPort.post(Output.of(passwordBytes))
         );
         userInterfaceAdapterPort.send(Output.of(Bytes.of("Password copied to clipboard.")));
-        userInterfaceAdapterPort.sendLineBreak();
         getCommand.invalidateInput();
+        userInterfaceAdapterPort.sendLineBreak();
     }
 
 }

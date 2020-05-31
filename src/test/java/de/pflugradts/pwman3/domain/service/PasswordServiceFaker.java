@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -32,10 +32,14 @@ public class PasswordServiceFaker {
     }
 
     public PasswordService fake() {
-        given(passwordService.findAllKeys()).willReturn(passwordEntries.stream().map(PasswordEntry::viewKey));
-        passwordEntries.forEach(passwordEntry ->
-                given(passwordService.viewPassword(passwordEntry.viewKey()))
-                        .willReturn(Optional.of(passwordEntry.viewPassword())));
+        lenient().when(passwordService.findAllKeys())
+                .thenReturn(passwordEntries.stream().map(PasswordEntry::viewKey));
+        passwordEntries.forEach(passwordEntry -> {
+                lenient().when(passwordService.viewPassword(passwordEntry.viewKey()))
+                        .thenReturn(Optional.of(passwordEntry.viewPassword()));
+                lenient().when(passwordService.entryExists(passwordEntry.viewKey()))
+                        .thenReturn(true);
+        });
         return passwordService;
     }
 

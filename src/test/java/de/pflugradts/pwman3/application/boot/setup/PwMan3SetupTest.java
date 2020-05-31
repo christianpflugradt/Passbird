@@ -59,7 +59,6 @@ class PwMan3SetupTest {
     void shouldRunConfigTemplateRoute() {
         // given
         final var configurationDirectory = "tmp";
-        final var confirmInput = InputFaker.faker().fakeInput().withMessage("c").fake();
         final var password = InputFaker.faker().fakeInput().withMessage("p4s5w0rD").fake();
         ConfigurationFaker.faker()
                 .forInstance(configuration)
@@ -69,8 +68,8 @@ class PwMan3SetupTest {
                 .fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseInputs(confirmInput)
-                .withTheseSecureInputs(password, password).fake();
+                .withTheseSecureInputs(password, password)
+                .withReceiveConfirmation(true).fake();
         given(configurationSync.sync(configurationDirectory)).willReturn(Try.success(null));
         given(keyStoreAdapterPort.storeKey(any(), any())).willReturn(Try.success(null));
         givenValidDirectory(configurationDirectory);
@@ -91,14 +90,13 @@ class PwMan3SetupTest {
     @Test
     void shouldAbortUnconfirmedConfigTemplateRoute() {
         // given
-        final var confirmInput = InputFaker.faker().fakeInput().withMessage("n").fake();
         ConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withConfigurationTemplate()
                 .fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseInputs(confirmInput).fake();
+                .withReceiveConfirmation(false).fake();
 
         // when
         pwMan3Setup.boot();
@@ -114,7 +112,6 @@ class PwMan3SetupTest {
     void shouldRunConfigKeyStoreRoute() {
         // given
         final var configurationDirectory = "tmp";
-        final var confirmInput = InputFaker.faker().fakeInput().withMessage("c").fake();
         final var password = InputFaker.faker().fakeInput().withMessage("p4s5w0rD").fake();
         ConfigurationFaker.faker()
                 .forInstance(configuration)
@@ -122,8 +119,8 @@ class PwMan3SetupTest {
                 .fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseInputs(confirmInput)
-                .withTheseSecureInputs(password, password).fake();
+                .withTheseSecureInputs(password, password)
+                .withReceiveConfirmation(true).fake();
         given(keyStoreAdapterPort.storeKey(any(), any())).willReturn(Try.success(null));
         givenValidDirectory(configurationDirectory);
 
@@ -144,14 +141,13 @@ class PwMan3SetupTest {
     void shouldAbortUnconfirmedConfigKeyStoreRoute() {
         // given
         final var configurationDirectory = "tmp";
-        final var confirmInput = InputFaker.faker().fakeInput().withMessage("n").fake();
         ConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withKeyStoreLocation(configurationDirectory)
                 .fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseInputs(confirmInput).fake();
+                .withReceiveConfirmation(false).fake();
 
         // when
         pwMan3Setup.boot();
@@ -169,7 +165,6 @@ class PwMan3SetupTest {
         MockitoAnnotations.initMocks(this);
         final var invalidConfigurationDirectory = "/dev/null";
         final var validDirectory = InputFaker.faker().fakeInput().withMessage("tmp").fake();
-        final var confirmInput = InputFaker.faker().fakeInput().withMessage("c").fake();
         final var password = InputFaker.faker().fakeInput().withMessage("p4s5w0rD").fake();
         ConfigurationFaker.faker()
                 .forInstance(configuration)
@@ -177,8 +172,9 @@ class PwMan3SetupTest {
                 .fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseInputs(confirmInput, validDirectory)
-                .withTheseSecureInputs(password, password).fake();
+                .withTheseInputs(validDirectory)
+                .withTheseSecureInputs(password, password)
+                .withReceiveConfirmation(true).fake();
         given(keyStoreAdapterPort.storeKey(any(), captor.capture())).willReturn(Try.success(null));
         givenInvalidDirectory(invalidConfigurationDirectory);
         givenValidDirectory(validDirectory.getBytes().asString());
@@ -198,8 +194,6 @@ class PwMan3SetupTest {
     void shouldCreateKeystoreWithMatchingPasswordInput() {
         // given
         final var configurationDirectory = "tmp";
-        final var confirmInput = InputFaker.faker().fakeInput()
-                .withMessage("c").fake();
         final var passwordMismatch1 = InputFaker.faker().fakeInput().withMessage("bassword").fake();
         final var passwordMismatch2 = InputFaker.faker().fakeInput().withMessage("guessword").fake();
         final var emptyPassword = Input.empty();
@@ -210,15 +204,14 @@ class PwMan3SetupTest {
                 .fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseInputs(confirmInput)
                 .withTheseSecureInputs(
                         passwordMismatch1,
                         passwordMismatch2,
                         emptyPassword,
                         emptyPassword,
                         passwordMatched,
-                        passwordMatched
-                ).fake();
+                        passwordMatched)
+                .withReceiveConfirmation(true).fake();
         given(keyStoreAdapterPort.storeKey(any(), any())).willReturn(Try.success(null));
         givenValidDirectory(configurationDirectory);
 

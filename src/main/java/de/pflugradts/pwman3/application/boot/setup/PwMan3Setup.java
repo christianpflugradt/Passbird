@@ -53,10 +53,7 @@ public class PwMan3Setup implements Bootable {
     }
 
     private boolean continueRoute() {
-        return userInterfaceAdapterPort.receive()
-                .onFailure(failureCollector::collectInputFailure)
-                .getOrElse(Input.empty())
-                .getCommandChar() == 'c';
+        return userInterfaceAdapterPort.receiveConfirmation(Output.of(Bytes.of("Your input: ")));
     }
 
     private void configTemplateRoute() {

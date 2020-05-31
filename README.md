@@ -32,7 +32,7 @@ Once set up PwMan3 will create a PwMan3.yml with various configuration parameter
 
  * **application.password.length**: specifies the length of generated passwords (default: 20 characters)
  * **application.password.specialCharacters**: specifies whether generated passwords have special characters such as !@#$% or not (default: true)
- * **application.password.promptOnRemoval**: not yet functional
+ * **application.password.promptOnRemoval**: specifies whether manual confirmation is required when an action would delete a previously saved password (default: true)
  * **adapter.clipboard.reset.enabled**: specifies whether clipboard will be cleared after a password is copied to clipboard (default: true)
  * **adapter.clipboard.reset.delaySeconds**: specifies after how many seconds clipboard will be cleared if clipboard reset is enabled (default: 10)
  * **adapter.keyStore.location**: contains path to directory where PwMan3.ks keystore file is stored (no default, specified in setup)

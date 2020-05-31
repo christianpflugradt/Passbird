@@ -7,10 +7,11 @@ import de.pflugradts.pwman3.application.util.BytesComparator;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import io.vavr.Tuple2;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class PasswordRepositoryService implements PasswordService {
+public class CryptoPasswordService implements PasswordService {
 
     @Inject
     private FailureCollector failureCollector;
@@ -20,6 +21,11 @@ public class PasswordRepositoryService implements PasswordService {
     private PasswordEntryRepository passwordEntryRepository;
     @Inject
     private DomainEventRegistry domainEventRegistry;
+
+    @Override
+    public boolean entryExists(final Bytes keyBytes) {
+        return find(encrypted(keyBytes)).isPresent();
+    }
 
     @Override
     public Optional<Bytes> viewPassword(final Bytes keyBytes) {
@@ -35,15 +41,25 @@ public class PasswordRepositoryService implements PasswordService {
     }
 
     @Override
+    public void putPasswordEntries(final Stream<Tuple2<Bytes, Bytes>> passwordEntries) {
+        passwordEntries.forEach(this::putPasswordEntryTuple);
+        processEventsAndSync();
+    }
+
+    @Override
     public void putPasswordEntry(final Bytes keyBytes, final Bytes passwordBytes) {
-        final var encryptedKeyBytes = encrypted(keyBytes);
-        final var encryptedPasswordBytes = encrypted(passwordBytes);
+        putPasswordEntryTuple(new Tuple2<>(keyBytes, passwordBytes));
+        processEventsAndSync();
+    }
+
+    private void putPasswordEntryTuple(final Tuple2<Bytes, Bytes> passwordEntryTuple) {
+        final var encryptedKeyBytes = encrypted(passwordEntryTuple._1());
+        final var encryptedPasswordBytes = encrypted(passwordEntryTuple._2());
         find(encryptedKeyBytes).ifPresentOrElse(
             passwordEntry -> passwordEntry.updatePassword(encryptedPasswordBytes),
             () -> passwordEntryRepository.add(
                     PasswordEntry.create(encryptedKeyBytes, encryptedPasswordBytes)));
-        passwordEntryRepository.sync();
-        domainEventRegistry.processEvents();
+
     }
 
     @Override
@@ -52,7 +68,7 @@ public class PasswordRepositoryService implements PasswordService {
         find(encryptedKeyBytes).ifPresentOrElse(
             PasswordEntry::discard,
             () -> domainEventRegistry.register(new PasswordEntryNotFound(keyBytes)));
-        domainEventRegistry.processEvents();
+        processEventsAndSync();
     }
 
     @Override
@@ -80,6 +96,11 @@ public class PasswordRepositoryService implements PasswordService {
                 .decrypt(bytes)
                 .onFailure(throwable -> failureCollector.collectDecryptionFailure(bytes, throwable))
                 .getOrElse(Bytes.empty());
+    }
+
+    private void processEventsAndSync() {
+        domainEventRegistry.processEvents();
+        passwordEntryRepository.sync();
     }
 
 }

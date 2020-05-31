@@ -14,8 +14,8 @@ class PasswordEntryTransformer {
 
     PasswordEntryRepresentation transform(final Tuple2<Bytes, Bytes> tuple) {
         return new PasswordEntryRepresentation(
-                tuple._1.asString(),
-                tuple._2.asString());
+                tuple._1().asString(),
+                tuple._2().asString());
     }
 
 }

@@ -67,7 +67,6 @@ public class DomainEventHandler implements EventHandler {
     private void sendToUserInterface(final String template, final Bytes keyBytes) {
         userInterfaceAdapterPort.send(Output.of(Bytes.of(
                 String.format(template, keyBytes.asString()))));
-        userInterfaceAdapterPort.sendLineBreak();
     }
 
 }

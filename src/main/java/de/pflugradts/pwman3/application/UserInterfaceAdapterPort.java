@@ -9,15 +9,28 @@ import io.vavr.control.Try;
  */
 public interface UserInterfaceAdapterPort {
     Try<Input> receive(Output output);
+
     default Try<Input> receive() {
         return receive(Output.empty());
     }
+
+    default boolean receiveConfirmation(Output output) {
+        return !receive(output)
+                .filter(input -> input.getData().isEmpty())
+                .filter(input -> input.getCommandChar() == 'c')
+                .isEmpty();
+    }
+
     Try<Input> receiveSecurely(Output output);
+
     default Try<Input> receiveSecurely() {
         return receiveSecurely(Output.empty());
     }
+
     void send(Output output);
+
     default void sendLineBreak() {
         send(Output.empty());
     }
+
 }

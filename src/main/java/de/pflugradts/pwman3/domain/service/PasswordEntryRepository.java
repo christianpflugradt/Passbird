@@ -37,12 +37,11 @@ public class PasswordEntryRepository implements Repository {
     public void add(final PasswordEntry passwordEntry) {
         domainEventRegistry.register(passwordEntry);
         getPasswordEntries().add(passwordEntry);
-        passwordStoreAdapterPort.sync(getPasswordEntriesSupplier());
     }
 
     public void delete(final PasswordEntry passwordEntry) {
         getPasswordEntries().remove(passwordEntry);
-        passwordStoreAdapterPort.sync(getPasswordEntriesSupplier());
+        domainEventRegistry.deregister(passwordEntry);
     }
 
     public Stream<PasswordEntry> findAll() {

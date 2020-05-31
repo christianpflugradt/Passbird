@@ -18,9 +18,9 @@ public class ViewCommandHandler implements CommandHandler {
     private void handleViewCommand(final ViewCommand viewCommand) {
         passwordService.viewPassword(viewCommand.getArgument()).ifPresent(passwordBytes -> {
             userInterfaceAdapterPort.send(Output.of(passwordBytes));
-            userInterfaceAdapterPort.sendLineBreak();
         });
         viewCommand.invalidateInput();
+        userInterfaceAdapterPort.sendLineBreak();
     }
 
 }

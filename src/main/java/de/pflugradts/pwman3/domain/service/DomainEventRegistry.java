@@ -25,6 +25,7 @@ public class DomainEventRegistry {
     private EventBus eventBus;
     private final Set<AggregateRoot> aggregateRoots = new HashSet<>();
     private final Queue<DomainEvent> domainEvents = new ArrayDeque<>();
+    private final Queue<AggregateRoot> abandonedAggregateRoots = new ArrayDeque<>();
 
     public void register(final AggregateRoot aggregateRoot) {
         aggregateRoots.add(aggregateRoot);
@@ -34,13 +35,33 @@ public class DomainEventRegistry {
         domainEvents.add(domainEvent);
     }
 
+    public void deregister(final AggregateRoot aggregateRoot) {
+        abandonedAggregateRoots.add(aggregateRoot);
+    }
+
     public void processEvents() {
+        processAbandonedAggregateRoots();
+        processAggregateRoots();
+        processDomainEvents();
+        processAbandonedAggregateRoots();
+    }
+
+    private void processAggregateRoots() {
         aggregateRoots.forEach(aggregateRoot -> {
             aggregateRoot.getDomainEvents().forEach(domainEvent -> getEventBus().post(domainEvent));
             aggregateRoot.clearDomainEvents();
         });
+    }
+
+    private void processDomainEvents() {
         while (!domainEvents.isEmpty()) {
             getEventBus().post(domainEvents.poll());
+        }
+    }
+
+    private void processAbandonedAggregateRoots() {
+        while (!abandonedAggregateRoots.isEmpty()) {
+            aggregateRoots.remove(abandonedAggregateRoots.poll());
         }
     }
 
