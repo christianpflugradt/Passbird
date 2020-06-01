@@ -1,5 +1,6 @@
 package de.pflugradts.pwman3.adapter.clipboard;
 
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.pflugradts.pwman3.application.ClipboardAdapterPort;
@@ -36,16 +37,20 @@ public class ClipboardService implements ClipboardAdapterPort {
 
     private void scheduleCleaner() {
         if (isResetEnabledInConfiguration()) {
-            cleanerThread = new Thread(() -> {
-                sleep();
-                systemOperation.copyToClipboard("");
-            });
+            cleanerThread = new Thread(() -> sleep().onSuccess(x -> systemOperation.copyToClipboard("")));
             cleanerThread.start();
         }
     }
 
     private Try<Void> sleep() {
-        return Try.run(() -> Thread.sleep(getDelaySecondsFromConfiguration() * MILLI_SECONDS));
+        return Try.run(() -> {
+            try {
+                Thread.sleep(getDelaySecondsFromConfiguration() * MILLI_SECONDS);
+            } catch (InterruptedException ex) {
+                // rethrow as unchecked exception since Vavr currently prints checked exceptions to std err
+                throw new UncheckedExecutionException(ex);
+            }
+        });
     }
 
     private boolean isResetEnabledInConfiguration() {
