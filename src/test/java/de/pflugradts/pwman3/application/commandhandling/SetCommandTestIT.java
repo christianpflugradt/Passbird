@@ -6,6 +6,7 @@ import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.SetCommandHandler;
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
+import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
@@ -33,6 +34,8 @@ class SetCommandTestIT {
 
     private InputHandler inputHandler;
 
+    @Mock
+    private FailureCollector failureCollector;
     @Mock
     private PasswordService passwordService;
     @Mock

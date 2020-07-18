@@ -1,6 +1,5 @@
 package de.pflugradts.pwman3.application.security;
 
-import de.pflugradts.pwman3.adapter.keystore.Key;
 import de.pflugradts.pwman3.application.KeyStoreAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPortFaker;

@@ -11,4 +11,6 @@ public interface EventRegistry {
 
     void deregister(AggregateRoot aggregateRoot);
 
+    void processEvents();
+
 }

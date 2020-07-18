@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 @SuppressWarnings("checkstyle:VisibilityModifier")
-public class EncryptionFailure implements Failure {
+public class PasswordEntryFailure implements Failure {
     Bytes bytes;
     Throwable throwable;
 }

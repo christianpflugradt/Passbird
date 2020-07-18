@@ -75,7 +75,7 @@ jacocoTestCoverageVerification {
 
 task architecturetests(type: Test, group: 'Verification') {
     useJUnitPlatform()
-    include '**/*TestArch.class'
+    include '**/*TestAT.class'
     testLogging {
         events "passed", "failed"
     }

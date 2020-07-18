@@ -4,11 +4,12 @@ import de.pflugradts.pwman3.application.ClipboardAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.GetCommandHandler;
+import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
+import de.pflugradts.pwman3.domain.service.PasswordServiceFaker;
 import de.pflugradts.pwman3.domain.service.password.PasswordService;
-import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,9 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class GetCommandTestIT {
@@ -50,8 +49,13 @@ class GetCommandTestIT {
         final var args = "key";
         final var bytes = Bytes.of("g" + args);
         final var reference = bytes.copy();
-        final var expectedPassword = mock(Bytes.class);
-        given(passwordService.viewPassword(Bytes.of(args))).willReturn(Optional.of(expectedPassword));
+        final var expectedPassword = Bytes.of("value");
+        PasswordServiceFaker.faker()
+                .forInstance(passwordService)
+                .withPasswordEntries(PasswordEntryFaker.faker()
+                        .fakePasswordEntry()
+                        .withKeyBytes(Bytes.of(args))
+                        .withPasswordBytes(expectedPassword).fake()).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);

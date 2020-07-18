@@ -1,6 +1,6 @@
 package de.pflugradts.pwman3.application;
 
-import de.pflugradts.pwman3.adapter.keystore.Key;
+import de.pflugradts.pwman3.application.security.Key;
 import de.pflugradts.pwman3.domain.model.transfer.Chars;
 import io.vavr.control.Try;
 import java.nio.file.Path;

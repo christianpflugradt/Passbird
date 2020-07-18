@@ -7,6 +7,7 @@ import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
 import de.pflugradts.pwman3.domain.service.password.PasswordService;
+import io.vavr.control.Try;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,7 @@ class ViewCommandTestIT {
         final var bytes = Bytes.of("v" + args);
         final var reference = bytes.copy();
         final var expectedPassword = mock(Bytes.class);
-        given(passwordService.viewPassword(Bytes.of(args))).willReturn(Optional.of(expectedPassword));
+        given(passwordService.viewPassword(Bytes.of(args))).willReturn(Optional.of(Try.of(() -> expectedPassword)));
 
         // when
         assertThat(bytes).isEqualTo(reference);

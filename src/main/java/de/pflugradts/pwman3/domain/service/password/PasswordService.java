@@ -1,8 +1,8 @@
 package de.pflugradts.pwman3.domain.service.password;
 
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
-
 import io.vavr.Tuple2;
+import io.vavr.control.Try;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -12,10 +12,10 @@ import java.util.stream.Stream;
  * {@link #putPasswordEntry(Bytes, Bytes)} and {@link #discardPasswordEntry(Bytes)}.</p>
  */
 public interface PasswordService {
-    boolean entryExists(Bytes keyBytes);
-    Optional<Bytes> viewPassword(Bytes keyBytes);
-    void putPasswordEntries(Stream<Tuple2<Bytes, Bytes>> passwordEntries);
-    void putPasswordEntry(Bytes keyBytes, Bytes passwordBytes);
-    void discardPasswordEntry(Bytes keyBytes);
-    Stream<Bytes> findAllKeys();
+    Try<Boolean> entryExists(Bytes keyBytes);
+    Optional<Try<Bytes>> viewPassword(Bytes keyBytes);
+    Try<Void> putPasswordEntries(Stream<Tuple2<Bytes, Bytes>> passwordEntries);
+    Try<Void> putPasswordEntry(Bytes keyBytes, Bytes passwordBytes);
+    Try<Void> discardPasswordEntry(Bytes keyBytes);
+    Try<Stream<Bytes>> findAllKeys();
 }

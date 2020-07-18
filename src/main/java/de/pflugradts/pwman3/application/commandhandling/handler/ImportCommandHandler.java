@@ -7,15 +7,19 @@ import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.commandhandling.command.ImportCommand;
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
 import de.pflugradts.pwman3.application.exchange.ImportExportService;
-import de.pflugradts.pwman3.application.util.BytesComparator;
+import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
+import de.pflugradts.pwman3.domain.model.transfer.BytesComparator;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
 import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import java.util.HashSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ImportCommandHandler implements CommandHandler {
 
+    @Inject
+    private FailureCollector failureCollector;
     @Inject
     private ReadableConfiguration configuration;
     @Inject
@@ -42,7 +46,9 @@ public class ImportCommandHandler implements CommandHandler {
             final var overlaps =
                     Streams.concat(
                             importExportService.peekImportKeyBytes(importCommand.getArgument().asString()).distinct(),
-                            passwordService.findAllKeys().distinct())
+                            passwordService.findAllKeys()
+                                    .onFailure(failureCollector::collectPasswordEntriesFailure)
+                                    .getOrElse(Stream.empty()).distinct())
                     .filter(bytes -> !duplicateDetector.add(bytes))
                     .sorted(new BytesComparator())
                     .map(Bytes::asString)

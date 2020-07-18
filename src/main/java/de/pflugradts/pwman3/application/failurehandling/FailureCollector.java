@@ -3,17 +3,16 @@ package de.pflugradts.pwman3.application.failurehandling;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import de.pflugradts.pwman3.application.failurehandling.failure.ChecksumFailure;
-import de.pflugradts.pwman3.application.failurehandling.failure.DecryptionFailure;
-import de.pflugradts.pwman3.application.failurehandling.failure.EncryptionFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.DecryptPasswordDatabaseFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.ExportFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.Failure;
 import de.pflugradts.pwman3.application.failurehandling.failure.ImportFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.InputFailure;
-import de.pflugradts.pwman3.application.failurehandling.failure.DecryptPasswordDatabaseFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.PasswordEntriesFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.PasswordEntryFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.SignatureCheckFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.WritePasswordDatabaseFailure;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
-
 import java.nio.file.Path;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
@@ -33,12 +32,12 @@ public class FailureCollector {
         collect(new ChecksumFailure(actualChecksum, expectedChecksum));
     }
 
-    public void collectDecryptionFailure(final Bytes bytes, final Throwable throwable) {
-        collect(new DecryptionFailure(bytes, throwable));
+    public void collectPasswordEntryFailure(final Bytes bytes, final Throwable throwable) {
+        collect(new PasswordEntryFailure(bytes, throwable));
     }
 
-    public void collectEncryptionFailure(final Bytes bytes, final Throwable throwable) {
-        collect(new EncryptionFailure(bytes, throwable));
+    public void collectPasswordEntriesFailure(final Throwable throwable) {
+        collect(new PasswordEntriesFailure(throwable));
     }
 
     public void collectExportFailure(final Throwable throwable) {

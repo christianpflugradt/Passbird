@@ -2,6 +2,7 @@ package de.pflugradts.pwman3.adapter.keystore;
 
 import com.google.inject.Inject;
 import de.pflugradts.pwman3.application.KeyStoreAdapterPort;
+import de.pflugradts.pwman3.application.security.Key;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Chars;

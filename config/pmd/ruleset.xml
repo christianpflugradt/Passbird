@@ -75,7 +75,7 @@
 
 	<rule ref="category/java/design.xml/TooManyMethods">
 		<properties>
-			<property name="maxmethods" value="12" />
+			<property name="maxmethods" value="15" />
 		</properties>
 	</rule>
 
