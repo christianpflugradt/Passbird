@@ -1,107 +1,124 @@
 package de.pflugradts.pwman3.domain.service.password;
 
 import com.google.inject.Inject;
-import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
-import de.pflugradts.pwman3.application.util.BytesComparator;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
-import de.pflugradts.pwman3.application.eventhandling.PwMan3EventRegistry;
+import de.pflugradts.pwman3.domain.model.transfer.BytesComparator;
+import de.pflugradts.pwman3.domain.service.eventhandling.EventRegistry;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
 import io.vavr.Tuple2;
+import io.vavr.control.Either;
+import io.vavr.control.Try;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CryptoPasswordService implements PasswordService {
 
     @Inject
-    private FailureCollector failureCollector;
-    @Inject
     private CryptoProvider cryptoProvider;
     @Inject
     private PasswordEntryRepository passwordEntryRepository;
     @Inject
-    private PwMan3EventRegistry pwMan3EventRegistry;
+    private EventRegistry eventRegistry;
 
     @Override
-    public boolean entryExists(final Bytes keyBytes) {
-        return find(encrypted(keyBytes)).isPresent();
+    public Try<Boolean> entryExists(final Bytes keyBytes) {
+        return encrypted(keyBytes).fold(
+                Try::failure, encryptedKeyBytes -> Try.of(() -> find(encryptedKeyBytes).isPresent()));
     }
 
     @Override
-    public Optional<Bytes> viewPassword(final Bytes keyBytes) {
-        final var encryptedKeyBytes = encrypted(keyBytes);
-        final var password = find(encryptedKeyBytes)
-                .map(PasswordEntry::viewPassword)
-                .map(this::decrypted);
-        if (password.isEmpty()) {
-            pwMan3EventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes));
-            pwMan3EventRegistry.processEvents();
-        }
-        return password;
+    public Optional<Try<Bytes>> viewPassword(final Bytes keyBytes) {
+        return encrypted(keyBytes).fold(
+            throwable -> Optional.of(Try.failure(throwable)),
+            encryptedKeyBytes -> find(encryptedKeyBytes)
+                    .map(PasswordEntry::viewPassword)
+                    .map(this::decrypted)
+                    .map(Either::toTry).or(() -> {
+                        eventRegistry.register(new PasswordEntryNotFound(keyBytes));
+                        eventRegistry.processEvents();
+                        return Optional.empty();
+                    }));
     }
 
     @Override
-    public void putPasswordEntries(final Stream<Tuple2<Bytes, Bytes>> passwordEntries) {
-        passwordEntries.forEach(this::putPasswordEntryTuple);
-        processEventsAndSync();
+    public Try<Void> putPasswordEntries(final Stream<Tuple2<Bytes, Bytes>> passwordEntries) {
+        return passwordEntries
+                .map(this::putPasswordEntryTuple)
+                .filter(Try::isFailure).findAny()
+                .orElse(Try.success(null))
+                .andThen(this::processEventsAndSync);
     }
 
     @Override
-    public void putPasswordEntry(final Bytes keyBytes, final Bytes passwordBytes) {
-        putPasswordEntryTuple(new Tuple2<>(keyBytes, passwordBytes));
-        processEventsAndSync();
+    public Try<Void> putPasswordEntry(final Bytes keyBytes, final Bytes passwordBytes) {
+        return putPasswordEntryTuple(new Tuple2<>(keyBytes, passwordBytes))
+                .andThen(this::processEventsAndSync);
     }
 
-    private void putPasswordEntryTuple(final Tuple2<Bytes, Bytes> passwordEntryTuple) {
-        final var encryptedKeyBytes = encrypted(passwordEntryTuple._1());
+    private Try<Void> putPasswordEntryTuple(final Tuple2<Bytes, Bytes> passwordEntryTuple) {
         final var encryptedPasswordBytes = encrypted(passwordEntryTuple._2());
-        find(encryptedKeyBytes).ifPresentOrElse(
+        return encryptedPasswordBytes.isLeft()
+                ? Try.failure(encryptedPasswordBytes.getLeft())
+                : encrypted(passwordEntryTuple._1).fold(
+                    Try::failure,
+                    encryptedKeyBytes -> putEncryptedPasswordEntry(encryptedKeyBytes, encryptedPasswordBytes.get()));
+    }
+
+    private Try<Void> putEncryptedPasswordEntry(final Bytes encryptedKeyBytes, final Bytes encryptedPasswordBytes) {
+        return Try.run(() -> find(encryptedKeyBytes).ifPresentOrElse(
             passwordEntry -> passwordEntry.updatePassword(encryptedPasswordBytes),
             () -> passwordEntryRepository.add(
-                    PasswordEntry.create(encryptedKeyBytes, encryptedPasswordBytes)));
-
+                    PasswordEntry.create(encryptedKeyBytes, encryptedPasswordBytes)
+            )));
     }
 
     @Override
-    public void discardPasswordEntry(final Bytes keyBytes) {
-        final var encryptedKeyBytes = encrypted(keyBytes);
-        find(encryptedKeyBytes).ifPresentOrElse(
-            PasswordEntry::discard,
-            () -> pwMan3EventRegistry.register(new PasswordEntryNotFound(keyBytes)));
-        processEventsAndSync();
+    public Try<Void> discardPasswordEntry(final Bytes keyBytes) {
+        return discardOrFail(keyBytes).andThen(this::processEventsAndSync);
+    }
+
+    private Try<Void> discardOrFail(final Bytes keyBytes) {
+        return encrypted(keyBytes).fold(
+            Try::failure,
+            encryptedKeyBytes -> Try.run(() -> find(encryptedKeyBytes).ifPresentOrElse(
+                PasswordEntry::discard,
+                () -> eventRegistry.register(new PasswordEntryNotFound(keyBytes)))));
     }
 
     @Override
-    public Stream<Bytes> findAllKeys() {
-        return passwordEntryRepository
+    public Try<Stream<Bytes>> findAllKeys() {
+        return getAllSortedIfNoErrors(passwordEntryRepository
                 .findAll()
                 .map(PasswordEntry::viewKey)
                 .map(this::decrypted)
-                .sorted(new BytesComparator());
+                .collect(Collectors.toList()));
+    }
+
+    private Try<Stream<Bytes>> getAllSortedIfNoErrors(final List<Either<Throwable, Bytes>> eitherList) {
+        return eitherList.stream().anyMatch(Either::isLeft)
+                ? Try.failure(eitherList.stream().filter(Either::isLeft).map(Either::getLeft).findAny().get())
+                : Try.of(() -> eitherList.stream().map(Either::get).sorted(new BytesComparator()));
     }
 
     private Optional<PasswordEntry> find(final Bytes keyBytes) {
         return passwordEntryRepository.find(keyBytes);
     }
 
-    private Bytes encrypted(final Bytes bytes) {
-        return cryptoProvider
-                .encrypt(bytes)
-                .onFailure(throwable -> failureCollector.collectEncryptionFailure(bytes, throwable))
-                .getOrElse(Bytes.empty());
+    private Either<Throwable, Bytes> encrypted(final Bytes bytes) {
+        return cryptoProvider.encrypt(bytes).toEither();
     }
 
-    private Bytes decrypted(final Bytes bytes) {
-        return cryptoProvider
-                .decrypt(bytes)
-                .onFailure(throwable -> failureCollector.collectDecryptionFailure(bytes, throwable))
-                .getOrElse(Bytes.empty());
+    private Either<Throwable, Bytes> decrypted(final Bytes bytes) {
+        return cryptoProvider.decrypt(bytes).toEither();
     }
 
     private void processEventsAndSync() {
-        pwMan3EventRegistry.processEvents();
+        eventRegistry.processEvents();
         passwordEntryRepository.sync();
     }
 

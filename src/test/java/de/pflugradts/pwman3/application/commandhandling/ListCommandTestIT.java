@@ -3,10 +3,12 @@ package de.pflugradts.pwman3.application.commandhandling;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.ListCommandHandler;
+import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
 import de.pflugradts.pwman3.domain.service.password.PasswordService;
+import io.vavr.control.Try;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +29,8 @@ class ListCommandTestIT {
 
     private InputHandler inputHandler;
 
+    @Mock
+    private FailureCollector failureCollector;
     @Mock
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
     @Mock
@@ -52,7 +56,7 @@ class ListCommandTestIT {
         final var key1 = Bytes.of("key1");
         final var key2 = Bytes.of("key2");
         final var key3 = Bytes.of("key3");
-        given(passwordService.findAllKeys()).willReturn(Stream.of(key1, key2, key3));
+        given(passwordService.findAllKeys()).willReturn(Try.of(() -> Stream.of(key1, key2, key3)));
 
         // when
         inputHandler.handleInput(input);
@@ -71,7 +75,7 @@ class ListCommandTestIT {
     void shouldHandleListCommand_WithEmptyDatabase() {
         // given
         final var input = Input.of(Bytes.of("l"));
-        given(passwordService.findAllKeys()).willReturn(Stream.empty());
+        given(passwordService.findAllKeys()).willReturn(Try.of(Stream::empty));
 
         // when
         inputHandler.handleInput(input);

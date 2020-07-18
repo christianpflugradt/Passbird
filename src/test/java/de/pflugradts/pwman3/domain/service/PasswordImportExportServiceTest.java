@@ -158,6 +158,9 @@ class PasswordImportExportServiceTest {
         ExchangeAdapterPortFaker.faker()
                 .usingFactory(exchangeFactory)
                 .withSendFailure(failure).fake();
+        PasswordServiceFaker.faker()
+                .forInstance(passwordService)
+                .withPasswordEntries(PasswordEntryFaker.faker().fakePasswordEntry().fake()).fake();
 
         // when
         importExportService.exportPasswordEntries(URI);

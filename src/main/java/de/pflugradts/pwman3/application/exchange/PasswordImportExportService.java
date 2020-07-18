@@ -5,6 +5,10 @@ import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import io.vavr.Tuple2;
+import io.vavr.control.Either;
+import io.vavr.control.Try;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PasswordImportExportService implements ImportExportService {
@@ -35,17 +39,24 @@ public class PasswordImportExportService implements ImportExportService {
 
     @Override
     public void exportPasswordEntries(final String uri) {
-        exchangeFactory.createPasswordExchange(uri).send(
-                passwordService
-                        .findAllKeys()
-                        .map(this::retrievePasswordEntryTuple))
-                .onFailure(failureCollector::collectExportFailure);
+        final var exportData = passwordService.findAllKeys()
+                        .onFailure(failureCollector::collectPasswordEntriesFailure)
+                        .getOrElse(Stream.empty())
+                        .map(this::retrievePasswordEntryTuple).collect(Collectors.toList());
+        if (!exportData.isEmpty()) {
+            exportData.stream().filter(Either::isLeft).findAny().ifPresentOrElse(
+                either -> failureCollector.collectPasswordEntriesFailure(either.getLeft()),
+                () -> exchangeFactory.createPasswordExchange(uri)
+                        .send(exportData.stream().map(Either::get))
+                        .onFailure(failureCollector::collectExportFailure));
+        }
     }
 
-    private Tuple2<Bytes, Bytes> retrievePasswordEntryTuple(final Bytes keyBytes) {
+    private Either<Throwable, Tuple2<Bytes, Bytes>> retrievePasswordEntryTuple(final Bytes keyBytes) {
         return passwordService.viewPassword(keyBytes)
-                .map(bytes -> new Tuple2<>(keyBytes, bytes))
-                .orElse(null);
+                .orElse(Try.failure(new NoSuchElementException()))
+                .toEither()
+                .map(bytes -> new Tuple2<>(keyBytes, bytes));
     }
 
 }

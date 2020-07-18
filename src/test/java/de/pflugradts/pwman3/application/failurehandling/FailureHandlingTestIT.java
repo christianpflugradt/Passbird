@@ -87,29 +87,29 @@ class FailureHandlingTestIT {
     }
 
     @Test
-    void shouldHandleDecryptionFailure() {
+    void shouldHandlePasswordEntryFailure() {
         // given
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.collectDecryptionFailure(Bytes.empty(), new RuntimeException());
+        failureCollector.collectPasswordEntryFailure(Bytes.empty(), new RuntimeException());
         final var actual = new String(outputStream.toByteArray());
 
         // then
-        assertThat(actual).isNotNull().containsIgnoringCase("decrypted");
+        assertThat(actual).isNotNull().containsIgnoringCase("password entry");
     }
 
     @Test
-    void shouldHandleEncryptionFailure() {
+    void shouldHandlePasswordEntriesFailure() {
         // given
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.collectEncryptionFailure(Bytes.empty(), new RuntimeException());
+        failureCollector.collectPasswordEntriesFailure(new RuntimeException());
         final var actual = new String(outputStream.toByteArray());
 
         // then
-        assertThat(actual).isNotNull().containsIgnoringCase("encrypted");
+        assertThat(actual).isNotNull().containsIgnoringCase("password entries");
     }
 
     @Test

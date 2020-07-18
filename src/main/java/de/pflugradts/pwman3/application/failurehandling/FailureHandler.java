@@ -2,20 +2,20 @@ package de.pflugradts.pwman3.application.failurehandling;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
-import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
 import de.pflugradts.pwman3.application.boot.Bootable;
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
 import de.pflugradts.pwman3.application.failurehandling.failure.ChecksumFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.DecryptPasswordDatabaseFailure;
-import de.pflugradts.pwman3.application.failurehandling.failure.DecryptionFailure;
-import de.pflugradts.pwman3.application.failurehandling.failure.EncryptionFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.ExportFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.ImportFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.InputFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.PasswordEntriesFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.PasswordEntryFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.SignatureCheckFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.WritePasswordDatabaseFailure;
 import de.pflugradts.pwman3.application.util.SystemOperation;
+import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
 import java.nio.file.Path;
 
 public class FailureHandler implements EventHandler {
@@ -38,13 +38,13 @@ public class FailureHandler implements EventHandler {
     }
 
     @Subscribe
-    private void handle(final DecryptionFailure decryptionFailure) {
-        err("Bytes could not be decrypted.");
+    private void handle(final PasswordEntryFailure passwordEntryFailure) {
+        err("Password Entry could not be accessed.");
     }
 
     @Subscribe
-    private void handle(final EncryptionFailure encryptionFailure) {
-        err("Bytes could not be encrypted.");
+    private void handle(final PasswordEntriesFailure passwordEntriesFailure) {
+        err("Password Entries could not be accessed.");
     }
 
     @Subscribe

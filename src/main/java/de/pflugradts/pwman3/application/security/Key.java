@@ -1,4 +1,4 @@
-package de.pflugradts.pwman3.adapter.keystore;
+package de.pflugradts.pwman3.application.security;
 
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import lombok.Value;

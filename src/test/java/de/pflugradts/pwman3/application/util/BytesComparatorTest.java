@@ -1,6 +1,7 @@
 package de.pflugradts.pwman3.application.util;
 
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.model.transfer.BytesComparator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;

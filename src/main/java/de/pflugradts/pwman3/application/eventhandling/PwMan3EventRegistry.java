@@ -43,6 +43,7 @@ public class PwMan3EventRegistry implements EventRegistry {
         abandonedAggregateRoots.add(aggregateRoot);
     }
 
+    @Override
     public void processEvents() {
         processAbandonedAggregateRoots();
         processAggregateRoots();

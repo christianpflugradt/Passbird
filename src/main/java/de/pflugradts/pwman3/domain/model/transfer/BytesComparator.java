@@ -1,6 +1,6 @@
-package de.pflugradts.pwman3.application.util;
+package de.pflugradts.pwman3.domain.model.transfer;
 
-import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.application.util.AsciiUtils;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;

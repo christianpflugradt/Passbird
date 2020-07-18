@@ -44,7 +44,10 @@ public class CustomSetCommandHandler implements CommandHandler {
 
     private boolean commandConfirmed(final CustomSetCommand customSetCommand) {
         if (configuration.getApplication().getPassword().isPromptOnRemoval()
-                && passwordService.entryExists(customSetCommand.getArgument())) {
+                && passwordService.entryExists(customSetCommand.getArgument())
+                .onFailure(throwable -> failureCollector
+                        .collectPasswordEntryFailure(customSetCommand.getArgument(), throwable))
+                .getOrElse(false)) {
             return userInterfaceAdapterPort
                     .receiveConfirmation(Output.of(Bytes.of(String.format(
                             "Existing Password Entry '%s' will be irrevocably overwritten.%n"

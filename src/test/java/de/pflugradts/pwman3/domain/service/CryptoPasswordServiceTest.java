@@ -1,16 +1,15 @@
 package de.pflugradts.pwman3.domain.service;
 
-import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
+import de.pflugradts.pwman3.application.eventhandling.PwMan3EventRegistry;
 import de.pflugradts.pwman3.application.security.CryptoProviderFaker;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryRepositoryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
-import de.pflugradts.pwman3.application.eventhandling.PwMan3EventRegistry;
 import de.pflugradts.pwman3.domain.service.password.CryptoPasswordService;
-import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
 import io.vavr.Tuple2;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -19,15 +18,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
 class CryptoPasswordServiceTest {
 
-    @Mock
-    private FailureCollector failureCollector;
     @Mock
     private CryptoProvider cryptoProvider;
     @Mock
@@ -56,7 +52,8 @@ class CryptoPasswordServiceTest {
 
         // then
         then(pwMan3EventRegistry).shouldHaveNoInteractions();
-        assertThat(actual).isTrue();
+        assertThat(actual.isSuccess()).isTrue();
+        assertThat(actual.get()).isTrue();
     }
 
     @Test
@@ -79,7 +76,8 @@ class CryptoPasswordServiceTest {
 
         // then
         then(pwMan3EventRegistry).shouldHaveNoInteractions();
-        assertThat(actual).isFalse();
+        assertThat(actual.isSuccess()).isTrue();
+        assertThat(actual.get()).isFalse();
     }
 
     @Test
@@ -105,7 +103,9 @@ class CryptoPasswordServiceTest {
         then(cryptoProvider).should().encrypt(givenKey);
         then(cryptoProvider).should().decrypt(expectedPassword);
         then(pwMan3EventRegistry).shouldHaveNoInteractions();
-        assertThat(actual).isNotEmpty().contains(expectedPassword);
+        assertThat(actual).isNotEmpty();
+        assertThat(actual.get().isSuccess()).isTrue();
+        assertThat(actual.get()).contains(expectedPassword);
     }
 
     @Test
@@ -294,47 +294,8 @@ class CryptoPasswordServiceTest {
         final var actual = passwordService.findAllKeys();
 
         // then
-        assertThat(actual).containsExactly(key1, key3, key2);
-    }
-
-    @Test
-    void shouldCollectEncryptionFailure_AndReturnEmptyOptional_IfEncryptFails() {
-        // given
-        final var matchingPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
-        CryptoProviderFaker.faker()
-                .forInstance(cryptoProvider)
-                .withEncryptionFailure().fake();
-        PasswordEntryRepositoryFaker.faker()
-                .forInstance(passwordEntryRepository)
-                .withThesePasswordEntries(matchingPasswordEntry).fake();
-
-        // when
-        final var actual = passwordService.viewPassword(matchingPasswordEntry.viewKey());
-
-        // then
-        then(failureCollector).should().collectEncryptionFailure(
-                eq(matchingPasswordEntry.viewKey()), any(Throwable.class));
-        assertThat(actual).isEmpty();
-    }
-
-    @Test
-    void shouldCollectDecryptionFailure_AndReturnEmptyBytes_IfDecryptFails() {
-        // given
-        final var matchingPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
-        CryptoProviderFaker.faker()
-                .forInstance(cryptoProvider)
-                .withDecryptionFailure().fake();
-        PasswordEntryRepositoryFaker.faker()
-                .forInstance(passwordEntryRepository)
-                .withThesePasswordEntries(matchingPasswordEntry).fake();
-
-        // when
-        final var actual = passwordService.viewPassword(matchingPasswordEntry.viewKey());
-
-        // then
-        then(failureCollector).should().collectDecryptionFailure(
-                any(Bytes.class), any(Throwable.class));
-        assertThat(actual).isNotEmpty().contains(Bytes.empty());
+        assertThat(actual.isSuccess()).isTrue();
+        assertThat(actual.get()).containsExactly(key1, key3, key2);
     }
 
     private void assertThatKeyExistsWithPassword(final Bytes keyBytes, final Bytes passwordBytes) {

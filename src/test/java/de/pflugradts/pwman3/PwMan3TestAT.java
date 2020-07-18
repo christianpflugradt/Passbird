@@ -22,7 +22,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 import static com.tngtech.archunit.library.Architectures.onionArchitecture;
 
-class PwMan3TestArch {
+class PwMan3TestAT {
 
     private static final String ROOT = "de.pflugradts.pwman3";
     private static final String ADAPTER_ROOT = ROOT + ".adapter";
@@ -62,7 +62,7 @@ class PwMan3TestArch {
                 .adapter(KEYSTORE_ADAPTER, path(ADAPTER_ROOT, KEYSTORE_ADAPTER))
                 .adapter(PASSWORDSTORE_ADAPTER, path(ADAPTER_ROOT, PASSWORDSTORE_ADAPTER))
                 .adapter(USERINTERFACE_ADAPTER, path(ADAPTER_ROOT, USERINTERFACE_ADAPTER))
-                //.check(classes)
+                .check(classes)
         ;
     }
 

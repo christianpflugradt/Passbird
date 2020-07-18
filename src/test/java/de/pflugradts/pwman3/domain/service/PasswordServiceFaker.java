@@ -1,13 +1,16 @@
 package de.pflugradts.pwman3.domain.service;
 
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
+import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.service.password.PasswordService;
+import io.vavr.control.Try;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
@@ -34,12 +37,15 @@ public class PasswordServiceFaker {
 
     public PasswordService fake() {
         lenient().when(passwordService.findAllKeys())
-                .thenReturn(passwordEntries.stream().map(PasswordEntry::viewKey));
+                .thenReturn(Try.of(() -> passwordEntries.stream().map(PasswordEntry::viewKey)));
+        lenient().when(passwordService.entryExists(any(Bytes.class))).thenReturn(Try.of(() -> false));
         passwordEntries.forEach(passwordEntry -> {
                 lenient().when(passwordService.viewPassword(passwordEntry.viewKey()))
-                        .thenReturn(Optional.of(passwordEntry.viewPassword()));
+                        .thenReturn(Optional.of(Try.of(passwordEntry::viewPassword)));
                 lenient().when(passwordService.entryExists(passwordEntry.viewKey()))
-                        .thenReturn(true);
+                        .thenReturn(Try.of(() -> true));
+                lenient().when(passwordService.discardPasswordEntry(passwordEntry.viewKey()))
+                        .thenReturn(Try.success(null));
         });
         return passwordService;
     }
