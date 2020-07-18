@@ -96,6 +96,10 @@ Short answer: No.
 
 Long answer: I am not a security expert and PwMan3 has not been reviewed. PwMan3 uses a Keystore and a Cipher to symmetrically encrypt all data using a master password chosen by the user. All data is generally handled in byte arrays by the application. All user input is read and program output is written as single bytes. Only for copying a password to clipboard I store it in a string because I know no other way to write to the clipboard using Java. Once sensitive decrypted data has been used, like written to the clipboard, the byte array will be overwritten with random bytes. The password database is double encoded so from analyzing it in a hex editor you should not even be able to tell how many passwords are currently stored in the database. PwMan3 is also completely offline. If I were to take a wild guess I would say it is probably reasonably safe.
 
+#### Does PwMan3 support Unicode? ####
+
+No. Many programs don't support unicode characters in passwords. In fact some don't even allow common special characters like backslashes or spaces. Supporting advanced character sets didn't seem worth it to me, thus PwMan3 translates every byte into an ascii character. You may input a unicode character which is represented in several bytes and PwMan3 will interpret it as multiple ascii characters. I advice against doing that. You might have trouble reproducing the correct input and end up with some broken password aliases that you can't delete.
+
 #### What can I do if I forget my master password? ####
 Without the correct master password you cannot decrypt your password database. There is no way to bypass this protection. The only thing you can do is to try and find out your password via brute force. PwMan3 terminates after 3 wrong attempts so if the program is still running after 3 guesses, you have guessed correctly. I am not aware of any way to protect against brute force attacks by the way, since an attacker could simply brute force the keystore itself instead of using PwMan3 to find out the correct password. The best protection is a secure password that would take a long time to guess, and to keep your keystore file safe.
 
