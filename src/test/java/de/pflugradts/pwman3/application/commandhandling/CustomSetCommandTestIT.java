@@ -11,7 +11,7 @@ import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
-import de.pflugradts.pwman3.domain.service.PasswordService;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import de.pflugradts.pwman3.domain.service.PasswordServiceFaker;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;

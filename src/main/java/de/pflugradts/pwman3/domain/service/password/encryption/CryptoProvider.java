@@ -1,4 +1,4 @@
-package de.pflugradts.pwman3.application.security;
+package de.pflugradts.pwman3.domain.service.password.encryption;
 
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.control.Try;

@@ -1,6 +1,7 @@
 package de.pflugradts.pwman3.domain.model.transfer;
 
 import de.pflugradts.pwman3.domain.model.ddd.ValueObject;
+import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -16,7 +17,7 @@ import static de.pflugradts.pwman3.application.util.AsciiUtils.MIN_ASCII_VALUE;
  * <p>Any content, be it public or sensitive data, should always be represented as Bytes.
  * A Bytes can be constructed from and converted to other data structures such as String, byte[] or
  * {@link Chars}. Sensitive data should never be converted to String unless it's inevitable.</p>
- * <p>A {@link de.pflugradts.pwman3.application.security.CryptoProvider CryptoProvider} can encrypt/decrypt a Bytes.
+ * <p>A {@link CryptoProvider CryptoProvider} can encrypt/decrypt a Bytes.
  * On an unencrypted Bytes {@link #scramble()} should always be called after using it.</p>
  */
 @EqualsAndHashCode(of = "byteArray")

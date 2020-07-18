@@ -9,7 +9,7 @@ import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
-import de.pflugradts.pwman3.domain.service.PasswordService;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
 
 public class CustomSetCommandHandler implements CommandHandler {
 

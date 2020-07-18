@@ -7,8 +7,8 @@ import de.pflugradts.pwman3.application.commandhandling.command.SetCommand;
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
-import de.pflugradts.pwman3.domain.service.PasswordProvider;
-import de.pflugradts.pwman3.domain.service.PasswordService;
+import de.pflugradts.pwman3.domain.service.password.provider.PasswordProvider;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
 
 public class SetCommandHandler implements CommandHandler {
 

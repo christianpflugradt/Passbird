@@ -6,6 +6,7 @@ import de.pflugradts.pwman3.domain.model.event.PasswordEntryCreated;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryDiscarded;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryUpdated;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordStoreAdapterPort;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -16,7 +17,7 @@ import java.util.List;
 
 /**
  * A PasswordEntry represents a {@link Key} and an associated {@link Password} stored in the
- * {@link de.pflugradts.pwman3.application.PasswordStoreAdapterPort PasswordStore}.
+ * {@link PasswordStoreAdapterPort PasswordStore}.
  */
 @EqualsAndHashCode(of = "key")
 @ToString(of = "key")

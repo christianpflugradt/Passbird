@@ -1,7 +1,7 @@
 package de.pflugradts.pwman3.application.password;
 
 import de.pflugradts.pwman3.domain.model.password.PasswordRequirementsFaker;
-import de.pflugradts.pwman3.domain.service.RandomPasswordProvider;
+import de.pflugradts.pwman3.domain.service.password.provider.RandomPasswordProvider;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;

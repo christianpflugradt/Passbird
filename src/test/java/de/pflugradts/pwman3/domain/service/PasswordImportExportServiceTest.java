@@ -7,6 +7,7 @@ import de.pflugradts.pwman3.application.exchange.PasswordImportExportService;
 import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import io.vavr.Tuple2;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

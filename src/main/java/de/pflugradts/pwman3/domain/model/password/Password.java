@@ -2,12 +2,13 @@ package de.pflugradts.pwman3.domain.model.password;
 
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.ddd.DomainEntity;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordStoreAdapterPort;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /**
- * A Password is stored in the {@link de.pflugradts.pwman3.application.PasswordStoreAdapterPort PasswordStore}.
+ * A Password is stored in the {@link PasswordStoreAdapterPort PasswordStore}.
  * It is identified by a {@link Key}.
  */
 @EqualsAndHashCode

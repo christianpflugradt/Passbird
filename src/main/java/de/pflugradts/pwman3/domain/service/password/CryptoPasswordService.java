@@ -1,12 +1,14 @@
-package de.pflugradts.pwman3.domain.service;
+package de.pflugradts.pwman3.domain.service.password;
 
 import com.google.inject.Inject;
 import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
-import de.pflugradts.pwman3.application.security.CryptoProvider;
 import de.pflugradts.pwman3.application.util.BytesComparator;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.application.eventhandling.PwMan3EventRegistry;
+import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
 import io.vavr.Tuple2;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -20,7 +22,7 @@ public class CryptoPasswordService implements PasswordService {
     @Inject
     private PasswordEntryRepository passwordEntryRepository;
     @Inject
-    private DomainEventRegistry domainEventRegistry;
+    private PwMan3EventRegistry pwMan3EventRegistry;
 
     @Override
     public boolean entryExists(final Bytes keyBytes) {
@@ -34,8 +36,8 @@ public class CryptoPasswordService implements PasswordService {
                 .map(PasswordEntry::viewPassword)
                 .map(this::decrypted);
         if (password.isEmpty()) {
-            domainEventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes));
-            domainEventRegistry.processEvents();
+            pwMan3EventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes));
+            pwMan3EventRegistry.processEvents();
         }
         return password;
     }
@@ -67,7 +69,7 @@ public class CryptoPasswordService implements PasswordService {
         final var encryptedKeyBytes = encrypted(keyBytes);
         find(encryptedKeyBytes).ifPresentOrElse(
             PasswordEntry::discard,
-            () -> domainEventRegistry.register(new PasswordEntryNotFound(keyBytes)));
+            () -> pwMan3EventRegistry.register(new PasswordEntryNotFound(keyBytes)));
         processEventsAndSync();
     }
 
@@ -99,7 +101,7 @@ public class CryptoPasswordService implements PasswordService {
     }
 
     private void processEventsAndSync() {
-        domainEventRegistry.processEvents();
+        pwMan3EventRegistry.processEvents();
         passwordEntryRepository.sync();
     }
 

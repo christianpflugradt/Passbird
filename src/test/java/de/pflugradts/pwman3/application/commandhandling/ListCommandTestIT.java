@@ -6,7 +6,7 @@ import de.pflugradts.pwman3.application.commandhandling.handler.ListCommandHandl
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
-import de.pflugradts.pwman3.domain.service.PasswordService;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;

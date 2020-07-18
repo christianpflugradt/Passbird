@@ -1,10 +1,10 @@
 package de.pflugradts.pwman3.domain.model.password;
 
-import de.pflugradts.pwman3.application.PasswordStoreAdapterPort;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordStoreAdapterPort;
 import de.pflugradts.pwman3.application.PasswordStoreAdapterPortFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
-import de.pflugradts.pwman3.domain.service.DomainEventRegistry;
-import de.pflugradts.pwman3.domain.service.PasswordEntryRepository;
+import de.pflugradts.pwman3.application.eventhandling.PwMan3EventRegistry;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,7 @@ class PasswordEntryRepositoryTest {
     @Mock
     private PasswordStoreAdapterPort passwordStoreAdapterPort;
     @Mock
-    private DomainEventRegistry domainEventRegistry;
+    private PwMan3EventRegistry pwMan3EventRegistry;
     @InjectMocks
     private PasswordEntryRepository repository;
 
@@ -50,8 +50,8 @@ class PasswordEntryRepositoryTest {
         repository.findAll();
 
         // then
-        then(domainEventRegistry).should().register(givenPasswordEntry1);
-        then(domainEventRegistry).should().register(givenPasswordEntry2);
+        then(pwMan3EventRegistry).should().register(givenPasswordEntry1);
+        then(pwMan3EventRegistry).should().register(givenPasswordEntry2);
     }
 
     @Test
@@ -127,7 +127,7 @@ class PasswordEntryRepositoryTest {
         repository.add(givenPasswordEntry);
 
         // then
-        then(domainEventRegistry).should().register(givenPasswordEntry);
+        then(pwMan3EventRegistry).should().register(givenPasswordEntry);
         assertThat(repository.findAll()).isNotNull().asList().hasSize(1);
         assertThat(repository.findAll().findAny()).isNotNull().contains(givenPasswordEntry);
     }

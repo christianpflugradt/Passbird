@@ -2,7 +2,7 @@ package de.pflugradts.pwman3.application.failurehandling;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
-import de.pflugradts.pwman3.EventHandler;
+import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
 import de.pflugradts.pwman3.application.boot.Bootable;
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;

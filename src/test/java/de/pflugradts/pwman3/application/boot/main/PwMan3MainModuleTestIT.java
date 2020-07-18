@@ -13,7 +13,9 @@ import de.pflugradts.pwman3.application.commandhandling.handler.ListCommandHandl
 import de.pflugradts.pwman3.application.commandhandling.handler.QuitCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.SetCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.ViewCommandHandler;
-import de.pflugradts.pwman3.application.security.CryptoProvider;
+import de.pflugradts.pwman3.application.eventhandling.ApplicationEventHandler;
+import de.pflugradts.pwman3.domain.service.eventhandling.DomainEventHandler;
+import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -30,12 +32,14 @@ class PwMan3MainModuleTestIT {
         assertThat(actual).isNotNull();
         assertAllPropertiesAreBound(actual);
         assertThatAllCommandHandlersAreBound(actual);
+        assertThatAllEventHandlersAreBound(actual);
     }
 
     private static void assertAllPropertiesAreBound(PwMan3TestMain pwMan3TestMain) {
         assertThat(pwMan3TestMain.getBootable()).isNotNull().isInstanceOf(PwMan3Application.class);
         assertThat(pwMan3TestMain.getClipboardAdapterPort()).isNotNull();
         assertThat(pwMan3TestMain.getConfiguration()).isNotNull();
+        assertThat(pwMan3TestMain.getEventRegistry()).isNotNull();
         assertThat(pwMan3TestMain.getImportExportService()).isNotNull();
         assertThat(pwMan3TestMain.getKeyStoreAdapterPort()).isNotNull();
         assertThat(pwMan3TestMain.getPasswordProvider()).isNotNull();
@@ -58,6 +62,14 @@ class PwMan3MainModuleTestIT {
                         QuitCommandHandler.class,
                         SetCommandHandler.class,
                         ViewCommandHandler.class);
+    }
+
+    private static void assertThatAllEventHandlersAreBound(PwMan3TestMain pwMan3TestMain) {
+        assertThat(pwMan3TestMain.getEventHandlers()).isNotNull()
+                .extracting("class")
+                .containsExactlyInAnyOrder(
+                        ApplicationEventHandler.class,
+                        DomainEventHandler.class);
     }
 
     static class PwMan3TestModule extends AbstractModule {

@@ -10,7 +10,7 @@ import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.application.exchange.ImportExportService;
-import de.pflugradts.pwman3.domain.service.PasswordService;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import de.pflugradts.pwman3.domain.service.PasswordServiceFaker;
 import java.util.Set;
 import java.util.stream.Stream;

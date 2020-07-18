@@ -1,13 +1,16 @@
 package de.pflugradts.pwman3.domain.service;
 
 import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
-import de.pflugradts.pwman3.application.security.CryptoProvider;
 import de.pflugradts.pwman3.application.security.CryptoProviderFaker;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryRepositoryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.application.eventhandling.PwMan3EventRegistry;
+import de.pflugradts.pwman3.domain.service.password.CryptoPasswordService;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
+import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import io.vavr.Tuple2;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -30,7 +33,7 @@ class CryptoPasswordServiceTest {
     @Mock
     private PasswordEntryRepository passwordEntryRepository;
     @Mock
-    private DomainEventRegistry domainEventRegistry;
+    private PwMan3EventRegistry pwMan3EventRegistry;
     @InjectMocks
     private CryptoPasswordService passwordService;
 
@@ -52,7 +55,7 @@ class CryptoPasswordServiceTest {
         final var actual = passwordService.entryExists(givenKey);
 
         // then
-        then(domainEventRegistry).shouldHaveNoInteractions();
+        then(pwMan3EventRegistry).shouldHaveNoInteractions();
         assertThat(actual).isTrue();
     }
 
@@ -75,7 +78,7 @@ class CryptoPasswordServiceTest {
         final var actual = passwordService.entryExists(otherKey);
 
         // then
-        then(domainEventRegistry).shouldHaveNoInteractions();
+        then(pwMan3EventRegistry).shouldHaveNoInteractions();
         assertThat(actual).isFalse();
     }
 
@@ -101,7 +104,7 @@ class CryptoPasswordServiceTest {
         // then
         then(cryptoProvider).should().encrypt(givenKey);
         then(cryptoProvider).should().decrypt(expectedPassword);
-        then(domainEventRegistry).shouldHaveNoInteractions();
+        then(pwMan3EventRegistry).shouldHaveNoInteractions();
         assertThat(actual).isNotEmpty().contains(expectedPassword);
     }
 
@@ -125,8 +128,8 @@ class CryptoPasswordServiceTest {
 
         // then
         then(cryptoProvider).should().encrypt(otherKey);
-        then(domainEventRegistry).should().register(eq(new PasswordEntryNotFound(otherKey)));
-        then(domainEventRegistry).should().processEvents();
+        then(pwMan3EventRegistry).should().register(eq(new PasswordEntryNotFound(otherKey)));
+        then(pwMan3EventRegistry).should().processEvents();
         assertThat(actual).isEmpty();
     }
 
@@ -154,7 +157,7 @@ class CryptoPasswordServiceTest {
         then(cryptoProvider).should().encrypt(newPassword);
         then(passwordEntryRepository).should().sync();
         then(passwordEntryRepository).should().add(eq(PasswordEntry.create(newKey, newPassword)));
-        then(domainEventRegistry).should().processEvents();
+        then(pwMan3EventRegistry).should().processEvents();
     }
 
     @Test
@@ -179,7 +182,7 @@ class CryptoPasswordServiceTest {
         then(cryptoProvider).should().encrypt(existingKey);
         then(cryptoProvider).should().encrypt(newPassword);
         then(passwordEntryRepository).should().sync();
-        then(domainEventRegistry).should().processEvents();
+        then(pwMan3EventRegistry).should().processEvents();
         assertThatKeyExistsWithPassword(existingKey, newPassword);
     }
 
@@ -211,7 +214,7 @@ class CryptoPasswordServiceTest {
         then(cryptoProvider).should().encrypt(existingKey);
         then(passwordEntryRepository).should().add(eq(PasswordEntry.create(newKey, newPassword)));
         then(passwordEntryRepository).should().sync();
-        then(domainEventRegistry).should().processEvents();
+        then(pwMan3EventRegistry).should().processEvents();
         assertThatKeyExistsWithPassword(existingKey, newPasswordForExistingKey);
     }
 
@@ -237,7 +240,7 @@ class CryptoPasswordServiceTest {
 
         // then
         then(cryptoProvider).should().encrypt(givenKey);
-        then(domainEventRegistry).should().processEvents();
+        then(pwMan3EventRegistry).should().processEvents();
         assertThat(givenPasswordEntry.viewPassword()).isNotNull().isNotEqualTo(givenPassword);
     }
 
@@ -261,8 +264,8 @@ class CryptoPasswordServiceTest {
 
         // then
         then(cryptoProvider).should().encrypt(otherKey);
-        then(domainEventRegistry).should().register(eq(new PasswordEntryNotFound(otherKey)));
-        then(domainEventRegistry).should().processEvents();
+        then(pwMan3EventRegistry).should().register(eq(new PasswordEntryNotFound(otherKey)));
+        then(pwMan3EventRegistry).should().processEvents();
     }
 
     @Test

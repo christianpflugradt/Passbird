@@ -1,4 +1,4 @@
-package de.pflugradts.pwman3.domain.service;
+package de.pflugradts.pwman3.domain.service.password;
 
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 

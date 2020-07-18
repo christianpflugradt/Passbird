@@ -1,11 +1,11 @@
-package de.pflugradts.pwman3.domain.service;
+package de.pflugradts.pwman3.domain.service.password.storage;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.pflugradts.pwman3.application.PasswordStoreAdapterPort;
 import de.pflugradts.pwman3.domain.model.ddd.Repository;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.eventhandling.EventRegistry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -19,7 +19,7 @@ public class PasswordEntryRepository implements Repository {
     @Inject
     private PasswordStoreAdapterPort passwordStoreAdapterPort;
     @Inject
-    private DomainEventRegistry domainEventRegistry;
+    private EventRegistry eventRegistry;
 
     private Set<PasswordEntry> passwordEntries;
 
@@ -35,13 +35,13 @@ public class PasswordEntryRepository implements Repository {
     }
 
     public void add(final PasswordEntry passwordEntry) {
-        domainEventRegistry.register(passwordEntry);
+        eventRegistry.register(passwordEntry);
         getPasswordEntries().add(passwordEntry);
     }
 
     public void delete(final PasswordEntry passwordEntry) {
         getPasswordEntries().remove(passwordEntry);
-        domainEventRegistry.deregister(passwordEntry);
+        eventRegistry.deregister(passwordEntry);
     }
 
     public Stream<PasswordEntry> findAll() {
@@ -66,7 +66,7 @@ public class PasswordEntryRepository implements Repository {
                 .collect(Collectors.toSet());
         passwordEntries.forEach(passwordEntry -> {
             passwordEntry.clearDomainEvents();
-            domainEventRegistry.register(passwordEntry);
+            eventRegistry.register(passwordEntry);
         });
     }
 

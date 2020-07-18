@@ -14,7 +14,6 @@ import de.pflugradts.pwman3.adapter.userinterface.CommandLineInterfaceService;
 import de.pflugradts.pwman3.application.ClipboardAdapterPort;
 import de.pflugradts.pwman3.application.ExchangeAdapterPort;
 import de.pflugradts.pwman3.application.KeyStoreAdapterPort;
-import de.pflugradts.pwman3.application.PasswordStoreAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.boot.Bootable;
 import de.pflugradts.pwman3.application.commandhandling.handler.CommandHandler;
@@ -28,17 +27,23 @@ import de.pflugradts.pwman3.application.commandhandling.handler.ListCommandHandl
 import de.pflugradts.pwman3.application.commandhandling.handler.QuitCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.SetCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.ViewCommandHandler;
-import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
 import de.pflugradts.pwman3.application.configuration.ConfigurationFactory;
+import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
+import de.pflugradts.pwman3.application.eventhandling.ApplicationEventHandler;
+import de.pflugradts.pwman3.application.eventhandling.PwMan3EventRegistry;
 import de.pflugradts.pwman3.application.exchange.ExchangeFactory;
 import de.pflugradts.pwman3.application.exchange.ImportExportService;
 import de.pflugradts.pwman3.application.exchange.PasswordImportExportService;
-import de.pflugradts.pwman3.application.security.CryptoProvider;
 import de.pflugradts.pwman3.application.security.CryptoProviderFactory;
-import de.pflugradts.pwman3.domain.service.PasswordProvider;
-import de.pflugradts.pwman3.domain.service.CryptoPasswordService;
-import de.pflugradts.pwman3.domain.service.PasswordService;
-import de.pflugradts.pwman3.domain.service.RandomPasswordProvider;
+import de.pflugradts.pwman3.domain.service.eventhandling.DomainEventHandler;
+import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
+import de.pflugradts.pwman3.domain.service.eventhandling.EventRegistry;
+import de.pflugradts.pwman3.domain.service.password.CryptoPasswordService;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
+import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
+import de.pflugradts.pwman3.domain.service.password.provider.PasswordProvider;
+import de.pflugradts.pwman3.domain.service.password.provider.RandomPasswordProvider;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordStoreAdapterPort;
 
 @SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.ExcessiveImports"})
 public class ApplicationModule extends AbstractModule {
@@ -53,6 +58,7 @@ public class ApplicationModule extends AbstractModule {
     private void configureApplication() {
         bind(Bootable.class).to(PwMan3Application.class);
         bind(ClipboardAdapterPort.class).to(ClipboardService.class);
+        bind(EventRegistry.class).to(PwMan3EventRegistry.class);
         bind(ImportExportService.class).to(PasswordImportExportService.class);
         bind(KeyStoreAdapterPort.class).to(KeyStoreService.class);
         bind(PasswordProvider.class).to(RandomPasswordProvider.class);
@@ -74,6 +80,10 @@ public class ApplicationModule extends AbstractModule {
         commandHandlerMultibinder.addBinding().to(QuitCommandHandler.class);
         commandHandlerMultibinder.addBinding().to(SetCommandHandler.class);
         commandHandlerMultibinder.addBinding().to(ViewCommandHandler.class);
+        final Multibinder<EventHandler> eventHandlerMultibinder =
+                Multibinder.newSetBinder(binder(), EventHandler.class);
+        eventHandlerMultibinder.addBinding().to(ApplicationEventHandler.class);
+        eventHandlerMultibinder.addBinding().to(DomainEventHandler.class);
     }
 
     private void configureProviders() {

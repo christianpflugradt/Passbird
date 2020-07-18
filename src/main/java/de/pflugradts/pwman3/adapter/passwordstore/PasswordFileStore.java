@@ -2,10 +2,10 @@ package de.pflugradts.pwman3.adapter.passwordstore;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.pflugradts.pwman3.application.PasswordStoreAdapterPort;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordStoreAdapterPort;
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
 import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
-import de.pflugradts.pwman3.application.security.CryptoProvider;
+import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.pwman3.application.util.ByteArrayUtils;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;

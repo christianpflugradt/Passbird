@@ -1,11 +1,12 @@
-package de.pflugradts.pwman3.domain.service;
+package de.pflugradts.pwman3.application.eventhandling;
 
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.pflugradts.pwman3.domain.model.ddd.AggregateRoot;
 import de.pflugradts.pwman3.domain.model.ddd.DomainEvent;
-
+import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
+import de.pflugradts.pwman3.domain.service.eventhandling.EventRegistry;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Objects;
@@ -17,24 +18,27 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Singleton
-public class DomainEventRegistry {
+public class PwMan3EventRegistry implements EventRegistry {
 
     @Inject
-    private DomainEventHandler domainEventHandler;
+    private Set<EventHandler> eventHandlers;
 
     private EventBus eventBus;
     private final Set<AggregateRoot> aggregateRoots = new HashSet<>();
     private final Queue<DomainEvent> domainEvents = new ArrayDeque<>();
     private final Queue<AggregateRoot> abandonedAggregateRoots = new ArrayDeque<>();
 
+    @Override
     public void register(final AggregateRoot aggregateRoot) {
         aggregateRoots.add(aggregateRoot);
     }
 
+    @Override
     public void register(final DomainEvent domainEvent) {
         domainEvents.add(domainEvent);
     }
 
+    @Override
     public void deregister(final AggregateRoot aggregateRoot) {
         abandonedAggregateRoots.add(aggregateRoot);
     }
@@ -67,7 +71,7 @@ public class DomainEventRegistry {
 
     private void initializeEventBus() {
         eventBus = new EventBus();
-        eventBus.register(domainEventHandler);
+        eventHandlers.forEach(eventBus::register);
     }
 
     private EventBus getEventBus() {

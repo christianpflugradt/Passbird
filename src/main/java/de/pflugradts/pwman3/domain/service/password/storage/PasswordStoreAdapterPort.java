@@ -1,4 +1,4 @@
-package de.pflugradts.pwman3.application;
+package de.pflugradts.pwman3.domain.service.password.storage;
 
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 

@@ -10,7 +10,7 @@ import de.pflugradts.pwman3.application.exchange.ImportExportService;
 import de.pflugradts.pwman3.application.util.BytesComparator;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
-import de.pflugradts.pwman3.domain.service.PasswordService;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 

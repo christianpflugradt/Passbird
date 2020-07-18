@@ -1,4 +1,4 @@
-package de.pflugradts.pwman3;
+package de.pflugradts.pwman3.application;
 
 import de.pflugradts.pwman3.application.boot.Bootable;
 import de.pflugradts.pwman3.application.boot.launcher.LauncherModule;

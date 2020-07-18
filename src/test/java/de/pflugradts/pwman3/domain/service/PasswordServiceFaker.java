@@ -1,6 +1,7 @@
 package de.pflugradts.pwman3.domain.service;
 
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

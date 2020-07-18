@@ -3,7 +3,7 @@ package de.pflugradts.pwman3.application.exchange;
 import com.google.inject.Inject;
 import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
-import de.pflugradts.pwman3.domain.service.PasswordService;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import io.vavr.Tuple2;
 import java.util.stream.Stream;
 

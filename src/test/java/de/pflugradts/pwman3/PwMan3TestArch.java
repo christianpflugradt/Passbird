@@ -5,6 +5,7 @@ import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
+import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
 import de.pflugradts.pwman3.domain.model.ddd.AggregateRoot;
 import de.pflugradts.pwman3.domain.model.ddd.DomainEntity;
 import de.pflugradts.pwman3.domain.model.ddd.DomainEvent;
@@ -22,13 +23,20 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 import static com.tngtech.archunit.library.Architectures.onionArchitecture;
 
 class PwMan3TestArch {
-    
+
     private static final String ROOT = "de.pflugradts.pwman3";
     private static final String ADAPTER_ROOT = ROOT + ".adapter";
     private static final String APPLICATION_ROOT = ROOT + ".application";
     private static final String DOMAIN_ROOT = ROOT + ".domain";
     private static final String DOMAIN_MODELS = DOMAIN_ROOT + ".model";
     private static final String DOMAIN_SERVICES = DOMAIN_ROOT + ".service";
+
+    private static final String CLIPBOARD_ADAPTER = "clipboard";
+    private static final String EXCHANGE_ADAPTER = "exchange";
+    private static final String KEYSTORE_ADAPTER = "keystore";
+    private static final String PASSWORDSTORE_ADAPTER = "passwordstore";
+    private static final String USERINTERFACE_ADAPTER = "userinterface";
+
 
     private JavaClasses classes;
 
@@ -49,11 +57,11 @@ class PwMan3TestArch {
                 .domainModels(path(DOMAIN_MODELS))
                 .domainServices(path(DOMAIN_SERVICES))
                 .applicationServices(path(APPLICATION_ROOT))
-                .adapter("clipboard", path(ADAPTER_ROOT, "clipboard"))
-                .adapter("exchange", path(ADAPTER_ROOT, "exchange"))
-                .adapter("keystore", path(ADAPTER_ROOT, "keystore"))
-                .adapter("passwordstore", path(ADAPTER_ROOT, "passwordstore"))
-                .adapter("userinterface", path(ADAPTER_ROOT, "userinterface"))
+                .adapter(CLIPBOARD_ADAPTER, path(ADAPTER_ROOT, CLIPBOARD_ADAPTER))
+                .adapter(EXCHANGE_ADAPTER, path(ADAPTER_ROOT, EXCHANGE_ADAPTER))
+                .adapter(KEYSTORE_ADAPTER, path(ADAPTER_ROOT, KEYSTORE_ADAPTER))
+                .adapter(PASSWORDSTORE_ADAPTER, path(ADAPTER_ROOT, PASSWORDSTORE_ADAPTER))
+                .adapter(USERINTERFACE_ADAPTER, path(ADAPTER_ROOT, USERINTERFACE_ADAPTER))
                 //.check(classes)
         ;
     }

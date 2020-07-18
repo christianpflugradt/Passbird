@@ -1,4 +1,4 @@
-package de.pflugradts.pwman3;
+package de.pflugradts.pwman3.application;
 
 import com.google.inject.Injector;
 import com.google.inject.Module;

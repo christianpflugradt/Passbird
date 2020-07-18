@@ -2,6 +2,7 @@ package de.pflugradts.pwman3.domain.service;
 
 import de.pflugradts.pwman3.domain.model.password.PasswordRequirements;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.password.provider.PasswordProvider;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import static org.mockito.ArgumentMatchers.any;

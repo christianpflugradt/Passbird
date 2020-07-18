@@ -1,6 +1,7 @@
 package de.pflugradts.pwman3.application;
 
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordStoreAdapterPort;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

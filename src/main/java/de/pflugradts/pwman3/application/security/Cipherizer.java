@@ -2,6 +2,7 @@ package de.pflugradts.pwman3.application.security;
 
 import de.pflugradts.pwman3.application.util.ByteArrayUtils;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import io.vavr.control.Try;
 
 import javax.crypto.BadPaddingException;

@@ -7,7 +7,7 @@ import de.pflugradts.pwman3.application.commandhandling.command.ListCommand;
 import de.pflugradts.pwman3.application.util.ByteArrayUtils;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
-import de.pflugradts.pwman3.domain.service.PasswordService;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import java.util.List;
 import java.util.stream.Collectors;
 
