@@ -26,7 +26,7 @@ public class SetCommandHandler implements CommandHandler {
         if (commandConfirmed(setCommand)) {
             passwordService.putPasswordEntry(
                     setCommand.getArgument(),
-                    passwordProvider.createNewPassword());
+                    passwordProvider.createNewPassword(configuration.parsePasswordRequirements()));
         } else {
             userInterfaceAdapterPort.send(Output.of(Bytes.of("Operation aborted.")));
         }

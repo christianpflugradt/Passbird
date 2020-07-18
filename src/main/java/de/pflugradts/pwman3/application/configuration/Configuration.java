@@ -1,6 +1,7 @@
 package de.pflugradts.pwman3.application.configuration;
 
 import com.google.inject.Singleton;
+import de.pflugradts.pwman3.domain.model.password.PasswordRequirements;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -20,6 +21,14 @@ public class Configuration implements UpdatableConfiguration {
         final var configuration = new Configuration();
         configuration.template = true;
         return configuration;
+    }
+
+    @Override
+    public PasswordRequirements parsePasswordRequirements() {
+        return PasswordRequirements.of(
+                getApplication().getPassword().isSpecialCharacters(),
+                getApplication().getPassword().getLength()
+        );
     }
 
     @Override

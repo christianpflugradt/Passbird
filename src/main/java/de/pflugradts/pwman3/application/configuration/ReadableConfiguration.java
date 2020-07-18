@@ -1,5 +1,7 @@
 package de.pflugradts.pwman3.application.configuration;
 
+import de.pflugradts.pwman3.domain.model.password.PasswordRequirements;
+
 public interface ReadableConfiguration {
 
     String CONFIGURATION_SYSTEM_PROPERTY = "config";
@@ -8,6 +10,7 @@ public interface ReadableConfiguration {
     String DATABASE_FILENAME = "PwMan3.pw";
     String EXCHANGE_FILENAME = "PwMan.json";
 
+    PasswordRequirements parsePasswordRequirements();
     boolean isTemplate();
     Application getApplication();
     Adapter getAdapter();
