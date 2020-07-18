@@ -1,5 +1,6 @@
 package de.pflugradts.pwman3.application.configuration;
 
+import de.pflugradts.pwman3.domain.model.password.PasswordRequirements;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import static org.mockito.Mockito.lenient;
@@ -116,6 +117,8 @@ public class ConfigurationFaker {
         lenient().when(configuration.getAdapter()).thenReturn(adapter);
         lenient().when(configuration.getApplication()).thenReturn(application);
         lenient().when(configuration.isTemplate()).thenReturn(isTemplate);
+        lenient().when(configuration.parsePasswordRequirements())
+                .thenReturn(PasswordRequirements.of(hasSpecialCharacters, passwordLength));
         return configuration;
     }
 

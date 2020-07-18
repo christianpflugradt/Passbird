@@ -49,11 +49,13 @@ class PwMan3TestArch {
                 .domainModels(path(DOMAIN_MODELS))
                 .domainServices(path(DOMAIN_SERVICES))
                 .applicationServices(path(APPLICATION_ROOT))
-                .adapter(path(ADAPTER_ROOT, "clipboard"))
-                .adapter(path(ADAPTER_ROOT, "exchange"))
-                .adapter(path(ADAPTER_ROOT, "keystore"))
-                .adapter(path(ADAPTER_ROOT, "passwordstore"))
-                .adapter(path(ADAPTER_ROOT, "userinterface"));
+                .adapter("clipboard", path(ADAPTER_ROOT, "clipboard"))
+                .adapter("exchange", path(ADAPTER_ROOT, "exchange"))
+                .adapter("keystore", path(ADAPTER_ROOT, "keystore"))
+                .adapter("passwordstore", path(ADAPTER_ROOT, "passwordstore"))
+                .adapter("userinterface", path(ADAPTER_ROOT, "userinterface"))
+                //.check(classes)
+        ;
     }
 
     @Nested

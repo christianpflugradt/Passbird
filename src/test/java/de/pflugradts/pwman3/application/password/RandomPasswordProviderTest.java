@@ -1,90 +1,94 @@
 package de.pflugradts.pwman3.application.password;
 
-import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
-import de.pflugradts.pwman3.application.configuration.Configuration;
+import de.pflugradts.pwman3.domain.model.password.PasswordRequirementsFaker;
 import de.pflugradts.pwman3.domain.service.RandomPasswordProvider;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class RandomPasswordProviderTest {
 
-    @Mock
-    private Configuration configuration;
     @InjectMocks
     private RandomPasswordProvider passwordProvider;
 
-    @BeforeEach
-    private void setup() {
-        ConfigurationFaker.faker().forInstance(configuration)
-                .withPasswordLength(20).fake();
-    }
-
     @Test
-    void shouldTakeLengthFromConfiguration() {
+    void shouldUseGivenLength() {
         // given
         final var passwordLength = 25;
-        ConfigurationFaker.faker().forInstance(configuration)
+        final var passwordRequirements = PasswordRequirementsFaker.faker()
+                .fakePasswordRequirements()
                 .withPasswordLength(passwordLength).fake();
 
         // when / then
         assertManyTimes(() ->
-                assertThat(passwordProvider.createNewPassword().toByteArray())
+                assertThat(passwordProvider.createNewPassword(passwordRequirements).toByteArray())
                         .hasSize(passwordLength));
     }
 
     @Test
     void shouldIncludeDigits() {
-        // given / when / then
+        // given
+        final var passwordRequirements = PasswordRequirementsFaker.faker()
+                .fakePasswordRequirements().fake();
+
+        // when / then
         assertManyTimes(() ->
-                assertThat(passwordProvider.createNewPassword().asString()
+                assertThat(passwordProvider.createNewPassword(passwordRequirements).asString()
                         .matches(".*[0-9].*")).isTrue());
     }
 
     @Test
     void shouldIncludeUppercase() {
-        // given / when / then
+        // given
+        final var passwordRequirements = PasswordRequirementsFaker.faker()
+                .fakePasswordRequirements().fake();
+
+        // when / then
         assertManyTimes(() ->
-                assertThat(passwordProvider.createNewPassword().asString()
+                assertThat(passwordProvider.createNewPassword(passwordRequirements).asString()
                         .matches(".*[A-Z].*")).isTrue());
     }
 
     @Test
     void shouldIncludeLowercase() {
-        // given / when / then
+        // given
+        final var passwordRequirements = PasswordRequirementsFaker.faker()
+                .fakePasswordRequirements().fake();
+
+        // when / then
         assertManyTimes(() ->
-                assertThat(passwordProvider.createNewPassword().asString()
+                assertThat(passwordProvider.createNewPassword(passwordRequirements).asString()
                         .matches(".*[a-z].*")).isTrue());
     }
 
     @Test
     void shouldIncludeSpecialCharacters_IfEnabled() {
         // given
-        ConfigurationFaker.faker().forInstance(configuration)
-                .withSpecialCharactersEnabled().fake();
+        final var passwordRequirements = PasswordRequirementsFaker.faker()
+                .fakePasswordRequirements()
+                .withUseSpecialCharactersEnabled().fake();
 
         // when / then
         assertManyTimes(() ->
-                assertThat(passwordProvider.createNewPassword().asString()
+                assertThat(passwordProvider.createNewPassword(passwordRequirements).asString()
                         .matches("^[0-9A-Za-z]+$")).isFalse());
     }
 
     @Test
     void shouldNotIncludeSpecialCharacters_IfDisabled() {
         // given
-        ConfigurationFaker.faker().forInstance(configuration)
-                .withSpecialCharactersDisabled().fake();
+        final var passwordRequirements = PasswordRequirementsFaker.faker()
+                .fakePasswordRequirements()
+                .withUseSpecialCharactersDisabled().fake();
 
         // when / then
         assertManyTimes(() ->
-                assertThat(passwordProvider.createNewPassword().asString()
+                assertThat(passwordProvider.createNewPassword(passwordRequirements).asString()
                         .matches("^[0-9A-Za-z]+$")).isTrue());
     }
 
