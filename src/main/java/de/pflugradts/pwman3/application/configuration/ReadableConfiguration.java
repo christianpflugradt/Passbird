@@ -8,7 +8,7 @@ public interface ReadableConfiguration {
     String CONFIGURATION_FILENAME = "PwMan3.yml";
     String KEYSTORE_FILENAME = "PwMan3.ks";
     String DATABASE_FILENAME = "PwMan3.pw";
-    String EXCHANGE_FILENAME = "PwMan.json";
+    String EXCHANGE_FILENAME = "PwMan3.json";
 
     PasswordRequirements parsePasswordRequirements();
     boolean isTemplate();
