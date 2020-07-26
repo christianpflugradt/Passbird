@@ -41,6 +41,7 @@
 		<exclude name="DoNotCallSystemExit"/>
 		<exclude name="BeanMembersShouldSerialize"/>
 		<exclude name="DataflowAnomalyAnalysis"/>
+		<exclude name="MissingSerialVersionUID"/>
 		<exclude name="UseLocaleWithCaseConversions"/>
 	</rule>
 	<rule ref="category/java/multithreading.xml">
