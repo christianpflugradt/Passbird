@@ -11,10 +11,10 @@ import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
-import de.pflugradts.pwman3.domain.service.PasswordProviderFaker;
-import de.pflugradts.pwman3.domain.service.PasswordServiceFaker;
-import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import de.pflugradts.pwman3.domain.service.password.provider.PasswordProvider;
+import de.pflugradts.pwman3.domain.service.PasswordProviderFaker;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
+import de.pflugradts.pwman3.domain.service.PasswordServiceFaker;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,8 +65,6 @@ class SetCommandTestIT {
         PasswordProviderFaker.faker()
                 .forInstance(passwordProvider)
                 .withCreatingThisPassword(generatedPassword).fake();
-        PasswordServiceFaker.faker()
-                .forInstance(passwordService).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
@@ -76,6 +74,7 @@ class SetCommandTestIT {
         then(passwordService).should().putPasswordEntry(eq(Bytes.of(args)), same(generatedPassword));
         assertThat(bytes).isNotEqualTo(reference);
     }
+
 
     @Test
     void shouldHandleSetCommand_WithPromptOnRemoval_AndNewPasswordEntry() {
@@ -88,7 +87,8 @@ class SetCommandTestIT {
                 .forInstance(passwordProvider)
                 .withCreatingThisPassword(generatedPassword).fake();
         PasswordServiceFaker.faker()
-                .forInstance(passwordService).fake();
+                .forInstance(passwordService)
+                .withPasswordEntries().fake();
         ConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withPromptOnRemovalEnabled().fake();

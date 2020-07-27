@@ -25,21 +25,16 @@ public class CustomSetCommandHandler implements CommandHandler {
     @Subscribe
     private void handleCustomSetCommand(final CustomSetCommand customSetCommand) {
         if (commandConfirmed(customSetCommand)) {
-            final var aliasCheck = passwordService.challengeAlias(customSetCommand.getArgument());
-            if (aliasCheck.isFailure()) {
-                failureCollector.collectPasswordEntryFailure(customSetCommand.getArgument(), aliasCheck.getCause());
+            final var secureInput = userInterfaceAdapterPort
+                    .receiveSecurely(Output.of(Bytes.of("Enter custom password: ")))
+                    .onFailure(failureCollector::collectInputFailure)
+                    .getOrElse(Input.empty());
+            if (secureInput.isEmpty()) {
+                userInterfaceAdapterPort.send(Output.of(Bytes.of("Empty input - Operation aborted.")));
             } else {
-                final var secureInput = userInterfaceAdapterPort
-                        .receiveSecurely(Output.of(Bytes.of("Enter custom password: ")))
-                        .onFailure(failureCollector::collectInputFailure)
-                        .getOrElse(Input.empty());
-                if (secureInput.isEmpty()) {
-                    userInterfaceAdapterPort.send(Output.of(Bytes.of("Empty input - Operation aborted.")));
-                } else {
-                    passwordService.putPasswordEntry(customSetCommand.getArgument(), secureInput.getBytes());
-                }
-                secureInput.invalidate();
+                passwordService.putPasswordEntry(customSetCommand.getArgument(), secureInput.getBytes());
             }
+            secureInput.invalidate();
         } else {
             userInterfaceAdapterPort.send(Output.of(Bytes.of("Operation aborted.")));
         }

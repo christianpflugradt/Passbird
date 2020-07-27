@@ -2,14 +2,13 @@ package de.pflugradts.pwman3.domain.model.transfer;
 
 import de.pflugradts.pwman3.domain.model.ddd.ValueObject;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.security.SecureRandom;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import static de.pflugradts.pwman3.application.util.AsciiUtils.MAX_ASCII_VALUE;
 import static de.pflugradts.pwman3.application.util.AsciiUtils.MIN_ASCII_VALUE;
 
@@ -102,10 +101,6 @@ public class Bytes implements ValueObject, Iterable<Byte> {
             builder.append((char) byteArray[i]);
         }
         return builder.toString();
-    }
-
-    public Stream<Byte> stream() {
-        return StreamSupport.stream(spliterator(), false);
     }
 
     public Bytes copy() {

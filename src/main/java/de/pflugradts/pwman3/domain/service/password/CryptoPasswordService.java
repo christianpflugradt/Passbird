@@ -1,9 +1,7 @@
 package de.pflugradts.pwman3.domain.service.password;
 
 import com.google.inject.Inject;
-import de.pflugradts.pwman3.application.util.AsciiUtils;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
-import de.pflugradts.pwman3.domain.model.password.InvalidKeyException;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.BytesComparator;
@@ -15,7 +13,6 @@ import io.vavr.control.Either;
 import io.vavr.control.Try;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -64,31 +61,12 @@ public class CryptoPasswordService implements PasswordService {
     }
 
     private Try<Void> putPasswordEntryTuple(final Tuple2<Bytes, Bytes> passwordEntryTuple) {
-        final var aliasCheck = challengeAlias(passwordEntryTuple._1);
-        if (aliasCheck.isFailure()) {
-            return aliasCheck;
-        } else {
-            final var encryptedPasswordBytes = encrypted(passwordEntryTuple._2());
-            return encryptedPasswordBytes.isLeft()
-                    ? Try.failure(encryptedPasswordBytes.getLeft())
-                    : encrypted(passwordEntryTuple._1).fold(
-                        Try::failure,
-                        encryptedKeyBytes -> putEncryptedPasswordEntry(
-                                encryptedKeyBytes, encryptedPasswordBytes.get()));
-        }
-    }
-
-    @Override
-    public Try<Void> challengeAlias(final Bytes bytes) {
-        return noneMatch(bytes.copy(), AsciiUtils::isDigit) && noneMatch(bytes.copy(), AsciiUtils::isSymbol)
-                ? Try.success(null)
-                : Try.failure(new InvalidKeyException(bytes));
-    }
-
-    private boolean noneMatch(final Bytes bytes, final Predicate<Byte> predicate) {
-        final var result = bytes.stream().noneMatch(predicate);
-        bytes.scramble();
-        return result;
+        final var encryptedPasswordBytes = encrypted(passwordEntryTuple._2());
+        return encryptedPasswordBytes.isLeft()
+                ? Try.failure(encryptedPasswordBytes.getLeft())
+                : encrypted(passwordEntryTuple._1).fold(
+                    Try::failure,
+                    encryptedKeyBytes -> putEncryptedPasswordEntry(encryptedKeyBytes, encryptedPasswordBytes.get()));
     }
 
     private Try<Void> putEncryptedPasswordEntry(final Bytes encryptedKeyBytes, final Bytes encryptedPasswordBytes) {
