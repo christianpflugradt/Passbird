@@ -134,7 +134,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes "Main-Class": "de.pflugradts.pwman3.Main",
+        attributes "Main-Class": "de.pflugradts.pwman3.application.Main",
        'Implementation-Version': version && !version.empty ? version : 'snapshot'
     }
 
