@@ -100,6 +100,14 @@ Long answer: I am not a security expert and PwMan3 has not been reviewed. PwMan3
 
 No. Many programs don't support unicode characters in passwords. In fact some don't even allow common special characters like backslashes or spaces. Supporting advanced character sets didn't seem worth it to me, thus PwMan3 translates every byte into an ascii character. You may input a unicode character which is represented in several bytes and PwMan3 will interpret it as multiple ascii characters. I advice against doing that. You might have trouble reproducing the correct input and end up with some broken password aliases that you can't delete.
 
+#### How do I update PwMan3? ####
+
+PwMan3 uses semantic versioning in the style of *x.y.z* where x is the major version, y the minor version and z the patch level version. Updating to a minor or patch level version is very simple: Just download the jar file and use it. 
+
+If you want to upgrade from PwMan3 version 1 to PwMan3 version 2, use the migration guide linked below:
+
+[migrate from PwMan3 version 1 to PwMan3 version 2](doc/migration/1xxTo2xx.md)
+
 #### What can I do if I forget my master password? ####
 Without the correct master password you cannot decrypt your password database. There is no way to bypass this protection. The only thing you can do is to try and find out your password via brute force. PwMan3 terminates after 3 wrong attempts so if the program is still running after 3 guesses, you have guessed correctly. I am not aware of any way to protect against brute force attacks by the way, since an attacker could simply brute force the keystore itself instead of using PwMan3 to find out the correct password. The best protection is a secure password that would take a long time to guess, and to keep your keystore file safe.
 
