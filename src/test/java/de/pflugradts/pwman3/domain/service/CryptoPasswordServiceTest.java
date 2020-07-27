@@ -3,6 +3,7 @@ package de.pflugradts.pwman3.domain.service;
 import de.pflugradts.pwman3.application.eventhandling.PwMan3EventRegistry;
 import de.pflugradts.pwman3.application.security.CryptoProviderFaker;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
+import de.pflugradts.pwman3.domain.model.password.InvalidKeyException;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryRepositoryFaker;
@@ -57,7 +58,7 @@ class CryptoPasswordServiceTest {
     }
 
     @Test
-    void shouldReturnFalse_IfNotEntryExists() {
+    void shouldReturnFalse_IfEntryDoesNotExist() {
         // given
         final var givenKey = Bytes.of("Key");
         final var otherKey = Bytes.of("try this");
@@ -109,10 +110,10 @@ class CryptoPasswordServiceTest {
     }
 
     @Test
-    void shouldFindExisting_ReturnEmptyOptionalOnNoMatch() {
+    void shouldFindExistingPassword_ReturnEmptyOptionalOnNoMatch() {
         // given
         final var givenKey = Bytes.of("Key");
-        final var otherKey = Bytes.of("try this");
+        final var otherKey = Bytes.of("tryThis");
         final var matchingPasswordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withKeyBytes(givenKey).fake();
@@ -137,7 +138,7 @@ class CryptoPasswordServiceTest {
     void shouldPutPasswordEntry_InsertNewEntry() {
         // given
         final var existingKey = Bytes.of("Key");
-        final var newKey = Bytes.of("try this");
+        final var newKey = Bytes.of("tryThis");
         final var newPassword = Bytes.of("Password");
         final var matchingPasswordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
@@ -187,9 +188,25 @@ class CryptoPasswordServiceTest {
     }
 
     @Test
+    void shouldPutPasswordEntry_RejectInvalidKey() {
+        // given
+        final var invalidKey = Bytes.of("Key1");
+
+        // when
+        final var actual = passwordService.putPasswordEntry(invalidKey, Bytes.of("password"));
+
+        // then
+        then(cryptoProvider).shouldHaveNoInteractions();
+        then(passwordEntryRepository).shouldHaveNoInteractions();
+        assertThat(actual.isFailure()).isTrue();
+        assertThat(actual.getCause()).isNotNull()
+                .isInstanceOf(InvalidKeyException.class);
+    }
+
+    @Test
     void shouldPutPasswordEntries_InsertAndUpdate() {
         // given
-        final var newKey = Bytes.of("try this");
+        final var newKey = Bytes.of("trythis");
         final var newPassword = Bytes.of("dont use this as a password");
         final var existingKey = Bytes.of("Key");
         final var newPasswordForExistingKey = Bytes.of("Password");
