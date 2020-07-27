@@ -310,6 +310,25 @@ class BytesTest {
                     .isNotSameAs(clonedBytes);
         }
 
+        @Test
+        void shouldTransformToStream() {
+            // given
+            final var givenBytes = Bytes.of("myBytes");
+
+            // when
+            final var actual = givenBytes.stream();
+
+            // then
+            assertThat(actual).containsExactly(
+                    (byte)'m',
+                    (byte)'y',
+                    (byte)'B',
+                    (byte)'y',
+                    (byte)'t',
+                    (byte)'e',
+                    (byte)'s');
+        }
+
     }
 
     @Nested

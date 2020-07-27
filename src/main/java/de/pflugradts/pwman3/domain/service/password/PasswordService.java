@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 public interface PasswordService {
     Try<Boolean> entryExists(Bytes keyBytes);
     Optional<Try<Bytes>> viewPassword(Bytes keyBytes);
+    Try<Void> challengeAlias(Bytes bytes);
     Try<Void> putPasswordEntries(Stream<Tuple2<Bytes, Bytes>> passwordEntries);
     Try<Void> putPasswordEntry(Bytes keyBytes, Bytes passwordBytes);
     Try<Void> discardPasswordEntry(Bytes keyBytes);

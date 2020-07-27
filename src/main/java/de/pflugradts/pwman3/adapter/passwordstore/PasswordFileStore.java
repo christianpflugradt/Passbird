@@ -141,7 +141,7 @@ public class PasswordFileStore implements PasswordStoreAdapterPort {
 
     @SuppressWarnings("checkstyle:MagicNumber")
     private byte[] signature() {
-        return new byte[]{0x0, 0x50, 0x77, 0x4D, 0x61, 0x6E, 0x33, 0x0};
+        return new byte[]{0x0, 0x50, 0x77, 0x4D, 0x61, 0x6E, 0x34, 0x0};
     }
 
     private int signatureSize() {
