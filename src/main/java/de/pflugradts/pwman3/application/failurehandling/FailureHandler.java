@@ -15,7 +15,6 @@ import de.pflugradts.pwman3.application.failurehandling.failure.PasswordEntryFai
 import de.pflugradts.pwman3.application.failurehandling.failure.SignatureCheckFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.WritePasswordDatabaseFailure;
 import de.pflugradts.pwman3.application.util.SystemOperation;
-import de.pflugradts.pwman3.domain.model.password.InvalidKeyException;
 import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
 import java.nio.file.Path;
 
@@ -40,11 +39,7 @@ public class FailureHandler implements EventHandler {
 
     @Subscribe
     private void handle(final PasswordEntryFailure passwordEntryFailure) {
-        if (passwordEntryFailure.getThrowable() instanceof InvalidKeyException) {
-            err("Password Alias cannot contain digits or special characters. Please choose a different Alias.");
-        } else {
-            err("Password Entry could not be accessed.");
-        }
+        err("Password Entry could not be accessed.");
     }
 
     @Subscribe
