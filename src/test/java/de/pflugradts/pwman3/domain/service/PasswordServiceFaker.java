@@ -5,12 +5,14 @@ import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import io.vavr.control.Try;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -43,6 +45,7 @@ public class PasswordServiceFaker {
     }
 
     public PasswordService fake() {
+        lenient().when(passwordService.putPasswordEntries(any())).thenReturn(Try.success(null));
         lenient().when(passwordService.challengeAlias(any(Bytes.class))).thenReturn(Try.success(null));
         if (invalidAlias != null) {
             lenient().when(passwordService.challengeAlias(invalidAlias))

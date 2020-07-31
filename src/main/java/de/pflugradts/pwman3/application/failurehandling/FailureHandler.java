@@ -41,9 +41,9 @@ public class FailureHandler implements EventHandler {
     @Subscribe
     private void handle(final PasswordEntryFailure passwordEntryFailure) {
         if (passwordEntryFailure.getThrowable() instanceof InvalidKeyException) {
-            err("Password Alias cannot contain digits or special characters. Please choose a different Alias.");
+            err("Password alias cannot contain digits or special characters. Please choose a different alias.");
         } else {
-            err("Password Entry could not be accessed.");
+            err("Password entry could not be accessed.");
         }
     }
 
@@ -59,7 +59,14 @@ public class FailureHandler implements EventHandler {
 
     @Subscribe
     private void handle(final ImportFailure importFailure) {
-        err("Password file could not be imported.");
+        if (importFailure.getThrowable() instanceof InvalidKeyException) {
+            err("Password file could not be imported because "
+                            + "at least one alias contains digits or special characters. "
+                            + "Please correct invalid aliases and try again. Errorneous alias: %s",
+                    ((InvalidKeyException) importFailure.getThrowable()).getKeyBytes().asString());
+        } else {
+            err("Password file could not be imported.");
+        }
     }
 
     @Subscribe
@@ -90,8 +97,8 @@ public class FailureHandler implements EventHandler {
         err("Password database could not be synced.");
     }
 
-    private void err(final String message) {
-        System.err.println(message);
+    private void err(final String template, final Object... params) {
+        System.err.println(String.format(template, params));
     }
 
     private Path getPasswordStoreLocationFromConfiguration() {

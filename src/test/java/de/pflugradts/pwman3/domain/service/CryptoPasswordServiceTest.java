@@ -12,12 +12,14 @@ import de.pflugradts.pwman3.domain.service.password.CryptoPasswordService;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
 import io.vavr.Tuple2;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
@@ -132,6 +134,43 @@ class CryptoPasswordServiceTest {
         then(pwMan3EventRegistry).should().register(eq(new PasswordEntryNotFound(otherKey)));
         then(pwMan3EventRegistry).should().processEvents();
         assertThat(actual).isEmpty();
+    }
+
+    @Test
+    void shouldSucceedChallengingAlphabeticAlias() {
+        // given
+        final var givenAlias = Bytes.of("abcDEF");
+
+        // when
+        final var actual = passwordService.challengeAlias(givenAlias);
+
+        // then
+        assertThat(actual.isSuccess()).isTrue();
+    }
+
+    @Test
+    void shouldFailChallengingAlphanumericAlias() {
+        // given
+        final var givenAlias = Bytes.of("abc123");
+
+        // when
+        final var actual = passwordService.challengeAlias(givenAlias);
+
+        // then
+        assertThat(actual.isSuccess()).isFalse();
+    }
+
+
+    @Test
+    void shouldFailChallengingAliasWithSpecialCharacters() {
+        // given
+        final var givenAlias = Bytes.of("abc!");
+
+        // when
+        final var actual = passwordService.challengeAlias(givenAlias);
+
+        // then
+        assertThat(actual.isSuccess()).isFalse();
     }
 
     @Test

@@ -50,11 +50,18 @@ public class CryptoPasswordService implements PasswordService {
 
     @Override
     public Try<Void> putPasswordEntries(final Stream<Tuple2<Bytes, Bytes>> passwordEntries) {
-        return passwordEntries
+        final var passwordEntriesList = passwordEntries.collect(Collectors.toList());
+        final var failedAliasCheck = passwordEntriesList
+                .stream()
+                .map(passwordEntry -> challengeAlias(passwordEntry._1))
+                .filter(Try::isFailure)
+                .findAny();
+        return failedAliasCheck.orElseGet(() -> passwordEntriesList
+                .stream()
                 .map(this::putPasswordEntryTuple)
                 .filter(Try::isFailure).findAny()
                 .orElse(Try.success(null))
-                .andThen(this::processEventsAndSync);
+                .andThen(this::processEventsAndSync));
     }
 
     @Override
