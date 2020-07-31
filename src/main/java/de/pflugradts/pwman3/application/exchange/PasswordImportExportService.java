@@ -34,7 +34,8 @@ public class PasswordImportExportService implements ImportExportService {
         exchangeFactory.createPasswordExchange(uri)
                 .receive()
                 .onFailure(failureCollector::collectImportFailure)
-                .onSuccess(passwordService::putPasswordEntries);
+                .onSuccess(passwordEntries -> passwordService.putPasswordEntries(passwordEntries)
+                        .onFailure(failureCollector::collectImportFailure));
     }
 
     @Override
