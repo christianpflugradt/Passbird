@@ -149,9 +149,21 @@ class CryptoPasswordServiceTest {
     }
 
     @Test
-    void shouldFailChallengingAlphanumericAlias() {
+    void shouldSucceedChallengingAliasWithDigitAtOtherThanFirstPosition() {
         // given
         final var givenAlias = Bytes.of("abc123");
+
+        // when
+        final var actual = passwordService.challengeAlias(givenAlias);
+
+        // then
+        assertThat(actual.isSuccess()).isTrue();
+    }
+
+    @Test
+    void shouldFailChallengingAliasWithDigitAtFirstPosition() {
+        // given
+        final var givenAlias = Bytes.of("123abc");
 
         // when
         final var actual = passwordService.challengeAlias(givenAlias);
@@ -229,7 +241,7 @@ class CryptoPasswordServiceTest {
     @Test
     void shouldPutPasswordEntry_RejectInvalidKey() {
         // given
-        final var invalidKey = Bytes.of("Key1");
+        final var invalidKey = Bytes.of("1Key");
 
         // when
         final var actual = passwordService.putPasswordEntry(invalidKey, Bytes.of("password"));

@@ -1,7 +1,7 @@
 package de.pflugradts.pwman3.domain.service.password;
 
 import com.google.inject.Inject;
-import de.pflugradts.pwman3.application.util.AsciiUtils;
+import de.pflugradts.pwman3.domain.service.util.AsciiUtils;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
 import de.pflugradts.pwman3.domain.model.password.InvalidKeyException;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
@@ -87,7 +87,7 @@ public class CryptoPasswordService implements PasswordService {
 
     @Override
     public Try<Void> challengeAlias(final Bytes bytes) {
-        return noneMatch(bytes.copy(), AsciiUtils::isDigit) && noneMatch(bytes.copy(), AsciiUtils::isSymbol)
+        return !AsciiUtils.isDigit(bytes.getByte(0)) && noneMatch(bytes.copy(), AsciiUtils::isSymbol)
                 ? Try.success(null)
                 : Try.failure(new InvalidKeyException(bytes));
     }

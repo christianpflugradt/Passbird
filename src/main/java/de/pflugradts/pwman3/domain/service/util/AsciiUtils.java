@@ -1,4 +1,4 @@
-package de.pflugradts.pwman3.application.util;
+package de.pflugradts.pwman3.domain.service.util;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

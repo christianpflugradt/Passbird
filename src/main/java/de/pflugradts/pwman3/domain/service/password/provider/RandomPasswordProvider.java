@@ -1,16 +1,16 @@
 package de.pflugradts.pwman3.domain.service.password.provider;
 
-import de.pflugradts.pwman3.application.util.AsciiUtils;
+import de.pflugradts.pwman3.domain.service.util.AsciiUtils;
 import de.pflugradts.pwman3.domain.model.password.PasswordRequirements;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import java.security.SecureRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.FIRST_DIGIT_INDEX;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.LAST_LOWERCASE_INDEX;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.MAX_ASCII_VALUE;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.MIN_ASCII_VALUE;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.FIRST_DIGIT_INDEX;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.LAST_LOWERCASE_INDEX;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MAX_ASCII_VALUE;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MIN_ASCII_VALUE;
 
 public class RandomPasswordProvider implements PasswordProvider {
 

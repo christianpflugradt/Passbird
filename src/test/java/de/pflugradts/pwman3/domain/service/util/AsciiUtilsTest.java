@@ -1,7 +1,9 @@
-package de.pflugradts.pwman3.application.util;
+package de.pflugradts.pwman3.domain.service.util;
+
+import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AsciiUtilsTest {

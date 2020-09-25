@@ -1,6 +1,6 @@
 package de.pflugradts.pwman3.domain.model.transfer;
 
-import de.pflugradts.pwman3.application.util.AsciiUtils;
+import de.pflugradts.pwman3.domain.service.util.AsciiUtils;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,14 +8,14 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.FIRST_DIGIT_INDEX;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.FIRST_LOWERCASE_INDEX;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.FIRST_UPPERCASE_INDEX;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.LAST_DIGIT_INDEX;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.LAST_LOWERCASE_INDEX;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.LAST_UPPERCASE_INDEX;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.MAX_ASCII_VALUE;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.MIN_ASCII_VALUE;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.FIRST_DIGIT_INDEX;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.FIRST_LOWERCASE_INDEX;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.FIRST_UPPERCASE_INDEX;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.LAST_DIGIT_INDEX;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.LAST_LOWERCASE_INDEX;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.LAST_UPPERCASE_INDEX;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MAX_ASCII_VALUE;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MIN_ASCII_VALUE;
 
 public class BytesComparator implements Comparator<Bytes> {
 
