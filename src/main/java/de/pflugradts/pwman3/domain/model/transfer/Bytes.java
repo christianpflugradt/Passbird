@@ -10,8 +10,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.MAX_ASCII_VALUE;
-import static de.pflugradts.pwman3.application.util.AsciiUtils.MIN_ASCII_VALUE;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MAX_ASCII_VALUE;
+import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MIN_ASCII_VALUE;
 
 /**
  * <p>A Bytes is the basic structure to represent information.</p>
