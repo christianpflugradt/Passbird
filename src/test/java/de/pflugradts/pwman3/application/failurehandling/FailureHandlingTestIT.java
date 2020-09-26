@@ -6,10 +6,6 @@ import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.control.Try;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +13,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Path;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -84,6 +86,19 @@ class FailureHandlingTestIT {
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("checksum");
         then(bootable).should(never()).terminate(systemOperation);
+    }
+
+    @Test
+    void shouldHandleRenamePasswordEntryFailure() {
+        // given
+        assertThat(outputStream.toByteArray()).isEmpty();
+
+        // when
+        failureCollector.collectRenamePasswordEntryFailure(new RuntimeException());
+        final var actual = new String(outputStream.toByteArray());
+
+        // then
+        assertThat(actual).isNotNull().containsIgnoringCase("could not be renamed");
     }
 
     @Test

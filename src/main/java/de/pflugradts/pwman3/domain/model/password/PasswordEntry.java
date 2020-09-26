@@ -4,6 +4,7 @@ import de.pflugradts.pwman3.domain.model.ddd.AggregateRoot;
 import de.pflugradts.pwman3.domain.model.ddd.DomainEvent;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryCreated;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryDiscarded;
+import de.pflugradts.pwman3.domain.model.event.PasswordEntryRenamed;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryUpdated;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.service.password.storage.PasswordStoreAdapterPort;
@@ -46,6 +47,11 @@ public class PasswordEntry implements AggregateRoot {
 
     public Bytes viewPassword() {
         return getPassword().view();
+    }
+
+    public void rename(final Bytes keyBytes) {
+        getKey().rename(keyBytes);
+        registerDomainEvent(new PasswordEntryRenamed(this));
     }
 
     public void updatePassword(final Bytes bytes) {

@@ -3,16 +3,7 @@ package de.pflugradts.pwman3.application.boot.main;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.util.Modules;
-import de.pflugradts.pwman3.application.commandhandling.handler.CustomSetCommandHandler;
-import de.pflugradts.pwman3.application.commandhandling.handler.DiscardCommandHandler;
-import de.pflugradts.pwman3.application.commandhandling.handler.ExportCommandHandler;
-import de.pflugradts.pwman3.application.commandhandling.handler.GetCommandHandler;
-import de.pflugradts.pwman3.application.commandhandling.handler.HelpCommandHandler;
-import de.pflugradts.pwman3.application.commandhandling.handler.ImportCommandHandler;
-import de.pflugradts.pwman3.application.commandhandling.handler.ListCommandHandler;
-import de.pflugradts.pwman3.application.commandhandling.handler.QuitCommandHandler;
-import de.pflugradts.pwman3.application.commandhandling.handler.SetCommandHandler;
-import de.pflugradts.pwman3.application.commandhandling.handler.ViewCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.*;
 import de.pflugradts.pwman3.application.eventhandling.ApplicationEventHandler;
 import de.pflugradts.pwman3.domain.service.eventhandling.DomainEventHandler;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
@@ -60,6 +51,7 @@ class PwMan3MainModuleTestIT {
                         ImportCommandHandler.class,
                         ListCommandHandler.class,
                         QuitCommandHandler.class,
+                        RenameCommandHandler.class,
                         SetCommandHandler.class,
                         ViewCommandHandler.class);
     }

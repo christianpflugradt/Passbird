@@ -43,6 +43,7 @@ public class HelpCommandHandler implements CommandHandler {
                         + "\ts[key] (set) sets a random password for a key overwriting any that existed%n"
                         + "\tc[key] (custom set) like set but prompts the user to input a new password%n"
                         + "\tv[key] (view) prints the password for that key to the console%n"
+                        + "\tr[key] (rename) renames a key by prompting the user for a new one%n"
                         + "\td[key] (discard) removes key and password from the database%n"
                         + "\te[directory] (export) exports the password database as a human readable json file "
                         + "to the specified directory%n"

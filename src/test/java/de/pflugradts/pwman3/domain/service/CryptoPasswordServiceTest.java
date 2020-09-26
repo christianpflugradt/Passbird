@@ -20,6 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.stream.Stream;
 
+import static de.pflugradts.pwman3.domain.service.password.PasswordService.EntryNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT;
+import static de.pflugradts.pwman3.domain.service.password.PasswordService.EntryNotExistsAction.DO_NOTHING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
@@ -51,7 +53,7 @@ class CryptoPasswordServiceTest {
                 .withThesePasswordEntries(matchingPasswordEntry).fake();
 
         // when
-        final var actual = passwordService.entryExists(givenKey);
+        final var actual = passwordService.entryExists(givenKey, DO_NOTHING);
 
         // then
         then(pwMan3EventRegistry).shouldHaveNoInteractions();
@@ -75,10 +77,35 @@ class CryptoPasswordServiceTest {
                 .withThesePasswordEntries(matchingPasswordEntry).fake();
 
         // when
-        final var actual = passwordService.entryExists(otherKey);
+        final var actual = passwordService.entryExists(otherKey, DO_NOTHING);
 
         // then
         then(pwMan3EventRegistry).shouldHaveNoInteractions();
+        assertThat(actual.isSuccess()).isTrue();
+        assertThat(actual.get()).isFalse();
+    }
+
+    @Test
+    void shouldCreatePasswordEntryNotFoundEvent_IfEntryDoesNotExistAndCreateEventIsRequested() {
+        // given
+        final var givenKey = Bytes.of("Key");
+        final var otherKey = Bytes.of("try this");
+        final var matchingPasswordEntry = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withKeyBytes(givenKey).fake();
+        CryptoProviderFaker.faker()
+                .forInstance(cryptoProvider)
+                .withMockedEncryption().fake();
+        PasswordEntryRepositoryFaker.faker()
+                .forInstance(passwordEntryRepository)
+                .withThesePasswordEntries(matchingPasswordEntry).fake();
+
+        // when
+        final var actual = passwordService.entryExists(otherKey, CREATE_ENTRY_NOT_EXISTS_EVENT);
+
+        // then
+        then(pwMan3EventRegistry).should().register(eq(new PasswordEntryNotFound(otherKey)));
+        then(pwMan3EventRegistry).should().processEvents();
         assertThat(actual.isSuccess()).isTrue();
         assertThat(actual.get()).isFalse();
     }
@@ -177,6 +204,18 @@ class CryptoPasswordServiceTest {
     void shouldFailChallengingAliasWithSpecialCharacters() {
         // given
         final var givenAlias = Bytes.of("abc!");
+
+        // when
+        final var actual = passwordService.challengeAlias(givenAlias);
+
+        // then
+        assertThat(actual.isSuccess()).isFalse();
+    }
+
+    @Test
+    void shouldFailChallengingEmptyAlias() {
+        // given
+        final var givenAlias = Bytes.of("");
 
         // when
         final var actual = passwordService.challengeAlias(givenAlias);

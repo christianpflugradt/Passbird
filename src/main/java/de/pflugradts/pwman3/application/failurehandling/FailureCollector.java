@@ -10,13 +10,15 @@ import de.pflugradts.pwman3.application.failurehandling.failure.ImportFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.InputFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.PasswordEntriesFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.PasswordEntryFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.RenamePasswordEntryFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.SignatureCheckFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.WritePasswordDatabaseFailure;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
-import java.nio.file.Path;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+
+import java.nio.file.Path;
+import java.util.Objects;
 
 @SuppressWarnings({"checkstyle:ClassDataAbstractionCoupling", "PMD.TooManyMethods"})
 @NoArgsConstructor
@@ -30,6 +32,10 @@ public class FailureCollector {
 
     public void collectChecksumFailure(final Byte actualChecksum, final Byte expectedChecksum) {
         collect(new ChecksumFailure(actualChecksum, expectedChecksum));
+    }
+
+    public void collectRenamePasswordEntryFailure(final Throwable throwable) {
+        collect(new RenamePasswordEntryFailure(throwable));
     }
 
     public void collectPasswordEntryFailure(final Bytes bytes, final Throwable throwable) {

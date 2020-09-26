@@ -16,6 +16,7 @@ public class CommandFactory {
             case IMPORT: return new ImportCommand(input);
             case LIST: return new ListCommand();
             case QUIT: return new QuitCommand();
+            case RENAME: return new RenameCommand(input);
             case SET: return new SetCommand(input);
             case VIEW: return new ViewCommand(input);
             default: return new NullCommand();
