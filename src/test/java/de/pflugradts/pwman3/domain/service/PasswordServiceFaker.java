@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
@@ -53,14 +54,19 @@ public class PasswordServiceFaker {
         }
         lenient().when(passwordService.findAllKeys())
                 .thenReturn(Try.of(() -> passwordEntries.stream().map(PasswordEntry::viewKey)));
-        lenient().when(passwordService.entryExists(any(Bytes.class))).thenReturn(Try.of(() -> false));
+        lenient().when(passwordService.entryExists(any(Bytes.class), any(PasswordService.EntryNotExistsAction.class)))
+                .thenReturn(Try.of(() -> false));
         lenient().when(passwordService.putPasswordEntry(any(Bytes.class), any(Bytes.class)))
+                .thenReturn(Try.success(null));
+        lenient().when(passwordService.renamePasswordEntry(any(Bytes.class), any(Bytes.class)))
                 .thenReturn(Try.success(null));
         passwordEntries.forEach(passwordEntry -> {
                 lenient().when(passwordService.viewPassword(passwordEntry.viewKey()))
                         .thenReturn(Optional.of(Try.of(passwordEntry::viewPassword)));
-                lenient().when(passwordService.entryExists(passwordEntry.viewKey()))
-                        .thenReturn(Try.of(() -> true));
+                lenient().when(passwordService.entryExists(
+                        eq(passwordEntry.viewKey()),
+                        any(PasswordService.EntryNotExistsAction.class))
+                ).thenReturn(Try.of(() -> true));
                 lenient().when(passwordService.discardPasswordEntry(passwordEntry.viewKey()))
                         .thenReturn(Try.success(null));
         });

@@ -26,6 +26,23 @@ class KeyTest {
     }
 
     @Test
+    void shouldRenameKey() {
+        // given
+        final var originalBytes = Bytes.of("key123");
+        final var key = Key.create(originalBytes);
+        final var updatedBytes = Bytes.of("keyABC");
+
+        // when
+        key.rename(updatedBytes);
+        final var actual = key.view();
+
+        // then
+        assertThat(actual).isNotNull()
+                .isEqualTo(updatedBytes)
+                .isNotEqualTo(originalBytes);
+    }
+
+    @Test
     void shouldCloneBytes() {
         // given
         final var bytes = Bytes.of("key");

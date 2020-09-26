@@ -13,7 +13,7 @@ import lombok.Getter;
 final class Key implements DomainEntity {
 
     @Getter(AccessLevel.PRIVATE)
-    private final Bytes bytes;
+    private Bytes bytes;
 
     private Key(final Bytes bytes) {
         this.bytes = bytes.copy();
@@ -21,6 +21,10 @@ final class Key implements DomainEntity {
 
     static Key create(final Bytes bytes) {
         return new Key(bytes);
+    }
+
+    void rename(final Bytes newBytes) {
+        this.bytes = newBytes.copy();
     }
 
     Bytes view() {

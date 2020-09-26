@@ -12,13 +12,16 @@ import de.pflugradts.pwman3.application.failurehandling.failure.ImportFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.InputFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.PasswordEntriesFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.PasswordEntryFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.RenamePasswordEntryFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.SignatureCheckFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.WritePasswordDatabaseFailure;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.password.InvalidKeyException;
 import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
+
 import java.nio.file.Path;
 
+@SuppressWarnings("PMD.TooManyMethods")
 public class FailureHandler implements EventHandler {
 
     @Inject
@@ -36,6 +39,11 @@ public class FailureHandler implements EventHandler {
                     + "database file, you can set the verifyChecksum option in your configuration to false.");
             bootable.terminate(systemOperation);
         }
+    }
+
+    @Subscribe
+    private void handle(final RenamePasswordEntryFailure renamePasswordEntryFailure) {
+        err("Password alias could not be renamed: %s", renamePasswordEntryFailure.getThrowable().getMessage());
     }
 
     @Subscribe

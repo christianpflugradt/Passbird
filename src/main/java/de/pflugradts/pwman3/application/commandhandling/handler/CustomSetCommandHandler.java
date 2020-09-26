@@ -11,6 +11,8 @@ import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
 import de.pflugradts.pwman3.domain.service.password.PasswordService;
 
+import static de.pflugradts.pwman3.domain.service.password.PasswordService.EntryNotExistsAction.DO_NOTHING;
+
 public class CustomSetCommandHandler implements CommandHandler {
 
     @Inject
@@ -49,7 +51,7 @@ public class CustomSetCommandHandler implements CommandHandler {
 
     private boolean commandConfirmed(final CustomSetCommand customSetCommand) {
         if (configuration.getApplication().getPassword().isPromptOnRemoval()
-                && passwordService.entryExists(customSetCommand.getArgument())
+                && passwordService.entryExists(customSetCommand.getArgument(), DO_NOTHING)
                 .onFailure(throwable -> failureCollector
                         .collectPasswordEntryFailure(customSetCommand.getArgument(), throwable))
                 .getOrElse(false)) {

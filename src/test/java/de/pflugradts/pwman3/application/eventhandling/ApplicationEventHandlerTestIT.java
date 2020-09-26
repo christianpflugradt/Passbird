@@ -1,25 +1,20 @@
 package de.pflugradts.pwman3.application.eventhandling;
 
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
-import de.pflugradts.pwman3.domain.model.event.PasswordEntryCreated;
-import de.pflugradts.pwman3.domain.model.event.PasswordEntryDiscarded;
-import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
-import de.pflugradts.pwman3.domain.model.event.PasswordEntryUpdated;
+import de.pflugradts.pwman3.domain.model.event.*;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import io.vavr.control.Try;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -48,10 +43,10 @@ class ApplicationEventHandlerTestIT {
     @Test
     void shouldProcessPasswordEntryCreated() {
         // given
-        final var giverPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
-        final var passwordEntryCreated = new PasswordEntryCreated(giverPasswordEntry);
+        final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
+        final var passwordEntryCreated = new PasswordEntryCreated(givenPasswordEntry);
         final var expectedBytes = Bytes.of("expected key");
-        given(cryptoProvider.decrypt(giverPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
+        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
 
         // when
         pwMan3EventRegistry.register(passwordEntryCreated);
@@ -68,10 +63,10 @@ class ApplicationEventHandlerTestIT {
     @Test
     void shouldProcessPasswordEntryUpdated() {
         // given
-        final var giverPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
-        final var passwordEntryUpdated = new PasswordEntryUpdated(giverPasswordEntry);
+        final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
+        final var passwordEntryUpdated = new PasswordEntryUpdated(givenPasswordEntry);
         final var expectedBytes = Bytes.of("expected key");
-        given(cryptoProvider.decrypt(giverPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
+        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
 
         // when
         pwMan3EventRegistry.register(passwordEntryUpdated);
@@ -86,12 +81,32 @@ class ApplicationEventHandlerTestIT {
     }
 
     @Test
+    void shouldProcessPasswordEntryRenamed() {
+        // given
+        final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
+        final var passwordEntryRenamed = new PasswordEntryRenamed(givenPasswordEntry);
+        final var expectedBytes = Bytes.of("expected key");
+        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
+
+        // when
+        pwMan3EventRegistry.register(passwordEntryRenamed);
+        pwMan3EventRegistry.processEvents();
+
+        // then
+        then(userInterfaceAdapterPort).should().send(captor.capture());
+        assertThat(captor.getValue()).isNotNull()
+                .extracting(Output::getBytes).isNotNull()
+                .extracting(Bytes::asString).isNotNull()
+                .asString().contains(expectedBytes.asString());
+    }
+
+    @Test
     void shouldProcessPasswordEntryDiscarded() {
         // given
-        final var giverPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
-        final var passwordEntryDiscarded = new PasswordEntryDiscarded(giverPasswordEntry);
+        final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
+        final var passwordEntryDiscarded = new PasswordEntryDiscarded(givenPasswordEntry);
         final var expectedBytes = Bytes.of("expected key");
-        given(cryptoProvider.decrypt(giverPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
+        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
 
         // when
         pwMan3EventRegistry.register(passwordEntryDiscarded);

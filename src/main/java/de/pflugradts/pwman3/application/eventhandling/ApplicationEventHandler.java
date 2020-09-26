@@ -6,6 +6,7 @@ import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryCreated;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryDiscarded;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
+import de.pflugradts.pwman3.domain.model.event.PasswordEntryRenamed;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryUpdated;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
@@ -37,6 +38,16 @@ public class ApplicationEventHandler implements EventHandler {
                         .viewKey())
                 .onSuccess(key -> sendToUserInterface(
                         "PasswordEntry '%s' successfully updated.", key));
+    }
+
+    @Subscribe
+    private void handlePasswordEntryRenamed(final PasswordEntryRenamed passwordEntryRenamed) {
+        cryptoProvider
+                .decrypt(passwordEntryRenamed
+                        .getPasswordEntry()
+                        .viewKey())
+                .onSuccess(key -> sendToUserInterface(
+                        "PasswordEntry '%s' successfully renamed.", key));
     }
 
     @Subscribe

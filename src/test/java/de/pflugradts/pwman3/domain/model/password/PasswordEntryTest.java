@@ -29,6 +29,25 @@ class PasswordEntryTest {
     }
 
     @Test
+    void shouldRenameKey() {
+        // given
+        final var givenBytes = Bytes.of("key123");
+        final var updatedBytes = Bytes.of("keyABC");
+        final var passwordEntry = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withKeyBytes(givenBytes).fake();
+
+        // when
+        passwordEntry.rename(updatedBytes);
+        final var actual = passwordEntry.viewKey();
+
+        // then
+        assertThat(actual).isNotNull()
+                .isEqualTo(updatedBytes)
+                .isNotEqualTo(givenBytes);
+    }
+
+    @Test
     void shouldViewPassword() {
         // given
         final var givenBytes = Bytes.of("myPassword");

@@ -14,6 +14,7 @@ public enum CommandType {
     IMPORT('i'),
     LIST('l'),
     QUIT('q'),
+    RENAME('r'),
     SET('s'),
     VIEW('v'),
     UNDEFINED('?');

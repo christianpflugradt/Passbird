@@ -12,8 +12,14 @@ import java.util.stream.Stream;
  * {@link #putPasswordEntry(Bytes, Bytes)} and {@link #discardPasswordEntry(Bytes)}.</p>
  */
 public interface PasswordService {
-    Try<Boolean> entryExists(Bytes keyBytes);
+
+    enum EntryNotExistsAction {
+        DO_NOTHING,
+        CREATE_ENTRY_NOT_EXISTS_EVENT
+    }
+    Try<Boolean> entryExists(Bytes keyBytes, EntryNotExistsAction entryNotExistsAction);
     Optional<Try<Bytes>> viewPassword(Bytes keyBytes);
+    Try<Void> renamePasswordEntry(Bytes keyBytes, Bytes newKeyBytes);
     Try<Void> challengeAlias(Bytes bytes);
     Try<Void> putPasswordEntries(Stream<Tuple2<Bytes, Bytes>> passwordEntries);
     Try<Void> putPasswordEntry(Bytes keyBytes, Bytes passwordBytes);
