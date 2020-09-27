@@ -28,7 +28,7 @@ public class RenameCommandHandler implements CommandHandler {
                         failureCollector.collectPasswordEntryFailure(renameCommand.getArgument(), throwable))
                 .getOrElse(false)) {
             final var secureInput = userInterfaceAdapterPort
-                    .receiveSecurely(Output.of(Bytes.of("Enter new alias or nothing to abort: ")))
+                    .receive(Output.of(Bytes.of("Enter new alias or nothing to abort: ")))
                     .onFailure(failureCollector::collectInputFailure)
                     .getOrElse(Input.empty());
             if (secureInput.isEmpty()) {

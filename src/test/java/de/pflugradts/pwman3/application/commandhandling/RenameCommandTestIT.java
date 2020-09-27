@@ -69,7 +69,7 @@ class RenameCommandTestIT {
                 .withPasswordEntries(givenPasswordEntry).fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseSecureInputs(Input.of(newKey)).fake();
+                .withTheseInputs(Input.of(newKey)).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
@@ -115,7 +115,7 @@ class RenameCommandTestIT {
                         .withKeyBytes(Bytes.of(args)).fake()).fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseSecureInputs(Input.of(newAlias)).fake();
+                .withTheseInputs(Input.of(newAlias)).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
@@ -142,7 +142,7 @@ class RenameCommandTestIT {
                 .withPasswordEntries(givenPasswordEntry).fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseSecureInputs(Input.of(existingAlias)).fake();
+                .withTheseInputs(Input.of(existingAlias)).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
