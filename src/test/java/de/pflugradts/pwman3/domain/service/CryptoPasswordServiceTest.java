@@ -225,6 +225,58 @@ class CryptoPasswordServiceTest {
     }
 
     @Test
+    void shouldRenamePasswordEntry() {
+        // given
+        final var oldKey = Bytes.of("key123");
+        final var newKey = Bytes.of("keyABC");
+        final var givenPasswordEntry = PasswordEntryFaker.faker()
+            .fakePasswordEntry()
+            .withKeyBytes(oldKey).fake();
+        CryptoProviderFaker.faker()
+            .forInstance(cryptoProvider)
+            .withMockedEncryption().fake();
+        PasswordEntryRepositoryFaker.faker()
+            .forInstance(passwordEntryRepository)
+            .withThesePasswordEntries(givenPasswordEntry).fake();
+
+        // when
+        final var actual = passwordService.renamePasswordEntry(oldKey, newKey);
+
+        // then
+        assertThat(actual).isNotNull();
+        assertThat(actual.isSuccess()).isTrue();
+        assertThat(givenPasswordEntry.viewKey())
+            .isNotNull().isEqualTo(newKey).isNotEqualTo(oldKey);
+    }
+
+    @Test
+    void shouldRenamePasswordEntry_DoNothingIfEntryDoesNotExist() {
+        // given
+        final var oldKey = Bytes.of("key123");
+        final var newKey = Bytes.of("keyABC");
+        final var givenPasswordEntry = PasswordEntryFaker.faker()
+            .fakePasswordEntry()
+            .withKeyBytes(oldKey).fake();
+        final var existingPasswordEntry = PasswordEntryFaker.faker()
+            .fakePasswordEntry().fake();
+        CryptoProviderFaker.faker()
+            .forInstance(cryptoProvider)
+            .withMockedEncryption().fake();
+        PasswordEntryRepositoryFaker.faker()
+            .forInstance(passwordEntryRepository)
+            .withThesePasswordEntries(existingPasswordEntry).fake();
+
+        // when
+        final var actual = passwordService.renamePasswordEntry(oldKey, newKey);
+
+        // then
+        assertThat(actual).isNotNull();
+        assertThat(actual.isSuccess()).isTrue();
+        assertThat(givenPasswordEntry.viewKey())
+            .isNotNull().isEqualTo(oldKey).isNotEqualTo(newKey);
+    }
+
+    @Test
     void shouldPutPasswordEntry_InsertNewEntry() {
         // given
         final var existingKey = Bytes.of("Key");
