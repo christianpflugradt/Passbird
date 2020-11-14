@@ -91,19 +91,19 @@ Some example inputs and what they do:
 
 ## <a name="faq"></a>Frequently Asked Questions ##
 
-#### Is PwMan3 the right tool for me? ####
+### Is PwMan3 the right tool for me? ###
 If you prefer the terminal to a graphical user interface and you don't need to store many hundreds of passwords, you might want to give PwMan3 a chance. Keep in mind that PwMan3 does not use a hierarchy for managing its keys so you might have a hard time memorizing all those keys or thinking of good names if you want to store hundreds of passwords or also want to store related information such as urls and usernames.
 
-#### Is PwMan3 secure? ####
+### Is PwMan3 secure? ###
 Short answer: No.
 
 Long answer: I am not a security expert and PwMan3 has not been reviewed. PwMan3 uses a Keystore and a Cipher to symmetrically encrypt all data using a master password chosen by the user. All data is generally handled in byte arrays by the application. All user input is read and program output is written as single bytes. Only for copying a password to clipboard I store it in a string because I know no other way to write to the clipboard using Java. Once sensitive decrypted data has been used, like written to the clipboard, the byte array will be overwritten with random bytes. The password database is double encoded so from analyzing it in a hex editor you should not even be able to tell how many passwords are currently stored in the database. PwMan3 is also completely offline. If I were to take a wild guess I would say it is probably reasonably safe.
 
-#### Does PwMan3 support Unicode? ####
+### Does PwMan3 support Unicode? ###
 
 No. Many programs don't support unicode characters in passwords. In fact some don't even allow common special characters like backslashes or spaces. Supporting advanced character sets didn't seem worth it to me, thus PwMan3 translates every byte into an ascii character. You may input a unicode character which is represented in several bytes and PwMan3 will interpret it as multiple ascii characters. I advice against doing that. You might have trouble reproducing the correct input and end up with some broken password aliases that you can't delete.
 
-#### How do I update PwMan3? ####
+### How do I update PwMan3? ###
 
 PwMan3 uses semantic versioning in the style of *x.y.z* where x is the major version, y the minor version and z the patch level version. Updating to a minor or patch level version is very simple: Just download the jar file and use it. 
 
@@ -111,20 +111,20 @@ If you want to upgrade from PwMan3 version 1 to PwMan3 version 2, use the migrat
 
 [migrate from PwMan3 version 1 to PwMan3 version 2](doc/migration/1xxTo2xx.md)
 
-#### What can I do if I forget my master password? ####
+### What can I do if I forget my master password? ###
 Without the correct master password you cannot decrypt your password database. There is no way to bypass this protection. The only thing you can do is to try and find out your password via brute force. PwMan3 terminates after 3 wrong attempts so if the program is still running after 3 guesses, you have guessed correctly. I am not aware of any way to protect against brute force attacks by the way, since an attacker could simply brute force the keystore itself instead of using PwMan3 to find out the correct password. The best protection is a secure password that would take a long time to guess, and to keep your keystore file safe.
 
-#### What can I do if I lose the keystore file? ####
+### What can I do if I lose the keystore file? ###
 Your master password will allow PwMan3 to retrieve the encryption key from the keystore. Without the encryption key your password database cannot be decrypted. If you recreate the keystore with the same master password, the encryption key will NOT be the same. Losing your keystore file means permanently losing access to your password database.
 
-#### Why is it named PwMan3? ####
+### Why is it named PwMan3? ###
 PwMan is short for Password Manager. To explain the *3*, a bit of history: In 2010 I felt a need for a password manager that could be worked with using only a keyboard and without memorizing lots of shortcuts. Thus a tool emerged and it was titled PwMan in lack of a better name. That tool had a very basic hard coded encryption and lacked many features such as import/export or erasing the clipboard. About 2014 I felt continueing to use PwMan was not appropriate anymore given that I started using it for work related passwords. I did some research how to implement a better encryption and decided to go with javax.crypto.Cipher and a KeyStore. Completely rewritten PwMan2 was born. It served me well over the years but it had a few minor bugs I never fixed and the code base was not as well structured as I wanted it to be. So in early 2020 I decided it should get a complete rewrite again. PwMan3 comes with a configuration file, a routine to automatically set up the keystore, all known bugs fixed, a healthy architecture with over 90% test coverage and an automated release process supported by quality assurance tools.
 
-#### Can I run multiple instances of PwMan3? ####
+### Can I run multiple instances of PwMan3? ###
 Of course! For example I use separate password databases for personal and occupational passwords. You can run them in different terminal windows at the same time and the instances won't be aware of each other.
 
-#### Can you add a graphical interface? ####
+### Can you add a graphical interface? ###
 No. The core characteristic of PwMan3 is its gui-less nature. If you want a gui, use one of the popular gui-based password managers such as Keepass.
 
-#### Can you implement feature xyz? ####
+### Can you implement feature xyz? ###
 It depends. If I think that feature is useful and it fits with PwMan3 I might implement it. Why don't you open a [Gitlab Issue](https://gitlab.com/christianpflugradt/pwman3/-/issues) for it? :-)
