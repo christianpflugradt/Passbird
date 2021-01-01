@@ -39,7 +39,7 @@ import de.pflugradts.pwman3.application.security.CryptoProviderFactory;
 import de.pflugradts.pwman3.domain.service.eventhandling.DomainEventHandler;
 import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
 import de.pflugradts.pwman3.domain.service.eventhandling.EventRegistry;
-import de.pflugradts.pwman3.domain.service.password.CryptoPasswordService;
+import de.pflugradts.pwman3.domain.service.password.PasswordFacade;
 import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.pwman3.domain.service.password.provider.PasswordProvider;
@@ -63,7 +63,7 @@ public class ApplicationModule extends AbstractModule {
         bind(ImportExportService.class).to(PasswordImportExportService.class);
         bind(KeyStoreAdapterPort.class).to(KeyStoreService.class);
         bind(PasswordProvider.class).to(RandomPasswordProvider.class);
-        bind(PasswordService.class).to(CryptoPasswordService.class);
+        bind(PasswordService.class).to(PasswordFacade.class);
         bind(PasswordStoreAdapterPort.class).to(PasswordFileStore.class);
         bind(UserInterfaceAdapterPort.class).to(CommandLineInterfaceService.class);
     }
