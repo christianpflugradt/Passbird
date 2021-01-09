@@ -6,6 +6,8 @@ import de.pflugradts.pwman3.domain.model.event.PasswordEntryUpdated;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.DEFAULT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -104,7 +106,7 @@ class PasswordEntryTest {
         @Test
         void shouldHaveCreatedEvent_WhenPasswordEntryIsCreated() {
             // given / when
-            final var passwordEntry = PasswordEntry.create(Bytes.of("key"), Bytes.of("password"));
+            final var passwordEntry = PasswordEntry.create(DEFAULT, Bytes.of("key"), Bytes.of("password"));
 
             // then
             assertThat(passwordEntry).isNotNull()

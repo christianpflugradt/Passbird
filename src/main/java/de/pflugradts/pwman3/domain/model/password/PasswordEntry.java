@@ -6,6 +6,7 @@ import de.pflugradts.pwman3.domain.model.event.PasswordEntryCreated;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryDiscarded;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryRenamed;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryUpdated;
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.service.password.storage.PasswordStoreAdapterPort;
 import lombok.AccessLevel;
@@ -28,17 +29,26 @@ public class PasswordEntry implements AggregateRoot {
     private final Key key;
     @Getter(AccessLevel.PRIVATE)
     private final Password password;
+    @Getter(AccessLevel.PRIVATE)
+    private final NamespaceSlot namespace;
     @Getter
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
-    protected PasswordEntry(final Bytes keyBytes, final Bytes passwordBytes) {
+    protected PasswordEntry(final NamespaceSlot namespaceSlot, final Bytes keyBytes, final Bytes passwordBytes) {
+        namespace = namespaceSlot;
         key = Key.create(keyBytes.copy());
         password = Password.create(passwordBytes.copy());
         registerDomainEvent(new PasswordEntryCreated(this));
     }
 
-    public static PasswordEntry create(final Bytes keyBytes, final Bytes passwordBytes) {
-        return new PasswordEntry(keyBytes, passwordBytes);
+    public static PasswordEntry create(final NamespaceSlot namespaceSlot,
+                                       final Bytes keyBytes,
+                                       final Bytes passwordBytes) {
+        return new PasswordEntry(namespaceSlot, keyBytes, passwordBytes);
+    }
+
+    public NamespaceSlot associatedNamespace() {
+        return namespace;
     }
 
     public Bytes viewKey() {

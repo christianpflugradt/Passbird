@@ -4,6 +4,8 @@ import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
+import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.DEFAULT;
+
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class PasswordEntryFaker {
 
@@ -31,7 +33,7 @@ public class PasswordEntryFaker {
     }
 
     public PasswordEntry fake() {
-        return PasswordEntry.create(key, password);
+        return PasswordEntry.create(DEFAULT, key, password);
     }
 
 }
