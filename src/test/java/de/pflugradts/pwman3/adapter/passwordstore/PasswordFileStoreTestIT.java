@@ -1,22 +1,25 @@
 package de.pflugradts.pwman3.adapter.passwordstore;
 
-import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
-import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
 import de.pflugradts.pwman3.application.configuration.Configuration;
+import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
+import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
 import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
-import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import io.vavr.control.Try;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -24,13 +27,13 @@ import static org.mockito.Mockito.mock;
 
 class PasswordFileStoreTestIT {
 
-    private FailureCollector failureCollector = mock(FailureCollector.class);
-    private Configuration configuration = mock(Configuration.class);
-    private CryptoProvider cryptoProvider = mock(CryptoProvider.class);
-    private PasswordFileStore passwordFileStore = setupPasswordFileStore();
+    private final FailureCollector failureCollector = mock(FailureCollector.class);
+    private final Configuration configuration = mock(Configuration.class);
+    private final CryptoProvider cryptoProvider = mock(CryptoProvider.class);
+    private final PasswordFileStore passwordFileStore = setupPasswordFileStore();
 
     private String tempPasswordStoreDirectory;
-    private String keyStoreFile;
+    private String dbFile;
 
     @BeforeEach
     private void setup() {
@@ -40,7 +43,7 @@ class PasswordFileStoreTestIT {
 
     private void setupFileSystem() {
         tempPasswordStoreDirectory = UUID.randomUUID().toString();
-        keyStoreFile = tempPasswordStoreDirectory + File.separator + ReadableConfiguration.DATABASE_FILENAME;
+        dbFile = tempPasswordStoreDirectory + File.separator + ReadableConfiguration.DATABASE_FILENAME;
         assertThat(new File(tempPasswordStoreDirectory).mkdir()).isTrue();
     }
 
@@ -56,7 +59,7 @@ class PasswordFileStoreTestIT {
 
     @AfterEach
     private void cleanup() {
-        assertThat(new File(keyStoreFile).delete()).isTrue();
+        assertThat(new File(dbFile).delete()).isTrue();
         assertThat(new File(tempPasswordStoreDirectory).delete()).isTrue();
     }
 
@@ -78,6 +81,7 @@ class PasswordFileStoreTestIT {
 
         // when
         passwordFileStore.sync(() -> Stream.of(passwordEntry1, passwordEntry2, passwordEntry3));
+        assertThat(new File(dbFile)).exists();
         final var actual = passwordFileStore.restore();
 
         // then
@@ -90,6 +94,30 @@ class PasswordFileStoreTestIT {
     void shouldUseEmptyPasswordDatabase_Roundtrip() {
         // when / then
         passwordFileStore.sync(Stream::empty);
+        assertThat(new File(dbFile)).exists();
+        final var actual = passwordFileStore.restore();
+
+        // then
+        assertThat(actual).isNotNull().extracting(Supplier::get).isNotNull();
+        assertThat(actual.get().collect(Collectors.toList())).isEmpty();
+    }
+
+    @Test
+    void shouldCreateEmptyPasswordDatabase_IfFileNotExists() {
+        // when / then
+        assertThat(new File(dbFile)).doesNotExist();
+        final var actual = passwordFileStore.restore();
+
+        // then
+        assertThat(actual).isNotNull().extracting(Supplier::get).isNotNull();
+        assertThat(actual.get().collect(Collectors.toList())).isEmpty();
+        passwordFileStore.sync(actual); // for cleanup
+    }
+
+    @Test
+    void shouldCreateEmptyPasswordDatabase_IfFileIsEmpty() throws IOException {
+        // when / then
+        assertThat(new File(dbFile).createNewFile()).isTrue();
         final var actual = passwordFileStore.restore();
 
         // then
@@ -99,11 +127,12 @@ class PasswordFileStoreTestIT {
 
     private PasswordFileStore setupPasswordFileStore() {
         return new PasswordFileStore(
-                new SystemOperation(),
-                failureCollector,
-                configuration,
-                new PasswordEntryTransformer(),
-                cryptoProvider);
+            new SystemOperation(),
+            failureCollector,
+            configuration,
+            new PasswordEntryTransformer(),
+            new NamespaceTransformer(),
+            cryptoProvider);
     }
 
 }

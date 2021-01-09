@@ -1,6 +1,7 @@
 package de.pflugradts.pwman3.domain.service.password;
 
 import com.google.inject.Inject;
+import de.pflugradts.pwman3.domain.model.namespace.Namespaces;
 import de.pflugradts.pwman3.domain.model.password.InvalidKeyException;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
@@ -62,7 +63,10 @@ class PutPasswordService implements CommonPasswordServiceCapabilities {
         return Try.run(() -> find(passwordEntryRepository, encryptedKeyBytes).ifPresentOrElse(
             passwordEntry -> passwordEntry.updatePassword(encryptedPasswordBytes),
             () -> passwordEntryRepository.add(
-                PasswordEntry.create(encryptedKeyBytes, encryptedPasswordBytes)
+                PasswordEntry.create(
+                    Namespaces.getCurrentNamespace().getSlot(),
+                    encryptedKeyBytes,
+                    encryptedPasswordBytes)
             )));
     }
 

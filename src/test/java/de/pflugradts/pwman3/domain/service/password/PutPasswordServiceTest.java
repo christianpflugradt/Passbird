@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.stream.Stream;
 
+import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.DEFAULT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
@@ -106,7 +107,7 @@ class PutPasswordServiceTest {
         then(cryptoProvider).should().encrypt(newKey);
         then(cryptoProvider).should().encrypt(newPassword);
         then(passwordEntryRepository).should().sync();
-        then(passwordEntryRepository).should().add(eq(PasswordEntry.create(newKey, newPassword)));
+        then(passwordEntryRepository).should().add(eq(PasswordEntry.create(DEFAULT, newKey, newPassword)));
         then(pwMan3EventRegistry).should().processEvents();
     }
 
@@ -178,7 +179,7 @@ class PutPasswordServiceTest {
         // then
         then(cryptoProvider).should().encrypt(newKey);
         then(cryptoProvider).should().encrypt(existingKey);
-        then(passwordEntryRepository).should().add(eq(PasswordEntry.create(newKey, newPassword)));
+        then(passwordEntryRepository).should().add(eq(PasswordEntry.create(DEFAULT, newKey, newPassword)));
         then(passwordEntryRepository).should().sync();
         then(pwMan3EventRegistry).should().processEvents();
         assertThatKeyExistsWithPassword(existingKey, newPasswordForExistingKey);
