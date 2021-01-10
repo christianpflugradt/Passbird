@@ -9,7 +9,7 @@ import com.google.inject.multibindings.Multibinder;
 import de.pflugradts.pwman3.adapter.clipboard.ClipboardService;
 import de.pflugradts.pwman3.adapter.exchange.FilePasswordExchange;
 import de.pflugradts.pwman3.adapter.keystore.KeyStoreService;
-import de.pflugradts.pwman3.adapter.passwordstore.PasswordFileStore;
+import de.pflugradts.pwman3.adapter.passwordstore.PasswordStoreFacade;
 import de.pflugradts.pwman3.adapter.userinterface.CommandLineInterfaceService;
 import de.pflugradts.pwman3.application.ClipboardAdapterPort;
 import de.pflugradts.pwman3.application.ExchangeAdapterPort;
@@ -64,7 +64,7 @@ public class ApplicationModule extends AbstractModule {
         bind(KeyStoreAdapterPort.class).to(KeyStoreService.class);
         bind(PasswordProvider.class).to(RandomPasswordProvider.class);
         bind(PasswordService.class).to(PasswordFacade.class);
-        bind(PasswordStoreAdapterPort.class).to(PasswordFileStore.class);
+        bind(PasswordStoreAdapterPort.class).to(PasswordStoreFacade.class);
         bind(UserInterfaceAdapterPort.class).to(CommandLineInterfaceService.class);
     }
 

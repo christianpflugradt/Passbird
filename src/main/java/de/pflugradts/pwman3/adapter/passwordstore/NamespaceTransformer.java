@@ -7,10 +7,10 @@ import de.pflugradts.pwman3.domain.model.namespace.Namespaces;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.Tuple2;
 
-import static de.pflugradts.pwman3.adapter.passwordstore.PasswordFileStore.EMPTY_NAMESPACE;
+import static de.pflugradts.pwman3.adapter.passwordstore.PasswordStoreCommons.EMPTY_NAMESPACE;
 import static java.lang.Integer.BYTES;
 
-public class NamespaceTransformer {
+class NamespaceTransformer {
 
     byte[] transform(final NamespaceSlot namespaceSlot) {
         final var namespaceBytes = Namespaces.atSlot(namespaceSlot)

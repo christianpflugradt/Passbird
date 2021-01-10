@@ -25,12 +25,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-class PasswordFileStoreTestIT {
+class PasswordStoreFacadeTestIT {
 
     private final FailureCollector failureCollector = mock(FailureCollector.class);
     private final Configuration configuration = mock(Configuration.class);
     private final CryptoProvider cryptoProvider = mock(CryptoProvider.class);
-    private final PasswordFileStore passwordFileStore = setupPasswordFileStore();
+    private final PasswordStoreFacade passwordStoreFacade = setupPasswordFileStore();
 
     private String tempPasswordStoreDirectory;
     private String dbFile;
@@ -80,9 +80,9 @@ class PasswordFileStoreTestIT {
                 .withPasswordBytes(Bytes.of("password3")).fake();
 
         // when
-        passwordFileStore.sync(() -> Stream.of(passwordEntry1, passwordEntry2, passwordEntry3));
+        passwordStoreFacade.sync(() -> Stream.of(passwordEntry1, passwordEntry2, passwordEntry3));
         assertThat(new File(dbFile)).exists();
-        final var actual = passwordFileStore.restore();
+        final var actual = passwordStoreFacade.restore();
 
         // then
         assertThat(actual).isNotNull().extracting(Supplier::get).isNotNull();
@@ -93,9 +93,9 @@ class PasswordFileStoreTestIT {
     @Test
     void shouldUseEmptyPasswordDatabase_Roundtrip() {
         // when / then
-        passwordFileStore.sync(Stream::empty);
+        passwordStoreFacade.sync(Stream::empty);
         assertThat(new File(dbFile)).exists();
-        final var actual = passwordFileStore.restore();
+        final var actual = passwordStoreFacade.restore();
 
         // then
         assertThat(actual).isNotNull().extracting(Supplier::get).isNotNull();
@@ -106,33 +106,33 @@ class PasswordFileStoreTestIT {
     void shouldCreateEmptyPasswordDatabase_IfFileNotExists() {
         // when / then
         assertThat(new File(dbFile)).doesNotExist();
-        final var actual = passwordFileStore.restore();
+        final var actual = passwordStoreFacade.restore();
 
         // then
         assertThat(actual).isNotNull().extracting(Supplier::get).isNotNull();
         assertThat(actual.get().collect(Collectors.toList())).isEmpty();
-        passwordFileStore.sync(actual); // for cleanup
+        passwordStoreFacade.sync(actual); // for cleanup
     }
 
     @Test
     void shouldCreateEmptyPasswordDatabase_IfFileIsEmpty() throws IOException {
         // when / then
         assertThat(new File(dbFile).createNewFile()).isTrue();
-        final var actual = passwordFileStore.restore();
+        final var actual = passwordStoreFacade.restore();
 
         // then
         assertThat(actual).isNotNull().extracting(Supplier::get).isNotNull();
         assertThat(actual.get().collect(Collectors.toList())).isEmpty();
     }
 
-    private PasswordFileStore setupPasswordFileStore() {
-        return new PasswordFileStore(
-            new SystemOperation(),
-            failureCollector,
-            configuration,
-            new PasswordEntryTransformer(),
-            new NamespaceTransformer(),
-            cryptoProvider);
+    private PasswordStoreFacade setupPasswordFileStore() {
+        final var systemOperation = new SystemOperation();
+        final var pTransformer = new PasswordEntryTransformer();
+        final var nTransformer = new NamespaceTransformer();
+        final var commons = new PasswordStoreCommons();
+        return new PasswordStoreFacade(
+            new PasswordStoreReader(systemOperation, failureCollector, configuration, pTransformer, nTransformer, cryptoProvider, commons),
+            new PasswordStoreWriter(systemOperation, failureCollector, configuration, pTransformer, nTransformer, cryptoProvider, commons));
     }
 
 }
