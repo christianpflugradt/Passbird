@@ -26,7 +26,7 @@ public class HelpCommandHandler implements CommandHandler {
     private void handleHelpCommand(final HelpCommand helpCommand) {
         if (helpCommand.getArgument().equals(Bytes.of("license"))) {
             openLicense();
-        } else if (helpCommand.getArgument().equals(Bytes.of("3rdparty"))) {
+        } else if (helpCommand.getArgument().equals(Bytes.of("thirdparty"))) {
             openDependencyReport();
         } else {
             printUsage();
@@ -35,7 +35,7 @@ public class HelpCommandHandler implements CommandHandler {
 
     private void printUsage() {
         userInterfaceAdapterPort.send(Output.of(Bytes.of(String.format(
-                "Usage: [command][parameter]%n"
+                "%nUsage: [command][parameter]%n"
                         + "A command takes at most one parameter which is either%n"
                         + "a key to a password or an absolute path to a file.%n%n"
                         + "commands:%n"
@@ -53,7 +53,7 @@ public class HelpCommandHandler implements CommandHandler {
                         + "\th (help) nonparameterized, prints this help%n"
                         + "\tq (quit) quits pwman3 applicationImpl%n%n"
                         + "\ttype 'hlicense' to view license for PwMan3%n"
-                        + "\ttype 'h3rdparty' to view a list of 3rd party libraries and their licenses"
+                        + "\ttype 'hthirdparty' to view a list of 3rd party libraries and their licenses"
         ))));
         userInterfaceAdapterPort.sendLineBreak();
     }

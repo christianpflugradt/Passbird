@@ -3,6 +3,7 @@ package de.pflugradts.pwman3.application.commandhandling;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
+import de.pflugradts.pwman3.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.RenameCommandHandler;
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
@@ -51,7 +52,7 @@ class RenameCommandTestIT {
         ConfigurationFaker.faker().forInstance(configuration).fake();
         inputHandler = new InputHandler(
                 new CommandBus(null, Set.of(renameCommandHandler)),
-                new CommandFactory());
+                new CommandFactory(new NamespaceCommandFactory()));
     }
 
     @Test

@@ -19,13 +19,22 @@ public class Input implements ValueObject {
         return Input.of(Bytes.of());
     }
 
-    public char getCommandChar() {
-        return bytes.size() > 0 ? (char) getBytes().getByte(0) : 0;
+    public Bytes getCommand() {
+        if (bytes.size() > 0) {
+            for (int i = 1; i < bytes.size(); i++) {
+                if (CharValue.of(bytes.getByte(i)).isAlphabeticCharacter()) {
+                    return bytes.slice(0, i);
+                }
+            }
+            return bytes;
+        } else {
+            return Bytes.empty();
+        }
     }
 
     public Bytes getData() {
         return getBytes().size() > 1
-                ? getBytes().slice(1, getBytes().size())
+                ? getBytes().slice(getCommand().size(), getBytes().size())
                 : Bytes.empty();
     }
 

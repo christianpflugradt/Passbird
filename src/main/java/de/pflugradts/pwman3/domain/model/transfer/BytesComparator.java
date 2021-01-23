@@ -1,6 +1,5 @@
 package de.pflugradts.pwman3.domain.model.transfer;
 
-import de.pflugradts.pwman3.domain.service.util.AsciiUtils;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,14 +7,15 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.FIRST_DIGIT_INDEX;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.FIRST_LOWERCASE_INDEX;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.FIRST_UPPERCASE_INDEX;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.LAST_DIGIT_INDEX;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.LAST_LOWERCASE_INDEX;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.LAST_UPPERCASE_INDEX;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MAX_ASCII_VALUE;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MIN_ASCII_VALUE;
+
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.FIRST_DIGIT_INDEX;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.FIRST_LOWERCASE_INDEX;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.FIRST_UPPERCASE_INDEX;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.LAST_DIGIT_INDEX;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.LAST_LOWERCASE_INDEX;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.LAST_UPPERCASE_INDEX;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.MAX_ASCII_VALUE;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.MIN_ASCII_VALUE;
 
 public class BytesComparator implements Comparator<Bytes> {
 
@@ -53,7 +53,7 @@ public class BytesComparator implements Comparator<Bytes> {
     private Map<Integer, Integer> buildSortReference() {
         final var sortReferenceMap = new HashMap<Integer, Integer>();
         final var index = new AtomicInteger(0);
-        IntStream.range(MIN_ASCII_VALUE, MAX_ASCII_VALUE + 1).filter(AsciiUtils::isSymbol)
+        IntStream.range(MIN_ASCII_VALUE, MAX_ASCII_VALUE + 1).filter(i -> CharValue.of(i).isSymbol())
                 .forEach(asciiValue -> sortReferenceMap.put(asciiValue, index.getAndIncrement()));
         IntStream.range(FIRST_DIGIT_INDEX, LAST_DIGIT_INDEX + 1)
                 .forEach(asciiValue -> sortReferenceMap.put(asciiValue, index.getAndIncrement()));

@@ -1,5 +1,6 @@
 package de.pflugradts.pwman3.application.commandhandling.command;
 
+import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -13,6 +14,7 @@ public enum CommandType {
     HELP('h'),
     IMPORT('i'),
     LIST('l'),
+    NAMESPACE('n'),
     QUIT('q'),
     RENAME('r'),
     SET('s'),
@@ -26,12 +28,12 @@ public enum CommandType {
         this.type = type;
     }
 
-    public static CommandType fromChar(final char type) {
+    public static CommandType fromCommandBytes(final Bytes type) {
         return Arrays.stream(CommandType.values())
                 .filter(commandType -> commandType
                         .name()
                         .toLowerCase()
-                        .charAt(0) == type)
+                        .charAt(0) == type.getFirstByte())
                 .findAny()
                 .orElse(UNDEFINED);
     }

@@ -67,7 +67,7 @@ The general usage info will be given below and is also available in PwMan3 by pr
         q (quit) quits pwman3 application
 
         type 'hlicense' to view license for PwMan3
-        type 'h3rdparty' to view a list of 3rd party libraries and their licenses
+        type 'hthirdparty' to view a list of 3rd party libraries and their licenses
 
 PwMan3 updates the physical database file immediately after every action. As of now there is no backup function and each action is irrevocable, so think carefully before you delete or overwrite a stored password. You might want to backup the password database file and keystore file from time to time.
 

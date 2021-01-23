@@ -3,6 +3,7 @@ package de.pflugradts.pwman3.application.commandhandling;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
+import de.pflugradts.pwman3.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.CustomSetCommandHandler;
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
@@ -50,7 +51,7 @@ class CustomSetCommandTestIT {
         ConfigurationFaker.faker().forInstance(configuration).fake();
         inputHandler = new InputHandler(
                 new CommandBus(null, Set.of(customSetCommandHandler)),
-                new CommandFactory());
+                new CommandFactory(new NamespaceCommandFactory()));
     }
 
     @Test

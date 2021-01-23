@@ -20,7 +20,7 @@ public class InputHandler {
     private CommandFactory commandFactory;
 
     public void handleInput(final Input input) {
-        commandBus.post(commandFactory.construct(CommandType.fromChar(input.getCommandChar()), input));
+        commandBus.post(commandFactory.construct(CommandType.fromCommandBytes(input.getCommand()), input));
     }
 
 }
