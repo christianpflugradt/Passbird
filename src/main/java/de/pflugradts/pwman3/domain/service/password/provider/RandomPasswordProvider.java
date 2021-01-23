@@ -1,16 +1,18 @@
 package de.pflugradts.pwman3.domain.service.password.provider;
 
-import de.pflugradts.pwman3.domain.service.util.AsciiUtils;
 import de.pflugradts.pwman3.domain.model.password.PasswordRequirements;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.model.transfer.CharValue;
+
 import java.security.SecureRandom;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.FIRST_DIGIT_INDEX;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.LAST_LOWERCASE_INDEX;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MAX_ASCII_VALUE;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MIN_ASCII_VALUE;
+
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.FIRST_DIGIT_INDEX;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.LAST_LOWERCASE_INDEX;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.MAX_ASCII_VALUE;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.MIN_ASCII_VALUE;
 
 public class RandomPasswordProvider implements PasswordProvider {
 
@@ -41,10 +43,11 @@ public class RandomPasswordProvider implements PasswordProvider {
     }
 
     private boolean isStrong(final Bytes passwordBytes, final PasswordRequirements requirements) {
-        return anyMatch(passwordBytes.copy(), AsciiUtils::isDigit)
-                && anyMatch(passwordBytes.copy(), AsciiUtils::isUppercaseCharacter)
-                && anyMatch(passwordBytes.copy(), AsciiUtils::isLowercaseCharacter)
-                && anyMatch(passwordBytes.copy(), AsciiUtils::isSymbol) == requirements.isIncludeSpecialCharacters();
+        return anyMatch(passwordBytes.copy(), c -> CharValue.of(c).isDigit())
+                && anyMatch(passwordBytes.copy(), c -> CharValue.of(c).isUppercaseCharacter())
+                && anyMatch(passwordBytes.copy(), c -> CharValue.of(c).isLowercaseCharacter())
+                && anyMatch(passwordBytes.copy(),
+                    c -> CharValue.of(c).isSymbol()) == requirements.isIncludeSpecialCharacters();
     }
 
     private boolean anyMatch(final Bytes bytes, final Predicate<Byte> predicate) {

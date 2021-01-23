@@ -3,24 +3,27 @@ package de.pflugradts.pwman3.application.commandhandling;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
+import de.pflugradts.pwman3.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.ImportCommandHandler;
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
+import de.pflugradts.pwman3.application.exchange.ImportExportService;
 import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
-import de.pflugradts.pwman3.application.exchange.ImportExportService;
-import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import de.pflugradts.pwman3.domain.service.PasswordServiceFaker;
-import java.util.Set;
-import java.util.stream.Stream;
+import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Set;
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -50,7 +53,7 @@ class ImportCommandTestIT {
         ConfigurationFaker.faker().forInstance(configuration).fake();
         inputHandler = new InputHandler(
                 new CommandBus(null, Set.of(importCommandHandler)),
-                new CommandFactory());
+                new CommandFactory(new NamespaceCommandFactory()));
     }
 
     @Test

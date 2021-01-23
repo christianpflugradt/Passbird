@@ -1,12 +1,14 @@
 package de.pflugradts.pwman3.domain.model.transfer;
 
-import java.security.SecureRandom;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MAX_ASCII_VALUE;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MIN_ASCII_VALUE;
+
+import java.security.SecureRandom;
+
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.MAX_ASCII_VALUE;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.MIN_ASCII_VALUE;
 
 /**
  * <p>A Chars is used to represent data send to or received from external interfaces that uses char[].</p>

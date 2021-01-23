@@ -2,16 +2,18 @@ package de.pflugradts.pwman3.domain.model.transfer;
 
 import de.pflugradts.pwman3.domain.model.ddd.ValueObject;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.security.SecureRandom;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MAX_ASCII_VALUE;
-import static de.pflugradts.pwman3.domain.service.util.AsciiUtils.MIN_ASCII_VALUE;
+
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.MAX_ASCII_VALUE;
+import static de.pflugradts.pwman3.domain.model.transfer.CharValue.MIN_ASCII_VALUE;
 
 /**
  * <p>A Bytes is the basic structure to represent information.</p>
@@ -75,6 +77,10 @@ public class Bytes implements ValueObject, Iterable<Byte> {
         } else {
             return Bytes.empty();
         }
+    }
+
+    public byte getFirstByte() {
+        return byteArray[0];
     }
 
     public void scramble() {

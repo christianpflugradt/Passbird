@@ -2,14 +2,13 @@ package de.pflugradts.pwman3.application.commandhandling;
 
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
+import de.pflugradts.pwman3.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.HelpCommandHandler;
 import de.pflugradts.pwman3.application.license.LicenseManager;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
-import java.io.File;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +18,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.io.File;
+import java.util.Set;
+
 import static de.pflugradts.pwman3.application.license.LicenseManager.LICENSE_FILENAME;
 import static de.pflugradts.pwman3.application.license.LicenseManager.THIRD_PARTY_LICENSES_FILENAME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,7 +49,7 @@ class HelpCommandTestIT {
     private void setup() {
         inputHandler = new InputHandler(
                 new CommandBus(null, Set.of(helpCommandHandler)),
-                new CommandFactory());
+                new CommandFactory(new NamespaceCommandFactory()));
         MockitoAnnotations.initMocks(this);
     }
 
@@ -63,7 +66,7 @@ class HelpCommandTestIT {
         assertThat(captor.getValue()).isNotNull()
                 .extracting(Output::getBytes).isNotNull()
                 .extracting(Bytes::asString).isNotNull()
-                .asString().startsWith("Usage");
+                .asString().contains("Usage");
     }
 
     @Test
@@ -86,7 +89,7 @@ class HelpCommandTestIT {
     @Test
     void shouldHandleHelpCommand_Open3rdParty() {
         // given
-        final var input = Input.of(Bytes.of("h3rdparty"));
+        final var input = Input.of(Bytes.of("hthirdparty"));
 
         // when
         inputHandler.handleInput(input);

@@ -3,13 +3,10 @@ package de.pflugradts.pwman3.application.commandhandling;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.command.namespace.NamespaceCommandFactory;
-import de.pflugradts.pwman3.application.commandhandling.handler.ListCommandHandler;
-import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
+import de.pflugradts.pwman3.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
-import de.pflugradts.pwman3.domain.service.password.PasswordService;
-import io.vavr.control.Try;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,25 +18,18 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 @ExtendWith(MockitoExtension.class)
-class ListCommandTestIT {
+class ViewNamespaceCommandTestIT {
 
     private InputHandler inputHandler;
-
-    @Mock
-    private FailureCollector failureCollector;
     @Mock
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
-    @Mock
-    private PasswordService passwordService;
     @InjectMocks
-    private ListCommandHandler listCommandHandler;
+    private ViewNamespaceCommandHandler viewNamespaceCommandHandler;
 
     @Captor
     private ArgumentCaptor<Output> captor;
@@ -47,19 +37,15 @@ class ListCommandTestIT {
     @BeforeEach
     private void setup() {
         inputHandler = new InputHandler(
-                new CommandBus(null, Set.of(listCommandHandler)),
+                new CommandBus(null, Set.of(viewNamespaceCommandHandler)),
                 new CommandFactory(new NamespaceCommandFactory()));
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    void shouldHandleListCommand() {
+    void shouldHandleViewNamespaceCommand_PrintInfo() {
         // given
-        final var input = Input.of(Bytes.of("l"));
-        final var key1 = Bytes.of("key1");
-        final var key2 = Bytes.of("key2");
-        final var key3 = Bytes.of("key3");
-        given(passwordService.findAllKeys()).willReturn(Try.of(() -> Stream.of(key1, key2, key3)));
+        final var input = Input.of(Bytes.of("n"));
 
         // when
         inputHandler.handleInput(input);
@@ -68,17 +54,14 @@ class ListCommandTestIT {
         then(userInterfaceAdapterPort).should().send(captor.capture());
         assertThat(captor.getValue()).isNotNull()
                 .extracting(Output::getBytes).isNotNull()
-                .extracting(Bytes::asString).isNotNull().asString()
-                .contains(key1.asString())
-                .contains(key2.asString())
-                .contains(key3.asString());
+                .extracting(Bytes::asString).isNotNull()
+                .asString().contains("Available namespace commands");
     }
 
     @Test
-    void shouldHandleListCommand_WithEmptyDatabase() {
+    void shouldHandleViewNamespaceCommand_PrintDefaultNamespace() {
         // given
-        final var input = Input.of(Bytes.of("l"));
-        given(passwordService.findAllKeys()).willReturn(Try.of(Stream::empty));
+        final var input = Input.of(Bytes.of("n"));
 
         // when
         inputHandler.handleInput(input);
@@ -86,10 +69,9 @@ class ListCommandTestIT {
         // then
         then(userInterfaceAdapterPort).should().send(captor.capture());
         assertThat(captor.getValue()).isNotNull()
-                .extracting(Output::getBytes).isNotNull()
-                .extracting(Bytes::asString).isNotNull().asString()
-                .isEqualTo("database is empty");
+            .extracting(Output::getBytes).isNotNull()
+            .extracting(Bytes::asString).isNotNull()
+            .asString().contains("Current namespace: default");
     }
-
 
 }

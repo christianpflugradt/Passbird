@@ -9,30 +9,44 @@ import static org.mockito.Mockito.mock;
 class InputTest {
 
     @Test
-    void shouldGetCommandChar() {
+    void shouldGetCommand() {
         // given
-        final var commandChar = 'g';
+        final var command = "g";
         final var data = "test";
-        final var input = Input.of(Bytes.of(commandChar+data));
+        final var input = Input.of(Bytes.of(command+data));
 
         // when
-        final var actual = input.getCommandChar();
+        final var actual = input.getCommand();
 
         // then
-        assertThat(actual).isNotNull().isEqualTo(commandChar);
+        assertThat(actual).isNotNull().isEqualTo(Bytes.of(command));
     }
 
     @Test
-    void shouldGetCommandChar_ReturnZeroOnEmptyBytes() {
+    void shouldGetCommand_ParseMultiCharacterCommand() {
+        // given
+        final var command = "n+1";
+        final var data = "test";
+        final var input = Input.of(Bytes.of(command+data));
+
+        // when
+        final var actual = input.getCommand();
+
+        // then
+        assertThat(actual).isNotNull().isEqualTo(Bytes.of(command));
+    }
+
+    @Test
+    void shouldGetCommand_ReturnZeroOnEmptyBytes() {
         // given / when / then
-        assertThat(Input.empty().getCommandChar()).isEqualTo((char) 0);
+        assertThat(Input.empty().getCommand()).isEqualTo(Bytes.empty());
     }
 
     @Test
     void shouldGetData() {
-        final var commandChar = 'g';
+        final var command = 'g';
         final var data = "test";
-        final var input = Input.of(Bytes.of(commandChar+data));
+        final var input = Input.of(Bytes.of(command+data));
         final var expected = Bytes.of(data);
 
         // when

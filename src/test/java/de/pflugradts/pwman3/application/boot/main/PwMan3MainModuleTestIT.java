@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.util.Modules;
 import de.pflugradts.pwman3.application.commandhandling.handler.*;
+import de.pflugradts.pwman3.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.eventhandling.ApplicationEventHandler;
 import de.pflugradts.pwman3.domain.service.eventhandling.DomainEventHandler;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
@@ -43,17 +44,18 @@ class PwMan3MainModuleTestIT {
         assertThat(pwMan3TestMain.getCommandHandlers()).isNotNull()
                 .extracting("class")
                 .containsExactlyInAnyOrder(
-                        CustomSetCommandHandler.class,
-                        DiscardCommandHandler.class,
-                        ExportCommandHandler.class,
-                        GetCommandHandler.class,
-                        HelpCommandHandler.class,
-                        ImportCommandHandler.class,
-                        ListCommandHandler.class,
-                        QuitCommandHandler.class,
-                        RenameCommandHandler.class,
-                        SetCommandHandler.class,
-                        ViewCommandHandler.class);
+                    CustomSetCommandHandler.class,
+                    DiscardCommandHandler.class,
+                    ExportCommandHandler.class,
+                    GetCommandHandler.class,
+                    HelpCommandHandler.class,
+                    ImportCommandHandler.class,
+                    ListCommandHandler.class,
+                    QuitCommandHandler.class,
+                    RenameCommandHandler.class,
+                    SetCommandHandler.class,
+                    ViewCommandHandler.class,
+                    ViewNamespaceCommandHandler.class);
     }
 
     private static void assertThatAllEventHandlersAreBound(PwMan3TestMain pwMan3TestMain) {

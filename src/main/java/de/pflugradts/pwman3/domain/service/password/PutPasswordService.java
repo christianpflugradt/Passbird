@@ -5,10 +5,10 @@ import de.pflugradts.pwman3.domain.model.namespace.Namespaces;
 import de.pflugradts.pwman3.domain.model.password.InvalidKeyException;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.model.transfer.CharValue;
 import de.pflugradts.pwman3.domain.service.eventhandling.EventRegistry;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
-import de.pflugradts.pwman3.domain.service.util.AsciiUtils;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
 
@@ -71,7 +71,8 @@ class PutPasswordService implements CommonPasswordServiceCapabilities {
     }
 
     public Try<Void> challengeAlias(final Bytes bytes) {
-        return !AsciiUtils.isDigit(bytes.getByte(0)) && noneMatch(bytes.copy(), AsciiUtils::isSymbol)
+        return !CharValue.of(bytes.getByte(0)).isDigit()
+                && noneMatch(bytes.copy(), b -> CharValue.of(b).isSymbol())
             ? Try.success(null)
             : Try.failure(new InvalidKeyException(bytes));
     }
