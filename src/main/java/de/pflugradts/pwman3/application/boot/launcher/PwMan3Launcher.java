@@ -63,7 +63,7 @@ public class PwMan3Launcher implements Bootable {
     private void sendLicenseNotice() {
         userInterfaceAdapterPort.sendLineBreak();
         userInterfaceAdapterPort.send(Output.of(Bytes.of(
-                "\tCopyright 2020 Christian Pflugradt")));
+                "\tCopyright 2020 - 2021 Christian Pflugradt")));
         userInterfaceAdapterPort.send(Output.of(Bytes.of(
                 "\tThis software is licensed under the Apache License, Version 2.0 (APLv2)\n"
                         + "\tYou may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0")));

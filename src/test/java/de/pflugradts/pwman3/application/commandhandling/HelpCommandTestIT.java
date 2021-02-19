@@ -1,8 +1,6 @@
 package de.pflugradts.pwman3.application.commandhandling;
 
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
-import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
-import de.pflugradts.pwman3.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.HelpCommandHandler;
 import de.pflugradts.pwman3.application.license.LicenseManager;
 import de.pflugradts.pwman3.application.util.SystemOperation;
@@ -20,8 +18,8 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
-import java.util.Set;
 
+import static de.pflugradts.pwman3.application.commandhandling.InputHandlerTestFactory.setupInputHandlerFor;
 import static de.pflugradts.pwman3.application.license.LicenseManager.LICENSE_FILENAME;
 import static de.pflugradts.pwman3.application.license.LicenseManager.THIRD_PARTY_LICENSES_FILENAME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,9 +45,7 @@ class HelpCommandTestIT {
 
     @BeforeEach
     private void setup() {
-        inputHandler = new InputHandler(
-                new CommandBus(null, Set.of(helpCommandHandler)),
-                new CommandFactory(new NamespaceCommandFactory()));
+        inputHandler = setupInputHandlerFor(helpCommandHandler);
         MockitoAnnotations.initMocks(this);
     }
 

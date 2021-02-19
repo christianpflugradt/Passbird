@@ -2,8 +2,6 @@ package de.pflugradts.pwman3.application.commandhandling;
 
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPortFaker;
-import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
-import de.pflugradts.pwman3.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.CustomSetCommandHandler;
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
@@ -15,13 +13,14 @@ import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
 import de.pflugradts.pwman3.domain.service.PasswordServiceFaker;
 import de.pflugradts.pwman3.domain.service.password.PasswordService;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static de.pflugradts.pwman3.application.commandhandling.InputHandlerTestFactory.setupInputHandlerFor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,9 +48,7 @@ class CustomSetCommandTestIT {
     @BeforeEach
     private void setup() {
         ConfigurationFaker.faker().forInstance(configuration).fake();
-        inputHandler = new InputHandler(
-                new CommandBus(null, Set.of(customSetCommandHandler)),
-                new CommandFactory(new NamespaceCommandFactory()));
+        inputHandler = setupInputHandlerFor(customSetCommandHandler);
     }
 
     @Test

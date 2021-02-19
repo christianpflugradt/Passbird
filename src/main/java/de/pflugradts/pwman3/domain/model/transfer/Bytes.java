@@ -69,6 +69,14 @@ public class Bytes implements ValueObject, Iterable<Byte> {
         return byteArray[index];
     }
 
+    public char getChar(final int index) {
+        return (char) getByte(index);
+    }
+
+    public Bytes slice(final int fromInclusive) {
+        return slice(fromInclusive, byteArray.length);
+    }
+
     public Bytes slice(final int fromInclusive, final int toExclusive) {
         if (toExclusive - fromInclusive > 0) {
             final var sub = new byte[toExclusive - fromInclusive];

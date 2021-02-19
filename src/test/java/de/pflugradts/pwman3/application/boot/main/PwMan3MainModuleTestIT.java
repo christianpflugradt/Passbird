@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.util.Modules;
 import de.pflugradts.pwman3.application.commandhandling.handler.*;
+import de.pflugradts.pwman3.application.commandhandling.handler.namespace.AddNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.eventhandling.ApplicationEventHandler;
 import de.pflugradts.pwman3.domain.service.eventhandling.DomainEventHandler;
@@ -44,6 +45,7 @@ class PwMan3MainModuleTestIT {
         assertThat(pwMan3TestMain.getCommandHandlers()).isNotNull()
                 .extracting("class")
                 .containsExactlyInAnyOrder(
+                    AddNamespaceCommandHandler.class,
                     CustomSetCommandHandler.class,
                     DiscardCommandHandler.class,
                     ExportCommandHandler.class,

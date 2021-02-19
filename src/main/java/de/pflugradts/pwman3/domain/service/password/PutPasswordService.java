@@ -1,11 +1,11 @@
 package de.pflugradts.pwman3.domain.service.password;
 
 import com.google.inject.Inject;
-import de.pflugradts.pwman3.domain.model.namespace.Namespaces;
 import de.pflugradts.pwman3.domain.model.password.InvalidKeyException;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.CharValue;
+import de.pflugradts.pwman3.domain.service.NamespaceService;
 import de.pflugradts.pwman3.domain.service.eventhandling.EventRegistry;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
@@ -22,6 +22,8 @@ class PutPasswordService implements CommonPasswordServiceCapabilities {
     private CryptoProvider cryptoProvider;
     @Inject
     private PasswordEntryRepository passwordEntryRepository;
+    @Inject
+    private NamespaceService namespaceService;
     @Inject
     private EventRegistry eventRegistry;
 
@@ -64,7 +66,7 @@ class PutPasswordService implements CommonPasswordServiceCapabilities {
             passwordEntry -> passwordEntry.updatePassword(encryptedPasswordBytes),
             () -> passwordEntryRepository.add(
                 PasswordEntry.create(
-                    Namespaces.getCurrentNamespace().getSlot(),
+                    namespaceService.getCurrentNamespace().getSlot(),
                     encryptedKeyBytes,
                     encryptedPasswordBytes)
             )));

@@ -2,8 +2,6 @@ package de.pflugradts.pwman3.application.commandhandling;
 
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPortFaker;
-import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
-import de.pflugradts.pwman3.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.DiscardCommandHandler;
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
@@ -21,8 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Set;
-
+import static de.pflugradts.pwman3.application.commandhandling.InputHandlerTestFactory.setupInputHandlerFor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
@@ -47,9 +44,7 @@ class DiscardCommandTestIT {
     @BeforeEach
     private void setup() {
         ConfigurationFaker.faker().forInstance(configuration).fake();
-        inputHandler = new InputHandler(
-                new CommandBus(null, Set.of(discardCommandHandler)),
-                new CommandFactory(new NamespaceCommandFactory()));
+        inputHandler = setupInputHandlerFor(discardCommandHandler);
     }
 
     @Test

@@ -1,11 +1,8 @@
 package de.pflugradts.pwman3.domain.model.namespace;
 
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -16,53 +13,48 @@ import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.DEFAULT;
 import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.FIRST;
 import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.LAST;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@SuppressWarnings({"checkstyle:HideUtilityClassConstructor", "PMD.ClassNamingConventions"})
 public class Namespaces {
 
-    private static final List<Optional<Namespace>> NAMESPACES_LIST = new ArrayList<>();
-    private static final NamespaceSlot CURRENT_NAMESPACE = DEFAULT;
+    private final List<Optional<Namespace>> namespacesList = new ArrayList<>();
+    private final NamespaceSlot currentNamespace = DEFAULT;
 
-    static void reset() {
-        NAMESPACES_LIST.clear();
+    void reset() {
+        namespacesList.clear();
     }
 
-    public static void populateEmpty() {
-        populate(Collections.nCopies(CAPACITY, Bytes.empty()));
+    private List<Optional<Namespace>> getNamespaces() {
+        return namespacesList;
     }
 
-    public static void populate(final List<Bytes> namespaceBytes) {
-        if (NAMESPACES_LIST.isEmpty()) {
+    public void populate(final List<Bytes> namespaceBytes) {
+        if (getNamespaces().isEmpty()) {
             if (namespaceBytes.size() == CAPACITY) {
                 IntStream.range(FIRST, LAST + 1).forEach(index ->
-                    NAMESPACES_LIST.add(namespaceBytes.get(index - 1).isEmpty()
+                    getNamespaces().add(namespaceBytes.get(index - 1).isEmpty()
                         ? Optional.empty()
                         : Optional.of(Namespace.create(namespaceBytes.get(index - 1), NamespaceSlot.at(index)))));
             } else {
-                IntStream.range(FIRST, LAST + 1).forEach(x -> NAMESPACES_LIST.add(Optional.empty()));
+                IntStream.range(FIRST, LAST + 1).forEach(x -> getNamespaces().add(Optional.empty()));
             }
         }
     }
 
-    private static List<Optional<Namespace>> getNamespaces() {
-        if (NAMESPACES_LIST.isEmpty()) {
-            populateEmpty();
-        }
-        return NAMESPACES_LIST;
+    public void deploy(final Bytes namespaceBytes, final NamespaceSlot namespaceSlot) {
+        getNamespaces().set(namespaceSlot.index() - 1, Optional.of(Namespace.create(namespaceBytes, namespaceSlot)));
     }
 
-    public static Optional<Namespace> atSlot(final NamespaceSlot namespaceSlot) {
+    public Optional<Namespace> atSlot(final NamespaceSlot namespaceSlot) {
         return namespaceSlot == DEFAULT
             ? Optional.of(Namespace.DEFAULT)
             : getNamespaces().get(namespaceSlot.index() - 1);
     }
 
-    public static Stream<Optional<Namespace>> all() {
+    public Stream<Optional<Namespace>> all() {
         return getNamespaces().stream();
     }
 
-    public static Namespace getCurrentNamespace() {
-        return atSlot(CURRENT_NAMESPACE).orElse(Namespace.DEFAULT);
+    public Namespace getCurrentNamespace() {
+        return atSlot(currentNamespace).orElse(Namespace.DEFAULT);
     }
 
 }

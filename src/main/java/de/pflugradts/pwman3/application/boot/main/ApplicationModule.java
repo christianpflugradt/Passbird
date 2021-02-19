@@ -28,6 +28,7 @@ import de.pflugradts.pwman3.application.commandhandling.handler.QuitCommandHandl
 import de.pflugradts.pwman3.application.commandhandling.handler.RenameCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.SetCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.ViewCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.namespace.AddNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.configuration.ConfigurationFactory;
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
@@ -37,6 +38,7 @@ import de.pflugradts.pwman3.application.exchange.ExchangeFactory;
 import de.pflugradts.pwman3.application.exchange.ImportExportService;
 import de.pflugradts.pwman3.application.exchange.PasswordImportExportService;
 import de.pflugradts.pwman3.application.security.CryptoProviderFactory;
+import de.pflugradts.pwman3.domain.service.NamespaceService;
 import de.pflugradts.pwman3.domain.service.eventhandling.DomainEventHandler;
 import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
 import de.pflugradts.pwman3.domain.service.eventhandling.EventRegistry;
@@ -45,6 +47,7 @@ import de.pflugradts.pwman3.domain.service.password.PasswordService;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.pwman3.domain.service.password.provider.PasswordProvider;
 import de.pflugradts.pwman3.domain.service.password.provider.RandomPasswordProvider;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
 import de.pflugradts.pwman3.domain.service.password.storage.PasswordStoreAdapterPort;
 
 @SuppressWarnings({"PMD.CouplingBetweenObjects", "PMD.ExcessiveImports"})
@@ -63,6 +66,8 @@ public class ApplicationModule extends AbstractModule {
         bind(EventRegistry.class).to(PwMan3EventRegistry.class);
         bind(ImportExportService.class).to(PasswordImportExportService.class);
         bind(KeyStoreAdapterPort.class).to(KeyStoreService.class);
+        bind(NamespaceService.class).in(Singleton.class);
+        bind(PasswordEntryRepository.class).in(Singleton.class);
         bind(PasswordProvider.class).to(RandomPasswordProvider.class);
         bind(PasswordService.class).to(PasswordFacade.class);
         bind(PasswordStoreAdapterPort.class).to(PasswordStoreFacade.class);
@@ -72,6 +77,7 @@ public class ApplicationModule extends AbstractModule {
     private void configureMultibinders() {
         final Multibinder<CommandHandler> commandHandlerMultibinder =
                 Multibinder.newSetBinder(binder(), CommandHandler.class);
+        commandHandlerMultibinder.addBinding().to(AddNamespaceCommandHandler.class);
         commandHandlerMultibinder.addBinding().to(CustomSetCommandHandler.class);
         commandHandlerMultibinder.addBinding().to(DiscardCommandHandler.class);
         commandHandlerMultibinder.addBinding().to(ExportCommandHandler.class);

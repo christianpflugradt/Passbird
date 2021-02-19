@@ -10,6 +10,14 @@ public enum NamespaceSlot {
     public static final int LAST = values().length - 1;
     private static final int DEFAULT_INDEX = values().length;
 
+    public static NamespaceSlot at(final char index) {
+        try {
+            return at(Integer.parseInt(String.valueOf(index)));
+        } catch (NumberFormatException ex) {
+            return DEFAULT;
+        }
+    }
+
     public static NamespaceSlot at(final int index) {
         return index >= FIRST && index <= LAST ? values()[index] : DEFAULT;
     }

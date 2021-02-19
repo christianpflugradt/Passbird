@@ -7,6 +7,7 @@ import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.NamespaceServiceFake;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import io.vavr.control.Try;
 import org.junit.jupiter.api.AfterEach;
@@ -128,11 +129,12 @@ class PasswordStoreFacadeTestIT {
     private PasswordStoreFacade setupPasswordFileStore() {
         final var systemOperation = new SystemOperation();
         final var pTransformer = new PasswordEntryTransformer();
-        final var nTransformer = new NamespaceTransformer();
+        final var nService = new NamespaceServiceFake();
+        final var nTransformer = new NamespaceTransformer(nService);
         final var commons = new PasswordStoreCommons();
         return new PasswordStoreFacade(
-            new PasswordStoreReader(systemOperation, failureCollector, configuration, pTransformer, nTransformer, cryptoProvider, commons),
-            new PasswordStoreWriter(systemOperation, failureCollector, configuration, pTransformer, nTransformer, cryptoProvider, commons));
+            new PasswordStoreReader(systemOperation, failureCollector, configuration, pTransformer, nTransformer, nService, cryptoProvider, commons),
+            new PasswordStoreWriter(systemOperation, failureCollector, configuration, pTransformer, nTransformer, nService, cryptoProvider, commons));
     }
 
 }

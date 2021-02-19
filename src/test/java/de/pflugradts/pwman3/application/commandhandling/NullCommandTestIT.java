@@ -1,8 +1,6 @@
 package de.pflugradts.pwman3.application.commandhandling;
 
-import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.command.NullCommand;
-import de.pflugradts.pwman3.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 
+import static de.pflugradts.pwman3.application.commandhandling.InputHandlerTestFactory.setupInputHandlerFor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 
@@ -20,13 +19,13 @@ import static org.mockito.BDDMockito.then;
 class NullCommandTestIT {
 
     @Spy
-    private CommandBus commandBus = new CommandBus(null, Collections.emptySet());
+    private final CommandBus commandBus = new CommandBus(null, Collections.emptySet());
 
     private InputHandler inputHandler;
 
     @BeforeEach
     private void setup() {
-        inputHandler = new InputHandler(commandBus, new CommandFactory(new NamespaceCommandFactory()));
+        inputHandler = setupInputHandlerFor(commandBus);
     }
 
     @Test

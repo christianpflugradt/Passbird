@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public class Namespace {
 
-    public static final Namespace DEFAULT = new Namespace(Bytes.empty(), NamespaceSlot.DEFAULT);
+    public static final Namespace DEFAULT = new Namespace(Bytes.of("Default"), NamespaceSlot.DEFAULT);
 
     private final Bytes bytes;
     private final NamespaceSlot slot;

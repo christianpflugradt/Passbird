@@ -1,8 +1,6 @@
 package de.pflugradts.pwman3.application.commandhandling;
 
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
-import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
-import de.pflugradts.pwman3.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.ExportCommandHandler;
 import de.pflugradts.pwman3.application.exchange.ImportExportService;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
@@ -14,8 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Set;
-
+import static de.pflugradts.pwman3.application.commandhandling.InputHandlerTestFactory.setupInputHandlerFor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 
@@ -34,9 +31,7 @@ class ExportCommandTestIT {
 
     @BeforeEach
     private void setup() {
-        inputHandler = new InputHandler(
-                new CommandBus(null, Set.of(exportCommandHandler)),
-                new CommandFactory(new NamespaceCommandFactory()));
+        inputHandler = setupInputHandlerFor(exportCommandHandler);
     }
 
     @Test
