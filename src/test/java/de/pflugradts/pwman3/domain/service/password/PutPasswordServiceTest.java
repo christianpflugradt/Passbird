@@ -7,6 +7,7 @@ import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntryRepositoryFaker;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.NamespaceServiceFake;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
 import io.vavr.Tuple2;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.stream.Stream;
@@ -28,6 +30,8 @@ class PutPasswordServiceTest {
 
     @Mock
     private CryptoProvider cryptoProvider;
+    @Spy
+    private final NamespaceServiceFake namespaceServiceFake = new NamespaceServiceFake();
     @Mock
     private PasswordEntryRepository passwordEntryRepository;
     @Mock

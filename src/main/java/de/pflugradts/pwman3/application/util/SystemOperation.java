@@ -2,6 +2,7 @@ package de.pflugradts.pwman3.application.util;
 
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.control.Try;
+
 import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
@@ -14,6 +15,7 @@ import java.nio.file.Paths;
 import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.Objects;
+
 import static de.pflugradts.pwman3.application.util.CryptoUtils.JCEKS_KEYSTORE;
 
 /**

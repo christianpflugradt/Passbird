@@ -6,9 +6,9 @@ import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.application.util.ByteArrayUtils;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
-import de.pflugradts.pwman3.domain.model.namespace.Namespaces;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.NamespaceService;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
@@ -43,6 +43,8 @@ class PasswordStoreReader {
     @Inject
     private NamespaceTransformer namespaceTransformer;
     @Inject
+    private NamespaceService namespaceService;
+    @Inject
     private CryptoProvider cryptoProvider;
     @Inject
     private PasswordStoreCommons commons;
@@ -68,7 +70,7 @@ class PasswordStoreReader {
                 return passwordEntries::stream;
             }
         }
-        Namespaces.populateEmpty();
+        namespaceService.populateEmpty();
         return Stream::empty;
     }
 
@@ -110,7 +112,7 @@ class PasswordStoreReader {
                 namespaceBytes.add(result._1);
                 incrementedOffset += result._2;
             }
-            Namespaces.populate(namespaceBytes);
+            namespaceService.populate(namespaceBytes);
             legacyMode = false;
         }
         return new Tuple2<>(incrementedOffset, legacyMode);

@@ -17,20 +17,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class NamespacesTest {
 
+    private final Namespaces namespaces = new Namespaces();
+
     @BeforeEach
     void reset() {
-        Namespaces.reset();
-    }
-
-    @Test
-    void shouldPopulateEmpty() {
-        // given / when
-        Namespaces.populateEmpty();
-        final var actual = Namespaces.all().collect(Collectors.toList());
-
-        // then
-        assertThat(actual).isNotNull().isNotEmpty().hasSize(CAPACITY);
-        actual.forEach(namespace -> assertThat(namespace).isEmpty());
+        namespaces.reset();
     }
 
     @Test
@@ -41,8 +32,8 @@ public class NamespacesTest {
             Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.of("namespace7"), Bytes.empty());
 
         // when
-        Namespaces.populate(namespaceBytes);
-        final var actual = Namespaces.all().collect(Collectors.toList());
+        namespaces.populate(namespaceBytes);
+        final var actual = namespaces.all().collect(Collectors.toList());
 
         // then
         assertThat(actual).isNotNull().isNotEmpty().hasSize(CAPACITY);
@@ -59,12 +50,13 @@ public class NamespacesTest {
     void shouldPopulateOnlyOnce() {
         // given
         final var givenBytes = Bytes.of("namespace");
+        final var otherBytes = Bytes.of("namespaceOthers");
         final var namespaceBytes = Collections.nCopies(9, givenBytes);
 
         // when
-        Namespaces.populate(namespaceBytes);
-        Namespaces.populateEmpty();
-        final var actual = Namespaces.all().collect(Collectors.toList());
+        namespaces.populate(namespaceBytes);
+        namespaces.populate(Collections.nCopies(9, otherBytes));
+        final var actual = namespaces.all().collect(Collectors.toList());
 
         // then
         assertThat(actual).isNotNull().isNotEmpty().hasSize(CAPACITY);
@@ -76,19 +68,9 @@ public class NamespacesTest {
     }
 
     @Test
-    void shouldReturnAllAsEmptyIfNotPopulated() {
-        // given / when
-        final var actual = Namespaces.all().collect(Collectors.toList());
-
-        // then
-        assertThat(actual).isNotNull().isNotEmpty().hasSize(CAPACITY);
-        actual.forEach(namespace -> assertThat(namespace).isEmpty());
-    }
-
-    @Test
     void shouldReturnDefaultNamespaceForDefaultSlot() {
         // given / when / then
-        assertThat(Namespaces.atSlot(DEFAULT)).isPresent().get().isEqualTo(Namespace.DEFAULT);
+        assertThat(namespaces.atSlot(DEFAULT)).isPresent().get().isEqualTo(Namespace.DEFAULT);
     }
 
     @Test
@@ -100,10 +82,10 @@ public class NamespacesTest {
             Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty());
 
         //when
-        Namespaces.populate(namespaceBytes);
+        namespaces.populate(namespaceBytes);
 
         //then
-        final var namespace2 = Namespaces.atSlot(_2).orElse(null);
+        final var namespace2 = namespaces.atSlot(_2).orElse(null);
         assertThat(namespace2).isNotNull();
         assertThat(namespace2.getSlot()).isNotNull().isEqualTo(_2);
         assertThat(namespace2.getBytes()).isNotNull().isEqualTo(givenNamespaceBytes);
@@ -117,10 +99,10 @@ public class NamespacesTest {
             Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty());
 
         //when
-        Namespaces.populate(namespaceBytes);
+        namespaces.populate(namespaceBytes);
 
         //then
-        assertThat(Namespaces.atSlot(_1)).isEmpty();
+        assertThat(namespaces.atSlot(_1)).isEmpty();
     }
 
 }

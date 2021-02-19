@@ -6,6 +6,7 @@ import de.pflugradts.pwman3.application.boot.Bootable;
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
 import de.pflugradts.pwman3.application.failurehandling.failure.ChecksumFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.CommandFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.DecryptPasswordDatabaseFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.ExportFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.ImportFailure;
@@ -39,6 +40,11 @@ public class FailureHandler implements EventHandler {
                     + "database file, you can set the verifyChecksum option in your configuration to false.");
             bootable.terminate(systemOperation);
         }
+    }
+
+    @Subscribe
+    private void handle(final CommandFailure commandFailure) {
+        err(commandFailure.getThrowable().getMessage());
     }
 
     @Subscribe

@@ -3,6 +3,7 @@ package de.pflugradts.pwman3.application.failurehandling;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import de.pflugradts.pwman3.application.failurehandling.failure.ChecksumFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.CommandFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.DecryptPasswordDatabaseFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.ExportFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.Failure;
@@ -16,6 +17,7 @@ import de.pflugradts.pwman3.application.failurehandling.failure.WritePasswordDat
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -32,6 +34,11 @@ public class FailureCollector {
 
     public void collectChecksumFailure(final Byte actualChecksum, final Byte expectedChecksum) {
         collect(new ChecksumFailure(actualChecksum, expectedChecksum));
+    }
+
+    public void collectCommandFailure(final Throwable throwable) {
+        collect(new CommandFailure(throwable));
+        sleep();
     }
 
     public void collectRenamePasswordEntryFailure(final Throwable throwable) {
@@ -84,6 +91,12 @@ public class FailureCollector {
             initializeEventBus();
         }
         return eventBus;
+    }
+
+    @SneakyThrows
+    public void sleep() {
+        final var defaultSleepTimeInMs = 300;
+        Thread.sleep(defaultSleepTimeInMs);
     }
 
 }

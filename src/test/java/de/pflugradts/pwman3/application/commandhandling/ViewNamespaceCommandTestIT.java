@@ -1,12 +1,11 @@
 package de.pflugradts.pwman3.application.commandhandling;
 
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
-import de.pflugradts.pwman3.application.commandhandling.command.CommandFactory;
-import de.pflugradts.pwman3.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.pwman3.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
+import de.pflugradts.pwman3.domain.service.NamespaceServiceFake;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,10 +14,10 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Set;
-
+import static de.pflugradts.pwman3.application.commandhandling.InputHandlerTestFactory.setupInputHandlerFor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 
@@ -26,6 +25,8 @@ import static org.mockito.BDDMockito.then;
 class ViewNamespaceCommandTestIT {
 
     private InputHandler inputHandler;
+    @Spy
+    private final NamespaceServiceFake namespaceServiceFake = new NamespaceServiceFake();
     @Mock
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
     @InjectMocks
@@ -36,9 +37,7 @@ class ViewNamespaceCommandTestIT {
 
     @BeforeEach
     private void setup() {
-        inputHandler = new InputHandler(
-                new CommandBus(null, Set.of(viewNamespaceCommandHandler)),
-                new CommandFactory(new NamespaceCommandFactory()));
+        inputHandler = setupInputHandlerFor(viewNamespaceCommandHandler);
         MockitoAnnotations.initMocks(this);
     }
 

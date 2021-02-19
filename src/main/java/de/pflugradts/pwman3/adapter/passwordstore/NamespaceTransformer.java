@@ -1,19 +1,27 @@
 package de.pflugradts.pwman3.adapter.passwordstore;
 
+import com.google.inject.Inject;
 import de.pflugradts.pwman3.application.util.ByteArrayUtils;
 import de.pflugradts.pwman3.domain.model.namespace.Namespace;
 import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
-import de.pflugradts.pwman3.domain.model.namespace.Namespaces;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.NamespaceService;
 import io.vavr.Tuple2;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import static de.pflugradts.pwman3.adapter.passwordstore.PasswordStoreCommons.EMPTY_NAMESPACE;
 import static java.lang.Integer.BYTES;
 
+@NoArgsConstructor
+@AllArgsConstructor
 class NamespaceTransformer {
 
+    @Inject
+    private NamespaceService namespaceService;
+
     byte[] transform(final NamespaceSlot namespaceSlot) {
-        final var namespaceBytes = Namespaces.atSlot(namespaceSlot)
+        final var namespaceBytes = namespaceService.atSlot(namespaceSlot)
             .map(Namespace::getBytes)
             .orElse(Bytes.empty());
         final var namespaceBytesSize = namespaceBytes.size();

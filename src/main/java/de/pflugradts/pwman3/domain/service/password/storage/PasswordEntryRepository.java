@@ -59,6 +59,10 @@ public class PasswordEntryRepository implements Repository {
         return () -> getPasswordEntries().stream();
     }
 
+    public void requestInitialization() {
+        initializeRepository();
+    }
+
     private void initializeRepository() {
         passwordEntries = passwordStoreAdapterPort
                 .restore()

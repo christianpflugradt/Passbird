@@ -35,7 +35,7 @@ public class NamespaceTest {
 
         // then
         assertThat(defaultNamespace).isNotNull();
-        assertThat(defaultNamespace.getBytes()).isNotNull().isEqualTo(Bytes.empty());
+        assertThat(defaultNamespace.getBytes()).isNotNull().isEqualTo(Bytes.of("Default"));
         assertThat(defaultNamespace.getSlot()).isNotNull().isEqualTo(DEFAULT);
     }
 

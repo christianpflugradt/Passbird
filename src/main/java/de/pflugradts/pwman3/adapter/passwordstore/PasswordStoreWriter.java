@@ -7,9 +7,9 @@ import de.pflugradts.pwman3.application.util.ByteArrayUtils;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.namespace.Namespace;
 import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
-import de.pflugradts.pwman3.domain.model.namespace.Namespaces;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.NamespaceService;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import io.vavr.control.Try;
 import lombok.AllArgsConstructor;
@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static de.pflugradts.pwman3.application.configuration.ReadableConfiguration.DATABASE_FILENAME;
+import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.CAPACITY;
 import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.FIRST;
 import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.LAST;
 
@@ -44,6 +45,8 @@ class PasswordStoreWriter {
     private PasswordEntryTransformer passwordEntryTransformer;
     @Inject
     private NamespaceTransformer namespaceTransformer;
+    @Inject
+    private NamespaceService namespaceService;
     @Inject
     private CryptoProvider cryptoProvider;
     @Inject
@@ -97,7 +100,7 @@ class PasswordStoreWriter {
             .map(passwordEntry ->
                 commons.intBytes() + passwordEntry.viewKey().size() + passwordEntry.viewPassword().size())
             .reduce(0, Integer::sum);
-        final var namespaceSize = commons.intBytes() + NamespaceSlot.CAPACITY * commons.intBytes() + Namespaces.all()
+        final var namespaceSize = commons.intBytes() + CAPACITY * commons.intBytes() + namespaceService.all()
             .filter(Optional::isPresent)
             .map(Optional::get)
             .map(Namespace::getBytes)
