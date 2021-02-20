@@ -2,6 +2,7 @@ package de.pflugradts.pwman3.application.commandhandling;
 
 import de.pflugradts.pwman3.application.UserInterfaceAdapterPort;
 import de.pflugradts.pwman3.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler;
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
@@ -58,7 +59,7 @@ class ViewNamespaceCommandTestIT {
     }
 
     @Test
-    void shouldHandleViewNamespaceCommand_PrintDefaultNamespace() {
+    void shouldHandleViewNamespaceCommand_PrintDefaultNamespaceIfCurrent() {
         // given
         final var input = Input.of(Bytes.of("n"));
 
@@ -71,6 +72,25 @@ class ViewNamespaceCommandTestIT {
             .extracting(Output::getBytes).isNotNull()
             .extracting(Bytes::asString).isNotNull()
             .asString().contains("Current namespace: default");
+    }
+
+    @Test
+    void shouldHandleViewNamespaceCommand_PrintDeployedNamespace() {
+        // given
+        final var input = Input.of(Bytes.of("n"));
+        final var deployedNamespaceSlot = 3;
+        final var deployedNamespace = "mynamespace";
+        namespaceServiceFake.deploy(Bytes.of(deployedNamespace), NamespaceSlot.at(deployedNamespaceSlot));
+
+        // when
+        inputHandler.handleInput(input);
+
+        // then
+        then(userInterfaceAdapterPort).should().send(captor.capture());
+        assertThat(captor.getValue()).isNotNull()
+            .extracting(Output::getBytes).isNotNull()
+            .extracting(Bytes::asString).isNotNull()
+            .asString().contains(deployedNamespaceSlot + ": " + deployedNamespace);
     }
 
 }

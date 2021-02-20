@@ -25,7 +25,8 @@ public class AddNamespaceCommandHandler implements CommandHandler {
     @Subscribe
     private void handleAddNamespaceCommand(final AddNamespaceCommand addNamespaceCommand) {
         if (namespaceService.atSlot(addNamespaceCommand.getSlot()).filter(DEFAULT::equals).isPresent()) {
-            userInterfaceAdapterPort.send(Output.of(Bytes.of("Invalid namespace specified - Operation aborted.")));
+            userInterfaceAdapterPort.send(Output.of(Bytes.of(
+                "Default namespace cannot be replaced - Operation aborted.")));
             return;
         }
         final var prompt = namespaceService.atSlot(addNamespaceCommand.getSlot()).isPresent()
@@ -33,16 +34,16 @@ public class AddNamespaceCommandHandler implements CommandHandler {
                 "Enter new name for existing namespace '%s' or nothing to abort%nYour input: ",
                 namespaceService.atSlot(addNamespaceCommand.getSlot()).get().getBytes().asString())
             : String.format("Enter name for namespace or nothing to abort%nYour input: ");
-        final var secureInput = userInterfaceAdapterPort
+        final var input = userInterfaceAdapterPort
             .receive(Output.of(Bytes.of(prompt)))
             .onFailure(failureCollector::collectInputFailure)
             .getOrElse(Input.empty());
-        if (secureInput.isEmpty()) {
+        if (input.isEmpty()) {
             userInterfaceAdapterPort.send(Output.of(Bytes.of("Empty input - Operation aborted.")));
         } else {
-            namespaceService.deploy(secureInput.getBytes(), addNamespaceCommand.getSlot());
+            namespaceService.deploy(input.getBytes(), addNamespaceCommand.getSlot());
         }
-        secureInput.invalidate();
+        input.invalidate();
         userInterfaceAdapterPort.sendLineBreak();
     }
 
