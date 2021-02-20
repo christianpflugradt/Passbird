@@ -4,6 +4,7 @@ import de.pflugradts.pwman3.application.boot.Bootable;
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
 import de.pflugradts.pwman3.application.util.SystemOperation;
+import de.pflugradts.pwman3.domain.model.password.InvalidKeyException;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.control.Try;
 import org.junit.jupiter.api.AfterEach;
@@ -66,7 +67,7 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectChecksumFailure(Byte.valueOf("0"), Byte.valueOf("0"));
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("checksum");
@@ -81,11 +82,25 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectChecksumFailure(Byte.valueOf("0"), Byte.valueOf("0"));
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("checksum");
         then(bootable).should(never()).terminate(systemOperation);
+    }
+
+    @Test
+    void shouldHandleCommandFailure() {
+        // given
+        assertThat(outputStream.toByteArray()).isEmpty();
+        final var expectedMessage = "print this error to stderr";
+
+        // when
+        failureCollector.collectCommandFailure(new RuntimeException(expectedMessage));
+        final var actual = outputStream.toString();
+
+        // then
+        assertThat(actual).isNotNull().isEqualTo(expectedMessage + System.lineSeparator());
     }
 
     @Test
@@ -95,7 +110,7 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectRenamePasswordEntryFailure(new RuntimeException());
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("could not be renamed");
@@ -108,10 +123,23 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectPasswordEntryFailure(Bytes.empty(), new RuntimeException());
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("password entry");
+    }
+
+    @Test
+    void shouldHandlePasswordEntryFailure_InvalidKeyException() {
+        // given
+        assertThat(outputStream.toByteArray()).isEmpty();
+
+        // when
+        failureCollector.collectPasswordEntryFailure(Bytes.empty(), new InvalidKeyException(Bytes.empty()));
+        final var actual = outputStream.toString();
+
+        // then
+        assertThat(actual).isNotNull().containsIgnoringCase("password alias");
     }
 
     @Test
@@ -121,7 +149,7 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectPasswordEntriesFailure(new RuntimeException());
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("password entries");
@@ -134,7 +162,7 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectExportFailure(new RuntimeException());
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("exported");
@@ -147,10 +175,24 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectImportFailure(new RuntimeException());
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("imported");
+    }
+
+    @Test
+    void shouldHandleImportFailure_InvalidKeyException() {
+        // given
+        assertThat(outputStream.toByteArray()).isEmpty();
+        final var keystring = "mykey";
+
+        // when
+        failureCollector.collectImportFailure(new InvalidKeyException(Bytes.of(keystring)));
+        final var actual = outputStream.toString();
+
+        // then
+        assertThat(actual).isNotNull().containsIgnoringCase(keystring);
     }
 
     @Test
@@ -160,7 +202,7 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectInputFailure(new RuntimeException());
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("input");
@@ -175,7 +217,7 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectDecryptPasswordDatabaseFailure(mock(Path.class), new RuntimeException());
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("database");
@@ -192,7 +234,7 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectSignatureCheckFailure(Bytes.empty());
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("signature");
@@ -207,7 +249,7 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectSignatureCheckFailure(Bytes.empty());
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("signature");
@@ -221,7 +263,7 @@ class FailureHandlingTestIT {
 
         // when
         failureCollector.collectWritePasswordDatabaseFailure(mock(Path.class), new RuntimeException());
-        final var actual = new String(outputStream.toByteArray());
+        final var actual = outputStream.toString();
 
         // then
         assertThat(actual).isNotNull().containsIgnoringCase("database");

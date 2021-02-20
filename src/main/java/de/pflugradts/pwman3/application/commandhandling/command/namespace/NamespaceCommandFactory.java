@@ -20,7 +20,7 @@ public class NamespaceCommandFactory {
         } else if (command.size() == 1 && data.isEmpty()) {
             return new ViewNamespaceCommand();
         } else if (command.size() > 2
-                && command.getChar(2) == ADD.getValue()) {
+                && command.getChar(1) == ADD.getValue()) {
             return new AddNamespaceCommand(NamespaceSlot.at(command.getChar(2)));
         }
         return new NullCommand();
