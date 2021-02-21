@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import de.pflugradts.pwman3.domain.model.ddd.Repository;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.NamespaceService;
 import de.pflugradts.pwman3.domain.service.eventhandling.EventRegistry;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,6 +19,8 @@ public class PasswordEntryRepository implements Repository {
 
     @Inject
     private PasswordStoreAdapterPort passwordStoreAdapterPort;
+    @Inject
+    private NamespaceService namespaceService;
     @Inject
     private EventRegistry eventRegistry;
 
@@ -55,8 +58,12 @@ public class PasswordEntryRepository implements Repository {
         return passwordEntries;
     }
 
+    private boolean inCurrentNamespace(final PasswordEntry passwordEntry) {
+        return passwordEntry.associatedNamespace().equals(namespaceService.getCurrentNamespace().getSlot());
+    }
+
     private Supplier<Stream<PasswordEntry>> getPasswordEntriesSupplier() {
-        return () -> getPasswordEntries().stream();
+        return () -> getPasswordEntries().stream().filter(this::inCurrentNamespace);
     }
 
     public void requestInitialization() {

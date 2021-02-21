@@ -105,4 +105,58 @@ public class NamespacesTest {
         assertThat(namespaces.atSlot(_1)).isEmpty();
     }
 
+    @Test
+    void shouldReturnDefaultNamespaceIfNoneIsSet() {
+        // given
+        final var namespaceBytes = List.of(
+            Bytes.empty(), Bytes.of("slot2"), Bytes.empty(), Bytes.empty(),
+            Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty());
+
+        //when
+        namespaces.populate(namespaceBytes);
+
+        //then
+        assertThat(namespaces.getCurrentNamespace()).isNotNull()
+            .extracting(Namespace::getSlot).isNotNull()
+            .isEqualTo(DEFAULT);
+    }
+
+    @Test
+    void shouldUpdateAndReturnCurrentNamespace() {
+        // given
+        final var namespaceBytes = List.of(
+            Bytes.empty(), Bytes.of("slot2"), Bytes.empty(), Bytes.empty(),
+            Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty());
+        namespaces.populate(namespaceBytes);
+        final var wantedCurrentNamespace = _2;
+
+        //when
+        namespaces.updateCurrentNamespace(wantedCurrentNamespace);
+
+        //then
+        assertThat(namespaces.getCurrentNamespace()).isNotNull()
+            .extracting(Namespace::getSlot).isNotNull()
+            .isEqualTo(wantedCurrentNamespace);
+    }
+
+
+    @Test
+    void shouldUpdateAndReturnCurrentNamespace_DoNothingIfNamespaceIsNotDeployed() {
+        // given
+        final var namespaceBytes = List.of(
+            Bytes.empty(), Bytes.of("slot2"), Bytes.empty(), Bytes.empty(),
+            Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty());
+        namespaces.populate(namespaceBytes);
+        final var wantedCurrentNamespace = _1;
+
+        //when
+        namespaces.updateCurrentNamespace(wantedCurrentNamespace);
+
+        //then
+        assertThat(namespaces.getCurrentNamespace()).isNotNull()
+            .extracting(Namespace::getSlot).isNotNull()
+            .isNotEqualTo(wantedCurrentNamespace)
+            .isEqualTo(DEFAULT);
+    }
+
 }

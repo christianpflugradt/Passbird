@@ -16,7 +16,7 @@ import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.LAST;
 public class Namespaces {
 
     private final List<Optional<Namespace>> namespacesList = new ArrayList<>();
-    private final NamespaceSlot currentNamespace = DEFAULT;
+    private NamespaceSlot currentNamespace = DEFAULT;
 
     void reset() {
         namespacesList.clear();
@@ -55,6 +55,12 @@ public class Namespaces {
 
     public Namespace getCurrentNamespace() {
         return atSlot(currentNamespace).orElse(Namespace.DEFAULT);
+    }
+
+    public void updateCurrentNamespace(final NamespaceSlot namespaceSlot) {
+        if (atSlot(namespaceSlot).isPresent()) {
+            currentNamespace = namespaceSlot;
+        }
     }
 
 }

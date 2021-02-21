@@ -57,6 +57,11 @@ public class NamespaceService {
         return namespaces.getCurrentNamespace();
     }
 
+    public void updateCurrentNamespace(final NamespaceSlot namespaceSlot) {
+        guard();
+        namespaces.updateCurrentNamespace(namespaceSlot);
+    }
+
     private void guard() {
         if (!isInitialized()) {
             passwordEntryRepository.requestInitialization();

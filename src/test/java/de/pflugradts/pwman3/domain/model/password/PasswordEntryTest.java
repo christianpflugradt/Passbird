@@ -3,6 +3,7 @@ package de.pflugradts.pwman3.domain.model.password;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryCreated;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryDiscarded;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryUpdated;
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -99,6 +100,83 @@ class PasswordEntryTest {
         // then
         then(givenBytes).should().scramble();
     }
+
+    @Nested
+    class IdentityTest {
+
+        @Test
+        void shouldBeEqualIfKeyAndNamespaceMatch() {
+            // given
+            final var givenBytes = Bytes.of("key");
+            final var givenNamespace = NamespaceSlot._1;
+
+            final var passwordEntry1 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withNamespace(givenNamespace)
+                .withKeyBytes(givenBytes).fake();
+
+            final var passwordEntry2 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withNamespace(givenNamespace)
+                .withKeyBytes(givenBytes).fake();
+
+            // when
+            final var actual = passwordEntry1.equals(passwordEntry2);
+
+            // then
+            assertThat(actual).isTrue();
+        }
+
+        @Test
+        void shouldNotBeEqualIfKeyDoesNotMatch() {
+            // given
+            final var givenBytes = Bytes.of("key");
+            final var otherBytes = Bytes.of("key2");
+            final var givenNamespace = NamespaceSlot._1;
+
+            final var passwordEntry1 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withNamespace(givenNamespace)
+                .withKeyBytes(givenBytes).fake();
+
+            final var passwordEntry2 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withNamespace(givenNamespace)
+                .withKeyBytes(otherBytes).fake();
+
+            // when
+            final var actual = passwordEntry1.equals(passwordEntry2);
+
+            // then
+            assertThat(actual).isFalse();
+        }
+
+        @Test
+        void shouldNotBeEqualIfNamespaceDoesNotMatch() {
+            // given
+            final var givenBytes = Bytes.of("key");
+            final var givenNamespace = NamespaceSlot._1;
+            final var otherNamespace = NamespaceSlot._2;
+
+            final var passwordEntry1 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withNamespace(givenNamespace)
+                .withKeyBytes(givenBytes).fake();
+
+            final var passwordEntry2 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withNamespace(otherNamespace)
+                .withKeyBytes(givenBytes).fake();
+
+            // when
+            final var actual = passwordEntry1.equals(passwordEntry2);
+
+            // then
+            assertThat(actual).isFalse();
+        }
+
+    }
+
 
     @Nested
     class DomainEventsTest {

@@ -5,6 +5,8 @@ import com.google.inject.Guice;
 import com.google.inject.util.Modules;
 import de.pflugradts.pwman3.application.commandhandling.handler.*;
 import de.pflugradts.pwman3.application.commandhandling.handler.namespace.AddNamespaceCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.namespace.SwitchNamespaceCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.namespace.AddNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.eventhandling.ApplicationEventHandler;
 import de.pflugradts.pwman3.domain.service.eventhandling.DomainEventHandler;
@@ -56,6 +58,7 @@ class PwMan3MainModuleTestIT {
                     QuitCommandHandler.class,
                     RenameCommandHandler.class,
                     SetCommandHandler.class,
+                    SwitchNamespaceCommandHandler.class,
                     ViewCommandHandler.class,
                     ViewNamespaceCommandHandler.class);
     }

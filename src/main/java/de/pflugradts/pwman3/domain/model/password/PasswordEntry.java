@@ -21,8 +21,8 @@ import java.util.List;
  * A PasswordEntry represents a {@link Key} and an associated {@link Password} stored in the
  * {@link PasswordStoreAdapterPort PasswordStore}.
  */
-@EqualsAndHashCode(of = "key")
-@ToString(of = "key")
+@EqualsAndHashCode(of = {"key", "namespace"})
+@ToString(of = {"key", "namespace"})
 public class PasswordEntry implements AggregateRoot {
 
     @Getter(AccessLevel.PRIVATE)
