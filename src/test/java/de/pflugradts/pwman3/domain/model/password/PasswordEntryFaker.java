@@ -1,5 +1,6 @@
 package de.pflugradts.pwman3.domain.model.password;
 
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -11,14 +12,21 @@ public class PasswordEntryFaker {
 
     private Bytes password;
     private Bytes key;
+    private NamespaceSlot namespace;
 
     public static PasswordEntryFaker faker() {
         return new PasswordEntryFaker();
     }
 
     public PasswordEntryFaker fakePasswordEntry() {
+        namespace = DEFAULT;
         key = Bytes.of("key");
         password = Bytes.of("password");
+        return this;
+    }
+
+    public PasswordEntryFaker withNamespace(final NamespaceSlot namespaceSlot) {
+        namespace = namespaceSlot;
         return this;
     }
 
@@ -33,7 +41,7 @@ public class PasswordEntryFaker {
     }
 
     public PasswordEntry fake() {
-        return PasswordEntry.create(DEFAULT, key, password);
+        return PasswordEntry.create(namespace, key, password);
     }
 
 }

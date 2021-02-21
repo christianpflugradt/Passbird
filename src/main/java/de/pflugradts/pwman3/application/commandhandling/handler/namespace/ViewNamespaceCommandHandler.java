@@ -29,10 +29,11 @@ public class ViewNamespaceCommandHandler implements CommandHandler {
                 + "Available namespaces: %s%n"
                 + "Available namespace commands:%n"
                 + "\tn (view) displays current namespace, available namespaces and namespace commands%n"
+                + "\tn0 (switch to default) switches to the default namespace%n"
                 + "\tn[1-9] (switch) switches to the namespace at the given slot (between 1 and 9 inclusively)%n"
                 + "\tn[1-9][key] (assign) assigns the password for that key to the specified namespace%n"
-                + "\tn+[1-9] (create) creates a new namespace for the specified slot%n"
-                + "\tn-[1-9] (discard) discards the namespace for the specified slot",
+                + "\tn+[1-9] (create) creates a new namespace at the specified slot%n"
+                + "\tn-[1-9] (discard) discards the namespace at the specified slot",
             getCurrentNamespace(),
             getAvailableNamespaces()
         ))));

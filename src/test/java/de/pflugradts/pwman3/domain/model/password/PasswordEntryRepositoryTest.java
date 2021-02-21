@@ -1,13 +1,14 @@
 package de.pflugradts.pwman3.domain.model.password;
 
-import de.pflugradts.pwman3.domain.service.password.storage.PasswordStoreAdapterPort;
 import de.pflugradts.pwman3.application.PasswordStoreAdapterPortFaker;
-import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.application.eventhandling.PwMan3EventRegistry;
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
+import de.pflugradts.pwman3.domain.model.transfer.Bytes;
+import de.pflugradts.pwman3.domain.service.NamespaceServiceFake;
 import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+import de.pflugradts.pwman3.domain.service.password.storage.PasswordStoreAdapterPort;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -15,7 +16,12 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 
@@ -26,6 +32,8 @@ class PasswordEntryRepositoryTest {
     private PasswordStoreAdapterPort passwordStoreAdapterPort;
     @Mock
     private PwMan3EventRegistry pwMan3EventRegistry;
+    @Spy
+    private final NamespaceServiceFake namespaceServiceFake = new NamespaceServiceFake();
     @InjectMocks
     private PasswordEntryRepository repository;
 
@@ -173,6 +181,82 @@ class PasswordEntryRepositoryTest {
         // then
         assertThat(actual).isNotNull().asList()
                 .containsExactlyInAnyOrder(givenPasswordEntry1, givenPasswordEntry2, givenPasswordEntry3);
+    }
+
+    @Nested
+    class namespaceTest {
+
+        @Test
+        void shouldFindAllInCurrentNamespace() {
+            // given
+            final var activeNamespace = NamespaceSlot._2;
+            final var otherNamespace = NamespaceSlot._3;
+            namespaceServiceFake.deploy(Bytes.of("namespace1"), activeNamespace);
+            namespaceServiceFake.deploy(Bytes.of("namespace2"), otherNamespace);
+            namespaceServiceFake.updateCurrentNamespace(activeNamespace);
+
+            final var givenPasswordEntry1 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withNamespace(activeNamespace)
+                .withKeyBytes(Bytes.of("firstEntry")).fake();
+            final var givenPasswordEntry2 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withNamespace(activeNamespace)
+                .withKeyBytes(Bytes.of("secondEntry")).fake();
+            final var otherPasswordEntry = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withNamespace(otherNamespace)
+                .withKeyBytes(Bytes.of("thirdEntry")).fake();
+
+            PasswordStoreAdapterPortFaker.faker()
+                .forInstance(passwordStoreAdapterPort)
+                .withThesePasswordEntries(givenPasswordEntry1, givenPasswordEntry2, otherPasswordEntry).fake();
+
+            // when
+            final var actual = repository.findAll();
+
+            // then
+            assertThat(actual).isNotNull().asList()
+                .containsExactlyInAnyOrder(givenPasswordEntry1, givenPasswordEntry2);
+        }
+
+        @Test
+        void shouldStoreMultiplePasswordEntriesWithIdenticalKeysInDifferentNamespaces() {
+            // given
+            final var keyBytes = Bytes.of("key");
+            final var firstNamespace = NamespaceSlot._1;
+            final var secondNamespace = NamespaceSlot._2;
+            namespaceServiceFake.deploy(Bytes.of("namespace1"), firstNamespace);
+            namespaceServiceFake.deploy(Bytes.of("namespace2"), secondNamespace);
+
+            final var givenPasswordEntry1 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withNamespace(firstNamespace)
+                .withKeyBytes(keyBytes).fake();
+            final var givenPasswordEntry2 = PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withNamespace(secondNamespace)
+                .withKeyBytes(keyBytes).fake();
+
+            PasswordStoreAdapterPortFaker.faker()
+                .forInstance(passwordStoreAdapterPort)
+                .withThesePasswordEntries(givenPasswordEntry1, givenPasswordEntry2).fake();
+
+            // when
+            namespaceServiceFake.updateCurrentNamespace(firstNamespace);
+            final var actualFirstEntry = repository.find(keyBytes);
+            namespaceServiceFake.updateCurrentNamespace(secondNamespace);
+            final var actualSecondEntry = repository.find(keyBytes);
+
+            // then
+            assertThat(actualFirstEntry).isPresent().get()
+                .isEqualTo(givenPasswordEntry1)
+                .isNotEqualTo(givenPasswordEntry2);
+            assertThat(actualSecondEntry).isPresent().get()
+                .isNotEqualTo(givenPasswordEntry1)
+                .isEqualTo(givenPasswordEntry2);
+        }
+
     }
 
 }

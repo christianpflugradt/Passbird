@@ -29,6 +29,7 @@ import de.pflugradts.pwman3.application.commandhandling.handler.RenameCommandHan
 import de.pflugradts.pwman3.application.commandhandling.handler.SetCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.ViewCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.namespace.AddNamespaceCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.namespace.SwitchNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.configuration.ConfigurationFactory;
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
@@ -88,6 +89,7 @@ public class ApplicationModule extends AbstractModule {
         commandHandlerMultibinder.addBinding().to(QuitCommandHandler.class);
         commandHandlerMultibinder.addBinding().to(RenameCommandHandler.class);
         commandHandlerMultibinder.addBinding().to(SetCommandHandler.class);
+        commandHandlerMultibinder.addBinding().to(SwitchNamespaceCommandHandler.class);
         commandHandlerMultibinder.addBinding().to(ViewCommandHandler.class);
         commandHandlerMultibinder.addBinding().to(ViewNamespaceCommandHandler.class);
         final Multibinder<EventHandler> eventHandlerMultibinder =

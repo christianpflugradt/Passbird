@@ -9,6 +9,9 @@ import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Input;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
+import de.pflugradts.pwman3.domain.service.NamespaceService;
+
+import static de.pflugradts.pwman3.domain.model.namespace.Namespace.DEFAULT;
 
 @Singleton
 public class PwMan3Application implements Bootable {
@@ -19,6 +22,8 @@ public class PwMan3Application implements Bootable {
     private FailureCollector failureCollector;
     @Inject
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
+    @Inject
+    private NamespaceService namespaceService;
     @Inject
     private InputHandler inputHandler;
 
@@ -33,13 +38,20 @@ public class PwMan3Application implements Bootable {
 
     private Input receiveInput() {
         return userInterfaceAdapterPort
-                .receive(Output.of(Bytes.of("Enter command: ")))
+                .receive(Output.of(Bytes.of(namespacePrefix() + "Enter command: ")))
                 .onFailure(failureCollector::collectInputFailure)
                 .getOrElse(Input.empty());
     }
 
+    private String namespacePrefix() {
+        final var currentNamespace = namespaceService.getCurrentNamespace();
+        return currentNamespace == DEFAULT ? "" : "[" + currentNamespace.getBytes().asString() + "] ";
+    }
+
     private boolean isSigTerm(final Input input) {
-        return input.getData().isEmpty() && input.getCommand().getFirstByte() == INTERRUPT;
+        return input.getData().isEmpty()
+            && !input.getCommand().isEmpty()
+            && input.getCommand().getFirstByte() == INTERRUPT;
     }
 
 }
