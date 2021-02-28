@@ -2,6 +2,11 @@ package de.pflugradts.pwman3.domain.model.transfer;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.DEFAULT;
+import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.INVALID;
+import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot._1;
+import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot._9;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -96,6 +101,93 @@ class InputTest {
             assertThat(Input.empty()).isNotNull()
                     .extracting(Input::getBytes).isNotNull()
                     .extracting(Bytes::isEmpty).isEqualTo(true);
+        }
+
+    }
+
+    @Nested
+    class ParseNamespeTest {
+
+        @Test
+        void shouldParseDefaultNamespace() {
+            // given
+            final var givenIndex = 0;
+            final var input = inputOf(givenIndex);
+
+            // when
+            final var actual = input.parseNamespace();
+
+            // then
+            assertThat(actual).isNotNull().isEqualTo(DEFAULT);
+        }
+
+        @Test
+        void shouldParseNamespace_1() {
+            // given
+            final var givenIndex = 1;
+            final var input = inputOf(givenIndex);
+
+            // when
+            final var actual = input.parseNamespace();
+
+            // then
+            assertThat(actual).isNotNull().isEqualTo(_1);
+        }
+
+        @Test
+        void shouldParseNamespace_9() {
+            // given
+            final var givenIndex = 9;
+            final var input = inputOf(givenIndex);
+
+            // when
+            final var actual = input.parseNamespace();
+
+            // then
+            assertThat(actual).isNotNull().isEqualTo(_9);
+        }
+
+        @Test
+        void shouldParseInvalidNamespace_LowerNumber() {
+            // given
+            final var givenIndex = -1;
+            final var input = inputOf(givenIndex);
+
+            // when
+            final var actual = input.parseNamespace();
+
+            // then
+            assertThat(actual).isNotNull().isEqualTo(INVALID);
+        }
+
+        @Test
+        void shouldParseInvalidNamespace_HigherNumber() {
+            // given
+            final var givenIndex = 10;
+            final var input = inputOf(givenIndex);
+
+            // when
+            final var actual = input.parseNamespace();
+
+            // then
+            assertThat(actual).isNotNull().isEqualTo(INVALID);
+        }
+
+        @Test
+        void shouldParseInvalidNamespace_String() {
+            // given
+            final var givenIndex = "-A";
+            final var input = Input.of(Bytes.of(givenIndex));
+
+            // when
+            final var actual = input.parseNamespace();
+
+            // then
+            assertThat(actual).isNotNull().isEqualTo(INVALID);
+        }
+
+        private Input inputOf(final int index) {
+            return Input.of(Bytes.of(String.valueOf(index)));
         }
 
     }

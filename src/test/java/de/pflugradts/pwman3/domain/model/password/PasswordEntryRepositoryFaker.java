@@ -1,11 +1,15 @@
 package de.pflugradts.pwman3.domain.model.password;
 
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
+import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 
@@ -31,9 +35,13 @@ public class PasswordEntryRepositoryFaker {
     }
 
     public PasswordEntryRepository fake() {
-        lenient().when(passwordEntryRepository.find(any())).thenAnswer(
+        lenient().when(passwordEntryRepository.find(any(Bytes.class))).thenAnswer(
                 invocation -> passwordEntries.stream().filter(
                         passwordEntry -> passwordEntry.viewKey().equals(invocation.getArgument(0))).findAny());
+        lenient().when(passwordEntryRepository.find(any(Bytes.class), any(NamespaceSlot.class))).thenAnswer(
+            invocation -> passwordEntries.stream().filter(
+                passwordEntry -> passwordEntry.viewKey().equals(invocation.getArgument(0))
+                    && passwordEntry.associatedNamespace().equals(invocation.getArgument(1))).findAny());
         lenient().when(passwordEntryRepository.findAll()).thenReturn(passwordEntries.stream());
         return passwordEntryRepository;
     }

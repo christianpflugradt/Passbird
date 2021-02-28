@@ -30,7 +30,7 @@ public class PasswordEntry implements AggregateRoot {
     @Getter(AccessLevel.PRIVATE)
     private final Password password;
     @Getter(AccessLevel.PRIVATE)
-    private final NamespaceSlot namespace;
+    private NamespaceSlot namespace;
     @Getter
     private final List<DomainEvent> domainEvents = new ArrayList<>();
 
@@ -67,6 +67,10 @@ public class PasswordEntry implements AggregateRoot {
     public void updatePassword(final Bytes bytes) {
         getPassword().update(bytes);
         registerDomainEvent(new PasswordEntryUpdated(this));
+    }
+
+    public void updateNamespace(final NamespaceSlot namespaceSlot) {
+        this.namespace = namespaceSlot;
     }
 
     public void discard() {

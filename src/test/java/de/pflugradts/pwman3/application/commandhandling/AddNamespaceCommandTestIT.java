@@ -55,7 +55,7 @@ class AddNamespaceCommandTestIT {
     void shouldHandleAddNamespaceCommand() {
         // given
         final var slotIndex = 1;
-        final var input = Input.of(Bytes.of("n+" + slotIndex));
+        final var givenInput = Bytes.of("n+" + slotIndex);
         final var slotFromInput = NamespaceSlot.at(slotIndex);
         final var referenceNamespace = Bytes.of("mynamespace");
         final var givenNamespace = Bytes.of("mynamespace");
@@ -64,7 +64,7 @@ class AddNamespaceCommandTestIT {
             .withTheseInputs(Input.of(givenNamespace)).fake();
 
         // when
-        inputHandler.handleInput(input);
+        inputHandler.handleInput(Input.of(givenInput));
 
         // then
         then(userInterfaceAdapterPort).should(never()).send(any());

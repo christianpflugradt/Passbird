@@ -2,6 +2,7 @@ package de.pflugradts.pwman3.domain.service.password;
 
 import com.google.inject.Inject;
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.BytesComparator;
@@ -24,6 +25,10 @@ public class ViewPasswordService implements CommonPasswordServiceCapabilities {
     private PasswordEntryRepository passwordEntryRepository;
     @Inject
     private EventRegistry eventRegistry;
+
+    public Try<Boolean> entryExists(final Bytes keyBytes, final NamespaceSlot namespace) {
+        return entryExists(cryptoProvider, passwordEntryRepository, keyBytes, namespace);
+    }
 
     public Try<Boolean> entryExists(final Bytes keyBytes,
                                     final PasswordService.EntryNotExistsAction entryNotExistsAction) {

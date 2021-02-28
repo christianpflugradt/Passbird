@@ -1,8 +1,10 @@
 package de.pflugradts.pwman3.domain.service.password;
 
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
+
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -17,6 +19,7 @@ public interface PasswordService {
         DO_NOTHING,
         CREATE_ENTRY_NOT_EXISTS_EVENT
     }
+    Try<Boolean> entryExists(Bytes keyBytes, NamespaceSlot namespace);
     Try<Boolean> entryExists(Bytes keyBytes, EntryNotExistsAction entryNotExistsAction);
     Optional<Try<Bytes>> viewPassword(Bytes keyBytes);
     Try<Void> renamePasswordEntry(Bytes keyBytes, Bytes newKeyBytes);
@@ -24,5 +27,6 @@ public interface PasswordService {
     Try<Void> putPasswordEntries(Stream<Tuple2<Bytes, Bytes>> passwordEntries);
     Try<Void> putPasswordEntry(Bytes keyBytes, Bytes passwordBytes);
     Try<Void> discardPasswordEntry(Bytes keyBytes);
+    Try<Void> movePasswordEntry(Bytes keyBytes, NamespaceSlot targetNamespace);
     Try<Stream<Bytes>> findAllKeys();
 }

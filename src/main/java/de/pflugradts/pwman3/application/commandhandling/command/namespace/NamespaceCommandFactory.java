@@ -12,6 +12,7 @@ public class NamespaceCommandFactory {
 
     private static final int MAX_COMMAND_SIZE = 3;
 
+    @SuppressWarnings("PMD.CyclomaticComplexity")
     public Command constructFromInput(final Input input) {
         final var command = input.getCommand();
         final var data = input.getData();
@@ -20,6 +21,8 @@ public class NamespaceCommandFactory {
                 + input.getCommand().slice(2).asString());
         } else if (command.size() == 1 && data.isEmpty()) {
             return new ViewNamespaceCommand();
+        } else if (command.size() == 1 && !data.isEmpty()) {
+            return new AssignNamespaceCommand(input);
         } else if (command.size() == 2 && CharValue.of(command.getChar(1)).isDigit()) {
             return new SwitchNamespaceCommand(NamespaceSlot.at(command.getChar(1)));
         } else if (command.size() > 2

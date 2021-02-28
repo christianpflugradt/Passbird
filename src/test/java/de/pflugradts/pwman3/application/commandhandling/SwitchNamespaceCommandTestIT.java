@@ -49,7 +49,7 @@ class SwitchNamespaceCommandTestIT {
     void shouldHandleSwitchNamespaceCommand() {
         // given
         final var givenNamespace = NamespaceSlot._1;
-        namespaceServiceFake.deploy(Bytes.of("namespace1"), givenNamespace);
+        namespaceServiceFake.deployAt(givenNamespace);
         final var input = Input.of(Bytes.of("n" + givenNamespace.index()));
 
         // when
@@ -66,7 +66,7 @@ class SwitchNamespaceCommandTestIT {
     void shouldHandleSwitchNamespaceCommand_DoNothingIfNamespaceIsAlreadyCurrent() {
         // given
         final var givenNamespace = NamespaceSlot._1;
-        namespaceServiceFake.deploy(Bytes.of("namespace1"), givenNamespace);
+        namespaceServiceFake.deployAtIndex(givenNamespace.index());
         namespaceServiceFake.updateCurrentNamespace(givenNamespace);
         final var input = Input.of(Bytes.of("n" + givenNamespace.index()));
 
