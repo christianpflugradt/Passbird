@@ -1,5 +1,6 @@
 package de.pflugradts.pwman3.domain.service;
 
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.pwman3.domain.model.password.InvalidKeyException;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
@@ -56,6 +57,8 @@ public class PasswordServiceFaker {
                 .thenReturn(Try.of(() -> passwordEntries.stream().map(PasswordEntry::viewKey)));
         lenient().when(passwordService.entryExists(any(Bytes.class), any(PasswordService.EntryNotExistsAction.class)))
                 .thenReturn(Try.of(() -> false));
+        lenient().when(passwordService.entryExists(any(Bytes.class), any(NamespaceSlot.class)))
+                .thenReturn(Try.of(() -> false));
         lenient().when(passwordService.putPasswordEntry(any(Bytes.class), any(Bytes.class)))
                 .thenReturn(Try.success(null));
         lenient().when(passwordService.renamePasswordEntry(any(Bytes.class), any(Bytes.class)))
@@ -67,8 +70,12 @@ public class PasswordServiceFaker {
                         eq(passwordEntry.viewKey()),
                         any(PasswordService.EntryNotExistsAction.class))
                 ).thenReturn(Try.of(() -> true));
+                lenient().when(passwordService.entryExists(
+                    eq(passwordEntry.viewKey()),
+                    eq(passwordEntry.associatedNamespace()))
+                ).thenReturn(Try.of(() -> true));
                 lenient().when(passwordService.discardPasswordEntry(passwordEntry.viewKey()))
-                        .thenReturn(Try.success(null));
+                            .thenReturn(Try.success(null));
         });
         return passwordService;
     }

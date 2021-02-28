@@ -9,12 +9,7 @@ import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
 import de.pflugradts.pwman3.domain.service.NamespaceService;
 
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static de.pflugradts.pwman3.domain.model.namespace.Namespace.DEFAULT;
-
-public class ViewNamespaceCommandHandler implements CommandHandler {
+public class ViewNamespaceCommandHandler implements CommandHandler, CanListAvailableNamespaces {
 
     @Inject
     private NamespaceService namespaceService;
@@ -26,7 +21,7 @@ public class ViewNamespaceCommandHandler implements CommandHandler {
         userInterfaceAdapterPort.send(Output.of(Bytes.of(String.format(
             "%nAttention: Namespaces are work in progress and of limited use until they're fully implemented%n"
                 + "%nCurrent namespace: %s%n%n"
-                + "Available namespaces: %s%n"
+                + "Available namespaces: %n%s%n"
                 + "Available namespace commands:%n"
                 + "\tn (view) displays current namespace, available namespaces and namespace commands%n"
                 + "\tn0 (switch to default) switches to the default namespace%n"
@@ -41,22 +36,14 @@ public class ViewNamespaceCommandHandler implements CommandHandler {
     }
 
     private String getCurrentNamespace() {
-        final var namespace = namespaceService.getCurrentNamespace();
-        return (namespace == DEFAULT) ? "default" : namespace.getBytes().asString();
+        return namespaceService.getCurrentNamespace().getBytes().asString();
     }
 
     private String getAvailableNamespaces() {
-        return namespaceService.all().anyMatch(Optional::isPresent)
-            ? System.lineSeparator() + namespaceService.all()
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(namespace -> "\t"
-                    + namespace.getSlot().index()
-                    + ": "
-                    + namespace.getBytes().asString()
-                    + System.lineSeparator())
-                .collect(Collectors.joining())
-            : "there aren't any namespaces, use the n+ command to create one" + System.lineSeparator();
+        final var namespaceList = getAvailableNamespaces(namespaceService, true);
+        return hasCustomNamespaces(namespaceService)
+            ? namespaceList
+            : namespaceList + "\t(use the n+ command to create custom namespaces)" + System.lineSeparator();
     }
 
 }

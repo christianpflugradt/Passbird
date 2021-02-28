@@ -1,8 +1,14 @@
 package de.pflugradts.pwman3.domain.model.transfer;
 
 import de.pflugradts.pwman3.domain.model.ddd.ValueObject;
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
+import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+
+import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.FIRST;
+import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.INVALID;
+import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.LAST;
 
 /**
  * An Input represents data given by the user through the
@@ -36,6 +42,12 @@ public class Input implements ValueObject {
         return getBytes().size() > 1
                 ? getBytes().slice(getCommand().size(), getBytes().size())
                 : Bytes.empty();
+    }
+
+    public NamespaceSlot parseNamespace() {
+        return Try.of(() -> Integer.parseInt(getBytes().asString()))
+            .map(value -> value >= FIRST - 1 && value <= LAST ? NamespaceSlot.at(value) : INVALID)
+            .getOrElse(INVALID);
     }
 
     public boolean isEmpty() {

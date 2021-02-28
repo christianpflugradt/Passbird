@@ -71,7 +71,7 @@ class ViewNamespaceCommandTestIT {
         assertThat(captor.getValue()).isNotNull()
             .extracting(Output::getBytes).isNotNull()
             .extracting(Bytes::asString).isNotNull()
-            .asString().contains("Current namespace: default");
+            .asString().contains("Current namespace: Default");
     }
 
     @Test

@@ -1,6 +1,7 @@
 package de.pflugradts.pwman3.domain.service.password;
 
 import com.google.inject.Inject;
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.Tuple2;
 import io.vavr.control.Try;
@@ -18,6 +19,13 @@ public class PasswordFacade implements PasswordService {
     private DiscardPasswordService discardPasswordService;
     @Inject
     private RenamePasswordService renamePasswordService;
+    @Inject
+    private MovePasswordService movePasswordService;
+
+    @Override
+    public Try<Boolean> entryExists(final Bytes keyBytes, final NamespaceSlot namespace) {
+        return viewPasswordService.entryExists(keyBytes, namespace);
+    }
 
     @Override
     public Try<Boolean> entryExists(final Bytes keyBytes, final EntryNotExistsAction entryNotExistsAction) {
@@ -57,6 +65,11 @@ public class PasswordFacade implements PasswordService {
     @Override
     public Try<Void> discardPasswordEntry(final Bytes keyBytes) {
         return discardPasswordService.discardPasswordEntry(keyBytes);
+    }
+
+    @Override
+    public Try<Void> movePasswordEntry(final Bytes keyBytes, final NamespaceSlot targetNamespace) {
+        return movePasswordService.movePassword(keyBytes, targetNamespace);
     }
 
 }

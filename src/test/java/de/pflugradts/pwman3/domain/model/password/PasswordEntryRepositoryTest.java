@@ -191,8 +191,8 @@ class PasswordEntryRepositoryTest {
             // given
             final var activeNamespace = NamespaceSlot._2;
             final var otherNamespace = NamespaceSlot._3;
-            namespaceServiceFake.deploy(Bytes.of("namespace1"), activeNamespace);
-            namespaceServiceFake.deploy(Bytes.of("namespace2"), otherNamespace);
+            namespaceServiceFake.deployAt(activeNamespace);
+            namespaceServiceFake.deployAt(otherNamespace);
             namespaceServiceFake.updateCurrentNamespace(activeNamespace);
 
             final var givenPasswordEntry1 = PasswordEntryFaker.faker()
@@ -226,8 +226,8 @@ class PasswordEntryRepositoryTest {
             final var keyBytes = Bytes.of("key");
             final var firstNamespace = NamespaceSlot._1;
             final var secondNamespace = NamespaceSlot._2;
-            namespaceServiceFake.deploy(Bytes.of("namespace1"), firstNamespace);
-            namespaceServiceFake.deploy(Bytes.of("namespace2"), secondNamespace);
+            namespaceServiceFake.deployAt(firstNamespace);
+            namespaceServiceFake.deployAt(secondNamespace);
 
             final var givenPasswordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()

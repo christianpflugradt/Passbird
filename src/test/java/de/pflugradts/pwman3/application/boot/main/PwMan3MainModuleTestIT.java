@@ -3,15 +3,26 @@ package de.pflugradts.pwman3.application.boot.main;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.util.Modules;
-import de.pflugradts.pwman3.application.commandhandling.handler.*;
+import de.pflugradts.pwman3.application.commandhandling.handler.CustomSetCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.DiscardCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.ExportCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.GetCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.HelpCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.ImportCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.ListCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.QuitCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.RenameCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.SetCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.ViewCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.namespace.AddNamespaceCommandHandler;
+import de.pflugradts.pwman3.application.commandhandling.handler.namespace.AssignNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.namespace.SwitchNamespaceCommandHandler;
-import de.pflugradts.pwman3.application.commandhandling.handler.namespace.AddNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler;
 import de.pflugradts.pwman3.application.eventhandling.ApplicationEventHandler;
 import de.pflugradts.pwman3.domain.service.eventhandling.DomainEventHandler;
 import de.pflugradts.pwman3.domain.service.password.encryption.CryptoProvider;
 import org.junit.jupiter.api.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -48,6 +59,7 @@ class PwMan3MainModuleTestIT {
                 .extracting("class")
                 .containsExactlyInAnyOrder(
                     AddNamespaceCommandHandler.class,
+                    AssignNamespaceCommandHandler.class,
                     CustomSetCommandHandler.class,
                     DiscardCommandHandler.class,
                     ExportCommandHandler.class,

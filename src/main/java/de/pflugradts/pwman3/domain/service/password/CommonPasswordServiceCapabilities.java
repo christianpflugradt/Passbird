@@ -1,6 +1,7 @@
 package de.pflugradts.pwman3.domain.service.password;
 
 import de.pflugradts.pwman3.domain.model.event.PasswordEntryNotFound;
+import de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.pwman3.domain.model.password.PasswordEntry;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.service.eventhandling.EventRegistry;
@@ -14,6 +15,12 @@ import java.util.Optional;
 import static de.pflugradts.pwman3.domain.service.password.PasswordService.EntryNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT;
 
 interface CommonPasswordServiceCapabilities {
+
+    default Optional<PasswordEntry> find(final PasswordEntryRepository passwordEntryRepository,
+                                         final Bytes keyBytes,
+                                         final NamespaceSlot namespace) {
+        return passwordEntryRepository.find(keyBytes, namespace);
+    }
 
     default Optional<PasswordEntry> find(final PasswordEntryRepository passwordEntryRepository, final Bytes keyBytes) {
         return passwordEntryRepository.find(keyBytes);
@@ -46,6 +53,14 @@ interface CommonPasswordServiceCapabilities {
             }
             return match;
         }));
+    }
+
+    default Try<Boolean> entryExists(final CryptoProvider cryptoProvider,
+                                     final PasswordEntryRepository passwordEntryRepository,
+                                     final Bytes keyBytes,
+                                     final NamespaceSlot namespace) {
+        return encrypted(cryptoProvider, keyBytes).fold(Try::failure, encryptedKeyBytes -> Try.of(() ->
+            find(passwordEntryRepository, encryptedKeyBytes, namespace).isPresent()));
     }
 
 }
