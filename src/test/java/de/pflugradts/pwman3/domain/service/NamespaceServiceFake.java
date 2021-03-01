@@ -26,4 +26,8 @@ public class NamespaceServiceFake extends NamespaceService {
         deployAt(NamespaceSlot.at(index));
     }
 
+    public void reset() {
+        getNamespaces().reset();
+    }
+
 }

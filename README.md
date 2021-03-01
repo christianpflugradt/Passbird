@@ -62,12 +62,22 @@ The general usage info will be given below and is also available in PwMan3 by pr
         d[key] (discard) removes key and password from the database
         e[directory] (export) exports the password database as a human readable json file to the specified directory
         i[directory] (import) imports a json file containing passwords into the database from the specified directory
-        l (list) nonparameterized, lists all keys in the database
-        h (help) nonparameterized, prints this help
+        l (list) non parameterized, lists all keys in the database
+        n (namespaces) view available namespaces and print namespace specific help
+        h (help) non parameterized, prints this help
         q (quit) quits pwman3 application
 
         type 'hlicense' to view license for PwMan3
         type 'hthirdparty' to view a list of 3rd party libraries and their licenses
+
+Namespaces are an advanced feature of PwMan3. Namespace related help is available by pressing *n* and then enter:
+
+    n (view) displays current namespace, available namespaces and namespace commands
+    n0 (switch to default) switches to the default namespace
+    n[1-9] (switch) switches to the namespace at the given slot (between 1 and 9 inclusively)
+    n[1-9][key] (assign) assigns the password for that key to the specified namespace
+    n+[1-9] (create) creates a new namespace at the specified slot
+    [NOT YET IMPLEMENTED] n-[1-9] (discard) discards the namespace at the specified slot
 
 PwMan3 updates the physical database file immediately after every action. As of now there is no backup function and each action is irrevocable, so think carefully before you delete or overwrite a stored password. You might want to backup the password database file and keystore file from time to time.
 

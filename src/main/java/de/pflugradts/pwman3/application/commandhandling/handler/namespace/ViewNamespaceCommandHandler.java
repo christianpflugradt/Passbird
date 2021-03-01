@@ -19,8 +19,7 @@ public class ViewNamespaceCommandHandler implements CommandHandler, CanListAvail
     @Subscribe
     private void handleViewNamespaceCommand(final ViewNamespaceCommand viewNamespaceCommand) {
         userInterfaceAdapterPort.send(Output.of(Bytes.of(String.format(
-            "%nAttention: Namespaces are work in progress and of limited use until they're fully implemented%n"
-                + "%nCurrent namespace: %s%n%n"
+                "%nCurrent namespace: %s%n%n"
                 + "Available namespaces: %n%s%n"
                 + "Available namespace commands:%n"
                 + "\tn (view) displays current namespace, available namespaces and namespace commands%n"
@@ -28,7 +27,7 @@ public class ViewNamespaceCommandHandler implements CommandHandler, CanListAvail
                 + "\tn[1-9] (switch) switches to the namespace at the given slot (between 1 and 9 inclusively)%n"
                 + "\tn[1-9][key] (assign) assigns the password for that key to the specified namespace%n"
                 + "\tn+[1-9] (create) creates a new namespace at the specified slot%n"
-                + "\tn-[1-9] (discard) discards the namespace at the specified slot",
+                + "\t[NOT YET IMPLEMENTED] n-[1-9] (discard) discards the namespace at the specified slot",
             getCurrentNamespace(),
             getAvailableNamespaces()
         ))));
