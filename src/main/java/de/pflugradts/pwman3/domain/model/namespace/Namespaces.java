@@ -18,7 +18,7 @@ public class Namespaces {
     private final List<Optional<Namespace>> namespacesList = new ArrayList<>();
     private NamespaceSlot currentNamespace = DEFAULT;
 
-    void reset() {
+    public void reset() {
         namespacesList.clear();
     }
 

@@ -8,6 +8,7 @@ import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.service.password.storage.PasswordEntryRepository;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Collections;
@@ -22,6 +23,7 @@ import static de.pflugradts.pwman3.domain.model.namespace.NamespaceSlot.CAPACITY
 public class NamespaceService {
 
     private boolean initialized;
+    @Getter(AccessLevel.PROTECTED)
     private final Namespaces namespaces = new Namespaces();
 
     @Inject
