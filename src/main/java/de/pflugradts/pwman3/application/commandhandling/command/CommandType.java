@@ -29,13 +29,13 @@ public enum CommandType {
     }
 
     public static CommandType fromCommandBytes(final Bytes type) {
-        return Arrays.stream(CommandType.values())
-                .filter(commandType -> commandType
-                        .name()
-                        .toLowerCase()
-                        .charAt(0) == type.getFirstByte())
-                .findAny()
-                .orElse(UNDEFINED);
+        return type.isEmpty() ? UNDEFINED : Arrays.stream(CommandType.values())
+            .filter(commandType -> commandType
+                    .name()
+                    .toLowerCase()
+                    .charAt(0) == type.getFirstByte())
+            .findAny()
+            .orElse(UNDEFINED);
     }
 
 }
