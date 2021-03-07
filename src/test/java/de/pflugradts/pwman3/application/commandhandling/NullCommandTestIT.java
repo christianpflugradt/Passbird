@@ -29,9 +29,21 @@ class NullCommandTestIT {
     }
 
     @Test
-    void shouldHandleNullCommand() {
+    void shouldHandleUnknownCommand() {
         // given
         final var input = Input.of(Bytes.of("?"));
+
+        // when
+        inputHandler.handleInput(input);
+
+        // then
+        then(commandBus).should().post(any(NullCommand.class));
+    }
+
+    @Test
+    void shouldHandleEmptyCommand() {
+        // given
+        final var input = Input.of(Bytes.empty());
 
         // when
         inputHandler.handleInput(input);
