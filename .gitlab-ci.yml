@@ -125,7 +125,7 @@ semver:
     - cat $SEM_RELEASE_OPTIONS > .releaserc.yml
   script: npx semantic-release -t \${version}
   only:
-    - master
+    - main
 
 publish:
   stage: release
