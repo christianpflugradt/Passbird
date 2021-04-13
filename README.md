@@ -1,6 +1,7 @@
 # PwMan3 #
 
-[![pipeline status](https://gitlab.com/christianpflugradt/pwman3/badges/main/pipeline.svg)](https://gitlab.com/christianpflugradt/pwman3/-/commits/main) [![coverage report](https://gitlab.com/christianpflugradt/pwman3/badges/main/coverage.svg)](https://gitlab.com/christianpflugradt/pwman3/-/commits/main) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![pipeline status](https://gitlab.com/christianpflugradt/pwman3/badges/main/pipeline.svg)](https://gitlab.com/christianpflugradt/pwman3/-/commits/main) [![coverage report](https://gitlab.com/christianpflugradt/pwman3/badges/main/coverage.svg)](https://gitlab.com/christianpflugradt/pwman3/-/commits/main) [![version](https://badgen.net/gitlab/release/christianpflugradt/pwman3)](https://gitlab.com/christianpflugradt/pwman3/-/tags)
+ [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 PwMan3 is a terminal based password manager written in Java. It works completely offline and encrypts all passwords using a AES/CBC/PKCS5Padding Cipher initialized with a JCEKS (Java Cryptography Extension KeyStore).
 
