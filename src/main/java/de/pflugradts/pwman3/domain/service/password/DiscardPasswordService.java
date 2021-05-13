@@ -28,7 +28,7 @@ public class DiscardPasswordService implements CommonPasswordServiceCapabilities
             Try::failure,
             encryptedKeyBytes -> Try.run(() -> find(passwordEntryRepository, encryptedKeyBytes).ifPresentOrElse(
                 PasswordEntry::discard,
-                () -> eventRegistry.register(new PasswordEntryNotFound(keyBytes)))));
+                () -> eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes)))));
     }
 
 }

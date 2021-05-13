@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class GetCommandTestIT {
@@ -62,6 +63,30 @@ class GetCommandTestIT {
         // then
         then(clipboardAdapterPort).should().post(eq(Output.of(expectedPassword)));
         then(userInterfaceAdapterPort).should().send(any(Output.class));
+        assertThat(bytes).isNotEqualTo(reference);
+    }
+
+
+    @Test
+    void shouldHandleGetCommand_InvalidPasswordEntry() {
+        // given
+        final var args = "key";
+        final var bytes = Bytes.of("g" + args);
+        final var reference = bytes.copy();
+        final var expectedPassword = Bytes.of("value");
+        PasswordServiceFaker.faker()
+            .forInstance(passwordService)
+            .withPasswordEntries(PasswordEntryFaker.faker()
+                .fakePasswordEntry()
+                .withKeyBytes(Bytes.of("other")).fake()).fake();
+
+        // when
+        assertThat(bytes).isEqualTo(reference);
+        inputHandler.handleInput(Input.of(bytes));
+
+        // then
+        then(clipboardAdapterPort).should(never()).post(any(Output.class));
+        then(userInterfaceAdapterPort).should(never()).send(any(Output.class));
         assertThat(bytes).isNotEqualTo(reference);
     }
 

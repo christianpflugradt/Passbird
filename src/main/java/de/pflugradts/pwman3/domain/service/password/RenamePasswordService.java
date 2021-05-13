@@ -40,7 +40,7 @@ public class RenamePasswordService implements CommonPasswordServiceCapabilities 
             Try::failure,
             encryptedKeyBytes -> Try.run(() -> find(passwordEntryRepository, encryptedKeyBytes).ifPresentOrElse(
                 passwordEntry -> passwordEntry.rename(newKeyBytes),
-                () -> eventRegistry.register(new PasswordEntryNotFound(keyBytes)))));
+                () -> eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes)))));
     }
 
 }
