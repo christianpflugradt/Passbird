@@ -29,7 +29,7 @@ public class MovePasswordService implements CommonPasswordServiceCapabilities {
                     Try.run(() -> find(passwordEntryRepository, encryptedKeyBytes)
                         .ifPresentOrElse(
                             passwordEntry -> passwordEntry.updateNamespace(targetNamespace),
-                            () -> eventRegistry.register(new PasswordEntryNotFound(keyBytes))))
+                            () -> eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes))))
                         .andThen(() -> processEventsAndSync(eventRegistry, passwordEntryRepository)));
         }
     }

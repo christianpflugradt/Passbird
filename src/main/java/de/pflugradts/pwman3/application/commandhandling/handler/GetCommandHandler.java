@@ -26,8 +26,10 @@ public class GetCommandHandler implements CommandHandler {
         passwordService.viewPassword(getCommand.getArgument()).ifPresent(result -> result
                 .onFailure(throwable -> failureCollector
                         .collectPasswordEntryFailure(getCommand.getArgument(), throwable))
-                .onSuccess(passwordBytes -> clipboardAdapterPort.post(Output.of(passwordBytes))));
-        userInterfaceAdapterPort.send(Output.of(Bytes.of("Password copied to clipboard.")));
+                .onSuccess(passwordBytes -> {
+                    clipboardAdapterPort.post(Output.of(passwordBytes));
+                    userInterfaceAdapterPort.send(Output.of(Bytes.of("Password copied to clipboard.")));
+                }));
         getCommand.invalidateInput();
         userInterfaceAdapterPort.sendLineBreak();
     }

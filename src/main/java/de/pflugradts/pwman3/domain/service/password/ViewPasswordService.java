@@ -42,7 +42,7 @@ public class ViewPasswordService implements CommonPasswordServiceCapabilities {
                 .map(PasswordEntry::viewPassword)
                 .map(passwordBytes -> decrypted(cryptoProvider, passwordBytes))
                 .map(Either::toTry).or(() -> {
-                    eventRegistry.register(new PasswordEntryNotFound(keyBytes));
+                    eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes));
                     eventRegistry.processEvents();
                     return Optional.empty();
                 }));
