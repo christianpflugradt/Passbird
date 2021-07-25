@@ -14,7 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -39,7 +38,6 @@ class ViewNamespaceCommandTestIT {
     @BeforeEach
     private void setup() {
         inputHandler = setupInputHandlerFor(viewNamespaceCommandHandler);
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test

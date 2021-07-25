@@ -14,7 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
@@ -46,7 +45,6 @@ class HelpCommandTestIT {
     @BeforeEach
     private void setup() {
         inputHandler = setupInputHandlerFor(helpCommandHandler);
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test

@@ -6,6 +6,7 @@ import de.pflugradts.pwman3.application.boot.Bootable;
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
 import de.pflugradts.pwman3.application.failurehandling.failure.ChecksumFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.ClipboardFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.CommandFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.DecryptPasswordDatabaseFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.ExportFailure;
@@ -109,6 +110,12 @@ public class FailureHandler implements EventHandler {
     @Subscribe
     private void handle(final WritePasswordDatabaseFailure writePasswordDatabaseFailure) {
         err("Password database could not be synced.");
+    }
+
+    @Subscribe
+    private void handle(final ClipboardFailure clipboardFailure) {
+        err("Clipboard could not be updated. Please check your Java version. Exception: "
+            + clipboardFailure.getThrowable());
     }
 
     private void err(final String template, final Object... params) {

@@ -269,4 +269,18 @@ class FailureHandlingTestIT {
         assertThat(actual).isNotNull().containsIgnoringCase("database");
     }
 
+    @Test
+    void shouldHandleClipboardFailure() {
+        // given
+        assertThat(outputStream.toByteArray()).isEmpty();
+        final var expectedMessage = "print this error to stderr";
+
+        // when
+        failureCollector.collectClipboardFailure(new RuntimeException(expectedMessage));
+        final var actual = outputStream.toString();
+
+        // then
+        assertThat(actual).isNotNull().contains(expectedMessage + System.lineSeparator());
+    }
+
 }

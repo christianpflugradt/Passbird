@@ -2,15 +2,18 @@ package de.pflugradts.pwman3.adapter.clipboard;
 
 import de.pflugradts.pwman3.application.configuration.Configuration;
 import de.pflugradts.pwman3.application.configuration.ConfigurationFaker;
+import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
-import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.concurrent.TimeUnit;
+
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
@@ -23,6 +26,8 @@ class ClipboardServiceTest {
     private SystemOperation systemOperation;
     @Mock
     private Configuration configuration;
+    @Mock
+    private FailureCollector failureCollector;
     @InjectMocks
     private ClipboardService clipboardService;
 
