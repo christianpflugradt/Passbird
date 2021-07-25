@@ -15,7 +15,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -42,7 +41,6 @@ class SwitchNamespaceCommandTestIT {
     @BeforeEach
     private void setup() {
         inputHandler = setupInputHandlerFor(switchNamespaceCommandHandler);
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test

@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.pflugradts.pwman3.application.ClipboardAdapterPort;
 import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
+import de.pflugradts.pwman3.application.failurehandling.FailureCollector;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Output;
 import io.vavr.control.Try;
@@ -16,6 +17,8 @@ public class ClipboardService implements ClipboardAdapterPort {
     private static final long MILLI_SECONDS = 1000L;
 
     @Inject
+    private FailureCollector failureCollector;
+    @Inject
     private SystemOperation systemOperation;
     @Inject
     private ReadableConfiguration configuration;
@@ -25,7 +28,8 @@ public class ClipboardService implements ClipboardAdapterPort {
     @Override
     public void post(final Output output) {
         this.terminateCleaner();
-        systemOperation.copyToClipboard(output.getBytes().asString());
+        Try.run(() -> systemOperation.copyToClipboard(output.getBytes().asString()))
+            .onFailure(failureCollector::collectClipboardFailure);
         this.scheduleCleaner();
     }
 

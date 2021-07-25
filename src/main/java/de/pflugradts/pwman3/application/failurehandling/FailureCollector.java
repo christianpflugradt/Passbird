@@ -3,6 +3,7 @@ package de.pflugradts.pwman3.application.failurehandling;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.Inject;
 import de.pflugradts.pwman3.application.failurehandling.failure.ChecksumFailure;
+import de.pflugradts.pwman3.application.failurehandling.failure.ClipboardFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.CommandFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.DecryptPasswordDatabaseFailure;
 import de.pflugradts.pwman3.application.failurehandling.failure.ExportFailure;
@@ -75,6 +76,10 @@ public class FailureCollector {
 
     public void collectWritePasswordDatabaseFailure(final Path path, final Throwable throwable) {
         collect(new WritePasswordDatabaseFailure(path, throwable));
+    }
+
+    public void collectClipboardFailure(final Throwable throwable) {
+        collect(new ClipboardFailure(throwable));
     }
 
     private void collect(final Failure failure) {
