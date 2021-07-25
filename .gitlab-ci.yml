@@ -55,6 +55,8 @@ spotbugs:
 unit-tests:
   stage: test
   script: ./gradlew unittests
+  needs:
+    - compile
   artifacts:
     when: always
     reports:
@@ -67,6 +69,8 @@ unit-tests:
 integration-tests:
   stage: test
   script: ./gradlew integrationtests
+  needs:
+    - compile
   artifacts:
     when: always
     reports:
@@ -79,6 +83,8 @@ integration-tests:
 architecture-tests:
   stage: test
   script: ./gradlew architecturetests
+  needs:
+    - compile
   artifacts:
     when: always
     reports:
