@@ -45,7 +45,7 @@ public class PwMan3Application implements Bootable {
 
     private String namespacePrefix() {
         final var currentNamespace = namespaceService.getCurrentNamespace();
-        return currentNamespace == DEFAULT ? "" : "[" + currentNamespace.getBytes().asString() + "] ";
+        return currentNamespace.equals(DEFAULT) ? "" : "[" + currentNamespace.getBytes().asString() + "] ";
     }
 
     private boolean isSigTerm(final Input input) {

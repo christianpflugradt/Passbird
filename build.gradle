@@ -4,8 +4,10 @@ plugins {
     id 'checkstyle'
     id 'pmd'
     id 'jacoco'
-    id 'com.github.hierynomus.license' version '0.15.0'
-    id 'com.github.spotbugs' version '4.7.0'
+    id 'com.github.hierynomus.license' version '0.16.1'
+    id 'com.github.spotbugs' version '4.7.6'
+    id 'org.owasp.dependencycheck' version '6.3.2'
+    id 'name.remal.check-dependency-updates' version '1.5.0'
 }
 
 sourceCompatibility = 11
@@ -74,6 +76,11 @@ jacocoTestCoverageVerification {
     }
 }
 
+dependencyCheck {
+    failBuildOnCVSS = 3
+    suppressionFile = 'config/owasp/suppressions.xml'
+}
+
 task architecturetests(type: Test, group: 'Verification') {
     useJUnitPlatform()
     include '**/*TestAT.class'
@@ -110,23 +117,23 @@ task checkAll() {
 }
 
 dependencies {
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.2'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.2'
-    implementation 'io.vavr:vavr:0.10.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.0'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.0'
+    implementation 'io.vavr:vavr:0.10.4'
     implementation 'com.google.inject:guice:5.0.1'
     implementation 'com.google.inject.extensions:guice-assistedinject:5.0.1'
-    implementation 'com.google.guava:guava:30.1.1-jre'
+    implementation 'com.google.guava:guava:31.0.1-jre'
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
     testCompileOnly 'org.projectlombok:lombok:1.18.20'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
-    testImplementation  'org.junit.jupiter:junit-jupiter-api:5.7.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
-    testImplementation  'org.mockito:mockito-junit-jupiter:3.8.0'
-    testImplementation  'org.mockito:mockito-core:3.8.0'
-    testImplementation  'org.assertj:assertj-core:3.19.0'
-    testImplementation  'org.awaitility:awaitility:4.0.3'
+    testImplementation  'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation  'org.mockito:mockito-junit-jupiter:3.12.4'
+    testImplementation  'org.mockito:mockito-core:3.12.4'
+    testImplementation  'org.assertj:assertj-core:3.21.0'
+    testImplementation  'org.awaitility:awaitility:4.1.0'
     testImplementation  'com.tngtech.archunit:archunit:0.15.0'
 }
 
