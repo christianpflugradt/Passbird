@@ -14,7 +14,7 @@ public interface UserInterfaceAdapterPort {
         return receive(Output.empty());
     }
 
-    default boolean receiveConfirmation(Output output) {
+    default boolean receiveConfirmation(final Output output) {
         return !receive(output)
                 .filter(input -> input.getData().isEmpty())
                 .filter(input -> input.getCommand().getFirstByte() == 'c')

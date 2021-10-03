@@ -20,6 +20,8 @@ import static de.pflugradts.pwman3.domain.model.transfer.CharValue.MIN_ASCII_VAL
 @ToString
 public class Chars {
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private final char[] charArray;
 
     public static Chars of(final char... chars) {
@@ -27,9 +29,8 @@ public class Chars {
     }
 
     public static void scramble(char... chars) {
-        final var random = new SecureRandom();
         for (int i = 0; i < chars.length; i++) {
-            chars[i] = (char) (random.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE);
+            chars[i] = (char) (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE);
         }
     }
 

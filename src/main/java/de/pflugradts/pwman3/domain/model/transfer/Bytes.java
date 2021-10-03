@@ -28,6 +28,8 @@ import static de.pflugradts.pwman3.domain.model.transfer.CharValue.MIN_ASCII_VAL
 @SuppressWarnings("PMD.TooManyMethods")
 public class Bytes implements ValueObject, Iterable<Byte> {
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private final byte[] byteArray;
     private final Iterator<Byte> byteIterator;
 
@@ -92,9 +94,8 @@ public class Bytes implements ValueObject, Iterable<Byte> {
     }
 
     public void scramble() {
-        final var random = new SecureRandom();
         for (int i = 0; i < byteArray.length; i++) {
-            byteArray[i] = (byte) (random.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE);
+            byteArray[i] = (byte) (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE);
         }
     }
 

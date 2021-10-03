@@ -25,6 +25,15 @@ compile:
   stage: check
   script: ./gradlew compileJava compileTestJava
 
+owasp:
+  stage: check
+  script: ./gradlew dependencyCheckAnalyze
+  artifacts:
+    when: always
+    paths:
+      - build/reports/*
+    expire_in: 1 week
+
 pmd:
   stage: check
   script: ./gradlew pmdMain
