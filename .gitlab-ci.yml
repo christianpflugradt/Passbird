@@ -134,7 +134,7 @@ licenses:
 
 semver:
   stage: release
-  image: node:13
+  image: node:14
   before_script:
     - npm install @semantic-release/gitlab
     - cat $SEM_RELEASE_OPTIONS > .releaserc.yml
