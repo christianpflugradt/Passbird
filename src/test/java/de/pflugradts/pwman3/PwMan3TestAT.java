@@ -1,19 +1,23 @@
 package de.pflugradts.pwman3;
 
 import com.google.common.eventbus.Subscribe;
+import com.google.inject.AbstractModule;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
-import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
 import de.pflugradts.pwman3.domain.model.ddd.AggregateRoot;
 import de.pflugradts.pwman3.domain.model.ddd.DomainEntity;
 import de.pflugradts.pwman3.domain.model.ddd.DomainEvent;
 import de.pflugradts.pwman3.domain.model.ddd.Repository;
 import de.pflugradts.pwman3.domain.model.ddd.ValueObject;
+import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import static com.tngtech.archunit.base.DescribedPredicate.alwaysTrue;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEndingWith;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
@@ -47,23 +51,23 @@ class PwMan3TestAT {
     @BeforeEach
     void setup() {
         classes = new ClassFileImporter()
-                .withImportOption(new ImportOption.DoNotIncludeTests())
-                .importPackages(ROOT);
+            .withImportOption(new ImportOption.DoNotIncludeTests())
+            .importPackages(ROOT);
     }
 
     @Test
     void shouldHaveOnionArchitecture() {
         onionArchitecture()
-                .domainModels(path(DOMAIN_MODELS))
-                .domainServices(path(DOMAIN_SERVICES))
-                .applicationServices(path(APPLICATION_ROOT))
-                .adapter(CLIPBOARD_ADAPTER, path(ADAPTER_ROOT, CLIPBOARD_ADAPTER))
-                .adapter(EXCHANGE_ADAPTER, path(ADAPTER_ROOT, EXCHANGE_ADAPTER))
-                .adapter(KEYSTORE_ADAPTER, path(ADAPTER_ROOT, KEYSTORE_ADAPTER))
-                .adapter(PASSWORDSTORE_ADAPTER, path(ADAPTER_ROOT, PASSWORDSTORE_ADAPTER))
-                .adapter(USERINTERFACE_ADAPTER, path(ADAPTER_ROOT, USERINTERFACE_ADAPTER))
-                .check(classes)
-        ;
+            .domainModels(path(DOMAIN_MODELS))
+            .domainServices(path(DOMAIN_SERVICES))
+            .applicationServices(path(APPLICATION_ROOT))
+            .adapter(CLIPBOARD_ADAPTER, path(ADAPTER_ROOT, CLIPBOARD_ADAPTER))
+            .adapter(EXCHANGE_ADAPTER, path(ADAPTER_ROOT, EXCHANGE_ADAPTER))
+            .adapter(KEYSTORE_ADAPTER, path(ADAPTER_ROOT, KEYSTORE_ADAPTER))
+            .adapter(PASSWORDSTORE_ADAPTER, path(ADAPTER_ROOT, PASSWORDSTORE_ADAPTER))
+            .adapter(USERINTERFACE_ADAPTER, path(ADAPTER_ROOT, USERINTERFACE_ADAPTER))
+            .ignoreDependency(assignableTo(AbstractModule.class), alwaysTrue()) // exclude guice modules
+            .check(classes);
     }
 
     @Nested
@@ -72,16 +76,16 @@ class PwMan3TestAT {
         @Test
         void adapterPortImplementationsShouldBeInAdapterPackages() {
             classes().that()
-                    .areAssignableTo(JavaClass.Predicates.INTERFACES.and(simpleNameEndingWith("AdapterPort")))
-                    .and().areNotInterfaces()
-                    .should().resideInAPackage(path(ADAPTER_ROOT))
-                    .check(classes);
+                .areAssignableTo(JavaClass.Predicates.INTERFACES.and(simpleNameEndingWith("AdapterPort")))
+                .and().areNotInterfaces()
+                .should().resideInAPackage(path(ADAPTER_ROOT))
+                .check(classes);
         }
 
         @Test
         void noClassesShouldBeInAdapterPackage() {
             noClasses().should().resideInAPackage(ADAPTER_ROOT)
-                    .check(classes);
+                .check(classes);
         }
 
     }
@@ -92,16 +96,16 @@ class PwMan3TestAT {
         @Test
         void repositoriesShouldOnlyBeAccessedFromApplicationAndDomainLayer() {
             classes().that().areAssignableTo(Repository.class)
-                    .should().onlyBeAccessed().byClassesThat().resideInAPackage(path(APPLICATION_ROOT))
-                    .orShould().onlyBeAccessed().byClassesThat().resideInAPackage(path(DOMAIN_SERVICES))
-                    .check(classes);
+                .should().onlyBeAccessed().byClassesThat().resideInAPackage(path(APPLICATION_ROOT))
+                .orShould().onlyBeAccessed().byClassesThat().resideInAPackage(path(DOMAIN_SERVICES))
+                .check(classes);
         }
 
         @Test
         void repositoriesShouldOnlyBeAccessedFromDomainServices() {
             classes().that().areAssignableTo(Repository.class)
-                    .should().onlyBeAccessed().byClassesThat().resideInAPackage(path(DOMAIN_SERVICES))
-                    .check(classes);
+                .should().onlyBeAccessed().byClassesThat().resideInAPackage(path(DOMAIN_SERVICES))
+                .check(classes);
         }
 
     }
@@ -112,49 +116,49 @@ class PwMan3TestAT {
         @Test
         void dddPackageShouldOnlyContainInterfaces() {
             classes().that().resideInAPackage(path(DOMAIN_MODELS, "ddd"))
-                    .should().beInterfaces()
-                    .check(classes);
+                .should().beInterfaces()
+                .check(classes);
         }
 
         @Test
         void aggregateRootsShouldResideInDomainModelPackage() {
             classes().that().areAssignableTo(AggregateRoot.class).and().areNotInterfaces()
-                    .should().resideInAPackage(path(DOMAIN_MODELS))
-                    .check(classes);
+                .should().resideInAPackage(path(DOMAIN_MODELS))
+                .check(classes);
         }
 
         @Test
         void domainEntitiesShouldResideInDomainModelPackage() {
             classes().that().areAssignableTo(DomainEntity.class).and().areNotInterfaces()
-                    .should().resideInAPackage(path(DOMAIN_MODELS))
-                    .check(classes);
+                .should().resideInAPackage(path(DOMAIN_MODELS))
+                .check(classes);
         }
 
         @Test
         void valueObjectsShouldResideInDomainModelPackage() {
             classes().that().areAssignableTo(ValueObject.class).and().areNotInterfaces()
-                    .should().resideInAPackage(path(DOMAIN_MODELS))
-                    .check(classes);
+                .should().resideInAPackage(path(DOMAIN_MODELS))
+                .check(classes);
         }
 
         @Test
         void repositoriesShouldResideInDomainModelPackage() {
             classes().that().areAssignableTo(Repository.class).and().areNotInterfaces()
-                    .should().resideInAPackage(path(DOMAIN_SERVICES))
-                    .check(classes);
+                .should().resideInAPackage(path(DOMAIN_SERVICES))
+                .check(classes);
         }
 
         @Test
         void domainEventsShouldResideInDomainModelEventPackage() {
             classes().that().areAssignableFrom(DomainEvent.class).and().areNotInterfaces()
-                    .should().resideInAPackage(path(DOMAIN_MODELS, "event"))
-                    .check(classes);
+                .should().resideInAPackage(path(DOMAIN_MODELS, "event"))
+                .check(classes);
         }
 
         @Test
         void noClassesShouldBeInDomainPackage() {
             noClasses().should().resideInAPackage(DOMAIN_ROOT)
-                    .check(classes);
+                .check(classes);
         }
 
     }
@@ -165,23 +169,23 @@ class PwMan3TestAT {
         @Test
         void eventHandlersShouldNotHavePublicMethods() {
             noMethods().that().areDeclaredInClassesThat().areAssignableTo(EventHandler.class)
-                    .should().bePublic().check(classes);
+                .should().bePublic().check(classes);
         }
 
         @Test
         void eventHandlersHandleMethodsMustBeAnnotatedWithSubscribe() {
             methods().that().areDeclaredInClassesThat().areAssignableTo(EventHandler.class)
-                    .and().haveNameMatching("handle.*")
-                    .should().beAnnotatedWith(Subscribe.class)
-                    .check(classes);
+                .and().haveNameMatching("handle.*")
+                .should().beAnnotatedWith(Subscribe.class)
+                .check(classes);
         }
 
         @Test
         void noMethodsThatAreNotEventHandlersMayBeAnnotatedWithSubscribe() {
             noMethods().that().areDeclaredInClassesThat().areNotAssignableTo(EventHandler.class)
-                    .or().haveNameNotMatching("handle.*")
-                    .should().beAnnotatedWith(Subscribe.class)
-                    .check(classes);
+                .or().haveNameNotMatching("handle.*")
+                .should().beAnnotatedWith(Subscribe.class)
+                .check(classes);
         }
 
     }
@@ -192,15 +196,15 @@ class PwMan3TestAT {
         @Test
         void utilityMethodsShouldBeStatic() {
             methods().that().areDeclaredInClassesThat().haveSimpleNameEndingWith("Utils")
-                    .should().beStatic()
-                    .check(classes);
+                .should().beStatic()
+                .check(classes);
         }
 
         @Test
         void utilityConstantsShouldBeStaticAndFinal() {
             fields().that().areDeclaredInClassesThat().haveSimpleNameEndingWith("Utils")
-                    .should().beStatic().andShould().beFinal()
-                    .check(classes);
+                .should().beStatic().andShould().beFinal()
+                .check(classes);
         }
 
     }
@@ -211,13 +215,13 @@ class PwMan3TestAT {
         @Test
         void noClassesMayHaveNameEndingWithImpl() {
             noClasses().should().haveSimpleNameEndingWith("Impl")
-                    .check(classes);
+                .check(classes);
         }
 
         @Test
         void noClassesMayHaveNameEndingWithHelper() {
             noClasses().should().haveSimpleNameEndingWith("Helper")
-                    .check(classes);
+                .check(classes);
         }
 
     }
@@ -228,19 +232,19 @@ class PwMan3TestAT {
         @Test
         void noMethodsShouldBeFinal() {
             noMethods().should().beFinal()
-                    .check(classes);
+                .check(classes);
         }
 
         @Test
         void noClassesShouldImplementCloneable() {
             noClasses().should().implement(Cloneable.class)
-                    .check(classes);
+                .check(classes);
         }
 
         @Test
         void instanceFieldsShouldBePrivate() {
             fields().that().areNotStatic().should().bePrivate()
-                    .check(classes);
+                .check(classes);
         }
 
     }
