@@ -108,6 +108,10 @@ architecture-tests:
 test-coverage-verification:
   stage: report
   script: ./gradlew jacocoTestCoverageVerification
+  needs:
+    - unit-tests
+    - integration-tests
+    - architecture-tests
 
 test-coverage-report:
   stage: report
@@ -117,6 +121,10 @@ test-coverage-report:
     - covered=$(xmllint --xpath 'string(/report/counter[@type="INSTRUCTION"]/@covered)' build/reports/jacoco/test/jacocoTestReport.xml)
     - total=$((missed + covered))
     - echo $covered $total | awk '{ print "Test-Coverage=" $1 / $2 * 100 "%" }'
+  needs:
+    - unit-tests
+    - integration-tests
+    - architecture-tests
   artifacts:
     when: always
     paths:
