@@ -22,8 +22,8 @@ public class LicenseManager {
         final var licenseFile = new File(licenseFileName);
         if (!licenseFile.exists()) {
             systemOperation.writeBytesToFile(
-                    systemOperation.getPath(licenseFile).getOrNull(),
-                    systemOperation.getResourceAsBytes(licenseFileName).getOrElse(Bytes.empty()));
+                systemOperation.getPath(licenseFile).getOrNull(),
+                systemOperation.getResourceAsBytes(licenseFileName).getOrElse(Bytes.empty()));
         }
     }
 

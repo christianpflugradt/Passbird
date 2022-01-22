@@ -33,6 +33,8 @@ owasp:
     paths:
       - build/reports/*
     expire_in: 1 week
+  except:
+    - tags
 
 pmd:
   stage: check
