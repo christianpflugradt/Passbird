@@ -35,7 +35,7 @@ class ApplicationEventHandlerTestIT {
     private ArgumentCaptor<Output> captor;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         pwMan3EventRegistry = new PwMan3EventRegistry(Set.of(applicationEventHandler), null);
         MockitoAnnotations.initMocks(this);
     }

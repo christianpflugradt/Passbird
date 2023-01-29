@@ -48,7 +48,7 @@ class PwMan3LauncherTest {
     private ArgumentCaptor<Module> captor;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         MockitoAnnotations.initMocks(this);
     }
 

@@ -42,7 +42,7 @@ class DiscardCommandTestIT {
     private DiscardCommandHandler discardCommandHandler;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         ConfigurationFaker.faker().forInstance(configuration).fake();
         inputHandler = setupInputHandlerFor(discardCommandHandler);
     }

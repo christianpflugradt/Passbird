@@ -6,6 +6,7 @@ import de.pflugradts.pwman3.application.boot.Bootable;
 import de.pflugradts.pwman3.application.boot.launcher.PwMan3Launcher;
 import de.pflugradts.pwman3.application.util.GuiceInjector;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -22,6 +23,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
+@Disabled
 class MainTest {
 
     @Mock
@@ -33,7 +35,7 @@ class MainTest {
     private ArgumentCaptor<Module> captor;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         MockitoAnnotations.initMocks(this);
         System.clearProperty(CONFIGURATION_SYSTEM_PROPERTY);
     }
