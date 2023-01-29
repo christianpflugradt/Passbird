@@ -38,7 +38,7 @@ class GetCommandTestIT {
     private GetCommandHandler getCommandHandler;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         inputHandler = setupInputHandlerFor(getCommandHandler);
     }
 

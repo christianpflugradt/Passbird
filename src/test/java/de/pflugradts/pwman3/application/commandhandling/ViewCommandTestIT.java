@@ -36,7 +36,7 @@ class ViewCommandTestIT {
     private ViewCommandHandler viewCommandHandler;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         inputHandler = setupInputHandlerFor(viewCommandHandler);
     }
 

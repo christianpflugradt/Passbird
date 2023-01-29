@@ -44,7 +44,7 @@ class FailureHandlingTestIT {
     private PrintStream printStream;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         failureCollector = new FailureCollector(null, failureHandler);
         outputStream = new ByteArrayOutputStream();
         printStream = new PrintStream(outputStream);
@@ -52,7 +52,7 @@ class FailureHandlingTestIT {
     }
 
     @AfterEach
-    private void cleanup() throws IOException {
+    void cleanup() throws IOException {
         printStream.close();
         outputStream.close();
     }

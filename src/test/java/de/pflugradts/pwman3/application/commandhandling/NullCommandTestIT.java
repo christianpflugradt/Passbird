@@ -24,7 +24,7 @@ class NullCommandTestIT {
     private InputHandler inputHandler;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         inputHandler = setupInputHandlerFor(commandBus);
     }
 

@@ -13,7 +13,7 @@ public final class Main {
 
     private static final int EXPECTED_NUMBER_OF_ARGUMENTS = 1;
 
-    private GuiceInjector guiceInjector = new GuiceInjector();
+    private final GuiceInjector guiceInjector = new GuiceInjector();
 
     public static void main(final String... args) {
         new Main().boot(args);

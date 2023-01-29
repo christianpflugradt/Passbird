@@ -4,12 +4,14 @@ import de.pflugradts.pwman3.application.configuration.ReadableConfiguration;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.Tuple2;
-import java.io.File;
-import java.util.UUID;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.util.UUID;
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FilePasswordExchangeTestIT {
@@ -20,7 +22,7 @@ class FilePasswordExchangeTestIT {
     private String exchangeFile;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         tempExchangeDirectory = UUID.randomUUID().toString();
         exchangeFile = tempExchangeDirectory + File.separator + ReadableConfiguration.EXCHANGE_FILENAME;
         assertThat(new File(tempExchangeDirectory).mkdir()).isTrue();
@@ -31,7 +33,7 @@ class FilePasswordExchangeTestIT {
     }
 
     @AfterEach
-    private void cleanup() {
+    void cleanup() {
         assertThat(new File(exchangeFile).delete()).isTrue();
         assertThat(new File(tempExchangeDirectory).delete()).isTrue();
     }

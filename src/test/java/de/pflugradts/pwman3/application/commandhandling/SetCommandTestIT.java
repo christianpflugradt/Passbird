@@ -48,7 +48,7 @@ class SetCommandTestIT {
     private SetCommandHandler setCommandHandler;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         ConfigurationFaker.faker().forInstance(configuration).fake();
         inputHandler = setupInputHandlerFor(setCommandHandler);
     }

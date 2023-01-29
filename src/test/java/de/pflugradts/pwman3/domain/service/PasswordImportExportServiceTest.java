@@ -43,7 +43,7 @@ class PasswordImportExportServiceTest {
     private final String URI = "any uri";
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         MockitoAnnotations.initMocks(this);
     }
 

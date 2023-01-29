@@ -47,7 +47,7 @@ class ImportCommandTestIT {
     private ImportCommandHandler importCommandHandler;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         ConfigurationFaker.faker().forInstance(configuration).fake();
         inputHandler = setupInputHandlerFor(importCommandHandler);
     }

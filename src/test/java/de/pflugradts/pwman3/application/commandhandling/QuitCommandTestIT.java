@@ -31,7 +31,7 @@ class QuitCommandTestIT {
     private QuitCommandHandler quitCommandHandler;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         inputHandler = setupInputHandlerFor(quitCommandHandler);
     }
 
