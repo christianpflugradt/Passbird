@@ -144,7 +144,7 @@ licenses:
 
 semver:
   stage: release
-  image: node:14
+  image: node:18
   before_script:
     - npm install @semantic-release/gitlab
     - cat $SEM_RELEASE_OPTIONS > .releaserc.yml
@@ -152,23 +152,3 @@ semver:
   only:
     - main
 
-publish:
-  stage: release
-  before_script:
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - mkdir src/main/resources
-    - cp LICENSE src/main/resources/pwman3-license.txt
-    - cp build/reports/license/dependency-license.html src/main/resources/pwman3-licenses-3rdparty.html
-  script:
-    - ./gradlew -Pversion=$CI_COMMIT_REF_NAME jar
-    - eval "$SSH_COPY"
-  artifacts:
-    paths:
-      - build/libs/*
-    expire_in: 1 week
-  only:
-    - tags
