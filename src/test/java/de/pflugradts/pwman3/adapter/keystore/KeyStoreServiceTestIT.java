@@ -20,7 +20,7 @@ class KeyStoreServiceTestIT {
     private String keyStoreFile;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         keyStoreService = new KeyStoreService(new SystemOperation());
         tempKeyStoreDirectory = UUID.randomUUID().toString();
         keyStoreFile = tempKeyStoreDirectory + File.separator + ReadableConfiguration.KEYSTORE_FILENAME;
@@ -28,7 +28,7 @@ class KeyStoreServiceTestIT {
     }
 
     @AfterEach
-    private void cleanup() {
+    void cleanup() {
         assertThat(new File(keyStoreFile).delete()).isTrue();
         assertThat(new File(tempKeyStoreDirectory).delete()).isTrue();
     }

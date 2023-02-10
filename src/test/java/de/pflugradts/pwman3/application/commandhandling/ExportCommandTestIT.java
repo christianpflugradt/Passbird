@@ -30,7 +30,7 @@ class ExportCommandTestIT {
     private ExportCommandHandler exportCommandHandler;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         inputHandler = setupInputHandlerFor(exportCommandHandler);
     }
 

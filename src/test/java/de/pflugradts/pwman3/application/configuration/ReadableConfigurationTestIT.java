@@ -1,9 +1,6 @@
 package de.pflugradts.pwman3.application.configuration;
 
 import de.pflugradts.pwman3.application.util.SystemOperation;
-import java.io.File;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +8,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.io.File;
+import java.util.Optional;
+import java.util.UUID;
+
 import static de.pflugradts.pwman3.application.configuration.ReadableConfiguration.CONFIGURATION_SYSTEM_PROPERTY;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,14 +28,14 @@ class ReadableConfigurationTestIT {
     private String configurationFile;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         tempConfigurationDirectory = UUID.randomUUID().toString();
         configurationFile = tempConfigurationDirectory + File.separator + ReadableConfiguration.CONFIGURATION_FILENAME;
         assertThat(new File(tempConfigurationDirectory).mkdir()).isTrue();
     }
 
     @AfterEach
-    private void cleanup() {
+    void cleanup() {
         assertThat(new File(configurationFile).delete()).isTrue();
         assertThat(new File(tempConfigurationDirectory).delete()).isTrue();
     }

@@ -3,14 +3,15 @@ package de.pflugradts.pwman3.application.license;
 import de.pflugradts.pwman3.application.util.SystemOperation;
 import de.pflugradts.pwman3.domain.model.transfer.Bytes;
 import io.vavr.control.Try;
-import java.io.File;
-import java.nio.file.Path;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.io.File;
+import java.nio.file.Path;
+
 import static de.pflugradts.pwman3.application.license.LicenseManager.LICENSE_FILENAME;
 import static de.pflugradts.pwman3.application.license.LicenseManager.THIRD_PARTY_LICENSES_FILENAME;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,10 +26,6 @@ class LicenseManagerTest {
     private SystemOperation systemOperation;
     @InjectMocks
     private LicenseManager licenseManager;
-
-    @BeforeEach
-    private void setup() {
-    }
 
     @Test
     void shouldVerifyLicenseFilesExist() {

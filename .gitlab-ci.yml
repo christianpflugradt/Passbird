@@ -151,4 +151,3 @@ semver:
   script: npx semantic-release -t \${version}
   only:
     - main
-

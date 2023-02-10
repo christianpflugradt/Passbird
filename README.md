@@ -7,7 +7,7 @@ PwMan3 is a terminal based password manager written in Java. It works completely
 Check the FAQ at the bottom if you are wondering whether PwMan3 is the right tool for you.
 
 ## Downloading PwMan3 ##
-The latest version of PwMan3 can be downloaded [at my website](https://pflugradts.de/tools/pwman3 "get PwMan3").
+The latest version of PwMan3 can be downloaded [at my website](https://pflugradts.de/password-manager/).
 
 You may also choose to build PwMan3 yourself by cloning this project and running the jar task with Gradle.
 

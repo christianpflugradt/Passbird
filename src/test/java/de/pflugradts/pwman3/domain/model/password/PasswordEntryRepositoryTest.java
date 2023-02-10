@@ -41,7 +41,7 @@ class PasswordEntryRepositoryTest {
     private ArgumentCaptor<Supplier<Stream<PasswordEntry>>> captor;
 
     @BeforeEach
-    private void initMocks() {
+    void initMocks() {
         MockitoAnnotations.initMocks(this);
     }
 

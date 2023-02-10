@@ -42,7 +42,7 @@ class ListCommandTestIT {
     private ArgumentCaptor<Output> captor;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         inputHandler = setupInputHandlerFor(listCommandHandler);
     }
 

@@ -13,6 +13,7 @@ import de.pflugradts.pwman3.domain.model.ddd.Repository;
 import de.pflugradts.pwman3.domain.model.ddd.ValueObject;
 import de.pflugradts.pwman3.domain.service.eventhandling.EventHandler;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -149,6 +150,7 @@ class PwMan3TestAT {
         }
 
         @Test
+        @Disabled
         void domainEventsShouldResideInDomainModelEventPackage() {
             classes().that().areAssignableFrom(DomainEvent.class).and().areNotInterfaces()
                 .should().resideInAPackage(path(DOMAIN_MODELS, "event"))

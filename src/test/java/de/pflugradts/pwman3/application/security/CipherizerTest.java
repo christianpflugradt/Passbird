@@ -10,7 +10,7 @@ class CipherizerTest {
     private Cipherizer cryptoProvider;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         final var secretBytes = Bytes.of(
                 new byte[]{97, -87, -65, -105, -48, -75, 65, -72, 67, -25, -88, -123, -28, 42, -61, 39});
         final var ivBytes = Bytes.of(

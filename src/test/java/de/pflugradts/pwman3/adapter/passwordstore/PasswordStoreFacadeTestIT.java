@@ -50,7 +50,7 @@ class PasswordStoreFacadeTestIT {
     private String dbFile;
 
     @BeforeEach
-    private void setup() {
+    void setup() {
         setupFileSystem();
         setupMocks();
         passwordStoreFacade = setupPasswordFileStore();
@@ -73,7 +73,7 @@ class PasswordStoreFacadeTestIT {
     }
 
     @AfterEach
-    private void cleanup() {
+    void cleanup() {
         assertThat(new File(dbFile).delete()).isTrue();
         assertThat(new File(tempPasswordStoreDirectory).delete()).isTrue();
     }
