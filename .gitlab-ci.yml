@@ -23,7 +23,7 @@ after_script:
 
 compile:
   stage: check
-  script: ./gradlew compileJava compileTestJava
+  script: ./gradlew compileKotlin compileTestKotlin compileJava compileTestJava
 
 owasp:
   stage: check
@@ -36,72 +36,48 @@ owasp:
   except:
     - tags
 
-pmd:
+ktlint:
   stage: check
-  script: ./gradlew pmdMain
+  script: ./gradlew ktlintCheck
   artifacts:
     when: always
     paths:
-      - build/reports/pmd/*
-    expire_in: 1 week
-
-checkstyle:
-  stage: check
-  script: ./gradlew checkstyleMain
-  artifacts:
-    when: always
-    paths:
-      - build/reports/checkstyle/*
-    expire_in: 1 week
-
-spotbugs:
-  stage: check
-  script: ./gradlew spotbugsMain
-  artifacts:
-    when: always
-    paths:
-      - build/reports/spotbugs/*
+      - build/reports/ktlint/*
     expire_in: 1 week
 
 unit-tests:
   stage: test
-  script: ./gradlew unittests
+  script: ./gradlew unitTests
   needs:
     - compile
   artifacts:
     when: always
-    reports:
-      junit: build/test-results/unittests/**TEST-*.xml
     paths:
-      - build/reports/tests/unittests/*
+      - build/reports/tests/unitTests/*
       - build/jacoco/*
     expire_in: 1 week
 
 integration-tests:
   stage: test
-  script: ./gradlew integrationtests
+  script: ./gradlew integrationTests
   needs:
     - compile
   artifacts:
     when: always
-    reports:
-      junit: build/test-results/integrationtests/**TEST-*.xml
     paths:
-      - build/reports/tests/integrationtests/*
+      - build/reports/tests/integrationTests/*
       - build/jacoco/*
     expire_in: 1 week
 
 architecture-tests:
   stage: test
-  script: ./gradlew architecturetests
+  script: ./gradlew architectureTests
   needs:
     - compile
   artifacts:
     when: always
-    reports:
-      junit: build/test-results/architecturetests/**TEST-*.xml
     paths:
-      - build/reports/tests/architecturetests/*
+      - build/reports/tests/architectureTests/*
       - build/jacoco/*
     expire_in: 1 week
 

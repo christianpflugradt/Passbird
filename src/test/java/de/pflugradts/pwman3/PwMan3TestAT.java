@@ -227,28 +227,4 @@ class PwMan3TestAT {
         }
 
     }
-
-    @Nested
-    class BestPracticesTest {
-
-        @Test
-        void noMethodsShouldBeFinal() {
-            noMethods().should().beFinal()
-                .check(classes);
-        }
-
-        @Test
-        void noClassesShouldImplementCloneable() {
-            noClasses().should().implement(Cloneable.class)
-                .check(classes);
-        }
-
-        @Test
-        void instanceFieldsShouldBePrivate() {
-            fields().that().areNotStatic().should().bePrivate()
-                .check(classes);
-        }
-
-    }
-
 }
