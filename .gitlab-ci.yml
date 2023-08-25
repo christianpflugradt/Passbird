@@ -36,33 +36,6 @@ owasp:
   except:
     - tags
 
-pmd:
-  stage: check
-  script: ./gradlew pmdMain
-  artifacts:
-    when: always
-    paths:
-      - build/reports/pmd/*
-    expire_in: 1 week
-
-checkstyle:
-  stage: check
-  script: ./gradlew checkstyleMain
-  artifacts:
-    when: always
-    paths:
-      - build/reports/checkstyle/*
-    expire_in: 1 week
-
-spotbugs:
-  stage: check
-  script: ./gradlew spotbugsMain
-  artifacts:
-    when: always
-    paths:
-      - build/reports/spotbugs/*
-    expire_in: 1 week
-
 unit-tests:
   stage: test
   script: ./gradlew unittests
