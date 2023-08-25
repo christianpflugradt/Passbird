@@ -8,7 +8,6 @@ plugins {
     jacoco
     java
     kotlin("jvm") version "1.9.10"
-
     id("org.owasp.dependencycheck") version "8.4.0"
     id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
     id("com.adarshr.test-logger") version "3.2.0"
@@ -47,8 +46,15 @@ dependencies {
 java.sourceCompatibility = JavaVersion.VERSION_17
 group = "de.pflugradts.pwman3"
 
-application {
-    mainClass.set("de.pflugradts.pwman3.application.Main")
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "de.pflugradts.pwman3.application.Main"
+        attributes["Implementation-Version"] = version
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.get().output)
+    dependsOn(configurations.runtimeClasspath)
+    from({ configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) } })
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -85,7 +91,7 @@ tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
 
-val testExecutionData = fileTree(project.rootDir.path).include(("**/build/jacoco/*.exec"))
+val testExecutionData: PatternFilterable = fileTree(project.rootDir.path).include(("**/build/jacoco/*.exec"))
 
 tasks.jacocoTestReport {
     executionData(testExecutionData)
