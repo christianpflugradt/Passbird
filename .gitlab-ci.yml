@@ -146,7 +146,7 @@ semver:
   stage: release
   image: node:18
   script:
-    - npm install @semantic-release/gitlab
+    - npm install semantic-release @semantic-release/gitlab conventional-changelog-conventionalcommits
     - npx semantic-release -t \${version}
   when: manual
   only:
