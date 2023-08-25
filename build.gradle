@@ -5,8 +5,9 @@ plugins {
     id 'pmd'
     id 'jacoco'
     id 'com.github.hierynomus.license' version '0.16.1'
-    id 'com.github.spotbugs' version '4.7.1'
-    id 'org.owasp.dependencycheck' version '8.0.2'
+    id 'com.github.spotbugs' version '4.7.5'
+    id 'org.owasp.dependencycheck' version '8.4.0'
+    id 'com.github.ben-manes.versions' version '0.47.0'
 }
 
 sourceCompatibility = 11
@@ -115,24 +116,24 @@ task checkAll() {
 }
 
 dependencies {
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.5'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.5'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2'
     implementation 'io.vavr:vavr:0.10.4'
-    implementation 'com.google.inject:guice:5.1.0'
-    implementation 'com.google.inject.extensions:guice-assistedinject:5.1.0'
-    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.google.inject:guice:7.0.0'
+    implementation 'com.google.inject.extensions:guice-assistedinject:7.0.0'
+    implementation 'com.google.guava:guava:32.1.2-jre'
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
 
-    testCompileOnly 'org.projectlombok:lombok:1.18.24'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
-    testImplementation  'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
-    testImplementation 'org.mockito:mockito-junit-jupiter:4.11.0'
-    testImplementation 'org.mockito:mockito-core:4.11.0'
+    testCompileOnly 'org.projectlombok:lombok:1.18.28'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.28'
+    testImplementation  'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.5.0'
+    testImplementation 'org.mockito:mockito-core:5.5.0'
     testImplementation  'org.assertj:assertj-core:3.24.2'
     testImplementation  'org.awaitility:awaitility:4.2.0'
-    testImplementation 'com.tngtech.archunit:archunit:1.0.1'
+    testImplementation 'com.tngtech.archunit:archunit:1.1.0'
 }
 
 jar {
