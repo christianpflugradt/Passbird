@@ -1,4 +1,4 @@
-image: registry.gitlab.com/christianpflugradt/pwman3/openjdk11:latest
+image: eclipse-temurin:17-jdk
 
 stages:
   - check
