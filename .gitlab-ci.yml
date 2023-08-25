@@ -145,9 +145,9 @@ licenses:
 semver:
   stage: release
   image: node:18
-  before_script:
+  script:
     - npm install @semantic-release/gitlab
-    - cat $SEM_RELEASE_OPTIONS > .releaserc.yml
-  script: npx semantic-release -t \${version}
+    - npx semantic-release -t \${version}
+  when: manual
   only:
     - main
