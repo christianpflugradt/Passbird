@@ -31,7 +31,7 @@ owasp:
   artifacts:
     when: always
     paths:
-      - build/reports/*
+      - build/reports/dependency-check-report.html
     expire_in: 1 week
   except:
     - tags
