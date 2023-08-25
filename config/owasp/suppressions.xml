@@ -3,91 +3,65 @@
     <suppress>
         <notes><![CDATA[
    file name: bcel-6.5.0.jar
-   introduced by spotbugs gradle plugin
    ]]></notes>
         <sha1>79b1975ec0c7a6c1a15e19fb3a58cc4041b4aaea</sha1>
-        <cve>CVE-2022-42920</cve>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[
-   file name: commons-io-2.6.jar
-   introduced by pmd gradle plugin
-   ]]></notes>
-        <sha1>815893df5f31da2ece4040fe0a12fd44b577afaf</sha1>
-        <cve>CVE-2021-29425</cve>
+        <cpe>cpe:/a:apache:commons_bcel</cpe>
     </suppress>
 
     <suppress>
         <notes><![CDATA[
    file name: commons-text-1.9.jar
-   introduced by spotbugs gradle plugin
    ]]></notes>
         <sha1>ba6ac8c2807490944a0a27f6f8e68fb5ed2e80e2</sha1>
-        <cve>CVE-2022-42889</cve>
+        <cpe>cpe:/a:apache:commons_text</cpe>
     </suppress>
 
     <suppress>
         <notes><![CDATA[
-   file name: gson-2.8.5.jar
-   introduced by pmd & spotbugs gradle plugin
+   file name: gson-2.8.8.jar
    ]]></notes>
-        <sha1>f645ed69d595b24d4cf8b3fbb64cc505bede8829</sha1>
+        <sha1>431fc3cbc0ff81abdbfde070062741089c3ba874</sha1>
         <cve>CVE-2022-25647</cve>
     </suppress>
 
     <suppress>
         <notes><![CDATA[
    file name: guava-29.0-jre.jar
-   introduced by checkstyle gradle plugin
+   ]]></notes>
+        <sha1>801142b4c3d0f0770dd29abea50906cacfddd447</sha1>
+        <cve>CVE-2023-2976</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: jackson-databind-2.15.2.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
+        <cve>CVE-2023-35116</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: bcel-6.5.0.jar
+   ]]></notes>
+        <sha1>79b1975ec0c7a6c1a15e19fb3a58cc4041b4aaea</sha1>
+        <vulnerabilityName>CVE-2022-42920</vulnerabilityName>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: commons-text-1.9.jar
+   ]]></notes>
+        <sha1>ba6ac8c2807490944a0a27f6f8e68fb5ed2e80e2</sha1>
+        <vulnerabilityName>CVE-2022-42889</vulnerabilityName>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: guava-29.0-jre.jar
    ]]></notes>
         <sha1>801142b4c3d0f0770dd29abea50906cacfddd447</sha1>
         <cve>CVE-2020-8908</cve>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[
-   file name: gson-2.8.6.jar
-   introduced by pmd gradle plugin
-   ]]></notes>
-        <sha1>9180733b7df8542621dc12e21e87557e8c99b8cb</sha1>
-        <cve>CVE-2022-25647</cve>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[
-   file name: snakeyaml-1.31.jar
-   introduced by jackson-databind (latest version)
-   ]]></notes>
-        <sha1>cf26b7b05fef01e7bec00cb88ab4feeeba743e12</sha1>
-        <vulnerabilityName>CVE-2022-1471</vulnerabilityName>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[
-   file name: snakeyaml-1.31.jar
-   introduced by jackson-databind (latest version)
-   ]]></notes>
-        <sha1>cf26b7b05fef01e7bec00cb88ab4feeeba743e12</sha1>
-        <vulnerabilityName>CVE-2022-38751</vulnerabilityName>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[
-   file name: snakeyaml-1.31.jar
-   introduced by jackson-databind (latest version)
-   ]]></notes>
-        <sha1>cf26b7b05fef01e7bec00cb88ab4feeeba743e12</sha1>
-        <cve>CVE-2022-38752</cve>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[
-   file name: snakeyaml-1.31.jar
-   introduced by jackson-databind (latest version)
-   ]]></notes>
-        <sha1>cf26b7b05fef01e7bec00cb88ab4feeeba743e12</sha1>
-        <cve>CVE-2022-41854</cve>
     </suppress>
 
 </suppressions>
