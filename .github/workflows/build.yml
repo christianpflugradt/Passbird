@@ -25,7 +25,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - run: ./gradlew dependencyCheckAnalyze
-      - uses: actions/upload-artifact@latest
+      - uses: actions/upload-artifact@v3
         with:
           name: dependency-check-report
           path: build/reports/dependency-check-report.html
@@ -39,7 +39,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - run: ./gradlew ktlintCheck
-      - uses: actions/upload-artifact@latest
+      - uses: actions/upload-artifact@v3
         with:
           name: ktlint-reports
           path: build/reports/ktlint/*
@@ -53,7 +53,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - run: ./gradlew unitTests
-      - uses: actions/upload-artifact@latest
+      - uses: actions/upload-artifact@v3
         with:
           name: unit-test-report
           path: build/reports/tests/unitTests/*
@@ -67,7 +67,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - run: ./gradlew integrationTests
-      - uses: actions/upload-artifact@latest
+      - uses: actions/upload-artifact@v3
         with:
           name: integration-test-report
           path: build/reports/tests/integrationTests/*
@@ -81,7 +81,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - run: ./gradlew architectureTests
-      - uses: actions/upload-artifact@latest
+      - uses: actions/upload-artifact@v3
         with:
           name: architecture-test-report
           path: build/reports/tests/architectureTests/*
@@ -98,15 +98,15 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: actions/download-artifact@latest
+      - uses: actions/download-artifact@v3
         with:
           name: unit-test-report
           path: build/reports/tests/unitTests/*
-      - uses: actions/download-artifact@latest
+      - uses: actions/download-artifact@v3
         with:
           name: integration-test-report
           path: build/reports/tests/integrationTests/*
-      - uses: actions/download-artifact@latest
+      - uses: actions/download-artifact@v3
         with:
           name: architecture-test-report
           path: build/reports/tests/architectureTests/*
@@ -124,20 +124,20 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: actions/download-artifact@latest
+      - uses: actions/download-artifact@v3
         with:
           name: unit-test-report
           path: build/reports/tests/unitTests/*
-      - uses: actions/download-artifact@latest
+      - uses: actions/download-artifact@v3
         with:
           name: integration-test-report
           path: build/reports/tests/integrationTests/*
-      - uses: actions/download-artifact@latest
+      - uses: actions/download-artifact@v3
         with:
           name: architecture-test-report
           path: build/reports/tests/architectureTests/*
       - run: ./gradlew jacocoTestReport
-      - uses: actions/upload-artifact@latest
+      - uses: actions/upload-artifact@v3
         with:
           name: test-coverage-report
           path: build/reports/jacoco/test/html/*
