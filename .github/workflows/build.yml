@@ -3,7 +3,7 @@ run-name: "verifying integrity"
 
 on:
   push:
-    branches: [ $default-branch ]
+    branches: [ main ]
 
 jobs:
   compile:
