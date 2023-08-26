@@ -91,12 +91,9 @@ test-coverage-verification:
 
 test-coverage-report:
   stage: report
+  coverage: '/Instruction Coverage: \d+\.\d+/'
   script:
     - ./gradlew jacocoTestReport
-    #- missed=$(xmllint --xpath 'string(/report/counter[@type="INSTRUCTION"]/@missed)' build/reports/jacoco/test/jacocoTestReport.xml)
-    #- covered=$(xmllint --xpath 'string(/report/counter[@type="INSTRUCTION"]/@covered)' build/reports/jacoco/test/jacocoTestReport.xml)
-    #- total=$((missed + covered))
-    #- echo $covered $total | awk '{ print "Test-Coverage=" $1 / $2 * 100 "%" }'
   needs:
     - unit-tests
     - integration-tests
