@@ -19,15 +19,16 @@ after_script:
 compile:
   stage: check
   script: ./gradlew compileKotlin compileTestKotlin compileJava compileTestJava
+  artifacts:
+    paths:
+      - build/*
 
 owasp:
   stage: check
   script: ./gradlew dependencyCheckAnalyze
   artifacts:
-    when: always
     paths:
       - build/reports/dependency-check-report.html
-    expire_in: 1 week
   except:
     - tags
 
@@ -35,10 +36,8 @@ ktlint:
   stage: check
   script: ./gradlew ktlintCheck
   artifacts:
-    when: always
     paths:
       - build/reports/ktlint/*
-    expire_in: 1 week
 
 unit-tests:
   stage: test
@@ -46,11 +45,9 @@ unit-tests:
   needs:
     - compile
   artifacts:
-    when: always
     paths:
       - build/reports/tests/unitTests/*
       - build/jacoco/*
-    expire_in: 1 week
 
 integration-tests:
   stage: test
@@ -58,11 +55,9 @@ integration-tests:
   needs:
     - compile
   artifacts:
-    when: always
     paths:
       - build/reports/tests/integrationTests/*
       - build/jacoco/*
-    expire_in: 1 week
 
 architecture-tests:
   stage: test
@@ -70,11 +65,9 @@ architecture-tests:
   needs:
     - compile
   artifacts:
-    when: always
     paths:
       - build/reports/tests/architectureTests/*
       - build/jacoco/*
-    expire_in: 1 week
 
 test-coverage-verification:
   stage: report
@@ -94,19 +87,15 @@ test-coverage-report:
     - integration-tests
     - architecture-tests
   artifacts:
-    when: always
     paths:
       - build/reports/jacoco/test/html/*
-    expire_in: 1 week
 
 licenses:
   stage: license
   script: ./gradlew downloadLicenses
   artifacts:
-    when: always
     paths:
       - build/reports/license/*
-    expire_in: 1 week
   only:
     - tags
 
