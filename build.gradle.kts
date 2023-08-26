@@ -88,11 +88,7 @@ listOf(
     }
 }
 
-tasks.test {
-    finalizedBy(tasks.jacocoTestReport)
-}
-
-val testExecutionData: PatternFilterable = fileTree(project.rootDir.path).include(("**/build/jacoco/*.exec"))
+val testExecutionData: PatternFilterable = fileTree(project.rootDir.path).include("build/jacoco/*.exec")
 
 tasks.jacocoTestReport {
     executionData(testExecutionData)

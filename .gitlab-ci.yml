@@ -1,11 +1,11 @@
 image: eclipse-temurin:17-jdk
 
 stages:
-  - check
-  - test
-  - report
-  - license
-  - release
+  - 🔎 check
+  - ✅ test
+  - 📘 report
+  - 💳 license
+  - 📦 release
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -13,18 +13,12 @@ variables:
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
 
-after_script:
-  - echo "done"
-
-compile:
-  stage: check
+⚙ compile:
+  stage: 🔎 check
   script: ./gradlew compileKotlin compileTestKotlin compileJava compileTestJava
-  artifacts:
-    paths:
-      - build/*
 
-owasp:
-  stage: check
+🔑 owasp:
+  stage: 🔎 check
   script: ./gradlew dependencyCheckAnalyze
   artifacts:
     paths:
@@ -32,66 +26,60 @@ owasp:
   except:
     - tags
 
-ktlint:
-  stage: check
+🏅 ktlint:
+  stage: 🔎 check
   script: ./gradlew ktlintCheck
   artifacts:
     paths:
       - build/reports/ktlint/*
 
-unit-tests:
-  stage: test
+🗃 unit-tests:
+  stage: ✅ test
   script: ./gradlew unitTests
-  needs:
-    - compile
   artifacts:
     paths:
       - build/reports/tests/unitTests/*
-      - build/jacoco/*
+      - build/jacoco/unitTests.exec
 
-integration-tests:
-  stage: test
+🛠 integration-tests:
+  stage: ✅ test
   script: ./gradlew integrationTests
-  needs:
-    - compile
   artifacts:
     paths:
       - build/reports/tests/integrationTests/*
-      - build/jacoco/*
+      - build/jacoco/integrationTests.exec
 
-architecture-tests:
-  stage: test
+🧱 architecture-tests:
+  stage: ✅ test
   script: ./gradlew architectureTests
-  needs:
-    - compile
   artifacts:
     paths:
       - build/reports/tests/architectureTests/*
-      - build/jacoco/*
+      - build/jacoco/architectureTests.exec
 
-test-coverage-verification:
-  stage: report
+🏆 test-coverage-verification:
+  stage: 📘 report
   script: ./gradlew jacocoTestCoverageVerification
   needs:
-    - unit-tests
-    - integration-tests
-    - architecture-tests
+    - 🗃 unit-tests
+    - 🛠 integration-tests
+    - 🧱 architecture-tests
 
-test-coverage-report:
-  stage: report
+📊 test-coverage-report:
+  stage: 📘 report
   coverage: '/Instruction Coverage: \d+\.\d+/'
   script:
     - ./gradlew jacocoTestReport
   needs:
-    - unit-tests
-    - integration-tests
-    - architecture-tests
+    - 🗃 unit-tests
+    - 🛠 integration-tests
+    - 🧱 architecture-tests
   artifacts:
     paths:
       - build/reports/jacoco/test/html/*
 
-licenses:
-  stage: license
+💳 licenses:
+  stage: 💳 license
   script: ./gradlew downloadLicenses
   artifacts:
     paths:
@@ -99,8 +87,8 @@ licenses:
   only:
     - tags
 
-semver:
-  stage: release
+🚀 semver:
+  stage: 📦 release
   image: node:18
   script:
     - npm install semantic-release @semantic-release/gitlab conventional-changelog-conventionalcommits
