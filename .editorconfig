@@ -1,0 +1,13 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+max_line_length = 140
+insert_final_newline = true
+
+[*.kt]
+ij_kotlin_packages_to_use_import_on_demand = 10
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
