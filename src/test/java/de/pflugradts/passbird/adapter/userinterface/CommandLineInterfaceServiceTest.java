@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.adapter.userinterface;
 
-import de.pflugradts.passbird.application.configuration.ConfigurationFaker;
+import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.configuration.Configuration;
 import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.application.util.SystemOperationFaker;
@@ -41,7 +41,7 @@ class CommandLineInterfaceServiceTest {
             String actual;
             try (var stream = new ByteArrayOutputStream(); var printStream = new PrintStream(stream)) {
                 System.setOut(printStream);
-                ConfigurationFaker.faker().forInstance(configuration);
+                MockitoConfigurationFaker.faker().forInstance(configuration);
 
                 // when
                 commandLineInterfaceService.send(Output.of(Bytes.of(givenMessage)));
@@ -82,7 +82,7 @@ class CommandLineInterfaceServiceTest {
             Try<Input> actual;
             try (var stream = new ByteArrayInputStream(inputBytes)) {
                 System.setIn(stream);
-                ConfigurationFaker.faker().forInstance(configuration);
+                MockitoConfigurationFaker.faker().forInstance(configuration);
 
                 // when
                 actual = commandLineInterfaceService.receive();
@@ -106,7 +106,7 @@ class CommandLineInterfaceServiceTest {
                  var in = new ByteArrayInputStream(("smth" + System.lineSeparator()).getBytes())) {
                 System.setOut(printStream);
                 System.setIn(in);
-                ConfigurationFaker.faker().forInstance(configuration);
+                MockitoConfigurationFaker.faker().forInstance(configuration);
 
                 // when
                 commandLineInterfaceService.receive(Output.of(Bytes.of(givenMessage)));
@@ -129,7 +129,7 @@ class CommandLineInterfaceServiceTest {
             SystemOperationFaker.faker()
                     .forInstance(systemOperation)
                     .withPasswordFromConsole(givenInput.toCharArray()).fake();
-            ConfigurationFaker.faker()
+            MockitoConfigurationFaker.faker()
                     .forInstance(configuration)
                     .withSecureInputEnabled().fake();
 
@@ -155,7 +155,7 @@ class CommandLineInterfaceServiceTest {
                 SystemOperationFaker.faker()
                         .forInstance(systemOperation)
                         .withPasswordFromConsole("smth".toCharArray()).fake();
-                ConfigurationFaker.faker()
+                MockitoConfigurationFaker.faker()
                         .forInstance(configuration)
                         .withSecureInputEnabled().fake();
 
@@ -176,7 +176,7 @@ class CommandLineInterfaceServiceTest {
             Try<Input> actual;
             try (var stream = new ByteArrayInputStream(inputBytes)) {
                 System.setIn(stream);
-                ConfigurationFaker.faker()
+                MockitoConfigurationFaker.faker()
                         .forInstance(configuration)
                         .withSecureInputDisabled().fake();
 
@@ -203,7 +203,7 @@ class CommandLineInterfaceServiceTest {
                 SystemOperationFaker.faker()
                         .forInstance(systemOperation)
                         .withConsoleDisabled().fake();
-                ConfigurationFaker.faker()
+                MockitoConfigurationFaker.faker()
                         .forInstance(configuration)
                         .withSecureInputEnabled().fake();
 
@@ -232,7 +232,7 @@ class CommandLineInterfaceServiceTest {
             boolean actual;
             try (var stream = new ByteArrayInputStream(inputBytes)) {
                 System.setIn(stream);
-                ConfigurationFaker.faker().forInstance(configuration);
+                MockitoConfigurationFaker.faker().forInstance(configuration);
 
                 // when
                 actual = commandLineInterfaceService.receiveConfirmation(Output.empty());
@@ -250,7 +250,7 @@ class CommandLineInterfaceServiceTest {
             boolean actual;
             try (var stream = new ByteArrayInputStream(inputBytes)) {
                 System.setIn(stream);
-                ConfigurationFaker.faker().forInstance(configuration);
+                MockitoConfigurationFaker.faker().forInstance(configuration);
 
                 // when
                 actual = commandLineInterfaceService.receiveConfirmation(Output.empty());
@@ -268,7 +268,7 @@ class CommandLineInterfaceServiceTest {
             boolean actual;
             try (var stream = new ByteArrayInputStream(inputBytes)) {
                 System.setIn(stream);
-                ConfigurationFaker.faker().forInstance(configuration);
+                MockitoConfigurationFaker.faker().forInstance(configuration);
 
                 // when
                 actual = commandLineInterfaceService.receiveConfirmation(Output.empty());
@@ -286,7 +286,7 @@ class CommandLineInterfaceServiceTest {
             boolean actual;
             try (var stream = new ByteArrayInputStream(inputBytes)) {
                 System.setIn(stream);
-                ConfigurationFaker.faker().forInstance(configuration);
+                MockitoConfigurationFaker.faker().forInstance(configuration);
 
                 // when
                 actual = commandLineInterfaceService.receiveConfirmation(Output.empty());

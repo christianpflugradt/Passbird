@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.passbird.application.commandhandling.handler.CustomSetCommandHandler;
 import de.pflugradts.passbird.application.configuration.Configuration;
-import de.pflugradts.passbird.application.configuration.ConfigurationFaker;
+import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.password.InvalidKeyException;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
@@ -47,7 +47,7 @@ class CustomSetCommandTestIT {
 
     @BeforeEach
     void setup() {
-        ConfigurationFaker.faker().forInstance(configuration).fake();
+        MockitoConfigurationFaker.faker().forInstance(configuration).fake();
         inputHandler = setupInputHandlerFor(customSetCommandHandler);
     }
 
@@ -83,7 +83,7 @@ class CustomSetCommandTestIT {
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withInvalidAlias(Bytes.of(args)).fake();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withPromptOnRemovalEnabled().fake();
 
@@ -156,7 +156,7 @@ class CustomSetCommandTestIT {
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withPasswordEntries(givenPasswordEntry).fake();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withPromptOnRemovalEnabled().fake();
         UserInterfaceAdapterPortFaker.faker()
@@ -186,7 +186,7 @@ class CustomSetCommandTestIT {
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withPasswordEntries(givenPasswordEntry).fake();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withPromptOnRemovalEnabled().fake();
         UserInterfaceAdapterPortFaker.faker()

@@ -80,8 +80,8 @@ tasks.withType<Test>().configureEach {
 
 listOf(
     Pair("unitTests", "Test"),
-    Pair("integrationTests", "TestIT"),
-    Pair("architectureTests", "TestAT")
+    Pair("integrationTests", "IT"),
+    Pair("architectureTests", "AT")
 ).forEach {
     tasks.register<Test>(it.first) {
         group = VERIFICATION_GROUP

@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.KeyStoreAdapterPort;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.passbird.application.configuration.Configuration;
-import de.pflugradts.passbird.application.configuration.ConfigurationFaker;
+import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.configuration.ConfigurationSync;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.application.util.FileFaker;
@@ -60,7 +60,7 @@ class PassbirdSetupTest {
         // given
         final var configurationDirectory = "tmp";
         final var password = InputFaker.faker().fakeInput().withMessage("p4s5w0rD").fake();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withConfigurationTemplate()
                 .withPasswordStoreLocation(configurationDirectory)
@@ -90,7 +90,7 @@ class PassbirdSetupTest {
     @Test
     void shouldAbortUnconfirmedConfigTemplateRoute() {
         // given
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withConfigurationTemplate()
                 .fake();
@@ -113,7 +113,7 @@ class PassbirdSetupTest {
         // given
         final var configurationDirectory = "tmp";
         final var password = InputFaker.faker().fakeInput().withMessage("p4s5w0rD").fake();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withKeyStoreLocation(configurationDirectory)
                 .fake();
@@ -141,7 +141,7 @@ class PassbirdSetupTest {
     void shouldAbortUnconfirmedConfigKeyStoreRoute() {
         // given
         final var configurationDirectory = "tmp";
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withKeyStoreLocation(configurationDirectory)
                 .fake();
@@ -166,7 +166,7 @@ class PassbirdSetupTest {
         final var invalidConfigurationDirectory = "/dev/null";
         final var validDirectory = InputFaker.faker().fakeInput().withMessage("tmp").fake();
         final var password = InputFaker.faker().fakeInput().withMessage("p4s5w0rD").fake();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withKeyStoreLocation(invalidConfigurationDirectory)
                 .fake();
@@ -198,7 +198,7 @@ class PassbirdSetupTest {
         final var passwordMismatch2 = InputFaker.faker().fakeInput().withMessage("guessword").fake();
         final var emptyPassword = Input.empty();
         final var passwordMatched = InputFaker.faker().fakeInput().withMessage("p4s5w0rD").fake();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withKeyStoreLocation(configurationDirectory)
                 .fake();

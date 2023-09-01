@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.passbird.application.commandhandling.handler.DiscardCommandHandler;
 import de.pflugradts.passbird.application.configuration.Configuration;
-import de.pflugradts.passbird.application.configuration.ConfigurationFaker;
+import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
@@ -43,7 +43,7 @@ class DiscardCommandTestIT {
 
     @BeforeEach
     void setup() {
-        ConfigurationFaker.faker().forInstance(configuration).fake();
+        MockitoConfigurationFaker.faker().forInstance(configuration).fake();
         inputHandler = setupInputHandlerFor(discardCommandHandler);
     }
 
@@ -74,7 +74,7 @@ class DiscardCommandTestIT {
         final var args = "key";
         final var bytes = Bytes.of("d" + args);
         final var reference = bytes.copy();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withPromptOnRemovalEnabled().fake();
         UserInterfaceAdapterPortFaker.faker()
@@ -101,7 +101,7 @@ class DiscardCommandTestIT {
         final var args = "key";
         final var bytes = Bytes.of("d" + args);
         final var reference = bytes.copy();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withPromptOnRemovalEnabled().fake();
         UserInterfaceAdapterPortFaker.faker()

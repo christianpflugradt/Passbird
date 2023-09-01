@@ -7,7 +7,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class ConfigurationFaker {
+public class MockitoConfigurationFaker {
 
     private boolean isTemplate = false;
     private String passwordStoreLocation;
@@ -22,81 +22,81 @@ public class ConfigurationFaker {
     private boolean isPromptOnRemoval = false;
     private Configuration configuration;
 
-    public static ConfigurationFaker faker() {
-        return new ConfigurationFaker();
+    public static MockitoConfigurationFaker faker() {
+        return new MockitoConfigurationFaker();
     }
 
-    public ConfigurationFaker forInstance(final Configuration configuration) {
+    public MockitoConfigurationFaker forInstance(final Configuration configuration) {
         this.configuration = configuration;
         return this;
     }
 
-    public ConfigurationFaker withConfigurationTemplate() {
+    public MockitoConfigurationFaker withConfigurationTemplate() {
         this.isTemplate = true;
         return this;
     }
 
-    public ConfigurationFaker withPasswordStoreLocation(final String passwordStoreLocation) {
+    public MockitoConfigurationFaker withPasswordStoreLocation(final String passwordStoreLocation) {
         this.passwordStoreLocation = passwordStoreLocation;
         return this;
     }
 
-    public ConfigurationFaker withKeyStoreLocation(final String keyStoreLocation) {
+    public MockitoConfigurationFaker withKeyStoreLocation(final String keyStoreLocation) {
         this.keyStoreLocation = keyStoreLocation;
         return this;
     }
 
-    public ConfigurationFaker withClipboardResetEnabled() {
+    public MockitoConfigurationFaker withClipboardResetEnabled() {
         this.isClipboardResetEnabled = true;
         return this;
     }
 
-    public ConfigurationFaker withClipboardResetDisabled() {
+    public MockitoConfigurationFaker withClipboardResetDisabled() {
         this.isClipboardResetEnabled = false;
         return this;
     }
 
-    public ConfigurationFaker withClipboardResetDelaySeconds(int seconds) {
+    public MockitoConfigurationFaker withClipboardResetDelaySeconds(int seconds) {
         this.clipboardResetDelaySeconds = seconds;
         return this;
     }
 
-    public ConfigurationFaker withSecureInputEnabled() {
+    public MockitoConfigurationFaker withSecureInputEnabled() {
         this.isSecureInput = true;
         return this;
     }
 
-    public ConfigurationFaker withSecureInputDisabled() {
+    public MockitoConfigurationFaker withSecureInputDisabled() {
         this.isSecureInput = false;
         return this;
     }
 
-    public ConfigurationFaker withPasswordLength(final int passwordLength) {
+    public MockitoConfigurationFaker withPasswordLength(final int passwordLength) {
         this.passwordLength = passwordLength;
         return this;
     }
 
-    public ConfigurationFaker withSpecialCharactersEnabled() {
+    public MockitoConfigurationFaker withSpecialCharactersEnabled() {
         this.hasSpecialCharacters = true;
         return this;
     }
 
-    public ConfigurationFaker withSpecialCharactersDisabled() {
+    public MockitoConfigurationFaker withSpecialCharactersDisabled() {
         this.hasSpecialCharacters = false;
         return this;
     }
 
-    public ConfigurationFaker withPromptOnRemovalEnabled() {
+    public MockitoConfigurationFaker withPromptOnRemovalEnabled() {
         this.isPromptOnRemoval = true;
         return this;
     }
 
-    public ConfigurationFaker withVerifyChecksumEnabled() {
+    public MockitoConfigurationFaker withVerifyChecksumEnabled() {
         this.isVerifyChecksum = true;
         return this;
     }
 
-    public ConfigurationFaker withVerifySignatureEnabled() {
+    public MockitoConfigurationFaker withVerifySignatureEnabled() {
         this.isVerifySignature = true;
         return this;
     }

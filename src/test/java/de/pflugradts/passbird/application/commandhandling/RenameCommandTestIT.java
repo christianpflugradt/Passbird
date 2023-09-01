@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.passbird.application.commandhandling.handler.RenameCommandHandler;
 import de.pflugradts.passbird.application.configuration.Configuration;
-import de.pflugradts.passbird.application.configuration.ConfigurationFaker;
+import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
@@ -46,7 +46,7 @@ class RenameCommandTestIT {
 
     @BeforeEach
     void setup() {
-        ConfigurationFaker.faker().forInstance(configuration).fake();
+        MockitoConfigurationFaker.faker().forInstance(configuration).fake();
         inputHandler = setupInputHandlerFor(renameCommandHandler);
     }
 

@@ -5,7 +5,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.passbird.application.boot.Bootable;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
-import de.pflugradts.passbird.application.configuration.ConfigurationFaker;
+import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.configuration.Configuration;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.application.util.PathFaker;
@@ -56,7 +56,7 @@ class CryptoProviderFactoryTest {
         SystemOperationFaker.faker()
                 .forInstance(systemOperation)
                 .withPath(keyStoreDirectory, keyStoreDirPath).fake();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withKeyStoreLocation(keyStoreDirectory).fake();
         UserInterfaceAdapterPortFaker.faker()
@@ -84,7 +84,7 @@ class CryptoProviderFactoryTest {
         SystemOperationFaker.faker()
                 .forInstance(systemOperation)
                 .withPath(keyStoreDirectory, keyStoreDirPath).fake();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withKeyStoreLocation(keyStoreDirectory).fake();
         UserInterfaceAdapterPortFaker.faker()
@@ -112,7 +112,7 @@ class CryptoProviderFactoryTest {
         SystemOperationFaker.faker()
                 .forInstance(systemOperation)
                 .withPath(keyStoreDirectory, keyStoreDirPath).fake();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withKeyStoreLocation(keyStoreDirectory).fake();
         UserInterfaceAdapterPortFaker.faker()

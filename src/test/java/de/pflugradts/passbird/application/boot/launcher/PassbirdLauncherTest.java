@@ -9,7 +9,7 @@ import de.pflugradts.passbird.application.boot.main.PassbirdApplication;
 import de.pflugradts.passbird.application.boot.setup.PassbirdSetup;
 import de.pflugradts.passbird.application.boot.setup.SetupModule;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
-import de.pflugradts.passbird.application.configuration.ConfigurationFaker;
+import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.configuration.Configuration;
 import de.pflugradts.passbird.application.util.FileFaker;
 import de.pflugradts.passbird.application.util.GuiceInjector;
@@ -90,7 +90,7 @@ class PassbirdLauncherTest {
     void shouldLaunchSetup_IfKeyStoreLocationIsNotSet() {
         // given
         final var expectedBootable = mock(PassbirdSetup.class);
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withKeyStoreLocation("").fake();
         setupInjectorWithCapture(expectedBootable);
@@ -116,7 +116,7 @@ class PassbirdLauncherTest {
         SystemOperationFaker.faker()
                 .forInstance(systemOperation)
                 .withPath(keystoreDirectory, path).fake();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withKeyStoreLocation(keystoreDirectory).fake();
     }
