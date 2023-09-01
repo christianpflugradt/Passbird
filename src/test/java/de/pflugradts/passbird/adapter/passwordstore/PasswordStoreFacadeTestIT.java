@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.adapter.passwordstore;
 
 import de.pflugradts.passbird.application.configuration.Configuration;
-import de.pflugradts.passbird.application.configuration.ConfigurationFaker;
+import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.application.util.SystemOperation;
@@ -67,7 +67,7 @@ class PasswordStoreFacadeTestIT {
                 invocation -> Try.of(() -> invocation.getArgument(0)));
         given(cryptoProvider.decrypt(any(Bytes.class))).willAnswer(
                 invocation -> Try.of(() -> invocation.getArgument(0)));
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withPasswordStoreLocation(tempPasswordStoreDirectory).fake();
     }

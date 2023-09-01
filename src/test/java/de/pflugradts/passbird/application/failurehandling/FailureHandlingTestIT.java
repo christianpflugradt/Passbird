@@ -2,7 +2,7 @@ package de.pflugradts.passbird.application.failurehandling;
 
 import de.pflugradts.passbird.application.boot.Bootable;
 import de.pflugradts.passbird.application.configuration.Configuration;
-import de.pflugradts.passbird.application.configuration.ConfigurationFaker;
+import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.password.InvalidKeyException;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
@@ -61,7 +61,7 @@ class FailureHandlingTestIT {
     void shouldHandleChecksumFailure_Strict() {
         // given
         assertThat(outputStream.toByteArray()).isEmpty();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withVerifyChecksumEnabled().fake();
 
@@ -78,7 +78,7 @@ class FailureHandlingTestIT {
     void shouldHandleChecksumFailure_Lenient() {
         // given
         assertThat(outputStream.toByteArray()).isEmpty();
-        ConfigurationFaker.faker().forInstance(configuration).fake();
+        MockitoConfigurationFaker.faker().forInstance(configuration).fake();
 
         // when
         failureCollector.collectChecksumFailure(Byte.valueOf("0"), Byte.valueOf("0"));
@@ -212,7 +212,7 @@ class FailureHandlingTestIT {
     void shouldHandleDecryptPasswordDatabaseFailure() {
         // given
         assertThat(outputStream.toByteArray()).isEmpty();
-        ConfigurationFaker.faker().forInstance(configuration).fake();
+        MockitoConfigurationFaker.faker().forInstance(configuration).fake();
         given(systemOperation.resolvePath(any(), any())).willReturn(Try.success(mock(Path.class)));
 
         // when
@@ -228,7 +228,7 @@ class FailureHandlingTestIT {
     void shouldHandleSignatureCheckFailure_Strict() {
         // given
         assertThat(outputStream.toByteArray()).isEmpty();
-        ConfigurationFaker.faker()
+        MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withVerifySignatureEnabled().fake();
 
@@ -245,7 +245,7 @@ class FailureHandlingTestIT {
     void shouldHandleSignatureCheckFailure_Lenient() {
         // given
         assertThat(outputStream.toByteArray()).isEmpty();
-        ConfigurationFaker.faker().forInstance(configuration).fake();
+        MockitoConfigurationFaker.faker().forInstance(configuration).fake();
 
         // when
         failureCollector.collectSignatureCheckFailure(Bytes.empty());

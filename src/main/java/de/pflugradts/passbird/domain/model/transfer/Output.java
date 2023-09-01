@@ -12,7 +12,7 @@ import lombok.Value;
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class Output {
 
-    Bytes bytes;
+    public Bytes bytes;
 
     public static Output empty() {
         return Output.of(Bytes.of(new byte[0]));
