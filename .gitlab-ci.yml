@@ -10,8 +10,7 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
 
-before_script:
-  - export GRADLE_USER_HOME=`pwd`/.gradle
+before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 
 ⚙ compile:
   stage: 🔎 check
@@ -21,21 +20,19 @@ before_script:
   stage: 🔎 check
   script: ./gradlew dependencyCheckAnalyze
   artifacts:
-    paths:
-      - build/reports/dependency-check-report.html
-  except:
-    - tags
+    paths: [ build/reports/dependency-check-report.html ]
+  except: [ tags ]
 
 🏅 ktlint:
   stage: 🔎 check
   script: ./gradlew ktlintCheck
   artifacts:
-    paths:
-      - build/reports/ktlint/*
+    paths: [ build/reports/ktlint/* ]
 
 🗃 unit-tests:
   stage: ✅ test
   script: ./gradlew unitTests
+  needs: [ ⚙ compile]
   artifacts:
     paths:
       - build/reports/tests/unitTests/*
@@ -44,6 +41,7 @@ before_script:
 🛠 integration-tests:
   stage: ✅ test
   script: ./gradlew integrationTests
+  needs: [ ⚙ compile]
   artifacts:
     paths:
       - build/reports/tests/integrationTests/*
@@ -52,6 +50,7 @@ before_script:
 🧱 architecture-tests:
   stage: ✅ test
   script: ./gradlew architectureTests
+  needs: [ ⚙ compile]
   artifacts:
     paths:
       - build/reports/tests/architectureTests/*
@@ -68,24 +67,20 @@ before_script:
 📊 test-coverage-report:
   stage: 📘 report
   coverage: '/Instruction Coverage: \d+\.\d+/'
-  script:
-    - ./gradlew jacocoTestReport
+  script: ./gradlew jacocoTestReport
   needs:
     - 🗃 unit-tests
     - 🛠 integration-tests
     - 🧱 architecture-tests
   artifacts:
-    paths:
-      - build/reports/jacoco/test/html/*
+    paths: [ build/reports/jacoco/test/html/* ]
 
 💳 licenses:
   stage: 💳 license
   script: ./gradlew downloadLicenses
   artifacts:
-    paths:
-      - build/reports/license/*
-  only:
-    - tags
+    paths: [ build/reports/license/* ]
+  only: [ tags ]
 
 🚀 semver:
   stage: 📦 release
@@ -94,5 +89,4 @@ before_script:
     - npm install semantic-release @semantic-release/gitlab conventional-changelog-conventionalcommits
     - npx semantic-release -t \${version}
   when: manual
-  only:
-    - main
+  only: [ main ]

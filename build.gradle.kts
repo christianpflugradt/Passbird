@@ -8,6 +8,7 @@ plugins {
     jacoco
     java
     kotlin("jvm") version "1.9.10"
+    id("com.github.hierynomus.license") version "0.16.1"
     id("org.owasp.dependencycheck") version "8.4.0"
     id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
     id("com.adarshr.test-logger") version "3.2.0"
