@@ -7,7 +7,6 @@ import de.pflugradts.passbird.application.commandhandling.command.CustomSetComma
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
 
@@ -32,9 +31,7 @@ public class CustomSetCommandHandler implements CommandHandler {
                 failureCollector.collectPasswordEntryFailure(customSetCommand.getArgument(), aliasCheck.getCause());
             } else {
                 final var secureInput = userInterfaceAdapterPort
-                        .receiveSecurely(Output.of(Bytes.of("Enter custom password: ")))
-                        .onFailure(failureCollector::collectInputFailure)
-                        .getOrElse(Input.empty());
+                        .receiveSecurely(Output.of(Bytes.of("Enter custom password: ")));
                 if (secureInput.isEmpty()) {
                     userInterfaceAdapterPort.send(Output.of(Bytes.of("Empty input - Operation aborted.")));
                 } else {

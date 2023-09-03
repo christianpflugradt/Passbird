@@ -31,7 +31,7 @@ internal class ClipboardServiceTest {
         val message = "write this to clipboard"
         fakeConfiguration(
             instance = configuration,
-            clipboardResetEnabled = false,
+            withClipboardResetEnabled = false,
         )
 
         // when
@@ -48,8 +48,8 @@ internal class ClipboardServiceTest {
         val delaySeconds = 1
         fakeConfiguration(
             instance = configuration,
-            clipboardResetEnabled = true,
-            clipboardResetDelaySeconds = delaySeconds,
+            withClipboardResetEnabled = true,
+            withClipboardResetDelaySeconds = delaySeconds,
         )
 
         // when
@@ -71,8 +71,8 @@ internal class ClipboardServiceTest {
         val almostASecond = 800
         fakeConfiguration(
             instance = configuration,
-            clipboardResetEnabled = true,
-            clipboardResetDelaySeconds = delaySeconds,
+            withClipboardResetEnabled = true,
+            withClipboardResetDelaySeconds = delaySeconds,
         )
 
         // when

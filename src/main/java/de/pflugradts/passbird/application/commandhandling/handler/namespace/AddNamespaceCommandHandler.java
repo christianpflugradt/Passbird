@@ -7,7 +7,6 @@ import de.pflugradts.passbird.application.commandhandling.command.namespace.AddN
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.NamespaceService;
 
@@ -35,9 +34,7 @@ public class AddNamespaceCommandHandler implements CommandHandler {
                 namespaceService.atSlot(addNamespaceCommand.getSlot()).get().getBytes().asString())
             : String.format("Enter name for namespace or nothing to abort%nYour input: ");
         final var input = userInterfaceAdapterPort
-            .receive(Output.of(Bytes.of(prompt)))
-            .onFailure(failureCollector::collectInputFailure)
-            .getOrElse(Input.empty());
+            .receive(Output.of(Bytes.of(prompt)));
         if (input.isEmpty()) {
             userInterfaceAdapterPort.send(Output.of(Bytes.of("Empty input - Operation aborted.")));
         } else {

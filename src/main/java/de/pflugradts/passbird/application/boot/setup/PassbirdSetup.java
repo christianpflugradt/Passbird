@@ -86,12 +86,8 @@ public class PassbirdSetup implements Bootable {
             if (Objects.nonNull(input)) {
                 setupGuide.sendNonMatchingInputs();
             }
-            input = userInterfaceAdapterPort.receiveSecurely(Output.of(Bytes.of("first input: ")))
-                    .onFailure(failureCollector::collectInputFailure)
-                    .getOrElse(Input.empty());
-            inputRepeated = userInterfaceAdapterPort.receiveSecurely(Output.of(Bytes.of("second input: ")))
-                    .onFailure(failureCollector::collectInputFailure)
-                    .getOrElse(Input.empty());
+            input = userInterfaceAdapterPort.receiveSecurely(Output.of(Bytes.of("first input: ")));
+            inputRepeated = userInterfaceAdapterPort.receiveSecurely(Output.of(Bytes.of("second input: ")));
         }
         userInterfaceAdapterPort.sendLineBreak();
         return input;
@@ -113,8 +109,7 @@ public class PassbirdSetup implements Bootable {
         var directory = source;
         while (!isValidDirectory(directory)) {
             directory = userInterfaceAdapterPort.receive(Output.of(Bytes.of("your input: ")))
-                    .onFailure(failureCollector::collectInputFailure)
-                    .getOrElse(Input.empty()).getBytes().asString();
+                    .getBytes().asString();
         }
         return directory;
     }

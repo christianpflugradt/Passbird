@@ -7,7 +7,6 @@ import de.pflugradts.passbird.application.commandhandling.command.namespace.Assi
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.NamespaceService;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
@@ -35,9 +34,7 @@ public class AssignNamespaceCommandHandler implements CommandHandler, CanListAva
             userInterfaceAdapterPort.send(Output.of(Bytes.of(String.format("Available namespaces: %n%s",
                 getAvailableNamespaces(namespaceService, false)))));
             final var input = userInterfaceAdapterPort
-                .receive(Output.of(Bytes.of("Enter namespace you want to move password entry to: ")))
-                .onFailure(failureCollector::collectInputFailure)
-                .getOrElse(Input.empty());
+                .receive(Output.of(Bytes.of("Enter namespace you want to move password entry to: ")));
             final var namespace = input.parseNamespace();
             if (namespace == INVALID) {
                 userInterfaceAdapterPort.send(Output.of(Bytes.of(
