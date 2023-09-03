@@ -17,17 +17,12 @@ class Chars private constructor(private val chars: CharArray) {
     ).also { this.scramble() }
 
     fun toCharArray() = chars.clone()
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        return chars contentEquals (other as Chars).chars
-    }
-    /* TODO why does this always return true?
-    override fun equals(other: Any?): Boolean = when (other) {
+
+    override fun equals(other: Any?): Boolean = when {
         (this === other) -> true
         (javaClass != other?.javaClass) -> false
         else -> chars contentEquals (other as Chars).chars
-    }*/
+    }
 
     override fun hashCode() = chars.contentHashCode()
 
