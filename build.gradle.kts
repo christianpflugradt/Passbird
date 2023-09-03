@@ -46,9 +46,10 @@ dependencies {
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
-group = "de.pflugradts.pwman3"
+group = "de.pflugradts"
 
 tasks.withType<Jar> {
+    archiveBaseName.set("pwman3")
     manifest {
         attributes["Main-Class"] = "de.pflugradts.passbird.application.Main"
         attributes["Implementation-Version"] = version
