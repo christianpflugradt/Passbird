@@ -7,13 +7,15 @@ import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Chars;
 import io.vavr.control.Try;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+import javax.crypto.KeyGenerator;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.security.KeyStore;
-import javax.crypto.KeyGenerator;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+
 import static de.pflugradts.passbird.application.util.CryptoUtils.AES_ENCRYPTION;
 import static de.pflugradts.passbird.application.util.CryptoUtils.KEYSTORE_KEY_BITS;
 
@@ -43,8 +45,8 @@ public class KeyStoreService implements KeyStoreAdapterPort {
                 keyStore.load(inputStream, passwordChars);
                 final var secret = keyStore.getKey(SECRET_ALIAS, passwordChars);
                 final var iv = keyStore.getKey(IV_ALIAS, passwordChars);
-                Chars.scramble(passwordChars);
-                password.scrambleSelf();
+                Chars.of(passwordChars).scramble();
+                password.scramble();
                 return new Key(Bytes.of(secret.getEncoded()), Bytes.of(iv.getEncoded()));
             }
         } else if (tryKeyStore.isFailure()) {
@@ -79,8 +81,8 @@ public class KeyStoreService implements KeyStoreAdapterPort {
                         new KeyStore.SecretKeyEntry(keyGenerator.generateKey()),
                         new KeyStore.PasswordProtection(passwordChars));
                 keyStore.store(outputStream, passwordChars);
-                Chars.scramble(passwordChars);
-                password.scrambleSelf();
+                Chars.of(passwordChars).scramble();
+                password.scramble();
             }
         } else if (tryKeyStore.isFailure()) {
             throw tryKeyStore.getCause();
