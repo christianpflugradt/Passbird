@@ -3,8 +3,6 @@ package de.pflugradts.passbird.domain.model.transfer;
 import de.pflugradts.passbird.domain.model.ddd.ValueObject;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import io.vavr.control.Try;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
 
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.FIRST;
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.INVALID;
@@ -14,15 +12,24 @@ import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.LAST;
  * An Input represents data given by the user through the
  * {@link de.pflugradts.passbird.application.UserInterfaceAdapterPort UserInterface}.
  */
-@RequiredArgsConstructor(staticName = "of")
-@Value
-@SuppressWarnings("checkstyle:VisibilityModifier")
 public class Input implements ValueObject {
 
-    Bytes bytes;
+    private final Bytes bytes;
 
     public static Input empty() {
         return Input.of(Bytes.of());
+    }
+
+    private Input(final Bytes bytes) {
+        this.bytes = bytes;
+    }
+
+    public static Input of(final Bytes bytes) {
+        return new Input(bytes);
+    }
+
+    public Bytes getBytes() {
+        return bytes;
     }
 
     public Bytes getCommand() {

@@ -2,13 +2,14 @@ package de.pflugradts.passbird.application;
 
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
-import io.vavr.control.Try;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
@@ -48,16 +49,16 @@ public class UserInterfaceAdapterPortFaker {
 
     private void givenReceivedInput() {
         lenient().when(userInterfaceAdapterPort.receive(any(Output.class))).thenAnswer(
-                invocation -> Try.of(() -> inputList.get(inputCount.getAndIncrement())));
+                invocation -> inputList.get(inputCount.getAndIncrement()));
         lenient().when(userInterfaceAdapterPort.receive()).thenAnswer(
-                invocation -> Try.of(() -> inputList.get(inputCount.getAndIncrement())));
+                invocation -> inputList.get(inputCount.getAndIncrement()));
     }
 
     private void givenReceivedSecureInput() {
         lenient().when(userInterfaceAdapterPort.receiveSecurely(any(Output.class))).thenAnswer(
-                invocation -> Try.of(() -> secureInputList.get(secureInputCount.getAndIncrement())));
+                invocation -> secureInputList.get(secureInputCount.getAndIncrement()));
         lenient().when(userInterfaceAdapterPort.receiveSecurely()).thenAnswer(
-                invocation -> Try.of(() -> secureInputList.get(secureInputCount.getAndIncrement())));
+                invocation -> secureInputList.get(secureInputCount.getAndIncrement()));
     }
 
     public UserInterfaceAdapterPort fake() {

@@ -27,8 +27,8 @@ public class SystemOperation {
         return Objects.nonNull(System.console());
     }
 
-    public Try<char[]> readPasswordFromConsole() {
-        return Try.of(() -> System.console().readPassword());
+    public char[] readPasswordFromConsole() {
+        return  System.console().readPassword();
     }
 
     public Try<Path> resolvePath(final String directory, final String fileName) {

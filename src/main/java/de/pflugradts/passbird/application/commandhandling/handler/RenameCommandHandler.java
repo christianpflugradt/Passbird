@@ -6,7 +6,6 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.RenameCommand;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
 
@@ -28,9 +27,7 @@ public class RenameCommandHandler implements CommandHandler {
                         failureCollector.collectPasswordEntryFailure(renameCommand.getArgument(), throwable))
                 .getOrElse(false)) {
             final var secureInput = userInterfaceAdapterPort
-                    .receive(Output.of(Bytes.of("Enter new alias or nothing to abort: ")))
-                    .onFailure(failureCollector::collectInputFailure)
-                    .getOrElse(Input.empty());
+                    .receive(Output.of(Bytes.of("Enter new alias or nothing to abort: ")));
             if (secureInput.isEmpty()) {
                 userInterfaceAdapterPort.send(Output.of(Bytes.of("Empty input - Operation aborted.")));
             } else {

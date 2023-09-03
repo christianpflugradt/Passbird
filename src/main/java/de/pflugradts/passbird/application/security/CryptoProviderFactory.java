@@ -10,11 +10,12 @@ import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Chars;
-import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
 import io.vavr.control.Try;
+
 import javax.security.auth.login.LoginException;
+
 import static de.pflugradts.passbird.application.configuration.ReadableConfiguration.KEYSTORE_FILENAME;
 
 @Singleton
@@ -54,8 +55,6 @@ public class CryptoProviderFactory {
     private Chars receiveLogin() {
         return userInterfaceAdapterPort
                 .receiveSecurely(Output.of(Bytes.of("Enter key: ")))
-                .onFailure(failureCollector::collectInputFailure)
-                .getOrElse(Input.empty())
                 .getBytes()
                 .toChars();
     }

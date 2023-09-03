@@ -1,13 +1,15 @@
 package de.pflugradts.passbird.application.util;
 
 import io.vavr.control.Try;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
@@ -47,7 +49,7 @@ public class SystemOperationFaker {
 
     public SystemOperationFaker withPasswordFromConsole(char[] password) {
         given(systemOperation.isConsoleAvailable()).willReturn(true);
-        given(systemOperation.readPasswordFromConsole()).willReturn(Try.of(() -> password));
+        given(systemOperation.readPasswordFromConsole()).willReturn(password);
         return this;
     }
 
