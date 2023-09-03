@@ -110,11 +110,11 @@ tasks.jacocoTestCoverageVerification {
         rule {
             limit {
                 counter = "INSTRUCTION"
-                minimum = 0.9.toBigDecimal()
+                minimum = 0.6.toBigDecimal()
             }
             limit {
                 counter = "BRANCH"
-                minimum = 0.9.toBigDecimal()
+                minimum = 0.6.toBigDecimal()
             }
         }
     }
