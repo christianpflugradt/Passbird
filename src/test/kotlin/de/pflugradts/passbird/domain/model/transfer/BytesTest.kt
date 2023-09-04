@@ -125,9 +125,7 @@ internal class BytesTest {
         // then
         expectThat(bytes.size) isEqualTo size
         bytes.forEach {
-            expectThat(it)
-                .isGreaterThanOrEqualTo(minAsciiValue.toByte())
-                .isLessThanOrEqualTo(maxAsciiValue.toByte())
+            expectThat(it) isGreaterThanOrEqualTo minAsciiValue.toByte() isLessThanOrEqualTo maxAsciiValue.toByte()
         }
     }
 
