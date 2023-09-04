@@ -18,13 +18,13 @@ class InputTest {
         // given
         final var command = "g";
         final var data = "test";
-        final var input = Input.of(Bytes.of(command+data));
+        final var input = Input.of(Bytes.bytesOf(command+data));
 
         // when
         final var actual = input.getCommand();
 
         // then
-        assertThat(actual).isNotNull().isEqualTo(Bytes.of(command));
+        assertThat(actual).isNotNull().isEqualTo(Bytes.bytesOf(command));
     }
 
     @Test
@@ -32,27 +32,27 @@ class InputTest {
         // given
         final var command = "n+1";
         final var data = "test";
-        final var input = Input.of(Bytes.of(command+data));
+        final var input = Input.of(Bytes.bytesOf(command+data));
 
         // when
         final var actual = input.getCommand();
 
         // then
-        assertThat(actual).isNotNull().isEqualTo(Bytes.of(command));
+        assertThat(actual).isNotNull().isEqualTo(Bytes.bytesOf(command));
     }
 
     @Test
     void shouldGetCommand_ReturnZeroOnEmptyBytes() {
         // given / when / then
-        assertThat(Input.empty().getCommand()).isEqualTo(Bytes.empty());
+        assertThat(Input.empty().getCommand()).isEqualTo(Bytes.emptyBytes());
     }
 
     @Test
     void shouldGetData() {
         final var command = 'g';
         final var data = "test";
-        final var input = Input.of(Bytes.of(command+data));
-        final var expected = Bytes.of(data);
+        final var input = Input.of(Bytes.bytesOf(command+data));
+        final var expected = Bytes.bytesOf(data);
 
         // when
         final var actual = input.getData();
@@ -85,7 +85,7 @@ class InputTest {
         @Test
         void shouldHaveBytes() {
             // given
-            final var givenBytes = Bytes.of(new byte[]{1, 2, 3});
+            final var givenBytes = Bytes.bytesOf(new byte[]{1, 2, 3});
             final var givenInput = Input.of(givenBytes);
 
             // when
@@ -177,7 +177,7 @@ class InputTest {
         void shouldParseInvalidNamespace_String() {
             // given
             final var givenIndex = "-A";
-            final var input = Input.of(Bytes.of(givenIndex));
+            final var input = Input.of(Bytes.bytesOf(givenIndex));
 
             // when
             final var actual = input.parseNamespace();
@@ -187,7 +187,7 @@ class InputTest {
         }
 
         private Input inputOf(final int index) {
-            return Input.of(Bytes.of(String.valueOf(index)));
+            return Input.of(Bytes.bytesOf(String.valueOf(index)));
         }
 
     }

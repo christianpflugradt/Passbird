@@ -53,10 +53,10 @@ class AddNamespaceCommandTestIT {
     void shouldHandleAddNamespaceCommand() {
         // given
         final var slotIndex = 1;
-        final var givenInput = Bytes.of("n+" + slotIndex);
+        final var givenInput = Bytes.bytesOf("n+" + slotIndex);
         final var slotFromInput = NamespaceSlot.at(slotIndex);
-        final var referenceNamespace = Bytes.of("mynamespace");
-        final var givenNamespace = Bytes.of("mynamespace");
+        final var referenceNamespace = Bytes.bytesOf("mynamespace");
+        final var givenNamespace = Bytes.bytesOf("mynamespace");
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(Input.of(givenNamespace)).fake();
@@ -74,11 +74,11 @@ class AddNamespaceCommandTestIT {
     void shouldHandleAddNamespaceCommand_UpdateExistingNamespace() {
         // given
         final var slotIndex = 1;
-        final var input = Input.of(Bytes.of("n+" + slotIndex));
+        final var input = Input.of(Bytes.bytesOf("n+" + slotIndex));
         final var slotFromInput = NamespaceSlot.at(slotIndex);
-        final var referenceNamespace = Bytes.of("mynamespace");
-        final var givenNamespace = Bytes.of("mynamespace");
-        final var otherNamespace = Bytes.of("othernamespace");
+        final var referenceNamespace = Bytes.bytesOf("mynamespace");
+        final var givenNamespace = Bytes.bytesOf("mynamespace");
+        final var otherNamespace = Bytes.bytesOf("othernamespace");
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(Input.of(givenNamespace)).fake();
@@ -99,9 +99,9 @@ class AddNamespaceCommandTestIT {
     void shouldHandleAddNamespaceCommand_EmptyInput() {
         // given
         final var slotIndex = 1;
-        final var input = Input.of(Bytes.of("n+" + slotIndex));
+        final var input = Input.of(Bytes.bytesOf("n+" + slotIndex));
         final var slotFromInput = NamespaceSlot.at(slotIndex);
-        final var givenNamespace = Bytes.of("");
+        final var givenNamespace = Bytes.bytesOf("");
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(Input.of(givenNamespace)).fake();
@@ -122,7 +122,7 @@ class AddNamespaceCommandTestIT {
     void shouldHandleAddNamespaceCommand_DefaultSlot() {
         // given
         final var slotIndex = 0;
-        final var input = Input.of(Bytes.of("n+" + slotIndex));
+        final var input = Input.of(Bytes.bytesOf("n+" + slotIndex));
         final var slotFromInput = NamespaceSlot.at(slotIndex);
 
         // when

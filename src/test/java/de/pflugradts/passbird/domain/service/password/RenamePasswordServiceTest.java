@@ -30,8 +30,8 @@ class RenamePasswordServiceTest {
     @Test
     void shouldRenamePasswordEntry() {
         // given
-        final var oldKey = Bytes.of("key123");
-        final var newKey = Bytes.of("keyABC");
+        final var oldKey = Bytes.bytesOf("key123");
+        final var newKey = Bytes.bytesOf("keyABC");
         final var givenPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(oldKey).fake();
@@ -55,8 +55,8 @@ class RenamePasswordServiceTest {
     @Test
     void shouldRenamePasswordEntry_DoNothingIfEntryDoesNotExist() {
         // given
-        final var oldKey = Bytes.of("key123");
-        final var newKey = Bytes.of("keyABC");
+        final var oldKey = Bytes.bytesOf("key123");
+        final var newKey = Bytes.bytesOf("keyABC");
         final var givenPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(oldKey).fake();

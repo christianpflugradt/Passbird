@@ -83,16 +83,16 @@ class PasswordStoreFacadeTestIT {
         // given
         final var passwordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("key1"))
-                .withPasswordBytes(Bytes.of("password1")).fake();
+                .withKeyBytes(Bytes.bytesOf("key1"))
+                .withPasswordBytes(Bytes.bytesOf("password1")).fake();
         final var passwordEntry2 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("key2"))
-                .withPasswordBytes(Bytes.of("password2")).fake();
+                .withKeyBytes(Bytes.bytesOf("key2"))
+                .withPasswordBytes(Bytes.bytesOf("password2")).fake();
         final var passwordEntry3 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("key3"))
-                .withPasswordBytes(Bytes.of("password3")).fake();
+                .withKeyBytes(Bytes.bytesOf("key3"))
+                .withPasswordBytes(Bytes.bytesOf("password3")).fake();
 
         // when
         passwordStoreFacade.sync(() -> Stream.of(passwordEntry1, passwordEntry2, passwordEntry3));
@@ -108,31 +108,31 @@ class PasswordStoreFacadeTestIT {
     @Test
     void shouldUsePasswordDatabase_RoundtripWithNamespaces() {
         // given
-        final var namespace1 = Bytes.of("namespace1");
-        final var namespace3 = Bytes.of("Namespace3");
-        final var namespace9 = Bytes.of("+nameSpace*9");
+        final var namespace1 = Bytes.bytesOf("namespace1");
+        final var namespace3 = Bytes.bytesOf("Namespace3");
+        final var namespace9 = Bytes.bytesOf("+nameSpace*9");
         namespaceServiceFake.deploy(namespace1, _1);
         namespaceServiceFake.deploy(namespace3, _3);
         namespaceServiceFake.deploy(namespace9, _9);
         final var passwordEntry1 = PasswordEntryFaker.faker()
             .fakePasswordEntry()
-            .withKeyBytes(Bytes.of("key1"))
-            .withPasswordBytes(Bytes.of("password1"))
+            .withKeyBytes(Bytes.bytesOf("key1"))
+            .withPasswordBytes(Bytes.bytesOf("password1"))
             .withNamespace(DEFAULT).fake();
         final var passwordEntry2 = PasswordEntryFaker.faker()
             .fakePasswordEntry()
-            .withKeyBytes(Bytes.of("key2"))
-            .withPasswordBytes(Bytes.of("password2"))
+            .withKeyBytes(Bytes.bytesOf("key2"))
+            .withPasswordBytes(Bytes.bytesOf("password2"))
             .withNamespace(_1).fake();
         final var passwordEntry3a = PasswordEntryFaker.faker()
             .fakePasswordEntry()
-            .withKeyBytes(Bytes.of("key3"))
-            .withPasswordBytes(Bytes.of("password3"))
+            .withKeyBytes(Bytes.bytesOf("key3"))
+            .withPasswordBytes(Bytes.bytesOf("password3"))
             .withNamespace(_3).fake();
         final var passwordEntry3b = PasswordEntryFaker.faker()
             .fakePasswordEntry()
-            .withKeyBytes(Bytes.of("key3"))
-            .withPasswordBytes(Bytes.of("password3b"))
+            .withKeyBytes(Bytes.bytesOf("key3"))
+            .withPasswordBytes(Bytes.bytesOf("password3b"))
             .withNamespace(_9).fake();
 
         // when

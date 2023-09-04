@@ -19,7 +19,7 @@ public class NamespaceServiceFake extends NamespaceService {
     }
 
     public void deployAt(final NamespaceSlot namespaceSlot) {
-        deploy(Bytes.of("namespace"), namespaceSlot);
+        deploy(Bytes.bytesOf("namespace"), namespaceSlot);
     }
 
     public void deployAtIndex(final int index) {

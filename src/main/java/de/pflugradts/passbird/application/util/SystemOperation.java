@@ -67,7 +67,7 @@ public class SystemOperation {
     }
 
     public Try<Bytes> readBytesFromFile(final Path path) {
-        return Try.of(() -> Bytes.of(Files.readAllBytes(path)));
+        return Try.of(() -> Bytes.bytesOf(Files.readAllBytes(path)));
     }
 
     public void copyToClipboard(final String text) {
@@ -76,7 +76,7 @@ public class SystemOperation {
     }
 
     public Try<Bytes> getResourceAsBytes(final String resource) {
-        return Try.of(() -> Bytes.of(Thread.currentThread()
+        return Try.of(() -> Bytes.bytesOf(Thread.currentThread()
                 .getContextClassLoader()
                 .getResourceAsStream(resource)
                 .readAllBytes()));

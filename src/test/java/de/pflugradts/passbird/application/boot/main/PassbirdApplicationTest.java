@@ -72,7 +72,7 @@ class PassbirdApplicationTest {
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(input1, interrupt).fake();
-        namespaceServiceFake.deploy(Bytes.of(givenNamespace), _1);
+        namespaceServiceFake.deploy(Bytes.bytesOf(givenNamespace), _1);
         namespaceServiceFake.updateCurrentNamespace(_1);
 
         // when

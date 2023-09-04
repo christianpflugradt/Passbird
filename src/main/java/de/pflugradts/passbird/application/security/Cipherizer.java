@@ -49,26 +49,26 @@ public class Cipherizer implements CryptoProvider {
                 new SecretKeySpec(Arrays.copyOf(MessageDigest.getInstance(SHA512_HASH)
                         .digest(keyBytes.toByteArray()), BLOCK_SIZE), AES_ENCRYPTION),
                 new IvParameterSpec(ivBytes.toByteArray()));
-        return Bytes.of(cipher.doFinal(bytes.toByteArray()));
+        return Bytes.bytesOf(cipher.doFinal(bytes.toByteArray()));
     }
 
     private int calcPadding(final Bytes bytes) {
-        return BLOCK_SIZE - bytes.size() % BLOCK_SIZE;
+        return BLOCK_SIZE - bytes.getSize() % BLOCK_SIZE;
     }
 
     private Bytes pack(final Bytes bytes) {
         final int padding = calcPadding(bytes);
-        final byte[] target = new byte[bytes.size() + padding];
+        final byte[] target = new byte[bytes.getSize() + padding];
         ByteArrayUtils.copyBytes(bytes, target, 0);
         target[target.length - 1] = (byte) padding;
-        return Bytes.of(target);
+        return Bytes.bytesOf(target);
     }
 
     private Bytes unpack(final Bytes bytes) {
-        final int padding = bytes.getByte(bytes.size() - 1);
-        final byte[] target = new byte[bytes.size() - padding];
+        final int padding = bytes.getByte(bytes.getSize() - 1);
+        final byte[] target = new byte[bytes.getSize() - padding];
         ByteArrayUtils.copyBytes(bytes, target, 0, target.length);
-        return Bytes.of(target);
+        return Bytes.bytesOf(target);
     }
 
 }

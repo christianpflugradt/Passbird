@@ -31,7 +31,7 @@ class NullCommandTestIT {
     @Test
     void shouldHandleUnknownCommand() {
         // given
-        final var input = Input.of(Bytes.of("?"));
+        final var input = Input.of(Bytes.bytesOf("?"));
 
         // when
         inputHandler.handleInput(input);
@@ -43,7 +43,7 @@ class NullCommandTestIT {
     @Test
     void shouldHandleEmptyCommand() {
         // given
-        final var input = Input.of(Bytes.empty());
+        final var input = Input.of(Bytes.emptyBytes());
 
         // when
         inputHandler.handleInput(input);

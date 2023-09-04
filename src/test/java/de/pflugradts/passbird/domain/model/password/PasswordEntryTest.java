@@ -19,7 +19,7 @@ class PasswordEntryTest {
     @Test
     void shouldViewKey() {
         // given
-        final var givenBytes = Bytes.of("myKey");
+        final var givenBytes = Bytes.bytesOf("myKey");
         final var passwordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withKeyBytes(givenBytes).fake();
@@ -34,8 +34,8 @@ class PasswordEntryTest {
     @Test
     void shouldRenameKey() {
         // given
-        final var givenBytes = Bytes.of("key123");
-        final var updatedBytes = Bytes.of("keyABC");
+        final var givenBytes = Bytes.bytesOf("key123");
+        final var updatedBytes = Bytes.bytesOf("keyABC");
         final var passwordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withKeyBytes(givenBytes).fake();
@@ -53,7 +53,7 @@ class PasswordEntryTest {
     @Test
     void shouldViewPassword() {
         // given
-        final var givenBytes = Bytes.of("myPassword");
+        final var givenBytes = Bytes.bytesOf("myPassword");
         final var passwordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withPasswordBytes(givenBytes).fake();
@@ -68,8 +68,8 @@ class PasswordEntryTest {
     @Test
     void shouldUpdatePassword() {
         // given
-        final var givenBytes = Bytes.of("myPassword");
-        final var updatedBytes = Bytes.of("newPassword");
+        final var givenBytes = Bytes.bytesOf("myPassword");
+        final var updatedBytes = Bytes.bytesOf("newPassword");
         final var passwordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withPasswordBytes(givenBytes).fake();
@@ -107,7 +107,7 @@ class PasswordEntryTest {
         @Test
         void shouldBeEqualIfKeyAndNamespaceMatch() {
             // given
-            final var givenBytes = Bytes.of("key");
+            final var givenBytes = Bytes.bytesOf("key");
             final var givenNamespace = NamespaceSlot._1;
 
             final var passwordEntry1 = PasswordEntryFaker.faker()
@@ -130,8 +130,8 @@ class PasswordEntryTest {
         @Test
         void shouldNotBeEqualIfKeyDoesNotMatch() {
             // given
-            final var givenBytes = Bytes.of("key");
-            final var otherBytes = Bytes.of("key2");
+            final var givenBytes = Bytes.bytesOf("key");
+            final var otherBytes = Bytes.bytesOf("key2");
             final var givenNamespace = NamespaceSlot._1;
 
             final var passwordEntry1 = PasswordEntryFaker.faker()
@@ -154,7 +154,7 @@ class PasswordEntryTest {
         @Test
         void shouldNotBeEqualIfNamespaceDoesNotMatch() {
             // given
-            final var givenBytes = Bytes.of("key");
+            final var givenBytes = Bytes.bytesOf("key");
             final var givenNamespace = NamespaceSlot._1;
             final var otherNamespace = NamespaceSlot._2;
 
@@ -184,7 +184,7 @@ class PasswordEntryTest {
         @Test
         void shouldHaveCreatedEvent_WhenPasswordEntryIsCreated() {
             // given / when
-            final var passwordEntry = PasswordEntry.create(DEFAULT, Bytes.of("key"), Bytes.of("password"));
+            final var passwordEntry = PasswordEntry.create(DEFAULT, Bytes.bytesOf("key"), Bytes.bytesOf("password"));
 
             // then
             assertThat(passwordEntry).isNotNull()
@@ -204,7 +204,7 @@ class PasswordEntryTest {
 
             // when
             passwordEntry.clearDomainEvents();
-            passwordEntry.updatePassword(Bytes.of("new password"));
+            passwordEntry.updatePassword(Bytes.bytesOf("new password"));
 
             // then
             assertThat(passwordEntry.getDomainEvents()).isNotNull().asList().hasSize(1);

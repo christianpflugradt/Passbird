@@ -43,7 +43,7 @@ class ViewNamespaceCommandTestIT {
     @Test
     void shouldHandleViewNamespaceCommand_PrintInfo() {
         // given
-        final var input = Input.of(Bytes.of("n"));
+        final var input = Input.of(Bytes.bytesOf("n"));
 
         // when
         inputHandler.handleInput(input);
@@ -59,7 +59,7 @@ class ViewNamespaceCommandTestIT {
     @Test
     void shouldHandleViewNamespaceCommand_PrintDefaultNamespaceIfCurrent() {
         // given
-        final var input = Input.of(Bytes.of("n"));
+        final var input = Input.of(Bytes.bytesOf("n"));
 
         // when
         inputHandler.handleInput(input);
@@ -75,10 +75,10 @@ class ViewNamespaceCommandTestIT {
     @Test
     void shouldHandleViewNamespaceCommand_PrintDeployedNamespace() {
         // given
-        final var input = Input.of(Bytes.of("n"));
+        final var input = Input.of(Bytes.bytesOf("n"));
         final var deployedNamespaceSlot = 3;
         final var deployedNamespace = "mynamespace";
-        namespaceServiceFake.deploy(Bytes.of(deployedNamespace), NamespaceSlot.at(deployedNamespaceSlot));
+        namespaceServiceFake.deploy(Bytes.bytesOf(deployedNamespace), NamespaceSlot.at(deployedNamespaceSlot));
 
         // when
         inputHandler.handleInput(input);

@@ -55,7 +55,7 @@ class CustomSetCommandTestIT {
     void shouldHandleCustomSetCommand() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("c" + args);
+        final var bytes = Bytes.bytesOf("c" + args);
         final var reference = bytes.copy();
         final var customPassword = mock(Bytes.class);
         PasswordServiceFaker.faker()
@@ -69,7 +69,7 @@ class CustomSetCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should().putPasswordEntry(eq(Bytes.of(args)), same(customPassword));
+        then(passwordService).should().putPasswordEntry(eq(Bytes.bytesOf(args)), same(customPassword));
         then(customPassword).should().scramble();
         assertThat(bytes).isNotEqualTo(reference);
     }
@@ -78,11 +78,11 @@ class CustomSetCommandTestIT {
     void shouldHandleCustomSetCommand_WithInvalidAlias() {
         // given
         final var args = "invalidkey1!";
-        final var bytes = Bytes.of("c" + args);
+        final var bytes = Bytes.bytesOf("c" + args);
         final var reference = bytes.copy();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
-                .withInvalidAlias(Bytes.of(args)).fake();
+                .withInvalidAlias(Bytes.bytesOf(args)).fake();
         MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withPromptOnRemovalEnabled().fake();
@@ -92,8 +92,8 @@ class CustomSetCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(failureCollector).should().collectPasswordEntryFailure(eq(Bytes.of(args)), any(InvalidKeyException.class));
-        then(passwordService).should(never()).putPasswordEntry(eq(Bytes.of(args)), any(Bytes.class));
+        then(failureCollector).should().collectPasswordEntryFailure(eq(Bytes.bytesOf(args)), any(InvalidKeyException.class));
+        then(passwordService).should(never()).putPasswordEntry(eq(Bytes.bytesOf(args)), any(Bytes.class));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -101,9 +101,9 @@ class CustomSetCommandTestIT {
     void shouldHandleCustomSetCommand_WithEmptyPasswordEntered() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("c" + args);
+        final var bytes = Bytes.bytesOf("c" + args);
         final var reference = bytes.copy();
-        final var customPassword = Bytes.empty();
+        final var customPassword = Bytes.emptyBytes();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService).fake();
         UserInterfaceAdapterPortFaker.faker()
@@ -115,8 +115,8 @@ class CustomSetCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should(never()).putPasswordEntry(eq(Bytes.of(args)), same(customPassword));
-        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.of("Empty input - Operation aborted."))));
+        then(passwordService).should(never()).putPasswordEntry(eq(Bytes.bytesOf(args)), same(customPassword));
+        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.bytesOf("Empty input - Operation aborted."))));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -124,7 +124,7 @@ class CustomSetCommandTestIT {
     void shouldHandleCustomSetCommand_WithPromptOnRemoval_AndNewPasswordEntry() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("c" + args);
+        final var bytes = Bytes.bytesOf("c" + args);
         final var reference = bytes.copy();
         final var customPassword = mock(Bytes.class);
         PasswordServiceFaker.faker()
@@ -138,7 +138,7 @@ class CustomSetCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should().putPasswordEntry(eq(Bytes.of(args)), same(customPassword));
+        then(passwordService).should().putPasswordEntry(eq(Bytes.bytesOf(args)), same(customPassword));
         then(customPassword).should().scramble();
         assertThat(bytes).isNotEqualTo(reference);
     }
@@ -147,12 +147,12 @@ class CustomSetCommandTestIT {
     void shouldHandleCustomSetCommand_WithPromptOnRemoval_AndExistingPasswordEntry() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("c" + args);
+        final var bytes = Bytes.bytesOf("c" + args);
         final var reference = bytes.copy();
         final var customPassword = mock(Bytes.class);
         final var givenPasswordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of(args)).fake();
+                .withKeyBytes(Bytes.bytesOf(args)).fake();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withPasswordEntries(givenPasswordEntry).fake();
@@ -169,7 +169,7 @@ class CustomSetCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should().putPasswordEntry(eq(Bytes.of(args)), same(customPassword));
+        then(passwordService).should().putPasswordEntry(eq(Bytes.bytesOf(args)), same(customPassword));
         then(customPassword).should().scramble();
         assertThat(bytes).isNotEqualTo(reference);
     }
@@ -178,11 +178,11 @@ class CustomSetCommandTestIT {
     void shouldHandleCustomSetCommand_WithPromptOnRemoval_AndOperationAborted() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("c" + args);
+        final var bytes = Bytes.bytesOf("c" + args);
         final var reference = bytes.copy();
         final var givenPasswordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of(args)).fake();
+                .withKeyBytes(Bytes.bytesOf(args)).fake();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withPasswordEntries(givenPasswordEntry).fake();
@@ -198,8 +198,8 @@ class CustomSetCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should(never()).putPasswordEntry(eq(Bytes.of(args)), any(Bytes.class));
-        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.of("Operation aborted."))));
+        then(passwordService).should(never()).putPasswordEntry(eq(Bytes.bytesOf(args)), any(Bytes.class));
+        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.bytesOf("Operation aborted."))));
         assertThat(bytes).isNotEqualTo(reference);
     }
 

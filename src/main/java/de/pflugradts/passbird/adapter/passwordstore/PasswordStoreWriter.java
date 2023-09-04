@@ -66,7 +66,7 @@ class PasswordStoreWriter {
                 ? checksum(Arrays.copyOfRange(bytes, commons.signatureSize(), contentSize))
                 : 0x0};
         ByteArrayUtils.copyBytes(checksumBytes, bytes, offset, commons.checksumBytes());
-        writeToDisk(Bytes.of(bytes))
+        writeToDisk(Bytes.bytesOf(bytes))
             .onFailure(throwable ->
                 failureCollector.collectWritePasswordDatabaseFailure(getFilePath(), throwable));
     }
@@ -86,11 +86,11 @@ class PasswordStoreWriter {
     private Try<Path> writeToDisk(final Bytes bytes) {
         return systemOperation.writeBytesToFile(
             getFilePath(),
-            cryptoProvider.encrypt(bytes).getOrElse(Bytes.empty()));
+            cryptoProvider.encrypt(bytes).getOrElse(Bytes.emptyBytes()));
     }
 
     private byte checksum(final byte[] bytes) {
-        return (byte) StreamSupport.stream(Bytes.of(bytes).spliterator(), false)
+        return (byte) StreamSupport.stream(Bytes.bytesOf(bytes).spliterator(), false)
             .mapToInt(b -> (int) (byte) b)
             .reduce(0, Integer::sum);
     }
@@ -98,13 +98,13 @@ class PasswordStoreWriter {
     private int calcRequiredContentSize(final Supplier<Stream<PasswordEntry>> passwordEntries) {
         final var dataSize = passwordEntries.get()
             .map(passwordEntry ->
-                commons.intBytes() + passwordEntry.viewKey().size() + passwordEntry.viewPassword().size())
+                commons.intBytes() + passwordEntry.viewKey().getSize() + passwordEntry.viewPassword().getSize())
             .reduce(0, Integer::sum);
         final var namespaceSize = commons.intBytes() + CAPACITY * commons.intBytes() + namespaceService.all()
             .filter(Optional::isPresent)
             .map(Optional::get)
             .map(Namespace::getBytes)
-            .map(Bytes::size)
+            .map(Bytes::getSize)
             .reduce(0, Integer::sum);
         final var metaSize = (int) passwordEntries.get().count() * 2 * commons.intBytes();
         return dataSize + namespaceSize + metaSize;

@@ -73,7 +73,7 @@ public class NamespaceServiceTest {
     @Test
     void shouldHandleCallToDeployIfNotPopulated() {
         // given
-        final var givenBytes = Bytes.of("test");
+        final var givenBytes = Bytes.bytesOf("test");
         final var givenSlot = _4;
 
         // when
@@ -91,7 +91,7 @@ public class NamespaceServiceTest {
     @Test
     void shouldSyncPasswordStoreOnDeploy() {
         // given / when
-        namespaceService.deploy(Bytes.of("test"), _4);
+        namespaceService.deploy(Bytes.bytesOf("test"), _4);
 
         // then
         then(passwordEntryRepository).should().sync();

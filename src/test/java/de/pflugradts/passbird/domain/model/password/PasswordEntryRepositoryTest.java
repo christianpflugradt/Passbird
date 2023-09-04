@@ -67,10 +67,10 @@ class PasswordEntryRepositoryTest {
         // given
         final var givenPasswordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("key1")).fake();
+                .withKeyBytes(Bytes.bytesOf("key1")).fake();
         final var givenPasswordEntry2 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("key2")).fake();
+                .withKeyBytes(Bytes.bytesOf("key2")).fake();
         PasswordStoreAdapterPortFaker.faker()
                 .forInstance(passwordStoreAdapterPort)
                 .withThesePasswordEntries(givenPasswordEntry1, givenPasswordEntry2).fake();
@@ -86,7 +86,7 @@ class PasswordEntryRepositoryTest {
     @Test
     void shouldFindPasswordEntry() {
         // given
-        final var givenKeyBytes = Bytes.of("target");
+        final var givenKeyBytes = Bytes.bytesOf("target");
         final var expectedPasswordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withKeyBytes(givenKeyBytes).fake();
@@ -106,7 +106,7 @@ class PasswordEntryRepositoryTest {
     @Test
     void shouldFindPasswordEntry_ReturnEmptyOptionalIfNoMatchExists() {
         // given
-        final var givenKeyBytes = Bytes.of("target");
+        final var givenKeyBytes = Bytes.bytesOf("target");
         final var otherPasswordEntry1 = PasswordEntryFaker.faker().fakePasswordEntry().fake();
         final var otherPasswordEntry2 = PasswordEntryFaker.faker().fakePasswordEntry().fake();
         PasswordStoreAdapterPortFaker.faker()
@@ -123,7 +123,7 @@ class PasswordEntryRepositoryTest {
     @Test
     void shouldAddPasswordEntry() {
         // given
-        final var givenKeyBytes = Bytes.of("target");
+        final var givenKeyBytes = Bytes.bytesOf("target");
         final var givenPasswordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withKeyBytes(givenKeyBytes).fake();
@@ -145,7 +145,7 @@ class PasswordEntryRepositoryTest {
         // given
         final var givenPasswordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("target")).fake();
+                .withKeyBytes(Bytes.bytesOf("target")).fake();
         PasswordStoreAdapterPortFaker.faker()
                 .forInstance(passwordStoreAdapterPort)
                 .withThesePasswordEntries(givenPasswordEntry).fake();
@@ -163,13 +163,13 @@ class PasswordEntryRepositoryTest {
         // given
         final var givenPasswordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("firstEntry")).fake();
+                .withKeyBytes(Bytes.bytesOf("firstEntry")).fake();
         final var givenPasswordEntry2 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("secondEntry")).fake();
+                .withKeyBytes(Bytes.bytesOf("secondEntry")).fake();
         final var givenPasswordEntry3 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("thirdEntry")).fake();
+                .withKeyBytes(Bytes.bytesOf("thirdEntry")).fake();
 
         PasswordStoreAdapterPortFaker.faker()
                 .forInstance(passwordStoreAdapterPort)
@@ -198,15 +198,15 @@ class PasswordEntryRepositoryTest {
             final var givenPasswordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withNamespace(activeNamespace)
-                .withKeyBytes(Bytes.of("firstEntry")).fake();
+                .withKeyBytes(Bytes.bytesOf("firstEntry")).fake();
             final var givenPasswordEntry2 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withNamespace(activeNamespace)
-                .withKeyBytes(Bytes.of("secondEntry")).fake();
+                .withKeyBytes(Bytes.bytesOf("secondEntry")).fake();
             final var otherPasswordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withNamespace(otherNamespace)
-                .withKeyBytes(Bytes.of("thirdEntry")).fake();
+                .withKeyBytes(Bytes.bytesOf("thirdEntry")).fake();
 
             PasswordStoreAdapterPortFaker.faker()
                 .forInstance(passwordStoreAdapterPort)
@@ -223,7 +223,7 @@ class PasswordEntryRepositoryTest {
         @Test
         void shouldStoreMultiplePasswordEntriesWithIdenticalKeysInDifferentNamespaces() {
             // given
-            final var keyBytes = Bytes.of("key");
+            final var keyBytes = Bytes.bytesOf("key");
             final var firstNamespace = NamespaceSlot._1;
             final var secondNamespace = NamespaceSlot._2;
             namespaceServiceFake.deployAt(firstNamespace);

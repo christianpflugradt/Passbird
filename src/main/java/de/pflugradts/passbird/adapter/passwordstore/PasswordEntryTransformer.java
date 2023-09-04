@@ -11,8 +11,8 @@ import static java.lang.Integer.BYTES;
 class PasswordEntryTransformer {
 
     byte[] transform(final PasswordEntry passwordEntry) {
-        final var keySize = passwordEntry.viewKey().size();
-        final var passwordSize = passwordEntry.viewPassword().size();
+        final var keySize = passwordEntry.viewKey().getSize();
+        final var passwordSize = passwordEntry.viewPassword().getSize();
         final var metaSize = 2 * BYTES;
         final var bytes = new byte[BYTES + keySize + passwordSize + metaSize];
         var offset = ByteArrayUtils.copyBytes(passwordEntry.associatedNamespace().index(), bytes, 0);
@@ -40,8 +40,8 @@ class PasswordEntryTransformer {
         return new Tuple2<>(
                 PasswordEntry.create(
                     NamespaceSlot.at(namespaceSlot),
-                    Bytes.of(keyBytes),
-                    Bytes.of(passwordBytes)),
+                    Bytes.bytesOf(keyBytes),
+                    Bytes.bytesOf(passwordBytes)),
                 incrementedOffset);
     }
 

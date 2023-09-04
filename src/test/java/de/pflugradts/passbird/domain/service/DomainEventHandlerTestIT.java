@@ -39,7 +39,7 @@ class DomainEventHandlerTestIT {
         // given
         final var giverPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
         final var passwordEntryDiscarded = new PasswordEntryDiscarded(giverPasswordEntry);
-        final var expectedBytes = Bytes.of("expected key");
+        final var expectedBytes = Bytes.bytesOf("expected key");
 
         // when
         passbirdEventRegistry.register(passwordEntryDiscarded);

@@ -20,7 +20,7 @@ public class RandomPasswordProvider implements PasswordProvider {
 
     @Override
     public Bytes createNewPassword(final PasswordRequirements passwordRequirements) {
-        Bytes passwordBytes = Bytes.empty();
+        Bytes passwordBytes = Bytes.emptyBytes();
         while (!isStrong(passwordBytes, passwordRequirements)) {
             passwordBytes = randomPassword(passwordRequirements);
         }
@@ -28,7 +28,7 @@ public class RandomPasswordProvider implements PasswordProvider {
     }
 
     private Bytes randomPassword(final PasswordRequirements passwordRequirements) {
-        return Bytes.of(IntStream.range(0, passwordRequirements.getPasswordLength())
+        return Bytes.bytesOf(IntStream.range(0, passwordRequirements.getPasswordLength())
                 .mapToObj(i -> nextByte(passwordRequirements)).collect(Collectors.toList()));
     }
 

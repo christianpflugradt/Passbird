@@ -51,20 +51,20 @@ class DiscardCommandTestIT {
     void shouldHandleDiscardCommand() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("d" + args);
+        final var bytes = Bytes.bytesOf("d" + args);
         final var reference = bytes.copy();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withPasswordEntries(PasswordEntryFaker.faker()
                         .fakePasswordEntry()
-                        .withKeyBytes(Bytes.of(args)).fake()).fake();
+                        .withKeyBytes(Bytes.bytesOf(args)).fake()).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should().discardPasswordEntry(eq(Bytes.of(args)));
+        then(passwordService).should().discardPasswordEntry(eq(Bytes.bytesOf(args)));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -72,7 +72,7 @@ class DiscardCommandTestIT {
     void shouldHandleDiscardCommand_WithPromptOnRemoval() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("d" + args);
+        final var bytes = Bytes.bytesOf("d" + args);
         final var reference = bytes.copy();
         MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
@@ -84,14 +84,14 @@ class DiscardCommandTestIT {
                 .forInstance(passwordService)
                 .withPasswordEntries(PasswordEntryFaker.faker()
                         .fakePasswordEntry()
-                        .withKeyBytes(Bytes.of(args)).fake()).fake();
+                        .withKeyBytes(Bytes.bytesOf(args)).fake()).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should().discardPasswordEntry(eq(Bytes.of(args)));
+        then(passwordService).should().discardPasswordEntry(eq(Bytes.bytesOf(args)));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -99,7 +99,7 @@ class DiscardCommandTestIT {
     void shouldHandleDiscardCommand_WithPromptOnRemoval_AndOperationAborted() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("d" + args);
+        final var bytes = Bytes.bytesOf("d" + args);
         final var reference = bytes.copy();
         MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
@@ -113,8 +113,8 @@ class DiscardCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should(never()).discardPasswordEntry(eq(Bytes.of(args)));
-        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.of("Operation aborted."))));
+        then(passwordService).should(never()).discardPasswordEntry(eq(Bytes.bytesOf(args)));
+        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.bytesOf("Operation aborted."))));
         assertThat(bytes).isNotEqualTo(reference);
     }
 

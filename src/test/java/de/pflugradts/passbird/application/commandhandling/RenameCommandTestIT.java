@@ -54,12 +54,12 @@ class RenameCommandTestIT {
     void shouldHandleRenameCommand() {
         // given
         final var args = "key123";
-        final var bytes = Bytes.of("r" + args);
+        final var bytes = Bytes.bytesOf("r" + args);
         final var reference = bytes.copy();
         final var newKey = mock(Bytes.class);
         final var givenPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
-            .withKeyBytes(Bytes.of(args)).fake();
+            .withKeyBytes(Bytes.bytesOf(args)).fake();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withPasswordEntries(givenPasswordEntry).fake();
@@ -72,9 +72,9 @@ class RenameCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should().renamePasswordEntry(eq(Bytes.of(args)), same(newKey));
+        then(passwordService).should().renamePasswordEntry(eq(Bytes.bytesOf(args)), same(newKey));
         then(newKey).should().scramble();
-        assertThat(givenPasswordEntry.viewKey()).isEqualTo(reference.slice(1, reference.size()));
+        assertThat(givenPasswordEntry.viewKey()).isEqualTo(reference.slice(1, reference.getSize()));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -82,18 +82,18 @@ class RenameCommandTestIT {
     void shouldHandleRenameCommand_WithUnknownAlias() {
         // given
         final var args = "invalidkey1!";
-        final var bytes = Bytes.of("r" + args);
+        final var bytes = Bytes.bytesOf("r" + args);
         final var reference = bytes.copy();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
-                .withInvalidAlias(Bytes.of(args)).fake();
+                .withInvalidAlias(Bytes.bytesOf(args)).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should(never()).renamePasswordEntry(eq(Bytes.of(args)), any(Bytes.class));
+        then(passwordService).should(never()).renamePasswordEntry(eq(Bytes.bytesOf(args)), any(Bytes.class));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -101,14 +101,14 @@ class RenameCommandTestIT {
     void shouldHandleRenameCommand_WithEmptyAliasEntered() {
         // given
         final var args = "key123";
-        final var bytes = Bytes.of("r" + args);
+        final var bytes = Bytes.bytesOf("r" + args);
         final var reference = bytes.copy();
-        final var newAlias = Bytes.of("");
+        final var newAlias = Bytes.bytesOf("");
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withPasswordEntries(PasswordEntryFaker.faker()
                         .fakePasswordEntry()
-                        .withKeyBytes(Bytes.of(args)).fake()).fake();
+                        .withKeyBytes(Bytes.bytesOf(args)).fake()).fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
                 .withTheseInputs(Input.of(newAlias)).fake();
@@ -118,8 +118,8 @@ class RenameCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should(never()).renamePasswordEntry(eq(Bytes.of(args)), any(Bytes.class));
-        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.of("Empty input - Operation aborted."))));
+        then(passwordService).should(never()).renamePasswordEntry(eq(Bytes.bytesOf(args)), any(Bytes.class));
+        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.bytesOf("Empty input - Operation aborted."))));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -127,12 +127,12 @@ class RenameCommandTestIT {
     void shouldHandleRenameCommand_WithExistingAliasEntered() {
         // given
         final var args = "key123";
-        final var bytes = Bytes.of("r" + args);
+        final var bytes = Bytes.bytesOf("r" + args);
         final var reference = bytes.copy();
-        final var existingAlias = Bytes.of("existingkey");
+        final var existingAlias = Bytes.bytesOf("existingkey");
         final var givenPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
-            .withKeyBytes(Bytes.of(args)).fake();
+            .withKeyBytes(Bytes.bytesOf(args)).fake();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withPasswordEntries(givenPasswordEntry).fake();
@@ -145,7 +145,7 @@ class RenameCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        assertThat(givenPasswordEntry.viewKey()).isEqualTo(reference.slice(1, reference.size()));
+        assertThat(givenPasswordEntry.viewKey()).isEqualTo(reference.slice(1, reference.getSize()));
         assertThat(bytes).isNotEqualTo(reference);
     }
 

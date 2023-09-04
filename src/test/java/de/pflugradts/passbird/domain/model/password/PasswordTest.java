@@ -12,15 +12,15 @@ class PasswordTest {
     @Test
     void shouldCreatePassword() {
         // given / when / then
-        assertThat(Password.create(Bytes.of("password"))).isNotNull();
+        assertThat(Password.create(Bytes.bytesOf("password"))).isNotNull();
     }
 
     @Test
     void shouldUpdatePassword() {
         // given
-        final var originalBytes = Bytes.of("password");
+        final var originalBytes = Bytes.bytesOf("password");
         final var password = Password.create(originalBytes);
-        final var updatedBytes = Bytes.of("p4s5w0rD");
+        final var updatedBytes = Bytes.bytesOf("p4s5w0rD");
 
         // when
         password.update(updatedBytes);
@@ -50,7 +50,7 @@ class PasswordTest {
     @Test
     void shouldViewPassword() {
         // given
-        final var bytes = Bytes.of("password");
+        final var bytes = Bytes.bytesOf("password");
         final var password = Password.create(bytes);
 
         // when
@@ -63,7 +63,7 @@ class PasswordTest {
     @Test
     void shouldCloneBytesOnCreation() {
         // given
-        final var bytes = Bytes.of("password");
+        final var bytes = Bytes.bytesOf("password");
         final var password = Password.create(bytes);
 
         // when
@@ -77,9 +77,9 @@ class PasswordTest {
     @Test
     void shouldCloneBytesOnUpdate() {
         // given
-        final var originalBytes = Bytes.of("password");
+        final var originalBytes = Bytes.bytesOf("password");
         final var password = Password.create(originalBytes);
-        final var updatedBytes = Bytes.of("p4s5w0rD");
+        final var updatedBytes = Bytes.bytesOf("p4s5w0rD");
 
         // when
         password.update(updatedBytes);

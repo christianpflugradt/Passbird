@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.domain.model.transfer
 
+import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -9,8 +11,8 @@ internal class CharsTest {
     @Test
     fun `should convert to bytes`() {
         // given
-        val givenChars = Chars.of('a', 'b', 'c')
-        val referenceChars = Chars.of('a', 'b', 'c')
+        val givenChars = charsOf('a', 'b', 'c')
+        val referenceChars = charsOf('a', 'b', 'c')
 
         // when
         val actual = givenChars.toBytes()
@@ -22,20 +24,20 @@ internal class CharsTest {
     @Test
     fun `should convert empty chars to bytes`() {
         // given
-        val givenChars = Chars.of()
+        val givenChars = charsOf()
 
         // when
         val actual = givenChars.toBytes()
 
         // then
-        expectThat(actual) isEqualTo Bytes.empty()
+        expectThat(actual) isEqualTo emptyBytes()
     }
 
     @Test
     fun `should scramble chars when converting to bytes`() {
         // given
-        val givenCharArray = Chars.of('a', 'b', 'c')
-        val referenceCharArray = Chars.of('a', 'b', 'c')
+        val givenCharArray = charsOf('a', 'b', 'c')
+        val referenceCharArray = charsOf('a', 'b', 'c')
 
         // when
         expectThat(givenCharArray) isEqualTo referenceCharArray
@@ -51,7 +53,7 @@ internal class CharsTest {
         val givenCharArray = charArrayOf('a', 'b', 'c')
 
         // when
-        val actual = Chars.of(givenCharArray).toCharArray()
+        val actual = charsOf(givenCharArray).toCharArray()
 
         // then
         expectThat(actual) isEqualTo givenCharArray
@@ -63,7 +65,7 @@ internal class CharsTest {
         val givenCharArray = charArrayOf()
 
         // when
-        val actual = Chars.of(givenCharArray).toCharArray()
+        val actual = charsOf(givenCharArray).toCharArray()
 
         // then
         expectThat(actual) isEqualTo givenCharArray
@@ -77,11 +79,11 @@ internal class CharsTest {
 
         // when
         expectThat(givenCharArray) isEqualTo referenceCharArray
-        Chars.of(givenCharArray).scramble()
+        charsOf(givenCharArray).scramble()
 
         // then
         expectThat(givenCharArray) isNotEqualTo referenceCharArray
     }
 
-    fun Chars.Companion.of(vararg chars: Char) = of(chars)
+    private fun charsOf(vararg chars: Char) = charsOf(chars)
 }

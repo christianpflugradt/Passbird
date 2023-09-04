@@ -51,8 +51,8 @@ public class PassbirdLauncher implements Bootable {
 
     private void sendBanner() {
         userInterfaceAdapterPort.sendLineBreak();
-        userInterfaceAdapterPort.send(Output.of(Bytes.of(banner())));
-        userInterfaceAdapterPort.send(Output.of(Bytes.of("\t" + getClass().getPackage().getImplementationVersion())));
+        userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(banner())));
+        userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf("\t" + getClass().getPackage().getImplementationVersion())));
         userInterfaceAdapterPort.sendLineBreak();
     }
 
@@ -62,9 +62,9 @@ public class PassbirdLauncher implements Bootable {
 
     private void sendLicenseNotice() {
         userInterfaceAdapterPort.sendLineBreak();
-        userInterfaceAdapterPort.send(Output.of(Bytes.of(
+        userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(
                 "\tCopyright 2020 - 2023 Christian Pflugradt")));
-        userInterfaceAdapterPort.send(Output.of(Bytes.of(
+        userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(
                 "\tThis software is licensed under the Apache License, Version 2.0 (APLv2)\n"
                         + "\tYou may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0")));
     }

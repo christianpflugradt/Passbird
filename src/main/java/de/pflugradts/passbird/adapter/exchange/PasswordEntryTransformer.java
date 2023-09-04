@@ -8,8 +8,8 @@ class PasswordEntryTransformer {
 
     Tuple2<Bytes, Bytes> transform(final PasswordEntryRepresentation passwordEntryRepresentation) {
         return new Tuple2<>(
-                Bytes.of(passwordEntryRepresentation.getKey()),
-                Bytes.of(passwordEntryRepresentation.getPassword()));
+                Bytes.bytesOf(passwordEntryRepresentation.getKey()),
+                Bytes.bytesOf(passwordEntryRepresentation.getPassword()));
     }
 
     PasswordEntryRepresentation transform(final Tuple2<Bytes, Bytes> tuple) {

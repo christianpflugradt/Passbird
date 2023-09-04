@@ -23,7 +23,7 @@ public class InputFaker {
     }
 
     public Input fake() {
-        return Input.of(Bytes.of(message));
+        return Input.of(Bytes.bytesOf(message));
     }
 
 }

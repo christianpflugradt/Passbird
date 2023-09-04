@@ -38,7 +38,7 @@ internal class CommandLineInterfaceServiceTest {
                     System.setOut(printStream)
 
                     // when
-                    commandLineInterfaceService.send(Output.of(Bytes.of(givenMessage)))
+                    commandLineInterfaceService.send(Output.of(Bytes.bytesOf(givenMessage)))
 
                     // then
                     actual = String(stream.toByteArray())
@@ -98,7 +98,7 @@ internal class CommandLineInterfaceServiceTest {
                         System.setIn(inStream)
 
                         // when
-                        commandLineInterfaceService.receive(Output.of(Bytes.of(givenMessage)))
+                        commandLineInterfaceService.receive(Output.of(Bytes.bytesOf(givenMessage)))
 
                         // then
                         actual = String(stream.toByteArray())
@@ -150,7 +150,7 @@ internal class CommandLineInterfaceServiceTest {
                     System.setOut(printStream)
 
                     // when
-                    commandLineInterfaceService.receiveSecurely(Output.of(Bytes.of(givenMessage)))
+                    commandLineInterfaceService.receiveSecurely(Output.of(Bytes.bytesOf(givenMessage)))
 
                     // then
                     actual = String(stream.toByteArray())

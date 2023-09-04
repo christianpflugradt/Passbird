@@ -19,13 +19,13 @@ public class SwitchNamespaceCommandHandler implements CommandHandler {
     @Subscribe
     private void handleSwitchNamespaceCommand(final SwitchNamespaceCommand switchNamespaceCommand) {
         if (namespaceService.getCurrentNamespace().getSlot().equals(switchNamespaceCommand.getSlot())) {
-            userInterfaceAdapterPort.send(Output.of(Bytes.of("'"
+            userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf("'"
                 + namespaceService.getCurrentNamespace().getBytes().asString()
                 + "' is already the current namespace.")));
         } else if (namespaceService.atSlot(switchNamespaceCommand.getSlot()).isPresent()) {
             namespaceService.updateCurrentNamespace(switchNamespaceCommand.getSlot());
         } else {
-            userInterfaceAdapterPort.send(Output.of(Bytes.of(
+            userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(
                 "Specified namespace does not exist - Operation aborted.")));
         }
         userInterfaceAdapterPort.sendLineBreak();

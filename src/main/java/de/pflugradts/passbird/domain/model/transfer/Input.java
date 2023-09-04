@@ -17,7 +17,7 @@ public class Input implements ValueObject {
     private final Bytes bytes;
 
     public static Input empty() {
-        return Input.of(Bytes.of());
+        return Input.of(Bytes.emptyBytes());
     }
 
     private Input(final Bytes bytes) {
@@ -33,22 +33,22 @@ public class Input implements ValueObject {
     }
 
     public Bytes getCommand() {
-        if (bytes.size() > 0) {
-            for (int i = 1; i < bytes.size(); i++) {
+        if (bytes.getSize() > 0) {
+            for (int i = 1; i < bytes.getSize(); i++) {
                 if (CharValue.of(bytes.getByte(i)).isAlphabeticCharacter()) {
                     return bytes.slice(0, i);
                 }
             }
             return bytes;
         } else {
-            return Bytes.empty();
+            return Bytes.emptyBytes();
         }
     }
 
     public Bytes getData() {
-        return getBytes().size() > 1
-                ? getBytes().slice(getCommand().size(), getBytes().size())
-                : Bytes.empty();
+        return getBytes().getSize() > 1
+                ? getBytes().slice(getCommand().getSize(), getBytes().getSize())
+                : Bytes.emptyBytes();
     }
 
     public NamespaceSlot parseNamespace() {

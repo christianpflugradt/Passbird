@@ -70,7 +70,7 @@ public class ApplicationEventHandler implements EventHandler {
     }
 
     private void sendToUserInterface(final String template, final Bytes keyBytes) {
-        userInterfaceAdapterPort.send(Output.of(Bytes.of(
+        userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(
                 String.format(template, keyBytes.asString()))));
     }
 

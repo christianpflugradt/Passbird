@@ -19,11 +19,11 @@ public class Output {
     }
 
     public static Output empty() {
-        return Output.of(Bytes.of());
+        return Output.of(Bytes.emptyBytes());
     }
 
     public static Output of(final byte... bytes) {
-        return Output.of(Bytes.of(bytes));
+        return Output.of(Bytes.bytesOf(bytes));
     }
 
     public Bytes getBytes() {

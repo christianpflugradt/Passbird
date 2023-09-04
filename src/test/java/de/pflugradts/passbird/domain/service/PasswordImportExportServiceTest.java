@@ -52,12 +52,12 @@ class PasswordImportExportServiceTest {
         // given
         final var passwordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("key1"))
-                .withPasswordBytes(Bytes.of("password1")).fake();
+                .withKeyBytes(Bytes.bytesOf("key1"))
+                .withPasswordBytes(Bytes.bytesOf("password1")).fake();
         final var passwordEntry2 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("key2"))
-                .withPasswordBytes(Bytes.of("password2")).fake();
+                .withKeyBytes(Bytes.bytesOf("key2"))
+                .withPasswordBytes(Bytes.bytesOf("password2")).fake();
         final var exchangeAdapterPort = mock(ExchangeAdapterPort.class);
         ExchangeAdapterPortFaker.faker()
                 .forInstance(exchangeAdapterPort)
@@ -78,12 +78,12 @@ class PasswordImportExportServiceTest {
         // given
         final var passwordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("key1"))
-                .withPasswordBytes(Bytes.of("password1")).fake();
+                .withKeyBytes(Bytes.bytesOf("key1"))
+                .withPasswordBytes(Bytes.bytesOf("password1")).fake();
         final var passwordEntry2 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("key2"))
-                .withPasswordBytes(Bytes.of("password2")).fake();
+                .withKeyBytes(Bytes.bytesOf("key2"))
+                .withPasswordBytes(Bytes.bytesOf("password2")).fake();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService).fake();
         final var exchangeAdapterPort = mock(ExchangeAdapterPort.class);
@@ -125,12 +125,12 @@ class PasswordImportExportServiceTest {
         // given
         final var passwordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("key1"))
-                .withPasswordBytes(Bytes.of("password1")).fake();
+                .withKeyBytes(Bytes.bytesOf("key1"))
+                .withPasswordBytes(Bytes.bytesOf("password1")).fake();
         final var passwordEntry2 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("key2"))
-                .withPasswordBytes(Bytes.of("password2")).fake();
+                .withKeyBytes(Bytes.bytesOf("key2"))
+                .withPasswordBytes(Bytes.bytesOf("password2")).fake();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withPasswordEntries(passwordEntry1, passwordEntry2).fake();

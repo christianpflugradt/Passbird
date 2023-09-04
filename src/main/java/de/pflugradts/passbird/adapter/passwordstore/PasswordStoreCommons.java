@@ -13,7 +13,7 @@ class PasswordStoreCommons {
     static final Integer EMPTY_NAMESPACE = -2;
 
     byte checksum(final byte[] bytes) {
-        return (byte) StreamSupport.stream(Bytes.of(bytes).spliterator(), false)
+        return (byte) StreamSupport.stream(Bytes.bytesOf(bytes).spliterator(), false)
             .mapToInt(b -> (int) (byte) b)
             .reduce(0, Integer::sum);
     }

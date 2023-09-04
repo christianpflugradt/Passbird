@@ -33,8 +33,8 @@ class DiscardPasswordServiceTest {
     @Test
     void shouldDiscardPasswordEntry() {
         // given
-        final var givenKey = Bytes.of("Key");
-        final var givenPassword = Bytes.of("Password");
+        final var givenKey = Bytes.bytesOf("Key");
+        final var givenPassword = Bytes.bytesOf("Password");
         final var givenPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(givenKey)
@@ -59,8 +59,8 @@ class DiscardPasswordServiceTest {
     @Test
     void shouldDiscardPasswordEntry_NoMatch() {
         // given
-        final var givenKey = Bytes.of("Key");
-        final var otherKey = Bytes.of("try this");
+        final var givenKey = Bytes.bytesOf("Key");
+        final var otherKey = Bytes.bytesOf("try this");
         final var givenPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(givenKey).fake();

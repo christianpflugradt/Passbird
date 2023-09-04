@@ -14,7 +14,7 @@ class KeyStoreServiceTest {
     @Test
     void shouldStoreKey_FailOnInvalidPath() {
         // given / when
-        final var actual = setupKeyStoreService().storeKey(Chars.of("password".toCharArray()), mock(Path.class));
+        final var actual = setupKeyStoreService().storeKey(Chars.charsOf("password".toCharArray()), mock(Path.class));
 
         // then
         assertThat(actual.isFailure()).isTrue();
@@ -23,7 +23,7 @@ class KeyStoreServiceTest {
     @Test
     void shouldLoadKey_FailOnInvalidPath() {
         // given / when
-        final var actual = setupKeyStoreService().loadKey(Chars.of("password".toCharArray()), mock(Path.class));
+        final var actual = setupKeyStoreService().loadKey(Chars.charsOf("password".toCharArray()), mock(Path.class));
 
         // then
         assertThat(actual.isFailure()).isTrue();
@@ -36,7 +36,7 @@ class KeyStoreServiceTest {
                 .fakeSystemOperation()
                 .withKeyStoreUnavailable().fake();
         final var actual = setupKeyStoreService(mockedSystemOperation)
-                .storeKey(Chars.of("password".toCharArray()), Paths.get(""));
+                .storeKey(Chars.charsOf("password".toCharArray()), Paths.get(""));
 
         // then
         assertThat(actual.isFailure()).isTrue();
@@ -49,7 +49,7 @@ class KeyStoreServiceTest {
                 .fakeSystemOperation()
                 .withKeyStoreUnavailable().fake();
         final var actual = setupKeyStoreService(mockedSystemOperation)
-                .loadKey(Chars.of("password".toCharArray()), Paths.get(""));
+                .loadKey(Chars.charsOf("password".toCharArray()), Paths.get(""));
 
         // then
         assertThat(actual.isFailure()).isTrue();

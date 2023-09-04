@@ -38,7 +38,7 @@ class ExportCommandTestIT {
     void shouldHandleExportCommand() {
         // given
         final var args = "tmp";
-        final var bytes = Bytes.of("e" + args);
+        final var bytes = Bytes.bytesOf("e" + args);
         final var reference = bytes.copy();
 
         // when

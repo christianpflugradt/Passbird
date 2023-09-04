@@ -56,7 +56,7 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.of("n" + givenAlias);
+        final var givenInput = Bytes.bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var expectedNamespace = 1;
 
@@ -66,7 +66,7 @@ class AssignNamespaceCommandTestIT {
             .withPasswordEntries(
                 PasswordEntryFaker.faker()
                     .fakePasswordEntry()
-                    .withKeyBytes(Bytes.of(givenAlias)).fake()).fake();
+                    .withKeyBytes(Bytes.bytesOf(givenAlias)).fake()).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(expectedNamespace)).fake();
@@ -75,7 +75,7 @@ class AssignNamespaceCommandTestIT {
         inputHandler.handleInput(Input.of(givenInput));
 
         // then
-        then(passwordService).should().movePasswordEntry(Bytes.of(givenAlias), NamespaceSlot.at(expectedNamespace));
+        then(passwordService).should().movePasswordEntry(Bytes.bytesOf(givenAlias), NamespaceSlot.at(expectedNamespace));
         assertThat(givenInput).isNotNull().isNotEqualTo(referenceInput);
     }
 
@@ -83,7 +83,7 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_EntryNotExists() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.of("n" + givenAlias);
+        final var givenInput = Bytes.bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var expectedNamespace = 1;
 
@@ -107,7 +107,7 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_DisplayTargetNamespace() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.of("n" + givenAlias);
+        final var givenInput = Bytes.bytesOf("n" + givenAlias);
         final var currentNamespace = 0;
         final var targetNamespace = 1;
 
@@ -118,7 +118,7 @@ class AssignNamespaceCommandTestIT {
             .withPasswordEntries(
                 PasswordEntryFaker.faker()
                     .fakePasswordEntry()
-                    .withKeyBytes(Bytes.of(givenAlias))
+                    .withKeyBytes(Bytes.bytesOf(givenAlias))
                     .withNamespace(NamespaceSlot.at(currentNamespace)).fake()).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
@@ -140,7 +140,7 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_DisplayTargetNamespaceWhenNotDefault() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.of("n" + givenAlias);
+        final var givenInput = Bytes.bytesOf("n" + givenAlias);
         final var currentNamespace = 1;
         final var targetNamespace = 0;
 
@@ -151,7 +151,7 @@ class AssignNamespaceCommandTestIT {
             .withPasswordEntries(
                 PasswordEntryFaker.faker()
                     .fakePasswordEntry()
-                    .withKeyBytes(Bytes.of(givenAlias))
+                    .withKeyBytes(Bytes.bytesOf(givenAlias))
                     .withNamespace(NamespaceSlot.at(currentNamespace)).fake()).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
@@ -173,7 +173,7 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_EnteredInvalidNamespace() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.of("n" + givenAlias);
+        final var givenInput = Bytes.bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var invalidNamespace = -1;
 
@@ -182,7 +182,7 @@ class AssignNamespaceCommandTestIT {
             .withPasswordEntries(
                 PasswordEntryFaker.faker()
                     .fakePasswordEntry()
-                    .withKeyBytes(Bytes.of(givenAlias)).fake()).fake();
+                    .withKeyBytes(Bytes.bytesOf(givenAlias)).fake()).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(invalidNamespace)).fake();
@@ -204,7 +204,7 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_EnteredCurrentNamespace() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.of("n" + givenAlias);
+        final var givenInput = Bytes.bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var currentNamespace = 1;
 
@@ -215,7 +215,7 @@ class AssignNamespaceCommandTestIT {
             .withPasswordEntries(
                 PasswordEntryFaker.faker()
                     .fakePasswordEntry()
-                    .withKeyBytes(Bytes.of(givenAlias)).fake()).fake();
+                    .withKeyBytes(Bytes.bytesOf(givenAlias)).fake()).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(currentNamespace)).fake();
@@ -237,7 +237,7 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_EnteredEmptyNamespace() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.of("n" + givenAlias);
+        final var givenInput = Bytes.bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var targetNamespace = 1;
 
@@ -246,7 +246,7 @@ class AssignNamespaceCommandTestIT {
             .withPasswordEntries(
                 PasswordEntryFaker.faker()
                     .fakePasswordEntry()
-                    .withKeyBytes(Bytes.of(givenAlias)).fake()).fake();
+                    .withKeyBytes(Bytes.bytesOf(givenAlias)).fake()).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(targetNamespace)).fake();
@@ -269,7 +269,7 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_OtherPasswordWithSameAliasAlreadyInTargetNamespace() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.of("n" + givenAlias);
+        final var givenInput = Bytes.bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var currentNamespace = 0;
         final var targetNamespace = 1;
@@ -281,11 +281,11 @@ class AssignNamespaceCommandTestIT {
             .withPasswordEntries(
                 PasswordEntryFaker.faker()
                     .fakePasswordEntry()
-                    .withKeyBytes(Bytes.of(givenAlias))
+                    .withKeyBytes(Bytes.bytesOf(givenAlias))
                     .withNamespace(NamespaceSlot.at(currentNamespace)).fake(),
             PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of(givenAlias))
+                .withKeyBytes(Bytes.bytesOf(givenAlias))
                 .withNamespace(NamespaceSlot.at(targetNamespace)).fake()).fake();
             UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
@@ -305,7 +305,7 @@ class AssignNamespaceCommandTestIT {
     }
 
     private Input inputOf(final int index) {
-        return Input.of(Bytes.of(String.valueOf(index)));
+        return Input.of(Bytes.bytesOf(String.valueOf(index)));
     }
 
 

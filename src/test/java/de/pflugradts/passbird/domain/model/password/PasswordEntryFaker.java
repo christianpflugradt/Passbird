@@ -20,8 +20,8 @@ public class PasswordEntryFaker {
 
     public PasswordEntryFaker fakePasswordEntry() {
         namespace = DEFAULT;
-        key = Bytes.of("key");
-        password = Bytes.of("password");
+        key = Bytes.bytesOf("key");
+        password = Bytes.bytesOf("password");
         return this;
     }
 

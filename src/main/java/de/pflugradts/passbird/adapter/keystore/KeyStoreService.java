@@ -45,9 +45,9 @@ public class KeyStoreService implements KeyStoreAdapterPort {
                 keyStore.load(inputStream, passwordChars);
                 final var secret = keyStore.getKey(SECRET_ALIAS, passwordChars);
                 final var iv = keyStore.getKey(IV_ALIAS, passwordChars);
-                Chars.of(passwordChars).scramble();
+                Chars.charsOf(passwordChars).scramble();
                 password.scramble();
-                return new Key(Bytes.of(secret.getEncoded()), Bytes.of(iv.getEncoded()));
+                return new Key(Bytes.bytesOf(secret.getEncoded()), Bytes.bytesOf(iv.getEncoded()));
             }
         } else if (tryKeyStore.isFailure()) {
             throw tryKeyStore.getCause();
@@ -81,7 +81,7 @@ public class KeyStoreService implements KeyStoreAdapterPort {
                         new KeyStore.SecretKeyEntry(keyGenerator.generateKey()),
                         new KeyStore.PasswordProtection(passwordChars));
                 keyStore.store(outputStream, passwordChars);
-                Chars.of(passwordChars).scramble();
+                Chars.charsOf(passwordChars).scramble();
                 password.scramble();
             }
         } else if (tryKeyStore.isFailure()) {

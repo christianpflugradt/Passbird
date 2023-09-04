@@ -1,35 +1,36 @@
 package de.pflugradts.passbird.domain.model.transfer
 
+import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.CharValue.MAX_ASCII_VALUE
 import de.pflugradts.passbird.domain.model.transfer.CharValue.MIN_ASCII_VALUE
 import java.security.SecureRandom
 
-class Chars private constructor(private val chars: CharArray) {
+class Chars private constructor(private val charArray: CharArray) {
 
-    fun scramble() = chars.indices.forEach {
-        chars[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toChar()
+    fun scramble() = charArray.indices.forEach {
+        charArray[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toChar()
     }
 
-    fun toBytes(): Bytes = Bytes.of(
-        *ByteArray(chars.size).also { byteArray ->
-            chars.indices.forEach { index -> byteArray[index] = chars[index].code.toByte() }
+    fun toBytes(): Bytes = bytesOf(
+        ByteArray(charArray.size).also { byteArray ->
+            charArray.indices.forEach { index -> byteArray[index] = charArray[index].code.toByte() }
         },
     ).also { this.scramble() }
 
-    fun toCharArray() = chars.clone()
+    fun toCharArray() = charArray.clone()
 
     override fun equals(other: Any?): Boolean = when {
         (this === other) -> true
         (javaClass != other?.javaClass) -> false
-        else -> chars contentEquals (other as Chars).chars
+        else -> charArray contentEquals (other as Chars).charArray
     }
 
-    override fun hashCode() = chars.contentHashCode()
+    override fun hashCode() = charArray.contentHashCode()
 
     companion object {
         val SECURE_RANDOM = SecureRandom()
 
         @JvmStatic
-        fun of(chars: CharArray) = Chars(chars.clone())
+        fun charsOf(chars: CharArray) = Chars(chars.clone())
     }
 }

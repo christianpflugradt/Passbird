@@ -11,13 +11,13 @@ public class NamespaceTest {
     @Test
     void shouldCreateNamespace() {
         // given / when / then
-        assertThat(Namespace.create(Bytes.of("namespace"), DEFAULT)).isNotNull();
+        assertThat(Namespace.create(Bytes.bytesOf("namespace"), DEFAULT)).isNotNull();
     }
 
     @Test
     void shouldCloneBytes() {
         // given
-        final var bytes = Bytes.of("key");
+        final var bytes = Bytes.bytesOf("key");
         final var namespace = Namespace.create(bytes, DEFAULT);
 
         // when
@@ -35,7 +35,7 @@ public class NamespaceTest {
 
         // then
         assertThat(defaultNamespace).isNotNull();
-        assertThat(defaultNamespace.getBytes()).isNotNull().isEqualTo(Bytes.of("Default"));
+        assertThat(defaultNamespace.getBytes()).isNotNull().isEqualTo(Bytes.bytesOf("Default"));
         assertThat(defaultNamespace.getSlot()).isNotNull().isEqualTo(DEFAULT);
     }
 

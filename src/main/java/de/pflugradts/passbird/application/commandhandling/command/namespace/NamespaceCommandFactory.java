@@ -16,16 +16,16 @@ public class NamespaceCommandFactory {
     public Command constructFromInput(final Input input) {
         final var command = input.getCommand();
         final var data = input.getData();
-        if (command.size() > MAX_COMMAND_SIZE) {
+        if (command.getSize() > MAX_COMMAND_SIZE) {
             throw new IllegalArgumentException("namespace command parameter not supported: "
                 + input.getCommand().slice(2).asString());
-        } else if (command.size() == 1 && data.isEmpty()) {
+        } else if (command.getSize() == 1 && data.isEmpty()) {
             return new ViewNamespaceCommand();
-        } else if (command.size() == 1 && !data.isEmpty()) {
+        } else if (command.getSize() == 1 && !data.isEmpty()) {
             return new AssignNamespaceCommand(input);
-        } else if (command.size() == 2 && CharValue.of(command.getChar(1)).isDigit()) {
+        } else if (command.getSize() == 2 && CharValue.of(command.getChar(1)).isDigit()) {
             return new SwitchNamespaceCommand(NamespaceSlot.at(command.getChar(1)));
-        } else if (command.size() > 2
+        } else if (command.getSize() > 2
                 && command.getChar(1) == ADD.getValue()) {
             return new AddNamespaceCommand(NamespaceSlot.at(command.getChar(2)));
         }

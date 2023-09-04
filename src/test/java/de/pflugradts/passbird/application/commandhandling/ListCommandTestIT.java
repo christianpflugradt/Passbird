@@ -49,10 +49,10 @@ class ListCommandTestIT {
     @Test
     void shouldHandleListCommand() {
         // given
-        final var input = Input.of(Bytes.of("l"));
-        final var key1 = Bytes.of("key1");
-        final var key2 = Bytes.of("key2");
-        final var key3 = Bytes.of("key3");
+        final var input = Input.of(Bytes.bytesOf("l"));
+        final var key1 = Bytes.bytesOf("key1");
+        final var key2 = Bytes.bytesOf("key2");
+        final var key3 = Bytes.bytesOf("key3");
         given(passwordService.findAllKeys()).willReturn(Try.of(() -> Stream.of(key1, key2, key3)));
 
         // when
@@ -71,7 +71,7 @@ class ListCommandTestIT {
     @Test
     void shouldHandleListCommand_WithEmptyDatabase() {
         // given
-        final var input = Input.of(Bytes.of("l"));
+        final var input = Input.of(Bytes.bytesOf("l"));
         given(passwordService.findAllKeys()).willReturn(Try.of(Stream::empty));
 
         // when

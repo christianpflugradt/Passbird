@@ -12,7 +12,7 @@ class OutputTest {
         @Test
         void shouldHaveBytes() {
             // given
-            final var givenBytes = Bytes.of(new byte[]{1, 2, 3});
+            final var givenBytes = Bytes.bytesOf(new byte[]{1, 2, 3});
             final var givenOutput = Output.of(givenBytes);
 
             // when
@@ -26,7 +26,7 @@ class OutputTest {
         void shouldInstantiateFromByteArray() {
             // given
             final var givenByteArray = new byte[]{1, 2, 3};
-            final var expectedBytes = Bytes.of(givenByteArray);
+            final var expectedBytes = Bytes.bytesOf(givenByteArray);
 
             // when
             final var actual = Output.of(givenByteArray);
@@ -42,7 +42,7 @@ class OutputTest {
             // given / when / then
             assertThat(Output.empty()).isNotNull()
                     .extracting(Output::getBytes)
-                    .isNotNull().isEqualTo(Bytes.empty());
+                    .isNotNull().isEqualTo(Bytes.emptyBytes());
         }
 
     }

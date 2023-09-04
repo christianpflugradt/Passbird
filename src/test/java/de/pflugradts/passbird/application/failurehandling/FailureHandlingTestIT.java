@@ -122,7 +122,7 @@ class FailureHandlingTestIT {
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.collectPasswordEntryFailure(Bytes.empty(), new RuntimeException());
+        failureCollector.collectPasswordEntryFailure(Bytes.emptyBytes(), new RuntimeException());
         final var actual = outputStream.toString();
 
         // then
@@ -135,7 +135,7 @@ class FailureHandlingTestIT {
         assertThat(outputStream.toByteArray()).isEmpty();
 
         // when
-        failureCollector.collectPasswordEntryFailure(Bytes.empty(), new InvalidKeyException(Bytes.empty()));
+        failureCollector.collectPasswordEntryFailure(Bytes.emptyBytes(), new InvalidKeyException(Bytes.emptyBytes()));
         final var actual = outputStream.toString();
 
         // then
@@ -188,7 +188,7 @@ class FailureHandlingTestIT {
         final var keystring = "mykey";
 
         // when
-        failureCollector.collectImportFailure(new InvalidKeyException(Bytes.of(keystring)));
+        failureCollector.collectImportFailure(new InvalidKeyException(Bytes.bytesOf(keystring)));
         final var actual = outputStream.toString();
 
         // then
@@ -233,7 +233,7 @@ class FailureHandlingTestIT {
                 .withVerifySignatureEnabled().fake();
 
         // when
-        failureCollector.collectSignatureCheckFailure(Bytes.empty());
+        failureCollector.collectSignatureCheckFailure(Bytes.emptyBytes());
         final var actual = outputStream.toString();
 
         // then
@@ -248,7 +248,7 @@ class FailureHandlingTestIT {
         MockitoConfigurationFaker.faker().forInstance(configuration).fake();
 
         // when
-        failureCollector.collectSignatureCheckFailure(Bytes.empty());
+        failureCollector.collectSignatureCheckFailure(Bytes.emptyBytes());
         final var actual = outputStream.toString();
 
         // then

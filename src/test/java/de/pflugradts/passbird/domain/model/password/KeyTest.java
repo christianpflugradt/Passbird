@@ -9,13 +9,13 @@ class KeyTest {
     @Test
     void shouldCreateKey() {
         // given / when / then
-        assertThat(Key.create(Bytes.of("key"))).isNotNull();
+        assertThat(Key.create(Bytes.bytesOf("key"))).isNotNull();
     }
 
     @Test
     void shouldViewKey() {
         // given
-        final var bytes = Bytes.of("key");
+        final var bytes = Bytes.bytesOf("key");
         final var key = Key.create(bytes);
 
         // when
@@ -28,9 +28,9 @@ class KeyTest {
     @Test
     void shouldRenameKey() {
         // given
-        final var originalBytes = Bytes.of("key123");
+        final var originalBytes = Bytes.bytesOf("key123");
         final var key = Key.create(originalBytes);
-        final var updatedBytes = Bytes.of("keyABC");
+        final var updatedBytes = Bytes.bytesOf("keyABC");
 
         // when
         key.rename(updatedBytes);
@@ -45,7 +45,7 @@ class KeyTest {
     @Test
     void shouldCloneBytes() {
         // given
-        final var bytes = Bytes.of("key");
+        final var bytes = Bytes.bytesOf("key");
         final var key = Key.create(bytes);
 
         // when

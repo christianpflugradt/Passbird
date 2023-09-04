@@ -47,7 +47,7 @@ class CryptoProviderFactoryTest {
     @Test
     void shouldCreateCryptoProvider() {
         // given
-        final var correctPassword = Input.of(Bytes.of("letmein"));
+        final var correctPassword = Input.of(Bytes.bytesOf("letmein"));
         final var keyStoreDirectory = "tmp";
         final var keyStoreFilePath = PathFaker.faker().fakePath().fake();
         final var keyStoreDirPath = PathFaker.faker()
@@ -74,8 +74,8 @@ class CryptoProviderFactoryTest {
     @Test
     void shouldCreateCryptoProvider_On3rdPasswordInputAttempt() {
         // given
-        final var incorrectPassword = Input.of(Bytes.of("letmeout"));
-        final var correctPassword = Input.of(Bytes.of("letmein"));
+        final var incorrectPassword = Input.of(Bytes.bytesOf("letmeout"));
+        final var correctPassword = Input.of(Bytes.bytesOf("letmein"));
         final var keyStoreDirectory = "tmp";
         final var keyStoreFilePath = PathFaker.faker().fakePath().fake();
         final var keyStoreDirPath = PathFaker.faker()
@@ -103,7 +103,7 @@ class CryptoProviderFactoryTest {
     @Test
     void shouldCreateCryptoProvider_TerminateApplicationAfter3FailedAttempts() {
         // given
-        final var incorrectPassword = Input.of(Bytes.of("letmeout"));
+        final var incorrectPassword = Input.of(Bytes.bytesOf("letmeout"));
         final var keyStoreDirectory = "tmp";
         final var keyStoreFilePath = PathFaker.faker().fakePath().fake();
         final var keyStoreDirPath = PathFaker.faker()
@@ -129,7 +129,7 @@ class CryptoProviderFactoryTest {
 
     private void givenLoginSucceeds(final Input password, final Path keyStoreFilePath) {
         given(keyStoreAdapterPort.loadKey(eq(password.getBytes().toChars()), eq(keyStoreFilePath)))
-                .willReturn(Try.of(() -> new Key(Bytes.empty(), Bytes.empty())));
+                .willReturn(Try.of(() -> new Key(Bytes.emptyBytes(), Bytes.emptyBytes())));
     }
 
     private void givenLoginFails(final Input password, final Path keyStoreFilePath) {

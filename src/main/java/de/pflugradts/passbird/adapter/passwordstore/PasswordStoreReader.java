@@ -78,15 +78,15 @@ class PasswordStoreReader {
         final var bytes = systemOperation.readBytesFromFile(getFilePath());
         return bytes.isSuccess()
             ? cryptoProvider.decrypt(bytes.get())
-            : Try.of(Bytes::empty);
+            : Try.of(Bytes::emptyBytes);
     }
 
     private void verifySignature(final byte[] bytes) {
         final byte[] expectedSignature = commons.signature();
         final byte[] actualSignature = new byte[commons.signatureSize()];
-        ByteArrayUtils.copyBytes(Bytes.of(bytes), actualSignature, 0);
+        ByteArrayUtils.copyBytes(Bytes.bytesOf(bytes), actualSignature, 0);
         if (!Arrays.equals(expectedSignature, actualSignature)) {
-            failureCollector.collectSignatureCheckFailure(Bytes.of(actualSignature));
+            failureCollector.collectSignatureCheckFailure(Bytes.bytesOf(actualSignature));
         }
     }
 

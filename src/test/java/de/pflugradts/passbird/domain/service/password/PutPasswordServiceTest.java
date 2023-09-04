@@ -42,7 +42,7 @@ class PutPasswordServiceTest {
     @Test
     void shouldSucceedChallengingAlphabeticAlias() {
         // given
-        final var givenAlias = Bytes.of("abcDEF");
+        final var givenAlias = Bytes.bytesOf("abcDEF");
 
         // when
         final var actual = passwordService.challengeAlias(givenAlias);
@@ -54,7 +54,7 @@ class PutPasswordServiceTest {
     @Test
     void shouldSucceedChallengingAliasWithDigitAtOtherThanFirstPosition() {
         // given
-        final var givenAlias = Bytes.of("abc123");
+        final var givenAlias = Bytes.bytesOf("abc123");
 
         // when
         final var actual = passwordService.challengeAlias(givenAlias);
@@ -66,7 +66,7 @@ class PutPasswordServiceTest {
     @Test
     void shouldFailChallengingAliasWithDigitAtFirstPosition() {
         // given
-        final var givenAlias = Bytes.of("123abc");
+        final var givenAlias = Bytes.bytesOf("123abc");
 
         // when
         final var actual = passwordService.challengeAlias(givenAlias);
@@ -79,7 +79,7 @@ class PutPasswordServiceTest {
     @Test
     void shouldFailChallengingAliasWithSpecialCharacters() {
         // given
-        final var givenAlias = Bytes.of("abc!");
+        final var givenAlias = Bytes.bytesOf("abc!");
 
         // when
         final var actual = passwordService.challengeAlias(givenAlias);
@@ -91,9 +91,9 @@ class PutPasswordServiceTest {
     @Test
     void shouldPutPasswordEntry_InsertNewEntry() {
         // given
-        final var existingKey = Bytes.of("Key");
-        final var newKey = Bytes.of("tryThis");
-        final var newPassword = Bytes.of("Password");
+        final var existingKey = Bytes.bytesOf("Key");
+        final var newKey = Bytes.bytesOf("tryThis");
+        final var newPassword = Bytes.bytesOf("Password");
         final var matchingPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(existingKey).fake();
@@ -118,8 +118,8 @@ class PutPasswordServiceTest {
     @Test
     void shouldPutPasswordEntry_UpdateExistingEntry() {
         // given
-        final var existingKey = Bytes.of("Key");
-        final var newPassword = Bytes.of("Password");
+        final var existingKey = Bytes.bytesOf("Key");
+        final var newPassword = Bytes.bytesOf("Password");
         final var matchingPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(existingKey).fake();
@@ -144,10 +144,10 @@ class PutPasswordServiceTest {
     @Test
     void shouldPutPasswordEntry_RejectInvalidKey() {
         // given
-        final var invalidKey = Bytes.of("1Key");
+        final var invalidKey = Bytes.bytesOf("1Key");
 
         // when
-        final var actual = passwordService.putPasswordEntry(invalidKey, Bytes.of("password"));
+        final var actual = passwordService.putPasswordEntry(invalidKey, Bytes.bytesOf("password"));
 
         // then
         then(cryptoProvider).shouldHaveNoInteractions();
@@ -160,10 +160,10 @@ class PutPasswordServiceTest {
     @Test
     void shouldPutPasswordEntries_InsertAndUpdate() {
         // given
-        final var newKey = Bytes.of("trythis");
-        final var newPassword = Bytes.of("dont use this as a password");
-        final var existingKey = Bytes.of("Key");
-        final var newPasswordForExistingKey = Bytes.of("Password");
+        final var newKey = Bytes.bytesOf("trythis");
+        final var newPassword = Bytes.bytesOf("dont use this as a password");
+        final var existingKey = Bytes.bytesOf("Key");
+        final var newPasswordForExistingKey = Bytes.bytesOf("Password");
         final var matchingPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(existingKey).fake();

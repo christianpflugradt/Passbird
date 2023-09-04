@@ -32,7 +32,7 @@ public final class ByteArrayUtils {
     }
 
     public static int copyBytes(final Bytes source, final byte[] target, final int offset) {
-        return copyBytes(source, target, offset, Math.min(source.size(), target.length));
+        return copyBytes(source, target, offset, Math.min(source.getSize(), target.length));
     }
 
     public static int copyBytes(final Bytes source, final byte[] target, final int offset, final int size) {

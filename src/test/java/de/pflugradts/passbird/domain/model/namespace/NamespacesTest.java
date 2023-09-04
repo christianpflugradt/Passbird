@@ -28,8 +28,8 @@ public class NamespacesTest {
     void shouldPopulate() {
         // given
         final var namespaceBytes = List.of(
-            Bytes.empty(), Bytes.of("namespace1"), Bytes.empty(), Bytes.of("namespace3"),
-            Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.of("namespace7"), Bytes.empty());
+            Bytes.emptyBytes(), Bytes.bytesOf("namespace1"), Bytes.emptyBytes(), Bytes.bytesOf("namespace3"),
+            Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.bytesOf("namespace7"), Bytes.emptyBytes());
 
         // when
         namespaces.populate(namespaceBytes);
@@ -49,8 +49,8 @@ public class NamespacesTest {
     @Test
     void shouldPopulateOnlyOnce() {
         // given
-        final var givenBytes = Bytes.of("namespace");
-        final var otherBytes = Bytes.of("namespaceOthers");
+        final var givenBytes = Bytes.bytesOf("namespace");
+        final var otherBytes = Bytes.bytesOf("namespaceOthers");
         final var namespaceBytes = Collections.nCopies(9, givenBytes);
 
         // when
@@ -76,10 +76,10 @@ public class NamespacesTest {
     @Test
     void shouldReturnNamespaceForNonEmptySlot() {
         // given
-        final var givenNamespaceBytes = Bytes.of("slot2");
+        final var givenNamespaceBytes = Bytes.bytesOf("slot2");
         final var namespaceBytes = List.of(
-            Bytes.empty(), givenNamespaceBytes, Bytes.empty(), Bytes.empty(),
-            Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty());
+            Bytes.emptyBytes(), givenNamespaceBytes, Bytes.emptyBytes(), Bytes.emptyBytes(),
+            Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes());
 
         //when
         namespaces.populate(namespaceBytes);
@@ -95,8 +95,8 @@ public class NamespacesTest {
     void shouldReturnEmptyOptionalForEmptySlot() {
         // given
         final var namespaceBytes = List.of(
-            Bytes.empty(), Bytes.of("slot2"), Bytes.empty(), Bytes.empty(),
-            Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty());
+            Bytes.emptyBytes(), Bytes.bytesOf("slot2"), Bytes.emptyBytes(), Bytes.emptyBytes(),
+            Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes());
 
         //when
         namespaces.populate(namespaceBytes);
@@ -109,8 +109,8 @@ public class NamespacesTest {
     void shouldReturnDefaultNamespaceIfNoneIsSet() {
         // given
         final var namespaceBytes = List.of(
-            Bytes.empty(), Bytes.of("slot2"), Bytes.empty(), Bytes.empty(),
-            Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty());
+            Bytes.emptyBytes(), Bytes.bytesOf("slot2"), Bytes.emptyBytes(), Bytes.emptyBytes(),
+            Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes());
 
         //when
         namespaces.populate(namespaceBytes);
@@ -125,8 +125,8 @@ public class NamespacesTest {
     void shouldUpdateAndReturnCurrentNamespace() {
         // given
         final var namespaceBytes = List.of(
-            Bytes.empty(), Bytes.of("slot2"), Bytes.empty(), Bytes.empty(),
-            Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty());
+            Bytes.emptyBytes(), Bytes.bytesOf("slot2"), Bytes.emptyBytes(), Bytes.emptyBytes(),
+            Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes());
         namespaces.populate(namespaceBytes);
         final var wantedCurrentNamespace = _2;
 
@@ -144,8 +144,8 @@ public class NamespacesTest {
     void shouldUpdateAndReturnCurrentNamespace_DoNothingIfNamespaceIsNotDeployed() {
         // given
         final var namespaceBytes = List.of(
-            Bytes.empty(), Bytes.of("slot2"), Bytes.empty(), Bytes.empty(),
-            Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty(), Bytes.empty());
+            Bytes.emptyBytes(), Bytes.bytesOf("slot2"), Bytes.emptyBytes(), Bytes.emptyBytes(),
+            Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes(), Bytes.emptyBytes());
         namespaces.populate(namespaceBytes);
         final var wantedCurrentNamespace = _1;
 

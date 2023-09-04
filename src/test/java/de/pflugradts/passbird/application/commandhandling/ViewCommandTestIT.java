@@ -44,10 +44,10 @@ class ViewCommandTestIT {
     void shouldHandleViewCommand() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("v" + args);
+        final var bytes = Bytes.bytesOf("v" + args);
         final var reference = bytes.copy();
         final var expectedPassword = mock(Bytes.class);
-        given(passwordService.viewPassword(Bytes.of(args))).willReturn(Optional.of(Try.of(() -> expectedPassword)));
+        given(passwordService.viewPassword(Bytes.bytesOf(args))).willReturn(Optional.of(Try.of(() -> expectedPassword)));
 
         // when
         assertThat(bytes).isEqualTo(reference);

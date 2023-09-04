@@ -34,7 +34,7 @@ class ViewPasswordServiceTest {
     @Test
     void shouldReturnTrue_IfEntryExists() {
         // given
-        final var givenKey = Bytes.of("Key");
+        final var givenKey = Bytes.bytesOf("Key");
         final var matchingPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(givenKey).fake();
@@ -57,8 +57,8 @@ class ViewPasswordServiceTest {
     @Test
     void shouldReturnFalse_IfEntryDoesNotExist() {
         // given
-        final var givenKey = Bytes.of("Key");
-        final var otherKey = Bytes.of("try this");
+        final var givenKey = Bytes.bytesOf("Key");
+        final var otherKey = Bytes.bytesOf("try this");
         final var matchingPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(givenKey).fake();
@@ -81,8 +81,8 @@ class ViewPasswordServiceTest {
     @Test
     void shouldFindExistingPassword() {
         // given
-        final var givenKey = Bytes.of("Key");
-        final var expectedPassword = Bytes.of("Password");
+        final var givenKey = Bytes.bytesOf("Key");
+        final var expectedPassword = Bytes.bytesOf("Password");
         final var matchingPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(givenKey)
@@ -109,8 +109,8 @@ class ViewPasswordServiceTest {
     @Test
     void shouldFindExistingPassword_ReturnEmptyOptionalOnNoMatch() {
         // given
-        final var givenKey = Bytes.of("Key");
-        final var otherKey = Bytes.of("tryThis");
+        final var givenKey = Bytes.bytesOf("Key");
+        final var otherKey = Bytes.bytesOf("tryThis");
         final var matchingPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(givenKey).fake();
@@ -134,15 +134,15 @@ class ViewPasswordServiceTest {
     @Test
     void shouldFindAllKeysAlphabetically() {
         // given
-        final var key1 = Bytes.of("abc");
+        final var key1 = Bytes.bytesOf("abc");
         final var passwordEntry1 = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(key1).fake();
-        final var key2 = Bytes.of("xyz");
+        final var key2 = Bytes.bytesOf("xyz");
         final var passwordEntry2 = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(key2).fake();
-        final var key3 = Bytes.of("hij");
+        final var key3 = Bytes.bytesOf("hij");
         final var passwordEntry3 = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(key3).fake();

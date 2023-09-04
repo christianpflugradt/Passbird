@@ -18,7 +18,7 @@ public class QuitCommandHandler implements CommandHandler {
 
     @Subscribe
     private void handleQuitCommand(final QuitCommand quitCommand) {
-        userInterfaceAdapterPort.send(Output.of(Bytes.of("goodbye")));
+        userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf("goodbye")));
         bootable.terminate(new SystemOperation());
     }
 

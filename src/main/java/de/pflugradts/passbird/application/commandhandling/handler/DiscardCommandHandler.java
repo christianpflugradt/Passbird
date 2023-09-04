@@ -28,7 +28,7 @@ public class DiscardCommandHandler implements CommandHandler {
                     .onFailure(throwable -> failureCollector
                             .collectPasswordEntryFailure(discardCommand.getArgument(), throwable));
         } else {
-            userInterfaceAdapterPort.send(Output.of(Bytes.of("Operation aborted.")));
+            userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf("Operation aborted.")));
         }
         discardCommand.invalidateInput();
         userInterfaceAdapterPort.sendLineBreak();
@@ -37,7 +37,7 @@ public class DiscardCommandHandler implements CommandHandler {
     private boolean commandConfirmed() {
         if (configuration.getApplication().getPassword().isPromptOnRemoval()) {
             return userInterfaceAdapterPort
-                    .receiveConfirmation(Output.of(Bytes.of(
+                    .receiveConfirmation(Output.of(Bytes.bytesOf(
                             "Discarding a Password Entry is an irrevocable action.\n"
                                     + "Input 'c' to confirm or anything else to abort.\nYour input: ")));
         }

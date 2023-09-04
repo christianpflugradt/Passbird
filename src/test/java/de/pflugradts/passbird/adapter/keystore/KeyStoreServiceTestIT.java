@@ -37,8 +37,8 @@ class KeyStoreServiceTestIT {
     void shouldUseKeyStore_Roundtrip() {
         // given
         final var password = "p4s5wrD";
-        final var oneTimePasswordChars1 = Chars.of(password.toCharArray());
-        final var oneTimePasswordChars2 = Chars.of(password.toCharArray());
+        final var oneTimePasswordChars1 = Chars.charsOf(password.toCharArray());
+        final var oneTimePasswordChars2 = Chars.charsOf(password.toCharArray());
         final var path = Paths.get(keyStoreFile);
         final var expectedByteArraySize = KEYSTORE_KEY_BITS / 8;
 

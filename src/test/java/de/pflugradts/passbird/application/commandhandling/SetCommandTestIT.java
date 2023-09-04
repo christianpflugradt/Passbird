@@ -57,9 +57,9 @@ class SetCommandTestIT {
     void shouldHandleSetCommand() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("s" + args);
+        final var bytes = Bytes.bytesOf("s" + args);
         final var reference = bytes.copy();
-        final var generatedPassword = Bytes.of("p4s5w0rD");
+        final var generatedPassword = Bytes.bytesOf("p4s5w0rD");
         PasswordProviderFaker.faker()
                 .forInstance(passwordProvider)
                 .withCreatingThisPassword(generatedPassword).fake();
@@ -71,7 +71,7 @@ class SetCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should().putPasswordEntry(eq(Bytes.of(args)), same(generatedPassword));
+        then(passwordService).should().putPasswordEntry(eq(Bytes.bytesOf(args)), same(generatedPassword));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -79,9 +79,9 @@ class SetCommandTestIT {
     void shouldHandleSetCommand_WithPromptOnRemoval_AndNewPasswordEntry() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("s" + args);
+        final var bytes = Bytes.bytesOf("s" + args);
         final var reference = bytes.copy();
-        final var generatedPassword = Bytes.of("p4s5w0rD");
+        final var generatedPassword = Bytes.bytesOf("p4s5w0rD");
         PasswordProviderFaker.faker()
                 .forInstance(passwordProvider)
                 .withCreatingThisPassword(generatedPassword).fake();
@@ -96,7 +96,7 @@ class SetCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should().putPasswordEntry(eq(Bytes.of(args)), same(generatedPassword));
+        then(passwordService).should().putPasswordEntry(eq(Bytes.bytesOf(args)), same(generatedPassword));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -104,12 +104,12 @@ class SetCommandTestIT {
     void shouldHandleSetCommand_WithPromptOnRemoval_AndExistingPasswordEntry() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("s" + args);
+        final var bytes = Bytes.bytesOf("s" + args);
         final var reference = bytes.copy();
-        final var generatedPassword = Bytes.of("p4s5w0rD");
+        final var generatedPassword = Bytes.bytesOf("p4s5w0rD");
         final var givenPasswordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of(args)).fake();
+                .withKeyBytes(Bytes.bytesOf(args)).fake();
         PasswordProviderFaker.faker()
                 .forInstance(passwordProvider)
                 .withCreatingThisPassword(generatedPassword).fake();
@@ -128,7 +128,7 @@ class SetCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should().putPasswordEntry(eq(Bytes.of(args)), same(generatedPassword));
+        then(passwordService).should().putPasswordEntry(eq(Bytes.bytesOf(args)), same(generatedPassword));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -136,11 +136,11 @@ class SetCommandTestIT {
     void shouldHandleSetCommand_WithPromptOnRemoval_AndOperationAborted() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("s" + args);
+        final var bytes = Bytes.bytesOf("s" + args);
         final var reference = bytes.copy();
         final var givenPasswordEntry = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of(args)).fake();
+                .withKeyBytes(Bytes.bytesOf(args)).fake();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withPasswordEntries(givenPasswordEntry).fake();
@@ -156,8 +156,8 @@ class SetCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(passwordService).should(never()).putPasswordEntry(eq(Bytes.of(args)), any(Bytes.class));
-        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.of("Operation aborted."))));
+        then(passwordService).should(never()).putPasswordEntry(eq(Bytes.bytesOf(args)), any(Bytes.class));
+        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.bytesOf("Operation aborted."))));
         assertThat(bytes).isNotEqualTo(reference);
     }
 

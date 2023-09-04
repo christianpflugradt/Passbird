@@ -23,8 +23,8 @@ class NamespaceTransformer {
     byte[] transform(final NamespaceSlot namespaceSlot) {
         final var namespaceBytes = namespaceService.atSlot(namespaceSlot)
             .map(Namespace::getBytes)
-            .orElse(Bytes.empty());
-        final var namespaceBytesSize = namespaceBytes.size();
+            .orElse(Bytes.emptyBytes());
+        final var namespaceBytesSize = namespaceBytes.getSize();
         final var bytes = new byte[BYTES + namespaceBytesSize];
         ByteArrayUtils.copyBytes(namespaceBytes.isEmpty() ? EMPTY_NAMESPACE : namespaceBytesSize, bytes, 0);
         if (!namespaceBytes.isEmpty()) {
@@ -41,9 +41,9 @@ class NamespaceTransformer {
         if (namespaceSize > 0) {
             final byte[] namespaceBytes = ByteArrayUtils.readBytes(bytes, incrementedOffset, namespaceSize);
             incrementedOffset += namespaceBytes.length;
-            result = Bytes.of(namespaceBytes);
+            result = Bytes.bytesOf(namespaceBytes);
         } else {
-            result = Bytes.empty();
+            result = Bytes.emptyBytes();
         }
         return new Tuple2<>(result, incrementedOffset - offset);
     }

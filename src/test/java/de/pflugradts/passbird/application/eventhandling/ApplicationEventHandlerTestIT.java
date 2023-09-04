@@ -45,7 +45,7 @@ class ApplicationEventHandlerTestIT {
         // given
         final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
         final var passwordEntryCreated = new PasswordEntryCreated(givenPasswordEntry);
-        final var expectedBytes = Bytes.of("expected key");
+        final var expectedBytes = Bytes.bytesOf("expected key");
         given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
 
         // when
@@ -65,7 +65,7 @@ class ApplicationEventHandlerTestIT {
         // given
         final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
         final var passwordEntryUpdated = new PasswordEntryUpdated(givenPasswordEntry);
-        final var expectedBytes = Bytes.of("expected key");
+        final var expectedBytes = Bytes.bytesOf("expected key");
         given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
 
         // when
@@ -85,7 +85,7 @@ class ApplicationEventHandlerTestIT {
         // given
         final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
         final var passwordEntryRenamed = new PasswordEntryRenamed(givenPasswordEntry);
-        final var expectedBytes = Bytes.of("expected key");
+        final var expectedBytes = Bytes.bytesOf("expected key");
         given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
 
         // when
@@ -105,7 +105,7 @@ class ApplicationEventHandlerTestIT {
         // given
         final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
         final var passwordEntryDiscarded = new PasswordEntryDiscarded(givenPasswordEntry);
-        final var expectedBytes = Bytes.of("expected key");
+        final var expectedBytes = Bytes.bytesOf("expected key");
         given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
 
         // when
@@ -123,9 +123,9 @@ class ApplicationEventHandlerTestIT {
     @Test
     void shouldProcessPasswordEntryNotFound() {
         // given
-        final var givenKey = Bytes.of("given key");
+        final var givenKey = Bytes.bytesOf("given key");
         final var passwordEntryNotFound = new PasswordEntryNotFound(givenKey);
-        final var expectedBytes = Bytes.of("expected key");
+        final var expectedBytes = Bytes.bytesOf("expected key");
         given(cryptoProvider.decrypt(givenKey)).willReturn(Try.success(expectedBytes));
 
         // when

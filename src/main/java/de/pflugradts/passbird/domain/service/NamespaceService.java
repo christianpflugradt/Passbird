@@ -30,7 +30,7 @@ public class NamespaceService {
     private PasswordEntryRepository passwordEntryRepository;
 
     public void populateEmpty() {
-        populate(Collections.nCopies(CAPACITY, Bytes.empty()));
+        populate(Collections.nCopies(CAPACITY, Bytes.emptyBytes()));
     }
 
     public void populate(final List<Bytes> namespaceBytes) {

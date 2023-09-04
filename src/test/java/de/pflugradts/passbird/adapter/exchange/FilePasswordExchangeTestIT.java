@@ -41,9 +41,9 @@ class FilePasswordExchangeTestIT {
     @Test
     void shouldUseFileSystem_Roundtrip() {
         // given
-        final var givenPasswordEntry1 = new Tuple2<>(Bytes.of("key1"), Bytes.of("password1"));
-        final var givenPasswordEntry2 = new Tuple2<>(Bytes.of("key2"), Bytes.of("password2"));
-        final var givenPasswordEntry3 = new Tuple2<>(Bytes.of("key3"), Bytes.of("password3"));
+        final var givenPasswordEntry1 = new Tuple2<>(Bytes.bytesOf("key1"), Bytes.bytesOf("password1"));
+        final var givenPasswordEntry2 = new Tuple2<>(Bytes.bytesOf("key2"), Bytes.bytesOf("password2"));
+        final var givenPasswordEntry3 = new Tuple2<>(Bytes.bytesOf("key3"), Bytes.bytesOf("password3"));
 
         // when
         filePasswordExchange.send(Stream.of(givenPasswordEntry1, givenPasswordEntry2, givenPasswordEntry3));

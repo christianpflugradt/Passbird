@@ -33,22 +33,22 @@ public class ListCommandHandler implements CommandHandler {
 
     private Bytes join(final List<Bytes> keyBytesList) {
         if (keyBytesList.isEmpty()) {
-            return Bytes.of("database is empty");
+            return Bytes.bytesOf("database is empty");
         } else {
             final int count = keyBytesList.stream()
-                    .map(Bytes::size)
+                    .map(Bytes::getSize)
                     .reduce((keyBytesList.size() - 1) * 2, Integer::sum);
             final byte[] bytes = new byte[count];
             int index = 0;
             for (final Bytes keyBytes : keyBytesList) {
                 ByteArrayUtils.copyBytes(keyBytes, bytes, index);
-                index += keyBytes.size();
+                index += keyBytes.getSize();
                 if (index < count) {
                     bytes[index++] = (byte) ',';
                     bytes[index++] = (byte) ' ';
                 }
             }
-            return Bytes.of(bytes);
+            return Bytes.bytesOf(bytes);
         }
     }
 

@@ -23,7 +23,7 @@ public class LicenseManager {
         if (!licenseFile.exists()) {
             systemOperation.writeBytesToFile(
                 systemOperation.getPath(licenseFile).getOrNull(),
-                systemOperation.getResourceAsBytes(licenseFileName).getOrElse(Bytes.empty()));
+                systemOperation.getResourceAsBytes(licenseFileName).getOrElse(Bytes.emptyBytes()));
         }
     }
 

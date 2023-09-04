@@ -33,7 +33,7 @@ public class SetCommandHandler implements CommandHandler {
                     passwordProvider.createNewPassword(configuration.parsePasswordRequirements())
             ).onFailure(throwable -> failureCollector.collectPasswordEntryFailure(setCommand.getArgument(), throwable));
         } else {
-            userInterfaceAdapterPort.send(Output.of(Bytes.of("Operation aborted.")));
+            userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf("Operation aborted.")));
         }
         setCommand.invalidateInput();
         userInterfaceAdapterPort.sendLineBreak();
@@ -46,7 +46,7 @@ public class SetCommandHandler implements CommandHandler {
                         .collectPasswordEntryFailure(setCommand.getArgument(), throwable))
                     .getOrElse(false)) {
             return userInterfaceAdapterPort
-                    .receiveConfirmation(Output.of(Bytes.of(String.format(
+                    .receiveConfirmation(Output.of(Bytes.bytesOf(String.format(
                             "Existing Password Entry '%s' will be irrevocably overwritten.%n"
                                     + "Input 'c' to confirm or anything else to abort.%nYour input: ",
                             setCommand.getArgument().asString()))));

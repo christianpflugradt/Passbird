@@ -8,7 +8,7 @@ public abstract class AbstractSingleCharInputCommand extends AbstractInputComman
 
     protected AbstractSingleCharInputCommand(final Input input) {
         super(input);
-        if (input.getCommand().size() > MAX_COMMAND_SIZE) {
+        if (input.getCommand().getSize() > MAX_COMMAND_SIZE) {
             throw new IllegalArgumentException("parameter for command '" + input.getCommand().getChar(0)
                 + "' not supported: " + input.getCommand().slice(1).asString());
         }

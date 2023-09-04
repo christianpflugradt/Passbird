@@ -46,14 +46,14 @@ class GetCommandTestIT {
     void shouldHandleGetCommand() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("g" + args);
+        final var bytes = Bytes.bytesOf("g" + args);
         final var reference = bytes.copy();
-        final var expectedPassword = Bytes.of("value");
+        final var expectedPassword = Bytes.bytesOf("value");
         PasswordServiceFaker.faker()
                 .forInstance(passwordService)
                 .withPasswordEntries(PasswordEntryFaker.faker()
                         .fakePasswordEntry()
-                        .withKeyBytes(Bytes.of(args))
+                        .withKeyBytes(Bytes.bytesOf(args))
                         .withPasswordBytes(expectedPassword).fake()).fake();
 
         // when
@@ -71,14 +71,14 @@ class GetCommandTestIT {
     void shouldHandleGetCommand_InvalidPasswordEntry() {
         // given
         final var args = "key";
-        final var bytes = Bytes.of("g" + args);
+        final var bytes = Bytes.bytesOf("g" + args);
         final var reference = bytes.copy();
-        final var expectedPassword = Bytes.of("value");
+        final var expectedPassword = Bytes.bytesOf("value");
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
             .withPasswordEntries(PasswordEntryFaker.faker()
                 .fakePasswordEntry()
-                .withKeyBytes(Bytes.of("other")).fake()).fake();
+                .withKeyBytes(Bytes.bytesOf("other")).fake()).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);

@@ -27,7 +27,7 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_NullAndEmpty() {
             // given
-            final Bytes bytes1 = Bytes.empty();
+            final Bytes bytes1 = Bytes.emptyBytes();
             final Bytes bytes2 = null;
 
             // when / then
@@ -39,7 +39,7 @@ class BytesComparatorTest {
         void shouldCompare_NullAndNonEmpty() {
             // given
             final Bytes bytes1 = null;
-            final Bytes bytes2 = Bytes.of("1");
+            final Bytes bytes2 = Bytes.bytesOf("1");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
@@ -49,8 +49,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_EmptyAndNonEmpty() {
             // given
-            final Bytes bytes1 = Bytes.empty();
-            final Bytes bytes2 = Bytes.of("1");
+            final Bytes bytes1 = Bytes.emptyBytes();
+            final Bytes bytes2 = Bytes.bytesOf("1");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
@@ -65,8 +65,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_SymbolAndDigit() {
             // given
-            final Bytes bytes1 = Bytes.of("!");
-            final Bytes bytes2 = Bytes.of("1");
+            final Bytes bytes1 = Bytes.bytesOf("!");
+            final Bytes bytes2 = Bytes.bytesOf("1");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
@@ -76,8 +76,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_SymbolAndLetter() {
             // given
-            final Bytes bytes1 = Bytes.of("!");
-            final Bytes bytes2 = Bytes.of("a");
+            final Bytes bytes1 = Bytes.bytesOf("!");
+            final Bytes bytes2 = Bytes.bytesOf("a");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
@@ -87,8 +87,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_DigitAndLetter() {
             // given
-            final Bytes bytes1 = Bytes.of("1");
-            final Bytes bytes2 = Bytes.of("a");
+            final Bytes bytes1 = Bytes.bytesOf("1");
+            final Bytes bytes2 = Bytes.bytesOf("a");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
@@ -103,8 +103,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_UppercaseAndLowercase() {
             // given
-            final Bytes bytes1 = Bytes.of("test");
-            final Bytes bytes2 = Bytes.of("TEST");
+            final Bytes bytes1 = Bytes.bytesOf("test");
+            final Bytes bytes2 = Bytes.bytesOf("TEST");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isZero();
@@ -114,8 +114,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_ShortAndLong() {
             // given
-            final Bytes bytes1 = Bytes.of("test");
-            final Bytes bytes2 = Bytes.of("TESTING");
+            final Bytes bytes1 = Bytes.bytesOf("test");
+            final Bytes bytes2 = Bytes.bytesOf("TESTING");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
@@ -125,8 +125,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_LastCharDiffers() {
             // given
-            final Bytes bytes1 = Bytes.of("testingA");
-            final Bytes bytes2 = Bytes.of("testingB");
+            final Bytes bytes1 = Bytes.bytesOf("testingA");
+            final Bytes bytes2 = Bytes.bytesOf("testingB");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
@@ -141,8 +141,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_ArbitraryStrings1() {
             // given
-            final Bytes bytes1 = Bytes.of("BzlPa");
-            final Bytes bytes2 = Bytes.of("NeIKii75");
+            final Bytes bytes1 = Bytes.bytesOf("BzlPa");
+            final Bytes bytes2 = Bytes.bytesOf("NeIKii75");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
@@ -152,8 +152,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_ArbitraryStrings2() {
             // given
-            final Bytes bytes1 = Bytes.of("Ue1e;Tv");
-            final Bytes bytes2 = Bytes.of("VknA@");
+            final Bytes bytes1 = Bytes.bytesOf("Ue1e;Tv");
+            final Bytes bytes2 = Bytes.bytesOf("VknA@");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
@@ -163,8 +163,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_ArbitraryStrings3() {
             // given
-            final Bytes bytes1 = Bytes.of("(F");
-            final Bytes bytes2 = Bytes.of("4");
+            final Bytes bytes1 = Bytes.bytesOf("(F");
+            final Bytes bytes2 = Bytes.bytesOf("4");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
@@ -174,8 +174,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_ArbitraryStrings4() {
             // given
-            final Bytes bytes1 = Bytes.of("789nGE");
-            final Bytes bytes2 = Bytes.of("KjLX%)Dm");
+            final Bytes bytes1 = Bytes.bytesOf("789nGE");
+            final Bytes bytes2 = Bytes.bytesOf("KjLX%)Dm");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
@@ -185,8 +185,8 @@ class BytesComparatorTest {
         @Test
         void shouldCompare_ArbitraryStrings5() {
             // given
-            final Bytes bytes1 = Bytes.of("7g.");
-            final Bytes bytes2 = Bytes.of("r^)HVd%^f");
+            final Bytes bytes1 = Bytes.bytesOf("7g.");
+            final Bytes bytes2 = Bytes.bytesOf("r^)HVd%^f");
 
             // when / then
             assertThat(comparator.compare(bytes1, bytes2)).isNegative();
