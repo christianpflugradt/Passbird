@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Output
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -34,7 +34,7 @@ internal class ClipboardServiceTest {
         )
 
         // when
-        clipboardService.post(Output.of(bytesOf(message)))
+        clipboardService.post(outputOf(bytesOf(message)))
 
         // then
         verify(exactly = 1) { systemOperation.copyToClipboard(message) }
@@ -52,7 +52,7 @@ internal class ClipboardServiceTest {
         )
 
         // when
-        clipboardService.post(Output.of(bytesOf(message)))
+        clipboardService.post(outputOf(bytesOf(message)))
 
         // then
         verify(exactly = 1) { systemOperation.copyToClipboard(message) }
@@ -75,9 +75,9 @@ internal class ClipboardServiceTest {
         )
 
         // when
-        clipboardService.post(Output.of(bytesOf(message)))
+        clipboardService.post(outputOf(bytesOf(message)))
         Thread.sleep(almostASecond.toLong())
-        clipboardService.post(Output.of(bytesOf(anotherMessage)))
+        clipboardService.post(outputOf(bytesOf(anotherMessage)))
         Thread.sleep(almostASecond.toLong())
 
         // then

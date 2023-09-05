@@ -31,23 +31,23 @@ public class AssignNamespaceCommandHandler implements CommandHandler, CanListAva
                 .onFailure(throwable ->
                     failureCollector.collectPasswordEntryFailure(assignNamespaceCommand.getArgument(), throwable))
                 .getOrElse(false)) {
-            userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(String.format("Available namespaces: %n%s",
+            userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(String.format("Available namespaces: %n%s",
                 getAvailableNamespaces(namespaceService, false)))));
             final var input = userInterfaceAdapterPort
-                .receive(Output.of(Bytes.bytesOf("Enter namespace you want to move password entry to: ")));
+                .receive(Output.Companion.outputOf(Bytes.bytesOf("Enter namespace you want to move password entry to: ")));
             final var namespace = input.parseNamespace();
             if (namespace == INVALID) {
-                userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(
+                userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(
                     "Invalid namespace - Operation aborted.")));
             } else if (namespace == namespaceService.getCurrentNamespace().getSlot()) {
-                userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(
+                userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(
                     "Password entry is already in the specified namespace - Operation aborted.")));
             } else if (namespaceService.atSlot(namespace).isEmpty()) {
-                userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(
+                userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(
                     "Specified namespace does not exist - Operation aborted.")));
             } else if (passwordService.entryExists(
                 assignNamespaceCommand.getArgument(), namespace).getOrElse(false)) {
-                userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(
+                userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(
                     "Password entry with same alias already exists in target namespace - Operation aborted.")));
             } else {
                 passwordService.movePasswordEntry(assignNamespaceCommand.getArgument(), namespace);

@@ -61,7 +61,7 @@ class GetCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(clipboardAdapterPort).should().post(eq(Output.of(expectedPassword)));
+        then(clipboardAdapterPort).should().post(eq(Output.Companion.outputOf(expectedPassword)));
         then(userInterfaceAdapterPort).should().send(any(Output.class));
         assertThat(bytes).isNotEqualTo(reference);
     }

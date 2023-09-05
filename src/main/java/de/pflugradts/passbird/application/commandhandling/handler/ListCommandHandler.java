@@ -24,7 +24,7 @@ public class ListCommandHandler implements CommandHandler {
 
     @Subscribe
     private void handleListCommand(final ListCommand listCommand) {
-        userInterfaceAdapterPort.send(Output.of(join(passwordService.findAllKeys()
+        userInterfaceAdapterPort.send(Output.Companion.outputOf(join(passwordService.findAllKeys()
                 .onFailure(failureCollector::collectPasswordEntriesFailure)
                 .getOrElse(Stream.empty())
                 .collect(Collectors.toList()))));

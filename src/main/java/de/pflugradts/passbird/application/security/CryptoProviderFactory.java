@@ -54,13 +54,13 @@ public class CryptoProviderFactory {
 
     private Chars receiveLogin() {
         return userInterfaceAdapterPort
-                .receiveSecurely(Output.of(Bytes.bytesOf("Enter key: ")))
+                .receiveSecurely(Output.Companion.outputOf(Bytes.bytesOf("Enter key: ")))
                 .getBytes()
                 .toChars();
     }
 
     private Try<Key> authenticationFailed() {
-        userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf("Login failed. Shutting down.")));
+        userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf("Login failed. Shutting down.")));
         application.terminate(new SystemOperation());
         return Try.failure(new LoginException());
     }

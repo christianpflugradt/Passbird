@@ -18,7 +18,7 @@ public class ViewNamespaceCommandHandler implements CommandHandler, CanListAvail
 
     @Subscribe
     private void handleViewNamespaceCommand(final ViewNamespaceCommand viewNamespaceCommand) {
-        userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(String.format(
+        userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(String.format(
                 "%nCurrent namespace: %s%n%n"
                 + "Available namespaces: %n%s%n"
                 + "Available namespace commands:%n"

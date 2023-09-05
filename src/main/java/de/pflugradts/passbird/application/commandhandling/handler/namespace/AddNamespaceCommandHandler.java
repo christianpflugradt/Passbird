@@ -24,7 +24,7 @@ public class AddNamespaceCommandHandler implements CommandHandler {
     @Subscribe
     private void handleAddNamespaceCommand(final AddNamespaceCommand addNamespaceCommand) {
         if (namespaceService.atSlot(addNamespaceCommand.getSlot()).filter(DEFAULT::equals).isPresent()) {
-            userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(
+            userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(
                 "Default namespace cannot be replaced - Operation aborted.")));
             return;
         }
@@ -34,9 +34,9 @@ public class AddNamespaceCommandHandler implements CommandHandler {
                 namespaceService.atSlot(addNamespaceCommand.getSlot()).get().getBytes().asString())
             : String.format("Enter name for namespace or nothing to abort%nYour input: ");
         final var input = userInterfaceAdapterPort
-            .receive(Output.of(Bytes.bytesOf(prompt)));
+            .receive(Output.Companion.outputOf(Bytes.bytesOf(prompt)));
         if (input.isEmpty()) {
-            userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf("Empty input - Operation aborted.")));
+            userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf("Empty input - Operation aborted.")));
         } else {
             namespaceService.deploy(input.getBytes(), addNamespaceCommand.getSlot());
         }

@@ -31,16 +31,16 @@ public class CustomSetCommandHandler implements CommandHandler {
                 failureCollector.collectPasswordEntryFailure(customSetCommand.getArgument(), aliasCheck.getCause());
             } else {
                 final var secureInput = userInterfaceAdapterPort
-                        .receiveSecurely(Output.of(Bytes.bytesOf("Enter custom password: ")));
+                        .receiveSecurely(Output.Companion.outputOf(Bytes.bytesOf("Enter custom password: ")));
                 if (secureInput.isEmpty()) {
-                    userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf("Empty input - Operation aborted.")));
+                    userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf("Empty input - Operation aborted.")));
                 } else {
                     passwordService.putPasswordEntry(customSetCommand.getArgument(), secureInput.getBytes());
                 }
                 secureInput.invalidate();
             }
         } else {
-            userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf("Operation aborted.")));
+            userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf("Operation aborted.")));
         }
         customSetCommand.invalidateInput();
         userInterfaceAdapterPort.sendLineBreak();
@@ -53,7 +53,7 @@ public class CustomSetCommandHandler implements CommandHandler {
                         .collectPasswordEntryFailure(customSetCommand.getArgument(), throwable))
                 .getOrElse(false)) {
             return userInterfaceAdapterPort
-                    .receiveConfirmation(Output.of(Bytes.bytesOf(String.format(
+                    .receiveConfirmation(Output.Companion.outputOf(Bytes.bytesOf(String.format(
                             "Existing Password Entry '%s' will be irrevocably overwritten.%n"
                                     + "Input 'c' to confirm or anything else to abort.%nYour input: ",
                             customSetCommand.getArgument().asString()))));

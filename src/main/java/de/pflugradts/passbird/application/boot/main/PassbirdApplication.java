@@ -38,7 +38,7 @@ public class PassbirdApplication implements Bootable {
 
     private Input receiveInput() {
         return userInterfaceAdapterPort
-                .receive(Output.of(Bytes.bytesOf(namespacePrefix() + "Enter command: ")));
+                .receive(Output.Companion.outputOf(Bytes.bytesOf(namespacePrefix() + "Enter command: ")));
     }
 
     private String namespacePrefix() {

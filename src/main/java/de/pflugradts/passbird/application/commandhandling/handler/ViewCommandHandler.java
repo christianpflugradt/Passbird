@@ -22,7 +22,7 @@ public class ViewCommandHandler implements CommandHandler {
         passwordService.viewPassword(viewCommand.getArgument()).ifPresent(result -> result
                 .onFailure(throwable -> failureCollector
                         .collectPasswordEntryFailure(viewCommand.getArgument(), throwable))
-                .onSuccess(passwordBytes -> userInterfaceAdapterPort.send(Output.of(passwordBytes))));
+                .onSuccess(passwordBytes -> userInterfaceAdapterPort.send(Output.Companion.outputOf(passwordBytes))));
         viewCommand.invalidateInput();
         userInterfaceAdapterPort.sendLineBreak();
     }

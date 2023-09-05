@@ -6,7 +6,8 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Input
-import de.pflugradts.passbird.domain.model.transfer.Output
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Nested
@@ -38,7 +39,7 @@ internal class CommandLineInterfaceServiceTest {
                     System.setOut(printStream)
 
                     // when
-                    commandLineInterfaceService.send(Output.of(Bytes.bytesOf(givenMessage)))
+                    commandLineInterfaceService.send(outputOf(Bytes.bytesOf(givenMessage)))
 
                     // then
                     actual = String(stream.toByteArray())
@@ -98,7 +99,7 @@ internal class CommandLineInterfaceServiceTest {
                         System.setIn(inStream)
 
                         // when
-                        commandLineInterfaceService.receive(Output.of(Bytes.bytesOf(givenMessage)))
+                        commandLineInterfaceService.receive(outputOf(Bytes.bytesOf(givenMessage)))
 
                         // then
                         actual = String(stream.toByteArray())
@@ -150,7 +151,7 @@ internal class CommandLineInterfaceServiceTest {
                     System.setOut(printStream)
 
                     // when
-                    commandLineInterfaceService.receiveSecurely(Output.of(Bytes.bytesOf(givenMessage)))
+                    commandLineInterfaceService.receiveSecurely(outputOf(Bytes.bytesOf(givenMessage)))
 
                     // then
                     actual = String(stream.toByteArray())
@@ -221,7 +222,7 @@ internal class CommandLineInterfaceServiceTest {
                 System.setIn(stream)
 
                 // when
-                actual = commandLineInterfaceService.receiveConfirmation(Output.empty())
+                actual = commandLineInterfaceService.receiveConfirmation(emptyOutput())
             }
 
             // then
@@ -238,7 +239,7 @@ internal class CommandLineInterfaceServiceTest {
                 System.setIn(stream)
 
                 // when
-                actual = commandLineInterfaceService.receiveConfirmation(Output.empty())
+                actual = commandLineInterfaceService.receiveConfirmation(emptyOutput())
             }
 
             // then
@@ -255,7 +256,7 @@ internal class CommandLineInterfaceServiceTest {
                 System.setIn(stream)
 
                 // when
-                actual = commandLineInterfaceService.receiveConfirmation(Output.empty())
+                actual = commandLineInterfaceService.receiveConfirmation(emptyOutput())
             }
 
             // then
@@ -272,7 +273,7 @@ internal class CommandLineInterfaceServiceTest {
                 System.setIn(stream)
 
                 // when
-                actual = commandLineInterfaceService.receiveConfirmation(Output.empty())
+                actual = commandLineInterfaceService.receiveConfirmation(emptyOutput())
             }
 
             // then

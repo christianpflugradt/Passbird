@@ -95,7 +95,7 @@ class SetupGuide {
     }
 
     private void send(final String message) {
-        userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(message)));
+        userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(message)));
     }
 
 }

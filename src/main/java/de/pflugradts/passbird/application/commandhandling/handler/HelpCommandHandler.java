@@ -34,7 +34,7 @@ public class HelpCommandHandler implements CommandHandler {
     }
 
     private void printUsage() {
-        userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(String.format(
+        userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(String.format(
                 "%nUsage: [command][parameter]%n"
                         + "A command takes at most one parameter which is either%n"
                         + "a key to a password or an absolute path to a file.%n%n"
@@ -73,7 +73,7 @@ public class HelpCommandHandler implements CommandHandler {
         final var resourceFile = new File(resource);
         licenseManager.verifyLicenseFilesExist();
         systemOperation.openFile(resourceFile);
-        userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf(String.format(
+        userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(String.format(
                 messageTemplate,
                 Path.of(System.getProperty("user.dir"), resource).toString()))));
         userInterfaceAdapterPort.sendLineBreak();

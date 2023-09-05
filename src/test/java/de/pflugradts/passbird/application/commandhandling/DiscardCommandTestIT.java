@@ -114,7 +114,7 @@ class DiscardCommandTestIT {
 
         // then
         then(passwordService).should(never()).discardPasswordEntry(eq(Bytes.bytesOf(args)));
-        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.bytesOf("Operation aborted."))));
+        then(userInterfaceAdapterPort).should().send(eq(Output.Companion.outputOf(Bytes.bytesOf("Operation aborted."))));
         assertThat(bytes).isNotEqualTo(reference);
     }
 

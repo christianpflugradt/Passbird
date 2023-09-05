@@ -40,7 +40,7 @@ class CommandLineInterfaceService @Inject constructor(
         }
     }
 
-    private fun sendWithoutLineBreak(output: Output) = Bytes.bytesOf(output.getBytes().toByteArray()).forEach {
+    private fun sendWithoutLineBreak(output: Output) = Bytes.bytesOf(output.bytes.toByteArray()).forEach {
         sendChar(Char(it.toUShort()))
     }
 

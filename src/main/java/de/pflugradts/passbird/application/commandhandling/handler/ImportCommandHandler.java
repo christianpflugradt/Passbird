@@ -34,7 +34,7 @@ public class ImportCommandHandler implements CommandHandler {
         if (commandConfirmed(importCommand)) {
             importExportService.importPasswordEntries(importCommand.getArgument().asString());
         } else {
-            userInterfaceAdapterPort.send(Output.of(Bytes.bytesOf("Operation aborted.")));
+            userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf("Operation aborted.")));
         }
         importCommand.invalidateInput();
         userInterfaceAdapterPort.sendLineBreak();
@@ -55,7 +55,7 @@ public class ImportCommandHandler implements CommandHandler {
                     .collect(Collectors.joining(", "));
             if (!overlaps.isEmpty()) {
                 return userInterfaceAdapterPort
-                        .receiveConfirmation(Output.of(Bytes.bytesOf(String
+                        .receiveConfirmation(Output.Companion.outputOf(Bytes.bytesOf(String
                         .format(
                                 "By importing this file %d existing Passwords will be irrevocably overwritten.%n"
                                         + "The following Password Entries will be affected: %s%n"

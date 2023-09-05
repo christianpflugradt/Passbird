@@ -54,7 +54,7 @@ class ViewCommandTestIT {
         inputHandler.handleInput(Input.of(bytes));
 
         // then
-        then(userInterfaceAdapterPort).should().send(eq(Output.of(expectedPassword)));
+        then(userInterfaceAdapterPort).should().send(eq(Output.Companion.outputOf(expectedPassword)));
         assertThat(bytes).isNotEqualTo(reference);
     }
 

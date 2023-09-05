@@ -116,7 +116,7 @@ class CustomSetCommandTestIT {
 
         // then
         then(passwordService).should(never()).putPasswordEntry(eq(Bytes.bytesOf(args)), same(customPassword));
-        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.bytesOf("Empty input - Operation aborted."))));
+        then(userInterfaceAdapterPort).should().send(eq(Output.Companion.outputOf(Bytes.bytesOf("Empty input - Operation aborted."))));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -199,7 +199,7 @@ class CustomSetCommandTestIT {
 
         // then
         then(passwordService).should(never()).putPasswordEntry(eq(Bytes.bytesOf(args)), any(Bytes.class));
-        then(userInterfaceAdapterPort).should().send(eq(Output.of(Bytes.bytesOf("Operation aborted."))));
+        then(userInterfaceAdapterPort).should().send(eq(Output.Companion.outputOf(Bytes.bytesOf("Operation aborted."))));
         assertThat(bytes).isNotEqualTo(reference);
     }
 

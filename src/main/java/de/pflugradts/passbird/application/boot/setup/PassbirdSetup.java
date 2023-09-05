@@ -53,7 +53,7 @@ public class PassbirdSetup implements Bootable {
     }
 
     private boolean continueRoute() {
-        return userInterfaceAdapterPort.receiveConfirmation(Output.of(Bytes.bytesOf("Your input: ")));
+        return userInterfaceAdapterPort.receiveConfirmation(Output.Companion.outputOf(Bytes.bytesOf("Your input: ")));
     }
 
     private void configTemplateRoute() {
@@ -86,8 +86,8 @@ public class PassbirdSetup implements Bootable {
             if (Objects.nonNull(input)) {
                 setupGuide.sendNonMatchingInputs();
             }
-            input = userInterfaceAdapterPort.receiveSecurely(Output.of(Bytes.bytesOf("first input: ")));
-            inputRepeated = userInterfaceAdapterPort.receiveSecurely(Output.of(Bytes.bytesOf("second input: ")));
+            input = userInterfaceAdapterPort.receiveSecurely(Output.Companion.outputOf(Bytes.bytesOf("first input: ")));
+            inputRepeated = userInterfaceAdapterPort.receiveSecurely(Output.Companion.outputOf(Bytes.bytesOf("second input: ")));
         }
         userInterfaceAdapterPort.sendLineBreak();
         return input;
@@ -108,7 +108,7 @@ public class PassbirdSetup implements Bootable {
     private String verifyValidDirectory(final String source) {
         var directory = source;
         while (!isValidDirectory(directory)) {
-            directory = userInterfaceAdapterPort.receive(Output.of(Bytes.bytesOf("your input: ")))
+            directory = userInterfaceAdapterPort.receive(Output.Companion.outputOf(Bytes.bytesOf("your input: ")))
                     .getBytes().asString();
         }
         return directory;
