@@ -9,10 +9,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static de.pflugradts.passbird.domain.model.transfer.CharValue.FIRST_DIGIT_INDEX;
-import static de.pflugradts.passbird.domain.model.transfer.CharValue.LAST_LOWERCASE_INDEX;
-import static de.pflugradts.passbird.domain.model.transfer.CharValue.MAX_ASCII_VALUE;
-import static de.pflugradts.passbird.domain.model.transfer.CharValue.MIN_ASCII_VALUE;
+import static de.pflugradts.passbird.domain.model.transfer.CharValueKt.FIRST_DIGIT_INDEX;
+import static de.pflugradts.passbird.domain.model.transfer.CharValueKt.LAST_LOWERCASE_INDEX;
+import static de.pflugradts.passbird.domain.model.transfer.CharValueKt.MAX_ASCII_VALUE;
+import static de.pflugradts.passbird.domain.model.transfer.CharValueKt.MIN_ASCII_VALUE;
 
 public class RandomPasswordProvider implements PasswordProvider {
 
@@ -43,11 +43,11 @@ public class RandomPasswordProvider implements PasswordProvider {
     }
 
     private boolean isStrong(final Bytes passwordBytes, final PasswordRequirements requirements) {
-        return anyMatch(passwordBytes.copy(), c -> CharValue.of(c).isDigit())
-                && anyMatch(passwordBytes.copy(), c -> CharValue.of(c).isUppercaseCharacter())
-                && anyMatch(passwordBytes.copy(), c -> CharValue.of(c).isLowercaseCharacter())
+        return anyMatch(passwordBytes.copy(), c -> CharValue.Companion.charValueOf(c).isDigit())
+                && anyMatch(passwordBytes.copy(), c -> CharValue.Companion.charValueOf(c).isUppercaseCharacter())
+                && anyMatch(passwordBytes.copy(), c -> CharValue.Companion.charValueOf(c).isLowercaseCharacter())
                 && anyMatch(passwordBytes.copy(),
-                    c -> CharValue.of(c).isSymbol()) == requirements.isIncludeSpecialCharacters();
+                    c -> CharValue.Companion.charValueOf(c).isSymbol()) == requirements.isIncludeSpecialCharacters();
     }
 
     private boolean anyMatch(final Bytes bytes, final Predicate<Byte> predicate) {

@@ -73,8 +73,8 @@ class PutPasswordService implements CommonPasswordServiceCapabilities {
     }
 
     public Try<Void> challengeAlias(final Bytes bytes) {
-        return !CharValue.of(bytes.getByte(0)).isDigit()
-                && noneMatch(bytes.copy(), b -> CharValue.of(b).isSymbol())
+        return !CharValue.Companion.charValueOf(bytes.getByte(0)).isDigit()
+                && noneMatch(bytes.copy(), b -> CharValue.Companion.charValueOf(b).isSymbol())
             ? Try.success(null)
             : Try.failure(new InvalidKeyException(bytes));
     }

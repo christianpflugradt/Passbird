@@ -23,7 +23,7 @@ public class NamespaceCommandFactory {
             return new ViewNamespaceCommand();
         } else if (command.getSize() == 1 && !data.isEmpty()) {
             return new AssignNamespaceCommand(input);
-        } else if (command.getSize() == 2 && CharValue.of(command.getChar(1)).isDigit()) {
+        } else if (command.getSize() == 2 && CharValue.Companion.charValueOf(command.getChar(1)).isDigit()) {
             return new SwitchNamespaceCommand(NamespaceSlot.at(command.getChar(1)));
         } else if (command.getSize() > 2
                 && command.getChar(1) == ADD.getValue()) {

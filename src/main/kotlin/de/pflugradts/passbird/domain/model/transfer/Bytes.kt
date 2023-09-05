@@ -1,8 +1,6 @@
 package de.pflugradts.passbird.domain.model.transfer
 
 import de.pflugradts.passbird.domain.model.ddd.ValueObject
-import de.pflugradts.passbird.domain.model.transfer.CharValue.MAX_ASCII_VALUE
-import de.pflugradts.passbird.domain.model.transfer.CharValue.MIN_ASCII_VALUE
 import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
 import java.security.SecureRandom
 import java.util.stream.Stream

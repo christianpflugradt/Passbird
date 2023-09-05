@@ -1,8 +1,6 @@
 package de.pflugradts.passbird.domain.model.transfer
 
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.CharValue.MAX_ASCII_VALUE
-import de.pflugradts.passbird.domain.model.transfer.CharValue.MIN_ASCII_VALUE
 import java.security.SecureRandom
 
 class Chars private constructor(private val charArray: CharArray) {

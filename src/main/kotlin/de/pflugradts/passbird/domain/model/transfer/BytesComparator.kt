@@ -1,13 +1,6 @@
 package de.pflugradts.passbird.domain.model.transfer
 
-import de.pflugradts.passbird.domain.model.transfer.CharValue.FIRST_DIGIT_INDEX
-import de.pflugradts.passbird.domain.model.transfer.CharValue.FIRST_LOWERCASE_INDEX
-import de.pflugradts.passbird.domain.model.transfer.CharValue.FIRST_UPPERCASE_INDEX
-import de.pflugradts.passbird.domain.model.transfer.CharValue.LAST_DIGIT_INDEX
-import de.pflugradts.passbird.domain.model.transfer.CharValue.LAST_LOWERCASE_INDEX
-import de.pflugradts.passbird.domain.model.transfer.CharValue.LAST_UPPERCASE_INDEX
-import de.pflugradts.passbird.domain.model.transfer.CharValue.MAX_ASCII_VALUE
-import de.pflugradts.passbird.domain.model.transfer.CharValue.MIN_ASCII_VALUE
+import de.pflugradts.passbird.domain.model.transfer.CharValue.Companion.charValueOf
 import java.util.concurrent.atomic.AtomicInteger
 
 private val sortReference = buildSortReference()
@@ -16,11 +9,11 @@ private fun buildSortReference(): Map<Int, Int> {
     val sortReferenceMap = mutableMapOf<Int, Int>()
     val index = AtomicInteger(0)
     val assignSlot: (Int) -> Unit = { sortReferenceMap[it] = index.getAndIncrement() }
-    (MIN_ASCII_VALUE..MAX_ASCII_VALUE).filter { CharValue.of(it).isSymbol }.forEach(assignSlot)
+    (MIN_ASCII_VALUE..MAX_ASCII_VALUE).filter { charValueOf(it).isSymbol }.forEach(assignSlot)
     (FIRST_DIGIT_INDEX..LAST_DIGIT_INDEX).forEach(assignSlot)
     val lowercaseRange = (FIRST_LOWERCASE_INDEX..LAST_LOWERCASE_INDEX)
     val uppercaseRange = (FIRST_UPPERCASE_INDEX..LAST_UPPERCASE_INDEX)
-    lowercaseRange.forEachIndexed { i, it ->
+    lowercaseRange.forEachIndexed { i, _ ->
         sortReferenceMap[uppercaseRange.elementAt(i)] = index.get()
         sortReferenceMap[lowercaseRange.elementAt(i)] = index.getAndIncrement()
     }

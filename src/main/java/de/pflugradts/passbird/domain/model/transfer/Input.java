@@ -35,7 +35,7 @@ public class Input implements ValueObject {
     public Bytes getCommand() {
         if (bytes.getSize() > 0) {
             for (int i = 1; i < bytes.getSize(); i++) {
-                if (CharValue.of(bytes.getByte(i)).isAlphabeticCharacter()) {
+                if (CharValue.Companion.charValueOf(bytes.getByte(i)).isAlphabeticCharacter()) {
                     return bytes.slice(0, i);
                 }
             }
