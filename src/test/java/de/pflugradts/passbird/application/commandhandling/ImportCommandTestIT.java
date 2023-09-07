@@ -61,7 +61,7 @@ class ImportCommandTestIT {
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(importExportService).should().importPasswordEntries(args);
@@ -91,7 +91,7 @@ class ImportCommandTestIT {
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(importExportService).should().importPasswordEntries(args);
@@ -124,7 +124,7 @@ class ImportCommandTestIT {
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(importExportService).should().importPasswordEntries(args);
@@ -157,7 +157,7 @@ class ImportCommandTestIT {
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(importExportService).should(never()).importPasswordEntries(args);

@@ -5,7 +5,6 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.passbird.application.commandhandling.InputHandler;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import de.pflugradts.passbird.domain.model.transfer.InputFaker;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.NamespaceServiceFake;
 import org.junit.jupiter.api.Test;
@@ -20,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static de.pflugradts.passbird.application.boot.main.PassbirdApplication.INTERRUPT;
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT;
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._1;
+import static de.pflugradts.passbird.domain.model.transfer.InputFakerKt.fakeInput;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
@@ -44,10 +44,10 @@ class PassbirdApplicationTest {
     @Test
     void shouldDelegateInput() {
         // given
-        final var input1 = InputFaker.faker().fakeInput().withMessage("1").fake();
-        final var input2 = InputFaker.faker().fakeInput().withMessage("2").fake();
-        final var input3 = InputFaker.faker().fakeInput().withMessage("3").fake();
-        final var interrupt = InputFaker.faker().fakeInput().withMessage(String.valueOf(INTERRUPT)).fake();
+        final var input1 = fakeInput("1");
+        final var input2 = fakeInput("2");
+        final var input3 = fakeInput("3");
+        final var interrupt = fakeInput(String.valueOf(INTERRUPT));
 
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
@@ -65,8 +65,8 @@ class PassbirdApplicationTest {
     @Test
     void shouldDisplayNamespaceIfCurrentIsOtherThanDefault() {
         // given
-        final var input1 = InputFaker.faker().fakeInput().withMessage("1").fake();
-        final var interrupt = InputFaker.faker().fakeInput().withMessage(String.valueOf(INTERRUPT)).fake();
+        final var input1 = fakeInput("1");
+        final var interrupt = fakeInput(String.valueOf(INTERRUPT));
         final var givenNamespace = "mynamespace";
 
         UserInterfaceAdapterPortFaker.faker()
@@ -88,8 +88,8 @@ class PassbirdApplicationTest {
     @Test
     void shouldDisplayNoNamespaceIfCurrentIsDefault() {
         // given
-        final var input1 = InputFaker.faker().fakeInput().withMessage("1").fake();
-        final var interrupt = InputFaker.faker().fakeInput().withMessage(String.valueOf(INTERRUPT)).fake();
+        final var input1 = fakeInput("1");
+        final var interrupt = fakeInput(String.valueOf(INTERRUPT));
 
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)

@@ -61,7 +61,7 @@ class DiscardCommandTestIT {
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(passwordService).should().discardPasswordEntry(eq(Bytes.bytesOf(args)));
@@ -88,7 +88,7 @@ class DiscardCommandTestIT {
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(passwordService).should().discardPasswordEntry(eq(Bytes.bytesOf(args)));
@@ -110,7 +110,7 @@ class DiscardCommandTestIT {
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(passwordService).should(never()).discardPasswordEntry(eq(Bytes.bytesOf(args)));

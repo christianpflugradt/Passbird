@@ -65,11 +65,11 @@ class RenameCommandTestIT {
                 .withPasswordEntries(givenPasswordEntry).fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseInputs(Input.of(newKey)).fake();
+                .withTheseInputs( Input.Companion.inputOf(newKey)).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(passwordService).should().renamePasswordEntry(eq(Bytes.bytesOf(args)), same(newKey));
@@ -90,7 +90,7 @@ class RenameCommandTestIT {
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(passwordService).should(never()).renamePasswordEntry(eq(Bytes.bytesOf(args)), any(Bytes.class));
@@ -111,11 +111,11 @@ class RenameCommandTestIT {
                         .withKeyBytes(Bytes.bytesOf(args)).fake()).fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseInputs(Input.of(newAlias)).fake();
+                .withTheseInputs( Input.Companion.inputOf(newAlias)).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(passwordService).should(never()).renamePasswordEntry(eq(Bytes.bytesOf(args)), any(Bytes.class));
@@ -138,11 +138,11 @@ class RenameCommandTestIT {
                 .withPasswordEntries(givenPasswordEntry).fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseInputs(Input.of(existingAlias)).fake();
+                .withTheseInputs( Input.Companion.inputOf(existingAlias)).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         assertThat(givenPasswordEntry.viewKey()).isEqualTo(reference.slice(1, reference.getSize()));

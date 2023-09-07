@@ -66,8 +66,8 @@ internal class BytesComparatorTest {
         @Test
         fun `should compare uppercase and lowercase`() {
             // given
-            val bytes1 = bytesOf("test")
-            val bytes2 = bytesOf("TEST")
+            val bytes1 = bytesOf("foo")
+            val bytes2 = bytesOf("FOO")
 
             // when / then
             expectThat(comparator.compare(bytes1, bytes2)) isEqualTo 0
@@ -77,8 +77,8 @@ internal class BytesComparatorTest {
         @Test
         fun `should compare short and long`() {
             // given
-            val bytes1 = bytesOf("test")
-            val bytes2 = bytesOf("TESTING")
+            val bytes1 = bytesOf("foo")
+            val bytes2 = bytesOf("FOOBAR")
 
             // when / then
             expectThat(comparator.compare(bytes1, bytes2)) isLessThan 0
@@ -88,8 +88,8 @@ internal class BytesComparatorTest {
         @Test
         fun `should compare last char differs`() {
             // given
-            val bytes1 = bytesOf("testingA")
-            val bytes2 = bytesOf("testingB")
+            val bytes1 = bytesOf("fooA")
+            val bytes2 = bytesOf("fooB")
 
             // when / then
             expectThat(comparator.compare(bytes1, bytes2)) isLessThan 0

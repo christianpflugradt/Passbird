@@ -47,7 +47,7 @@ class Bytes private constructor(
     }
 
     @JvmOverloads
-    fun slice(fromInclusive: Int, toExclusive: Int = byteArray.size) =
+    fun slice(fromInclusive: Int, toExclusive: Int = byteArray.size): Bytes =
         if (toExclusive - fromInclusive > 0) {
             val sub = ByteArray(toExclusive - fromInclusive)
             System.arraycopy(byteArray, fromInclusive, sub, 0, sub.size)

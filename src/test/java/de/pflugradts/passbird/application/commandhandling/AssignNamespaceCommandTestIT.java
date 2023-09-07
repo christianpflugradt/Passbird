@@ -72,7 +72,7 @@ class AssignNamespaceCommandTestIT {
             .withTheseInputs(inputOf(expectedNamespace)).fake();
 
         // when
-        inputHandler.handleInput(Input.of(givenInput));
+        inputHandler.handleInput( Input.Companion.inputOf(givenInput));
 
         // then
         then(passwordService).should().movePasswordEntry(Bytes.bytesOf(givenAlias), NamespaceSlot.at(expectedNamespace));
@@ -96,7 +96,7 @@ class AssignNamespaceCommandTestIT {
             .withTheseInputs(inputOf(expectedNamespace)).fake();
 
         // when
-        inputHandler.handleInput(Input.of(givenInput));
+        inputHandler.handleInput( Input.Companion.inputOf(givenInput));
 
         // then
         then(passwordService).should(never()).movePasswordEntry(any(Bytes.class), any(NamespaceSlot.class));
@@ -125,7 +125,7 @@ class AssignNamespaceCommandTestIT {
             .withTheseInputs(inputOf(targetNamespace)).fake();
 
         // when
-        inputHandler.handleInput(Input.of(givenInput));
+        inputHandler.handleInput( Input.Companion.inputOf(givenInput));
 
         // then
         then(userInterfaceAdapterPort).should().send(captor.capture());
@@ -158,7 +158,7 @@ class AssignNamespaceCommandTestIT {
             .withTheseInputs(inputOf(targetNamespace)).fake();
 
         // when
-        inputHandler.handleInput(Input.of(givenInput));
+        inputHandler.handleInput( Input.Companion.inputOf(givenInput));
 
         // then
         then(userInterfaceAdapterPort).should().send(captor.capture());
@@ -188,7 +188,7 @@ class AssignNamespaceCommandTestIT {
             .withTheseInputs(inputOf(invalidNamespace)).fake();
 
         // when
-        inputHandler.handleInput(Input.of(givenInput));
+        inputHandler.handleInput( Input.Companion.inputOf(givenInput));
 
         // then
         then(userInterfaceAdapterPort).should(times(2)).send(captor.capture());
@@ -221,7 +221,7 @@ class AssignNamespaceCommandTestIT {
             .withTheseInputs(inputOf(currentNamespace)).fake();
 
         // when
-        inputHandler.handleInput(Input.of(givenInput));
+        inputHandler.handleInput( Input.Companion.inputOf(givenInput));
 
         // then
         then(userInterfaceAdapterPort).should(times(2)).send(captor.capture());
@@ -253,7 +253,7 @@ class AssignNamespaceCommandTestIT {
         assertThat(namespaceServiceFake.atSlot(NamespaceSlot.at(targetNamespace))).isNotPresent();
 
         // when
-        inputHandler.handleInput(Input.of(givenInput));
+        inputHandler.handleInput( Input.Companion.inputOf(givenInput));
 
         // then
         then(userInterfaceAdapterPort).should(times(2)).send(captor.capture());
@@ -292,7 +292,7 @@ class AssignNamespaceCommandTestIT {
             .withTheseInputs(inputOf(targetNamespace)).fake();
 
         // when
-        inputHandler.handleInput(Input.of(givenInput));
+        inputHandler.handleInput( Input.Companion.inputOf(givenInput));
 
         // then
         then(userInterfaceAdapterPort).should(times(2)).send(captor.capture());
@@ -305,7 +305,7 @@ class AssignNamespaceCommandTestIT {
     }
 
     private Input inputOf(final int index) {
-        return Input.of(Bytes.bytesOf(String.valueOf(index)));
+        return  Input.Companion.inputOf(Bytes.bytesOf(String.valueOf(index)));
     }
 
 

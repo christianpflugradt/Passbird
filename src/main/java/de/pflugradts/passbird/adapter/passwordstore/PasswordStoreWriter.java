@@ -25,8 +25,8 @@ import java.util.stream.StreamSupport;
 
 import static de.pflugradts.passbird.application.configuration.ReadableConfiguration.DATABASE_FILENAME;
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.CAPACITY;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.FIRST;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.LAST;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.FIRST_NAMESPACE;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.LAST_NAMESPACE;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -75,7 +75,7 @@ class PasswordStoreWriter {
         var incrementedOffset = offset;
         ByteArrayUtils.copyBytes(SECTOR, bytes, incrementedOffset);
         incrementedOffset += commons.intBytes();
-        for (int index = FIRST; index <= LAST; index++) {
+        for (int index = FIRST_NAMESPACE; index <= LAST_NAMESPACE; index++) {
             final var namespaceBytes = namespaceTransformer.transform(NamespaceSlot.at(index));
             incrementedOffset += ByteArrayUtils.copyBytes(
                 namespaceBytes, bytes, incrementedOffset, namespaceBytes.length);

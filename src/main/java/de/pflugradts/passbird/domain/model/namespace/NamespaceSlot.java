@@ -6,8 +6,8 @@ public enum NamespaceSlot {
     DEFAULT, _1, _2, _3, _4, _5, _6, _7, _8, _9, INVALID;
 
     public static final int CAPACITY = 9;
-    public static final int FIRST = 1;
-    public static final int LAST = 9;
+    public static final int FIRST_NAMESPACE = 1;
+    public static final int LAST_NAMESPACE = 9;
     private static final int DEFAULT_INDEX = 10;
 
     public static NamespaceSlot at(final char index) {
@@ -19,11 +19,11 @@ public enum NamespaceSlot {
     }
 
     public static NamespaceSlot at(final int index) {
-        return index >= FIRST && index <= LAST ? values()[index] : DEFAULT;
+        return index >= FIRST_NAMESPACE && index <= LAST_NAMESPACE ? values()[index] : DEFAULT;
     }
 
     public int index() {
-        for (int index = FIRST; index <= LAST; index++) {
+        for (int index = FIRST_NAMESPACE; index <= LAST_NAMESPACE; index++) {
             if (this.equals(at(index))) {
                 return index;
             }

@@ -48,7 +48,7 @@ class SwitchNamespaceCommandTestIT {
         // given
         final var givenNamespace = NamespaceSlot._1;
         namespaceServiceFake.deployAt(givenNamespace);
-        final var input = Input.of(Bytes.bytesOf("n" + givenNamespace.index()));
+        final var input =  Input.Companion.inputOf(Bytes.bytesOf("n" + givenNamespace.index()));
 
         // when
         inputHandler.handleInput(input);
@@ -66,7 +66,7 @@ class SwitchNamespaceCommandTestIT {
         final var givenNamespace = NamespaceSlot._1;
         namespaceServiceFake.deployAtIndex(givenNamespace.index());
         namespaceServiceFake.updateCurrentNamespace(givenNamespace);
-        final var input = Input.of(Bytes.bytesOf("n" + givenNamespace.index()));
+        final var input =  Input.Companion.inputOf(Bytes.bytesOf("n" + givenNamespace.index()));
 
         // when
         inputHandler.handleInput(input);
@@ -83,7 +83,7 @@ class SwitchNamespaceCommandTestIT {
     void shouldHandleSwitchNamespaceCommand_DoNothingIfNamespaceIsNotDeployed() {
         // given
         final var givenNamespace = NamespaceSlot._1;
-        final var input = Input.of(Bytes.bytesOf("n" + givenNamespace.index()));
+        final var input =  Input.Companion.inputOf(Bytes.bytesOf("n" + givenNamespace.index()));
         assertThat(namespaceServiceFake.atSlot(givenNamespace)).isNotPresent();
 
         // when

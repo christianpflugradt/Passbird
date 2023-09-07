@@ -62,11 +62,11 @@ class CustomSetCommandTestIT {
                 .forInstance(passwordService).fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseSecureInputs(Input.of(customPassword)).fake();
+                .withTheseSecureInputs( Input.Companion.inputOf(customPassword)).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(passwordService).should().putPasswordEntry(eq(Bytes.bytesOf(args)), same(customPassword));
@@ -89,7 +89,7 @@ class CustomSetCommandTestIT {
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(failureCollector).should().collectPasswordEntryFailure(eq(Bytes.bytesOf(args)), any(InvalidKeyException.class));
@@ -108,11 +108,11 @@ class CustomSetCommandTestIT {
                 .forInstance(passwordService).fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseSecureInputs(Input.of(customPassword)).fake();
+                .withTheseSecureInputs( Input.Companion.inputOf(customPassword)).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(passwordService).should(never()).putPasswordEntry(eq(Bytes.bytesOf(args)), same(customPassword));
@@ -131,11 +131,11 @@ class CustomSetCommandTestIT {
                 .forInstance(passwordService).fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseSecureInputs(Input.of(customPassword)).fake();
+                .withTheseSecureInputs( Input.Companion.inputOf(customPassword)).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(passwordService).should().putPasswordEntry(eq(Bytes.bytesOf(args)), same(customPassword));
@@ -161,12 +161,12 @@ class CustomSetCommandTestIT {
                 .withPromptOnRemovalEnabled().fake();
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
-                .withTheseSecureInputs(Input.of(customPassword))
+                .withTheseSecureInputs( Input.Companion.inputOf(customPassword))
                 .withReceiveConfirmation(true).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(passwordService).should().putPasswordEntry(eq(Bytes.bytesOf(args)), same(customPassword));
@@ -195,7 +195,7 @@ class CustomSetCommandTestIT {
 
         // when
         assertThat(bytes).isEqualTo(reference);
-        inputHandler.handleInput(Input.of(bytes));
+        inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
         then(passwordService).should(never()).putPasswordEntry(eq(Bytes.bytesOf(args)), any(Bytes.class));

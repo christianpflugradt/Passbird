@@ -10,8 +10,8 @@ import java.util.stream.Stream;
 
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.CAPACITY;
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.FIRST;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.LAST;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.FIRST_NAMESPACE;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.LAST_NAMESPACE;
 
 public class Namespaces {
 
@@ -29,12 +29,12 @@ public class Namespaces {
     public void populate(final List<Bytes> namespaceBytes) {
         if (getNamespaces().isEmpty()) {
             if (namespaceBytes.size() == CAPACITY) {
-                IntStream.range(FIRST, LAST + 1).forEach(index ->
+                IntStream.range(FIRST_NAMESPACE, LAST_NAMESPACE + 1).forEach(index ->
                     getNamespaces().add(namespaceBytes.get(index - 1).isEmpty()
                         ? Optional.empty()
                         : Optional.of(Namespace.create(namespaceBytes.get(index - 1), NamespaceSlot.at(index)))));
             } else {
-                IntStream.range(FIRST, LAST + 1).forEach(x -> getNamespaces().add(Optional.empty()));
+                IntStream.range(FIRST_NAMESPACE, LAST_NAMESPACE + 1).forEach(x -> getNamespaces().add(Optional.empty()));
             }
         }
     }

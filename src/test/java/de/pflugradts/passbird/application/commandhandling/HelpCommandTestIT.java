@@ -50,7 +50,7 @@ class HelpCommandTestIT {
     @Test
     void shouldHandleHelpCommand_PrintUsage() {
         // given
-        final var input = Input.of(Bytes.bytesOf("h"));
+        final var input =  Input.Companion.inputOf(Bytes.bytesOf("h"));
 
         // when
         inputHandler.handleInput(input);
@@ -66,7 +66,7 @@ class HelpCommandTestIT {
     @Test
     void shouldHandleHelpCommand_OpenLicense() {
         // given
-        final var input = Input.of(Bytes.bytesOf("hlicense"));
+        final var input =  Input.Companion.inputOf(Bytes.bytesOf("hlicense"));
 
         // when
         inputHandler.handleInput(input);
@@ -83,7 +83,7 @@ class HelpCommandTestIT {
     @Test
     void shouldHandleHelpCommand_Open3rdParty() {
         // given
-        final var input = Input.of(Bytes.bytesOf("hthirdparty"));
+        final var input =  Input.Companion.inputOf(Bytes.bytesOf("hthirdparty"));
 
         // when
         inputHandler.handleInput(input);

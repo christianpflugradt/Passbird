@@ -38,7 +38,7 @@ class QuitCommandTestIT {
     @Test
     void shouldHandleQuitCommand() {
         // given
-        final var input = Input.of(Bytes.bytesOf("q"));
+        final var input =  Input.Companion.inputOf(Bytes.bytesOf("q"));
 
         // when
         inputHandler.handleInput(input);
