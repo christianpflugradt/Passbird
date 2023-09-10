@@ -66,7 +66,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 
 📊 test-coverage-report:
   stage: 📘 report
-  coverage: '/Instruction Coverage: \d+\.\d+/'
+  coverage: '/Branch Coverage: \d+\.\d+/'
   script: ./gradlew jacocoTestReport
   needs:
     - 🗃 unit-tests
