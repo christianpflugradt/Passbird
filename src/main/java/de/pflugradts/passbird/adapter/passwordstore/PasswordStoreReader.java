@@ -11,7 +11,6 @@ import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.NamespaceService;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
 import io.vavr.Tuple2;
-import io.vavr.control.Try;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -51,34 +50,31 @@ class PasswordStoreReader {
 
     public Supplier<Stream<PasswordEntry>> restore() {
         final var passwordEntries = new ArrayDeque<PasswordEntry>();
-        final var bytes = readFromDisk().onFailure(throwable ->
-            failureCollector.collectDecryptPasswordDatabaseFailure(getFilePath(), throwable));
-        if (bytes.isSuccess()) {
-            final var byteArray = bytes.get().toByteArray();
-            if (byteArray.length > 0) {
-                verifySignature(byteArray);
-                verifyChecksum(byteArray);
-                int offset = commons.signatureSize();
-                final var res1 = populateNamespaces(byteArray, offset);
-                offset = res1._1;
-                while (!EOF.equals(ByteArrayUtils.readInt(byteArray, offset))) {
-                    final var res2 =
-                        passwordEntryTransformer.transform(byteArray, offset, res1._2);
-                    passwordEntries.add(res2._1());
-                    offset = res2._2();
-                }
-                return passwordEntries::stream;
+        final var bytes = readFromDisk();
+        final var byteArray = bytes.toByteArray();
+        if (byteArray.length > 0) {
+            verifySignature(byteArray);
+            verifyChecksum(byteArray);
+            int offset = commons.signatureSize();
+            final var res1 = populateNamespaces(byteArray, offset);
+            offset = res1._1;
+            while (!EOF.equals(ByteArrayUtils.readInt(byteArray, offset))) {
+                final var res2 =
+                    passwordEntryTransformer.transform(byteArray, offset, res1._2);
+                passwordEntries.add(res2._1());
+                offset = res2._2();
             }
+            return passwordEntries::stream;
         }
         namespaceService.populateEmpty();
         return Stream::empty;
     }
 
-    private Try<Bytes> readFromDisk() {
+    private Bytes readFromDisk() {
         final var bytes = systemOperation.readBytesFromFile(getFilePath());
         return bytes.isSuccess()
             ? cryptoProvider.decrypt(bytes.get())
-            : Try.of(Bytes::emptyBytes);
+            : Bytes.emptyBytes();
     }
 
     private void verifySignature(final byte[] bytes) {

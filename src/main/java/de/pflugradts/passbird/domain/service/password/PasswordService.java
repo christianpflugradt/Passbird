@@ -3,7 +3,6 @@ package de.pflugradts.passbird.domain.service.password;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import io.vavr.Tuple2;
-import io.vavr.control.Try;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -19,14 +18,14 @@ public interface PasswordService {
         DO_NOTHING,
         CREATE_ENTRY_NOT_EXISTS_EVENT
     }
-    Try<Boolean> entryExists(Bytes keyBytes, NamespaceSlot namespace);
-    Try<Boolean> entryExists(Bytes keyBytes, EntryNotExistsAction entryNotExistsAction);
-    Optional<Try<Bytes>> viewPassword(Bytes keyBytes);
-    Try<Void> renamePasswordEntry(Bytes keyBytes, Bytes newKeyBytes);
-    Try<Void> challengeAlias(Bytes bytes);
-    Try<Void> putPasswordEntries(Stream<Tuple2<Bytes, Bytes>> passwordEntries);
-    Try<Void> putPasswordEntry(Bytes keyBytes, Bytes passwordBytes);
-    Try<Void> discardPasswordEntry(Bytes keyBytes);
-    Try<Void> movePasswordEntry(Bytes keyBytes, NamespaceSlot targetNamespace);
-    Try<Stream<Bytes>> findAllKeys();
+    Boolean entryExists(Bytes keyBytes, NamespaceSlot namespace);
+    Boolean entryExists(Bytes keyBytes, EntryNotExistsAction entryNotExistsAction);
+    Optional<Bytes> viewPassword(Bytes keyBytes);
+    void renamePasswordEntry(Bytes keyBytes, Bytes newKeyBytes);
+    void challengeAlias(Bytes bytes);
+    void putPasswordEntries(Stream<Tuple2<Bytes, Bytes>> passwordEntries);
+    void putPasswordEntry(Bytes keyBytes, Bytes passwordBytes);
+    void discardPasswordEntry(Bytes keyBytes);
+    void movePasswordEntry(Bytes keyBytes, NamespaceSlot targetNamespace);
+    Stream<Bytes> findAllKeys();
 }

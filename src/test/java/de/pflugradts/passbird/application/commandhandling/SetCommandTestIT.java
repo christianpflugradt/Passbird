@@ -7,6 +7,7 @@ import de.pflugradts.passbird.application.configuration.Configuration;
 import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
+import de.pflugradts.passbird.domain.model.password.PasswordRequirements;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
@@ -26,7 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,13 +68,36 @@ class SetCommandTestIT {
                 .withCreatingThisPassword(generatedPassword).fake();
         PasswordServiceFaker.faker()
                 .forInstance(passwordService).fake();
+        given(configuration.parsePasswordRequirements()).willReturn(mock(PasswordRequirements.class));
+
+        // when
+        assertThat(bytes).isEqualTo(reference);
+        inputHandler.handleInput(Input.Companion.inputOf(bytes));
+
+        // then
+        then(passwordService).should().putPasswordEntry(eq(Bytes.bytesOf(args)), same(generatedPassword));
+        assertThat(bytes).isNotEqualTo(reference);
+    }
+
+    @Test
+    void shouldHandleSetCommand_WithInvalidAlias() {
+        // given
+        final var args = "invalidkey1!";
+        final var bytes = Bytes.bytesOf("s" + args);
+        final var reference = bytes.copy();
+        PasswordServiceFaker.faker()
+            .forInstance(passwordService)
+            .withInvalidAlias(Bytes.bytesOf(args)).fake();
+        UserInterfaceAdapterPortFaker.faker()
+            .forInstance(userInterfaceAdapterPort).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
         inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
-        then(passwordService).should().putPasswordEntry(eq(Bytes.bytesOf(args)), same(generatedPassword));
+        then(userInterfaceAdapterPort).should().send(eq(Output.Companion.outputOf(Bytes.bytesOf("Password alias cannot contain digits or special characters. Please choose a different alias."))));
+        then(passwordService).should(never()).putPasswordEntry(eq(Bytes.bytesOf(args)), any(Bytes.class));
         assertThat(bytes).isNotEqualTo(reference);
     }
 
@@ -90,6 +116,7 @@ class SetCommandTestIT {
         MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withPromptOnRemovalEnabled().fake();
+        given(configuration.parsePasswordRequirements()).willReturn(mock(PasswordRequirements.class));
 
         // when
         assertThat(bytes).isEqualTo(reference);
@@ -122,6 +149,7 @@ class SetCommandTestIT {
         UserInterfaceAdapterPortFaker.faker()
                 .forInstance(userInterfaceAdapterPort)
                 .withReceiveConfirmation(true).fake();
+        given(configuration.parsePasswordRequirements()).willReturn(mock(PasswordRequirements.class));
 
         // when
         assertThat(bytes).isEqualTo(reference);

@@ -9,8 +9,6 @@ import de.pflugradts.passbird.domain.model.transfer.BytesComparator;
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository;
-import io.vavr.control.Either;
-import io.vavr.control.Try;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,29 +24,28 @@ public class ViewPasswordService implements CommonPasswordServiceCapabilities {
     @Inject
     private EventRegistry eventRegistry;
 
-    public Try<Boolean> entryExists(final Bytes keyBytes, final NamespaceSlot namespace) {
+    public Boolean entryExists(final Bytes keyBytes, final NamespaceSlot namespace) {
         return entryExists(cryptoProvider, passwordEntryRepository, keyBytes, namespace);
     }
 
-    public Try<Boolean> entryExists(final Bytes keyBytes,
+    public Boolean entryExists(final Bytes keyBytes,
                                     final PasswordService.EntryNotExistsAction entryNotExistsAction) {
         return entryExists(cryptoProvider, passwordEntryRepository, eventRegistry, keyBytes, entryNotExistsAction);
     }
 
-    public Optional<Try<Bytes>> viewPassword(final Bytes keyBytes) {
-        return encrypted(cryptoProvider, keyBytes).fold(
-            throwable -> Optional.of(Try.failure(throwable)),
-            encryptedKeyBytes -> find(passwordEntryRepository, encryptedKeyBytes)
-                .map(PasswordEntry::viewPassword)
-                .map(passwordBytes -> decrypted(cryptoProvider, passwordBytes))
-                .map(Either::toTry).or(() -> {
-                    eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes));
-                    eventRegistry.processEvents();
-                    return Optional.empty();
-                }));
+    public Optional<Bytes> viewPassword(final Bytes keyBytes) {
+        var encryptedKeyBytes = encrypted(cryptoProvider, keyBytes);
+        return find(passwordEntryRepository, encryptedKeyBytes)
+            .map(PasswordEntry::viewPassword)
+            .map(passwordBytes -> decrypted(cryptoProvider, passwordBytes))
+            .or(() -> {
+                eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes));
+                eventRegistry.processEvents();
+                return Optional.empty();
+            });
     }
 
-    public Try<Stream<Bytes>> findAllKeys() {
+    public Stream<Bytes> findAllKeys() {
         return getAllSortedIfNoErrors(passwordEntryRepository
             .findAll()
             .map(PasswordEntry::viewKey)
@@ -56,10 +53,8 @@ public class ViewPasswordService implements CommonPasswordServiceCapabilities {
             .collect(Collectors.toList()));
     }
 
-    private Try<Stream<Bytes>> getAllSortedIfNoErrors(final List<Either<Throwable, Bytes>> eitherList) {
-        return eitherList.stream().anyMatch(Either::isLeft)
-            ? Try.failure(eitherList.stream().filter(Either::isLeft).map(Either::getLeft).findAny().get())
-            : Try.of(() -> eitherList.stream().map(Either::get).sorted(new BytesComparator()));
+    private Stream<Bytes> getAllSortedIfNoErrors(final List<Bytes> bytesList) {
+        return bytesList.stream().sorted(new BytesComparator());
     }
 
 }

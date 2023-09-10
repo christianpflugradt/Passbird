@@ -21,7 +21,7 @@ public class ConfigurationFactory {
         final var directory = System.getProperty(CONFIGURATION_SYSTEM_PROPERTY);
         final var mapper = new ObjectMapper(new YAMLFactory());
         return Try.of(() -> mapper.readValue(
-                systemOperation.getPath(directory).getOrNull().resolve(CONFIGURATION_FILENAME).toFile(),
+                systemOperation.getPath(directory).resolve(CONFIGURATION_FILENAME).toFile(),
                 Configuration.class)
         );
     }

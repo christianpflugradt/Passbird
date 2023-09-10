@@ -24,9 +24,7 @@ public class DiscardCommandHandler implements CommandHandler {
     @Subscribe
     private void handleDiscardCommand(final DiscardCommand discardCommand) {
         if (commandConfirmed()) {
-            passwordService.discardPasswordEntry(discardCommand.getArgument())
-                    .onFailure(throwable -> failureCollector
-                            .collectPasswordEntryFailure(discardCommand.getArgument(), throwable));
+            passwordService.discardPasswordEntry(discardCommand.getArgument());
         } else {
             userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf("Operation aborted.")));
         }

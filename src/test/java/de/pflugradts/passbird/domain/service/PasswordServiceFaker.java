@@ -5,7 +5,6 @@ import de.pflugradts.passbird.domain.model.password.InvalidKeyException;
 import de.pflugradts.passbird.domain.model.password.PasswordEntry;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
-import io.vavr.control.Try;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
@@ -24,7 +23,7 @@ public class PasswordServiceFaker {
 
     private PasswordService passwordService = mock(PasswordService.class);
     private Bytes invalidAlias = null;
-    private List<PasswordEntry> passwordEntries = new ArrayList<>();
+    private final List<PasswordEntry> passwordEntries = new ArrayList<>();
 
     public static PasswordServiceFaker faker() {
         return new PasswordServiceFaker();
@@ -47,35 +46,26 @@ public class PasswordServiceFaker {
     }
 
     public PasswordService fake() {
-        lenient().when(passwordService.putPasswordEntries(any())).thenReturn(Try.success(null));
-        lenient().when(passwordService.challengeAlias(any(Bytes.class))).thenReturn(Try.success(null));
         if (invalidAlias != null) {
-            lenient().when(passwordService.challengeAlias(invalidAlias))
-                    .thenReturn(Try.failure(new InvalidKeyException(invalidAlias)));
+            lenient().doThrow(new InvalidKeyException(invalidAlias)).when(passwordService).challengeAlias(invalidAlias);
         }
         lenient().when(passwordService.findAllKeys())
-                .thenReturn(Try.of(() -> passwordEntries.stream().map(PasswordEntry::viewKey)));
+                .thenReturn(passwordEntries.stream().map(PasswordEntry::viewKey));
         lenient().when(passwordService.entryExists(any(Bytes.class), any(PasswordService.EntryNotExistsAction.class)))
-                .thenReturn(Try.of(() -> false));
+                .thenReturn(false);
         lenient().when(passwordService.entryExists(any(Bytes.class), any(NamespaceSlot.class)))
-                .thenReturn(Try.of(() -> false));
-        lenient().when(passwordService.putPasswordEntry(any(Bytes.class), any(Bytes.class)))
-                .thenReturn(Try.success(null));
-        lenient().when(passwordService.renamePasswordEntry(any(Bytes.class), any(Bytes.class)))
-                .thenReturn(Try.success(null));
+                .thenReturn(false);
         passwordEntries.forEach(passwordEntry -> {
                 lenient().when(passwordService.viewPassword(passwordEntry.viewKey()))
-                        .thenReturn(Optional.of(Try.of(passwordEntry::viewPassword)));
+                        .thenReturn(Optional.of(passwordEntry.viewPassword()));
                 lenient().when(passwordService.entryExists(
                         eq(passwordEntry.viewKey()),
                         any(PasswordService.EntryNotExistsAction.class))
-                ).thenReturn(Try.of(() -> true));
+                ).thenReturn(true);
                 lenient().when(passwordService.entryExists(
                     eq(passwordEntry.viewKey()),
                     eq(passwordEntry.associatedNamespace()))
-                ).thenReturn(Try.of(() -> true));
-                lenient().when(passwordService.discardPasswordEntry(passwordEntry.viewKey()))
-                            .thenReturn(Try.success(null));
+                ).thenReturn(true);
         });
         return passwordService;
     }

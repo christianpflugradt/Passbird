@@ -34,13 +34,13 @@ class LicenseManagerTest {
         final var licenseBytes = mock(Bytes.class);
         final var licensePath = mock(Path.class);
         given(systemOperation.getResourceAsBytes(licenseFileName)).willReturn(Try.success(licenseBytes));
-        given(systemOperation.getPath(eq(new File(licenseFileName)))).willReturn(Try.success(licensePath));
+        given(systemOperation.getPath(eq(new File(licenseFileName)))).willReturn(licensePath);
 
         final var thirdPartyFileName = THIRD_PARTY_LICENSES_FILENAME;
         final var thirdPartyBytes = mock(Bytes.class);
         final var thirdPartyPath = mock(Path.class);
         given(systemOperation.getResourceAsBytes(thirdPartyFileName)).willReturn(Try.success(thirdPartyBytes));
-        given(systemOperation.getPath(eq(new File(thirdPartyFileName)))).willReturn(Try.success(thirdPartyPath));
+        given(systemOperation.getPath(eq(new File(thirdPartyFileName)))).willReturn(thirdPartyPath);
 
         // when
         licenseManager.verifyLicenseFilesExist();

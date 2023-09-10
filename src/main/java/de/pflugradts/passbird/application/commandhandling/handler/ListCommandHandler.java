@@ -9,9 +9,8 @@ import de.pflugradts.passbird.application.util.ByteArrayUtils;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
+
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ListCommandHandler implements CommandHandler {
 
@@ -24,10 +23,7 @@ public class ListCommandHandler implements CommandHandler {
 
     @Subscribe
     private void handleListCommand(final ListCommand listCommand) {
-        userInterfaceAdapterPort.send(Output.Companion.outputOf(join(passwordService.findAllKeys()
-                .onFailure(failureCollector::collectPasswordEntriesFailure)
-                .getOrElse(Stream.empty())
-                .collect(Collectors.toList()))));
+        userInterfaceAdapterPort.send(Output.Companion.outputOf(join(passwordService.findAllKeys().toList())));
         userInterfaceAdapterPort.sendLineBreak();
     }
 

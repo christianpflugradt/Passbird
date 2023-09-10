@@ -66,7 +66,7 @@ class SetupGuide {
         sendCreateFileFailed(CONFIGURATION, throwable);
     }
 
-    void sendCreateKeyStoreSucceeded(final Void none) {
+    void sendCreateKeyStoreSucceeded() {
         sendCreateFileSucceeded(KEYSTORE);
     }
 

@@ -1,9 +1,9 @@
 package de.pflugradts.passbird.application.util;
 
-import io.vavr.control.Try;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
@@ -25,10 +25,10 @@ public class SystemOperationFaker {
         return new SystemOperationFaker();
     }
 
-    public SystemOperationFaker fakeSystemOperation() {
+    public SystemOperationFaker fakeSystemOperation() throws IOException {
         this.systemOperation = mock(SystemOperation.class);
-        lenient().when(systemOperation.newInputStream(any())).thenReturn(Try.success(mock(InputStream.class)));
-        lenient().when(systemOperation.newOutputStream(any())).thenReturn(Try.success(mock(OutputStream.class)));
+        lenient().when(systemOperation.newInputStream(any())).thenReturn(mock(InputStream.class));
+        lenient().when(systemOperation.newOutputStream(any())).thenReturn(mock(OutputStream.class));
         return this;
     }
 
@@ -53,13 +53,8 @@ public class SystemOperationFaker {
         return this;
     }
 
-    public SystemOperationFaker withKeyStoreUnavailable() {
-        given(systemOperation.getJceksInstance()).willReturn(Try.failure(new RuntimeException()));
-        return this;
-    }
-
     public SystemOperation fake() {
-        paths.forEach((uri, path) -> given(systemOperation.getPath(uri)).willReturn(Try.of(() -> path)));
+        paths.forEach((uri, path) -> given(systemOperation.getPath(uri)).willReturn(path));
         return systemOperation;
     }
 

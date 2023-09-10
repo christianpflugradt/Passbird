@@ -7,8 +7,6 @@ import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository;
-import io.vavr.control.Either;
-import io.vavr.control.Try;
 
 import java.util.Optional;
 
@@ -26,12 +24,12 @@ interface CommonPasswordServiceCapabilities {
         return passwordEntryRepository.find(keyBytes);
     }
 
-    default Either<Throwable, Bytes> encrypted(final CryptoProvider cryptoProvider, final Bytes bytes) {
-        return cryptoProvider.encrypt(bytes).toEither();
+    default Bytes encrypted(final CryptoProvider cryptoProvider, final Bytes bytes) {
+        return cryptoProvider.encrypt(bytes);
     }
 
-    default Either<Throwable, Bytes> decrypted(final CryptoProvider cryptoProvider, final Bytes bytes) {
-        return cryptoProvider.decrypt(bytes).toEither();
+    default Bytes decrypted(final CryptoProvider cryptoProvider, final Bytes bytes) {
+        return cryptoProvider.decrypt(bytes);
     }
 
     default void processEventsAndSync(final EventRegistry eventRegistry,
@@ -40,27 +38,25 @@ interface CommonPasswordServiceCapabilities {
         passwordEntryRepository.sync();
     }
 
-    default Try<Boolean> entryExists(final CryptoProvider cryptoProvider,
+    default Boolean entryExists(final CryptoProvider cryptoProvider,
                                      final PasswordEntryRepository passwordEntryRepository,
                                      final EventRegistry eventRegistry,
                                      final Bytes keyBytes,
                                      final PasswordService.EntryNotExistsAction entryNotExistsAction) {
-        return encrypted(cryptoProvider, keyBytes).fold(Try::failure, encryptedKeyBytes -> Try.of(() -> {
-            final var match = find(passwordEntryRepository, encryptedKeyBytes).isPresent();
-            if (!match && entryNotExistsAction == CREATE_ENTRY_NOT_EXISTS_EVENT) {
-                eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes));
-                eventRegistry.processEvents();
-            }
-            return match;
-        }));
+        var encryptedKeyBytes = encrypted(cryptoProvider, keyBytes);
+        final var match = find(passwordEntryRepository, encryptedKeyBytes).isPresent();
+        if (!match && entryNotExistsAction == CREATE_ENTRY_NOT_EXISTS_EVENT) {
+            eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes));
+            eventRegistry.processEvents();
+        }
+        return match;
     }
 
-    default Try<Boolean> entryExists(final CryptoProvider cryptoProvider,
+    default Boolean entryExists(final CryptoProvider cryptoProvider,
                                      final PasswordEntryRepository passwordEntryRepository,
                                      final Bytes keyBytes,
                                      final NamespaceSlot namespace) {
-        return encrypted(cryptoProvider, keyBytes).fold(Try::failure, encryptedKeyBytes -> Try.of(() ->
-            find(passwordEntryRepository, encryptedKeyBytes, namespace).isPresent()));
+        return find(passwordEntryRepository, encrypted(cryptoProvider, keyBytes), namespace).isPresent();
     }
 
 }

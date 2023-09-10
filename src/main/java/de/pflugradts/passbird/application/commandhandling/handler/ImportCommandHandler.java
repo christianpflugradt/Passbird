@@ -8,13 +8,13 @@ import de.pflugradts.passbird.application.commandhandling.command.ImportCommand;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
 import de.pflugradts.passbird.application.exchange.ImportExportService;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
-import de.pflugradts.passbird.domain.model.transfer.BytesComparator;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
+import de.pflugradts.passbird.domain.model.transfer.BytesComparator;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
+
 import java.util.HashSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ImportCommandHandler implements CommandHandler {
 
@@ -46,9 +46,7 @@ public class ImportCommandHandler implements CommandHandler {
             final var overlaps =
                     Streams.concat(
                             importExportService.peekImportKeyBytes(importCommand.getArgument().asString()).distinct(),
-                            passwordService.findAllKeys()
-                                    .onFailure(failureCollector::collectPasswordEntriesFailure)
-                                    .getOrElse(Stream.empty()).distinct())
+                            passwordService.findAllKeys().distinct())
                     .filter(bytes -> !duplicateDetector.add(bytes))
                     .sorted(new BytesComparator())
                     .map(Bytes::asString)

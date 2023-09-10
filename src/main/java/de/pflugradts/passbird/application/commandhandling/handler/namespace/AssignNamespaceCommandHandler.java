@@ -27,10 +27,7 @@ public class AssignNamespaceCommandHandler implements CommandHandler, CanListAva
 
     @Subscribe
     private void handleAssignNamespaceCommand(final AssignNamespaceCommand assignNamespaceCommand) {
-        if (passwordService.entryExists(assignNamespaceCommand.getArgument(), CREATE_ENTRY_NOT_EXISTS_EVENT)
-                .onFailure(throwable ->
-                    failureCollector.collectPasswordEntryFailure(assignNamespaceCommand.getArgument(), throwable))
-                .getOrElse(false)) {
+        if (passwordService.entryExists(assignNamespaceCommand.getArgument(), CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(String.format("Available namespaces: %n%s",
                 getAvailableNamespaces(namespaceService, false)))));
             final var input = userInterfaceAdapterPort
@@ -45,8 +42,7 @@ public class AssignNamespaceCommandHandler implements CommandHandler, CanListAva
             } else if (namespaceService.atSlot(namespace).isEmpty()) {
                 userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(
                     "Specified namespace does not exist - Operation aborted.")));
-            } else if (passwordService.entryExists(
-                assignNamespaceCommand.getArgument(), namespace).getOrElse(false)) {
+            } else if (passwordService.entryExists(assignNamespaceCommand.getArgument(), namespace)) {
                 userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(
                     "Password entry with same alias already exists in target namespace - Operation aborted.")));
             } else {

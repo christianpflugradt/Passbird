@@ -22,51 +22,32 @@ public class ApplicationEventHandler implements EventHandler {
 
     @Subscribe
     private void handlePasswordEntryCreated(final PasswordEntryCreated passwordEntryCreated) {
-        cryptoProvider
-                .decrypt(passwordEntryCreated
-                        .getPasswordEntry()
-                        .viewKey())
-                .onSuccess(key -> sendToUserInterface(
-                        "PasswordEntry '%s' successfully created.", key));
+        var key = cryptoProvider.decrypt(passwordEntryCreated.getPasswordEntry().viewKey());
+        sendToUserInterface("PasswordEntry '%s' successfully created.", key);
     }
 
     @Subscribe
     private void handlePasswordEntryUpdated(final PasswordEntryUpdated passwordEntryUpdated) {
-        cryptoProvider
-                .decrypt(passwordEntryUpdated
-                        .getPasswordEntry()
-                        .viewKey())
-                .onSuccess(key -> sendToUserInterface(
-                        "PasswordEntry '%s' successfully updated.", key));
+        var key = cryptoProvider.decrypt(passwordEntryUpdated.getPasswordEntry().viewKey());
+        sendToUserInterface("PasswordEntry '%s' successfully updated.", key);
     }
 
     @Subscribe
     private void handlePasswordEntryRenamed(final PasswordEntryRenamed passwordEntryRenamed) {
-        cryptoProvider
-                .decrypt(passwordEntryRenamed
-                        .getPasswordEntry()
-                        .viewKey())
-                .onSuccess(key -> sendToUserInterface(
-                        "PasswordEntry '%s' successfully renamed.", key));
+        var key = cryptoProvider.decrypt(passwordEntryRenamed.getPasswordEntry().viewKey());
+        sendToUserInterface("PasswordEntry '%s' successfully renamed.", key);
     }
 
     @Subscribe
     private void handlePasswordEntryDiscarded(final PasswordEntryDiscarded passwordEntryDiscarded) {
-        cryptoProvider
-                .decrypt(passwordEntryDiscarded
-                        .getPasswordEntry()
-                        .viewKey())
-                .onSuccess(key -> sendToUserInterface(
-                        "PasswordEntry '%s' successfully deleted.", key));
+        var key = cryptoProvider.decrypt(passwordEntryDiscarded.getPasswordEntry().viewKey());
+        sendToUserInterface("PasswordEntry '%s' successfully deleted.", key);
     }
 
     @Subscribe
     private void handlePasswordEntryNotFound(final PasswordEntryNotFound passwordEntryNotFound) {
-        cryptoProvider
-                .decrypt(passwordEntryNotFound
-                        .getKeyBytes())
-                .onSuccess(key -> sendToUserInterface(
-                        "PasswordEntry '%s' not found.", key));
+        var key = cryptoProvider.decrypt(passwordEntryNotFound.getKeyBytes());
+        sendToUserInterface("PasswordEntry '%s' not found.", key);
     }
 
     private void sendToUserInterface(final String template, final Bytes keyBytes) {

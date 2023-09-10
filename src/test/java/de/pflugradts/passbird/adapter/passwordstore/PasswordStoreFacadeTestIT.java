@@ -10,7 +10,6 @@ import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.NamespaceServiceFake;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
-import io.vavr.control.Try;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,9 +63,9 @@ class PasswordStoreFacadeTestIT {
 
     private void setupMocks() {
         given(cryptoProvider.encrypt(any(Bytes.class))).willAnswer(
-                invocation -> Try.of(() -> invocation.getArgument(0)));
+                invocation -> invocation.getArgument(0));
         given(cryptoProvider.decrypt(any(Bytes.class))).willAnswer(
-                invocation -> Try.of(() -> invocation.getArgument(0)));
+                invocation -> invocation.getArgument(0));
         MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withPasswordStoreLocation(tempPasswordStoreDirectory).fake();

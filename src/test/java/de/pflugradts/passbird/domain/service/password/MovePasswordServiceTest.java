@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 @ExtendWith(MockitoExtension.class)
 class MovePasswordServiceTest {
@@ -47,11 +48,9 @@ class MovePasswordServiceTest {
             .withThesePasswordEntries(givenPasswordEntry).fake();
 
         // when
-        final var actual = passwordService.movePassword(givenKey, newNamespace);
+        passwordService.movePassword(givenKey, newNamespace);
 
         // then
-        assertThat(actual).isNotNull();
-        assertThat(actual.isSuccess()).isTrue();
         assertThat(givenPasswordEntry.associatedNamespace())
             .isNotNull().isEqualTo(newNamespace).isNotEqualTo(givenNamespace);
     }
@@ -78,12 +77,10 @@ class MovePasswordServiceTest {
             .withThesePasswordEntries(givenPasswordEntry, conflictingPasswordEntry).fake();
 
         // when
-        final var actual = passwordService.movePassword(givenKey, newNamespace);
+        final var actual = catchThrowable(() -> passwordService.movePassword(givenKey, newNamespace));
 
         // then
-        assertThat(actual).isNotNull();
-        assertThat(actual.isSuccess()).isFalse();
-        assertThat(actual.getCause()).isNotNull().isInstanceOf(KeyAlreadyExistsException.class);
+        assertThat(actual).isNotNull().isInstanceOf(KeyAlreadyExistsException.class);
         assertThat(givenPasswordEntry.associatedNamespace())
             .isNotNull().isNotEqualTo(newNamespace).isEqualTo(givenNamespace);
     }

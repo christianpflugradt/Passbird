@@ -6,7 +6,6 @@ import de.pflugradts.passbird.application.commandhandling.handler.CustomSetComma
 import de.pflugradts.passbird.application.configuration.Configuration;
 import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
-import de.pflugradts.passbird.domain.model.password.InvalidKeyException;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
@@ -86,13 +85,15 @@ class CustomSetCommandTestIT {
         MockitoConfigurationFaker.faker()
                 .forInstance(configuration)
                 .withPromptOnRemovalEnabled().fake();
+        UserInterfaceAdapterPortFaker.faker()
+            .forInstance(userInterfaceAdapterPort).fake();
 
         // when
         assertThat(bytes).isEqualTo(reference);
         inputHandler.handleInput( Input.Companion.inputOf(bytes));
 
         // then
-        then(failureCollector).should().collectPasswordEntryFailure(eq(Bytes.bytesOf(args)), any(InvalidKeyException.class));
+        then(userInterfaceAdapterPort).should().send(eq(Output.Companion.outputOf(Bytes.bytesOf("Password alias cannot contain digits or special characters. Please choose a different alias."))));
         then(passwordService).should(never()).putPasswordEntry(eq(Bytes.bytesOf(args)), any(Bytes.class));
         assertThat(bytes).isNotEqualTo(reference);
     }

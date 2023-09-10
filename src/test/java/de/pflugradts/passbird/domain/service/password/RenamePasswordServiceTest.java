@@ -43,11 +43,9 @@ class RenamePasswordServiceTest {
             .withThesePasswordEntries(givenPasswordEntry).fake();
 
         // when
-        final var actual = passwordService.renamePasswordEntry(oldKey, newKey);
+        passwordService.renamePasswordEntry(oldKey, newKey);
 
         // then
-        assertThat(actual).isNotNull();
-        assertThat(actual.isSuccess()).isTrue();
         assertThat(givenPasswordEntry.viewKey())
             .isNotNull().isEqualTo(newKey).isNotEqualTo(oldKey);
     }
@@ -70,11 +68,9 @@ class RenamePasswordServiceTest {
             .withThesePasswordEntries(existingPasswordEntry).fake();
 
         // when
-        final var actual = passwordService.renamePasswordEntry(oldKey, newKey);
+        passwordService.renamePasswordEntry(oldKey, newKey);
 
         // then
-        assertThat(actual).isNotNull();
-        assertThat(actual.isSuccess()).isTrue();
         assertThat(givenPasswordEntry.viewKey())
             .isNotNull().isEqualTo(oldKey).isNotEqualTo(newKey);
     }

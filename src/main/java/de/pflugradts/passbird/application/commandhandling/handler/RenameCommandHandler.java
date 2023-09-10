@@ -22,17 +22,13 @@ public class RenameCommandHandler implements CommandHandler {
 
     @Subscribe
     private void handleRenameCommand(final RenameCommand renameCommand) {
-        if (passwordService.entryExists(renameCommand.getArgument(), CREATE_ENTRY_NOT_EXISTS_EVENT)
-                .onFailure(throwable ->
-                        failureCollector.collectPasswordEntryFailure(renameCommand.getArgument(), throwable))
-                .getOrElse(false)) {
+        if (passwordService.entryExists(renameCommand.getArgument(), CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             final var secureInput = userInterfaceAdapterPort
                     .receive(Output.Companion.outputOf(Bytes.bytesOf("Enter new alias or nothing to abort: ")));
             if (secureInput.isEmpty()) {
                 userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf("Empty input - Operation aborted.")));
             } else {
-                passwordService.renamePasswordEntry(renameCommand.getArgument(), secureInput.getBytes())
-                    .onFailure(failureCollector::collectRenamePasswordEntryFailure);
+                passwordService.renamePasswordEntry(renameCommand.getArgument(), secureInput.getBytes());
             }
             secureInput.invalidate();
         }

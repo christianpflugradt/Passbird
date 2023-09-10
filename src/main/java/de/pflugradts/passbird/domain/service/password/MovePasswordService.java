@@ -8,7 +8,6 @@ import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository;
-import io.vavr.control.Try;
 
 public class MovePasswordService implements CommonPasswordServiceCapabilities {
 
@@ -19,18 +18,16 @@ public class MovePasswordService implements CommonPasswordServiceCapabilities {
     @Inject
     private EventRegistry eventRegistry;
 
-    public Try<Void> movePassword(final Bytes keyBytes, final NamespaceSlot targetNamespace) {
-        if (entryExists(cryptoProvider, passwordEntryRepository, keyBytes, targetNamespace)
-                 .getOrElse(true)) {
-            return Try.failure(new KeyAlreadyExistsException(keyBytes));
+    public void movePassword(final Bytes keyBytes, final NamespaceSlot targetNamespace) {
+        if (entryExists(cryptoProvider, passwordEntryRepository, keyBytes, targetNamespace)) {
+            throw new KeyAlreadyExistsException(keyBytes);
         } else {
-            return encrypted(cryptoProvider, keyBytes).fold(
-                Try::failure, encryptedKeyBytes ->
-                    Try.run(() -> find(passwordEntryRepository, encryptedKeyBytes)
-                        .ifPresentOrElse(
-                            passwordEntry -> passwordEntry.updateNamespace(targetNamespace),
-                            () -> eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes))))
-                        .andThen(() -> processEventsAndSync(eventRegistry, passwordEntryRepository)));
+            var encryptedKeyBytes = encrypted(cryptoProvider, keyBytes);
+            find(passwordEntryRepository, encryptedKeyBytes)
+                .ifPresentOrElse(
+                passwordEntry -> passwordEntry.updateNamespace(targetNamespace),
+                () -> eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes)));
+            processEventsAndSync(eventRegistry, passwordEntryRepository);
         }
     }
 

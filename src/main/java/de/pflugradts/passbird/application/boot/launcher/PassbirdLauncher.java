@@ -12,6 +12,8 @@ import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import java.io.File;
+import java.util.Optional;
+
 import static de.pflugradts.passbird.application.configuration.ReadableConfiguration.KEYSTORE_FILENAME;
 
 public class PassbirdLauncher implements Bootable {
@@ -42,11 +44,10 @@ public class PassbirdLauncher implements Bootable {
     }
 
     private boolean keystoreExists() {
-        return getKeyStoreLocation().length() > 0
-                && !systemOperation.getPath(getKeyStoreLocation())
-                        .map(path -> path.resolve(KEYSTORE_FILENAME).toFile())
+        return !getKeyStoreLocation().isEmpty()
+                && Optional.of(systemOperation.getPath(getKeyStoreLocation()).resolve(KEYSTORE_FILENAME).toFile())
                         .filter(File::exists)
-                        .isEmpty();
+                        .isPresent();
     }
 
     private void sendBanner() {

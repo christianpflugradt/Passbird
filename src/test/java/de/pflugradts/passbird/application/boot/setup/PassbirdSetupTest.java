@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,7 +74,6 @@ class PassbirdSetupTest {
                 .withTheseSecureInputs(password, password)
                 .withReceiveConfirmation(true).fake();
         given(configurationSync.sync(configurationDirectory)).willReturn(Try.success(null));
-        given(keyStoreAdapterPort.storeKey(any(), any())).willReturn(Try.success(null));
         givenValidDirectory(configurationDirectory);
 
         // when
@@ -123,7 +123,6 @@ class PassbirdSetupTest {
                 .forInstance(userInterfaceAdapterPort)
                 .withTheseSecureInputs(password, password)
                 .withReceiveConfirmation(true).fake();
-        given(keyStoreAdapterPort.storeKey(any(), any())).willReturn(Try.success(null));
         givenValidDirectory(configurationDirectory);
 
         // when
@@ -177,7 +176,7 @@ class PassbirdSetupTest {
                 .withTheseInputs(validDirectory)
                 .withTheseSecureInputs(password, password)
                 .withReceiveConfirmation(true).fake();
-        given(keyStoreAdapterPort.storeKey(any(), captor.capture())).willReturn(Try.success(null));
+        doNothing().when(keyStoreAdapterPort).storeKey(any(), captor.capture());
         givenInvalidDirectory(invalidConfigurationDirectory);
         givenValidDirectory(validDirectory.getBytes().asString());
 
@@ -214,7 +213,6 @@ class PassbirdSetupTest {
                         passwordMatched,
                         passwordMatched)
                 .withReceiveConfirmation(true).fake();
-        given(keyStoreAdapterPort.storeKey(any(), any())).willReturn(Try.success(null));
         givenValidDirectory(configurationDirectory);
 
         // when

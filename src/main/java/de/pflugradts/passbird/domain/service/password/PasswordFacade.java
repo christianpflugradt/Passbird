@@ -23,53 +23,53 @@ public class PasswordFacade implements PasswordService {
     private MovePasswordService movePasswordService;
 
     @Override
-    public Try<Boolean> entryExists(final Bytes keyBytes, final NamespaceSlot namespace) {
+    public Boolean entryExists(final Bytes keyBytes, final NamespaceSlot namespace) {
         return viewPasswordService.entryExists(keyBytes, namespace);
     }
 
     @Override
-    public Try<Boolean> entryExists(final Bytes keyBytes, final EntryNotExistsAction entryNotExistsAction) {
+    public Boolean entryExists(final Bytes keyBytes, final EntryNotExistsAction entryNotExistsAction) {
         return viewPasswordService.entryExists(keyBytes, entryNotExistsAction);
     }
 
     @Override
-    public Optional<Try<Bytes>> viewPassword(final Bytes keyBytes) {
+    public Optional<Bytes> viewPassword(final Bytes keyBytes) {
         return viewPasswordService.viewPassword(keyBytes);
     }
 
     @Override
-    public Try<Void> renamePasswordEntry(final Bytes keyBytes, final Bytes newKeyBytes) {
-        return renamePasswordService.renamePasswordEntry(keyBytes, newKeyBytes);
+    public void renamePasswordEntry(final Bytes keyBytes, final Bytes newKeyBytes) {
+        renamePasswordService.renamePasswordEntry(keyBytes, newKeyBytes);
     }
 
     @Override
-    public Try<Stream<Bytes>> findAllKeys() {
+    public Stream<Bytes> findAllKeys() {
         return viewPasswordService.findAllKeys();
     }
 
     @Override
-    public Try<Void> challengeAlias(final Bytes bytes) {
-        return putPasswordService.challengeAlias(bytes);
+    public void challengeAlias(final Bytes bytes) {
+        putPasswordService.challengeAlias(bytes);
     }
 
     @Override
-    public Try<Void> putPasswordEntries(final Stream<Tuple2<Bytes, Bytes>> passwordEntries) {
-        return putPasswordService.putPasswordEntries(passwordEntries);
+    public void putPasswordEntries(final Stream<Tuple2<Bytes, Bytes>> passwordEntries) {
+        putPasswordService.putPasswordEntries(passwordEntries);
     }
 
     @Override
-    public Try<Void> putPasswordEntry(final Bytes keyBytes, final Bytes passwordBytes) {
-        return putPasswordService.putPasswordEntry(keyBytes, passwordBytes);
+    public void putPasswordEntry(final Bytes keyBytes, final Bytes passwordBytes) {
+        putPasswordService.putPasswordEntry(keyBytes, passwordBytes);
     }
 
     @Override
-    public Try<Void> discardPasswordEntry(final Bytes keyBytes) {
-        return discardPasswordService.discardPasswordEntry(keyBytes);
+    public void discardPasswordEntry(final Bytes keyBytes) {
+        discardPasswordService.discardPasswordEntry(keyBytes);
     }
 
     @Override
-    public Try<Void> movePasswordEntry(final Bytes keyBytes, final NamespaceSlot targetNamespace) {
-        return movePasswordService.movePassword(keyBytes, targetNamespace);
+    public void movePasswordEntry(final Bytes keyBytes, final NamespaceSlot targetNamespace) {
+        movePasswordService.movePassword(keyBytes, targetNamespace);
     }
 
 }

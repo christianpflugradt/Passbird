@@ -86,7 +86,7 @@ class PasswordStoreWriter {
     private Try<Path> writeToDisk(final Bytes bytes) {
         return systemOperation.writeBytesToFile(
             getFilePath(),
-            cryptoProvider.encrypt(bytes).getOrElse(Bytes.emptyBytes()));
+            cryptoProvider.encrypt(bytes));
     }
 
     private byte checksum(final byte[] bytes) {

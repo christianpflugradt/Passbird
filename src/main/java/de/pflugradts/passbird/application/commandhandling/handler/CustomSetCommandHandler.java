@@ -6,6 +6,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
+import de.pflugradts.passbird.domain.model.password.InvalidKeyException;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
@@ -26,18 +27,18 @@ public class CustomSetCommandHandler implements CommandHandler {
     @Subscribe
     private void handleCustomSetCommand(final CustomSetCommand customSetCommand) {
         if (commandConfirmed(customSetCommand)) {
-            final var aliasCheck = passwordService.challengeAlias(customSetCommand.getArgument());
-            if (aliasCheck.isFailure()) {
-                failureCollector.collectPasswordEntryFailure(customSetCommand.getArgument(), aliasCheck.getCause());
-            } else {
+            try {
+                passwordService.challengeAlias(customSetCommand.getArgument());
                 final var secureInput = userInterfaceAdapterPort
-                        .receiveSecurely(Output.Companion.outputOf(Bytes.bytesOf("Enter custom password: ")));
+                    .receiveSecurely(Output.Companion.outputOf(Bytes.bytesOf("Enter custom password: ")));
                 if (secureInput.isEmpty()) {
                     userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf("Empty input - Operation aborted.")));
                 } else {
                     passwordService.putPasswordEntry(customSetCommand.getArgument(), secureInput.getBytes());
                 }
                 secureInput.invalidate();
+            } catch (InvalidKeyException ex) {
+                userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf("Password alias cannot contain digits or special characters. Please choose a different alias.")));
             }
         } else {
             userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf("Operation aborted.")));
@@ -48,10 +49,7 @@ public class CustomSetCommandHandler implements CommandHandler {
 
     private boolean commandConfirmed(final CustomSetCommand customSetCommand) {
         if (configuration.getApplication().getPassword().isPromptOnRemoval()
-                && passwordService.entryExists(customSetCommand.getArgument(), DO_NOTHING)
-                .onFailure(throwable -> failureCollector
-                        .collectPasswordEntryFailure(customSetCommand.getArgument(), throwable))
-                .getOrElse(false)) {
+                && passwordService.entryExists(customSetCommand.getArgument(), DO_NOTHING)) {
             return userInterfaceAdapterPort
                     .receiveConfirmation(Output.Companion.outputOf(Bytes.bytesOf(String.format(
                             "Existing Password Entry '%s' will be irrevocably overwritten.%n"

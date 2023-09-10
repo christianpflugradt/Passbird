@@ -5,10 +5,8 @@ import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
 import io.vavr.Tuple2;
-import io.vavr.control.Either;
-import io.vavr.control.Try;
-import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
+
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class PasswordImportExportService implements ImportExportService {
@@ -34,29 +32,21 @@ public class PasswordImportExportService implements ImportExportService {
         exchangeFactory.createPasswordExchange(uri)
                 .receive()
                 .onFailure(failureCollector::collectImportFailure)
-                .onSuccess(passwordEntries -> passwordService.putPasswordEntries(passwordEntries)
-                        .onFailure(failureCollector::collectImportFailure));
+                .onSuccess(passwordEntries -> passwordService.putPasswordEntries(passwordEntries));
     }
 
     @Override
     public void exportPasswordEntries(final String uri) {
         final var exportData = passwordService.findAllKeys()
-                        .onFailure(failureCollector::collectPasswordEntriesFailure)
-                        .getOrElse(Stream.empty())
-                        .map(this::retrievePasswordEntryTuple).collect(Collectors.toList());
+                        .map(this::retrievePasswordEntryTuple).toList();
         if (!exportData.isEmpty()) {
-            exportData.stream().filter(Either::isLeft).findAny().ifPresentOrElse(
-                either -> failureCollector.collectPasswordEntriesFailure(either.getLeft()),
-                () -> exchangeFactory.createPasswordExchange(uri)
-                        .send(exportData.stream().map(Either::get))
-                        .onFailure(failureCollector::collectExportFailure));
+            exchangeFactory.createPasswordExchange(uri)
+                .send(exportData.stream().filter(Optional::isPresent).map(Optional::get));
         }
     }
 
-    private Either<Throwable, Tuple2<Bytes, Bytes>> retrievePasswordEntryTuple(final Bytes keyBytes) {
+    private Optional<Tuple2<Bytes, Bytes>> retrievePasswordEntryTuple(final Bytes keyBytes) {
         return passwordService.viewPassword(keyBytes)
-                .orElse(Try.failure(new NoSuchElementException()))
-                .toEither()
                 .map(bytes -> new Tuple2<>(keyBytes, bytes));
     }
 

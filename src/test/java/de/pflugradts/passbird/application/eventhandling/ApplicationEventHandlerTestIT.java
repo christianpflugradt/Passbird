@@ -1,16 +1,23 @@
 package de.pflugradts.passbird.application.eventhandling;
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
-import de.pflugradts.passbird.domain.model.event.*;
+import de.pflugradts.passbird.domain.model.event.PasswordEntryCreated;
+import de.pflugradts.passbird.domain.model.event.PasswordEntryDiscarded;
+import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound;
+import de.pflugradts.passbird.domain.model.event.PasswordEntryRenamed;
+import de.pflugradts.passbird.domain.model.event.PasswordEntryUpdated;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
-import io.vavr.control.Try;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
@@ -46,7 +53,7 @@ class ApplicationEventHandlerTestIT {
         final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
         final var passwordEntryCreated = new PasswordEntryCreated(givenPasswordEntry);
         final var expectedBytes = Bytes.bytesOf("expected key");
-        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
+        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(expectedBytes);
 
         // when
         passbirdEventRegistry.register(passwordEntryCreated);
@@ -66,7 +73,7 @@ class ApplicationEventHandlerTestIT {
         final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
         final var passwordEntryUpdated = new PasswordEntryUpdated(givenPasswordEntry);
         final var expectedBytes = Bytes.bytesOf("expected key");
-        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
+        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(expectedBytes);
 
         // when
         passbirdEventRegistry.register(passwordEntryUpdated);
@@ -86,7 +93,7 @@ class ApplicationEventHandlerTestIT {
         final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
         final var passwordEntryRenamed = new PasswordEntryRenamed(givenPasswordEntry);
         final var expectedBytes = Bytes.bytesOf("expected key");
-        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
+        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(expectedBytes);
 
         // when
         passbirdEventRegistry.register(passwordEntryRenamed);
@@ -106,7 +113,7 @@ class ApplicationEventHandlerTestIT {
         final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
         final var passwordEntryDiscarded = new PasswordEntryDiscarded(givenPasswordEntry);
         final var expectedBytes = Bytes.bytesOf("expected key");
-        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(Try.success(expectedBytes));
+        given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(expectedBytes);
 
         // when
         passbirdEventRegistry.register(passwordEntryDiscarded);
@@ -126,7 +133,7 @@ class ApplicationEventHandlerTestIT {
         final var givenKey = Bytes.bytesOf("given key");
         final var passwordEntryNotFound = new PasswordEntryNotFound(givenKey);
         final var expectedBytes = Bytes.bytesOf("expected key");
-        given(cryptoProvider.decrypt(givenKey)).willReturn(Try.success(expectedBytes));
+        given(cryptoProvider.decrypt(givenKey)).willReturn(expectedBytes);
 
         // when
         passbirdEventRegistry.register(passwordEntryNotFound);

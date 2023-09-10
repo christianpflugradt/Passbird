@@ -1,9 +1,11 @@
 package de.pflugradts.passbird.application.util;
 
-import java.io.File;
-import java.nio.file.Path;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+
+import java.io.File;
+import java.nio.file.Path;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -18,11 +20,6 @@ public class PathFaker {
 
     public PathFaker fakePath() {
         path = mock(Path.class);
-        return this;
-    }
-
-    public PathFaker withPathResolvingTo(final Path resolvedPath, final String filename) {
-        given(path.resolve(filename)).willReturn(resolvedPath);
         return this;
     }
 

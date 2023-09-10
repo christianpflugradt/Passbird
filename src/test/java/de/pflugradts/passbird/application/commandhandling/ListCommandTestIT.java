@@ -7,7 +7,6 @@ import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
-import io.vavr.control.Try;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +52,7 @@ class ListCommandTestIT {
         final var key1 = Bytes.bytesOf("key1");
         final var key2 = Bytes.bytesOf("key2");
         final var key3 = Bytes.bytesOf("key3");
-        given(passwordService.findAllKeys()).willReturn(Try.of(() -> Stream.of(key1, key2, key3)));
+        given(passwordService.findAllKeys()).willReturn(Stream.of(key1, key2, key3));
 
         // when
         inputHandler.handleInput(input);
@@ -72,7 +71,7 @@ class ListCommandTestIT {
     void shouldHandleListCommand_WithEmptyDatabase() {
         // given
         final var input =  Input.Companion.inputOf(Bytes.bytesOf("l"));
-        given(passwordService.findAllKeys()).willReturn(Try.of(Stream::empty));
+        given(passwordService.findAllKeys()).willReturn(Stream.empty());
 
         // when
         inputHandler.handleInput(input);

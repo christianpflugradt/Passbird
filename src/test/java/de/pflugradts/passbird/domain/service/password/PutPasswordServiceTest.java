@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
 
@@ -45,10 +46,10 @@ class PutPasswordServiceTest {
         final var givenAlias = Bytes.bytesOf("abcDEF");
 
         // when
-        final var actual = passwordService.challengeAlias(givenAlias);
+        final var actual = catchThrowable(() -> passwordService.challengeAlias(givenAlias));
 
         // then
-        assertThat(actual.isSuccess()).isTrue();
+        assertThat(actual).isNull();
     }
 
     @Test
@@ -57,10 +58,10 @@ class PutPasswordServiceTest {
         final var givenAlias = Bytes.bytesOf("abc123");
 
         // when
-        final var actual = passwordService.challengeAlias(givenAlias);
+        final var actual = catchThrowable(() -> passwordService.challengeAlias(givenAlias));
 
         // then
-        assertThat(actual.isSuccess()).isTrue();
+        assertThat(actual).isNull();
     }
 
     @Test
@@ -69,10 +70,10 @@ class PutPasswordServiceTest {
         final var givenAlias = Bytes.bytesOf("123abc");
 
         // when
-        final var actual = passwordService.challengeAlias(givenAlias);
+        final var actual = catchThrowable(() -> passwordService.challengeAlias(givenAlias));
 
         // then
-        assertThat(actual.isSuccess()).isFalse();
+        assertThat(actual).isNotNull().isInstanceOf(InvalidKeyException.class);
     }
 
 
@@ -82,10 +83,10 @@ class PutPasswordServiceTest {
         final var givenAlias = Bytes.bytesOf("abc!");
 
         // when
-        final var actual = passwordService.challengeAlias(givenAlias);
+        final var actual = catchThrowable(() -> passwordService.challengeAlias(givenAlias));
 
         // then
-        assertThat(actual.isSuccess()).isFalse();
+        assertThat(actual).isNotNull();
     }
 
     @Test
@@ -147,14 +148,12 @@ class PutPasswordServiceTest {
         final var invalidKey = Bytes.bytesOf("1Key");
 
         // when
-        final var actual = passwordService.putPasswordEntry(invalidKey, Bytes.bytesOf("password"));
+        var actual = catchThrowable(() -> passwordService.putPasswordEntry(invalidKey, Bytes.bytesOf("password")));
 
         // then
+        assertThat(actual).isNotNull().isInstanceOf(InvalidKeyException.class);
         then(cryptoProvider).shouldHaveNoInteractions();
         then(passwordEntryRepository).shouldHaveNoInteractions();
-        assertThat(actual.isFailure()).isTrue();
-        assertThat(actual.getCause()).isNotNull()
-            .isInstanceOf(InvalidKeyException.class);
     }
 
     @Test

@@ -7,12 +7,14 @@ import java.awt.Desktop;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -39,27 +41,26 @@ public class SystemOperation {
         return Try.of(() -> Paths.get(directory).resolve(fileName).toFile());
     }
 
-    public Try<Path> getPath(final File file) {
-        return Try.of(file::toPath);
+    public Path getPath(final File file) {
+        return file.toPath();
     }
 
-    public Try<Path> getPath(final String... uri) {
-        return Try.of(() -> uri.length > 1
+    public Path getPath(final String... uri) {
+        return uri.length > 1
                     ? Paths.get(uri[0], Arrays.copyOfRange(uri, 1, uri.length))
-                    : Paths.get(uri[0])
-        );
+                    : Paths.get(uri[0]);
     }
 
-    public Try<KeyStore> getJceksInstance() {
-        return Try.of(() -> KeyStore.getInstance(JCEKS_KEYSTORE));
+    public KeyStore getJceksInstance() throws KeyStoreException {
+        return KeyStore.getInstance(JCEKS_KEYSTORE);
     }
 
-    public Try<InputStream> newInputStream(final Path path) {
-        return Try.of(() -> Files.newInputStream(path));
+    public InputStream newInputStream(final Path path) throws IOException {
+        return Files.newInputStream(path);
     }
 
-    public Try<OutputStream> newOutputStream(final Path path) {
-        return Try.of(() -> Files.newOutputStream(path));
+    public OutputStream newOutputStream(final Path path) throws IOException {
+        return Files.newOutputStream(path);
     }
 
     public Try<Path> writeBytesToFile(final Path path, final Bytes bytes) {

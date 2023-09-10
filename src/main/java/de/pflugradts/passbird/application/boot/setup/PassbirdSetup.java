@@ -11,10 +11,11 @@ import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
+
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
+
 import static de.pflugradts.passbird.application.configuration.ReadableConfiguration.KEYSTORE_FILENAME;
 
 public class PassbirdSetup implements Bootable {
@@ -100,9 +101,8 @@ public class PassbirdSetup implements Bootable {
     private void createKeyStore(final String directory, final Input password) {
         keyStoreAdapterPort.storeKey(
                 password.getBytes().toChars(),
-                systemOperation.resolvePath(directory, KEYSTORE_FILENAME).getOrNull())
-            .onSuccess(setupGuide::sendCreateKeyStoreSucceeded)
-            .onFailure(setupGuide::sendCreateKeyStoreFailed);
+                systemOperation.resolvePath(directory, KEYSTORE_FILENAME).getOrNull());
+        setupGuide.sendCreateKeyStoreSucceeded();
     }
 
     private String verifyValidDirectory(final String source) {
@@ -115,14 +115,12 @@ public class PassbirdSetup implements Bootable {
     }
 
     private boolean isValidDirectory(final String directory) {
-        return Optional.ofNullable(systemOperation.getPath(directory)
-                .getOrNull())
-                .map(Path::toFile)
-                .filter(File::isDirectory)
-                .map(File::getParentFile)
-                .filter(File::isDirectory)
-                .filter(File::exists)
-                .isPresent();
+        return Optional.of(systemOperation.getPath(directory).toFile())
+            .filter(File::isDirectory)
+            .map(File::getParentFile)
+            .filter(File::isDirectory)
+            .filter(File::exists)
+            .isPresent();
     }
 
 }

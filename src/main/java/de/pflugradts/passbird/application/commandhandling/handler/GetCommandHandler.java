@@ -23,13 +23,10 @@ public class GetCommandHandler implements CommandHandler {
 
     @Subscribe
     private void handleGetCommand(final GetCommand getCommand) {
-        passwordService.viewPassword(getCommand.getArgument()).ifPresent(result -> result
-                .onFailure(throwable -> failureCollector
-                        .collectPasswordEntryFailure(getCommand.getArgument(), throwable))
-                .onSuccess(passwordBytes -> {
+        passwordService.viewPassword(getCommand.getArgument()).ifPresent(passwordBytes -> {
                     clipboardAdapterPort.post(Output.Companion.outputOf(passwordBytes));
                     userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf("Password copied to clipboard.")));
-                }));
+                });
         getCommand.invalidateInput();
         userInterfaceAdapterPort.sendLineBreak();
     }

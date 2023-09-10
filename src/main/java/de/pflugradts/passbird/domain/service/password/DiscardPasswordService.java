@@ -7,7 +7,6 @@ import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository;
-import io.vavr.control.Try;
 
 public class DiscardPasswordService implements CommonPasswordServiceCapabilities {
 
@@ -18,17 +17,16 @@ public class DiscardPasswordService implements CommonPasswordServiceCapabilities
     @Inject
     private EventRegistry eventRegistry;
 
-    public Try<Void> discardPasswordEntry(final Bytes keyBytes) {
-        return discardOrFail(keyBytes)
-            .andThen(() -> processEventsAndSync(eventRegistry, passwordEntryRepository));
+    public void discardPasswordEntry(final Bytes keyBytes) {
+        discardOrFail(keyBytes);
+        processEventsAndSync(eventRegistry, passwordEntryRepository);
     }
 
-    private Try<Void> discardOrFail(final Bytes keyBytes) {
-        return encrypted(cryptoProvider, keyBytes).fold(
-            Try::failure,
-            encryptedKeyBytes -> Try.run(() -> find(passwordEntryRepository, encryptedKeyBytes).ifPresentOrElse(
-                PasswordEntry::discard,
-                () -> eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes)))));
+    private void discardOrFail(final Bytes keyBytes) {
+        var encryptedKeyBytes = encrypted(cryptoProvider, keyBytes);
+        find(passwordEntryRepository, encryptedKeyBytes).ifPresentOrElse(
+            PasswordEntry::discard,
+            () -> eventRegistry.register(new PasswordEntryNotFound(encryptedKeyBytes)));
     }
 
 }

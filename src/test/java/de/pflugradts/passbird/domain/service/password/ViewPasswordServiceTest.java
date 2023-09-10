@@ -50,8 +50,7 @@ class ViewPasswordServiceTest {
 
         // then
         then(passbirdEventRegistry).shouldHaveNoInteractions();
-        assertThat(actual.isSuccess()).isTrue();
-        assertThat(actual.get()).isTrue();
+        assertThat(actual).isTrue();
     }
 
     @Test
@@ -74,8 +73,7 @@ class ViewPasswordServiceTest {
 
         // then
         then(passbirdEventRegistry).shouldHaveNoInteractions();
-        assertThat(actual.isSuccess()).isTrue();
-        assertThat(actual.get()).isFalse();
+        assertThat(actual).isFalse();
     }
 
     @Test
@@ -102,8 +100,7 @@ class ViewPasswordServiceTest {
         then(cryptoProvider).should().decrypt(expectedPassword);
         then(passbirdEventRegistry).shouldHaveNoInteractions();
         assertThat(actual).isNotEmpty();
-        assertThat(actual.get().isSuccess()).isTrue();
-        assertThat(actual.get()).contains(expectedPassword);
+        assertThat(actual).contains(expectedPassword);
     }
 
     @Test
@@ -157,8 +154,7 @@ class ViewPasswordServiceTest {
         final var actual = passwordService.findAllKeys();
 
         // then
-        assertThat(actual.isSuccess()).isTrue();
-        assertThat(actual.get()).containsExactly(key1, key3, key2);
+        assertThat(actual).containsExactly(key1, key3, key2);
     }
 
 }
