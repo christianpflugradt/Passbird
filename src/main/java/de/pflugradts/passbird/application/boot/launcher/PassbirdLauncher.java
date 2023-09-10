@@ -7,13 +7,15 @@ import de.pflugradts.passbird.application.boot.main.ApplicationModule;
 import de.pflugradts.passbird.application.boot.setup.SetupModule;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
 import de.pflugradts.passbird.application.license.LicenseManager;
-import de.pflugradts.passbird.application.util.GuiceInjector;
 import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.util.Optional;
 
+import static de.pflugradts.passbird.application.boot.BootableKt.bootModule;
 import static de.pflugradts.passbird.application.configuration.ReadableConfiguration.KEYSTORE_FILENAME;
 
 public class PassbirdLauncher implements Bootable {
@@ -27,9 +29,6 @@ public class PassbirdLauncher implements Bootable {
     @Inject
     private LicenseManager licenseManager;
 
-    @SuppressWarnings("PMD.ImmutableField")
-    private GuiceInjector guiceInjector = new GuiceInjector();
-
     @Override
     public void boot() {
         sendLicenseNotice();
@@ -37,10 +36,10 @@ public class PassbirdLauncher implements Bootable {
         if (configuration.getApplication().isVerifyLicenseFilesExist()) {
             licenseManager.verifyLicenseFilesExist();
         }
-        guiceInjector.create(keystoreExists()
+        bootModule(keystoreExists()
                 ? new ApplicationModule()
                 : new SetupModule()
-        ).getInstance(Bootable.class).boot();
+        );
     }
 
     private boolean keystoreExists() {
@@ -90,4 +89,8 @@ public class PassbirdLauncher implements Bootable {
             0x5f, 0x5f, 0x5f, 0x2f, 0xa};
     }
 
+    @Override
+    public void terminate(@NotNull SystemOperation systemOperation) {
+        systemOperation.exit();
+    }
 }

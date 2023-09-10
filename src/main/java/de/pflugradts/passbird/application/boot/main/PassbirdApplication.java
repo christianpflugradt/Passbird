@@ -6,10 +6,12 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.boot.Bootable;
 import de.pflugradts.passbird.application.commandhandling.InputHandler;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
+import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.NamespaceService;
+import org.jetbrains.annotations.NotNull;
 
 import static de.pflugradts.passbird.domain.model.namespace.Namespace.DEFAULT;
 
@@ -52,4 +54,8 @@ public class PassbirdApplication implements Bootable {
             && input.getCommand().getFirstByte() == INTERRUPT;
     }
 
+    @Override
+    public void terminate(@NotNull SystemOperation systemOperation) {
+        systemOperation.exit();
+    }
 }

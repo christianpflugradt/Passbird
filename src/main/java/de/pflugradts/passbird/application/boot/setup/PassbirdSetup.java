@@ -11,6 +11,7 @@ import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Objects;
@@ -123,4 +124,8 @@ public class PassbirdSetup implements Bootable {
             .isPresent();
     }
 
+    @Override
+    public void terminate(@NotNull SystemOperation systemOperation) {
+        systemOperation.exit();
+    }
 }
