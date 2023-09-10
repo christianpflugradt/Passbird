@@ -25,7 +25,7 @@ import strikt.assertions.isTrue
 
 internal class InputTest {
     @Test
-    fun shouldGetCommand() {
+    fun `should get command`() {
         // given
         val command = "g"
         val data = "foo"
@@ -39,7 +39,7 @@ internal class InputTest {
     }
 
     @Test
-    fun shouldGetCommand_ParseMultiCharacterCommand() {
+    fun `should get command and parse multi character command`() {
         // given
         val command = "n+1"
         val data = "foo"
@@ -53,13 +53,13 @@ internal class InputTest {
     }
 
     @Test
-    fun shouldGetCommand_ReturnZeroOnEmptyBytes() {
+    fun `should get command and return zero on empty bytes`() {
         // given / when / then
         expectThat(emptyInput().command) isEqualTo emptyBytes()
     }
 
     @Test
-    fun shouldGetData() {
+    fun `should get data`() {
         val command = 'g'
         val data = "foo"
         val input = inputOf(bytesOf(command.toString() + data))
@@ -73,13 +73,13 @@ internal class InputTest {
     }
 
     @Test
-    fun shouldGetData_ReturnEmptyBytesOnInputWithoutData() {
+    fun `should get data and return empty bytes on input without data`() {
         // given / when / then
         expectThat(emptyInput().data.isEmpty).isTrue()
     }
 
     @Test
-    fun shouldInvalidateInput() {
+    fun `should invalidate input`() {
         // given
         val bytes = spyk<Bytes>(bytesOf("foo"))
 
@@ -93,7 +93,7 @@ internal class InputTest {
     @Nested
     internal inner class InstantiationTest {
         @Test
-        fun shouldHaveBytes() {
+        fun `should have bytes`() {
             // given
             val givenBytes = bytesOf(byteArrayOf(1, 2, 3))
             val givenInput = inputOf(givenBytes)
@@ -106,7 +106,7 @@ internal class InputTest {
         }
 
         @Test
-        fun shouldInstantiateEmptyInput() {
+        fun `should instantiate empty input`() {
             // given / when / then
             expectThat(emptyInput().bytes.isEmpty).isTrue()
         }
@@ -115,7 +115,7 @@ internal class InputTest {
     @Nested
     internal inner class ParseNamespeTest {
         @Test
-        fun shouldParseDefaultNamespace() {
+        fun `should parse default namespace`() {
             // given
             val givenIndex = 0
             val input = inputOf(givenIndex)
@@ -128,7 +128,7 @@ internal class InputTest {
         }
 
         @Test
-        fun shouldParseNamespaces() {
+        fun `should parse namespaces`() {
             // given
             (1..9).zip(arrayOf(_1, _2, _3, _4, _5, _6, _7, _8, _9)).forEach {
                 val givenIndex = it.first
@@ -144,7 +144,7 @@ internal class InputTest {
         }
 
         @Test
-        fun shouldParseInvalidNamespace_LowerNumber() {
+        fun `should parse invalid namespace with lower number`() {
             // given
             val givenIndex = -1
             val input = inputOf(givenIndex)
@@ -157,7 +157,7 @@ internal class InputTest {
         }
 
         @Test
-        fun shouldParseInvalidNamespace_HigherNumber() {
+        fun `should parse invalid namespace with higher number`() {
             // given
             val givenIndex = 10
             val input = inputOf(givenIndex)
@@ -170,7 +170,7 @@ internal class InputTest {
         }
 
         @Test
-        fun shouldParseInvalidNamespace_String() {
+        fun `should parse invalid namespace with string`() {
             // given
             val givenIndex = "-A"
             val input = inputOf(bytesOf(givenIndex))

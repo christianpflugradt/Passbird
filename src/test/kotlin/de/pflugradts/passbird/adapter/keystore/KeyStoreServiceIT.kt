@@ -38,7 +38,7 @@ internal class KeyStoreServiceIT {
     }
 
     @Test
-    fun shouldUseKeyStore_Roundtrip() {
+    fun `should use key store roundtrip`() {
         // given
         val password = "p4s5wrD"
         val oneTimePasswordChars1 = charsOf(password.toCharArray())

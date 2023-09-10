@@ -39,7 +39,7 @@ internal class CryptoProviderFactoryTest {
     )
 
     @Test
-    fun shouldCreateCryptoProvider() {
+    fun `should create crypto provider`() {
         // given
         val correctPassword = inputOf(bytesOf("letmein"))
         val keyStoreDirectory = "tmp"
@@ -58,7 +58,7 @@ internal class CryptoProviderFactoryTest {
     }
 
     @Test
-    fun shouldCreateCryptoProvider_On3rdPasswordInputAttempt() {
+    fun `should create crypto provider on 3rd password input attempt`() {
         // given
         val incorrectPassword1 = inputOf(bytesOf("letmeout"))
         val incorrectPassword2 = inputOf(bytesOf("letmeout"))
@@ -84,7 +84,7 @@ internal class CryptoProviderFactoryTest {
     }
 
     @Test
-    fun shouldCreateCryptoProvider_TerminateApplicationAfter3FailedAttempts() {
+    fun `should create crypto provider and terminate application after 3 failed attempts`() {
         // given
         val incorrectPassword = inputOf(bytesOf("letmeout"))
         val keyStoreDirectory = "tmp"

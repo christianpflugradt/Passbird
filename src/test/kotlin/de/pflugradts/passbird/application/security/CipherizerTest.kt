@@ -1,8 +1,9 @@
 package de.pflugradts.passbird.application.security
 
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 
 internal class CipherizerTest {
 
@@ -10,7 +11,7 @@ internal class CipherizerTest {
     private val ivBytes = bytesOf(byteArrayOf(-93, -95, 112, -58, -16, -60, 90, 0, 60, 33, 24, -111, -40, 39, 87, -66))
 
     @Test
-    fun shouldEncryptBytes() {
+    fun `should encrypt bytes`() {
         // given
         val cryptoProvider = Cipherizer(secretBytes, ivBytes)
         val givenDecryptedBytes = bytesOf(byteArrayOf(91, 87, 99, 52, 97, 79, 120, 82, 35, 40, 59, 77, 61, 111, 111, 110, 67, 102, 89, 108))
@@ -26,11 +27,11 @@ internal class CipherizerTest {
         val actual = cryptoProvider.encrypt(givenDecryptedBytes)
 
         // then
-        Assertions.assertThat(actual).isNotNull().isEqualTo(expectedEncryptedBytes)
+        expectThat(actual) isEqualTo expectedEncryptedBytes
     }
 
     @Test
-    fun shouldDecryptBytes() {
+    fun `should decrypt bytes`() {
         // given
         val cryptoProvider = Cipherizer(secretBytes, ivBytes)
         val givenEncryptedBytes = bytesOf(
@@ -47,6 +48,6 @@ internal class CipherizerTest {
         val actual = cryptoProvider.decrypt(givenEncryptedBytes)
 
         // then
-        Assertions.assertThat(actual).isNotNull().isEqualTo(expectedDecryptedBytes)
+        expectThat(actual) isEqualTo expectedDecryptedBytes
     }
 }

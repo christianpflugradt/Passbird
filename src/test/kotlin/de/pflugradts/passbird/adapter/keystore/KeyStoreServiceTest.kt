@@ -18,7 +18,7 @@ internal class KeyStoreServiceTest {
     private val keyStoreService = KeyStoreService(systemOperation)
 
     @Test
-    fun shouldStoreKey_FailOnInvalidPath() {
+    fun `should store key and fail on invalid path`() {
         // given
         val invalidPath = mockk<Path>()
 
@@ -30,7 +30,7 @@ internal class KeyStoreServiceTest {
     }
 
     @Test
-    fun shouldLoadKey_FailOnInvalidPath() {
+    fun `should load key and fail on invalid path`() {
         // given
         val invalidPath = mockk<Path>()
 
@@ -42,7 +42,7 @@ internal class KeyStoreServiceTest {
     }
 
     @Test
-    fun shouldStoreKey_FailOnKeyStoreUnavailable() {
+    fun `should store key and fail on key store unavailable`() {
         // given
         fakeSystemOperation(
             instance = systemOperation,
@@ -58,7 +58,7 @@ internal class KeyStoreServiceTest {
     }
 
     @Test
-    fun shouldLoadKey_FailOnKeyStoreUnavailable() {
+    fun `should load key and fail on key store unavailable`() {
         // given
         fakeSystemOperation(
             instance = systemOperation,
