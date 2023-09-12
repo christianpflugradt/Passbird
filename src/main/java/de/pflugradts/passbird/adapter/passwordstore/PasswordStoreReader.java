@@ -72,9 +72,7 @@ class PasswordStoreReader {
 
     private Bytes readFromDisk() {
         final var bytes = systemOperation.readBytesFromFile(getFilePath());
-        return bytes.isSuccess()
-            ? cryptoProvider.decrypt(bytes.get())
-            : Bytes.emptyBytes();
+        return bytes.isEmpty() ? bytes : cryptoProvider.decrypt(bytes);
     }
 
     private void verifySignature(final byte[] bytes) {
@@ -118,7 +116,7 @@ class PasswordStoreReader {
         return systemOperation.resolvePath(
             configuration.getAdapter().getPasswordStore().getLocation(),
             DATABASE_FILENAME
-        ).getOrNull();
+        );
     }
 
     private int calcActualContentSize(final int totalSize) {

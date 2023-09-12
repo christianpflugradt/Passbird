@@ -6,7 +6,6 @@ import de.pflugradts.passbird.application.configuration.MockitoConfigurationFake
 import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.password.InvalidKeyException;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import io.vavr.control.Try;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -213,7 +212,7 @@ class FailureHandlingTestIT {
         // given
         assertThat(outputStream.toByteArray()).isEmpty();
         MockitoConfigurationFaker.faker().forInstance(configuration).fake();
-        given(systemOperation.resolvePath(any(), any())).willReturn(Try.success(mock(Path.class)));
+        given(systemOperation.resolvePath(any(), any())).willReturn(mock(Path.class));
 
         // when
         failureCollector.collectDecryptPasswordDatabaseFailure(mock(Path.class), new RuntimeException());

@@ -11,7 +11,6 @@ import de.pflugradts.passbird.domain.model.password.PasswordEntry;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.NamespaceService;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
-import io.vavr.control.Try;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -66,9 +65,7 @@ class PasswordStoreWriter {
                 ? checksum(Arrays.copyOfRange(bytes, commons.signatureSize(), contentSize))
                 : 0x0};
         ByteArrayUtils.copyBytes(checksumBytes, bytes, offset, commons.checksumBytes());
-        writeToDisk(Bytes.bytesOf(bytes))
-            .onFailure(throwable ->
-                failureCollector.collectWritePasswordDatabaseFailure(getFilePath(), throwable));
+        writeToDisk(Bytes.bytesOf(bytes));
     }
 
     private int persistNamespaces(final byte[] bytes, final int offset) {
@@ -83,7 +80,7 @@ class PasswordStoreWriter {
         return incrementedOffset;
     }
 
-    private Try<Path> writeToDisk(final Bytes bytes) {
+    private Path writeToDisk(final Bytes bytes) {
         return systemOperation.writeBytesToFile(
             getFilePath(),
             cryptoProvider.encrypt(bytes));
@@ -114,7 +111,7 @@ class PasswordStoreWriter {
         return systemOperation.resolvePath(
             configuration.getAdapter().getPasswordStore().getLocation(),
             DATABASE_FILENAME
-        ).getOrNull();
+        );
     }
 
     private int calcActualTotalSize(final int contentSize) {

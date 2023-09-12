@@ -119,14 +119,14 @@ public class FailureHandler implements EventHandler {
     }
 
     private void err(final String template, final Object... params) {
-        System.err.println(String.format(template, params));
+        System.err.printf((template) + "%n", params);
     }
 
     private Path getPasswordStoreLocationFromConfiguration() {
         return systemOperation.resolvePath(
                 configuration.getAdapter().getPasswordStore().getLocation(),
                 Configuration.DATABASE_FILENAME
-        ).getOrNull();
+        );
     }
 
 }

@@ -1,12 +1,15 @@
 package de.pflugradts.passbird.application.util;
 
+import org.junit.jupiter.api.Test;
+
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.junit.jupiter.api.Test;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 
 class SystemOperationTest {
@@ -23,7 +26,7 @@ class SystemOperationTest {
                 .withUri(uri).fake();
         final var desktop = mock(Desktop.class);
         given(systemOperation.getDesktop()).willReturn(desktop);
-        given(systemOperation.openFile(givenFile)).willCallRealMethod();
+        doCallRealMethod().when(systemOperation).openFile(givenFile);
 
         // when
         systemOperation.openFile(givenFile);
@@ -41,7 +44,7 @@ class SystemOperationTest {
                 .withName("test.txt").fake();
         final var desktop = mock(Desktop.class);
         given(systemOperation.getDesktop()).willReturn(desktop);
-        given(systemOperation.openFile(givenFile)).willCallRealMethod();
+        doCallRealMethod().when(systemOperation).openFile(givenFile);
 
         // when
         systemOperation.openFile(givenFile);

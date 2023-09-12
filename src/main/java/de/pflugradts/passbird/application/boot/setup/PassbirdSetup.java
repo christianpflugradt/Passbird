@@ -102,7 +102,7 @@ public class PassbirdSetup implements Bootable {
     private void createKeyStore(final String directory, final Input password) {
         keyStoreAdapterPort.storeKey(
                 password.getBytes().toChars(),
-                systemOperation.resolvePath(directory, KEYSTORE_FILENAME).getOrNull());
+                systemOperation.resolvePath(directory, KEYSTORE_FILENAME));
         setupGuide.sendCreateKeyStoreSucceeded();
     }
 

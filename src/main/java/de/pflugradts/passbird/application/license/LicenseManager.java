@@ -2,7 +2,7 @@ package de.pflugradts.passbird.application.license;
 
 import com.google.inject.Inject;
 import de.pflugradts.passbird.application.util.SystemOperation;
-import de.pflugradts.passbird.domain.model.transfer.Bytes;
+
 import java.io.File;
 import java.util.List;
 
@@ -22,8 +22,8 @@ public class LicenseManager {
         final var licenseFile = new File(licenseFileName);
         if (!licenseFile.exists()) {
             systemOperation.writeBytesToFile(
-                systemOperation.getPath(licenseFile),
-                systemOperation.getResourceAsBytes(licenseFileName).getOrElse(Bytes.emptyBytes()));
+                licenseFile.toPath(),
+                systemOperation.getResourceAsBytes(licenseFileName));
         }
     }
 

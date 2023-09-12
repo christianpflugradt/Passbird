@@ -27,7 +27,7 @@ public class ConfigurationSyncService implements ConfigurationSync {
                 .disable(WRITE_DOC_START_MARKER))
                 .enable(PROPAGATE_TRANSIENT_MARKER)
                 .writeValue(
-                        systemOperation.resolvePathToFile(directory, CONFIGURATION_FILENAME).getOrNull(),
+                        systemOperation.resolvePath(directory, CONFIGURATION_FILENAME).toFile(),
                         updatableConfiguration)
         );
     }
