@@ -12,7 +12,6 @@ import de.pflugradts.passbird.application.util.PathFaker;
 import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.application.util.SystemOperationFaker;
 import de.pflugradts.passbird.domain.model.transfer.Input;
-import io.vavr.control.Try;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -32,6 +31,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
@@ -73,7 +73,7 @@ class PassbirdSetupTest {
                 .forInstance(userInterfaceAdapterPort)
                 .withTheseSecureInputs(password, password)
                 .withReceiveConfirmation(true).fake();
-        given(configurationSync.sync(configurationDirectory)).willReturn(Try.success(null));
+        willDoNothing().given(configurationSync).sync(configurationDirectory);
         givenValidDirectory(configurationDirectory);
 
         // when

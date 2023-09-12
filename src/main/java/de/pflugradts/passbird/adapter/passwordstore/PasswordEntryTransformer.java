@@ -1,10 +1,10 @@
 package de.pflugradts.passbird.adapter.passwordstore;
 
 import de.pflugradts.passbird.application.util.ByteArrayUtils;
+import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.password.PasswordEntry;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import io.vavr.Tuple2;
 
 import static java.lang.Integer.BYTES;
 
@@ -23,7 +23,7 @@ class PasswordEntryTransformer {
         return bytes;
     }
 
-    Tuple2<PasswordEntry, Integer> transform(final byte[] bytes, final int offset, final boolean legacyMode) {
+    Tuple<PasswordEntry, Integer> transform(final byte[] bytes, final int offset, final boolean legacyMode) {
         var incrementedOffset = offset;
         final int namespaceSlot = legacyMode
             ? NamespaceSlot.DEFAULT.index()
@@ -37,7 +37,7 @@ class PasswordEntryTransformer {
         incrementedOffset += BYTES;
         final byte[] passwordBytes = ByteArrayUtils.readBytes(bytes, incrementedOffset, passwordSize);
         incrementedOffset += passwordSize;
-        return new Tuple2<>(
+        return new Tuple<>(
                 PasswordEntry.create(
                     NamespaceSlot.at(namespaceSlot),
                     Bytes.bytesOf(keyBytes),

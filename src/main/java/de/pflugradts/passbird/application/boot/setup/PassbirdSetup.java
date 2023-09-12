@@ -76,9 +76,7 @@ public class PassbirdSetup implements Bootable {
     }
 
     private void createConfiguration(final String directory) {
-        configurationSync.sync(directory)
-                .onSuccess(setupGuide::sendCreateConfigurationSucceeded)
-                .onFailure(setupGuide::sendCreateConfigurationFailed);
+        configurationSync.sync(directory);
     }
 
     private Input receiveMasterPassword() {

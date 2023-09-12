@@ -3,7 +3,6 @@ package de.pflugradts.passbird.application.commandhandling.command;
 import com.google.inject.Inject;
 import de.pflugradts.passbird.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.passbird.domain.model.transfer.Input;
-import io.vavr.control.Try;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -16,24 +15,22 @@ public class CommandFactory {
     private NamespaceCommandFactory namespaceCommandFactory;
 
     @SuppressWarnings("PMD.CyclomaticComplexity")
-    public Try<Command> construct(final CommandType commandType, final Input input) {
-        return Try.of(() -> {
-            switch (commandType) {
-                case CUSTOM_SET: return new CustomSetCommand(input);
-                case DISCARD: return new DiscardCommand(input);
-                case EXPORT: return new ExportCommand(input);
-                case GET: return new GetCommand(input);
-                case HELP: return new HelpCommand(input);
-                case IMPORT: return new ImportCommand(input);
-                case LIST: return new ListCommand();
-                case NAMESPACE: return namespaceCommandFactory.constructFromInput(input);
-                case QUIT: return new QuitCommand();
-                case RENAME: return new RenameCommand(input);
-                case SET: return new SetCommand(input);
-                case VIEW: return new ViewCommand(input);
-                default: return new NullCommand();
-            }
-        });
+    public Command construct(final CommandType commandType, final Input input) {
+        return switch (commandType) {
+            case CUSTOM_SET -> new CustomSetCommand(input);
+            case DISCARD -> new DiscardCommand(input);
+            case EXPORT -> new ExportCommand(input);
+            case GET -> new GetCommand(input);
+            case HELP -> new HelpCommand(input);
+            case IMPORT -> new ImportCommand(input);
+            case LIST -> new ListCommand();
+            case NAMESPACE -> namespaceCommandFactory.constructFromInput(input);
+            case QUIT -> new QuitCommand();
+            case RENAME -> new RenameCommand(input);
+            case SET -> new SetCommand(input);
+            case VIEW -> new ViewCommand(input);
+            default -> new NullCommand();
+        };
     }
 
 }

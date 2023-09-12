@@ -1,8 +1,8 @@
 package de.pflugradts.passbird.domain.service.password;
 
+import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import io.vavr.Tuple2;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -23,7 +23,7 @@ public interface PasswordService {
     Optional<Bytes> viewPassword(Bytes keyBytes);
     void renamePasswordEntry(Bytes keyBytes, Bytes newKeyBytes);
     void challengeAlias(Bytes bytes);
-    void putPasswordEntries(Stream<Tuple2<Bytes, Bytes>> passwordEntries);
+    void putPasswordEntries(Stream<Tuple<Bytes, Bytes>> passwordEntries);
     void putPasswordEntry(Bytes keyBytes, Bytes passwordBytes);
     void discardPasswordEntry(Bytes keyBytes);
     void movePasswordEntry(Bytes keyBytes, NamespaceSlot targetNamespace);

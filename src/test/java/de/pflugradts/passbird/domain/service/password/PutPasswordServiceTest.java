@@ -2,6 +2,7 @@ package de.pflugradts.passbird.domain.service.password;
 
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry;
 import de.pflugradts.passbird.application.security.CryptoProviderFaker;
+import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.password.InvalidKeyException;
 import de.pflugradts.passbird.domain.model.password.PasswordEntry;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
@@ -10,7 +11,6 @@ import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.NamespaceServiceFake;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository;
-import io.vavr.Tuple2;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -175,8 +175,8 @@ class PutPasswordServiceTest {
 
         // when
         passwordService.putPasswordEntries(Stream.of(
-            new Tuple2<>(newKey, newPassword),
-            new Tuple2<>(existingKey, newPasswordForExistingKey)
+            new Tuple<>(newKey, newPassword),
+            new Tuple<>(existingKey, newPasswordForExistingKey)
         ));
 
         // then

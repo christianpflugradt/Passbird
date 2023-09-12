@@ -5,12 +5,12 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.application.util.ByteArrayUtils;
 import de.pflugradts.passbird.application.util.SystemOperation;
+import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.password.PasswordEntry;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.NamespaceService;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
-import io.vavr.Tuple2;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -61,8 +61,8 @@ class PasswordStoreReader {
             while (!EOF.equals(ByteArrayUtils.readInt(byteArray, offset))) {
                 final var res2 =
                     passwordEntryTransformer.transform(byteArray, offset, res1._2);
-                passwordEntries.add(res2._1());
-                offset = res2._2();
+                passwordEntries.add(res2.get_1());
+                offset = res2.get_2();
             }
             return passwordEntries::stream;
         }
@@ -95,7 +95,7 @@ class PasswordStoreReader {
         }
     }
 
-    private Tuple2<Integer, Boolean> populateNamespaces(final byte[] bytes, final int offset) {
+    private Tuple<Integer, Boolean> populateNamespaces(final byte[] bytes, final int offset) {
         var incrementedOffset = offset;
         var legacyMode = true;
         if (SECTOR.equals(ByteArrayUtils.readInt(bytes, incrementedOffset))) {
@@ -109,7 +109,7 @@ class PasswordStoreReader {
             namespaceService.populate(namespaceBytes);
             legacyMode = false;
         }
-        return new Tuple2<>(incrementedOffset, legacyMode);
+        return new Tuple<>(incrementedOffset, legacyMode);
     }
 
     private Path getFilePath() {

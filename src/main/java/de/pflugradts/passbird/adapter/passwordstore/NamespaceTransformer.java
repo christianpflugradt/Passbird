@@ -2,11 +2,11 @@ package de.pflugradts.passbird.adapter.passwordstore;
 
 import com.google.inject.Inject;
 import de.pflugradts.passbird.application.util.ByteArrayUtils;
+import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.namespace.Namespace;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.NamespaceService;
-import io.vavr.Tuple2;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -33,7 +33,7 @@ class NamespaceTransformer {
         return bytes;
     }
 
-    Tuple2<Bytes, Integer> transform(final byte[] bytes, final int offset) {
+    Tuple<Bytes, Integer> transform(final byte[] bytes, final int offset) {
         var incrementedOffset = offset;
         final int namespaceSize = ByteArrayUtils.readInt(bytes, incrementedOffset);
         incrementedOffset += BYTES;
@@ -45,7 +45,7 @@ class NamespaceTransformer {
         } else {
             result = Bytes.emptyBytes();
         }
-        return new Tuple2<>(result, incrementedOffset - offset);
+        return new Tuple<>(result, incrementedOffset - offset);
     }
 
 }

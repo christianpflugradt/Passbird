@@ -1,18 +1,21 @@
 package de.pflugradts.passbird.application;
 
 import de.pflugradts.passbird.application.exchange.ExchangeFactory;
+import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.password.PasswordEntry;
-import io.vavr.Tuple2;
-import io.vavr.control.Try;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import java.util.stream.Stream;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -55,17 +58,15 @@ public class ExchangeAdapterPortFaker {
     }
 
     public ExchangeAdapterPort fake() {
-        given(exchangeAdapterPort.send(any())).willReturn(Objects.nonNull(sendFailure)
-                ? Try.failure(sendFailure)
-                : Try.success(null));
+        doNothing().when(exchangeAdapterPort).send(any());
 
         given(exchangeAdapterPort.receive()).willReturn(Objects.nonNull(receiveFailure)
-                ? Try.failure(receiveFailure)
-                : Try.of(() -> passwordEntries
+                ? Stream.empty()
+                : passwordEntries
                         .stream()
-                        .map(passwordEntry -> new Tuple2<>(
+                        .map(passwordEntry -> new Tuple<>(
                                 passwordEntry.viewKey(),
-                                passwordEntry.viewPassword()))));
+                                passwordEntry.viewPassword())));
         return exchangeAdapterPort;
     }
 

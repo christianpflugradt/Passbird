@@ -2,8 +2,8 @@ package de.pflugradts.passbird.adapter.exchange;
 
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
 import de.pflugradts.passbird.application.util.SystemOperation;
+import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import io.vavr.Tuple2;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,17 +41,16 @@ class FilePasswordExchangeTestIT {
     @Test
     void shouldUseFileSystem_Roundtrip() {
         // given
-        final var givenPasswordEntry1 = new Tuple2<>(Bytes.bytesOf("key1"), Bytes.bytesOf("password1"));
-        final var givenPasswordEntry2 = new Tuple2<>(Bytes.bytesOf("key2"), Bytes.bytesOf("password2"));
-        final var givenPasswordEntry3 = new Tuple2<>(Bytes.bytesOf("key3"), Bytes.bytesOf("password3"));
+        final var givenPasswordEntry1 = new Tuple<>(Bytes.bytesOf("key1"), Bytes.bytesOf("password1"));
+        final var givenPasswordEntry2 = new Tuple<>(Bytes.bytesOf("key2"), Bytes.bytesOf("password2"));
+        final var givenPasswordEntry3 = new Tuple<>(Bytes.bytesOf("key3"), Bytes.bytesOf("password3"));
 
         // when
         filePasswordExchange.send(Stream.of(givenPasswordEntry1, givenPasswordEntry2, givenPasswordEntry3));
         final var actual = filePasswordExchange.receive();
 
         // then
-        assertThat(actual.isSuccess()).isTrue();
-        assertThat(actual.get()).containsExactlyInAnyOrder(
+        assertThat(actual).containsExactlyInAnyOrder(
                 givenPasswordEntry1,
                 givenPasswordEntry2,
                 givenPasswordEntry3);

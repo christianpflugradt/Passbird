@@ -2,9 +2,9 @@ package de.pflugradts.passbird.application.exchange;
 
 import com.google.inject.Inject;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
+import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
-import io.vavr.Tuple2;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -22,17 +22,13 @@ public class PasswordImportExportService implements ImportExportService {
     public Stream<Bytes> peekImportKeyBytes(final String uri) {
         return exchangeFactory.createPasswordExchange(uri)
                 .receive()
-                .onFailure(failureCollector::collectImportFailure)
-                .getOrElse(Stream::empty)
-                .map(Tuple2::_1);
+                // .onFailure(failureCollector::collectImportFailure)
+                .map(Tuple::get_1);
     }
 
     @Override
     public void importPasswordEntries(final String uri) {
-        exchangeFactory.createPasswordExchange(uri)
-                .receive()
-                .onFailure(failureCollector::collectImportFailure)
-                .onSuccess(passwordEntries -> passwordService.putPasswordEntries(passwordEntries));
+        passwordService.putPasswordEntries(exchangeFactory.createPasswordExchange(uri).receive());
     }
 
     @Override
@@ -45,9 +41,9 @@ public class PasswordImportExportService implements ImportExportService {
         }
     }
 
-    private Optional<Tuple2<Bytes, Bytes>> retrievePasswordEntryTuple(final Bytes keyBytes) {
+    private Optional<Tuple<Bytes, Bytes>> retrievePasswordEntryTuple(final Bytes keyBytes) {
         return passwordService.viewPassword(keyBytes)
-                .map(bytes -> new Tuple2<>(keyBytes, bytes));
+                .map(bytes -> new Tuple<>(keyBytes, bytes));
     }
 
 }

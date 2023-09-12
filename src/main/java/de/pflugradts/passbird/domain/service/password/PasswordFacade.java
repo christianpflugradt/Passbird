@@ -1,10 +1,9 @@
 package de.pflugradts.passbird.domain.service.password;
 
 import com.google.inject.Inject;
+import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import io.vavr.Tuple2;
-import io.vavr.control.Try;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -53,7 +52,7 @@ public class PasswordFacade implements PasswordService {
     }
 
     @Override
-    public void putPasswordEntries(final Stream<Tuple2<Bytes, Bytes>> passwordEntries) {
+    public void putPasswordEntries(final Stream<Tuple<Bytes, Bytes>> passwordEntries) {
         putPasswordService.putPasswordEntries(passwordEntries);
     }
 
