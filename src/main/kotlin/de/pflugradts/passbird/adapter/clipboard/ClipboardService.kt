@@ -4,7 +4,6 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.application.failurehandling.logError
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Output
 
@@ -17,7 +16,7 @@ class ClipboardService @Inject constructor(
     private var cleanerThread: Thread? = null
     override fun post(output: Output) {
         cleanerThread?.interrupt()
-        runCatching { systemOperation.copyToClipboard(output.bytes.asString()) }.onFailure { logError(it) }
+        systemOperation.copyToClipboard(output.bytes.asString())
         scheduleCleaner()
     }
 
