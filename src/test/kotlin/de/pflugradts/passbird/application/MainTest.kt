@@ -24,9 +24,7 @@ internal class MainTest {
     }
 
     @AfterEach
-    fun cleanup() {
-        unmockkAll()
-    }
+    fun cleanup() { unmockkAll() }
 
     @Test
     fun `should set system property and boot launcher`() {
