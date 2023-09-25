@@ -1,9 +1,7 @@
 package de.pflugradts.passbird.domain.model.namespace;
 
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import lombok.Getter;
 
-@Getter
 public class Namespace {
 
     public static final Namespace DEFAULT = new Namespace(Bytes.bytesOf("Default"), NamespaceSlot.DEFAULT);
@@ -14,6 +12,14 @@ public class Namespace {
     private Namespace(final Bytes bytes, final NamespaceSlot namespaceSlot) {
         this.bytes = bytes.copy();
         this.slot = namespaceSlot;
+    }
+
+    public Bytes getBytes() {
+        return bytes;
+    }
+
+    public NamespaceSlot getSlot() {
+        return slot;
     }
 
     static Namespace create(final Bytes bytes, final NamespaceSlot namespaceSlot) {
