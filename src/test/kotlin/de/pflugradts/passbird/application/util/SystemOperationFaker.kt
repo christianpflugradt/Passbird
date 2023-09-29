@@ -18,4 +18,5 @@ fun fakeSystemOperation(
     every { instance.readPasswordFromConsole() } returns withPasswordFromConsole
     if (withKeyStoreUnavailable) every { instance.jceksInstance } throws KeyStoreException()
     withPaths.forEach { every { instance.getPath(it.first) } returns it.second }
+    every { instance.exit() } returns Unit
 }

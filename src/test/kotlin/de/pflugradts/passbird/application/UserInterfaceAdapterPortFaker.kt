@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 fun fakeUserInterfaceAdapterPort(
     instance: UserInterfaceAdapterPort,
+    withReceiveConfirmation: Boolean = false,
     withTheseInputs: List<Input> = emptyList(),
     withTheseSecureInputs: List<Input> = emptyList(),
 ) {
@@ -16,6 +17,7 @@ fun fakeUserInterfaceAdapterPort(
     val secureInputCount = AtomicInteger(0)
     every { instance.receiveSecurely() } answers { withTheseSecureInputs[secureInputCount.getAndIncrement()] }
     every { instance.receiveSecurely(any(Output::class)) } answers { withTheseSecureInputs[secureInputCount.getAndIncrement()] }
+    every { instance.receiveConfirmation(any(Output::class)) } returns withReceiveConfirmation
     every { instance.send(any()) } returns Unit
     every { instance.sendLineBreak() } returns Unit
 }

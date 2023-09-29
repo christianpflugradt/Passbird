@@ -11,8 +11,10 @@ fun fakeConfiguration(
     instance: Configuration,
     withClipboardResetEnabled: Boolean = false,
     withClipboardResetDelaySeconds: Int = 0,
-    withSecureInputEnabled: Boolean = true,
+    withConfigurationTemplate: Boolean = false,
     withKeyStoreLocation: String = "",
+    withPasswordStoreLocation: String = "",
+    withSecureInputEnabled: Boolean = true,
 ) {
     val clipboardReset = mockk<ClipboardReset>()
     every { clipboardReset.isEnabled } returns withClipboardResetEnabled
@@ -23,9 +25,13 @@ fun fakeConfiguration(
     every { userInterface.isSecureInput } returns withSecureInputEnabled
     val keyStore = mockk<Configuration.KeyStore>()
     every { keyStore.location } returns withKeyStoreLocation
+    val passwordStore = mockk<Configuration.PasswordStore>()
+    every { passwordStore.location } returns withPasswordStoreLocation
     val adapter = mockk<Adapter>()
     every { adapter.clipboard } returns clipboard
     every { adapter.userInterface } returns userInterface
     every { adapter.keyStore } returns keyStore
+    every { adapter.passwordStore } returns passwordStore
     every { instance.adapter } returns adapter
+    every { instance.isTemplate } returns withConfigurationTemplate
 }
