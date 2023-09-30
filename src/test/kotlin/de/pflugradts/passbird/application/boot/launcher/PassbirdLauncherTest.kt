@@ -9,7 +9,6 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.UpdatableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
-import de.pflugradts.passbird.application.license.LicenseManager
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
@@ -30,10 +29,8 @@ internal class PassbirdLauncherTest {
     private val configuration = mockk<Configuration>(relaxed = true)
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val systemOperation = mockk<SystemOperation>()
-    private val licenseManager = mockk<LicenseManager>(relaxed = true)
-    private val passbirdLauncher = PassbirdLauncher(configuration, userInterfaceAdapterPort, systemOperation, licenseManager)
-
-    val moduleSlot = slot<Module>()
+    private val passbirdLauncher = PassbirdLauncher(configuration, userInterfaceAdapterPort, systemOperation)
+    private val moduleSlot = slot<Module>()
 
     @BeforeEach
     fun setup() {

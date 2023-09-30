@@ -7,7 +7,6 @@ import de.pflugradts.passbird.application.boot.bootModule
 import de.pflugradts.passbird.application.boot.main.ApplicationModule
 import de.pflugradts.passbird.application.boot.setup.SetupModule
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.application.license.LicenseManager
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -21,7 +20,6 @@ class PassbirdLauncher @Inject constructor(
     @Inject private val configuration: ReadableConfiguration,
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     @Inject private val systemOperation: SystemOperation,
-    @Inject private val licenseManager: LicenseManager,
 ) : Bootable {
 
     private val keyStoreLocation get() = configuration.getAdapter().getKeyStore().getLocation()
@@ -29,7 +27,6 @@ class PassbirdLauncher @Inject constructor(
     override fun boot() {
         sendLicenseNotice()
         sendBanner()
-        if (configuration.getApplication().isVerifyLicenseFilesExist()) { licenseManager.verifyLicenseFilesExist() }
         bootModule(if (keystoreExists()) ApplicationModule() else SetupModule())
     }
 

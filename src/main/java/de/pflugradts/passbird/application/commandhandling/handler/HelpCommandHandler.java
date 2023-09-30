@@ -4,14 +4,9 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.HelpCommand;
-import de.pflugradts.passbird.application.license.LicenseManager;
 import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
-import java.io.File;
-import java.nio.file.Path;
-import static de.pflugradts.passbird.application.license.LicenseManager.LICENSE_FILENAME;
-import static de.pflugradts.passbird.application.license.LicenseManager.THIRD_PARTY_LICENSES_FILENAME;
 
 public class HelpCommandHandler implements CommandHandler {
 
@@ -19,18 +14,10 @@ public class HelpCommandHandler implements CommandHandler {
     private SystemOperation systemOperation;
     @Inject
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
-    @Inject
-    private LicenseManager licenseManager;
 
     @Subscribe
     private void handleHelpCommand(final HelpCommand helpCommand) {
-        if (helpCommand.getArgument().equals(Bytes.bytesOf("license"))) {
-            openLicense();
-        } else if (helpCommand.getArgument().equals(Bytes.bytesOf("thirdparty"))) {
-            openDependencyReport();
-        } else {
-            printUsage();
-        }
+        printUsage();
     }
 
     private void printUsage() {
@@ -53,29 +40,7 @@ public class HelpCommandHandler implements CommandHandler {
                         + "\tn (namespaces) view available namespaces and print namespace specific help%n"
                         + "\th (help) non parameterized, prints this help%n"
                         + "\tq (quit) quits pwman3 applicationImpl%n%n"
-                        + "\ttype 'hlicense' to view license for PwMan3%n"
-                        + "\ttype 'hthirdparty' to view a list of 3rd party libraries and their licenses"
         ))));
-        userInterfaceAdapterPort.sendLineBreak();
-    }
-
-    private void openLicense() {
-        openResource(LICENSE_FILENAME, "If you are not seeing the license, "
-                + "please open the following file with a text editor of your choice: %s");
-    }
-
-    private void openDependencyReport() {
-        openResource(THIRD_PARTY_LICENSES_FILENAME, "If you are not seeing the 3rdparty licenses report, "
-                        + "please open the following url in your web browser of choice: %s");
-    }
-
-    private void openResource(final String resource, final String messageTemplate) {
-        final var resourceFile = new File(resource);
-        licenseManager.verifyLicenseFilesExist();
-        systemOperation.openFile(resourceFile);
-        userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(String.format(
-                messageTemplate,
-                Path.of(System.getProperty("user.dir"), resource).toString()))));
         userInterfaceAdapterPort.sendLineBreak();
     }
 
