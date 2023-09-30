@@ -90,7 +90,7 @@ internal class PassbirdLauncherTest {
     }
 
     @Test
-    fun shouldLaunchSetup_IfKeyStoreLocationIsNotSet() {
+    fun `should launch setup if key store location is not set`() {
         // given
         val keyStoreDirectoryName = ""
         fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectoryName)

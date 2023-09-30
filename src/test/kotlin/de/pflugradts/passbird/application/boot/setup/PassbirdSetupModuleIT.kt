@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
 
-internal class PassbirdSetupModuleTestIT {
+internal class PassbirdSetupModuleIT {
     @Test
     fun `should resolve all dependencies`() {
         // given / when

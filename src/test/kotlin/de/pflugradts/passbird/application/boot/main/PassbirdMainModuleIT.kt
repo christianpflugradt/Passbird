@@ -29,7 +29,7 @@ import strikt.assertions.isSameInstanceAs
 
 internal class PassbirdMainModuleIT {
     @Test
-    fun shouldResolveAllDependencies() {
+    fun `should resolve all dependencies`() {
         // given / when
         val actual = Guice.createInjector(Modules.override(ApplicationModule()).with(PassbirdTestModule()))
             .getInstance(PassbirdTestMain::class.java)
