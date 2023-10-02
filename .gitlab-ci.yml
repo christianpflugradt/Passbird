@@ -4,7 +4,6 @@ stages:
   - 🔎 check
   - ✅ test
   - 📘 report
-  - 💳 license
   - 📦 release
 
 variables:
@@ -74,13 +73,6 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
     - 🧱 architecture-tests
   artifacts:
     paths: [ build/reports/jacoco/test/html/* ]
-
-💳 licenses:
-  stage: 💳 license
-  script: ./gradlew downloadLicenses
-  artifacts:
-    paths: [ build/reports/license/* ]
-  only: [ tags ]
 
 🚀 semver:
   stage: 📦 release
