@@ -40,7 +40,7 @@ class PutPasswordService implements CommonPasswordServiceCapabilities {
 
     private void putPasswordEntryTuple(final Tuple<Bytes, Bytes> passwordEntryTuple) {
         challengeAlias(passwordEntryTuple._1);
-        final var encryptedPasswordBytes = encrypted(cryptoProvider, passwordEntryTuple.get_2());
+        final var encryptedPasswordBytes = encrypted(cryptoProvider, passwordEntryTuple._2);
         putEncryptedPasswordEntry(encrypted(cryptoProvider, passwordEntryTuple._1), encryptedPasswordBytes);
     }
 

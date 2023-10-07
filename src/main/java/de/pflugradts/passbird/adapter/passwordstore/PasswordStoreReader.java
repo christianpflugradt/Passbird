@@ -61,8 +61,8 @@ class PasswordStoreReader {
             while (!EOF.equals(ByteArrayUtils.readInt(byteArray, offset))) {
                 final var res2 =
                     passwordEntryTransformer.transform(byteArray, offset, res1._2);
-                passwordEntries.add(res2.get_1());
-                offset = res2.get_2();
+                passwordEntries.add(res2._1);
+                offset = res2._2;
             }
             return passwordEntries::stream;
         }
