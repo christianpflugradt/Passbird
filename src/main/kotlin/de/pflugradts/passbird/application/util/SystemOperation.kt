@@ -18,12 +18,14 @@ import java.security.KeyStore
 import java.util.Arrays
 import kotlin.system.exitProcess
 
+private const val JCEKS_KEYSTORE = "JCEKS"
+
 /**
  * Wraps interactions with the operating system.
  */
 class SystemOperation {
     val isConsoleAvailable: Boolean get() = System.console() != null
-    val jceksInstance: KeyStore get() = KeyStore.getInstance(CryptoUtils.JCEKS_KEYSTORE)
+    val jceksInstance: KeyStore get() = KeyStore.getInstance(JCEKS_KEYSTORE)
     val desktop: Desktop get() = Desktop.getDesktop()
 
     fun readPasswordFromConsole(): CharArray = System.console().readPassword()

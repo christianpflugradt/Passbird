@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.adapter.keystore
 
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.application.util.CryptoUtils
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
 import org.junit.jupiter.api.AfterEach
@@ -44,7 +43,7 @@ internal class KeyStoreServiceIT {
         val oneTimePasswordChars1 = charsOf(password.toCharArray())
         val oneTimePasswordChars2 = charsOf(password.toCharArray())
         val path = Paths.get(keyStoreFile!!)
-        val expectedByteArraySize = CryptoUtils.KEYSTORE_KEY_BITS / 8
+        val expectedByteArraySize = KEYSTORE_KEY_BITS / 8
         expectThat(oneTimePasswordChars1.toCharArray()) isEqualTo password.toCharArray()
         expectThat(oneTimePasswordChars2.toCharArray()) isEqualTo password.toCharArray()
 

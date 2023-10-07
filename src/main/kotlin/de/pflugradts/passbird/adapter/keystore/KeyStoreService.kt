@@ -4,7 +4,6 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.LoginResult
 import de.pflugradts.passbird.application.security.Key
-import de.pflugradts.passbird.application.util.CryptoUtils
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Chars
@@ -19,6 +18,8 @@ import javax.crypto.KeyGenerator
 
 private const val SECRET_ALIAS = "PwMan3Secret"
 private const val IV_ALIAS = "PwMan3IV"
+private const val AES_ENCRYPTION = "AES"
+internal const val KEYSTORE_KEY_BITS = 128
 
 class KeyStoreService @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
@@ -47,8 +48,8 @@ class KeyStoreService @Inject constructor(
         val keyStore = systemOperation.jceksInstance
         val passwordChars = password.toCharArray()
         keyStore.load(null, null)
-        val keyGenerator = KeyGenerator.getInstance(CryptoUtils.AES_ENCRYPTION)
-        keyGenerator.init(CryptoUtils.KEYSTORE_KEY_BITS)
+        val keyGenerator = KeyGenerator.getInstance(AES_ENCRYPTION)
+        keyGenerator.init(KEYSTORE_KEY_BITS)
         keyStore.setEntry(
             SECRET_ALIAS,
             KeyStore.SecretKeyEntry(keyGenerator.generateKey()),

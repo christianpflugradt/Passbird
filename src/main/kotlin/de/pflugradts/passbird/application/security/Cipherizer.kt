@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.application.security
 
 import de.pflugradts.passbird.application.util.ByteArrayUtils
-import de.pflugradts.passbird.application.util.CryptoUtils
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -10,25 +9,27 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
+private const val AES_CBC_PKCS5PADDING_CIPHER = "AES/CBC/PKCS5Padding"
+private const val AES_ENCRYPTION = "AES"
+private const val BLOCK_SIZE = 16
+private const val SHA512_HASH = "SHA-512"
+
 class Cipherizer internal constructor(private val keyBytes: Bytes, private val ivBytes: Bytes) : CryptoProvider {
     override fun encrypt(bytes: Bytes) = cipherize(Cipher.ENCRYPT_MODE, pack(bytes))
 
     override fun decrypt(bytes: Bytes) = unpack(cipherize(Cipher.DECRYPT_MODE, bytes))
 
     private fun cipherize(mode: Int, bytes: Bytes): Bytes {
-        val cipher = Cipher.getInstance(CryptoUtils.AES_CBC_PKCS5PADDING_CIPHER)
+        val cipher = Cipher.getInstance(AES_CBC_PKCS5PADDING_CIPHER)
         cipher.init(
             mode,
-            SecretKeySpec(
-                MessageDigest.getInstance(CryptoUtils.SHA512_HASH).digest(keyBytes.toByteArray()).copyOf(CryptoUtils.BLOCK_SIZE),
-                CryptoUtils.AES_ENCRYPTION,
-            ),
+            SecretKeySpec(MessageDigest.getInstance(SHA512_HASH).digest(keyBytes.toByteArray()).copyOf(BLOCK_SIZE), AES_ENCRYPTION),
             IvParameterSpec(ivBytes.toByteArray()),
         )
         return bytesOf(cipher.doFinal(bytes.toByteArray()))
     }
 
-    private fun calcPadding(bytes: Bytes) = CryptoUtils.BLOCK_SIZE - bytes.size % CryptoUtils.BLOCK_SIZE
+    private fun calcPadding(bytes: Bytes) = BLOCK_SIZE - bytes.size % BLOCK_SIZE
 
     private fun pack(bytes: Bytes): Bytes {
         val padding = calcPadding(bytes)
