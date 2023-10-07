@@ -1,11 +1,14 @@
 package de.pflugradts.passbird.adapter.passwordstore;
 
-import de.pflugradts.passbird.application.util.ByteArrayUtils;
 import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.password.PasswordEntry;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 
+import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.copyBytes;
+import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.copyInt;
+import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.readBytes;
+import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.readInt;
 import static java.lang.Integer.BYTES;
 
 class PasswordEntryTransformer {
@@ -15,11 +18,11 @@ class PasswordEntryTransformer {
         final var passwordSize = passwordEntry.viewPassword().getSize();
         final var metaSize = 2 * BYTES;
         final var bytes = new byte[BYTES + keySize + passwordSize + metaSize];
-        var offset = ByteArrayUtils.copyBytes(passwordEntry.associatedNamespace().index(), bytes, 0);
-        offset += ByteArrayUtils.copyBytes(keySize, bytes, offset);
-        offset += ByteArrayUtils.copyBytes(passwordEntry.viewKey(), bytes, offset, keySize);
-        offset += ByteArrayUtils.copyBytes(passwordSize, bytes, offset);
-        ByteArrayUtils.copyBytes(passwordEntry.viewPassword(), bytes, offset, passwordSize);
+        var offset = copyInt(passwordEntry.associatedNamespace().index(), bytes, 0);
+        offset += copyInt(keySize, bytes, offset);
+        offset += copyBytes(passwordEntry.viewKey().toByteArray(), bytes, offset, keySize);
+        offset += copyInt(passwordSize, bytes, offset);
+        copyBytes(passwordEntry.viewPassword().toByteArray(), bytes, offset, passwordSize);
         return bytes;
     }
 
@@ -27,15 +30,15 @@ class PasswordEntryTransformer {
         var incrementedOffset = offset;
         final int namespaceSlot = legacyMode
             ? NamespaceSlot.DEFAULT.index()
-            : ByteArrayUtils.readInt(bytes, incrementedOffset);
+            : readInt(bytes, incrementedOffset);
         incrementedOffset += legacyMode ? 0 : BYTES;
-        final int keySize = ByteArrayUtils.readInt(bytes, incrementedOffset);
+        final int keySize = readInt(bytes, incrementedOffset);
         incrementedOffset += BYTES;
-        final byte[] keyBytes = ByteArrayUtils.readBytes(bytes, incrementedOffset, keySize);
+        final byte[] keyBytes = readBytes(bytes, incrementedOffset, keySize);
         incrementedOffset += keySize;
-        final int passwordSize = ByteArrayUtils.readInt(bytes, incrementedOffset);
+        final int passwordSize = readInt(bytes, incrementedOffset);
         incrementedOffset += BYTES;
-        final byte[] passwordBytes = ByteArrayUtils.readBytes(bytes, incrementedOffset, passwordSize);
+        final byte[] passwordBytes = readBytes(bytes, incrementedOffset, passwordSize);
         incrementedOffset += passwordSize;
         return new Tuple<>(
                 PasswordEntry.create(

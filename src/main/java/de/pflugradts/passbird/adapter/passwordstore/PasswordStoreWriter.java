@@ -3,7 +3,6 @@ package de.pflugradts.passbird.adapter.passwordstore;
 import com.google.inject.Inject;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
-import de.pflugradts.passbird.application.util.ByteArrayUtils;
 import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.namespace.Namespace;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
@@ -18,11 +17,12 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static de.pflugradts.passbird.application.configuration.ReadableConfiguration.DATABASE_FILENAME;
+import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.copyBytes;
+import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.copyInt;
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.CAPACITY;
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.FIRST_NAMESPACE;
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.LAST_NAMESPACE;
@@ -54,28 +54,27 @@ class PasswordStoreWriter {
     public void sync(final Supplier<Stream<PasswordEntry>> passwordEntriesSupplier) {
         final var contentSize = calcRequiredContentSize(passwordEntriesSupplier);
         final var bytes = new byte[calcActualTotalSize(contentSize)];
-        var offset = ByteArrayUtils.copyBytes(commons.signature(), bytes, 0, commons.signatureSize());
+        var offset = copyBytes(commons.signature(), bytes, 0, commons.signatureSize());
         offset = persistNamespaces(bytes, offset);
-        for (final PasswordEntry passwordEntry : passwordEntriesSupplier.get().collect(Collectors.toList())) {
+        for (final PasswordEntry passwordEntry : passwordEntriesSupplier.get().toList()) {
             final var entryBytes = passwordEntryTransformer.transform(passwordEntry);
-            offset += ByteArrayUtils.copyBytes(entryBytes, bytes, offset, entryBytes.length);
+            offset += copyBytes(entryBytes, bytes, offset, entryBytes.length);
         }
-        offset += ByteArrayUtils.copyBytes(EOF, bytes, offset);
+        offset += copyInt(EOF, bytes, offset);
         final byte[] checksumBytes = {contentSize > 0
                 ? checksum(Arrays.copyOfRange(bytes, commons.signatureSize(), contentSize))
                 : 0x0};
-        ByteArrayUtils.copyBytes(checksumBytes, bytes, offset, commons.checksumBytes());
+        copyBytes(checksumBytes, bytes, offset, commons.checksumBytes());
         writeToDisk(Bytes.bytesOf(bytes));
     }
 
     private int persistNamespaces(final byte[] bytes, final int offset) {
         var incrementedOffset = offset;
-        ByteArrayUtils.copyBytes(SECTOR, bytes, incrementedOffset);
+        copyInt(SECTOR, bytes, incrementedOffset);
         incrementedOffset += commons.intBytes();
         for (int index = FIRST_NAMESPACE; index <= LAST_NAMESPACE; index++) {
             final var namespaceBytes = namespaceTransformer.transform(NamespaceSlot.at(index));
-            incrementedOffset += ByteArrayUtils.copyBytes(
-                namespaceBytes, bytes, incrementedOffset, namespaceBytes.length);
+            incrementedOffset += copyBytes(namespaceBytes, bytes, incrementedOffset, namespaceBytes.length);
         }
         return incrementedOffset;
     }

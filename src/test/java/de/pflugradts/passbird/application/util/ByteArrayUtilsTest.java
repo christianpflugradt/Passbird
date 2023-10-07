@@ -1,6 +1,10 @@
 package de.pflugradts.passbird.application.util;
 
 import org.junit.jupiter.api.Test;
+
+import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.copyBytes;
+import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.readBytes;
+import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.readInt;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ByteArrayUtilsTest {
@@ -13,7 +17,7 @@ class ByteArrayUtilsTest {
         final var expectedInt = 16909060;
 
         // when
-        final var actual = ByteArrayUtils.readInt(givenByteArray, givenOffset);
+        final var actual = readInt(givenByteArray, givenOffset);
 
         // then
         assertThat(actual).isEqualTo(expectedInt);
@@ -27,7 +31,7 @@ class ByteArrayUtilsTest {
         final var expectedInt = 67438087;
 
         // when
-        final var actual = ByteArrayUtils.readInt(givenByteArray, givenOffset);
+        final var actual = readInt(givenByteArray, givenOffset);
 
         // then
         assertThat(actual).isEqualTo(expectedInt);
@@ -42,7 +46,7 @@ class ByteArrayUtilsTest {
         final var expectedBytes = new byte[]{1, 2, 3, 4};
 
         // when
-        final var actual = ByteArrayUtils.readBytes(givenByteArray, givenOffset, givenSize);
+        final var actual = readBytes(givenByteArray, givenOffset, givenSize);
 
         // then
         assertThat(actual).isEqualTo(expectedBytes);
@@ -57,7 +61,7 @@ class ByteArrayUtilsTest {
         final var expectedBytes = new byte[]{6, 7, 8};
 
         // when
-        final var actual = ByteArrayUtils.readBytes(givenByteArray, givenOffset, givenSize);
+        final var actual = readBytes(givenByteArray, givenOffset, givenSize);
 
         // then
         assertThat(actual).isEqualTo(expectedBytes);
@@ -73,7 +77,7 @@ class ByteArrayUtilsTest {
         final var expectedTargetByteArray = new byte[]{0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0};
 
         // when
-        final var actual = ByteArrayUtils.copyBytes(givenSourceByteArray, givenTargetByteArray, offset, size);
+        final var actual = copyBytes(givenSourceByteArray, givenTargetByteArray, offset, size);
 
         // then
         assertThat(actual).isEqualTo(size);

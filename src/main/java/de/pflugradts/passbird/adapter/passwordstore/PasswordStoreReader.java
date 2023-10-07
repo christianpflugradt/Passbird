@@ -3,7 +3,6 @@ package de.pflugradts.passbird.adapter.passwordstore;
 import com.google.inject.Inject;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
-import de.pflugradts.passbird.application.util.ByteArrayUtils;
 import de.pflugradts.passbird.application.util.SystemOperation;
 import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
@@ -26,6 +25,8 @@ import java.util.stream.Stream;
 import static de.pflugradts.passbird.adapter.passwordstore.PasswordStoreCommons.EOF;
 import static de.pflugradts.passbird.adapter.passwordstore.PasswordStoreCommons.SECTOR;
 import static de.pflugradts.passbird.application.configuration.ReadableConfiguration.DATABASE_FILENAME;
+import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.copyBytes;
+import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.readInt;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -58,7 +59,7 @@ class PasswordStoreReader {
             int offset = commons.signatureSize();
             final var res1 = populateNamespaces(byteArray, offset);
             offset = res1._1;
-            while (!EOF.equals(ByteArrayUtils.readInt(byteArray, offset))) {
+            while (!EOF.equals(readInt(byteArray, offset))) {
                 final var res2 =
                     passwordEntryTransformer.transform(byteArray, offset, res1._2);
                 passwordEntries.add(res2._1);
@@ -78,7 +79,7 @@ class PasswordStoreReader {
     private void verifySignature(final byte[] bytes) {
         final byte[] expectedSignature = commons.signature();
         final byte[] actualSignature = new byte[commons.signatureSize()];
-        ByteArrayUtils.copyBytes(Bytes.bytesOf(bytes), actualSignature, 0);
+        copyBytes(Bytes.bytesOf(bytes).toByteArray(), actualSignature, 0, commons.signatureSize());
         if (!Arrays.equals(expectedSignature, actualSignature)) {
             failureCollector.collectSignatureCheckFailure(Bytes.bytesOf(actualSignature));
         }
@@ -98,7 +99,7 @@ class PasswordStoreReader {
     private Tuple<Integer, Boolean> populateNamespaces(final byte[] bytes, final int offset) {
         var incrementedOffset = offset;
         var legacyMode = true;
-        if (SECTOR.equals(ByteArrayUtils.readInt(bytes, incrementedOffset))) {
+        if (SECTOR.equals(readInt(bytes, incrementedOffset))) {
             incrementedOffset += commons.intBytes();
             final List<Bytes> namespaceBytes = new ArrayList<>();
             for (int i = 0; i < NamespaceSlot.CAPACITY; i++) {
