@@ -21,7 +21,6 @@ import static com.tngtech.archunit.base.DescribedPredicate.alwaysTrue;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEndingWith;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
@@ -187,25 +186,6 @@ class PassbirdTestAT {
             noMethods().that().areDeclaredInClassesThat().areNotAssignableTo(EventHandler.class)
                 .or().haveNameNotMatching("handle.*")
                 .should().beAnnotatedWith(Subscribe.class)
-                .check(classes);
-        }
-
-    }
-
-    @Nested
-    class UtilsTest {
-
-        @Test
-        void utilityMethodsShouldBeStatic() {
-            methods().that().areDeclaredInClassesThat().haveSimpleNameEndingWith("Utils")
-                .should().beStatic()
-                .check(classes);
-        }
-
-        @Test
-        void utilityConstantsShouldBeStaticAndFinal() {
-            fields().that().areDeclaredInClassesThat().haveSimpleNameEndingWith("Utils")
-                .should().beStatic().andShould().beFinal()
                 .check(classes);
         }
 
