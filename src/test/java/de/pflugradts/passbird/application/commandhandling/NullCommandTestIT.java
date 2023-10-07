@@ -19,7 +19,7 @@ import static org.mockito.BDDMockito.then;
 class NullCommandTestIT {
 
     @Spy
-    private final CommandBus commandBus = new CommandBus(null, Collections.emptySet());
+    private final CommandBus commandBus = new CommandBus(Collections.emptySet());
 
     private InputHandler inputHandler;
 

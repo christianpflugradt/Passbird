@@ -16,7 +16,7 @@ class InputHandlerTestFactory {
 
     static InputHandler setupInputHandlerFor(final CommandHandler commandHandler) {
         return new InputHandler(
-            new CommandBus(null, Set.of(commandHandler)),
+            new CommandBus(Set.of(commandHandler)),
             new CommandFactory(new NamespaceCommandFactory()));
     }
 
