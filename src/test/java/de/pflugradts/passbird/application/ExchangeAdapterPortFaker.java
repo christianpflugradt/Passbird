@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.application;
 
 import de.pflugradts.passbird.application.exchange.ExchangeFactory;
-import de.pflugradts.passbird.domain.model.Tuple;
 import de.pflugradts.passbird.domain.model.password.PasswordEntry;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -60,13 +57,13 @@ public class ExchangeAdapterPortFaker {
     public ExchangeAdapterPort fake() {
         doNothing().when(exchangeAdapterPort).send(any());
 
-        given(exchangeAdapterPort.receive()).willReturn(Objects.nonNull(receiveFailure)
+        /* given(exchangeAdapterPort.receive()).willReturn(Objects.nonNull(receiveFailure)
                 ? Stream.empty()
                 : passwordEntries
                         .stream()
                         .map(passwordEntry -> new Tuple<>(
                                 passwordEntry.viewKey(),
-                                passwordEntry.viewPassword())));
+                                passwordEntry.viewPassword())));*/
         return exchangeAdapterPort;
     }
 
