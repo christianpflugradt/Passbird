@@ -18,7 +18,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isTrue
 
-internal class PassbirdApplicationTest {
+class PassbirdApplicationTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>()
     private val namespaceServiceFake = spyk<NamespaceService>(NamespaceServiceFake())

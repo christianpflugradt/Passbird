@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
-internal class OutputTest {
+class OutputTest {
     @Nested
-    internal inner class InstantiationTest {
+    inner class InstantiationTest {
         @Test
         fun `should have bytes`() {
             // given

@@ -20,14 +20,14 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 
-internal class CommandLineInterfaceServiceTest {
+class CommandLineInterfaceServiceTest {
 
     private val systemOperation = mockk<SystemOperation>()
     private val configuration = mockk<Configuration>()
     private val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration)
 
     @Nested
-    internal inner class SendTest {
+    inner class SendTest {
         @Test
         fun `should send output`() {
             // given
@@ -69,7 +69,7 @@ internal class CommandLineInterfaceServiceTest {
     }
 
     @Nested
-    internal inner class ReceiveTest {
+    inner class ReceiveTest {
         @Test
         fun `should receive input`() {
             // given
@@ -111,7 +111,7 @@ internal class CommandLineInterfaceServiceTest {
     }
 
     @Nested
-    internal inner class ReceiveSecurelyTest {
+    inner class ReceiveSecurelyTest {
         @Test
         fun `should receive input securely`() {
             // given
@@ -211,7 +211,7 @@ internal class CommandLineInterfaceServiceTest {
     }
 
     @Nested
-    internal inner class ReceiveConfirmationTest {
+    inner class ReceiveConfirmationTest {
         @Test
         fun `should return true on input c`() {
             // given

@@ -14,7 +14,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNullOrEmpty
 
-internal class MainTest {
+class MainTest {
 
     @BeforeEach
     fun setup() {

@@ -14,7 +14,7 @@ private const val AES_ENCRYPTION = "AES"
 private const val BLOCK_SIZE = 16
 private const val SHA512_HASH = "SHA-512"
 
-class Cipherizer internal constructor(private val keyBytes: Bytes, private val ivBytes: Bytes) : CryptoProvider {
+class Cipherizer(private val keyBytes: Bytes, private val ivBytes: Bytes) : CryptoProvider {
     override fun encrypt(bytes: Bytes) = cipherize(Cipher.ENCRYPT_MODE, pack(bytes))
 
     override fun decrypt(bytes: Bytes) = unpack(cipherize(Cipher.DECRYPT_MODE, bytes))

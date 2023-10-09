@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.TimeUnit
 
-internal class ClipboardServiceTest {
+class ClipboardServiceTest {
 
     private val systemOperation = mockk<SystemOperation>()
     private val configuration = mockk<Configuration>()

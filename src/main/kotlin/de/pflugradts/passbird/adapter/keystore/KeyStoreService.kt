@@ -19,7 +19,7 @@ import javax.crypto.KeyGenerator
 private const val SECRET_ALIAS = "PwMan3Secret"
 private const val IV_ALIAS = "PwMan3IV"
 private const val AES_ENCRYPTION = "AES"
-internal const val KEYSTORE_KEY_BITS = 128
+const val KEYSTORE_KEY_BITS = 128
 
 class KeyStoreService @Inject constructor(
     @Inject private val systemOperation: SystemOperation,

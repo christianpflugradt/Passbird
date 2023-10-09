@@ -16,7 +16,7 @@ import java.io.File
 import java.nio.file.Paths
 import java.util.UUID
 
-internal class KeyStoreServiceIT {
+class KeyStoreServiceIT {
 
     private var keyStoreService: KeyStoreService? = null
     private var tempKeyStoreDirectory: String? = null

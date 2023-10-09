@@ -34,7 +34,7 @@ import strikt.java.exists
 import java.io.File
 import java.util.UUID
 
-internal class PasswordStoreFacadeIT {
+class PasswordStoreFacadeIT {
 
     private val configuration = mockk<Configuration>()
     private val cryptoProvider = mockk<CryptoProvider>()

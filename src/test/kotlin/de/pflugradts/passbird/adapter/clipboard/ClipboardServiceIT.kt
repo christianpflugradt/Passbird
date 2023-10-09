@@ -17,7 +17,7 @@ import java.awt.datatransfer.DataFlavor
 import java.util.concurrent.TimeUnit
 
 @Disabled
-internal class ClipboardServiceIT {
+class ClipboardServiceIT {
 
     private val systemOperation = SystemOperation()
     private val configuration = mockk<Configuration>()

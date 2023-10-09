@@ -26,7 +26,7 @@ import kotlin.io.path.name
 
 private const val VALID_DIRECTORY = "tmp"
 
-internal class PassbirdSetupTest {
+class PassbirdSetupTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>()
     private val setupGuide = spyk(SetupGuide(userInterfaceAdapterPort))
     private val configurationSync = mockk<ConfigurationSync>()

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
-internal class CipherizerTest {
+class CipherizerTest {
 
     private val secretBytes = bytesOf(byteArrayOf(97, -87, -65, -105, -48, -75, 65, -72, 67, -25, -88, -123, -28, 42, -61, 39))
     private val ivBytes = bytesOf(byteArrayOf(-93, -95, 112, -58, -16, -60, 90, 0, 60, 33, 24, -111, -40, 39, 87, -66))

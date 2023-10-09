@@ -14,7 +14,7 @@ import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
 import de.pflugradts.passbird.domain.service.password.storage.PasswordStoreAdapterPort
 
-internal class PassbirdTestMain @Inject constructor(
+class PassbirdTestMain @Inject constructor(
     @Inject val bootable: Bootable,
     @Inject val clipboardAdapterPort: ClipboardAdapterPort,
     @Inject val eventRegistry: EventRegistry,

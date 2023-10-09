@@ -17,7 +17,7 @@ class LauncherModule : AbstractModule() {
         bind(UserInterfaceAdapterPort::class.java).to(CommandLineInterfaceService::class.java)
     }
 
-    internal class ConfigurationDependencyProvider @Inject constructor(
+    class ConfigurationDependencyProvider @Inject constructor(
         @Inject private val configurationFactory: ConfigurationFactory,
     ) : Provider<ReadableConfiguration> {
         override fun get(): ReadableConfiguration = configurationFactory.loadConfiguration()

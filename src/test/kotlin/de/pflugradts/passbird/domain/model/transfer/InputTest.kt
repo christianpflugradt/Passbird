@@ -23,7 +23,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isTrue
 
-internal class InputTest {
+class InputTest {
     @Test
     fun `should get command`() {
         // given
@@ -91,7 +91,7 @@ internal class InputTest {
     }
 
     @Nested
-    internal inner class InstantiationTest {
+    inner class InstantiationTest {
         @Test
         fun `should have bytes`() {
             // given
@@ -113,7 +113,7 @@ internal class InputTest {
     }
 
     @Nested
-    internal inner class ParseNamespeTest {
+    inner class ParseNamespeTest {
         @Test
         fun `should parse default namespace`() {
             // given

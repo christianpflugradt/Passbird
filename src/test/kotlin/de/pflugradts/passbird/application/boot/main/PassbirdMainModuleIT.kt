@@ -27,7 +27,7 @@ import strikt.api.expectThat
 import strikt.assertions.isA
 import strikt.assertions.isSameInstanceAs
 
-internal class PassbirdMainModuleIT {
+class PassbirdMainModuleIT {
     @Test
     fun `should resolve all dependencies`() {
         // given / when
@@ -65,7 +65,7 @@ internal class PassbirdMainModuleIT {
         }
     }
 
-    internal class PassbirdTestModule : AbstractModule() {
+    class PassbirdTestModule : AbstractModule() {
         public override fun configure() { bind(CryptoProvider::class.java).toInstance(Mockito.mock(CryptoProvider::class.java)) }
     }
 }

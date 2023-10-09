@@ -52,7 +52,7 @@ class FilePasswordExchange @Inject constructor(
     }
 }
 
-internal data class PasswordEntryRepresentation(var key: String? = null, var password: String? = null) {
+data class PasswordEntryRepresentation(var key: String? = null, var password: String? = null) {
     fun asBytesPair() = if (key.isNullOrBlank() || password.isNullOrBlank()) {
         BytePair(Pair(emptyBytes(), emptyBytes()))
     } else {
@@ -60,8 +60,8 @@ internal data class PasswordEntryRepresentation(var key: String? = null, var pas
     }
 }
 
-internal data class PasswordEntriesRepresentation(
+data class PasswordEntriesRepresentation(
     @JsonProperty("passwordEntry") val passwordEntryRepresentations: List<PasswordEntryRepresentation>? = null,
 )
 
-internal fun BytePair.asPasswordEntryRepresentation() = PasswordEntryRepresentation(value.first.asString(), value.second.asString())
+fun BytePair.asPasswordEntryRepresentation() = PasswordEntryRepresentation(value.first.asString(), value.second.asString())

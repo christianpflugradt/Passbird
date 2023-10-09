@@ -12,7 +12,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.KeyStoreException
 
-internal class KeyStoreServiceTest {
+class KeyStoreServiceTest {
 
     private val systemOperation = mockk<SystemOperation>()
     private val keyStoreService = KeyStoreService(systemOperation)

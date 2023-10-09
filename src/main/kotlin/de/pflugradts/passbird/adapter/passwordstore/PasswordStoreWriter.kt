@@ -19,7 +19,7 @@ private const val EOF = 0
 private const val SECTOR = -1
 private const val EMPTY_NAMESPACE = -2
 
-internal class PasswordStoreWriter @Inject constructor(
+class PasswordStoreWriter @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
     @Inject private val configuration: ReadableConfiguration,
     @Inject private val namespaceService: NamespaceService,

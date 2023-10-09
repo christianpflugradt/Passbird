@@ -8,7 +8,7 @@ import java.util.function.Supplier
 import java.util.stream.Stream
 
 @Singleton
-internal class PasswordStoreFacade @Inject constructor(
+class PasswordStoreFacade @Inject constructor(
     @Inject val passwordStoreReader: PasswordStoreReader,
     @Inject val passwordStoreWriter: PasswordStoreWriter,
 ) : PasswordStoreAdapterPort {

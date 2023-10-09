@@ -35,7 +35,7 @@ private const val KEYSTORE_ADAPTER = "keystore"
 private const val PASSWORDSTORE_ADAPTER = "passwordstore"
 private const val USERINTERFACE_ADAPTER = "userinterface"
 
-internal class PassbirdAT {
+class PassbirdAT {
     private var classes = ClassFileImporter().withImportOption(DoNotIncludeTests()).importPackages(ROOT)
     private fun path(vararg segments: String) = "${segments.joinToString(".")}.."
 
@@ -55,7 +55,7 @@ internal class PassbirdAT {
     }
 
     @Nested
-    internal inner class AdapterTest {
+    inner class AdapterTest {
         @Test
         fun adapterPortImplementationsShouldBeInAdapterPackages() {
             classes().that()
@@ -72,7 +72,7 @@ internal class PassbirdAT {
     }
 
     @Nested
-    internal inner class RepositoryAccessTest {
+    inner class RepositoryAccessTest {
         @Test
         fun repositoriesShouldOnlyBeAccessedFromApplicationAndDomainLayer() {
             classes().that().areAssignableTo(Repository::class.java)
@@ -90,7 +90,7 @@ internal class PassbirdAT {
     }
 
     @Nested
-    internal inner class DomainModelTest {
+    inner class DomainModelTest {
         @Test
         fun dddPackageShouldOnlyContainInterfaces() {
             classes().that().resideInAPackage(path(DOMAIN_MODELS, "ddd"))
@@ -142,7 +142,7 @@ internal class PassbirdAT {
     }
 
     @Nested
-    internal inner class EventHandlerTest {
+    inner class EventHandlerTest {
         @Test
         fun eventHandlersShouldNotHavePublicMethods() {
             noMethods().that().areDeclaredInClassesThat().areAssignableTo(EventHandler::class.java).should().bePublic().check(classes)
@@ -166,7 +166,7 @@ internal class PassbirdAT {
     }
 
     @Nested
-    internal inner class NamingTest {
+    inner class NamingTest {
         @Test
         fun noClassesMayHaveNameEndingWithImpl() {
             noClasses().should().haveSimpleNameEndingWith("Impl").check(classes)

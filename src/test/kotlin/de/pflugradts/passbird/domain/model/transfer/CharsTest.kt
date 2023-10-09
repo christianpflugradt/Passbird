@@ -7,7 +7,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
 
-internal class CharsTest {
+class CharsTest {
     @Test
     fun `should convert to bytes`() {
         // given

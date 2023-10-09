@@ -13,7 +13,7 @@ import de.pflugradts.passbird.domain.model.transfer.Input.Companion.emptyInput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import java.nio.file.Paths
 
-internal class PassbirdSetup @Inject constructor(
+class PassbirdSetup @Inject constructor(
     @Inject private val setupGuide: SetupGuide,
     @Inject private val configurationSync: ConfigurationSync,
     @Inject private val configuration: ReadableConfiguration,

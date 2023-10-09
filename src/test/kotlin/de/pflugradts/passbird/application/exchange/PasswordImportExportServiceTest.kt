@@ -20,7 +20,7 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isTrue
 import java.util.stream.Stream
 
-internal class PasswordImportExportServiceTest {
+class PasswordImportExportServiceTest {
 
     private val exchangeFactory = mockk<ExchangeFactory>()
     private val passwordService = mockk<PasswordService>()

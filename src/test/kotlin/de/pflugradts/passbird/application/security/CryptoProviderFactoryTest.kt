@@ -23,7 +23,7 @@ import strikt.api.expectThat
 import strikt.assertions.isA
 import java.nio.file.Path
 
-internal class CryptoProviderFactoryTest {
+class CryptoProviderFactoryTest {
 
     private val application = mockk<Bootable>()
     private val configuration = mockk<Configuration>()

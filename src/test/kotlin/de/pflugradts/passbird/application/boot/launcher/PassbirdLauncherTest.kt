@@ -24,7 +24,7 @@ import strikt.api.expectThat
 import strikt.assertions.isA
 import strikt.assertions.isTrue
 
-internal class PassbirdLauncherTest {
+class PassbirdLauncherTest {
 
     private val configuration = mockk<Configuration>(relaxed = true)
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)

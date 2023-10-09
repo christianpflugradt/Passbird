@@ -16,7 +16,7 @@ import strikt.assertions.isNotSameInstanceAs
 import strikt.assertions.isTrue
 import java.util.Collections
 
-internal class BytesTest {
+class BytesTest {
 
     @Test
     fun test() {
@@ -130,7 +130,7 @@ internal class BytesTest {
     }
 
     @Nested
-    internal inner class InstantiationTest {
+    inner class InstantiationTest {
         @Test
         fun `should instantiate from byte array`() {
             // given
@@ -207,7 +207,7 @@ internal class BytesTest {
     }
 
     @Nested
-    internal inner class InstantiationFromEmptySourceTest {
+    inner class InstantiationFromEmptySourceTest {
         @Test
         fun `should instantiate from empty byte array`() {
             // given
@@ -262,7 +262,7 @@ internal class BytesTest {
     }
 
     @Nested
-    internal inner class TransformationTest {
+    inner class TransformationTest {
         @Test
         fun `should transform to byte array`() {
             // given
@@ -339,7 +339,7 @@ internal class BytesTest {
     }
 
     @Nested
-    internal inner class TransformEmptyBytesTest {
+    inner class TransformEmptyBytesTest {
         @Test
         fun `should transform to byte array`() {
             // given
@@ -378,7 +378,7 @@ internal class BytesTest {
     }
 
     @Nested
-    internal inner class IteratorTest {
+    inner class IteratorTest {
         @Test
         fun `should iterate over elements`() {
             // given

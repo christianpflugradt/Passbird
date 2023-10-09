@@ -14,7 +14,7 @@ import java.io.File
 import java.util.UUID
 import java.util.stream.Stream
 
-internal class FilePasswordExchangeIT {
+class FilePasswordExchangeIT {
 
     private val tempExchangeDirectory = UUID.randomUUID().toString()
     private val exchangeFile = tempExchangeDirectory + File.separator + ReadableConfiguration.EXCHANGE_FILENAME

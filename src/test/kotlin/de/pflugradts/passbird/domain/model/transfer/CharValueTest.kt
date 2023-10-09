@@ -11,7 +11,7 @@ private const val UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 private const val LOWER = "abcdefghijklmnopqrstuvwxyz"
 private const val SYMBOLS = "$&[{}(=*)+]!#/@\\';,.-~%`?^|\":<>_ "
 
-internal class CharValueTest {
+class CharValueTest {
     @Test
     fun `should detect digits`() {
         // given / when / then

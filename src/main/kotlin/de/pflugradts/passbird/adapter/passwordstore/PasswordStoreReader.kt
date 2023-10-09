@@ -21,7 +21,7 @@ import java.util.stream.Stream
 private const val EOF = 0
 private const val SECTOR = -1
 
-internal class PasswordStoreReader @Inject constructor(
+class PasswordStoreReader @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
     @Inject private val failureCollector: FailureCollector,
     @Inject private val configuration: ReadableConfiguration,

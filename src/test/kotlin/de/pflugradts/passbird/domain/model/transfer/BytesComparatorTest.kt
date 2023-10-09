@@ -11,7 +11,7 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isGreaterThan
 import strikt.assertions.isLessThan
 
-internal class BytesComparatorTest {
+class BytesComparatorTest {
     private val comparator = BytesComparator()
 
     @Test
@@ -26,7 +26,7 @@ internal class BytesComparatorTest {
     }
 
     @Nested
-    internal inner class SymbolsAndDigitsTest {
+    inner class SymbolsAndDigitsTest {
         @Test
         fun `should compare symbol and digit`() {
             // given
@@ -62,7 +62,7 @@ internal class BytesComparatorTest {
     }
 
     @Nested
-    internal inner class LettersTest {
+    inner class LettersTest {
         @Test
         fun `should compare uppercase and lowercase`() {
             // given
