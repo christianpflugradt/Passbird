@@ -2,6 +2,7 @@ package de.pflugradts.passbird.adapter.passwordstore
 
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.DATABASE_FILENAME
 import de.pflugradts.passbird.application.failurehandling.FailureCollector
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
@@ -83,11 +84,7 @@ class PasswordStoreReader @Inject constructor(
         return Pair(incrementedOffset, legacyMode)
     }
 
-    private val filePath get() = systemOperation.resolvePath(
-        configuration.getAdapter().getPasswordStore().getLocation(),
-        ReadableConfiguration.DATABASE_FILENAME,
-    )
-
+    private val filePath get() = systemOperation.resolvePath(configuration.adapter.passwordStore.location, DATABASE_FILENAME)
     private fun calcActualContentSize(totalSize: Int) = totalSize - signatureSize() - checksumBytes() - eofBytes()
 
     private fun ByteArray.asNamespaceBytes(offset: Int): Pair<Bytes, Int> {

@@ -7,6 +7,8 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Output
 
+private const val MILLI_SECONDS = 1000L
+
 @Singleton
 class ClipboardService @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
@@ -29,12 +31,6 @@ class ClipboardService @Inject constructor(
 
     private fun sleep() = runCatching { Thread.sleep(delaySeconds * MILLI_SECONDS) }
 
-    private val isResetEnabled: Boolean
-        get() = configuration.getAdapter().getClipboard().getReset().isEnabled()
-    private val delaySeconds: Int
-        get() = configuration.getAdapter().getClipboard().getReset().getDelaySeconds()
-
-    companion object {
-        private const val MILLI_SECONDS = 1000L
-    }
+    private val isResetEnabled: Boolean get() = configuration.adapter.clipboard.reset.enabled
+    private val delaySeconds: Int get() = configuration.adapter.clipboard.reset.delaySeconds
 }

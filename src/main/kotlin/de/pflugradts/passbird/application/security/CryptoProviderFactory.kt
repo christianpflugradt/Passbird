@@ -32,7 +32,7 @@ class CryptoProviderFactory @Inject constructor(
 
     private fun authenticate() = keyStoreAdapterPort.loadKey(
         receiveLogin(),
-        systemOperation.getPath(configuration.getAdapter().getKeyStore().getLocation())
+        systemOperation.getPath(configuration.adapter.keyStore.location)
             .resolve(ReadableConfiguration.KEYSTORE_FILENAME),
     )
 

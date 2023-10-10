@@ -22,7 +22,7 @@ class PassbirdLauncher @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
 ) : Bootable {
 
-    private val keyStoreLocation get() = configuration.getAdapter().getKeyStore().getLocation()
+    private val keyStoreLocation get() = configuration.adapter.keyStore.location
 
     override fun boot() {
         sendLicenseNotice()

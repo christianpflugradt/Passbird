@@ -46,7 +46,7 @@ public class SetCommandHandler implements CommandHandler {
     }
 
     private boolean commandConfirmed(final SetCommand setCommand) {
-        if (configuration.getApplication().getPassword().isPromptOnRemoval()
+        if (configuration.getApplication().getPassword().getPromptOnRemoval()
                 && passwordService.entryExists(setCommand.getArgument(), DO_NOTHING)) {
             return userInterfaceAdapterPort
                     .receiveConfirmation(Output.Companion.outputOf(Bytes.bytesOf(String.format(

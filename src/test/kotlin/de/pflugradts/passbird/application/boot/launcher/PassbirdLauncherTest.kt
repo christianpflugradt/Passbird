@@ -7,7 +7,7 @@ import de.pflugradts.passbird.application.boot.main.ApplicationModule
 import de.pflugradts.passbird.application.boot.setup.SetupModule
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.application.configuration.UpdatableConfiguration
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
@@ -46,7 +46,7 @@ class PassbirdLauncherTest {
     fun `should launch main application if key store exists`() {
         // given
         val keyStoreDirectoryName = "/tmp"
-        val keyStoreFileName = UpdatableConfiguration.KEYSTORE_FILENAME
+        val keyStoreFileName = KEYSTORE_FILENAME
         fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectoryName)
         val keyStoreFilePath = fakePath(exists = true)
         val keyStoreDirPath = fakePath(resolvingTo = Pair(keyStoreFilePath, keyStoreFileName))
@@ -68,7 +68,7 @@ class PassbirdLauncherTest {
     fun `should launch setup if key store does not exist`() {
         // given
         val keyStoreDirectoryName = "/tmp"
-        val keyStoreFileName = UpdatableConfiguration.KEYSTORE_FILENAME
+        val keyStoreFileName = KEYSTORE_FILENAME
         fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectoryName)
         val keyStoreFilePath = fakePath(exists = false)
         val keyStoreDirPath = fakePath(resolvingTo = Pair(keyStoreFilePath, keyStoreFileName))

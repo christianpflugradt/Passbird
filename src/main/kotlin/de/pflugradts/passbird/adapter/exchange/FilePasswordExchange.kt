@@ -6,7 +6,7 @@ import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import de.pflugradts.passbird.application.BytePair
 import de.pflugradts.passbird.application.ExchangeAdapterPort
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.EXCHANGE_FILENAME
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.Tuple
 import de.pflugradts.passbird.domain.model.transfer.Bytes
@@ -29,7 +29,7 @@ class FilePasswordExchange @Inject constructor(
     override fun send(data: Stream<BytePair>) {
         try {
             Files.writeString(
-                systemOperation.resolvePath(uri, ReadableConfiguration.EXCHANGE_FILENAME),
+                systemOperation.resolvePath(uri, EXCHANGE_FILENAME),
                 objectMapper.writeValueAsString(
                     PasswordEntriesRepresentation(data.map { it.asPasswordEntryRepresentation() }.toList()),
                 ),
@@ -42,7 +42,7 @@ class FilePasswordExchange @Inject constructor(
     override fun receive(): Stream<BytePair> {
         return try {
             objectMapper.readValue(
-                Files.readString(systemOperation.resolvePath(uri, ReadableConfiguration.EXCHANGE_FILENAME)),
+                Files.readString(systemOperation.resolvePath(uri, EXCHANGE_FILENAME)),
                 PasswordEntriesRepresentation::class.java,
             ).passwordEntryRepresentations?.stream()?.map { it.asBytesPair() } ?: Stream.empty()
         } catch (e: IOException) {

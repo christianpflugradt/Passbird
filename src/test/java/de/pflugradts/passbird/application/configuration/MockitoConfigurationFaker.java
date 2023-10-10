@@ -71,7 +71,7 @@ public class MockitoConfigurationFaker {
         lenient().when(application.getPassword()).thenReturn(passwordProvider);
         lenient().when(configuration.getAdapter()).thenReturn(adapter);
         lenient().when(configuration.getApplication()).thenReturn(application);
-        lenient().when(configuration.isTemplate()).thenReturn(isTemplate);
+        lenient().when(configuration.getTemplate()).thenReturn(isTemplate);
         return configuration;
     }
 
@@ -90,15 +90,15 @@ public class MockitoConfigurationFaker {
 
     private Configuration.Password givenPasswordProvider() {
         final var passwordProvider = mock(Configuration.Password.class);
-        lenient().when(passwordProvider.isPromptOnRemoval()).thenReturn(isPromptOnRemoval);
+        lenient().when(passwordProvider.getPromptOnRemoval()).thenReturn(isPromptOnRemoval);
         return passwordProvider;
     }
 
     private Configuration.PasswordStore givenPasswordStoreAdapter() {
         final var passwordStore = mock(Configuration.PasswordStore.class);
         lenient().when(passwordStore.getLocation()).thenReturn(passwordStoreLocation);
-        lenient().when(passwordStore.isVerifyChecksum()).thenReturn(isVerifyChecksum);
-        lenient().when(passwordStore.isVerifySignature()).thenReturn(isVerifySignature);
+        lenient().when(passwordStore.getVerifyChecksum()).thenReturn(isVerifyChecksum);
+        lenient().when(passwordStore.getVerifySignature()).thenReturn(isVerifySignature);
         return passwordStore;
     }
 

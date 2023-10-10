@@ -36,7 +36,7 @@ public class FailureHandler implements EventHandler {
     @Subscribe
     private void handle(final ChecksumFailure checksumFailure) {
         err("Checksum of password database could not be verified.");
-        if (configuration.getAdapter().getPasswordStore().isVerifyChecksum()) {
+        if (configuration.getAdapter().getPasswordStore().getVerifyChecksum()) {
             err("Shutting down due to checksum failure. If you still think this is a valid PwMan3 password "
                     + "database file, you can set the verifyChecksum option in your configuration to false.");
             bootable.terminate(systemOperation);
@@ -100,7 +100,7 @@ public class FailureHandler implements EventHandler {
     @Subscribe
     private void handle(final SignatureCheckFailure signatureCheckFailure) {
         err("Signature of password database could not be verified.");
-        if (configuration.getAdapter().getPasswordStore().isVerifySignature()) {
+        if (configuration.getAdapter().getPasswordStore().getVerifySignature()) {
             err("Shutting down due to signature failure. If you still think this is a valid PwMan3 password "
                     + "database file, you can set the verifySignature option in your configuration to false.");
             bootable.terminate(systemOperation);

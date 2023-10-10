@@ -23,13 +23,13 @@ class PassbirdSetup @Inject constructor(
 ) : Bootable {
     override fun boot() {
         setupGuide.sendWelcome()
-        if (configuration.isTemplate()) {
+        if (configuration.template) {
             setupGuide.sendConfigTemplateRouteInformation()
             if (continueRoute()) {
                 configTemplateRoute()
             }
         } else {
-            setupGuide.sendConfigKeyStoreRouteInformation(configuration.getAdapter().getKeyStore().getLocation())
+            setupGuide.sendConfigKeyStoreRouteInformation(configuration.adapter.keyStore.location)
             if (continueRoute()) {
                 configKeyStoreRoute()
             }
@@ -42,16 +42,16 @@ class PassbirdSetup @Inject constructor(
 
     private fun configTemplateRoute() {
         setupGuide.sendInputPath("configuration")
-        createConfiguration(verifyValidDirectory(configuration.getAdapter().getPasswordStore().getLocation()))
+        createConfiguration(verifyValidDirectory(configuration.adapter.passwordStore.location))
         setupGuide.sendCreateKeyStoreInformation()
-        createKeyStore(configuration.getAdapter().getKeyStore().getLocation(), receiveMasterPassword())
+        createKeyStore(configuration.adapter.keyStore.location, receiveMasterPassword())
         setupGuide.sendRestart()
     }
 
     private fun configKeyStoreRoute() {
         setupGuide.sendInputPath("keystore")
         setupGuide.sendCreateKeyStoreInformation()
-        createKeyStore(verifyValidDirectory(configuration.getAdapter().getKeyStore().getLocation()), receiveMasterPassword())
+        createKeyStore(verifyValidDirectory(configuration.adapter.keyStore.location), receiveMasterPassword())
         setupGuide.sendRestart()
     }
 

@@ -34,7 +34,7 @@ class CommandLineInterfaceService @Inject constructor(
 
     override fun receiveSecurely(output: Output): Input {
         sendWithoutLineBreak(output)
-        return if (configuration.getAdapter().getUserInterface().isSecureInput() && systemOperation.isConsoleAvailable) {
+        return if (configuration.adapter.userInterface.secureInput && systemOperation.isConsoleAvailable) {
             inputOf(charsOf(systemOperation.readPasswordFromConsole()).toBytes())
         } else {
             receive()

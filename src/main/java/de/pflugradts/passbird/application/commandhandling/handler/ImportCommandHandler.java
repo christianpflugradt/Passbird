@@ -41,7 +41,7 @@ public class ImportCommandHandler implements CommandHandler {
     }
 
     private boolean commandConfirmed(final ImportCommand importCommand) {
-        if (configuration.getApplication().getPassword().isPromptOnRemoval()) {
+        if (configuration.getApplication().getPassword().getPromptOnRemoval()) {
             final var duplicateDetector = new HashSet<Bytes>();
             final var overlaps =
                     Streams.concat(

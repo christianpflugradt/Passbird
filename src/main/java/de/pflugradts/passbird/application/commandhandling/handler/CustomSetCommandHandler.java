@@ -48,7 +48,7 @@ public class CustomSetCommandHandler implements CommandHandler {
     }
 
     private boolean commandConfirmed(final CustomSetCommand customSetCommand) {
-        if (configuration.getApplication().getPassword().isPromptOnRemoval()
+        if (configuration.getApplication().getPassword().getPromptOnRemoval()
                 && passwordService.entryExists(customSetCommand.getArgument(), DO_NOTHING)) {
             return userInterfaceAdapterPort
                     .receiveConfirmation(Output.Companion.outputOf(Bytes.bytesOf(String.format(

@@ -2,6 +2,7 @@ package de.pflugradts.passbird.adapter.passwordstore
 
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.DATABASE_FILENAME
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.copyInt
@@ -64,11 +65,7 @@ class PasswordStoreWriter @Inject constructor(
         return dataSize + namespaceSize + metaSize
     }
 
-    private val filePath get() = systemOperation.resolvePath(
-        configuration.getAdapter().getPasswordStore().getLocation(),
-        ReadableConfiguration.DATABASE_FILENAME,
-    )
-
+    private val filePath get() = systemOperation.resolvePath(configuration.adapter.passwordStore.location, DATABASE_FILENAME)
     private fun calcActualTotalSize(contentSize: Int) = signatureSize() + contentSize + eofBytes() + checksumBytes()
 
     private fun NamespaceSlot.asByteArray(): ByteArray {

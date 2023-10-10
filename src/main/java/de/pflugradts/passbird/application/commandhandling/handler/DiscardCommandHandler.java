@@ -33,7 +33,7 @@ public class DiscardCommandHandler implements CommandHandler {
     }
 
     private boolean commandConfirmed() {
-        if (configuration.getApplication().getPassword().isPromptOnRemoval()) {
+        if (configuration.getApplication().getPassword().getPromptOnRemoval()) {
             return userInterfaceAdapterPort
                     .receiveConfirmation(Output.Companion.outputOf(Bytes.bytesOf(
                             "Discarding a Password Entry is an irrevocable action.\n"
