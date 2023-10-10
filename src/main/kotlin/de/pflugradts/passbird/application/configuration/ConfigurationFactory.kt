@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.application.configuration
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_SYSTEM_PROPERTY
@@ -11,7 +10,7 @@ class ConfigurationFactory @Inject constructor(@Inject private val systemOperati
     fun loadConfiguration() = configurationFromFile() ?: Configuration(template = true)
     private fun configurationFromFile() =
         try {
-            ObjectMapper(YAMLFactory()).readValue(
+            YAMLMapper().readValue(
                 systemOperation.getPath(System.getProperty(CONFIGURATION_SYSTEM_PROPERTY)).resolve(CONFIGURATION_FILENAME).toFile(),
                 Configuration::class.java,
             )

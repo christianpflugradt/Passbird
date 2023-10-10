@@ -1,15 +1,13 @@
 package de.pflugradts.passbird.adapter.exchange
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import de.pflugradts.passbird.application.BytePair
 import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.EXCHANGE_FILENAME
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.Tuple
-import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 import lombok.AllArgsConstructor
@@ -22,17 +20,13 @@ class FilePasswordExchange @Inject constructor(
     @param:Assisted private val uri: String,
     @Inject private val systemOperation: SystemOperation,
 ) : ExchangeAdapterPort {
-    private val objectMapper = ObjectMapper()
-
-    override fun send_Deprecated(data: Stream<Tuple<Bytes, Bytes>>) { send(data.map { BytePair(Pair(it._1, it._2)) }) }
+    private val mapper = YAMLMapper()
 
     override fun send(data: Stream<BytePair>) {
         try {
             Files.writeString(
                 systemOperation.resolvePath(uri, EXCHANGE_FILENAME),
-                objectMapper.writeValueAsString(
-                    PasswordEntriesRepresentation(data.map { it.asPasswordEntryRepresentation() }.toList()),
-                ),
+                mapper.writeValueAsString(PasswordEntriesRepresentation(data.map { it.asPasswordEntryRepresentation() }.toList())),
             )
         } catch (e: IOException) {
             // FIXME error handling
@@ -41,7 +35,7 @@ class FilePasswordExchange @Inject constructor(
 
     override fun receive(): Stream<BytePair> {
         return try {
-            objectMapper.readValue(
+            mapper.readValue(
                 Files.readString(systemOperation.resolvePath(uri, EXCHANGE_FILENAME)),
                 PasswordEntriesRepresentation::class.java,
             ).passwordEntryRepresentations?.stream()?.map { it.asBytesPair() } ?: Stream.empty()
