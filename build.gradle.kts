@@ -11,7 +11,7 @@ plugins {
     id("org.owasp.dependencycheck") version "8.4.0"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
     id("com.adarshr.test-logger") version "3.2.0"
-    id("com.github.ben-manes.versions") version "0.47.0"
+    id("com.github.ben-manes.versions") version "0.49.0"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
 }
 
@@ -24,22 +24,22 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2")
     implementation("com.google.inject:guice:7.0.0")
     implementation("com.google.inject.extensions:guice-assistedinject:7.0.0")
-    implementation("com.google.guava:guava:32.1.2-jre")
+    implementation("com.google.guava:guava:32.1.3-jre")
     compileOnly("org.projectlombok:lombok:1.18.28")
-    annotationProcessor("org.projectlombok:lombok:1.18.28")
+    annotationProcessor("org.projectlombok:lombok:1.18.30")
 
     testImplementation("io.strikt:strikt-core:0.34.1")
     testImplementation("io.strikt:strikt-jvm:0.34.1")
-    testImplementation("io.mockk:mockk:1.13.7")
+    testImplementation("io.mockk:mockk:1.13.8")
 
-    testCompileOnly("org.projectlombok:lombok:1.18.28")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.28")
+    testCompileOnly("org.projectlombok:lombok:1.18.30")
+    testAnnotationProcessor("org.projectlombok:lombok:1.18.30")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:5.10.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
-    testImplementation("org.mockito:mockito-core:5.5.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.6.0")
+    testImplementation("org.mockito:mockito-core:5.6.0")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.awaitility:awaitility:4.2.0")
     testImplementation("com.tngtech.archunit:archunit:1.1.0")
