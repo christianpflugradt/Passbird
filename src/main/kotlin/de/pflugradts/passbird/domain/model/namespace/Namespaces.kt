@@ -14,8 +14,7 @@ class Namespaces {
     private val namespaces = Collections.nCopies(CAPACITY, Optional.empty<Namespace>()).toMutableList()
     private var currentNamespace = NamespaceSlot.DEFAULT
 
-    // TODO current version of ktlint gradle plugin crashes if code is rewritten as "0..<CAPACITY"
-    fun reset() = (0..(CAPACITY - 1)).forEach { namespaces[it] = Optional.empty() }
+    fun reset() = (0..<CAPACITY).forEach { namespaces[it] = Optional.empty() }
 
     fun populate(namespaceBytes: List<Bytes>) {
         if (namespaces.find { it.isPresent } == null && namespaceBytes.size == NamespaceSlot.CAPACITY) {

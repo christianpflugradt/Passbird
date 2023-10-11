@@ -62,12 +62,12 @@ tasks.withType<Jar> {
 
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
-        freeCompilerArgs = listOf(
-            "-Xjsr305=strict"
-        )
+        freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = "17"
     }
 }
+
+ktlint.version = "0.50.0"
 
 ktlint {
     reporters {
@@ -82,7 +82,7 @@ tasks.withType<Test>().configureEach {
 listOf(
     Pair("unitTests", "Test"),
     Pair("integrationTests", "IT"),
-    Pair("architectureTests", "AT")
+    Pair("architectureTests", "AT"),
 ).forEach {
     tasks.register<Test>(it.first) {
         group = VERIFICATION_GROUP
