@@ -10,12 +10,10 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Co
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
-import lombok.AllArgsConstructor
 import java.io.IOException
 import java.nio.file.Files
 import java.util.stream.Stream
 
-@AllArgsConstructor
 class FilePasswordExchange @Inject constructor(
     @param:Assisted private val uri: String,
     @Inject private val systemOperation: SystemOperation,
