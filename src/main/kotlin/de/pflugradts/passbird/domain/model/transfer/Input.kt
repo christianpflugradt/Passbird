@@ -2,10 +2,10 @@ package de.pflugradts.passbird.domain.model.transfer
 
 import de.pflugradts.passbird.domain.model.ddd.ValueObject
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.FIRST_NAMESPACE
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.Companion.FIRST_NAMESPACE
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.Companion.LAST_NAMESPACE
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.Companion.at
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.INVALID
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.LAST_NAMESPACE
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.at
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 import de.pflugradts.passbird.domain.model.transfer.CharValue.Companion.charValueOf
 

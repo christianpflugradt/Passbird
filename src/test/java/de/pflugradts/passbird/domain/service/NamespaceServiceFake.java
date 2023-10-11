@@ -23,7 +23,7 @@ public class NamespaceServiceFake extends NamespaceService {
     }
 
     public void deployAtIndex(final int index) {
-        deployAt(NamespaceSlot.at(index));
+        deployAt(NamespaceSlot.Companion.at(index));
     }
 
     public void reset() {

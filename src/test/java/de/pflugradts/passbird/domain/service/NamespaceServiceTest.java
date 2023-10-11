@@ -16,15 +16,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.CAPACITY;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._1;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._2;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._3;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._4;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._5;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._6;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._7;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._8;
-import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._9;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N1;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N2;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N3;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N4;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N5;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N6;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N7;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N8;
+import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N9;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 
@@ -59,9 +59,9 @@ public class NamespaceServiceTest {
     @Test
     void shouldHandleCallToAtSlotIfNotPopulated() {
         // given / when
-        final var slot1 = namespaceService.atSlot(_1);
-        final var slot4 = namespaceService.atSlot(_4);
-        final var slot9 = namespaceService.atSlot(_9);
+        final var slot1 = namespaceService.atSlot(N1);
+        final var slot4 = namespaceService.atSlot(N4);
+        final var slot9 = namespaceService.atSlot(N9);
 
         // then
         then(passwordEntryRepository).should().requestInitialization();
@@ -74,7 +74,7 @@ public class NamespaceServiceTest {
     void shouldHandleCallToDeployIfNotPopulated() {
         // given
         final var givenBytes = Bytes.bytesOf("test");
-        final var givenSlot = _4;
+        final var givenSlot = N4;
 
         // when
         namespaceService.deploy(givenBytes, givenSlot);
@@ -85,13 +85,13 @@ public class NamespaceServiceTest {
             .isNotEmpty().get()
             .extracting(Namespace::getBytes).isNotNull()
             .isEqualTo(givenBytes);
-        assertSlotsAreEmpty(namespaceService, _1, _2, _3, _5, _6, _7, _8, _9);
+        assertSlotsAreEmpty(namespaceService, N1, N2, N3, N5, N6, N7, N8, N9);
     }
 
     @Test
     void shouldSyncPasswordStoreOnDeploy() {
         // given / when
-        namespaceService.deploy(Bytes.bytesOf("test"), _4);
+        namespaceService.deploy(Bytes.bytesOf("test"), N4);
 
         // then
         then(passwordEntryRepository).should().sync();

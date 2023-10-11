@@ -108,7 +108,7 @@ class PasswordEntryTest {
         void shouldBeEqualIfKeyAndNamespaceMatch() {
             // given
             final var givenBytes = Bytes.bytesOf("key");
-            final var givenNamespace = NamespaceSlot._1;
+            final var givenNamespace = NamespaceSlot.N1;
 
             final var passwordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
@@ -132,7 +132,7 @@ class PasswordEntryTest {
             // given
             final var givenBytes = Bytes.bytesOf("key");
             final var otherBytes = Bytes.bytesOf("key2");
-            final var givenNamespace = NamespaceSlot._1;
+            final var givenNamespace = NamespaceSlot.N1;
 
             final var passwordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()
@@ -155,8 +155,8 @@ class PasswordEntryTest {
         void shouldNotBeEqualIfNamespaceDoesNotMatch() {
             // given
             final var givenBytes = Bytes.bytesOf("key");
-            final var givenNamespace = NamespaceSlot._1;
-            final var otherNamespace = NamespaceSlot._2;
+            final var givenNamespace = NamespaceSlot.N1;
+            final var otherNamespace = NamespaceSlot.N2;
 
             final var passwordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()

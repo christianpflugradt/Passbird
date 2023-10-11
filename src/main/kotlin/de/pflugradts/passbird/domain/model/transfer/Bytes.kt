@@ -24,6 +24,7 @@ class Bytes private constructor(
 
     val size get() = byteArray.size
     val isEmpty get() = size == 0
+    val isNotEmpty get() = !isEmpty
     val firstByte get() = byteArray[0]
     fun getByte(index: Int) = byteArray[index]
     fun getChar(index: Int) = Char(getByte(index).toUShort())

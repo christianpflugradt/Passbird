@@ -75,7 +75,7 @@ class AssignNamespaceCommandTestIT {
         inputHandler.handleInput( Input.Companion.inputOf(givenInput));
 
         // then
-        then(passwordService).should().movePasswordEntry(Bytes.bytesOf(givenAlias), NamespaceSlot.at(expectedNamespace));
+        then(passwordService).should().movePasswordEntry(Bytes.bytesOf(givenAlias), NamespaceSlot.Companion.at(expectedNamespace));
         assertThat(givenInput).isNotNull().isNotEqualTo(referenceInput);
     }
 
@@ -111,7 +111,7 @@ class AssignNamespaceCommandTestIT {
         final var currentNamespace = 0;
         final var targetNamespace = 1;
 
-        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot.at(currentNamespace));
+        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot.Companion.at(currentNamespace));
         namespaceServiceFake.deployAtIndex(targetNamespace);
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
@@ -119,7 +119,7 @@ class AssignNamespaceCommandTestIT {
                 PasswordEntryFaker.faker()
                     .fakePasswordEntry()
                     .withKeyBytes(Bytes.bytesOf(givenAlias))
-                    .withNamespace(NamespaceSlot.at(currentNamespace)).fake()).fake();
+                    .withNamespace(NamespaceSlot.Companion.at(currentNamespace)).fake()).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(targetNamespace)).fake();
@@ -145,14 +145,14 @@ class AssignNamespaceCommandTestIT {
         final var targetNamespace = 0;
 
         namespaceServiceFake.deployAtIndex(currentNamespace);
-        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot.at(currentNamespace));
+        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot.Companion.at(currentNamespace));
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
             .withPasswordEntries(
                 PasswordEntryFaker.faker()
                     .fakePasswordEntry()
                     .withKeyBytes(Bytes.bytesOf(givenAlias))
-                    .withNamespace(NamespaceSlot.at(currentNamespace)).fake()).fake();
+                    .withNamespace(NamespaceSlot.Companion.at(currentNamespace)).fake()).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(targetNamespace)).fake();
@@ -209,7 +209,7 @@ class AssignNamespaceCommandTestIT {
         final var currentNamespace = 1;
 
         namespaceServiceFake.deployAtIndex(currentNamespace);
-        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot.at(currentNamespace));
+        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot.Companion.at(currentNamespace));
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
             .withPasswordEntries(
@@ -250,7 +250,7 @@ class AssignNamespaceCommandTestIT {
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(targetNamespace)).fake();
-        assertThat(namespaceServiceFake.atSlot(NamespaceSlot.at(targetNamespace))).isNotPresent();
+        assertThat(namespaceServiceFake.atSlot(NamespaceSlot.Companion.at(targetNamespace))).isNotPresent();
 
         // when
         inputHandler.handleInput( Input.Companion.inputOf(givenInput));
@@ -274,7 +274,7 @@ class AssignNamespaceCommandTestIT {
         final var currentNamespace = 0;
         final var targetNamespace = 1;
 
-        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot.at(currentNamespace));
+        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot.Companion.at(currentNamespace));
         namespaceServiceFake.deployAtIndex(targetNamespace);
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
@@ -282,11 +282,11 @@ class AssignNamespaceCommandTestIT {
                 PasswordEntryFaker.faker()
                     .fakePasswordEntry()
                     .withKeyBytes(Bytes.bytesOf(givenAlias))
-                    .withNamespace(NamespaceSlot.at(currentNamespace)).fake(),
+                    .withNamespace(NamespaceSlot.Companion.at(currentNamespace)).fake(),
             PasswordEntryFaker.faker()
                 .fakePasswordEntry()
                 .withKeyBytes(Bytes.bytesOf(givenAlias))
-                .withNamespace(NamespaceSlot.at(targetNamespace)).fake()).fake();
+                .withNamespace(NamespaceSlot.Companion.at(targetNamespace)).fake()).fake();
             UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(targetNamespace)).fake();

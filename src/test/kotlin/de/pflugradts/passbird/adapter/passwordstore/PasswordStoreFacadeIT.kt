@@ -7,15 +7,15 @@ import de.pflugradts.passbird.application.failurehandling.FailureCollector
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.fakePasswordEntry
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._1
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._2
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._3
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._4
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._5
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._6
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._7
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._8
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._9
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N1
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N2
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N3
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N4
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N5
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N6
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N7
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N8
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N9
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.service.NamespaceServiceFake
@@ -97,9 +97,9 @@ class PasswordStoreFacadeIT {
         val namespace1 = bytesOf("namespace1")
         val namespace3 = bytesOf("Namespace3")
         val namespace9 = bytesOf("+nameSpace*9")
-        namespaceServiceFake.deploy(namespace1, _1)
-        namespaceServiceFake.deploy(namespace3, _3)
-        namespaceServiceFake.deploy(namespace9, _9)
+        namespaceServiceFake.deploy(namespace1, N1)
+        namespaceServiceFake.deploy(namespace3, N3)
+        namespaceServiceFake.deploy(namespace9, N9)
         val passwordEntry1 = fakePasswordEntry(
             withKeyBytes = bytesOf("key1"),
             withPasswordBytes = bytesOf("password1"),
@@ -108,17 +108,17 @@ class PasswordStoreFacadeIT {
         val passwordEntry2 = fakePasswordEntry(
             withKeyBytes = bytesOf("key2"),
             withPasswordBytes = bytesOf("password2"),
-            withNamespace = _1,
+            withNamespace = N1,
         )
         val passwordEntry3 = fakePasswordEntry(
             withKeyBytes = bytesOf("key3"),
             withPasswordBytes = bytesOf("password3"),
-            withNamespace = _3,
+            withNamespace = N3,
         )
         val passwordEntry3b = fakePasswordEntry(
             withKeyBytes = bytesOf("key3"),
             withPasswordBytes = bytesOf("password3b"),
-            withNamespace = _9,
+            withNamespace = N9,
         )
         val passwordEntries = listOf(passwordEntry1, passwordEntry2, passwordEntry3, passwordEntry3b)
 
@@ -130,11 +130,11 @@ class PasswordStoreFacadeIT {
 
         // then
         expectThat(actual.get().toList()) containsExactly passwordEntries
-        listOf(_2, _4, _5, _6, _7, _8).forEach { expectThat(namespaceServiceFake.atSlot(it).isPresent).isFalse() }
+        listOf(N2, N4, N5, N6, N7, N8).forEach { expectThat(namespaceServiceFake.atSlot(it).isPresent).isFalse() }
         mapOf(
-            _1 to namespace1,
-            _3 to namespace3,
-            _9 to namespace9,
+            N1 to namespace1,
+            N3 to namespace3,
+            N9 to namespace9,
         ).forEach { (k, v) ->
             expectThat(namespaceServiceFake.atSlot(k).isPresent)
             expectThat(namespaceServiceFake.atSlot(k).get().bytes) isEqualTo v

@@ -2,15 +2,15 @@ package de.pflugradts.passbird.domain.model.transfer
 
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.INVALID
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._1
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._2
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._3
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._4
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._5
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._6
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._7
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._8
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot._9
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N1
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N2
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N3
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N4
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N5
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N6
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N7
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N8
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N9
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.emptyInput
@@ -130,7 +130,7 @@ class InputTest {
         @Test
         fun `should parse namespaces`() {
             // given
-            (1..9).zip(arrayOf(_1, _2, _3, _4, _5, _6, _7, _8, _9)).forEach {
+            (1..9).zip(arrayOf(N1, N2, N3, N4, N5, N6, N7, N8, N9)).forEach {
                 val givenIndex = it.first
                 val expectedNamespaceSlot = it.second
                 val input = inputOf(givenIndex)

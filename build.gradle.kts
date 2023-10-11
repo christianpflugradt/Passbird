@@ -9,7 +9,7 @@ plugins {
     java
     kotlin("jvm") version "1.9.10"
     id("org.owasp.dependencycheck") version "8.4.0"
-    id("org.jlleitschuh.gradle.ktlint") version "11.5.1"
+    id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
     id("com.adarshr.test-logger") version "3.2.0"
     id("com.github.ben-manes.versions") version "0.47.0"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"

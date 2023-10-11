@@ -78,7 +78,7 @@ class ViewNamespaceCommandTestIT {
         final var input =  Input.Companion.inputOf(Bytes.bytesOf("n"));
         final var deployedNamespaceSlot = 3;
         final var deployedNamespace = "mynamespace";
-        namespaceServiceFake.deploy(Bytes.bytesOf(deployedNamespace), NamespaceSlot.at(deployedNamespaceSlot));
+        namespaceServiceFake.deploy(Bytes.bytesOf(deployedNamespace), NamespaceSlot.Companion.at(deployedNamespaceSlot));
 
         // when
         inputHandler.handleInput(input);

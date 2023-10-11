@@ -189,8 +189,8 @@ class PasswordEntryRepositoryTest {
         @Test
         void shouldFindAllInCurrentNamespace() {
             // given
-            final var activeNamespace = NamespaceSlot._2;
-            final var otherNamespace = NamespaceSlot._3;
+            final var activeNamespace = NamespaceSlot.N2;
+            final var otherNamespace = NamespaceSlot.N3;
             namespaceServiceFake.deployAt(activeNamespace);
             namespaceServiceFake.deployAt(otherNamespace);
             namespaceServiceFake.updateCurrentNamespace(activeNamespace);
@@ -224,8 +224,8 @@ class PasswordEntryRepositoryTest {
         void shouldStoreMultiplePasswordEntriesWithIdenticalKeysInDifferentNamespaces() {
             // given
             final var keyBytes = Bytes.bytesOf("key");
-            final var firstNamespace = NamespaceSlot._1;
-            final var secondNamespace = NamespaceSlot._2;
+            final var firstNamespace = NamespaceSlot.N1;
+            final var secondNamespace = NamespaceSlot.N2;
             namespaceServiceFake.deployAt(firstNamespace);
             namespaceServiceFake.deployAt(secondNamespace);
 

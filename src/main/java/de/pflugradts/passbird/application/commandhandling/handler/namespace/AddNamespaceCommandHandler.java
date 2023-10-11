@@ -6,11 +6,10 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.namespace.AddNamespaceCommand;
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler;
 import de.pflugradts.passbird.application.failurehandling.FailureCollector;
+import de.pflugradts.passbird.domain.model.namespace.Namespace;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.NamespaceService;
-
-import static de.pflugradts.passbird.domain.model.namespace.Namespace.DEFAULT;
 
 public class AddNamespaceCommandHandler implements CommandHandler {
 
@@ -23,7 +22,7 @@ public class AddNamespaceCommandHandler implements CommandHandler {
 
     @Subscribe
     private void handleAddNamespaceCommand(final AddNamespaceCommand addNamespaceCommand) {
-        if (namespaceService.atSlot(addNamespaceCommand.getSlot()).filter(DEFAULT::equals).isPresent()) {
+        if (namespaceService.atSlot(addNamespaceCommand.getSlot()).filter(it -> Namespace.Companion.getDEFAULT().equals(it)).isPresent()) {
             userInterfaceAdapterPort.send(Output.Companion.outputOf(Bytes.bytesOf(
                 "Default namespace cannot be replaced - Operation aborted.")));
             return;

@@ -54,7 +54,7 @@ class AddNamespaceCommandTestIT {
         // given
         final var slotIndex = 1;
         final var givenInput = Bytes.bytesOf("n+" + slotIndex);
-        final var slotFromInput = NamespaceSlot.at(slotIndex);
+        final var slotFromInput = NamespaceSlot.Companion.at(slotIndex);
         final var referenceNamespace = Bytes.bytesOf("mynamespace");
         final var givenNamespace = Bytes.bytesOf("mynamespace");
         UserInterfaceAdapterPortFaker.faker()
@@ -75,7 +75,7 @@ class AddNamespaceCommandTestIT {
         // given
         final var slotIndex = 1;
         final var input =  Input.Companion.inputOf(Bytes.bytesOf("n+" + slotIndex));
-        final var slotFromInput = NamespaceSlot.at(slotIndex);
+        final var slotFromInput = NamespaceSlot.Companion.at(slotIndex);
         final var referenceNamespace = Bytes.bytesOf("mynamespace");
         final var givenNamespace = Bytes.bytesOf("mynamespace");
         final var otherNamespace = Bytes.bytesOf("othernamespace");
@@ -100,7 +100,7 @@ class AddNamespaceCommandTestIT {
         // given
         final var slotIndex = 1;
         final var input =  Input.Companion.inputOf(Bytes.bytesOf("n+" + slotIndex));
-        final var slotFromInput = NamespaceSlot.at(slotIndex);
+        final var slotFromInput = NamespaceSlot.Companion.at(slotIndex);
         final var givenNamespace = Bytes.bytesOf("");
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
@@ -123,7 +123,7 @@ class AddNamespaceCommandTestIT {
         // given
         final var slotIndex = 0;
         final var input =  Input.Companion.inputOf(Bytes.bytesOf("n+" + slotIndex));
-        final var slotFromInput = NamespaceSlot.at(slotIndex);
+        final var slotFromInput = NamespaceSlot.Companion.at(slotIndex);
 
         // when
         inputHandler.handleInput(input);

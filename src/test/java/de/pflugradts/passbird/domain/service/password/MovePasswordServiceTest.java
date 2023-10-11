@@ -34,8 +34,8 @@ class MovePasswordServiceTest {
     void shouldMovePasswordEntry() {
         // given
         final var givenKey = Bytes.bytesOf("key123");
-        final var givenNamespace = NamespaceSlot._1;
-        final var newNamespace = NamespaceSlot._2;
+        final var givenNamespace = NamespaceSlot.N1;
+        final var newNamespace = NamespaceSlot.N2;
         final var givenPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(givenKey)
@@ -59,8 +59,8 @@ class MovePasswordServiceTest {
     void shouldNotMovePasswordEntryIfAlreadyExistsInTargetNamespace() {
         // given
         final var givenKey = Bytes.bytesOf("key123");
-        final var givenNamespace = NamespaceSlot._1;
-        final var newNamespace = NamespaceSlot._2;
+        final var givenNamespace = NamespaceSlot.N1;
+        final var newNamespace = NamespaceSlot.N2;
         final var givenPasswordEntry = PasswordEntryFaker.faker()
             .fakePasswordEntry()
             .withKeyBytes(givenKey)

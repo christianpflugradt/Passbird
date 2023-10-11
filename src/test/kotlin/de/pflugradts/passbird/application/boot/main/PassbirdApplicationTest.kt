@@ -63,8 +63,8 @@ class PassbirdApplicationTest {
         every { inputHandler.handleInput(any()) } returns Unit
 
         // when
-        namespaceServiceFake.deploy(bytesOf(givenNamespace), NamespaceSlot._1)
-        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot._1)
+        namespaceServiceFake.deploy(bytesOf(givenNamespace), NamespaceSlot.N1)
+        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot.N1)
         passbirdApplication.boot()
 
         // then
