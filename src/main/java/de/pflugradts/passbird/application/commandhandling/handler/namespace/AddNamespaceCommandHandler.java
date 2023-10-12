@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.namespace.AddNamespaceCommand;
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.namespace.Namespace;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
@@ -17,8 +16,6 @@ public class AddNamespaceCommandHandler implements CommandHandler {
     private NamespaceService namespaceService;
     @Inject
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
-    @Inject
-    private FailureCollector failureCollector;
 
     @Subscribe
     private void handleAddNamespaceCommand(final AddNamespaceCommand addNamespaceCommand) {

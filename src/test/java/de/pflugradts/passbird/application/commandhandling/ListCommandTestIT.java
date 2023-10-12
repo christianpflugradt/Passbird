@@ -2,7 +2,6 @@ package de.pflugradts.passbird.application.commandhandling;
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.handler.ListCommandHandler;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
@@ -28,8 +27,6 @@ class ListCommandTestIT {
 
     private InputHandler inputHandler;
 
-    @Mock
-    private FailureCollector failureCollector;
     @Mock
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
     @Mock

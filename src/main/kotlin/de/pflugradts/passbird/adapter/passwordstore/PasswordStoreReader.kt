@@ -3,7 +3,9 @@ package de.pflugradts.passbird.adapter.passwordstore
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.DATABASE_FILENAME
-import de.pflugradts.passbird.application.failurehandling.FailureCollector
+import de.pflugradts.passbird.application.failure.ChecksumFailure
+import de.pflugradts.passbird.application.failure.SignatureCheckFailure
+import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.readBytes
@@ -24,7 +26,6 @@ private const val SECTOR = -1
 
 class PasswordStoreReader @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
-    @Inject private val failureCollector: FailureCollector,
     @Inject private val configuration: ReadableConfiguration,
     @Inject private val namespaceService: NamespaceService,
     @Inject private val cryptoProvider: CryptoProvider,
@@ -56,14 +57,22 @@ class PasswordStoreReader @Inject constructor(
         val expectedSignature = signature()
         val actualSignature = ByteArray(signatureSize())
         copyBytes(bytesOf(bytes).toByteArray(), actualSignature, 0, signatureSize())
-        if (!expectedSignature.contentEquals(actualSignature)) { failureCollector.collectSignatureCheckFailure(bytesOf(actualSignature)) }
+        if (!expectedSignature.contentEquals(actualSignature)) {
+            val critical = configuration.adapter.passwordStore.verifySignature
+            reportFailure(SignatureCheckFailure(bytesOf(actualSignature), critical))
+            if (critical) systemOperation.exit()
+        }
     }
 
     private fun verifyChecksum(bytes: ByteArray) {
         val contentSize = calcActualContentSize(bytes.size)
         val expectedChecksum = if (contentSize > 0) checksum(Arrays.copyOfRange(bytes, signatureSize(), contentSize)) else 0x0
         val actualCheckSum = bytes[bytes.size - 1]
-        if (expectedChecksum != actualCheckSum) { failureCollector.collectChecksumFailure(actualCheckSum, expectedChecksum) }
+        if (expectedChecksum != actualCheckSum) {
+            val critical = configuration.adapter.passwordStore.verifyChecksum
+            reportFailure(ChecksumFailure(actualCheckSum, expectedChecksum, critical))
+            if (critical) systemOperation.exit()
+        }
     }
 
     private fun populateNamespaces(bytes: ByteArray, offset: Int): Pair<Int, Boolean> {

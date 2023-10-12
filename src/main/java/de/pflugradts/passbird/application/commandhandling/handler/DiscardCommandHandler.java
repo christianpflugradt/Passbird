@@ -5,15 +5,12 @@ import com.google.inject.Inject;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.DiscardCommand;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
 
 public class DiscardCommandHandler implements CommandHandler {
 
-    @Inject
-    private FailureCollector failureCollector;
     @Inject
     private ReadableConfiguration configuration;
     @Inject

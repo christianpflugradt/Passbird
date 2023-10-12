@@ -4,7 +4,6 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.RenameCommand;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
@@ -13,8 +12,6 @@ import static de.pflugradts.passbird.domain.service.password.PasswordService.Ent
 
 public class RenameCommandHandler implements CommandHandler {
 
-    @Inject
-    private FailureCollector failureCollector;
     @Inject
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
     @Inject

@@ -4,14 +4,11 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.ViewCommand;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
 
 public class ViewCommandHandler implements CommandHandler {
 
-    @Inject
-    private FailureCollector failureCollector;
     @Inject
     private PasswordService passwordService;
     @Inject

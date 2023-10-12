@@ -3,7 +3,6 @@ package de.pflugradts.passbird.adapter.passwordstore
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
-import de.pflugradts.passbird.application.failurehandling.FailureCollector
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.fakePasswordEntry
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT
@@ -38,14 +37,12 @@ class PasswordStoreFacadeIT {
 
     private val configuration = mockk<Configuration>()
     private val cryptoProvider = mockk<CryptoProvider>()
-    private val failureCollector = mockk<FailureCollector>()
     private val namespaceServiceFake = NamespaceServiceFake()
     private val systemOperation = SystemOperation()
     private var passwordStoreFacade: PasswordStoreFacade = PasswordStoreFacade(
         passwordStoreReader = PasswordStoreReader(
             configuration = configuration,
             cryptoProvider = cryptoProvider,
-            failureCollector = failureCollector,
             namespaceService = namespaceServiceFake,
             systemOperation = systemOperation,
         ),

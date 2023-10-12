@@ -5,7 +5,6 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.passbird.application.commandhandling.handler.SetCommandHandler;
 import de.pflugradts.passbird.application.configuration.Configuration;
 import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.password.PasswordRequirements;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
@@ -37,8 +36,6 @@ class SetCommandTestIT {
 
     private InputHandler inputHandler;
 
-    @Mock
-    private FailureCollector failureCollector;
     @Mock
     private PasswordService passwordService;
     @Mock

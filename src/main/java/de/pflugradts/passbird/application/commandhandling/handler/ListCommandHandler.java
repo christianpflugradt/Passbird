@@ -4,7 +4,6 @@ import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.ListCommand;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
@@ -15,8 +14,6 @@ import static de.pflugradts.passbird.application.util.ByteArrayUtilsKt.copyBytes
 
 public class ListCommandHandler implements CommandHandler {
 
-    @Inject
-    private FailureCollector failureCollector;
     @Inject
     private PasswordService passwordService;
     @Inject

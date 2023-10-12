@@ -7,7 +7,6 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.ImportCommand;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
 import de.pflugradts.passbird.application.exchange.ImportExportService;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.BytesComparator;
 import de.pflugradts.passbird.domain.model.transfer.Output;
@@ -18,8 +17,6 @@ import java.util.stream.Collectors;
 
 public class ImportCommandHandler implements CommandHandler {
 
-    @Inject
-    private FailureCollector failureCollector;
     @Inject
     private ReadableConfiguration configuration;
     @Inject

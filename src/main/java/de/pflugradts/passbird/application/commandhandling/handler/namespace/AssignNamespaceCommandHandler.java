@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.namespace.AssignNamespaceCommand;
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.NamespaceService;
@@ -22,8 +21,6 @@ public class AssignNamespaceCommandHandler implements CommandHandler, CanListAva
     private PasswordService passwordService;
     @Inject
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
-    @Inject
-    private FailureCollector failureCollector;
 
     @Subscribe
     private void handleAssignNamespaceCommand(final AssignNamespaceCommand assignNamespaceCommand) {

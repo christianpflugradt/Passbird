@@ -3,7 +3,6 @@ package de.pflugradts.passbird.application.commandhandling;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.passbird.application.commandhandling.handler.namespace.AssignNamespaceCommandHandler;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
@@ -39,8 +38,6 @@ class AssignNamespaceCommandTestIT {
     private PasswordService passwordService;
     @Mock
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
-    @Mock
-    private FailureCollector failureCollector;
     @InjectMocks
     private AssignNamespaceCommandHandler assignNamespaceCommandHandler;
 

@@ -5,19 +5,16 @@ import com.google.inject.Inject;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.SetCommand;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.password.InvalidKeyException;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
-import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
+import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider;
 
 import static de.pflugradts.passbird.domain.service.password.PasswordService.EntryNotExistsAction.DO_NOTHING;
 
 public class SetCommandHandler implements CommandHandler {
 
-    @Inject
-    private FailureCollector failureCollector;
     @Inject
     private ReadableConfiguration configuration;
     @Inject

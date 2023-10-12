@@ -6,7 +6,6 @@ import de.pflugradts.passbird.application.commandhandling.handler.ImportCommandH
 import de.pflugradts.passbird.application.configuration.Configuration;
 import de.pflugradts.passbird.application.configuration.MockitoConfigurationFaker;
 import de.pflugradts.passbird.application.exchange.ImportExportService;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
@@ -33,8 +32,6 @@ class ImportCommandTestIT {
     private CommandBus commandBus;
     private InputHandler inputHandler;
 
-    @Mock
-    private FailureCollector failureCollector;
     @Mock
     private ImportExportService importExportService;
     @Mock

@@ -1,11 +1,9 @@
 package de.pflugradts.passbird.domain.model.password;
 
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import lombok.Getter;
 
 public class InvalidKeyException extends RuntimeException {
 
-    @Getter
     private final Bytes keyBytes;
 
     public InvalidKeyException(final Bytes keyBytes) {
@@ -13,4 +11,7 @@ public class InvalidKeyException extends RuntimeException {
         this.keyBytes = keyBytes;
     }
 
+    public Bytes getKeyBytes() {
+        return keyBytes;
+    }
 }

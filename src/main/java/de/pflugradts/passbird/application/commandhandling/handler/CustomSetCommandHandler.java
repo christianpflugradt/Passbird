@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand;
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.password.InvalidKeyException;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
@@ -17,8 +16,6 @@ public class CustomSetCommandHandler implements CommandHandler {
 
     @Inject
     private ReadableConfiguration configuration;
-    @Inject
-    private FailureCollector failureCollector;
     @Inject
     private PasswordService passwordService;
     @Inject

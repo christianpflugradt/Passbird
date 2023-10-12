@@ -3,7 +3,6 @@ package de.pflugradts.passbird.application.commandhandling;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.passbird.application.commandhandling.handler.namespace.AddNamespaceCommandHandler;
-import de.pflugradts.passbird.application.failurehandling.FailureCollector;
 import de.pflugradts.passbird.domain.model.namespace.Namespace;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
@@ -36,8 +35,6 @@ class AddNamespaceCommandTestIT {
     private final NamespaceServiceFake namespaceServiceFake = new NamespaceServiceFake();
     @Mock
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
-    @Mock
-    private FailureCollector failureCollector;
     @InjectMocks
     private AddNamespaceCommandHandler addNamespaceCommandHandler;
 
