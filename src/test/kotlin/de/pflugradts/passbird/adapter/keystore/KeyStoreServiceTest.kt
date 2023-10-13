@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.adapter.keystore
 
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
@@ -23,10 +24,10 @@ class KeyStoreServiceTest {
         val invalidPath = mockk<Path>()
 
         // when
-        val actual = runCatching { keyStoreService.storeKey(charsOf("password".toCharArray()), invalidPath) }
+        val actual = tryCatching { keyStoreService.storeKey(charsOf("password".toCharArray()), invalidPath) }
 
         // then
-        expectThat(actual.isFailure).isTrue()
+        expectThat(actual.failure).isTrue()
     }
 
     @Test
@@ -35,10 +36,10 @@ class KeyStoreServiceTest {
         val invalidPath = mockk<Path>()
 
         // when
-        val actual = runCatching { keyStoreService.loadKey(charsOf("password".toCharArray()), invalidPath) }
+        val actual = tryCatching { keyStoreService.loadKey(charsOf("password".toCharArray()), invalidPath) }
 
         // then
-        expectThat(actual.isFailure).isTrue()
+        expectThat(actual.failure).isTrue()
     }
 
     @Test
@@ -50,10 +51,10 @@ class KeyStoreServiceTest {
         )
 
         // when
-        val actual = runCatching { keyStoreService.storeKey(charsOf("password".toCharArray()), Paths.get("")) }
+        val actual = tryCatching { keyStoreService.storeKey(charsOf("password".toCharArray()), Paths.get("")) }
 
         // then
-        expectThat(actual.isFailure).isTrue()
+        expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isA<KeyStoreException>()
     }
 
@@ -66,10 +67,10 @@ class KeyStoreServiceTest {
         )
 
         // when
-        val actual = runCatching { keyStoreService.loadKey(charsOf("password".toCharArray()), Paths.get("")) }
+        val actual = tryCatching { keyStoreService.loadKey(charsOf("password".toCharArray()), Paths.get("")) }
 
         // then
-        expectThat(actual.isFailure).isTrue()
+        expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isA<KeyStoreException>()
     }
 }

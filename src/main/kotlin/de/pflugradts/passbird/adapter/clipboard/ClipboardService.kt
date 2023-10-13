@@ -2,6 +2,7 @@ package de.pflugradts.passbird.adapter.clipboard
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -29,7 +30,7 @@ class ClipboardService @Inject constructor(
         }
     }
 
-    private fun sleep() = runCatching { Thread.sleep(delaySeconds * MILLI_SECONDS) }
+    private fun sleep() = tryCatching { Thread.sleep(delaySeconds * MILLI_SECONDS) }
 
     private val isResetEnabled: Boolean get() = configuration.adapter.clipboard.reset.enabled
     private val delaySeconds: Int get() = configuration.adapter.clipboard.reset.delaySeconds

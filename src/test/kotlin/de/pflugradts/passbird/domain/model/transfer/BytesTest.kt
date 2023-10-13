@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.domain.model.transfer
 
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
@@ -61,10 +62,10 @@ class BytesTest {
         val bytes = bytesOf(givenBytes)
 
         // when
-        val throwable = runCatching { bytes.getByte(invalidIndex) }.exceptionOrNull()
+        val exception = tryCatching { bytes.getByte(invalidIndex) }.exceptionOrNull()
 
         // then
-        expectThat(throwable).isA<ArrayIndexOutOfBoundsException>()
+        expectThat(exception).isA<ArrayIndexOutOfBoundsException>()
     }
 
     @Test
@@ -101,10 +102,10 @@ class BytesTest {
         val bytes = bytesOf(givenBytes)
 
         // when
-        val throwable = runCatching { bytes.slice(invalidIndex, invalidIndex + 1) }.exceptionOrNull()
+        val exception = tryCatching { bytes.slice(invalidIndex, invalidIndex + 1) }.exceptionOrNull()
 
         // then
-        expectThat(throwable).isA<ArrayIndexOutOfBoundsException>()
+        expectThat(exception).isA<ArrayIndexOutOfBoundsException>()
     }
 
     @Test
@@ -406,10 +407,10 @@ class BytesTest {
             }
 
             // when
-            val throwable = runCatching { iterator.next() }.exceptionOrNull()
+            val exception = tryCatching { iterator.next() }.exceptionOrNull()
 
             // then
-            expectThat(throwable).isA<NoSuchElementException>()
+            expectThat(exception).isA<NoSuchElementException>()
         }
     }
 }

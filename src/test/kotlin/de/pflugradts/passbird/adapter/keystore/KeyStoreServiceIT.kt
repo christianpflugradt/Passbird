@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.adapter.keystore
 
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
-import strikt.assertions.isSuccess
 import strikt.assertions.isTrue
 import strikt.java.exists
 import java.io.File
@@ -37,7 +37,7 @@ class KeyStoreServiceIT {
     }
 
     @Test
-    fun `should use key store roundtrip`() {
+    fun `should write to and read from key store`() {
         // given
         val password = "p4s5wrD"
         val oneTimePasswordChars1 = charsOf(password.toCharArray())
@@ -48,12 +48,12 @@ class KeyStoreServiceIT {
         expectThat(oneTimePasswordChars2.toCharArray()) isEqualTo password.toCharArray()
 
         // when
-        val actualStoreResult = runCatching { keyStoreService!!.storeKey(oneTimePasswordChars1, path) }
+        val actualStoreResult = tryCatching { keyStoreService!!.storeKey(oneTimePasswordChars1, path) }
         val actualLoadResult = keyStoreService!!.loadKey(oneTimePasswordChars2, path)
 
         // then
         expectThat(File(keyStoreFile!!)).exists()
-        expectThat(actualStoreResult).isSuccess()
+        expectThat(actualStoreResult.success).isTrue()
         expectThat(actualLoadResult.isSuccess).isTrue()
         expectThat(actualLoadResult.value?.secret?.size) isEqualTo expectedByteArraySize
         expectThat(actualLoadResult.value?.iv?.size) isEqualTo expectedByteArraySize

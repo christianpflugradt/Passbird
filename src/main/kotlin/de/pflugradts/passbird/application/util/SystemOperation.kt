@@ -1,15 +1,14 @@
 package de.pflugradts.passbird.application.util
 
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
-import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Files
-import java.nio.file.InvalidPathException
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.KeyStore
@@ -27,13 +26,13 @@ class SystemOperation {
 
     fun readPasswordFromConsole(): CharArray = System.console().readPassword()
     fun resolvePath(directory: String, fileName: String): Path? =
-        try { Paths.get(directory).resolve(fileName) } catch (ex: InvalidPathException) { null }
+        tryCatching { Paths.get(directory).resolve(fileName) }.getOrNull()
     fun getPath(vararg uri: String): Path =
         if (uri.size > 1) Paths.get(uri[0], *Arrays.copyOfRange(uri, 1, uri.size)) else Paths.get(uri[0])
     fun newInputStream(path: Path): InputStream = Files.newInputStream(path)
     fun newOutputStream(path: Path): OutputStream = Files.newOutputStream(path)
     fun writeBytesToFile(path: Path, bytes: Bytes): Path = Files.write(path, bytes.toByteArray())
-    fun readBytesFromFile(path: Path) = try { bytesOf(Files.readAllBytes(path)) } catch (ex: IOException) { emptyBytes() }
+    fun readBytesFromFile(path: Path) = tryCatching { bytesOf(Files.readAllBytes(path)) } getOrElse emptyBytes()
     fun copyToClipboard(text: String) = StringSelection(text).let { Toolkit.getDefaultToolkit().systemClipboard.setContents(it, it) }
     fun exit() { exitProcess(0) }
 }

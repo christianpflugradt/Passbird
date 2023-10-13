@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.domain.model.namespace
 
+import de.pflugradts.kotlinextensions.tryCatching
+
 enum class NamespaceSlot {
     DEFAULT,
     N1,
@@ -21,7 +23,7 @@ enum class NamespaceSlot {
         const val FIRST_NAMESPACE = 1
         const val LAST_NAMESPACE = 9
         private const val DEFAULT_INDEX = 10
-        fun at(index: Char) = try { at(index.toString().toInt()) } catch (ex: NumberFormatException) { DEFAULT }
+        fun at(index: Char) = tryCatching { at(index.toString().toInt()) } getOrElse DEFAULT
         fun at(index: Int) = if (index in FIRST_NAMESPACE..LAST_NAMESPACE) entries[index] else DEFAULT
     }
 }
