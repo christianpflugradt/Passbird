@@ -33,7 +33,7 @@ public class RandomPasswordProvider implements PasswordProvider {
     }
 
     private Byte nextByte(final PasswordRequirements passwordRequirements) {
-        return passwordRequirements.isIncludeSpecialCharacters()
+        return passwordRequirements.getIncludeSpecialCharacters()
                 ? randomByte(MIN_ASCII_VALUE, MAX_ASCII_VALUE + 1)
                 : randomByte(FIRST_DIGIT_INDEX, LAST_LOWERCASE_INDEX + 1);
     }
@@ -47,7 +47,7 @@ public class RandomPasswordProvider implements PasswordProvider {
                 && anyMatch(passwordBytes.copy(), c -> CharValue.Companion.charValueOf(c).isUppercaseCharacter())
                 && anyMatch(passwordBytes.copy(), c -> CharValue.Companion.charValueOf(c).isLowercaseCharacter())
                 && anyMatch(passwordBytes.copy(),
-                    c -> CharValue.Companion.charValueOf(c).isSymbol()) == requirements.isIncludeSpecialCharacters();
+                    c -> CharValue.Companion.charValueOf(c).isSymbol()) == requirements.getIncludeSpecialCharacters();
     }
 
     private boolean anyMatch(final Bytes bytes, final Predicate<Byte> predicate) {

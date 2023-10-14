@@ -12,7 +12,7 @@ data class Configuration(
 ) : UpdatableConfiguration {
 
     override fun parsePasswordRequirements(): PasswordRequirements =
-        PasswordRequirements.of(application.password.specialCharacters, application.password.length)
+        PasswordRequirements.passwordRequirementsOf(application.password.specialCharacters, application.password.length)
 
     override fun updateDirectory(directory: String) {
         adapter.keyStore.location = directory

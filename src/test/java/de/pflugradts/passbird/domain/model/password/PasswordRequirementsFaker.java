@@ -35,7 +35,7 @@ public class PasswordRequirementsFaker {
     }
 
     public PasswordRequirements fake() {
-        return PasswordRequirements.of(includeSpecialCharacters, passwordLength);
+        return PasswordRequirements.Companion.passwordRequirementsOf(includeSpecialCharacters, passwordLength);
     }
 
 }
