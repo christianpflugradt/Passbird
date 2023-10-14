@@ -15,7 +15,6 @@ import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
 import de.pflugradts.passbird.application.commandhandling.command.SetCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewCommand
 import de.pflugradts.passbird.application.commandhandling.command.base.Command
-import de.pflugradts.passbird.application.commandhandling.command.namespace.NamespaceCommandFactory
 import de.pflugradts.passbird.domain.model.transfer.Input
 
 @Singleton

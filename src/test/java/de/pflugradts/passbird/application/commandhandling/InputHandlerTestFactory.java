@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.application.commandhandling;
 
-import de.pflugradts.passbird.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler;
 
 import java.util.Set;
