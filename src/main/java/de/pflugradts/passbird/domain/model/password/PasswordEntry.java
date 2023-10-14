@@ -36,7 +36,7 @@ public class PasswordEntry implements AggregateRoot {
 
     protected PasswordEntry(final NamespaceSlot namespaceSlot, final Bytes keyBytes, final Bytes passwordBytes) {
         namespace = namespaceSlot;
-        key = Key.create(keyBytes.copy());
+        key = Key.Companion.createKey(keyBytes.copy());
         password = Password.create(passwordBytes.copy());
         registerDomainEvent(new PasswordEntryCreated(this));
     }
