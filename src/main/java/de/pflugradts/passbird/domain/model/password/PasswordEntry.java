@@ -1,11 +1,11 @@
 package de.pflugradts.passbird.domain.model.password;
 
+import de.pflugradts.passbird.domain.model.PasswordEntryCreated;
+import de.pflugradts.passbird.domain.model.PasswordEntryDiscarded;
+import de.pflugradts.passbird.domain.model.PasswordEntryRenamed;
+import de.pflugradts.passbird.domain.model.PasswordEntryUpdated;
 import de.pflugradts.passbird.domain.model.ddd.AggregateRoot;
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent;
-import de.pflugradts.passbird.domain.model.event.PasswordEntryCreated;
-import de.pflugradts.passbird.domain.model.event.PasswordEntryDiscarded;
-import de.pflugradts.passbird.domain.model.event.PasswordEntryRenamed;
-import de.pflugradts.passbird.domain.model.event.PasswordEntryUpdated;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.password.storage.PasswordStoreAdapterPort;

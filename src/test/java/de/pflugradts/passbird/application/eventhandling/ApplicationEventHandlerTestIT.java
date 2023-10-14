@@ -1,11 +1,11 @@
 package de.pflugradts.passbird.application.eventhandling;
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
-import de.pflugradts.passbird.domain.model.event.PasswordEntryCreated;
-import de.pflugradts.passbird.domain.model.event.PasswordEntryDiscarded;
-import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound;
-import de.pflugradts.passbird.domain.model.event.PasswordEntryRenamed;
-import de.pflugradts.passbird.domain.model.event.PasswordEntryUpdated;
+import de.pflugradts.passbird.domain.model.PasswordEntryCreated;
+import de.pflugradts.passbird.domain.model.PasswordEntryDiscarded;
+import de.pflugradts.passbird.domain.model.PasswordEntryNotFound;
+import de.pflugradts.passbird.domain.model.PasswordEntryRenamed;
+import de.pflugradts.passbird.domain.model.PasswordEntryUpdated;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;

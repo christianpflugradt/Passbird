@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.service;
 
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry;
-import de.pflugradts.passbird.domain.model.event.PasswordEntryDiscarded;
+import de.pflugradts.passbird.domain.model.PasswordEntryDiscarded;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler;
