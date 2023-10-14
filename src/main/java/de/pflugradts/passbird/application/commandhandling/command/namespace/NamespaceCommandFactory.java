@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.command.namespace;
 
+import de.pflugradts.passbird.application.commandhandling.CommandVariant;
 import de.pflugradts.passbird.application.commandhandling.command.AddNamespaceCommand;
 import de.pflugradts.passbird.application.commandhandling.command.AssignNamespaceCommand;
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand;
@@ -9,8 +10,6 @@ import de.pflugradts.passbird.application.commandhandling.command.base.Command;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.CharValue;
 import de.pflugradts.passbird.domain.model.transfer.Input;
-
-import static de.pflugradts.passbird.application.commandhandling.command.CommandVariant.ADD;
 
 public class NamespaceCommandFactory {
 
@@ -30,7 +29,7 @@ public class NamespaceCommandFactory {
         } else if (command.getSize() == 2 && CharValue.Companion.charValueOf(command.getChar(1)).isDigit()) {
             return new SwitchNamespaceCommand(NamespaceSlot.Companion.at(command.getChar(1)));
         } else if (command.getSize() > 2
-                && command.getChar(1) == ADD.getValue()) {
+                && command.getChar(1) == CommandVariant.ADD.getValue()) {
             return new AddNamespaceCommand(NamespaceSlot.Companion.at(command.getChar(2)));
         }
         return new NullCommand();
