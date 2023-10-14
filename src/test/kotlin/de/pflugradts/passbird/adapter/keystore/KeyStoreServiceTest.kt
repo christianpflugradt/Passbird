@@ -36,7 +36,7 @@ class KeyStoreServiceTest {
         val invalidPath = mockk<Path>()
 
         // when
-        val actual = tryCatching { keyStoreService.loadKey(charsOf("password".toCharArray()), invalidPath) }
+        val actual = keyStoreService.loadKey(charsOf("password".toCharArray()), invalidPath)
 
         // then
         expectThat(actual.failure).isTrue()
@@ -67,7 +67,7 @@ class KeyStoreServiceTest {
         )
 
         // when
-        val actual = tryCatching { keyStoreService.loadKey(charsOf("password".toCharArray()), Paths.get("")) }
+        val actual = keyStoreService.loadKey(charsOf("password".toCharArray()), Paths.get(""))
 
         // then
         expectThat(actual.failure).isTrue()

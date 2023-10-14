@@ -43,6 +43,12 @@ value class TryResult<R> private constructor(
         return this
     }
 
+    fun <T> fold(onSuccess: (value: R) -> T, onFailure: (value: Exception) -> T): T {
+        return if (success) onSuccess(getOrNull()!!) else onFailure(exceptionOrNull()!!)
+    }
+
+    fun retry(block: (TryResult<R>) -> TryResult<R>) = if (failure) block(this) else this
+
     companion object {
         fun <R> success(value: R) = TryResult<R>(value)
         fun <R> failure(ex: Exception) = TryResult<R>(Failure(ex))

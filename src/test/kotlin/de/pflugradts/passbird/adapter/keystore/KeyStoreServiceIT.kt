@@ -54,9 +54,9 @@ class KeyStoreServiceIT {
         // then
         expectThat(File(keyStoreFile!!)).exists()
         expectThat(actualStoreResult.success).isTrue()
-        expectThat(actualLoadResult.isSuccess).isTrue()
-        expectThat(actualLoadResult.value?.secret?.size) isEqualTo expectedByteArraySize
-        expectThat(actualLoadResult.value?.iv?.size) isEqualTo expectedByteArraySize
+        expectThat(actualLoadResult.success).isTrue()
+        expectThat(actualLoadResult.getOrNull()?.secret?.size) isEqualTo expectedByteArraySize
+        expectThat(actualLoadResult.getOrNull()?.iv?.size) isEqualTo expectedByteArraySize
         expectThat(oneTimePasswordChars1.toCharArray()) isNotEqualTo password.toCharArray()
         expectThat(oneTimePasswordChars2.toCharArray()) isNotEqualTo password.toCharArray()
     }

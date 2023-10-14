@@ -1,7 +1,8 @@
 package de.pflugradts.passbird.application.security
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
-import de.pflugradts.passbird.application.LoginResult
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -108,9 +109,9 @@ class CryptoProviderFactoryTest {
 
     private fun givenLoginSucceeds(password: Input, keyStoreFilePath: Path) = every {
         keyStoreAdapterPort.loadKey(eq(password.bytes.toChars()), eq(keyStoreFilePath))
-    } returns LoginResult(value = Key(emptyBytes(), emptyBytes()))
+    } returns success(value = Key(emptyBytes(), emptyBytes()))
 
     private fun givenLoginFails(password: Input, keyStoreFilePath: Path) = every {
         keyStoreAdapterPort.loadKey(eq(password.bytes.toChars()), eq(keyStoreFilePath))
-    } returns LoginResult(exception = RuntimeException())
+    } returns failure(ex = RuntimeException())
 }

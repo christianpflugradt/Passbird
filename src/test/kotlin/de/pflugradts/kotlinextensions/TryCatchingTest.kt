@@ -92,4 +92,52 @@ class TryCatchingTest {
         // then
         expectThat(state) isEqualTo failureState
     }
+
+    @Test
+    fun `should fold successfully`() {
+        // given
+        val tenDividedBy = { x: Int -> 10 / x }
+        val givenSuccess = tryCatching { tenDividedBy(2) }
+        val givenFailure = tryCatching { tenDividedBy(0) }
+        val expectedSuccess = "success"
+        val expectedFailure = "failure"
+
+        // when
+        val actualSuccess = givenSuccess.fold(
+            onSuccess = { expectedSuccess },
+            onFailure = { expectedFailure },
+        )
+        val actualFailure = givenFailure.fold(
+            onSuccess = { expectedSuccess },
+            onFailure = { expectedFailure },
+        )
+
+        // then
+        expectThat(actualSuccess) isEqualTo expectedSuccess
+        expectThat(actualFailure) isEqualTo expectedFailure
+    }
+
+    @Test
+    fun `should retry successfully`() {
+        // given
+        var divisor = -1
+        val incI = { divisor++ }
+        val tenDividedBy = { x: Int -> 10 / x }
+        val incAndDivide = {
+            tryCatching {
+                incI()
+                tenDividedBy(divisor)
+            }
+        }
+
+        // when
+        val actual = incAndDivide() // divisor is incremented to 0, result is failure
+            .retry { incAndDivide() } // divisor is incremented to 1, result is success
+            .retry { incAndDivide() } // divisor is not incremented because result is success
+            .retry { incAndDivide() } // divisor is not incremented because result is success
+
+        // then
+        expectThat(divisor) isEqualTo 1
+        expectThat(actual.success).isTrue()
+    }
 }

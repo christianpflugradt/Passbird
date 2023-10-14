@@ -1,14 +1,13 @@
 package de.pflugradts.passbird.adapter.keystore
 
 import com.google.inject.Inject
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
-import de.pflugradts.passbird.application.LoginResult
 import de.pflugradts.passbird.application.security.Key
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Chars
 import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
-import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Path
@@ -25,11 +24,7 @@ class KeyStoreService @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
 ) : KeyStoreAdapterPort {
 
-    override fun loadKey(password: Chars, path: Path) = try {
-        LoginResult(value = load(password, systemOperation.newInputStream(path)))
-    } catch (exception: IOException) {
-        LoginResult(exception = exception)
-    }
+    override fun loadKey(password: Chars, path: Path) = tryCatching { load(password, systemOperation.newInputStream(path)) }
 
     private fun load(password: Chars, inputStream: InputStream) = inputStream.use {
         val keyStore = systemOperation.jceksInstance
