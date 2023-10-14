@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.command;
 
 import com.google.inject.Inject;
+import de.pflugradts.passbird.application.commandhandling.command.base.Command;
 import de.pflugradts.passbird.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ public class CommandFactory {
             case DISCARD -> new DiscardCommand(input);
             case EXPORT -> new ExportCommand(input);
             case GET -> new GetCommand(input);
-            case HELP -> new HelpCommand(input);
+            case HELP -> new HelpCommand();
             case IMPORT -> new ImportCommand(input);
             case LIST -> new ListCommand();
             case NAMESPACE -> namespaceCommandFactory.constructFromInput(input);

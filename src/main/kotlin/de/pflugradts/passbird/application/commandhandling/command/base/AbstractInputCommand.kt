@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.application.commandhandling.command
+package de.pflugradts.passbird.application.commandhandling.command.base
 
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Input

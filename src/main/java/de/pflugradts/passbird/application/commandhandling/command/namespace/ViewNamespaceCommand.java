@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.command.namespace;
 
-import de.pflugradts.passbird.application.commandhandling.command.Command;
+import de.pflugradts.passbird.application.commandhandling.command.base.Command;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
