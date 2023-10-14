@@ -1,8 +1,7 @@
 package de.pflugradts.passbird.domain.model.ddd;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AggregateRootTest {
@@ -40,11 +39,6 @@ class AggregateRootTest {
 
     private AggregateRoot setupAggregate() {
         return new AggregateRoot() {
-            private final List<DomainEvent> domainEventList = new ArrayList<>();
-            @Override
-            public List<DomainEvent> getDomainEvents() {
-                return domainEventList;
-            }
         };
     }
 

@@ -4,7 +4,6 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.fakePasswordEntry
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N1
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N2
@@ -15,6 +14,7 @@ import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N6
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N7
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N8
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N9
+import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.service.NamespaceServiceFake
@@ -74,9 +74,9 @@ class PasswordStoreFacadeIT {
     @Test
     fun `should write to and them read from database`() {
         // given
-        val passwordEntry1 = fakePasswordEntry(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1"))
-        val passwordEntry2 = fakePasswordEntry(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2"))
-        val passwordEntry3 = fakePasswordEntry(withKeyBytes = bytesOf("key3"), withPasswordBytes = bytesOf("password3"))
+        val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1"))
+        val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2"))
+        val passwordEntry3 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key3"), withPasswordBytes = bytesOf("password3"))
         val passwordEntries = listOf(passwordEntry1, passwordEntry2, passwordEntry3)
 
         // when
@@ -97,22 +97,22 @@ class PasswordStoreFacadeIT {
         namespaceServiceFake.deploy(namespace1, N1)
         namespaceServiceFake.deploy(namespace3, N3)
         namespaceServiceFake.deploy(namespace9, N9)
-        val passwordEntry1 = fakePasswordEntry(
+        val passwordEntry1 = createPasswordEntryForTesting(
             withKeyBytes = bytesOf("key1"),
             withPasswordBytes = bytesOf("password1"),
             withNamespace = DEFAULT,
         )
-        val passwordEntry2 = fakePasswordEntry(
+        val passwordEntry2 = createPasswordEntryForTesting(
             withKeyBytes = bytesOf("key2"),
             withPasswordBytes = bytesOf("password2"),
             withNamespace = N1,
         )
-        val passwordEntry3 = fakePasswordEntry(
+        val passwordEntry3 = createPasswordEntryForTesting(
             withKeyBytes = bytesOf("key3"),
             withPasswordBytes = bytesOf("password3"),
             withNamespace = N3,
         )
-        val passwordEntry3b = fakePasswordEntry(
+        val passwordEntry3b = createPasswordEntryForTesting(
             withKeyBytes = bytesOf("key3"),
             withPasswordBytes = bytesOf("password3b"),
             withNamespace = N9,

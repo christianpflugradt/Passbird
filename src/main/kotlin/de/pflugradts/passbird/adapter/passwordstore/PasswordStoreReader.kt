@@ -12,6 +12,7 @@ import de.pflugradts.passbird.application.util.readBytes
 import de.pflugradts.passbird.application.util.readInt
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
 import de.pflugradts.passbird.domain.model.password.PasswordEntry
+import de.pflugradts.passbird.domain.model.password.PasswordEntry.Companion.createPasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.service.NamespaceService
@@ -124,7 +125,7 @@ class PasswordStoreReader @Inject constructor(
         val passwordBytes = readBytes(this, incrementedOffset, passwordSize)
         incrementedOffset += passwordSize
         return Pair(
-            PasswordEntry.create(NamespaceSlot.at(namespaceSlot), bytesOf(keyBytes), bytesOf(passwordBytes)),
+            createPasswordEntry(NamespaceSlot.at(namespaceSlot), bytesOf(keyBytes), bytesOf(passwordBytes)),
             incrementedOffset,
         )
     }

@@ -41,7 +41,7 @@ public class PasswordEntryFaker {
     }
 
     public PasswordEntry fake() {
-        return PasswordEntry.create(namespace, key, password);
+        return PasswordEntry.Companion.createPasswordEntry(namespace, key, password);
     }
 
 }

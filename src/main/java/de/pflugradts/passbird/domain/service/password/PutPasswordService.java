@@ -48,7 +48,7 @@ class PutPasswordService implements CommonPasswordServiceCapabilities {
         find(passwordEntryRepository, encryptedKeyBytes).ifPresentOrElse(
             passwordEntry -> passwordEntry.updatePassword(encryptedPasswordBytes),
             () -> passwordEntryRepository.add(
-                PasswordEntry.create(
+                PasswordEntry.Companion.createPasswordEntry(
                     namespaceService.getCurrentNamespace().getSlot(),
                     encryptedKeyBytes,
                     encryptedPasswordBytes)

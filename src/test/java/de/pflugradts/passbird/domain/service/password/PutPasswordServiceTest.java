@@ -112,7 +112,7 @@ class PutPasswordServiceTest {
         then(cryptoProvider).should().encrypt(newKey);
         then(cryptoProvider).should().encrypt(newPassword);
         then(passwordEntryRepository).should().sync();
-        then(passwordEntryRepository).should().add(eq(PasswordEntry.create(DEFAULT, newKey, newPassword)));
+        then(passwordEntryRepository).should().add(eq(PasswordEntry.Companion.createPasswordEntry(DEFAULT, newKey, newPassword)));
         then(passbirdEventRegistry).should().processEvents();
     }
 
@@ -182,7 +182,7 @@ class PutPasswordServiceTest {
         // then
         then(cryptoProvider).should().encrypt(newKey);
         then(cryptoProvider).should().encrypt(existingKey);
-        then(passwordEntryRepository).should().add(eq(PasswordEntry.create(DEFAULT, newKey, newPassword)));
+        then(passwordEntryRepository).should().add(eq(PasswordEntry.Companion.createPasswordEntry(DEFAULT, newKey, newPassword)));
         then(passwordEntryRepository).should().sync();
         then(passbirdEventRegistry).should().processEvents();
         assertThatKeyExistsWithPassword(existingKey, newPasswordForExistingKey);

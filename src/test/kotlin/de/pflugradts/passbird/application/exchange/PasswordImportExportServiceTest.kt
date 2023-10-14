@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.exchange
 import de.pflugradts.passbird.application.BytePair
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
 import de.pflugradts.passbird.domain.model.Tuple
-import de.pflugradts.passbird.domain.model.fakePasswordEntry
+import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
@@ -30,8 +30,8 @@ class PasswordImportExportServiceTest {
     @Test
     fun `should peek import key bytes`() {
         // given
-        val passwordEntry1 = fakePasswordEntry(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1"))
-        val passwordEntry2 = fakePasswordEntry(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2"))
+        val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1"))
+        val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2"))
         fakeExchangeAdapterPort(
             forExchangeFactory = exchangeFactory,
             withPasswordEntries = listOf(passwordEntry1, passwordEntry2),
@@ -49,8 +49,8 @@ class PasswordImportExportServiceTest {
     @Test
     fun `should import passwords`() {
         // given
-        val passwordEntry1 = fakePasswordEntry(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1"))
-        val passwordEntry2 = fakePasswordEntry(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2"))
+        val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1"))
+        val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2"))
         val passwordEntries = listOf(passwordEntry1, passwordEntry2)
         fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory, withPasswordEntries = passwordEntries)
         fakePasswordService(instance = passwordService)
@@ -74,8 +74,8 @@ class PasswordImportExportServiceTest {
     @Test
     fun `should export passwords`() {
         // given
-        val passwordEntry1 = fakePasswordEntry(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1"))
-        val passwordEntry2 = fakePasswordEntry(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2"))
+        val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1"))
+        val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2"))
         val passwordEntries = listOf(passwordEntry1, passwordEntry2)
         val exchangeAdapterPort = fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory)
         fakePasswordService(instance = passwordService, withPasswordEntries = passwordEntries)

@@ -6,7 +6,8 @@ import de.pflugradts.passbird.domain.model.PasswordEntryDiscarded;
 import de.pflugradts.passbird.domain.model.PasswordEntryNotFound;
 import de.pflugradts.passbird.domain.model.PasswordEntryRenamed;
 import de.pflugradts.passbird.domain.model.PasswordEntryUpdated;
-import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
+import de.pflugradts.passbird.domain.model.password.PasswordEntry;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
@@ -22,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
 
+import static de.pflugradts.passbird.domain.model.password.PasswordEntryTestFactoryKt.createPasswordEntryForTesting;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -50,7 +52,7 @@ class ApplicationEventHandlerTestIT {
     @Test
     void shouldProcessPasswordEntryCreated() {
         // given
-        final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
+        final var givenPasswordEntry = setupPasswordEntry();
         final var passwordEntryCreated = new PasswordEntryCreated(givenPasswordEntry);
         final var expectedBytes = Bytes.bytesOf("expected key");
         given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(expectedBytes);
@@ -70,7 +72,7 @@ class ApplicationEventHandlerTestIT {
     @Test
     void shouldProcessPasswordEntryUpdated() {
         // given
-        final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
+        final var givenPasswordEntry = setupPasswordEntry();
         final var passwordEntryUpdated = new PasswordEntryUpdated(givenPasswordEntry);
         final var expectedBytes = Bytes.bytesOf("expected key");
         given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(expectedBytes);
@@ -90,7 +92,7 @@ class ApplicationEventHandlerTestIT {
     @Test
     void shouldProcessPasswordEntryRenamed() {
         // given
-        final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
+        final var givenPasswordEntry = setupPasswordEntry();
         final var passwordEntryRenamed = new PasswordEntryRenamed(givenPasswordEntry);
         final var expectedBytes = Bytes.bytesOf("expected key");
         given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(expectedBytes);
@@ -110,7 +112,7 @@ class ApplicationEventHandlerTestIT {
     @Test
     void shouldProcessPasswordEntryDiscarded() {
         // given
-        final var givenPasswordEntry = PasswordEntryFaker.faker().fakePasswordEntry().fake();
+        final var givenPasswordEntry = setupPasswordEntry();
         final var passwordEntryDiscarded = new PasswordEntryDiscarded(givenPasswordEntry);
         final var expectedBytes = Bytes.bytesOf("expected key");
         given(cryptoProvider.decrypt(givenPasswordEntry.viewKey())).willReturn(expectedBytes);
@@ -145,6 +147,10 @@ class ApplicationEventHandlerTestIT {
                 .extracting(Output::getBytes).isNotNull()
                 .extracting(Bytes::asString).isNotNull()
                 .asString().contains(expectedBytes.asString());
+    }
+
+    private PasswordEntry setupPasswordEntry() {
+        return createPasswordEntryForTesting(Bytes.bytesOf("foo"), Bytes.bytesOf("foo"), NamespaceSlot.DEFAULT);
     }
 
 }

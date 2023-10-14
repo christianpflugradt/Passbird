@@ -6,6 +6,7 @@ import com.tngtech.archunit.base.DescribedPredicate.alwaysTrue
 import com.tngtech.archunit.core.domain.JavaClass
 import com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo
 import com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEndingWith
+import com.tngtech.archunit.core.domain.JavaModifier
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.core.importer.ImportOption.DoNotIncludeTests
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes
@@ -92,9 +93,9 @@ class PassbirdAT {
     @Nested
     inner class DomainModelTest {
         @Test
-        fun dddPackageShouldOnlyContainInterfaces() {
+        fun dddPackageShouldOnlyContainInterfacesAndAbstractClasses() {
             classes().that().resideInAPackage(path(DOMAIN_MODELS, "ddd"))
-                .should().beInterfaces()
+                .should().beInterfaces().orShould().haveModifier(JavaModifier.ABSTRACT)
                 .check(classes)
         }
 

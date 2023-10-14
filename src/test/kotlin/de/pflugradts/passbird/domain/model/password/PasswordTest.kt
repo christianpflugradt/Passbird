@@ -72,7 +72,7 @@ class PasswordTest {
     }
 
     @Test
-    fun `should CloneBytesOnUpdate`() {
+    fun `should clone bytes on update`() {
         // given
         val originalBytes = bytesOf("password")
         val password = createPassword(originalBytes)
