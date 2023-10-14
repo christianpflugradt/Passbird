@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.domain.model.password
 
 import de.pflugradts.passbird.domain.model.password.Key.Companion.createKey
+import de.pflugradts.passbird.domain.model.password.Password.Companion.createPassword
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -92,7 +93,7 @@ class KeyTest {
             val key = createKey(bytes)
 
             // when
-            val actual = key.equals(bytes)
+            val actual = key.equals(createPassword(bytes))
 
             // then
             expectThat(actual).isFalse()
