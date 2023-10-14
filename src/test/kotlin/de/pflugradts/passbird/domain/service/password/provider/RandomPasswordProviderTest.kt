@@ -6,7 +6,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.matches
 
-internal class RandomPasswordProviderTest {
+class RandomPasswordProviderTest {
 
     private val passwordProvider = RandomPasswordProvider()
 

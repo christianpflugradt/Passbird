@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
-internal class ByteArrayUtilsTest {
+class ByteArrayUtilsTest {
     @Test
     fun `should read int`() {
         // given

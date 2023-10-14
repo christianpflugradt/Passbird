@@ -165,7 +165,7 @@ class PasswordEntryTest {
     }
 
     @Nested
-    internal inner class DomainEventsTest {
+    inner class DomainEventsTest {
         @Test
         fun `should have created event when password entry is created`() {
             // given / when
