@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.service.password;
 
 import com.google.inject.Inject;
-import de.pflugradts.passbird.domain.model.PasswordEntryNotFound;
+import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.password.PasswordEntry;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;

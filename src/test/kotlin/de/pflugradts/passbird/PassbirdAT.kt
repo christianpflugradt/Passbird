@@ -13,14 +13,13 @@ import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods
-import com.tngtech.archunit.library.Architectures
+import com.tngtech.archunit.library.Architectures.onionArchitecture
 import de.pflugradts.passbird.domain.model.ddd.AggregateRoot
 import de.pflugradts.passbird.domain.model.ddd.DomainEntity
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
 import de.pflugradts.passbird.domain.model.ddd.Repository
 import de.pflugradts.passbird.domain.model.ddd.ValueObject
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -41,8 +40,8 @@ class PassbirdAT {
     private fun path(vararg segments: String) = "${segments.joinToString(".")}.."
 
     @Test
-    fun shouldHaveOnionArchitecture() {
-        Architectures.onionArchitecture()
+    fun `should have onion architecture`() {
+        onionArchitecture()
             .domainModels(path(DOMAIN_MODELS))
             .domainServices(path(DOMAIN_SERVICES))
             .applicationServices(path(APPLICATION_ROOT))
@@ -58,7 +57,7 @@ class PassbirdAT {
     @Nested
     inner class AdapterTest {
         @Test
-        fun adapterPortImplementationsShouldBeInAdapterPackages() {
+        fun `adapter port implementations should be in adapter packages`() {
             classes().that()
                 .areAssignableTo(JavaClass.Predicates.INTERFACES.and(simpleNameEndingWith("AdapterPort")))
                 .and().areNotInterfaces()
@@ -67,7 +66,7 @@ class PassbirdAT {
         }
 
         @Test
-        fun noClassesShouldBeInAdapterPackage() {
+        fun `no classes should be in adapter package`() {
             noClasses().should().resideInAPackage(ADAPTER_ROOT).check(classes)
         }
     }
@@ -75,15 +74,7 @@ class PassbirdAT {
     @Nested
     inner class RepositoryAccessTest {
         @Test
-        fun repositoriesShouldOnlyBeAccessedFromApplicationAndDomainLayer() {
-            classes().that().areAssignableTo(Repository::class.java)
-                .should().onlyBeAccessed().byClassesThat().resideInAPackage(path(APPLICATION_ROOT))
-                .orShould().onlyBeAccessed().byClassesThat().resideInAPackage(path(DOMAIN_SERVICES))
-                .check(classes)
-        }
-
-        @Test
-        fun repositoriesShouldOnlyBeAccessedFromDomainServices() {
+        fun `repositories should only be accessed from domain services`() {
             classes().that().areAssignableTo(Repository::class.java)
                 .should().onlyBeAccessed().byClassesThat().resideInAPackage(path(DOMAIN_SERVICES))
                 .check(classes)
@@ -93,50 +84,49 @@ class PassbirdAT {
     @Nested
     inner class DomainModelTest {
         @Test
-        fun dddPackageShouldOnlyContainInterfacesAndAbstractClasses() {
+        fun `ddd package should only contain interfaces and abstract classes`() {
             classes().that().resideInAPackage(path(DOMAIN_MODELS, "ddd"))
                 .should().beInterfaces().orShould().haveModifier(JavaModifier.ABSTRACT)
                 .check(classes)
         }
 
         @Test
-        fun aggregateRootsShouldResideInDomainModelPackage() {
+        fun `aggregate roots should reside in domain model package`() {
             classes().that().areAssignableTo(AggregateRoot::class.java).and().areNotInterfaces()
                 .should().resideInAPackage(path(DOMAIN_MODELS))
                 .check(classes)
         }
 
         @Test
-        fun domainEntitiesShouldResideInDomainModelPackage() {
+        fun `domain entities should reside in domain model package`() {
             classes().that().areAssignableTo(DomainEntity::class.java).and().areNotInterfaces()
                 .should().resideInAPackage(path(DOMAIN_MODELS))
                 .check(classes)
         }
 
         @Test
-        fun valueObjectsShouldResideInDomainModelPackage() {
+        fun `value objects should reside in domain model package`() {
             classes().that().areAssignableTo(ValueObject::class.java).and().areNotInterfaces()
                 .should().resideInAPackage(path(DOMAIN_MODELS))
                 .check(classes)
         }
 
         @Test
-        fun repositoriesShouldResideInDomainModelPackage() {
+        fun `repositories should reside in domain model package`() {
             classes().that().areAssignableTo(Repository::class.java).and().areNotInterfaces()
                 .should().resideInAPackage(path(DOMAIN_SERVICES))
                 .check(classes)
         }
 
         @Test
-        @Disabled
-        fun domainEventsShouldResideInDomainModelEventPackage() {
-            classes().that().areAssignableFrom(DomainEvent::class.java).and().areNotInterfaces()
+        fun `domain events should reside in domain model event package`() {
+            classes().that().areAssignableTo(DomainEvent::class.java).and().areNotInterfaces()
                 .should().resideInAPackage(path(DOMAIN_MODELS, "event"))
                 .check(classes)
         }
 
         @Test
-        fun noClassesShouldBeInDomainPackage() {
+        fun `no classes should be in domain package`() {
             noClasses().should().resideInAPackage(DOMAIN_ROOT)
                 .check(classes)
         }
@@ -145,12 +135,12 @@ class PassbirdAT {
     @Nested
     inner class EventHandlerTest {
         @Test
-        fun eventHandlersShouldNotHavePublicMethods() {
+        fun `event handlers should not have public methods`() {
             noMethods().that().areDeclaredInClassesThat().areAssignableTo(EventHandler::class.java).should().bePublic().check(classes)
         }
 
         @Test
-        fun eventHandlersHandleMethodsMustBeAnnotatedWithSubscribe() {
+        fun `event handlers handle methods must be annotated with subscribe`() {
             methods().that().areDeclaredInClassesThat().areAssignableTo(EventHandler::class.java)
                 .and().haveNameMatching("handle.*")
                 .should().beAnnotatedWith(Subscribe::class.java)
@@ -158,7 +148,7 @@ class PassbirdAT {
         }
 
         @Test
-        fun noMethodsThatAreNotEventHandlersMayBeAnnotatedWithSubscribe() {
+        fun `no methods that are not event handlers may be annotated with subscribe`() {
             noMethods().that().areDeclaredInClassesThat().areNotAssignableTo(EventHandler::class.java)
                 .or().haveNameNotMatching("handle.*")
                 .should().beAnnotatedWith(Subscribe::class.java)
@@ -169,12 +159,12 @@ class PassbirdAT {
     @Nested
     inner class NamingTest {
         @Test
-        fun noClassesMayHaveNameEndingWithImpl() {
+        fun `no classes may have name ending with impl`() {
             noClasses().should().haveSimpleNameEndingWith("Impl").check(classes)
         }
 
         @Test
-        fun noClassesMayHaveNameEndingWithHelper() {
+        fun `no classes may have name ending with helper`() {
             noClasses().should().haveSimpleNameEndingWith("Helper").check(classes)
         }
     }

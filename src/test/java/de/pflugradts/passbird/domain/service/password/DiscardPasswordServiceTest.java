@@ -2,7 +2,7 @@ package de.pflugradts.passbird.domain.service.password;
 
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry;
 import de.pflugradts.passbird.application.security.CryptoProviderFaker;
-import de.pflugradts.passbird.domain.model.PasswordEntryNotFound;
+import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryRepositoryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;

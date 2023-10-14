@@ -2,8 +2,8 @@ package de.pflugradts.passbird.domain.service;
 
 import com.google.common.eventbus.EventBus;
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry;
-import de.pflugradts.passbird.domain.model.PasswordEntryCreated;
-import de.pflugradts.passbird.domain.model.PasswordEntryUpdated;
+import de.pflugradts.passbird.domain.model.event.PasswordEntryCreated;
+import de.pflugradts.passbird.domain.model.event.PasswordEntryUpdated;
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import org.junit.jupiter.api.Test;

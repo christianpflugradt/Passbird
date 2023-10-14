@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.domain.model
+package de.pflugradts.passbird.domain.model.event
 
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
 import de.pflugradts.passbird.domain.model.password.PasswordEntry

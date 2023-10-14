@@ -3,7 +3,7 @@ package de.pflugradts.passbird.domain.service.eventhandling;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.pflugradts.passbird.domain.model.PasswordEntryDiscarded;
+import de.pflugradts.passbird.domain.model.event.PasswordEntryDiscarded;
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository;
 
 @Singleton
