@@ -3,7 +3,6 @@ package de.pflugradts.passbird.application.commandhandling
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import de.pflugradts.passbird.application.commandhandling.CommandType.Companion.resolveCommandTypeFrom
-import de.pflugradts.passbird.application.commandhandling.command.CommandFactory
 import de.pflugradts.passbird.domain.model.transfer.Input
 
 @Singleton
