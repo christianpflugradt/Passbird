@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class MockitoConfigurationFaker {
 
-    private boolean isTemplate = false;
     private boolean isPromptOnRemoval = false;
     private Configuration configuration;
 
@@ -42,6 +41,7 @@ public class MockitoConfigurationFaker {
         lenient().when(application.getPassword()).thenReturn(passwordProvider);
         lenient().when(configuration.getAdapter()).thenReturn(adapter);
         lenient().when(configuration.getApplication()).thenReturn(application);
+        boolean isTemplate = false;
         lenient().when(configuration.getTemplate()).thenReturn(isTemplate);
         return configuration;
     }
@@ -54,9 +54,7 @@ public class MockitoConfigurationFaker {
     }
 
     private Configuration.KeyStore givenKeyStoreAdapter() {
-        final var keyStore = mock(Configuration.KeyStore.class);
-        lenient().when(keyStore.getLocation()).thenReturn(keyStoreLocation);
-        return keyStore;
+        return mock(Configuration.KeyStore.class);
     }
 
     private Configuration.Password givenPasswordProvider() {
@@ -66,11 +64,7 @@ public class MockitoConfigurationFaker {
     }
 
     private Configuration.PasswordStore givenPasswordStoreAdapter() {
-        final var passwordStore = mock(Configuration.PasswordStore.class);
-        lenient().when(passwordStore.getLocation()).thenReturn(passwordStoreLocation);
-        lenient().when(passwordStore.getVerifyChecksum()).thenReturn(isVerifyChecksum);
-        lenient().when(passwordStore.getVerifySignature()).thenReturn(isVerifySignature);
-        return passwordStore;
+        return mock(Configuration.PasswordStore.class);
     }
 
     private Configuration.UserInterface givenUserInterfaceAdapter() {
