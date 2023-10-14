@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.command;
 
 import com.google.inject.Inject;
+import de.pflugradts.passbird.application.commandhandling.CommandType;
 import de.pflugradts.passbird.application.commandhandling.command.base.Command;
 import de.pflugradts.passbird.application.commandhandling.command.namespace.NamespaceCommandFactory;
 import de.pflugradts.passbird.domain.model.transfer.Input;
