@@ -1,7 +1,11 @@
 package de.pflugradts.passbird.application.commandhandling.command.namespace;
 
-import de.pflugradts.passbird.application.commandhandling.command.base.Command;
+import de.pflugradts.passbird.application.commandhandling.command.AddNamespaceCommand;
+import de.pflugradts.passbird.application.commandhandling.command.AssignNamespaceCommand;
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand;
+import de.pflugradts.passbird.application.commandhandling.command.SwitchNamespaceCommand;
+import de.pflugradts.passbird.application.commandhandling.command.ViewNamespaceCommand;
+import de.pflugradts.passbird.application.commandhandling.command.base.Command;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.CharValue;
 import de.pflugradts.passbird.domain.model.transfer.Input;

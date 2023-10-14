@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.namespace;
 import com.google.common.eventbus.Subscribe;
 import com.google.inject.Inject;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
-import de.pflugradts.passbird.application.commandhandling.command.namespace.AssignNamespaceCommand;
+import de.pflugradts.passbird.application.commandhandling.command.AssignNamespaceCommand;
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
