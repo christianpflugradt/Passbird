@@ -10,10 +10,6 @@ import static org.mockito.Mockito.mock;
 public class MockitoConfigurationFaker {
 
     private boolean isTemplate = false;
-    private String passwordStoreLocation;
-    private String keyStoreLocation;
-    private boolean isVerifyChecksum;
-    private boolean isVerifySignature;
     private boolean isPromptOnRemoval = false;
     private Configuration configuration;
 
@@ -26,33 +22,8 @@ public class MockitoConfigurationFaker {
         return this;
     }
 
-    public MockitoConfigurationFaker withConfigurationTemplate() {
-        this.isTemplate = true;
-        return this;
-    }
-
-    public MockitoConfigurationFaker withPasswordStoreLocation(final String passwordStoreLocation) {
-        this.passwordStoreLocation = passwordStoreLocation;
-        return this;
-    }
-
-    public MockitoConfigurationFaker withKeyStoreLocation(final String keyStoreLocation) {
-        this.keyStoreLocation = keyStoreLocation;
-        return this;
-    }
-
     public MockitoConfigurationFaker withPromptOnRemovalEnabled() {
         this.isPromptOnRemoval = true;
-        return this;
-    }
-
-    public MockitoConfigurationFaker withVerifyChecksumEnabled() {
-        this.isVerifyChecksum = true;
-        return this;
-    }
-
-    public MockitoConfigurationFaker withVerifySignatureEnabled() {
-        this.isVerifySignature = true;
         return this;
     }
 
