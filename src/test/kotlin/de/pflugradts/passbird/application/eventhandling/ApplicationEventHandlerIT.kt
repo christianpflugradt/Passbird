@@ -35,7 +35,7 @@ class ApplicationEventHandlerIT {
 
     @ParameterizedTest
     @MethodSource("providePasswordEvents")
-    fun shouldProcessPasswordEntryCreated(domainEvent: DomainEvent) {
+    fun `should process password entry created`(domainEvent: DomainEvent) {
         // given
         val expectedBytes = bytesOf("expected key")
         every { cryptoProvider.decrypt(any(Bytes::class)) } answers { expectedBytes }
