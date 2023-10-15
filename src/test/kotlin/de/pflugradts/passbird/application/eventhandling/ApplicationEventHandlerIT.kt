@@ -31,7 +31,7 @@ class ApplicationEventHandlerIT {
     private val cryptoProvider = mockk<CryptoProvider>()
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>()
     private val applicationEventHandler = ApplicationEventHandler(cryptoProvider, userInterfaceAdapterPort)
-    private var passbirdEventRegistry = PassbirdEventRegistry(mutableSetOf<EventHandler>(applicationEventHandler), null)
+    private var passbirdEventRegistry = PassbirdEventRegistry(mutableSetOf<EventHandler>(applicationEventHandler))
 
     @ParameterizedTest
     @MethodSource("providePasswordEvents")

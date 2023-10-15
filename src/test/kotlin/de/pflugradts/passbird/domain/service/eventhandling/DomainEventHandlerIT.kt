@@ -12,7 +12,7 @@ class DomainEventHandlerIT {
 
     private val passwordEntryRepository = mockk<PasswordEntryRepository>()
     private val domainEventHandler = DomainEventHandler(passwordEntryRepository)
-    private var passbirdEventRegistry = PassbirdEventRegistry(mutableSetOf<EventHandler>(domainEventHandler), null)
+    private var passbirdEventRegistry = PassbirdEventRegistry(mutableSetOf<EventHandler>(domainEventHandler))
 
     @Test
     fun `should process password entry discarded`() {
