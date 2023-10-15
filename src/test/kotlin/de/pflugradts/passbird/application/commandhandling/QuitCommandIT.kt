@@ -14,7 +14,7 @@ class QuitCommandIT {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val bootable = mockk<Bootable>()
     private val quitCommandHandler = QuitCommandHandler(userInterfaceAdapterPort, bootable)
-    private val inputHandler = InputHandlerTestFactory.setupInputHandlerFor(quitCommandHandler)
+    private val inputHandler = createInputHandlerFor(quitCommandHandler)
 
     @Test
     fun `should handle quit command`() {
