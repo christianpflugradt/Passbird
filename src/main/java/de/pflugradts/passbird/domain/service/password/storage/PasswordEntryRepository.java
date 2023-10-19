@@ -71,12 +71,12 @@ public class PasswordEntryRepository implements Repository {
 
     private Supplier<Stream<PasswordEntry>> getPasswordEntriesSupplier(final PasswordEntryFilter passwordEntryFilter) {
         return getPasswordEntriesSupplier(passwordEntryFilter.equals(CURRENT_NAMESPACE)
-            ? PasswordEntryFilter.inNamespace(namespaceService.getCurrentNamespace().getSlot())
-            : PasswordEntryFilter.all());
+            ? PasswordEntryFilter.Companion.inNamespace(namespaceService.getCurrentNamespace().getSlot())
+            : PasswordEntryFilter.Companion.all());
     }
 
     private Supplier<Stream<PasswordEntry>> getPasswordEntriesSupplier(final NamespaceSlot namespace) {
-        return getPasswordEntriesSupplier(PasswordEntryFilter.inNamespace(namespace));
+        return getPasswordEntriesSupplier(PasswordEntryFilter.Companion.inNamespace(namespace));
     }
 
     private Supplier<Stream<PasswordEntry>> getPasswordEntriesSupplier(final Predicate<PasswordEntry> predicate) {
