@@ -7,7 +7,7 @@ import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
-import de.pflugradts.passbird.domain.service.NamespaceServiceFake;
+import de.pflugradts.passbird.domain.service.FixedNamespaceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +19,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static de.pflugradts.passbird.application.commandhandling.InputHandlerTestFactory.setupInputHandlerFor;
+import static de.pflugradts.passbird.domain.service.NamespaceServiceTestFactoryKt.createNamespaceServiceForTesting;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
@@ -29,7 +30,7 @@ class SwitchNamespaceCommandTestIT {
 
     private InputHandler inputHandler;
     @Spy
-    private final NamespaceServiceFake namespaceServiceFake = new NamespaceServiceFake();
+    private final FixedNamespaceService namespaceService = createNamespaceServiceForTesting();
     @Mock
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
     @InjectMocks
@@ -47,7 +48,7 @@ class SwitchNamespaceCommandTestIT {
     void shouldHandleSwitchNamespaceCommand() {
         // given
         final var givenNamespace = NamespaceSlot.N1;
-        namespaceServiceFake.deployAt(givenNamespace);
+        namespaceService.deploy(Bytes.bytesOf("namespace"), givenNamespace);
         final var input =  Input.Companion.inputOf(Bytes.bytesOf("n" + givenNamespace.index()));
 
         // when
@@ -55,7 +56,7 @@ class SwitchNamespaceCommandTestIT {
 
         // then
         then(userInterfaceAdapterPort).should(never()).send(any());
-        assertThat(namespaceServiceFake.getCurrentNamespace()).isNotNull()
+        assertThat(namespaceService.getCurrentNamespace()).isNotNull()
             .extracting(Namespace::getSlot).isNotNull()
             .isEqualTo(givenNamespace);
     }
@@ -64,8 +65,8 @@ class SwitchNamespaceCommandTestIT {
     void shouldHandleSwitchNamespaceCommand_DoNothingIfNamespaceIsAlreadyCurrent() {
         // given
         final var givenNamespace = NamespaceSlot.N1;
-        namespaceServiceFake.deployAtIndex(givenNamespace.index());
-        namespaceServiceFake.updateCurrentNamespace(givenNamespace);
+        namespaceService.deploy(Bytes.bytesOf("namespace"), givenNamespace);
+        namespaceService.updateCurrentNamespace(givenNamespace);
         final var input =  Input.Companion.inputOf(Bytes.bytesOf("n" + givenNamespace.index()));
 
         // when
@@ -84,7 +85,7 @@ class SwitchNamespaceCommandTestIT {
         // given
         final var givenNamespace = NamespaceSlot.N1;
         final var input =  Input.Companion.inputOf(Bytes.bytesOf("n" + givenNamespace.index()));
-        assertThat(namespaceServiceFake.atSlot(givenNamespace)).isNotPresent();
+        assertThat(namespaceService.atSlot(givenNamespace)).isNotPresent();
 
         // when
         inputHandler.handleInput(input);

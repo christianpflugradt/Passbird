@@ -4,6 +4,7 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N1
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N2
@@ -17,7 +18,8 @@ import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N9
 import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.service.NamespaceServiceFake
+import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.service.createNamespaceServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.every
 import io.mockk.mockk
@@ -31,25 +33,26 @@ import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 import strikt.java.exists
 import java.io.File
+import java.util.Collections
 import java.util.UUID
 
 class PasswordStoreFacadeIT {
 
     private val configuration = mockk<Configuration>()
     private val cryptoProvider = mockk<CryptoProvider>()
-    private val namespaceServiceFake = NamespaceServiceFake()
+    private val namespaceService = createNamespaceServiceForTesting()
     private val systemOperation = SystemOperation()
     private var passwordStoreFacade: PasswordStoreFacade = PasswordStoreFacade(
         passwordStoreReader = PasswordStoreReader(
             configuration = configuration,
             cryptoProvider = cryptoProvider,
-            namespaceService = namespaceServiceFake,
+            namespaceService = namespaceService,
             systemOperation = systemOperation,
         ),
         passwordStoreWriter = PasswordStoreWriter(
             configuration = configuration,
             cryptoProvider = cryptoProvider,
-            namespaceService = namespaceServiceFake,
+            namespaceService = namespaceService,
             systemOperation = systemOperation,
         ),
     )
@@ -94,9 +97,9 @@ class PasswordStoreFacadeIT {
         val namespace1 = bytesOf("namespace1")
         val namespace3 = bytesOf("Namespace3")
         val namespace9 = bytesOf("+nameSpace*9")
-        namespaceServiceFake.deploy(namespace1, N1)
-        namespaceServiceFake.deploy(namespace3, N3)
-        namespaceServiceFake.deploy(namespace9, N9)
+        namespaceService.deploy(namespace1, N1)
+        namespaceService.deploy(namespace3, N3)
+        namespaceService.deploy(namespace9, N9)
         val passwordEntry1 = createPasswordEntryForTesting(
             withKeyBytes = bytesOf("key1"),
             withPasswordBytes = bytesOf("password1"),
@@ -121,20 +124,20 @@ class PasswordStoreFacadeIT {
 
         // when
         passwordStoreFacade.sync { passwordEntries.stream() }
-        namespaceServiceFake.reset()
+        namespaceService.populate(Collections.nCopies(CAPACITY, emptyBytes()))
         expectThat(File(databaseFilename)).exists()
         val actual = passwordStoreFacade.restore()
 
         // then
         expectThat(actual.get().toList()) containsExactly passwordEntries
-        listOf(N2, N4, N5, N6, N7, N8).forEach { expectThat(namespaceServiceFake.atSlot(it).isPresent).isFalse() }
+        listOf(N2, N4, N5, N6, N7, N8).forEach { expectThat(namespaceService.atSlot(it).isPresent).isFalse() }
         mapOf(
             N1 to namespace1,
             N3 to namespace3,
             N9 to namespace9,
         ).forEach { (k, v) ->
-            expectThat(namespaceServiceFake.atSlot(k).isPresent)
-            expectThat(namespaceServiceFake.atSlot(k).get().bytes) isEqualTo v
+            expectThat(namespaceService.atSlot(k).isPresent)
+            expectThat(namespaceService.atSlot(k).get().bytes) isEqualTo v
         }
     }
 

@@ -7,12 +7,12 @@ import de.pflugradts.passbird.application.commandhandling.command.ViewNamespaceC
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
-import de.pflugradts.passbird.domain.service.NamespaceService;
+import de.pflugradts.passbird.domain.service.FixedNamespaceService;
 
 public class ViewNamespaceCommandHandler implements CommandHandler, CanListAvailableNamespaces {
 
     @Inject
-    private NamespaceService namespaceService;
+    private FixedNamespaceService namespaceService;
     @Inject
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
 

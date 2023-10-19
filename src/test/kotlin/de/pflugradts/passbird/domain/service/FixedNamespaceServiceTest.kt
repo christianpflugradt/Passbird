@@ -1,10 +1,13 @@
-package de.pflugradts.passbird.domain.model.namespace
+package de.pflugradts.passbird.domain.service
 
 import de.pflugradts.passbird.domain.model.namespace.Namespace.Companion.DEFAULT
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
-import org.junit.jupiter.api.BeforeEach
+import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.hasSize
@@ -13,21 +16,21 @@ import strikt.assertions.isFalse
 import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
 import strikt.java.isPresent
-import java.util.Collections
 import kotlin.jvm.optionals.getOrNull
 
-class NamespacesTest {
-    private val namespaces = Namespaces()
+class FixedNamespaceServiceTest {
 
-    @BeforeEach
-    fun reset() {
-        namespaces.reset()
-    }
+    private val passwordEntryRepository = mockk<PasswordEntryRepository>(relaxed = true)
+    private val namespaceService = FixedNamespaceService(passwordEntryRepository)
 
     @Test
-    fun `should have 9 slots`() {
-        // given // when // then
-        expectThat(namespaces.all().toList()) hasSize CAPACITY
+    fun `should have 9 empty slots upon initialisation`() {
+        // given / when
+        val actual = namespaceService.all().toList()
+
+        // then
+        expectThat(actual) hasSize CAPACITY
+        expectThat(actual.stream().allMatch { it.isEmpty }).isTrue()
     }
 
     @Test
@@ -39,8 +42,8 @@ class NamespacesTest {
         )
 
         // when
-        namespaces.populate(namespaceBytes)
-        val actual = namespaces.all().toList()
+        namespaceService.populate(namespaceBytes)
+        val actual = namespaceService.all().toList()
 
         // then
         intArrayOf(1, 3, 7).forEach {
@@ -51,25 +54,9 @@ class NamespacesTest {
     }
 
     @Test
-    fun `should populate only once`() {
-        // given
-        val givenBytes = bytesOf("namespace")
-        val otherBytes = bytesOf("namespaceOthers")
-        val namespaceBytes = Collections.nCopies(9, givenBytes)
-
-        // when
-        namespaces.populate(namespaceBytes)
-        namespaces.populate(Collections.nCopies(9, otherBytes))
-        val actual = namespaces.all().toList()
-
-        // then
-        actual.forEach { expectThat(it.getOrNull()?.bytes) isEqualTo givenBytes }
-    }
-
-    @Test
     fun `should return default namespace for default slot`() {
         // given / when / then
-        expectThat(namespaces.atSlot(NamespaceSlot.DEFAULT).getOrNull()) isEqualTo DEFAULT
+        expectThat(namespaceService.atSlot(NamespaceSlot.DEFAULT).getOrNull()) isEqualTo DEFAULT
     }
 
     @Test
@@ -82,10 +69,10 @@ class NamespacesTest {
         )
 
         // when
-        namespaces.populate(namespaceBytes)
+        namespaceService.populate(namespaceBytes)
 
         // then
-        val namespace2 = namespaces.atSlot(NamespaceSlot.N2)
+        val namespace2 = namespaceService.atSlot(NamespaceSlot.N2)
         expectThat(namespace2).isPresent()
         expectThat(namespace2.get().slot) isEqualTo NamespaceSlot.N2
         expectThat(namespace2.get().bytes) isEqualTo givenNamespaceBytes
@@ -100,10 +87,10 @@ class NamespacesTest {
         )
 
         // when
-        namespaces.populate(namespaceBytes)
+        namespaceService.populate(namespaceBytes)
 
         // then
-        expectThat(namespaces.atSlot(NamespaceSlot.N1).isPresent).isFalse()
+        expectThat(namespaceService.atSlot(NamespaceSlot.N1).isPresent).isFalse()
     }
 
     @Test
@@ -115,10 +102,10 @@ class NamespacesTest {
         )
 
         // when
-        namespaces.populate(namespaceBytes)
+        namespaceService.populate(namespaceBytes)
 
         // then
-        expectThat(namespaces.getCurrentNamespace().slot) isEqualTo NamespaceSlot.DEFAULT
+        expectThat(namespaceService.getCurrentNamespace().slot) isEqualTo NamespaceSlot.DEFAULT
     }
 
     @Test
@@ -128,14 +115,14 @@ class NamespacesTest {
             emptyBytes(), bytesOf("slot2"), emptyBytes(), emptyBytes(),
             emptyBytes(), emptyBytes(), emptyBytes(), emptyBytes(), emptyBytes(),
         )
-        namespaces.populate(namespaceBytes)
+        namespaceService.populate(namespaceBytes)
         val wantedCurrentNamespace = NamespaceSlot.N2
 
         // when
-        namespaces.updateCurrentNamespace(wantedCurrentNamespace)
+        namespaceService.updateCurrentNamespace(wantedCurrentNamespace)
 
         // then
-        expectThat(namespaces.getCurrentNamespace().slot) isEqualTo wantedCurrentNamespace
+        expectThat(namespaceService.getCurrentNamespace().slot) isEqualTo wantedCurrentNamespace
     }
 
     @Test
@@ -145,13 +132,29 @@ class NamespacesTest {
             emptyBytes(), bytesOf("slot2"), emptyBytes(), emptyBytes(),
             emptyBytes(), emptyBytes(), emptyBytes(), emptyBytes(), emptyBytes(),
         )
-        namespaces.populate(namespaceBytes)
+        namespaceService.populate(namespaceBytes)
         val wantedCurrentNamespace = NamespaceSlot.N1
 
         // when
-        namespaces.updateCurrentNamespace(wantedCurrentNamespace)
+        namespaceService.updateCurrentNamespace(wantedCurrentNamespace)
 
         // then
-        expectThat(namespaces.getCurrentNamespace().slot) isNotEqualTo wantedCurrentNamespace
+        expectThat(namespaceService.getCurrentNamespace().slot) isNotEqualTo wantedCurrentNamespace
+    }
+
+    @Test
+    fun `should deploy namespace and sync`() {
+        // given
+        val namespaceBytes = bytesOf("name space")
+
+        // when
+        namespaceService.deploy(namespaceBytes, NamespaceSlot.N3)
+        val actual = namespaceService.atSlot(NamespaceSlot.N3)
+
+        // then
+        expectThat(actual.isPresent).isTrue()
+        expectThat(actual.get().bytes) isEqualTo namespaceBytes
+        expectThat(actual.get().slot) isEqualTo NamespaceSlot.N3
+        verify(exactly = 1) { passwordEntryRepository.sync() }
     }
 }

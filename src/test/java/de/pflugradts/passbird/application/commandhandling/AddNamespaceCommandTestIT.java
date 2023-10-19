@@ -8,7 +8,7 @@ import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
-import de.pflugradts.passbird.domain.service.NamespaceServiceFake;
+import de.pflugradts.passbird.domain.service.FixedNamespaceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static de.pflugradts.passbird.application.commandhandling.InputHandlerTestFactory.setupInputHandlerFor;
+import static de.pflugradts.passbird.domain.service.NamespaceServiceTestFactoryKt.createNamespaceServiceForTesting;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
@@ -32,7 +33,7 @@ class AddNamespaceCommandTestIT {
 
     private InputHandler inputHandler;
     @Spy
-    private final NamespaceServiceFake namespaceServiceFake = new NamespaceServiceFake();
+    private final FixedNamespaceService namespaceService = createNamespaceServiceForTesting();
     @Mock
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
     @InjectMocks
@@ -63,7 +64,7 @@ class AddNamespaceCommandTestIT {
 
         // then
         then(userInterfaceAdapterPort).should(never()).send(any());
-        assertNamespaceEquals(namespaceServiceFake.atSlot(slotFromInput), referenceNamespace);
+        assertNamespaceEquals(namespaceService.atSlot(slotFromInput), referenceNamespace);
         assertThat(givenNamespace).isNotNull().isNotEqualTo(referenceNamespace);
     }
 
@@ -80,15 +81,15 @@ class AddNamespaceCommandTestIT {
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs( Input.Companion.inputOf(givenNamespace)).fake();
 
-        namespaceServiceFake.deploy(otherNamespace, slotFromInput);
-        assertNamespaceEquals(namespaceServiceFake.atSlot(slotFromInput), otherNamespace);
+        namespaceService.deploy(otherNamespace, slotFromInput);
+        assertNamespaceEquals(namespaceService.atSlot(slotFromInput), otherNamespace);
 
         // when
         inputHandler.handleInput(input);
 
         // then
         then(userInterfaceAdapterPort).should(never()).send(any());
-        assertNamespaceEquals(namespaceServiceFake.atSlot(slotFromInput), referenceNamespace);
+        assertNamespaceEquals(namespaceService.atSlot(slotFromInput), referenceNamespace);
         assertThat(givenNamespace).isNotNull().isNotEqualTo(referenceNamespace);
     }
 
@@ -112,7 +113,7 @@ class AddNamespaceCommandTestIT {
             .extracting(Output::getBytes).isNotNull()
             .extracting(Bytes::asString).isNotNull()
             .asString().contains("Empty input");
-        assertThat(namespaceServiceFake.atSlot(slotFromInput)).isNotPresent();
+        assertThat(namespaceService.atSlot(slotFromInput)).isNotPresent();
     }
 
     @Test

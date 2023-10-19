@@ -40,6 +40,7 @@ import de.pflugradts.passbird.application.exchange.ExchangeFactory
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.exchange.PasswordImportExportService
 import de.pflugradts.passbird.application.security.CryptoProviderFactory
+import de.pflugradts.passbird.domain.service.FixedNamespaceService
 import de.pflugradts.passbird.domain.service.NamespaceService
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
@@ -65,8 +66,8 @@ class ApplicationModule : AbstractModule() {
         bind(EventRegistry::class.java).to(PassbirdEventRegistry::class.java)
         bind(ImportExportService::class.java).to(PasswordImportExportService::class.java)
         bind(KeyStoreAdapterPort::class.java).to(KeyStoreService::class.java)
-        bind(NamespaceService::class.java).`in`(Singleton::class.java)
         bind(PasswordEntryRepository::class.java).`in`(Singleton::class.java)
+        bind(NamespaceService::class.java).to(FixedNamespaceService::class.java)
         bind(PasswordProvider::class.java).to(RandomPasswordProvider::class.java)
         bind(PasswordService::class.java).to(PasswordFacade::class.java)
         bind(PasswordStoreAdapterPort::class.java).to(PasswordStoreFacade::class.java)

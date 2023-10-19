@@ -8,7 +8,7 @@ import de.pflugradts.passbird.domain.model.password.PasswordEntry;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.password.PasswordEntryRepositoryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import de.pflugradts.passbird.domain.service.NamespaceServiceFake;
+import de.pflugradts.passbird.domain.service.FixedNamespaceService;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository;
 import org.junit.jupiter.api.Test;
@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.stream.Stream;
 
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT;
+import static de.pflugradts.passbird.domain.service.NamespaceServiceTestFactoryKt.createNamespaceServiceForTesting;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,7 +33,7 @@ class PutPasswordServiceTest {
     @Mock
     private CryptoProvider cryptoProvider;
     @Spy
-    private final NamespaceServiceFake namespaceServiceFake = new NamespaceServiceFake();
+    private final FixedNamespaceService namespaceService = createNamespaceServiceForTesting();
     @Mock
     private PasswordEntryRepository passwordEntryRepository;
     @Mock

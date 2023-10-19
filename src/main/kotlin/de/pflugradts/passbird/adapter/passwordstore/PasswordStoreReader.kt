@@ -48,7 +48,6 @@ class PasswordStoreReader @Inject constructor(
             }
             return Supplier { passwordEntries.stream() }
         }
-        namespaceService.populateEmpty()
         return Supplier { Stream.empty() }
     }
 

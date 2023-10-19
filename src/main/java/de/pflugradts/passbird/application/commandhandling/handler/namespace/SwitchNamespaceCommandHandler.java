@@ -7,12 +7,12 @@ import de.pflugradts.passbird.application.commandhandling.command.SwitchNamespac
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
-import de.pflugradts.passbird.domain.service.NamespaceService;
+import de.pflugradts.passbird.domain.service.FixedNamespaceService;
 
 public class SwitchNamespaceCommandHandler implements CommandHandler {
 
     @Inject
-    private NamespaceService namespaceService;
+    private FixedNamespaceService namespaceService;
     @Inject
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
 

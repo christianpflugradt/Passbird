@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.PasswordStoreAdapterPortFaker;
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
-import de.pflugradts.passbird.domain.service.NamespaceServiceFake;
+import de.pflugradts.passbird.domain.service.FixedNamespaceService;
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository;
 import de.pflugradts.passbird.domain.service.password.storage.PasswordStoreAdapterPort;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static de.pflugradts.passbird.domain.service.NamespaceServiceTestFactoryKt.createNamespaceServiceForTesting;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 
@@ -33,7 +34,7 @@ class PasswordEntryRepositoryTest {
     @Mock
     private PassbirdEventRegistry passbirdEventRegistry;
     @Spy
-    private final NamespaceServiceFake namespaceServiceFake = new NamespaceServiceFake();
+    private final FixedNamespaceService namespaceServiceFake = createNamespaceServiceForTesting();
     @InjectMocks
     private PasswordEntryRepository repository;
 
@@ -191,8 +192,8 @@ class PasswordEntryRepositoryTest {
             // given
             final var activeNamespace = NamespaceSlot.N2;
             final var otherNamespace = NamespaceSlot.N3;
-            namespaceServiceFake.deployAt(activeNamespace);
-            namespaceServiceFake.deployAt(otherNamespace);
+            namespaceServiceFake.deploy(Bytes.bytesOf("namespace"), activeNamespace);
+            namespaceServiceFake.deploy(Bytes.bytesOf("namespace"), otherNamespace);
             namespaceServiceFake.updateCurrentNamespace(activeNamespace);
 
             final var givenPasswordEntry1 = PasswordEntryFaker.faker()
@@ -226,8 +227,8 @@ class PasswordEntryRepositoryTest {
             final var keyBytes = Bytes.bytesOf("key");
             final var firstNamespace = NamespaceSlot.N1;
             final var secondNamespace = NamespaceSlot.N2;
-            namespaceServiceFake.deployAt(firstNamespace);
-            namespaceServiceFake.deployAt(secondNamespace);
+            namespaceServiceFake.deploy(Bytes.bytesOf("namespace"), firstNamespace);
+            namespaceServiceFake.deploy(Bytes.bytesOf("namespace"), secondNamespace);
 
             final var givenPasswordEntry1 = PasswordEntryFaker.faker()
                 .fakePasswordEntry()

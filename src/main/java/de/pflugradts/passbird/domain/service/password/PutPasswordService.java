@@ -6,7 +6,7 @@ import de.pflugradts.passbird.domain.model.password.InvalidKeyException;
 import de.pflugradts.passbird.domain.model.password.PasswordEntry;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.CharValue;
-import de.pflugradts.passbird.domain.service.NamespaceService;
+import de.pflugradts.passbird.domain.service.FixedNamespaceService;
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry;
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider;
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository;
@@ -21,7 +21,7 @@ class PutPasswordService implements CommonPasswordServiceCapabilities {
     @Inject
     private PasswordEntryRepository passwordEntryRepository;
     @Inject
-    private NamespaceService namespaceService;
+    private FixedNamespaceService namespaceService;
     @Inject
     private EventRegistry eventRegistry;
 

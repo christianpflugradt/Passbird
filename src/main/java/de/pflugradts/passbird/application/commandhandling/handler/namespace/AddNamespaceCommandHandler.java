@@ -8,12 +8,12 @@ import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.namespace.Namespace;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
-import de.pflugradts.passbird.domain.service.NamespaceService;
+import de.pflugradts.passbird.domain.service.FixedNamespaceService;
 
 public class AddNamespaceCommandHandler implements CommandHandler {
 
     @Inject
-    private NamespaceService namespaceService;
+    private FixedNamespaceService namespaceService;
     @Inject
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
 

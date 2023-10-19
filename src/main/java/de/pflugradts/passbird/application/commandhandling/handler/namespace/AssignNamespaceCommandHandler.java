@@ -7,7 +7,7 @@ import de.pflugradts.passbird.application.commandhandling.command.AssignNamespac
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Output;
-import de.pflugradts.passbird.domain.service.NamespaceService;
+import de.pflugradts.passbird.domain.service.FixedNamespaceService;
 import de.pflugradts.passbird.domain.service.password.PasswordService;
 
 import static de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.INVALID;
@@ -16,7 +16,7 @@ import static de.pflugradts.passbird.domain.service.password.PasswordService.Ent
 public class AssignNamespaceCommandHandler implements CommandHandler, CanListAvailableNamespaces {
 
     @Inject
-    private NamespaceService namespaceService;
+    private FixedNamespaceService namespaceService;
     @Inject
     private PasswordService passwordService;
     @Inject

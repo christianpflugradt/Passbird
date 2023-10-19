@@ -6,7 +6,7 @@ import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
-import de.pflugradts.passbird.domain.service.NamespaceServiceFake;
+import de.pflugradts.passbird.domain.service.FixedNamespaceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +18,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static de.pflugradts.passbird.application.commandhandling.InputHandlerTestFactory.setupInputHandlerFor;
+import static de.pflugradts.passbird.domain.service.NamespaceServiceTestFactoryKt.createNamespaceServiceForTesting;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 
@@ -26,7 +27,7 @@ class ViewNamespaceCommandTestIT {
 
     private InputHandler inputHandler;
     @Spy
-    private final NamespaceServiceFake namespaceServiceFake = new NamespaceServiceFake();
+    private final FixedNamespaceService namespaceService = createNamespaceServiceForTesting();
     @Mock
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
     @InjectMocks
@@ -78,7 +79,7 @@ class ViewNamespaceCommandTestIT {
         final var input =  Input.Companion.inputOf(Bytes.bytesOf("n"));
         final var deployedNamespaceSlot = 3;
         final var deployedNamespace = "mynamespace";
-        namespaceServiceFake.deploy(Bytes.bytesOf(deployedNamespace), NamespaceSlot.Companion.at(deployedNamespaceSlot));
+        namespaceService.deploy(Bytes.bytesOf(deployedNamespace), NamespaceSlot.Companion.at(deployedNamespaceSlot));
 
         // when
         inputHandler.handleInput(input);

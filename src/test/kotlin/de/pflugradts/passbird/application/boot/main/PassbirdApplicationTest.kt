@@ -7,11 +7,9 @@ import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.fakeInput
-import de.pflugradts.passbird.domain.service.NamespaceService
-import de.pflugradts.passbird.domain.service.NamespaceServiceFake
+import de.pflugradts.passbird.domain.service.createNamespaceServiceSpyForTesting
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -21,9 +19,9 @@ import strikt.assertions.isTrue
 class PassbirdApplicationTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>()
-    private val namespaceServiceFake = spyk<NamespaceService>(NamespaceServiceFake())
+    private val namespaceService = createNamespaceServiceSpyForTesting()
     private val inputHandler = mockk<InputHandler>()
-    private val passbirdApplication = PassbirdApplication(userInterfaceAdapterPort, namespaceServiceFake, inputHandler)
+    private val passbirdApplication = PassbirdApplication(userInterfaceAdapterPort, namespaceService, inputHandler)
 
     @Test
     fun `should delegate input`() {
@@ -63,8 +61,8 @@ class PassbirdApplicationTest {
         every { inputHandler.handleInput(any()) } returns Unit
 
         // when
-        namespaceServiceFake.deploy(bytesOf(givenNamespace), NamespaceSlot.N1)
-        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot.N1)
+        namespaceService.deploy(bytesOf(givenNamespace), NamespaceSlot.N1)
+        namespaceService.updateCurrentNamespace(NamespaceSlot.N1)
         passbirdApplication.boot()
 
         // then
@@ -86,7 +84,7 @@ class PassbirdApplicationTest {
         every { inputHandler.handleInput(any()) } returns Unit
 
         // when
-        namespaceServiceFake.updateCurrentNamespace(NamespaceSlot.DEFAULT)
+        namespaceService.updateCurrentNamespace(NamespaceSlot.DEFAULT)
         passbirdApplication.boot()
 
         // then

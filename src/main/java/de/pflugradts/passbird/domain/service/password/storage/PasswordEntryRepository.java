@@ -64,7 +64,7 @@ public class PasswordEntryRepository implements Repository {
 
     private Set<PasswordEntry> getPasswordEntries() {
         if (Objects.isNull(passwordEntries)) {
-            initializeRepository();
+            requestInitialization();
         }
         return passwordEntries;
     }
@@ -84,18 +84,13 @@ public class PasswordEntryRepository implements Repository {
     }
 
     public void requestInitialization() {
-        initializeRepository();
-    }
-
-    private void initializeRepository() {
         passwordEntries = passwordStoreAdapterPort
-                .restore()
-                .get()
-                .collect(Collectors.toSet());
+            .restore()
+            .get()
+            .collect(Collectors.toSet());
         passwordEntries.forEach(passwordEntry -> {
             passwordEntry.clearDomainEvents();
             eventRegistry.register(passwordEntry);
         });
     }
-
 }

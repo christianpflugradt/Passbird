@@ -10,14 +10,14 @@ import de.pflugradts.passbird.domain.model.namespace.Namespace
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.service.NamespaceService
+import de.pflugradts.passbird.domain.service.FixedNamespaceService
 
 const val INTERRUPT = 0x03.toChar()
 
 @Singleton
 class PassbirdApplication @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-    @Inject private val namespaceService: NamespaceService,
+    @Inject private val namespaceService: FixedNamespaceService,
     @Inject private val inputHandler: InputHandler,
 ) : Bootable {
 
