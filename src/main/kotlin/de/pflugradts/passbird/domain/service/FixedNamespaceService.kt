@@ -15,8 +15,6 @@ class FixedNamespaceService @Inject constructor(
     private val namespaces = Collections.nCopies(NamespaceSlot.CAPACITY, Optional.empty<Namespace>()).toMutableList()
     private var currentNamespace = NamespaceSlot.DEFAULT
 
-    init { passwordEntryRepository.requestInitialization() }
-
     override fun populate(namespaceBytes: List<Bytes>) {
         if (namespaceBytes.size == NamespaceSlot.CAPACITY) {
             (NamespaceSlot.FIRST_NAMESPACE..NamespaceSlot.LAST_NAMESPACE).forEach {
