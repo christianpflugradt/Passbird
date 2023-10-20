@@ -22,12 +22,12 @@ public class PasswordFacade implements PasswordService {
     private MovePasswordService movePasswordService;
 
     @Override
-    public Boolean entryExists(final Bytes keyBytes, final NamespaceSlot namespace) {
+    public boolean entryExists(final Bytes keyBytes, final NamespaceSlot namespace) {
         return viewPasswordService.entryExists(keyBytes, namespace);
     }
 
     @Override
-    public Boolean entryExists(final Bytes keyBytes, final EntryNotExistsAction entryNotExistsAction) {
+    public boolean entryExists(final Bytes keyBytes, final EntryNotExistsAction entryNotExistsAction) {
         return viewPasswordService.entryExists(keyBytes, entryNotExistsAction);
     }
 
