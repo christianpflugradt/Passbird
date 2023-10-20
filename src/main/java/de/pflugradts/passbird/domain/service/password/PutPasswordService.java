@@ -14,7 +14,7 @@ import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepos
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-class PutPasswordService implements CommonPasswordServiceCapabilities {
+public class PutPasswordService implements CommonPasswordServiceCapabilities {
 
     @Inject
     private CryptoProvider cryptoProvider;
