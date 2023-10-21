@@ -11,14 +11,14 @@ class DiscardPasswordService @Inject constructor(
     @Inject private val cryptoProvider: CryptoProvider,
     @Inject private val passwordEntryRepository: PasswordEntryRepository,
     @Inject private val eventRegistry: EventRegistry,
-) : CommonPasswordServiceCapabilities {
+) : CommonPasswordServiceCapabilities(cryptoProvider, passwordEntryRepository, eventRegistry) {
     fun discardPasswordEntry(keyBytes: Bytes) {
-        encrypted(cryptoProvider, keyBytes).let { encryptedKeyBytes ->
-            find(passwordEntryRepository, encryptedKeyBytes).ifPresentOrElse(
+        encrypted(keyBytes).let { encryptedKeyBytes ->
+            find(encryptedKeyBytes).ifPresentOrElse(
                 { it.discard() },
                 { eventRegistry.register(PasswordEntryNotFound(encryptedKeyBytes)) },
             )
         }
-        processEventsAndSync(eventRegistry, passwordEntryRepository)
+        processEventsAndSync()
     }
 }

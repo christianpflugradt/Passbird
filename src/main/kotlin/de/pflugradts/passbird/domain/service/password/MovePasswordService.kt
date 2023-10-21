@@ -13,18 +13,18 @@ class MovePasswordService @Inject constructor(
     @Inject private val cryptoProvider: CryptoProvider,
     @Inject private val passwordEntryRepository: PasswordEntryRepository,
     @Inject private val eventRegistry: EventRegistry,
-) : CommonPasswordServiceCapabilities {
+) : CommonPasswordServiceCapabilities(cryptoProvider, passwordEntryRepository, eventRegistry) {
     fun movePassword(keyBytes: Bytes, targetNamespace: NamespaceSlot) {
-        if (entryExists(cryptoProvider, passwordEntryRepository, keyBytes, targetNamespace)) {
+        if (entryExists(keyBytes, targetNamespace)) {
             throw KeyAlreadyExistsException(keyBytes)
         } else {
-            encrypted(cryptoProvider, keyBytes).let { encryptedKeyBytes ->
-                find(passwordEntryRepository, encryptedKeyBytes).ifPresentOrElse(
+            encrypted(keyBytes).let { encryptedKeyBytes ->
+                find(encryptedKeyBytes).ifPresentOrElse(
                     { it.updateNamespace(targetNamespace) },
                     { eventRegistry.register(PasswordEntryNotFound(encryptedKeyBytes)) },
                 )
             }
-            processEventsAndSync(eventRegistry, passwordEntryRepository)
+            processEventsAndSync()
         }
     }
 }

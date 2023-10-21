@@ -13,23 +13,22 @@ class RenamePasswordService @Inject constructor(
     @Inject private val cryptoProvider: CryptoProvider,
     @Inject private val passwordEntryRepository: PasswordEntryRepository,
     @Inject private val eventRegistry: EventRegistry,
-) : CommonPasswordServiceCapabilities {
+) : CommonPasswordServiceCapabilities(cryptoProvider, passwordEntryRepository, eventRegistry) {
     fun renamePasswordEntry(keyBytes: Bytes, newKeyBytes: Bytes) {
-        if (entryExists(cryptoProvider, passwordEntryRepository, eventRegistry, keyBytes, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
-            encrypted(cryptoProvider, newKeyBytes).let { encryptedNewKeyBytes ->
-                if (find(passwordEntryRepository, encryptedNewKeyBytes).isEmpty) {
+        if (entryExists(keyBytes, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
+            encrypted(newKeyBytes).let { encryptedNewKeyBytes ->
+                if (find(encryptedNewKeyBytes).isEmpty) {
                     renamePasswordEntryOrFail(keyBytes, encryptedNewKeyBytes)
-                    processEventsAndSync(eventRegistry, passwordEntryRepository)
+                    processEventsAndSync()
                 } else {
                     throw KeyAlreadyExistsException(newKeyBytes)
                 }
             }
         }
     }
-
     private fun renamePasswordEntryOrFail(keyBytes: Bytes, newKeyBytes: Bytes) =
-        encrypted(cryptoProvider, keyBytes).let { encryptedKeyBytes ->
-            find(passwordEntryRepository, encryptedKeyBytes).ifPresentOrElse(
+        encrypted(keyBytes).let { encryptedKeyBytes ->
+            find(encryptedKeyBytes).ifPresentOrElse(
                 { it.rename(newKeyBytes) },
                 { eventRegistry.register(PasswordEntryNotFound(encryptedKeyBytes)) },
             )

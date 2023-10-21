@@ -18,34 +18,22 @@ class PutPasswordService @Inject constructor(
     @Inject private val passwordEntryRepository: PasswordEntryRepository,
     @Inject private val eventRegistry: EventRegistry,
     @Inject private val namespaceService: NamespaceService,
-) : CommonPasswordServiceCapabilities {
+) : CommonPasswordServiceCapabilities(cryptoProvider, passwordEntryRepository, eventRegistry) {
     fun putPasswordEntries(passwordEntries: Stream<BytePair>) {
         passwordEntries.forEach { putPasswordEntry(it.value.first, it.value.second, false) }
-        processEventsAndSync(eventRegistry, passwordEntryRepository)
+        processEventsAndSync()
     }
 
     fun putPasswordEntry(keyBytes: Bytes, passwordBytes: Bytes, sync: Boolean = true) {
-        putPasswordEntryPair(BytePair(Pair(keyBytes, passwordBytes)))
-        if (sync) processEventsAndSync(eventRegistry, passwordEntryRepository)
-    }
-
-    private fun putPasswordEntryPair(passwordEntryPair: BytePair) {
-        challengeAlias(passwordEntryPair.value.first)
-        putEncryptedPasswordEntry(
-            encrypted(cryptoProvider, passwordEntryPair.value.first),
-            encrypted(cryptoProvider, passwordEntryPair.value.second),
-        )
-    }
-
-    private fun putEncryptedPasswordEntry(encryptedKeyBytes: Bytes, encryptedPasswordBytes: Bytes) {
-        find(passwordEntryRepository, encryptedKeyBytes).ifPresentOrElse(
+        challengeAlias(keyBytes)
+        val encryptedKeyBytes = encrypted(keyBytes)
+        val encryptedPasswordBytes = encrypted(passwordBytes)
+        val namespaceSlot = namespaceService.getCurrentNamespace().slot
+        find(encryptedKeyBytes).ifPresentOrElse(
             { it.updatePassword(encryptedPasswordBytes) },
-            {
-                passwordEntryRepository.add(
-                    createPasswordEntry(namespaceService.getCurrentNamespace().slot, encryptedKeyBytes, encryptedPasswordBytes),
-                )
-            },
+            { passwordEntryRepository.add(createPasswordEntry(namespaceSlot, encryptedKeyBytes, encryptedPasswordBytes)) },
         )
+        if (sync) processEventsAndSync()
     }
 
     fun challengeAlias(bytes: Bytes) {
