@@ -14,6 +14,5 @@ interface UserInterfaceAdapterPort {
     fun receiveSecurely(): Input = receiveSecurely(emptyOutput())
     fun send(output: Output)
     fun sendLineBreak() = send(emptyOutput())
-    fun receiveConfirmation(output: Output): Boolean =
-        receive(output).run { !isEmpty && data.isEmpty && command.firstByte == 'c'.code.toByte() }
+    fun receiveConfirmation(output: Output) = receive(output).run { !isEmpty && data.isEmpty && command.firstByte == 'c'.code.toByte() }
 }
