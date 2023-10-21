@@ -13,4 +13,5 @@ fun fakePasswordEntryRepository(
         Optional.ofNullable(withPasswordEntries.find { it.viewKey() == firstArg() && it.associatedNamespace() == secondArg() })
     }
     every { instance.findAll() } answers { withPasswordEntries.stream() }
+    every { instance.sync() } returns Unit
 }
