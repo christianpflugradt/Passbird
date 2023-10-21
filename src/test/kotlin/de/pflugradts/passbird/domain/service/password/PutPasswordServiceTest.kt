@@ -3,7 +3,7 @@ package de.pflugradts.passbird.domain.service.password
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
-import de.pflugradts.passbird.domain.model.Tuple
+import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
 import de.pflugradts.passbird.domain.model.password.InvalidKeyException
 import de.pflugradts.passbird.domain.model.password.PasswordEntry.Companion.createPasswordEntry
@@ -154,7 +154,9 @@ class PutPasswordServiceTest {
         fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(matchingPasswordEntry))
 
         // when
-        passwordService.putPasswordEntries(Stream.of(Tuple(newKey, newPassword), Tuple(existingKey, newPasswordForExistingKey)))
+        passwordService.putPasswordEntries(
+            Stream.of(BytePair(Pair(newKey, newPassword)), BytePair(Pair(existingKey, newPasswordForExistingKey))),
+        )
 
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(newKey) }

@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application
 
 import de.pflugradts.passbird.application.exchange.ExchangeFactory
+import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.password.PasswordEntry
 import io.mockk.every
 import io.mockk.mockk

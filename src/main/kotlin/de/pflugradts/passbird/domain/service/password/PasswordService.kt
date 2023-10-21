@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.domain.service.password
 
-import de.pflugradts.passbird.domain.model.Tuple
+import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import java.util.Optional
@@ -24,7 +24,7 @@ interface PasswordService {
     fun viewPassword(keyBytes: Bytes): Optional<Bytes>
     fun renamePasswordEntry(keyBytes: Bytes, newKeyBytes: Bytes)
     fun challengeAlias(bytes: Bytes)
-    fun putPasswordEntries(passwordEntries: Stream<Tuple<Bytes, Bytes>>)
+    fun putPasswordEntries(passwordEntries: Stream<BytePair>)
     fun putPasswordEntry(keyBytes: Bytes, passwordBytes: Bytes)
     fun discardPasswordEntry(keyBytes: Bytes)
     fun movePasswordEntry(keyBytes: Bytes, targetNamespace: NamespaceSlot)

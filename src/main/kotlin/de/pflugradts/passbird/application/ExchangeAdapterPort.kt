@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.application
 
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.BytePair
 import java.util.stream.Stream
 
 /**
@@ -10,6 +10,3 @@ interface ExchangeAdapterPort {
     fun send(data: Stream<BytePair>)
     fun receive(): Stream<BytePair>
 }
-
-@JvmInline
-value class BytePair(val value: Pair<Bytes, Bytes>)

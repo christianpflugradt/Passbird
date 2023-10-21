@@ -1,8 +1,7 @@
 package de.pflugradts.passbird.application.exchange
 
 import com.google.inject.Inject
-import de.pflugradts.passbird.application.BytePair
-import de.pflugradts.passbird.domain.model.Tuple
+import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import java.util.stream.Stream
@@ -16,7 +15,7 @@ class PasswordImportExportService @Inject constructor(
 
     override fun importPasswordEntries(uri: String) {
         passwordService.putPasswordEntries(
-            exchangeFactory.createPasswordExchange(uri).receive().map { Tuple(it.value.first, it.value.second) },
+            exchangeFactory.createPasswordExchange(uri).receive(),
             // FIXME when migrated password service to kotlin
         )
     }

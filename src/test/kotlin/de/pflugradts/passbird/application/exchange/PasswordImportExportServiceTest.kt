@@ -1,10 +1,8 @@
 package de.pflugradts.passbird.application.exchange
 
-import de.pflugradts.passbird.application.BytePair
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
-import de.pflugradts.passbird.domain.model.Tuple
+import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
-import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -54,7 +52,7 @@ class PasswordImportExportServiceTest {
         val passwordEntries = listOf(passwordEntry1, passwordEntry2)
         fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory, withPasswordEntries = passwordEntries)
         fakePasswordService(instance = passwordService)
-        val passwordEntriesSlot = slot<Stream<Tuple<Bytes, Bytes>>>()
+        val passwordEntriesSlot = slot<Stream<BytePair>>()
 
         // when
         importExportService.importPasswordEntries(uri)
@@ -66,8 +64,8 @@ class PasswordImportExportServiceTest {
         val actual = passwordEntriesSlot.captured.toList()
         expectThat(actual) hasSize passwordEntries.size
         actual.forEachIndexed { index, it ->
-            expectThat(it._1) isEqualTo passwordEntries[index].viewKey()
-            expectThat(it._2) isEqualTo passwordEntries[index].viewPassword()
+            expectThat(it.value.first) isEqualTo passwordEntries[index].viewKey()
+            expectThat(it.value.second) isEqualTo passwordEntries[index].viewPassword()
         }
     }
 

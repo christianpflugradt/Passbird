@@ -1,8 +1,8 @@
 package de.pflugradts.passbird.adapter.exchange
 
-import de.pflugradts.passbird.application.BytePair
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

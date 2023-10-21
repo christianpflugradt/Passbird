@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
 import com.google.inject.Inject
-import de.pflugradts.passbird.domain.model.Tuple
+import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.password.InvalidKeyException
 import de.pflugradts.passbird.domain.model.password.PasswordEntry.Companion.createPasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
@@ -19,19 +19,22 @@ class PutPasswordService @Inject constructor(
     @Inject private val eventRegistry: EventRegistry,
     @Inject private val namespaceService: NamespaceService,
 ) : CommonPasswordServiceCapabilities {
-    fun putPasswordEntries(passwordEntries: Stream<Tuple<Bytes, Bytes>>) {
-        passwordEntries.forEach { putPasswordEntry(it._1, it._2, false) }
+    fun putPasswordEntries(passwordEntries: Stream<BytePair>) {
+        passwordEntries.forEach { putPasswordEntry(it.value.first, it.value.second, false) }
         processEventsAndSync(eventRegistry, passwordEntryRepository)
     }
 
     fun putPasswordEntry(keyBytes: Bytes, passwordBytes: Bytes, sync: Boolean = true) {
-        putPasswordEntryTuple(Tuple(keyBytes, passwordBytes))
+        putPasswordEntryPair(BytePair(Pair(keyBytes, passwordBytes)))
         if (sync) processEventsAndSync(eventRegistry, passwordEntryRepository)
     }
 
-    private fun putPasswordEntryTuple(passwordEntryTuple: Tuple<Bytes, Bytes>) {
-        challengeAlias(passwordEntryTuple._1)
-        putEncryptedPasswordEntry(encrypted(cryptoProvider, passwordEntryTuple._1), encrypted(cryptoProvider, passwordEntryTuple._2))
+    private fun putPasswordEntryPair(passwordEntryPair: BytePair) {
+        challengeAlias(passwordEntryPair.value.first)
+        putEncryptedPasswordEntry(
+            encrypted(cryptoProvider, passwordEntryPair.value.first),
+            encrypted(cryptoProvider, passwordEntryPair.value.second),
+        )
     }
 
     private fun putEncryptedPasswordEntry(encryptedKeyBytes: Bytes, encryptedPasswordBytes: Bytes) {

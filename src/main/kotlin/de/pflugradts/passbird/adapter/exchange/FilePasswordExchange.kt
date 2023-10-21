@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
-import de.pflugradts.passbird.application.BytePair
 import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.EXCHANGE_FILENAME
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 import java.io.IOException

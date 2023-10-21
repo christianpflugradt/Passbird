@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
 import com.google.inject.Inject
-import de.pflugradts.passbird.domain.model.Tuple
+import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.service.password.PasswordService.EntryNotExistsAction
@@ -21,7 +21,7 @@ class PasswordFacade @Inject constructor(
     override fun renamePasswordEntry(keyBytes: Bytes, newKeyBytes: Bytes) = renamePasswordService.renamePasswordEntry(keyBytes, newKeyBytes)
     override fun findAllKeys() = viewPasswordService.findAllKeys()
     override fun challengeAlias(bytes: Bytes) = putPasswordService.challengeAlias(bytes)
-    override fun putPasswordEntries(passwordEntries: Stream<Tuple<Bytes, Bytes>>) = putPasswordService.putPasswordEntries(passwordEntries)
+    override fun putPasswordEntries(passwordEntries: Stream<BytePair>) = putPasswordService.putPasswordEntries(passwordEntries)
     override fun putPasswordEntry(keyBytes: Bytes, passwordBytes: Bytes) = putPasswordService.putPasswordEntry(keyBytes, passwordBytes)
     override fun discardPasswordEntry(keyBytes: Bytes) = discardPasswordService.discardPasswordEntry(keyBytes)
     override fun movePasswordEntry(keyBytes: Bytes, targetNamespace: NamespaceSlot) =
