@@ -35,11 +35,6 @@ public class PasswordEntryFaker {
         return this;
     }
 
-    public PasswordEntryFaker withPasswordBytes(final Bytes passwordBytes) {
-        password = passwordBytes;
-        return this;
-    }
-
     public PasswordEntry fake() {
         return PasswordEntry.Companion.createPasswordEntry(namespace, key, password);
     }
