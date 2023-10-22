@@ -34,11 +34,6 @@ public class PasswordServiceFaker {
         return this;
     }
 
-    public PasswordServiceFaker withInvalidAlias(final Bytes invalidAlias) {
-        this.invalidAlias = invalidAlias;
-        return this;
-    }
-
     public PasswordServiceFaker withPasswordEntries(final PasswordEntry... passwordEntries) {
         this.passwordEntries.clear();
         this.passwordEntries.addAll(Arrays.asList(passwordEntries));

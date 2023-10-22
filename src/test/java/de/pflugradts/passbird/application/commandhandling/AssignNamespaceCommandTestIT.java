@@ -4,7 +4,6 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort;
 import de.pflugradts.passbird.application.UserInterfaceAdapterPortFaker;
 import de.pflugradts.passbird.application.commandhandling.handler.namespace.AssignNamespaceCommandHandler;
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot;
-import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker;
 import de.pflugradts.passbird.domain.model.transfer.Bytes;
 import de.pflugradts.passbird.domain.model.transfer.Input;
 import de.pflugradts.passbird.domain.model.transfer.Output;
@@ -22,6 +21,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static de.pflugradts.passbird.application.commandhandling.InputHandlerTestFactory.setupInputHandlerFor;
+import static de.pflugradts.passbird.domain.model.password.PasswordEntryTestFactoryKt.createPasswordEntryForTesting;
+import static de.pflugradts.passbird.domain.model.transfer.Bytes.bytesOf;
 import static de.pflugradts.passbird.domain.service.NamespaceServiceTestFactoryKt.createNamespaceServiceForTesting;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,17 +55,16 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.bytesOf("n" + givenAlias);
+        final var givenInput = bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var expectedNamespace = 1;
 
-        namespaceService.deploy(Bytes.bytesOf("namespace"), NamespaceSlot.Companion.at(expectedNamespace));
+        namespaceService.deploy(bytesOf("namespace"), NamespaceSlot.Companion.at(expectedNamespace));
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
             .withPasswordEntries(
-                PasswordEntryFaker.faker()
-                    .fakePasswordEntry()
-                    .withKeyBytes(Bytes.bytesOf(givenAlias)).fake()).fake();
+                createPasswordEntryForTesting(bytesOf(givenAlias), bytesOf("password"), NamespaceSlot.DEFAULT)
+            ).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(expectedNamespace)).fake();
@@ -73,7 +73,7 @@ class AssignNamespaceCommandTestIT {
         inputHandler.handleInput( Input.Companion.inputOf(givenInput));
 
         // then
-        then(passwordService).should().movePasswordEntry(Bytes.bytesOf(givenAlias), NamespaceSlot.Companion.at(expectedNamespace));
+        then(passwordService).should().movePasswordEntry(bytesOf(givenAlias), NamespaceSlot.Companion.at(expectedNamespace));
         assertThat(givenInput).isNotNull().isNotEqualTo(referenceInput);
     }
 
@@ -81,11 +81,11 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_EntryNotExists() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.bytesOf("n" + givenAlias);
+        final var givenInput = bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var expectedNamespace = 1;
 
-        namespaceService.deploy(Bytes.bytesOf("namespace"), NamespaceSlot.Companion.at(expectedNamespace));
+        namespaceService.deploy(bytesOf("namespace"), NamespaceSlot.Companion.at(expectedNamespace));
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
             .withPasswordEntries().fake();
@@ -105,19 +105,17 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_DisplayTargetNamespace() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.bytesOf("n" + givenAlias);
+        final var givenInput = bytesOf("n" + givenAlias);
         final var currentNamespace = 0;
         final var targetNamespace = 1;
 
         namespaceService.updateCurrentNamespace(NamespaceSlot.Companion.at(currentNamespace));
-        namespaceService.deploy(Bytes.bytesOf("namespace"), NamespaceSlot.Companion.at(targetNamespace));
+        namespaceService.deploy(bytesOf("namespace"), NamespaceSlot.Companion.at(targetNamespace));
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
             .withPasswordEntries(
-                PasswordEntryFaker.faker()
-                    .fakePasswordEntry()
-                    .withKeyBytes(Bytes.bytesOf(givenAlias))
-                    .withNamespace(NamespaceSlot.Companion.at(currentNamespace)).fake()).fake();
+                createPasswordEntryForTesting(bytesOf(givenAlias), bytesOf("password"), NamespaceSlot.Companion.at(currentNamespace))
+            ).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(targetNamespace)).fake();
@@ -138,19 +136,17 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_DisplayTargetNamespaceWhenNotDefault() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.bytesOf("n" + givenAlias);
+        final var givenInput = bytesOf("n" + givenAlias);
         final var currentNamespace = 1;
         final var targetNamespace = 0;
 
-        namespaceService.deploy(Bytes.bytesOf("namespace"), NamespaceSlot.Companion.at(currentNamespace));
+        namespaceService.deploy(bytesOf("namespace"), NamespaceSlot.Companion.at(currentNamespace));
         namespaceService.updateCurrentNamespace(NamespaceSlot.Companion.at(currentNamespace));
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
             .withPasswordEntries(
-                PasswordEntryFaker.faker()
-                    .fakePasswordEntry()
-                    .withKeyBytes(Bytes.bytesOf(givenAlias))
-                    .withNamespace(NamespaceSlot.Companion.at(currentNamespace)).fake()).fake();
+                createPasswordEntryForTesting(bytesOf(givenAlias), bytesOf("password"), NamespaceSlot.Companion.at(currentNamespace))
+            ).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(targetNamespace)).fake();
@@ -171,16 +167,15 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_EnteredInvalidNamespace() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.bytesOf("n" + givenAlias);
+        final var givenInput = bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var invalidNamespace = -1;
 
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
             .withPasswordEntries(
-                PasswordEntryFaker.faker()
-                    .fakePasswordEntry()
-                    .withKeyBytes(Bytes.bytesOf(givenAlias)).fake()).fake();
+                createPasswordEntryForTesting(bytesOf(givenAlias), bytesOf("password"), NamespaceSlot.DEFAULT)
+            ).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(invalidNamespace)).fake();
@@ -202,18 +197,17 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_EnteredCurrentNamespace() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.bytesOf("n" + givenAlias);
+        final var givenInput = bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var currentNamespace = 1;
 
-        namespaceService.deploy(Bytes.bytesOf("namespace"), NamespaceSlot.Companion.at(currentNamespace));
+        namespaceService.deploy(bytesOf("namespace"), NamespaceSlot.Companion.at(currentNamespace));
         namespaceService.updateCurrentNamespace(NamespaceSlot.Companion.at(currentNamespace));
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
             .withPasswordEntries(
-                PasswordEntryFaker.faker()
-                    .fakePasswordEntry()
-                    .withKeyBytes(Bytes.bytesOf(givenAlias)).fake()).fake();
+                createPasswordEntryForTesting(bytesOf(givenAlias), bytesOf("password"), NamespaceSlot.DEFAULT)
+            ).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(currentNamespace)).fake();
@@ -235,16 +229,15 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_EnteredEmptyNamespace() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.bytesOf("n" + givenAlias);
+        final var givenInput = bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var targetNamespace = 1;
 
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
             .withPasswordEntries(
-                PasswordEntryFaker.faker()
-                    .fakePasswordEntry()
-                    .withKeyBytes(Bytes.bytesOf(givenAlias)).fake()).fake();
+                createPasswordEntryForTesting(bytesOf(givenAlias), bytesOf("password"), NamespaceSlot.DEFAULT)
+            ).fake();
         UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(targetNamespace)).fake();
@@ -267,24 +260,19 @@ class AssignNamespaceCommandTestIT {
     void shouldHandleAssignNamespaceCommand_OtherPasswordWithSameAliasAlreadyInTargetNamespace() {
         // given
         final var givenAlias = "a";
-        final var givenInput = Bytes.bytesOf("n" + givenAlias);
+        final var givenInput = bytesOf("n" + givenAlias);
         final var referenceInput = givenInput.copy();
         final var currentNamespace = 0;
         final var targetNamespace = 1;
 
         namespaceService.updateCurrentNamespace(NamespaceSlot.Companion.at(currentNamespace));
-        namespaceService.deploy(Bytes.bytesOf("namespace"), NamespaceSlot.Companion.at(targetNamespace));
+        namespaceService.deploy(bytesOf("namespace"), NamespaceSlot.Companion.at(targetNamespace));
         PasswordServiceFaker.faker()
             .forInstance(passwordService)
             .withPasswordEntries(
-                PasswordEntryFaker.faker()
-                    .fakePasswordEntry()
-                    .withKeyBytes(Bytes.bytesOf(givenAlias))
-                    .withNamespace(NamespaceSlot.Companion.at(currentNamespace)).fake(),
-            PasswordEntryFaker.faker()
-                .fakePasswordEntry()
-                .withKeyBytes(Bytes.bytesOf(givenAlias))
-                .withNamespace(NamespaceSlot.Companion.at(targetNamespace)).fake()).fake();
+                createPasswordEntryForTesting(bytesOf(givenAlias), bytesOf("password"), NamespaceSlot.Companion.at(currentNamespace)),
+                createPasswordEntryForTesting(bytesOf(givenAlias), bytesOf("password"), NamespaceSlot.Companion.at(targetNamespace))
+            ).fake();
             UserInterfaceAdapterPortFaker.faker()
             .forInstance(userInterfaceAdapterPort)
             .withTheseInputs(inputOf(targetNamespace)).fake();
@@ -303,7 +291,7 @@ class AssignNamespaceCommandTestIT {
     }
 
     private Input inputOf(final int index) {
-        return  Input.Companion.inputOf(Bytes.bytesOf(String.valueOf(index)));
+        return  Input.Companion.inputOf(bytesOf(String.valueOf(index)));
     }
 
 

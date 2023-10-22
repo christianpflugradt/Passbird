@@ -5,7 +5,6 @@ import de.pflugradts.passbird.application.commandhandling.handler.CustomSetComma
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
-import de.pflugradts.passbird.domain.model.password.PasswordEntryFaker
 import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
@@ -120,9 +119,7 @@ class CustomSetCommandIT {
         val bytes = bytesOf("c$args")
         val reference = bytes.copy()
         val customPassword = mockk<Bytes>(relaxed = true)
-        val givenPasswordEntry = PasswordEntryFaker.faker()
-            .fakePasswordEntry()
-            .withKeyBytes(bytesOf(args)).fake()
+        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(args))
         fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
