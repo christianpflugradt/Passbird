@@ -31,7 +31,7 @@ class AssignNamespaceCommandIT {
     private val inputHandler = createInputHandlerFor(assignNamespaceCommandHandler)
 
     @Test
-    fun shouldHandleAssignNamespaceCommand() {
+    fun `should handle assign namespace command`() {
         // given
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
@@ -52,7 +52,7 @@ class AssignNamespaceCommandIT {
     }
 
     @Test
-    fun shouldHandleAssignNamespaceCommand_EntryNotExists() {
+    fun `should handle entry not exists`() {
         // given
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
@@ -72,7 +72,7 @@ class AssignNamespaceCommandIT {
     }
 
     @Test
-    fun shouldHandleAssignNamespaceCommand_DisplayTargetNamespace() {
+    fun `should display target namespace`() {
         // given
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
@@ -99,7 +99,7 @@ class AssignNamespaceCommandIT {
     }
 
     @Test
-    fun shouldHandleAssignNamespaceCommand_DisplayTargetNamespaceWhenNotDefault() {
+    fun `should display target namespace when not default`() {
         // given
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
@@ -126,7 +126,7 @@ class AssignNamespaceCommandIT {
     }
 
     @Test
-    fun shouldHandleAssignNamespaceCommand_EnteredInvalidNamespace() {
+    fun `should handle invalid namespace entered`() {
         // given
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
@@ -150,7 +150,7 @@ class AssignNamespaceCommandIT {
     }
 
     @Test
-    fun shouldHandleAssignNamespaceCommand_EnteredCurrentNamespace() {
+    fun `should handle current namespace entered`() {
         // given
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
@@ -176,7 +176,7 @@ class AssignNamespaceCommandIT {
     }
 
     @Test
-    fun shouldHandleAssignNamespaceCommand_EnteredEmptyNamespace() {
+    fun `should handle empty namespace entered`() {
         // given
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
@@ -201,7 +201,7 @@ class AssignNamespaceCommandIT {
     }
 
     @Test
-    fun shouldHandleAssignNamespaceCommand_OtherPasswordWithSameAliasAlreadyInTargetNamespace() {
+    fun `should handle other password with same alias in target namespace`() {
         // given
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
