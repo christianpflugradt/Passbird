@@ -27,4 +27,5 @@ fun fakePasswordService(
         every { instance.challengeAlias(any()) } returns Unit
     }
     every { instance.discardPasswordEntry(any()) } returns Unit
+    every { instance.renamePasswordEntry(any(), any()) } returns Unit
 }
