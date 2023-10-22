@@ -12,7 +12,7 @@ import de.pflugradts.passbird.domain.service.NamespaceService
 class ViewNamespaceCommandHandler @Inject constructor(
     @Inject private val namespaceService: NamespaceService,
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-) : CommandHandler, CanListAvailableNamespaces {
+) : CommandHandler, CanListAvailableNamespaces(namespaceService) {
     @Subscribe
     private fun handleViewNamespaceCommand(viewNamespaceCommand: ViewNamespaceCommand) {
         userInterfaceAdapterPort.send(
@@ -38,7 +38,7 @@ ${'\t'}[NOT YET IMPLEMENTED] n-[1-9] (discard) discards the namespace at the spe
     }
 
     private val currentNamespace get() = namespaceService.getCurrentNamespace().bytes.asString()
-    private val availableNamespaces get() = getAvailableNamespaces(namespaceService, true).let {
-        if (hasCustomNamespaces(namespaceService)) it else "$it\t(use the n+ command to create custom namespaces)\n"
+    private val availableNamespaces get() = getAvailableNamespaces(includeCurrent = true).let {
+        if (hasCustomNamespaces()) it else "$it\t(use the n+ command to create custom namespaces)\n"
     }
 }

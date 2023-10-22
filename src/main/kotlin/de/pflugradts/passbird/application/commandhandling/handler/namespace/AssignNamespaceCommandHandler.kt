@@ -16,12 +16,12 @@ class AssignNamespaceCommandHandler @Inject constructor(
     @Inject private val namespaceService: NamespaceService,
     @Inject private val passwordService: PasswordService,
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-) : CommandHandler, CanListAvailableNamespaces {
+) : CommandHandler, CanListAvailableNamespaces(namespaceService) {
     @Subscribe
     private fun handleAssignNamespaceCommand(assignNamespaceCommand: AssignNamespaceCommand) {
         if (passwordService.entryExists(assignNamespaceCommand.argument, EntryNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             userInterfaceAdapterPort.send(
-                outputOf(bytesOf("Available namespaces: \n${getAvailableNamespaces(namespaceService, false)}")),
+                outputOf(bytesOf("Available namespaces: \n${getAvailableNamespaces(includeCurrent = false)}")),
             )
             val input = userInterfaceAdapterPort.receive(outputOf(bytesOf("Enter namespace you want to move password entry to: ")))
             val namespace = input.parseNamespace()
