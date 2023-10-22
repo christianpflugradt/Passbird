@@ -1,18 +1,18 @@
 package de.pflugradts.passbird.application.commandhandling.handler.namespace;
 
 import de.pflugradts.passbird.domain.model.namespace.Namespace;
-import de.pflugradts.passbird.domain.service.FixedNamespaceService;
+import de.pflugradts.passbird.domain.service.NamespaceService;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public interface CanListAvailableNamespaces {
 
-    default boolean hasCustomNamespaces(final FixedNamespaceService namespaceService) {
+    default boolean hasCustomNamespaces(final NamespaceService namespaceService) {
         return namespaceService.all().anyMatch(Optional::isPresent);
     }
 
-    default String getAvailableNamespaces(final FixedNamespaceService namespaceService, final boolean includeCurrent) {
+    default String getAvailableNamespaces(final NamespaceService namespaceService, final boolean includeCurrent) {
         final var defaultNamespaceLine = includeCurrent || !namespaceService.getCurrentNamespace().equals(Namespace.Companion.getDEFAULT())
             ? "\t0: " + Namespace.Companion.getDEFAULT().getBytes().asString() + System.lineSeparator() : "";
         return defaultNamespaceLine + namespaceService.all()
