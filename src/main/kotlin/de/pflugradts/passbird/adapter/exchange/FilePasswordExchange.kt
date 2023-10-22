@@ -6,6 +6,9 @@ import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.EXCHANGE_FILENAME
+import de.pflugradts.passbird.application.failure.ExportFailure
+import de.pflugradts.passbird.application.failure.ImportFailure
+import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
@@ -27,7 +30,7 @@ class FilePasswordExchange @Inject constructor(
                 mapper.writeValueAsString(PasswordEntriesRepresentation(data.map { it.asPasswordEntryRepresentation() }.toList())),
             )
         } catch (e: IOException) {
-            // FIXME error handling
+            reportFailure(ExportFailure(e))
         }
     }
 
@@ -38,7 +41,7 @@ class FilePasswordExchange @Inject constructor(
                 PasswordEntriesRepresentation::class.java,
             ).passwordEntryRepresentations?.stream()?.map { it.asBytesPair() } ?: Stream.empty()
         } catch (e: IOException) {
-            // FIXME error handling
+            reportFailure(ImportFailure(e))
             Stream.empty()
         }
     }
