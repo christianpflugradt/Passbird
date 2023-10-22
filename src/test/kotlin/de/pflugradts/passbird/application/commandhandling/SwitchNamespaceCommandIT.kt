@@ -52,7 +52,6 @@ class SwitchNamespaceCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()) contains "is already the current namespace"
     }
 
@@ -69,7 +68,6 @@ class SwitchNamespaceCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()) contains "Specified namespace does not exist"
     }
 }

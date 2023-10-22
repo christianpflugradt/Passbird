@@ -13,8 +13,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
+import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
-import strikt.assertions.isTrue
 
 class PassbirdApplicationTest {
 
@@ -53,7 +53,7 @@ class PassbirdApplicationTest {
         val input1 = fakeInput("1")
         val interrupt = fakeInput(INTERRUPT)
         val givenNamespace = "mynamespace"
-        val expectedOutput = mutableListOf<Output>()
+        val expectedOutputSlot = mutableListOf<Output>()
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
             withTheseInputs = listOf(input1, interrupt),
@@ -66,9 +66,9 @@ class PassbirdApplicationTest {
         passbirdApplication.boot()
 
         // then
-        verify { userInterfaceAdapterPort.receive(capture(expectedOutput)) }
-        expectThat(expectedOutput.size == 2).isTrue()
-        expectedOutput.forEach { expectThat(it.bytes.asString()) isEqualTo "[$givenNamespace] Enter command: " }
+        verify { userInterfaceAdapterPort.receive(capture(expectedOutputSlot)) }
+        expectThat(expectedOutputSlot) hasSize 2
+        expectedOutputSlot.forEach { expectThat(it.bytes.asString()) isEqualTo "[$givenNamespace] Enter command: " }
     }
 
     @Test
@@ -76,7 +76,7 @@ class PassbirdApplicationTest {
         // given
         val input1 = fakeInput("1")
         val interrupt = fakeInput(INTERRUPT)
-        val expectedOutput = mutableListOf<Output>()
+        val expectedOutputSlot = mutableListOf<Output>()
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
             withTheseInputs = listOf(input1, interrupt),
@@ -88,8 +88,8 @@ class PassbirdApplicationTest {
         passbirdApplication.boot()
 
         // then
-        verify { userInterfaceAdapterPort.receive(capture(expectedOutput)) }
-        expectThat(expectedOutput.size == 2).isTrue()
-        expectedOutput.forEach { expectThat(it.bytes.asString()) isEqualTo "Enter command: " }
+        verify { userInterfaceAdapterPort.receive(capture(expectedOutputSlot)) }
+        expectThat(expectedOutputSlot) hasSize 2
+        expectedOutputSlot.forEach { expectThat(it.bytes.asString()) isEqualTo "Enter command: " }
     }
 }

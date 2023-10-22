@@ -22,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
-import strikt.assertions.isTrue
 
 class PassbirdLauncherTest {
 
@@ -59,7 +58,6 @@ class PassbirdLauncherTest {
         passbirdLauncher.boot()
 
         // then
-        expectThat(moduleSlot.isCaptured).isTrue()
         expectThat(moduleSlot.captured).isA<ApplicationModule>()
         expectThat(moduleSlot.captured).not().isA<SetupModule>()
     }
@@ -81,7 +79,6 @@ class PassbirdLauncherTest {
         passbirdLauncher.boot()
 
         // then
-        expectThat(moduleSlot.isCaptured).isTrue()
         expectThat(moduleSlot.captured).isA<SetupModule>()
         expectThat(moduleSlot.captured).not().isA<ApplicationModule>()
     }
@@ -96,7 +93,6 @@ class PassbirdLauncherTest {
         passbirdLauncher.boot()
 
         // then
-        expectThat(moduleSlot.isCaptured).isTrue()
         expectThat(moduleSlot.captured).isA<SetupModule>()
         expectThat(moduleSlot.captured).not().isA<ApplicationModule>()
     }

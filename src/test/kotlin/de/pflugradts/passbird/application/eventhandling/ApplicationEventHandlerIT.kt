@@ -23,7 +23,6 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import strikt.api.expectThat
 import strikt.assertions.contains
-import strikt.assertions.isTrue
 import java.util.stream.Stream
 
 class ApplicationEventHandlerIT {
@@ -48,7 +47,6 @@ class ApplicationEventHandlerIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()) contains expectedBytes.asString()
     }
 

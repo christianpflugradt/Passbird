@@ -47,7 +47,7 @@ class PassbirdSetupTest {
         // given
         val configurationDirectory = VALID_DIRECTORY
         val password = fakeInput("p4s5w0rD")
-        val path = slot<Path>()
+        val pathSlot = slot<Path>()
         fakeConfiguration(
             instance = configuration,
             withConfigurationTemplate = true,
@@ -64,7 +64,7 @@ class PassbirdSetupTest {
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
         every { configurationSync.sync(configurationDirectory) } returns Unit
-        every { keyStoreAdapterPort.storeKey(eq(password.bytes.toChars()), capture(path)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(password.bytes.toChars()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
@@ -74,8 +74,8 @@ class PassbirdSetupTest {
         verify(exactly = 1) { setupGuide.sendConfigTemplateRouteInformation() }
         verify(exactly = 1) { setupGuide.sendInputPath("configuration") }
         verify(exactly = 1) { setupGuide.sendCreateKeyStoreInformation() }
-        expectThat(path.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
-        expectThat(path.captured.parent.name) isEqualTo configurationDirectory
+        expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
+        expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
         verify(exactly = 1) { setupGuide.sendRestart() }
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
@@ -105,7 +105,7 @@ class PassbirdSetupTest {
         // given
         val configurationDirectory = VALID_DIRECTORY
         val password = fakeInput("p4s5w0rD")
-        val path = slot<Path>()
+        val pathSlot = slot<Path>()
         fakeConfiguration(instance = configuration, withKeyStoreLocation = configurationDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
@@ -116,7 +116,7 @@ class PassbirdSetupTest {
             instance = systemOperation,
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
-        every { keyStoreAdapterPort.storeKey(eq(password.bytes.toChars()), capture(path)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(password.bytes.toChars()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
@@ -126,8 +126,8 @@ class PassbirdSetupTest {
         verify(exactly = 1) { setupGuide.sendConfigKeyStoreRouteInformation(configurationDirectory) }
         verify(exactly = 1) { setupGuide.sendInputPath("keystore") }
         verify(exactly = 1) { setupGuide.sendCreateKeyStoreInformation() }
-        expectThat(path.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
-        expectThat(path.captured.parent.name) isEqualTo configurationDirectory
+        expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
+        expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
         verify(exactly = 1) { setupGuide.sendRestart() }
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
@@ -160,7 +160,7 @@ class PassbirdSetupTest {
         val invalidConfigurationDirectory = "/dev/null"
         val validDirectory = fakeInput(VALID_DIRECTORY)
         val password = fakeInput("p4s5w0rD")
-        val path = slot<Path>()
+        val pathSlot = slot<Path>()
         fakeConfiguration(instance = configuration, withKeyStoreLocation = invalidConfigurationDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
@@ -175,15 +175,15 @@ class PassbirdSetupTest {
                 Pair(invalidConfigurationDirectory, fakePath(exists = true, isDirectory = false)),
             ),
         )
-        every { keyStoreAdapterPort.storeKey(eq(password.bytes.toChars()), capture(path)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(password.bytes.toChars()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
 
         // then
         verify(exactly = 1) { setupGuide.sendWelcome() }
-        expectThat(path.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
-        expectThat(path.captured.parent.name) isEqualTo VALID_DIRECTORY
+        expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
+        expectThat(pathSlot.captured.parent.name) isEqualTo VALID_DIRECTORY
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
     }
@@ -196,7 +196,7 @@ class PassbirdSetupTest {
         val passwordMismatch2 = fakeInput("guessword")
         val emptyPassword = emptyInput()
         val passwordMatched = fakeInput("p4s5w0rD")
-        val path = slot<Path>()
+        val pathSlot = slot<Path>()
         fakeConfiguration(instance = configuration, withKeyStoreLocation = configurationDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
@@ -214,7 +214,7 @@ class PassbirdSetupTest {
             instance = systemOperation,
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
-        every { keyStoreAdapterPort.storeKey(eq(passwordMatched.bytes.toChars()), capture(path)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(passwordMatched.bytes.toChars()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
@@ -224,8 +224,8 @@ class PassbirdSetupTest {
         verify(exactly = 1) { setupGuide.sendConfigKeyStoreRouteInformation(configurationDirectory) }
         verify(exactly = 1) { setupGuide.sendInputPath("keystore") }
         verify(exactly = 1) { setupGuide.sendCreateKeyStoreInformation() }
-        expectThat(path.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
-        expectThat(path.captured.parent.name) isEqualTo configurationDirectory
+        expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
+        expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
         verify(exactly = 1) { setupGuide.sendRestart() }
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }

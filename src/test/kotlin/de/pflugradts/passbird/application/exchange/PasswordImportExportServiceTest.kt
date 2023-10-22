@@ -15,7 +15,6 @@ import strikt.api.expectThat
 import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
-import strikt.assertions.isTrue
 import java.util.stream.Stream
 
 class PasswordImportExportServiceTest {
@@ -60,7 +59,6 @@ class PasswordImportExportServiceTest {
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange(uri) }
         verify(exactly = 1) { passwordService.putPasswordEntries(capture(passwordEntriesSlot)) }
-        expectThat(passwordEntriesSlot.isCaptured).isTrue()
         val actual = passwordEntriesSlot.captured.toList()
         expectThat(actual) hasSize passwordEntries.size
         actual.forEachIndexed { index, it ->
@@ -85,7 +83,6 @@ class PasswordImportExportServiceTest {
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange(uri) }
         verify(exactly = 1) { exchangeAdapterPort.send(capture(bytesPairsSlot)) }
-        expectThat(bytesPairsSlot.isCaptured).isTrue()
         val actual = bytesPairsSlot.captured.toList()
         expectThat(actual) hasSize passwordEntries.size
         actual.forEachIndexed { index, it ->

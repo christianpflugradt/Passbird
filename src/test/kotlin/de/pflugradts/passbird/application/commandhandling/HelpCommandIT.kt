@@ -11,7 +11,6 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
-import strikt.assertions.isTrue
 
 class HelpCommandIT {
 
@@ -30,7 +29,6 @@ class HelpCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()).contains("Usage")
     }
 }

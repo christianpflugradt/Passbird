@@ -92,7 +92,6 @@ class AssignNamespaceCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()).contains("$targetNamespace: ")
         expectThat(outputSlot.captured.bytes.asString()).not().contains("$currentNamespace: ")
         expectThat(givenInput) isNotEqualTo referenceInput
@@ -119,7 +118,6 @@ class AssignNamespaceCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()).contains("$targetNamespace: ")
         expectThat(outputSlot.captured.bytes.asString()).not().contains("$currentNamespace: ")
         expectThat(givenInput) isNotEqualTo referenceInput

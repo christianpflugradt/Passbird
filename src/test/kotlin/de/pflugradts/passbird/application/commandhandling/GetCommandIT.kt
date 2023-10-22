@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
-import strikt.assertions.isTrue
 
 class GetCommandIT {
 
@@ -46,7 +45,6 @@ class GetCommandIT {
 
         // then
         verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes) isEqualTo expectedPassword
         verify(exactly = 1) { userInterfaceAdapterPort.send(any()) }
         expectThat(command) isNotEqualTo reference

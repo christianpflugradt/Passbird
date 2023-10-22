@@ -13,7 +13,6 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
-import strikt.assertions.isTrue
 
 class ViewNamespaceCommandIT {
 
@@ -33,7 +32,6 @@ class ViewNamespaceCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()) contains "Available namespace commands"
     }
 
@@ -48,7 +46,6 @@ class ViewNamespaceCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()) contains "Current namespace: Default"
     }
 
@@ -66,7 +63,6 @@ class ViewNamespaceCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()) contains "$deployedNamespaceSlot: $deployedNamespace"
     }
 }

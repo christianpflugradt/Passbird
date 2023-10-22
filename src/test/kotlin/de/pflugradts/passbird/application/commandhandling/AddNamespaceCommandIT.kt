@@ -85,7 +85,6 @@ class AddNamespaceCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()) contains "Empty input"
         expectThat(namespaceService.atSlot(slotFromInput).isEmpty).isTrue()
     }
@@ -103,7 +102,6 @@ class AddNamespaceCommandIT {
         // then
         verify(exactly = 0) { userInterfaceAdapterPort.receive(any()) }
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()) contains "Default namespace cannot be replaced"
     }
 

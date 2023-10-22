@@ -14,7 +14,6 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import strikt.assertions.isTrue
 
 internal class ListCommandIT {
 
@@ -45,7 +44,6 @@ internal class ListCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()) isEqualTo "${key1.asString()}, ${key2.asString()}, ${key3.asString()}"
     }
 
@@ -61,7 +59,6 @@ internal class ListCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.isCaptured).isTrue()
         expectThat(outputSlot.captured.bytes.asString()) isEqualTo "database is empty"
     }
 }
