@@ -5,6 +5,8 @@ import com.google.inject.Singleton
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.failure.ClipboardFailure
+import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Output
 
@@ -19,13 +21,14 @@ class ClipboardService @Inject constructor(
     private var cleanerThread: Thread? = null
     override fun post(output: Output) {
         cleanerThread?.interrupt()
-        systemOperation.copyToClipboard(output.bytes.asString())
+        tryCatching { systemOperation.copyToClipboard(output.bytes.asString()) }
+            .onFailure { reportFailure(ClipboardFailure(it)) }
         scheduleCleaner()
     }
 
     private fun scheduleCleaner() {
         if (isResetEnabled) {
-            cleanerThread = Thread { sleep().onSuccess { systemOperation.copyToClipboard("") } }
+            cleanerThread = Thread { sleep().onSuccess { tryCatching { systemOperation.copyToClipboard("") } } }
             cleanerThread?.start()
         }
     }
