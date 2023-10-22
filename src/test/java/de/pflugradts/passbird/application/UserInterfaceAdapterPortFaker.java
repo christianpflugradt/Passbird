@@ -18,9 +18,7 @@ import static org.mockito.Mockito.lenient;
 public class UserInterfaceAdapterPortFaker {
 
     private final AtomicInteger inputCount = new AtomicInteger(0);
-    private final AtomicInteger secureInputCount = new AtomicInteger(0);
     private final List<Input> inputList = new ArrayList<>();
-    private final List<Input> secureInputList = new ArrayList<>();
     private UserInterfaceAdapterPort userInterfaceAdapterPort;
 
     public static UserInterfaceAdapterPortFaker faker() {
@@ -42,11 +40,6 @@ public class UserInterfaceAdapterPortFaker {
         return this;
     }
 
-    public UserInterfaceAdapterPortFaker withTheseSecureInputs(final Input... inputs) {
-        secureInputList.addAll(Arrays.asList(inputs));
-        return this;
-    }
-
     private void givenReceivedInput() {
         lenient().when(userInterfaceAdapterPort.receive(any(Output.class))).thenAnswer(
                 invocation -> inputList.get(inputCount.getAndIncrement()));
@@ -54,16 +47,8 @@ public class UserInterfaceAdapterPortFaker {
                 invocation -> inputList.get(inputCount.getAndIncrement()));
     }
 
-    private void givenReceivedSecureInput() {
-        lenient().when(userInterfaceAdapterPort.receiveSecurely(any(Output.class))).thenAnswer(
-                invocation -> secureInputList.get(secureInputCount.getAndIncrement()));
-        lenient().when(userInterfaceAdapterPort.receiveSecurely()).thenAnswer(
-                invocation -> secureInputList.get(secureInputCount.getAndIncrement()));
-    }
-
     public UserInterfaceAdapterPort fake() {
         givenReceivedInput();
-        givenReceivedSecureInput();
         return userInterfaceAdapterPort;
     }
 
