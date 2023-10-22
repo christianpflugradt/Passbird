@@ -26,4 +26,5 @@ fun fakePasswordService(
     } else {
         every { instance.challengeAlias(any()) } returns Unit
     }
+    every { instance.discardPasswordEntry(any()) } returns Unit
 }
