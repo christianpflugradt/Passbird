@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
 import de.pflugradts.passbird.application.commandhandling.command.DiscardCommand
 import de.pflugradts.passbird.application.commandhandling.command.ExportCommand
@@ -15,6 +16,8 @@ import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
 import de.pflugradts.passbird.application.commandhandling.command.SetCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewCommand
 import de.pflugradts.passbird.application.commandhandling.command.base.Command
+import de.pflugradts.passbird.application.failure.CommandFailure
+import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.domain.model.transfer.Input
 
 @Singleton
@@ -30,7 +33,10 @@ class CommandFactory @Inject constructor(
             CommandType.HELP -> HelpCommand()
             CommandType.IMPORT -> ImportCommand(input)
             CommandType.LIST -> ListCommand()
-            CommandType.NAMESPACE -> namespaceCommandFactory.constructFromInput(input)
+            CommandType.NAMESPACE ->
+                tryCatching { namespaceCommandFactory.constructFromInput(input) }
+                    .onFailure { reportFailure(CommandFailure(it)) }
+                    .getOrElse(NullCommand())
             CommandType.QUIT -> QuitCommand()
             CommandType.RENAME -> RenameCommand(input)
             CommandType.SET -> SetCommand(input)
