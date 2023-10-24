@@ -11,6 +11,7 @@ import strikt.assertions.containsExactly
 import strikt.assertions.isA
 import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
 import strikt.assertions.isGreaterThanOrEqualTo
 import strikt.assertions.isLessThanOrEqualTo
 import strikt.assertions.isNotSameInstanceAs
@@ -411,6 +412,77 @@ class BytesTest {
 
             // then
             expectThat(exception).isA<NoSuchElementException>()
+        }
+    }
+
+    @Nested
+    inner class EqualsTest {
+
+        @Test
+        fun `should be equal to itself`() {
+            // given
+            val bytes1 = bytesOf("abc")
+            val bytes2 = bytes1
+
+            // when
+            val actual = bytes1.equals(bytes2)
+
+            // then
+            expectThat(actual).isTrue()
+        }
+
+        @Test
+        fun `should be equal to bytes with equal char array`() {
+            // given
+            val str = "abc"
+            val bytes1 = bytesOf(str)
+            val bytes2 = bytesOf(str)
+
+            // when
+            val actual = bytes1.equals(bytes2)
+
+            // then
+            expectThat(actual).isTrue()
+        }
+
+        @Test
+        fun `should not be equal to bytes with other char array`() {
+            // given
+            val str = "abc"
+            val otherStr = "abd"
+            val bytes1 = bytesOf(str)
+            val bytes2 = bytesOf(otherStr)
+
+            // when
+            val actual = bytes1.equals(bytes2)
+
+            // then
+            expectThat(actual).isFalse()
+        }
+
+        @Test
+        fun `should not be equal to other class`() {
+            // given
+            val str = "abc"
+            val bytes = bytesOf(str)
+
+            // when
+            val actual = bytes.equals(str)
+
+            // then
+            expectThat(actual).isFalse()
+        }
+
+        @Test
+        fun `should not be equal to null`() {
+            // given
+            val bytes = bytesOf("abc")
+
+            // when
+            val actual = bytes.equals(null)
+
+            // then
+            expectThat(actual).isFalse()
         }
     }
 }
