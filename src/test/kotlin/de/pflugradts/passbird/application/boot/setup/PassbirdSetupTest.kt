@@ -158,13 +158,14 @@ class PassbirdSetupTest {
     fun `should accept corrected directory`() {
         // given
         val invalidConfigurationDirectory = "/dev/null"
+        val nonexistentConfigurationDirectory = "/dev/none"
         val validDirectory = fakeInput(VALID_DIRECTORY)
         val password = fakeInput("p4s5w0rD")
         val pathSlot = slot<Path>()
         fakeConfiguration(instance = configuration, withKeyStoreLocation = invalidConfigurationDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseInputs = listOf(validDirectory),
+            withTheseInputs = listOf(fakeInput(nonexistentConfigurationDirectory), validDirectory),
             withTheseSecureInputs = listOf(password, password),
             withReceiveConfirmation = true,
         )
@@ -173,6 +174,7 @@ class PassbirdSetupTest {
             withPaths = listOf(
                 Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true)),
                 Pair(invalidConfigurationDirectory, fakePath(exists = true, isDirectory = false)),
+                Pair(nonexistentConfigurationDirectory, fakePath(exists = false, isDirectory = true)),
             ),
         )
         every { keyStoreAdapterPort.storeKey(eq(password.bytes.toChars()), capture(pathSlot)) } returns Unit
