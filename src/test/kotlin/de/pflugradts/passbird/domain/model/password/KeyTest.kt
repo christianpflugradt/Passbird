@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.domain.model.password
 
 import de.pflugradts.passbird.domain.model.password.Key.Companion.createKey
-import de.pflugradts.passbird.domain.model.password.Password.Companion.createPassword
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -58,11 +57,25 @@ class KeyTest {
     inner class EqualsTest {
 
         @Test
+        fun `should be equal to itself`() {
+            // given
+            val key1 = createKey(bytesOf("abc"))
+            val key2 = key1
+
+            // when
+            val actual = key1.equals(key2)
+
+            // then
+            expectThat(actual).isTrue()
+        }
+
+        @Test
         fun `should be equal to key with equal bytes`() {
             // given
-            val bytes = bytesOf("key")
+            val bytes = bytesOf("abc")
+            val sameBytes = bytesOf("abc")
             val key1 = createKey(bytes)
-            val key2 = createKey(bytes)
+            val key2 = createKey(sameBytes)
 
             // when
             val actual = key1.equals(key2)
@@ -74,8 +87,8 @@ class KeyTest {
         @Test
         fun `should not be equal to key with other bytes`() {
             // given
-            val bytes = bytesOf("key")
-            val otherBytes = bytesOf("other")
+            val bytes = bytesOf("abc")
+            val otherBytes = bytesOf("abd")
             val key1 = createKey(bytes)
             val key2 = createKey(otherBytes)
 
@@ -89,11 +102,11 @@ class KeyTest {
         @Test
         fun `should not be equal to other class`() {
             // given
-            val bytes = bytesOf("key")
+            val bytes = bytesOf("abc")
             val key = createKey(bytes)
 
             // when
-            val actual = key.equals(createPassword(bytes))
+            val actual = key.equals(bytes)
 
             // then
             expectThat(actual).isFalse()
@@ -102,7 +115,7 @@ class KeyTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val key = createKey(bytesOf("key"))
+            val key = createKey(bytesOf("abc"))
 
             // when
             val actual = key.equals(null)
