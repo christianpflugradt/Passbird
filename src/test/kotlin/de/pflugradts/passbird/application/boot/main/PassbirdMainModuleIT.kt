@@ -21,8 +21,8 @@ import de.pflugradts.passbird.application.commandhandling.handler.namespace.View
 import de.pflugradts.passbird.application.eventhandling.ApplicationEventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
+import io.mockk.mockk
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import strikt.api.expectThat
 import strikt.assertions.isA
 import strikt.assertions.isSameInstanceAs
@@ -66,6 +66,6 @@ class PassbirdMainModuleIT {
     }
 
     class PassbirdTestModule : AbstractModule() {
-        public override fun configure() { bind(CryptoProvider::class.java).toInstance(Mockito.mock(CryptoProvider::class.java)) }
+        public override fun configure() { bind(CryptoProvider::class.java).toInstance(mockk<CryptoProvider>()) }
     }
 }
