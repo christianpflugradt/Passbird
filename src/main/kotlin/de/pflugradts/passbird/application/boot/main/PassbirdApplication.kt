@@ -5,7 +5,6 @@ import com.google.inject.Singleton
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.commandhandling.InputHandler
-import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.namespace.Namespace
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input
@@ -34,6 +33,4 @@ class PassbirdApplication @Inject constructor(
     }
 
     private fun isSigTerm(input: Input) = input.data.isEmpty && !input.command.isEmpty && input.command.firstByte == INTERRUPT.code.toByte()
-
-    override fun terminate(systemOperation: SystemOperation) { systemOperation.exit() }
 }

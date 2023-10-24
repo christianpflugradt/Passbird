@@ -87,6 +87,4 @@ class PassbirdSetup @Inject constructor(
 
     private fun isValidDirectory(directory: String) =
         systemOperation.getPath(directory).toFile().let { it.isDirectory && it.exists() }
-
-    override fun terminate(systemOperation: SystemOperation) { systemOperation.exit() }
 }
