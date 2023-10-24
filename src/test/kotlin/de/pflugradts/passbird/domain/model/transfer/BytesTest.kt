@@ -432,11 +432,12 @@ class BytesTest {
         }
 
         @Test
-        fun `should be equal to bytes with equal char array`() {
+        fun `should be equal to bytes with equal string`() {
             // given
             val str = "abc"
+            val sameStr = "abc"
             val bytes1 = bytesOf(str)
-            val bytes2 = bytesOf(str)
+            val bytes2 = bytesOf(sameStr)
 
             // when
             val actual = bytes1.equals(bytes2)
@@ -446,7 +447,7 @@ class BytesTest {
         }
 
         @Test
-        fun `should not be equal to bytes with other char array`() {
+        fun `should not be equal to bytes with other string`() {
             // given
             val str = "abc"
             val otherStr = "abd"

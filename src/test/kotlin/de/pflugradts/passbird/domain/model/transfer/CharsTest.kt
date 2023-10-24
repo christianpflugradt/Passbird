@@ -108,8 +108,9 @@ class CharsTest {
         fun `should be equal to chars with equal char array`() {
             // given
             val charArray = charArrayOf('a', 'b', 'c')
+            val sameCharArray = charArrayOf('a', 'b', 'c')
             val chars1 = charsOf(charArray)
-            val chars2 = charsOf(charArray)
+            val chars2 = charsOf(sameCharArray)
 
             // when
             val actual = chars1.equals(chars2)

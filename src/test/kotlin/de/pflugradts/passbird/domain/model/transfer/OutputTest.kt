@@ -67,8 +67,9 @@ class OutputTest {
         fun `should be equal to output with equal bytes`() {
             // given
             val bytes = bytesOf("abc")
+            val sameBytes = bytesOf("abc")
             val output1 = outputOf(bytes)
-            val output2 = outputOf(bytes)
+            val output2 = outputOf(sameBytes)
 
             // when
             val actual = output1.equals(output2)
