@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.domain.model.password
 
-import de.pflugradts.passbird.domain.model.password.Key.Companion.createKey
 import de.pflugradts.passbird.domain.model.password.Password.Companion.createPassword
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
@@ -91,11 +90,10 @@ class PasswordTest {
     inner class EqualsTest {
 
         @Test
-        fun `should be equal to key with equal bytes`() {
+        fun `should be equal to itself`() {
             // given
-            val bytes = bytesOf("password")
-            val password1 = createPassword(bytes)
-            val password2 = createPassword(bytes)
+            val password1 = createPassword(bytesOf("abc"))
+            val password2 = password1
 
             // when
             val actual = password1.equals(password2)
@@ -105,10 +103,25 @@ class PasswordTest {
         }
 
         @Test
-        fun `should not be equal to key with other bytes`() {
+        fun `should be equal to password with equal bytes`() {
             // given
-            val bytes = bytesOf("password")
-            val otherBytes = bytesOf("other")
+            val bytes = bytesOf("abc")
+            val sameBytes = bytesOf("abc")
+            val password1 = createPassword(bytes)
+            val password2 = createPassword(sameBytes)
+
+            // when
+            val actual = password1.equals(password2)
+
+            // then
+            expectThat(actual).isTrue()
+        }
+
+        @Test
+        fun `should not be equal to password with other bytes`() {
+            // given
+            val bytes = bytesOf("abc")
+            val otherBytes = bytesOf("abd")
             val password1 = createPassword(bytes)
             val password2 = createPassword(otherBytes)
 
@@ -122,11 +135,11 @@ class PasswordTest {
         @Test
         fun `should not be equal to other class`() {
             // given
-            val bytes = bytesOf("password")
+            val bytes = bytesOf("abc")
             val password = createPassword(bytes)
 
             // when
-            val actual = password.equals(createKey(bytes))
+            val actual = password.equals(bytes)
 
             // then
             expectThat(actual).isFalse()
@@ -135,7 +148,7 @@ class PasswordTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val password = createPassword(bytesOf("password"))
+            val password = createPassword(bytesOf("abc"))
 
             // when
             val actual = password.equals(null)

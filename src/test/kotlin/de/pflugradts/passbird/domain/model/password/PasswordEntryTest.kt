@@ -5,7 +5,6 @@ import de.pflugradts.passbird.domain.model.event.PasswordEntryDiscarded
 import de.pflugradts.passbird.domain.model.event.PasswordEntryUpdated
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
 import de.pflugradts.passbird.domain.model.password.Key.Companion.createKey
-import de.pflugradts.passbird.domain.model.password.Password.Companion.createPassword
 import de.pflugradts.passbird.domain.model.password.PasswordEntry.Companion.createPasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
@@ -94,7 +93,22 @@ class PasswordEntryTest {
     }
 
     @Nested
-    inner class IdentityTest {
+    inner class EqualsTest {
+
+        @Test
+        fun `should be equal to itself`() {
+            // given
+            val givenBytes = bytesOf("key")
+            val givenNamespace = NamespaceSlot.N1
+            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNamespace = givenNamespace)
+            val passwordEntry2 = passwordEntry1
+
+            // when
+            val actual = passwordEntry1.equals(passwordEntry2)
+
+            // then
+            expectThat(actual).isTrue()
+        }
 
         @Test
         fun `should be equal if key and namespace match`() {
@@ -149,9 +163,11 @@ class PasswordEntryTest {
             val givenBytes = bytesOf("key")
             val passwordEntry = createPasswordEntryForTesting(withKeyBytes = givenBytes)
 
-            // when / then
-            expectThat(passwordEntry.equals(createKey(givenBytes))).isFalse()
-            expectThat(passwordEntry.equals(createPassword(givenBytes))).isFalse()
+            // when
+            val actual = passwordEntry.equals(createKey(givenBytes))
+
+            // then
+            expectThat(actual).isFalse()
         }
 
         @Test
@@ -159,8 +175,11 @@ class PasswordEntryTest {
             // given
             val passwordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf("key"))
 
-            // when / then
-            expectThat(passwordEntry.equals(null)).isFalse()
+            // when
+            val actual = passwordEntry.equals(null)
+
+            // then
+            expectThat(actual).isFalse()
         }
     }
 
