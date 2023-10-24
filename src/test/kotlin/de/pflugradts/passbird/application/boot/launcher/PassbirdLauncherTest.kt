@@ -17,6 +17,7 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.unmockkAll
+import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,7 +28,7 @@ class PassbirdLauncherTest {
 
     private val configuration = mockk<Configuration>(relaxed = true)
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
-    private val systemOperation = mockk<SystemOperation>()
+    private val systemOperation = mockk<SystemOperation>(relaxed = true)
     private val passbirdLauncher = PassbirdLauncher(configuration, userInterfaceAdapterPort, systemOperation)
     private val moduleSlot = slot<Module>()
 
@@ -95,5 +96,14 @@ class PassbirdLauncherTest {
         // then
         expectThat(moduleSlot.captured).isA<SetupModule>()
         expectThat(moduleSlot.captured).not().isA<ApplicationModule>()
+    }
+
+    @Test
+    fun `should terminate application`() {
+        // given / when
+        passbirdLauncher.terminate(systemOperation)
+
+        // then
+        verify(exactly = 1) { systemOperation.exit() }
     }
 }
