@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.domain.service.password
 
 import com.google.inject.Inject
-import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound
 import de.pflugradts.passbird.domain.model.password.KeyAlreadyExistsException
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
@@ -18,7 +17,7 @@ class RenamePasswordService @Inject constructor(
         if (entryExists(keyBytes, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             encrypted(newKeyBytes).let { encryptedNewKeyBytes ->
                 if (find(encryptedNewKeyBytes).isEmpty) {
-                    renamePasswordEntryOrFail(keyBytes, encryptedNewKeyBytes)
+                    encrypted(keyBytes).let { find(it).get().rename(newKeyBytes) }
                     processEventsAndSync()
                 } else {
                     throw KeyAlreadyExistsException(newKeyBytes)
@@ -26,11 +25,4 @@ class RenamePasswordService @Inject constructor(
             }
         }
     }
-    private fun renamePasswordEntryOrFail(keyBytes: Bytes, newKeyBytes: Bytes) =
-        encrypted(keyBytes).let { encryptedKeyBytes ->
-            find(encryptedKeyBytes).ifPresentOrElse(
-                { it.rename(newKeyBytes) },
-                { eventRegistry.register(PasswordEntryNotFound(encryptedKeyBytes)) },
-            )
-        }
 }
