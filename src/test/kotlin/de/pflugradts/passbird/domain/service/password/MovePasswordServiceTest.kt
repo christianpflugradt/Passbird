@@ -2,6 +2,7 @@
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
+import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
 import de.pflugradts.passbird.domain.model.password.KeyAlreadyExistsException
 import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
@@ -11,6 +12,7 @@ import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
 import de.pflugradts.passbird.domain.service.password.storage.fakePasswordEntryRepository
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
@@ -40,6 +42,21 @@ internal class MovePasswordServiceTest {
 
         // then
         expectThat(givenPasswordEntry.associatedNamespace()) isEqualTo newNamespace isNotEqualTo givenNamespace
+    }
+
+    @Test
+    fun `should not move password entry if it does not exist`() {
+        // given
+        val givenKey = bytesOf("key123")
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakePasswordEntryRepository(instance = passwordEntryRepository)
+
+        // when
+        passwordService.movePassword(givenKey, NamespaceSlot.N1)
+
+        // then
+        verify(exactly = 1) { passbirdEventRegistry.register(eq(PasswordEntryNotFound(givenKey))) }
+        verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 
     @Test
