@@ -168,4 +168,19 @@ class PutPasswordServiceTest {
             passwordEntryRepository.find(keyBytes = existingKey).orElse(null).viewPassword(),
         ) isEqualTo newPasswordForExistingKey
     }
+
+    @Test
+    fun `should accept empty stream`() {
+        // given
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakePasswordEntryRepository(instance = passwordEntryRepository)
+
+        // when
+        passwordService.putPasswordEntries(Stream.empty())
+
+        // then
+        verify(exactly = 0) { passwordEntryRepository.add(any()) }
+        verify(exactly = 1) { passwordEntryRepository.sync() }
+        verify(exactly = 1) { passbirdEventRegistry.processEvents() }
+    }
 }
