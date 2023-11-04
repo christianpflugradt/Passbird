@@ -21,11 +21,11 @@ fun reportFailure(exportFailure: ExportFailure) = err("Password database could n
 fun reportFailure(importFailure: ImportFailure) =
     if (importFailure.ex is InvalidKeyException) {
         err(
-            "Password file could not be imported because at least one alias contains digits or special characters. " +
+            "Password database could not be imported because at least one alias contains digits or special characters. " +
                 "Please correct invalid aliases and try again. Erroneous alias: ${importFailure.ex.keyBytes.asString()}",
         )
     } else {
-        err("Password file could not be imported.")
+        err("Password database could not be imported.")
     }
 fun reportFailure(inputFailure: InputFailure) = err("Input could not be processed: ${inputFailure.ex.message}")
 fun reportFailure(passwordEntriesFailure: PasswordEntriesFailure) = err("Password Entries could not be accessed.")
