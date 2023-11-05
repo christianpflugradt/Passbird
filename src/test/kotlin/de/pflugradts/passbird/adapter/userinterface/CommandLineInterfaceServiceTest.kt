@@ -1,11 +1,12 @@
 package de.pflugradts.passbird.adapter.userinterface
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemOut
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.mockSystemInWith
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.mockk.mockk
@@ -16,9 +17,6 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 
 class CommandLineInterfaceServiceTest {
 
@@ -33,38 +31,30 @@ class CommandLineInterfaceServiceTest {
             // given
             val givenMessage = "hello world"
             val expectedMessage = givenMessage + System.lineSeparator()
-            var actual: String
-            ByteArrayOutputStream().use { stream ->
-                PrintStream(stream).use { printStream ->
-                    System.setOut(printStream)
+            val captureSystemOut = captureSystemOut()
 
-                    // when
-                    commandLineInterfaceService.send(outputOf(Bytes.bytesOf(givenMessage)))
-
-                    // then
-                    actual = String(stream.toByteArray())
-                }
+            // when
+            captureSystemOut.during {
+                commandLineInterfaceService.send(outputOf(Bytes.bytesOf(givenMessage)))
             }
-            expectThat(actual) isEqualTo expectedMessage
+
+            // then
+            expectThat(captureSystemOut.capture) isEqualTo expectedMessage
         }
 
         @Test
         fun `should send line break`() {
             // given
             val expectedMessage = System.lineSeparator()
-            var actual: String
-            ByteArrayOutputStream().use { stream ->
-                PrintStream(stream).use { printStream ->
-                    System.setOut(printStream)
+            val captureSystemOut = captureSystemOut()
 
-                    // when
-                    commandLineInterfaceService.sendLineBreak()
-
-                    // then
-                    actual = String(stream.toByteArray())
-                }
+            // when
+            captureSystemOut.during {
+                commandLineInterfaceService.sendLineBreak()
             }
-            expectThat(actual) isEqualTo expectedMessage
+
+            // then
+            expectThat(captureSystemOut.capture) isEqualTo expectedMessage
         }
     }
 
@@ -74,13 +64,10 @@ class CommandLineInterfaceServiceTest {
         fun `should receive input`() {
             // given
             val givenInput = "hello world"
-            val inputBytes = (givenInput + System.lineSeparator()).toByteArray()
-            var actual: Input
-            ByteArrayInputStream(inputBytes).use { stream ->
-                System.setIn(stream)
 
-                // when
-                actual = commandLineInterfaceService.receive()
+            // when
+            val actual = mockSystemInWith("$givenInput\n") {
+                commandLineInterfaceService.receive()
             }
 
             // then
@@ -91,22 +78,17 @@ class CommandLineInterfaceServiceTest {
         fun `should receive input when sending output`() {
             // given
             val givenMessage = "hello world"
-            var actual: String
-            ByteArrayOutputStream().use { stream ->
-                PrintStream(stream).use { printStream ->
-                    ByteArrayInputStream(("smth" + System.lineSeparator()).toByteArray()).use { inStream ->
-                        System.setOut(printStream)
-                        System.setIn(inStream)
+            val captureSystemOut = captureSystemOut()
 
-                        // when
-                        commandLineInterfaceService.receive(outputOf(Bytes.bytesOf(givenMessage)))
-
-                        // then
-                        actual = String(stream.toByteArray())
-                    }
+            // when
+            captureSystemOut.during {
+                mockSystemInWith("smth\n") {
+                    commandLineInterfaceService.receive(outputOf(Bytes.bytesOf(givenMessage)))
                 }
             }
-            expectThat(actual) isEqualTo givenMessage
+
+            // then
+            expectThat(captureSystemOut.capture) isEqualTo givenMessage
         }
     }
 
@@ -145,37 +127,30 @@ class CommandLineInterfaceServiceTest {
                 instance = configuration,
                 withSecureInputEnabled = true,
             )
-            var actual: String
-            ByteArrayOutputStream().use { stream ->
-                PrintStream(stream).use { printStream ->
-                    System.setOut(printStream)
+            val captureSystemOut = captureSystemOut()
 
-                    // when
-                    commandLineInterfaceService.receiveSecurely(outputOf(Bytes.bytesOf(givenMessage)))
-
-                    // then
-                    actual = String(stream.toByteArray())
-                }
+            // when
+            captureSystemOut.during {
+                commandLineInterfaceService.receiveSecurely(outputOf(Bytes.bytesOf(givenMessage)))
             }
+
+            // then
             verify(exactly = 1) { systemOperation.readPasswordFromConsole() }
-            expectThat(actual) isEqualTo givenMessage
+            expectThat(captureSystemOut.capture) isEqualTo givenMessage
         }
 
         @Test
         fun `should receive secure input as plain if secure input is disabled`() {
             // given
             val givenInput = "hello world"
-            val inputBytes = (givenInput + System.lineSeparator()).toByteArray()
             fakeConfiguration(
                 instance = configuration,
                 withSecureInputEnabled = false,
             )
-            var actual: Input
-            ByteArrayInputStream(inputBytes).use { stream ->
-                System.setIn(stream)
 
-                // when
-                actual = commandLineInterfaceService.receiveSecurely()
+            // when
+            val actual = mockSystemInWith("$givenInput\n") {
+                commandLineInterfaceService.receiveSecurely()
             }
 
             // then
@@ -196,12 +171,10 @@ class CommandLineInterfaceServiceTest {
                 instance = configuration,
                 withSecureInputEnabled = true,
             )
-            var actual: Input
-            ByteArrayInputStream(inputBytes).use { stream ->
-                System.setIn(stream)
 
-                // when
-                actual = commandLineInterfaceService.receiveSecurely()
+            // when
+            val actual = mockSystemInWith("$givenInput\n") {
+                commandLineInterfaceService.receiveSecurely()
             }
 
             // then
@@ -216,13 +189,10 @@ class CommandLineInterfaceServiceTest {
         fun `should return true on input c`() {
             // given
             val givenInput = "c"
-            val inputBytes = (givenInput + System.lineSeparator()).toByteArray()
-            var actual: Boolean
-            ByteArrayInputStream(inputBytes).use { stream ->
-                System.setIn(stream)
 
-                // when
-                actual = commandLineInterfaceService.receiveConfirmation(emptyOutput())
+            // when
+            val actual = mockSystemInWith("$givenInput\n") {
+                commandLineInterfaceService.receiveConfirmation(emptyOutput())
             }
 
             // then
@@ -233,13 +203,10 @@ class CommandLineInterfaceServiceTest {
         fun `should return false on input cc`() {
             // given
             val givenInput = "cc"
-            val inputBytes = (givenInput + System.lineSeparator()).toByteArray()
-            var actual: Boolean
-            ByteArrayInputStream(inputBytes).use { stream ->
-                System.setIn(stream)
 
-                // when
-                actual = commandLineInterfaceService.receiveConfirmation(emptyOutput())
+            // when
+            val actual = mockSystemInWith("$givenInput\n") {
+                commandLineInterfaceService.receiveConfirmation(emptyOutput())
             }
 
             // then
@@ -250,13 +217,10 @@ class CommandLineInterfaceServiceTest {
         fun `should return false on input d`() {
             // given
             val givenInput = "d"
-            val inputBytes = (givenInput + System.lineSeparator()).toByteArray()
-            var actual: Boolean
-            ByteArrayInputStream(inputBytes).use { stream ->
-                System.setIn(stream)
 
-                // when
-                actual = commandLineInterfaceService.receiveConfirmation(emptyOutput())
+            // when
+            val actual = mockSystemInWith("$givenInput\n") {
+                commandLineInterfaceService.receiveConfirmation(emptyOutput())
             }
 
             // then
@@ -267,13 +231,10 @@ class CommandLineInterfaceServiceTest {
         fun `should return false on empty input`() {
             // given
             val givenInput = ""
-            val inputBytes = (givenInput + System.lineSeparator()).toByteArray()
-            var actual: Boolean
-            ByteArrayInputStream(inputBytes).use { stream ->
-                System.setIn(stream)
 
-                // when
-                actual = commandLineInterfaceService.receiveConfirmation(emptyOutput())
+            // when
+            val actual = mockSystemInWith("$givenInput\n") {
+                commandLineInterfaceService.receiveConfirmation(emptyOutput())
             }
 
             // then

@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
@@ -13,8 +14,6 @@ import org.junit.jupiter.params.provider.ValueSource
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.isA
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 
 class InvalidCommandIT {
 
@@ -66,17 +65,14 @@ class InvalidCommandIT {
             val input = inputOf(bytesOf(givenInput))
 
             // when
-            ByteArrayOutputStream().use { stream ->
-                PrintStream(stream).use { printStream ->
-                    System.setErr(printStream)
-                    val actual = commandFactory.construct(CommandType.resolveCommandTypeFrom(input.command), input)
-                    val errorOutput = String(stream.toByteArray())
-
-                    // then
-                    expectThat(actual).isA<NullCommand>()
-                    expectThat(errorOutput) contains "Command execution failed:"
-                }
+            val captureSystemErr = captureSystemErr()
+            val actual = captureSystemErr.during {
+                commandFactory.construct(CommandType.resolveCommandTypeFrom(input.command), input)
             }
+
+            // then
+            expectThat(actual).isA<NullCommand>()
+            expectThat(captureSystemErr.capture) contains "Command execution failed:"
         }
 
         @ParameterizedTest

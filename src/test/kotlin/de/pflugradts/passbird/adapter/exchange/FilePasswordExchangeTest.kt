@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.adapter.exchange
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
@@ -10,8 +11,6 @@ import strikt.assertions.contains
 import strikt.assertions.isEmpty
 import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 import java.util.stream.Stream
 
 class FilePasswordExchangeTest {
@@ -25,17 +24,14 @@ class FilePasswordExchangeTest {
         fakeSystemOperation(instance = systemOperation, withIoException = true)
 
         // when
-        ByteArrayOutputStream().use { stream ->
-            PrintStream(stream).use { printStream ->
-                System.setErr(printStream)
-                val actual = tryCatching { filePasswordExchange.send(Stream.empty()) }
-                val errorOutput = String(stream.toByteArray())
-
-                // then
-                expectThat(actual.success).isTrue()
-                expectThat(errorOutput) contains "Password database could not be exported"
-            }
+        val captureSystemErr = captureSystemErr()
+        val actual = captureSystemErr.during {
+            tryCatching { filePasswordExchange.send(Stream.empty()) }
         }
+
+        // then
+        expectThat(actual.success).isTrue()
+        expectThat(captureSystemErr.capture) contains "Password database could not be exported"
     }
 
     @Test
@@ -44,18 +40,15 @@ class FilePasswordExchangeTest {
         fakeSystemOperation(instance = systemOperation, withIoException = true)
 
         // when
-        ByteArrayOutputStream().use { stream ->
-            PrintStream(stream).use { printStream ->
-                System.setErr(printStream)
-                val actual = tryCatching { filePasswordExchange.receive() }
-                val errorOutput = String(stream.toByteArray())
-
-                // then
-                expectThat(actual.success).isTrue()
-                expectThat(actual.getOrNull()).isNotNull()
-                expectThat(actual.getOrNull()!!.toList()).isEmpty()
-                expectThat(errorOutput) contains "Password database could not be imported"
-            }
+        val captureSystemErr = captureSystemErr()
+        val actual = captureSystemErr.during {
+            tryCatching { filePasswordExchange.receive() }
         }
+
+        // then
+        expectThat(actual.success).isTrue()
+        expectThat(actual.getOrNull()).isNotNull()
+        expectThat(actual.getOrNull()!!.toList()).isEmpty()
+        expectThat(captureSystemErr.capture) contains "Password database could not be imported"
     }
 }
