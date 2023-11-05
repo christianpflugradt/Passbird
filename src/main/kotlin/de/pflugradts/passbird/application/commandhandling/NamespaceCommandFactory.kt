@@ -25,7 +25,7 @@ class NamespaceCommandFactory() {
             return AssignNamespaceCommand(input)
         } else if (command.size == 2 && charValueOf(command.getChar(1)).isDigit) {
             return SwitchNamespaceCommand(at(command.getChar(1)))
-        } else if (command.size > 2 && command.getChar(1) == CommandVariant.ADD.value) {
+        } else if (command.size == 3 && command.getChar(1) == CommandVariant.ADD.value && command.getChar(2).isDigit()) {
             return AddNamespaceCommand(at(command.getChar(2)))
         }
         return NullCommand()
