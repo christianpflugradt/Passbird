@@ -7,8 +7,8 @@ plugins {
     application
     jacoco
     java
-    kotlin("jvm") version "1.9.10"
-    id("org.owasp.dependencycheck") version "8.4.0"
+    kotlin("jvm") version "1.9.20"
+    id("org.owasp.dependencycheck") version "8.4.2"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
     id("com.github.ben-manes.versions") version "0.49.0"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
@@ -19,8 +19,8 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.3")
     implementation("com.google.inject:guice:7.0.0")
     implementation("com.google.inject.extensions:guice-assistedinject:7.0.0")
     implementation("com.google.guava:guava:32.1.3-jre")
@@ -29,12 +29,12 @@ dependencies {
     testImplementation("io.strikt:strikt-jvm:0.34.1")
     testImplementation("io.mockk:mockk:1.13.8")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:5.10.1")
     testImplementation("org.awaitility:awaitility:4.2.0")
-    testImplementation("com.tngtech.archunit:archunit:1.1.0")
+    testImplementation("com.tngtech.archunit:archunit:1.2.0")
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
