@@ -39,12 +39,11 @@ class PasswordStoreReader @Inject constructor(
             verifySignature(byteArray)
             verifyChecksum(byteArray)
             var offset = signatureSize()
-            val res1 = populateNamespaces(byteArray, offset)
-            offset = res1.first
+            offset = populateNamespaces(byteArray, offset)
             while (EOF != readInt(byteArray, offset)) {
-                val res2 = byteArray.asPasswordEntry(offset, res1.second)
-                passwordEntries.add(res2.first)
-                offset = res2.second
+                val res = byteArray.asPasswordEntry(offset)
+                passwordEntries.add(res.first)
+                offset = res.second
             }
             return Supplier { passwordEntries.stream() }
         }
@@ -75,9 +74,8 @@ class PasswordStoreReader @Inject constructor(
         }
     }
 
-    private fun populateNamespaces(bytes: ByteArray, offset: Int): Pair<Int, Boolean> {
+    private fun populateNamespaces(bytes: ByteArray, offset: Int): Int {
         var incrementedOffset = offset
-        var legacyMode = true
         if (SECTOR == readInt(bytes, incrementedOffset)) {
             incrementedOffset += intBytes()
             val namespaceBytes: MutableList<Bytes> = ArrayList()
@@ -88,9 +86,8 @@ class PasswordStoreReader @Inject constructor(
                 }
             }
             namespaceService.populate(namespaceBytes)
-            legacyMode = false
         }
-        return Pair(incrementedOffset, legacyMode)
+        return incrementedOffset
     }
 
     private val filePath get() = systemOperation.resolvePath(configuration.adapter.passwordStore.location, DATABASE_FILENAME)
@@ -111,10 +108,10 @@ class PasswordStoreReader @Inject constructor(
         return Pair(result, incrementedOffset - offset)
     }
 
-    private fun ByteArray.asPasswordEntry(offset: Int, legacyMode: Boolean): Pair<PasswordEntry, Int> {
+    private fun ByteArray.asPasswordEntry(offset: Int): Pair<PasswordEntry, Int> {
         var incrementedOffset = offset
-        val namespaceSlot = if (legacyMode) NamespaceSlot.DEFAULT.index() else readInt(this, incrementedOffset)
-        incrementedOffset += if (legacyMode) 0 else Integer.BYTES
+        val namespaceSlot = readInt(this, incrementedOffset)
+        incrementedOffset += Integer.BYTES
         val keySize = readInt(this, incrementedOffset)
         incrementedOffset += Integer.BYTES
         val keyBytes = readBytes(this, incrementedOffset, keySize)
