@@ -11,7 +11,6 @@ import strikt.assertions.contains
 import strikt.assertions.isEmpty
 import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
-import java.util.stream.Stream
 
 class FilePasswordExchangeTest {
 
@@ -26,7 +25,7 @@ class FilePasswordExchangeTest {
         // when
         val captureSystemErr = captureSystemErr()
         val actual = captureSystemErr.during {
-            tryCatching { filePasswordExchange.send(Stream.empty()) }
+            tryCatching { filePasswordExchange.send(emptyMap()) }
         }
 
         // then

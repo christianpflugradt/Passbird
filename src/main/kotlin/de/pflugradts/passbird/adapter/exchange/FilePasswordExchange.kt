@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.adapter.exchange
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
+import com.fasterxml.jackson.databind.json.JsonMapper
 import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import de.pflugradts.passbird.application.ExchangeAdapterPort
@@ -11,52 +10,46 @@ import de.pflugradts.passbird.application.failure.ImportFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.BytePair
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 import java.io.IOException
 import java.nio.file.Files
-import java.util.stream.Stream
 
 class FilePasswordExchange @Inject constructor(
-    @param:Assisted private val uri: String,
+    @Assisted private val uri: String,
     @Inject private val systemOperation: SystemOperation,
 ) : ExchangeAdapterPort {
-    private val mapper = YAMLMapper()
+    private val mapper = JsonMapper()
 
-    override fun send(data: Stream<BytePair>) {
+    override fun send(data: Map<NamespaceSlot, List<BytePair>>) {
         try {
             Files.writeString(
                 systemOperation.resolvePath(uri, EXCHANGE_FILENAME),
-                mapper.writeValueAsString(PasswordEntriesRepresentation(data.map { it.asPasswordEntryRepresentation() }.toList())),
+                mapper.writerWithDefaultPrettyPrinter().writeValueAsString(ExchangeWrapper(data.toSerializable())),
             )
         } catch (e: IOException) {
             reportFailure(ExportFailure(e))
         }
     }
 
-    override fun receive(): Stream<BytePair> {
+    override fun receive(): Map<NamespaceSlot, List<BytePair>> {
         return try {
             mapper.readValue(
                 Files.readString(systemOperation.resolvePath(uri, EXCHANGE_FILENAME)),
-                PasswordEntriesRepresentation::class.java,
-            ).passwordEntryRepresentations?.stream()?.map { it.asBytesPair() } ?: Stream.empty()
+                ExchangeWrapper::class.java,
+            ).value.toBytePairMap()
         } catch (e: IOException) {
             reportFailure(ImportFailure(e))
-            Stream.empty()
+            emptyMap()
         }
     }
 }
 
-data class PasswordEntryRepresentation(var key: String? = null, var password: String? = null) {
-    fun asBytesPair() = if (key.isNullOrBlank() || password.isNullOrBlank()) {
-        BytePair(Pair(emptyBytes(), emptyBytes()))
-    } else {
-        BytePair(Pair(bytesOf(key!!), bytesOf(password!!)))
-    }
+private class ExchangeWrapper(val value: Map<NamespaceSlot, List<PlainPasswordEntry>> = emptyMap())
+private class PlainPasswordEntry(var alias: String = "", var password: String = "")
+private fun Map<NamespaceSlot, List<BytePair>>.toSerializable() = entries.associate { namespace ->
+    namespace.key to namespace.value.map { PlainPasswordEntry(it.value.first.asString(), it.value.second.asString()) }
 }
-
-data class PasswordEntriesRepresentation(
-    @JsonProperty("passwordEntry") val passwordEntryRepresentations: List<PasswordEntryRepresentation>? = null,
-)
-
-fun BytePair.asPasswordEntryRepresentation() = PasswordEntryRepresentation(value.first.asString(), value.second.asString())
+private fun Map<NamespaceSlot, List<PlainPasswordEntry>>.toBytePairMap() = entries.associate { namespace ->
+    namespace.key to namespace.value.map { BytePair(Pair(bytesOf(it.alias), bytesOf(it.password))) }
+}

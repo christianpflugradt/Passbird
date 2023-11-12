@@ -10,7 +10,7 @@ interface NamespaceService {
     fun populate(namespaceBytes: List<Bytes>)
     fun deploy(namespaceBytes: Bytes, namespaceSlot: NamespaceSlot)
     fun atSlot(namespaceSlot: NamespaceSlot): Optional<Namespace>
-    fun all(): Stream<Optional<Namespace>>
+    fun all(includeDefault: Boolean = false): Stream<Optional<Namespace>>
     fun getCurrentNamespace(): Namespace
     fun updateCurrentNamespace(namespaceSlot: NamespaceSlot)
 }

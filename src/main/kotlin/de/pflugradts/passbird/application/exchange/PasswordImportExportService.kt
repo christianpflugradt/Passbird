@@ -2,29 +2,43 @@ package de.pflugradts.passbird.application.exchange
 
 import com.google.inject.Inject
 import de.pflugradts.passbird.domain.model.BytePair
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.service.NamespaceService
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import java.util.stream.Stream
 
 class PasswordImportExportService @Inject constructor(
     @Inject private val exchangeFactory: ExchangeFactory,
     @Inject private val passwordService: PasswordService,
+    @Inject private val namespaceService: NamespaceService,
 ) : ImportExportService {
-    override fun peekImportKeyBytes(uri: String): Stream<Bytes> =
-        exchangeFactory.createPasswordExchange(uri).receive().map { it.value.first }
+    override fun peekImportKeyBytes(uri: String) = exchangeFactory.createPasswordExchange(uri).receive().entries.associate {
+        it.key to it.value.map { bytePair -> bytePair.value.first }
+    }
 
     override fun importPasswordEntries(uri: String) {
-        passwordService.putPasswordEntries(
-            exchangeFactory.createPasswordExchange(uri).receive(),
-            // FIXME when migrated password service to kotlin
-        )
+        val currentNamespace = namespaceService.getCurrentNamespace()
+        val passwordEntriesByNamespaces = exchangeFactory.createPasswordExchange(uri).receive()
+        passwordEntriesByNamespaces.keys.forEach { slot ->
+            val deployedNamespace = namespaceService.atSlot(slot)
+            if (deployedNamespace.isEmpty) {
+                namespaceService.deploy(bytesOf("Namespace-${slot.index()}"), slot)
+            }
+            namespaceService.updateCurrentNamespace(slot)
+            passwordService.putPasswordEntries(passwordEntriesByNamespaces[slot]!!.stream())
+        }
+        namespaceService.updateCurrentNamespace(currentNamespace.slot)
     }
 
     override fun exportPasswordEntries(uri: String) {
-        passwordService.findAllKeys().map { retrievePasswordEntry(it) }.toList().let {
-            if (it.isNotEmpty()) { exchangeFactory.createPasswordExchange(uri).send(it.stream()) }
+        val currentNamespace = namespaceService.getCurrentNamespace()
+        val passwordEntriesByNamespaces = mutableMapOf<NamespaceSlot, List<BytePair>>()
+        namespaceService.all(includeDefault = true).filter { it.isPresent }.map { it.get() }.forEach { namespace ->
+            namespaceService.updateCurrentNamespace(namespace.slot)
+            passwordEntriesByNamespaces[namespace.slot] = passwordService.findAllKeys()
+                .map { key -> BytePair(Pair(key, passwordService.viewPassword(key).get())) }.toList()
         }
+        exchangeFactory.createPasswordExchange(uri).send(passwordEntriesByNamespaces)
+        namespaceService.updateCurrentNamespace(currentNamespace.slot)
     }
-
-    private fun retrievePasswordEntry(keyBytes: Bytes) = passwordService.viewPassword(keyBytes).map { BytePair(Pair(keyBytes, it)) }.get()
 }

@@ -12,10 +12,19 @@ fun fakePasswordService(
     instance: PasswordService,
     withInvalidAlias: Boolean = false,
     withPasswordEntries: List<PasswordEntry> = emptyList(),
+    withNamespaceService: NamespaceService? = null,
 ) {
     every { instance.putPasswordEntry(any(), any()) } returns Unit
     every { instance.putPasswordEntries(any()) } returns Unit
-    every { instance.findAllKeys() } returns withPasswordEntries.map { it.viewKey() }.stream()
+    every { instance.findAllKeys() } answers {
+        if (withNamespaceService != null) {
+            withPasswordEntries
+                .filter { it.associatedNamespace() == withNamespaceService.getCurrentNamespace().slot }
+                .map { it.viewKey() }.stream()
+        } else {
+            withPasswordEntries.map { it.viewKey() }.stream()
+        }
+    }
     every { instance.viewPassword(any()) } answers {
         Optional.ofNullable(withPasswordEntries.find { it.viewKey() == firstArg() }?.viewPassword())
     }

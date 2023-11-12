@@ -6,9 +6,11 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
+import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
+import de.pflugradts.passbird.domain.service.createNamespaceServiceForTesting
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
@@ -18,7 +20,6 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
-import java.util.stream.Stream
 
 class ImportCommandIT {
 
@@ -26,7 +27,14 @@ class ImportCommandIT {
     private val importExportService = mockk<ImportExportService>(relaxed = true)
     private val configuration = mockk<Configuration>()
     private val passwordService = mockk<PasswordService>()
-    private val importCommandHandler = ImportCommandHandler(configuration, importExportService, passwordService, userInterfaceAdapterPort)
+    private val namespaceService = createNamespaceServiceForTesting()
+    private val importCommandHandler = ImportCommandHandler(
+        configuration,
+        importExportService,
+        namespaceService,
+        passwordService,
+        userInterfaceAdapterPort,
+    )
     private val inputHandler = createInputHandlerFor(importCommandHandler)
 
     @Test
@@ -58,7 +66,7 @@ class ImportCommandIT {
         val databaseKey2 = bytesOf("database2")
         val givenPasswordEntry1 = createPasswordEntryForTesting(withKeyBytes = databaseKey1)
         val givenPasswordEntry2 = createPasswordEntryForTesting(withKeyBytes = databaseKey2)
-        every { importExportService.peekImportKeyBytes(args) } returns Stream.of(importKey1, importKey2)
+        every { importExportService.peekImportKeyBytes(args) } returns mapOf(DEFAULT to listOf(importKey1, importKey2))
         fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry1, givenPasswordEntry2))
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
@@ -83,7 +91,7 @@ class ImportCommandIT {
         val databaseKey2 = bytesOf("overlap")
         val givenPasswordEntry1 = createPasswordEntryForTesting(withKeyBytes = databaseKey1)
         val givenPasswordEntry2 = createPasswordEntryForTesting(withKeyBytes = databaseKey2)
-        every { importExportService.peekImportKeyBytes(args) } returns Stream.of(importKey1, importKey2)
+        every { importExportService.peekImportKeyBytes(args) } returns mapOf(DEFAULT to listOf(importKey1, importKey2))
         fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry1, givenPasswordEntry2))
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
@@ -109,7 +117,7 @@ class ImportCommandIT {
         val databaseKey2 = bytesOf("overlap")
         val givenPasswordEntry1 = createPasswordEntryForTesting(withKeyBytes = databaseKey1)
         val givenPasswordEntry2 = createPasswordEntryForTesting(withKeyBytes = databaseKey2)
-        every { importExportService.peekImportKeyBytes(args) } returns Stream.of(importKey1, importKey2)
+        every { importExportService.peekImportKeyBytes(args) } returns mapOf(DEFAULT to listOf(importKey1, importKey2))
         fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry1, givenPasswordEntry2))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
@@ -122,4 +130,6 @@ class ImportCommandIT {
         verify(exactly = 0) { importExportService.importPasswordEntries(args) }
         expectThat(bytes) isNotEqualTo reference
     }
+
+    // FIXME add tests for keys across multiple namespaces
 }

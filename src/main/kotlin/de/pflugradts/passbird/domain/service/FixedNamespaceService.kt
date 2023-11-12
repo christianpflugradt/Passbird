@@ -2,6 +2,7 @@ package de.pflugradts.passbird.domain.service
 
 import com.google.inject.Inject
 import de.pflugradts.passbird.domain.model.namespace.Namespace
+import de.pflugradts.passbird.domain.model.namespace.Namespace.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
@@ -30,10 +31,12 @@ class FixedNamespaceService @Inject constructor(
         passwordEntryRepository.sync()
     }
     override fun atSlot(namespaceSlot: NamespaceSlot): Optional<Namespace> =
-        if (namespaceSlot === NamespaceSlot.DEFAULT) Optional.of(Namespace.DEFAULT) else namespaces[namespaceSlot.index() - 1]
-    override fun all() = namespaces.stream()
-    override fun getCurrentNamespace(): Namespace = atSlot(currentNamespace).orElse(Namespace.DEFAULT)
+        if (namespaceSlot === NamespaceSlot.DEFAULT) Optional.of(DEFAULT) else namespaces[namespaceSlot.index() - 1]
+    override fun all(includeDefault: Boolean) = namespaces.let { if (includeDefault) DEFAULT.asOptionalInList() + it else it }.stream()
+    override fun getCurrentNamespace(): Namespace = atSlot(currentNamespace).orElse(DEFAULT)
     override fun updateCurrentNamespace(namespaceSlot: NamespaceSlot) {
         if (atSlot(namespaceSlot).isPresent) { currentNamespace = namespaceSlot }
     }
 }
+
+private fun Namespace.asOptionalInList() = listOf(Optional.of(this))
