@@ -114,7 +114,7 @@ tasks.jacocoTestCoverageVerification {
 }
 
 dependencyCheck {
-    failBuildOnCVSS = 3.0f
+    failBuildOnCVSS = 0.0f
     suppressionFile = "owasp-suppressions.xml"
     analyzers.apply {
         assemblyEnabled = false
