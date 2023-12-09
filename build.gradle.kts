@@ -115,6 +115,7 @@ tasks.jacocoTestCoverageVerification {
 
 dependencyCheck {
     failBuildOnCVSS = 0.0f
+    nvd.apiKey = System.getenv("NVD_API_KEY")
     suppressionFile = "owasp-suppressions.xml"
     analyzers.apply {
         assemblyEnabled = false

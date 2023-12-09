@@ -18,7 +18,9 @@ jobs:
       - name: check dependencies for vulnerabilities
         env:
             NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-        run: ./gradlew dependencyCheckAnalyze
+        run: |
+          export JAVA_OPTS="-Xms1g -Xmx2g"
+          ./gradlew dependencyCheckAnalyze
       - uses: actions/upload-artifact@v3
         with:
           name: dependency-check-report

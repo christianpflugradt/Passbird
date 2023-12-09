@@ -17,7 +17,9 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 
 🔑 owasp:
   stage: 🔎 check
-  script: ./gradlew dependencyCheckAnalyze
+  script:
+    - export JAVA_OPTS="-Xms1g -Xmx2g"
+    - ./gradlew dependencyCheckAnalyze
   artifacts:
     paths: [ build/reports/dependency-check-report.html ]
   except: [ tags ]
