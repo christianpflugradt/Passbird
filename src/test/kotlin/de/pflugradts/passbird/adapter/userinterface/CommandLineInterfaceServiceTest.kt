@@ -162,7 +162,6 @@ class CommandLineInterfaceServiceTest {
         fun `should receive secure input as plain if console is unavailable`() {
             // given
             val givenInput = "hello world"
-            val inputBytes = (givenInput + System.lineSeparator()).toByteArray()
             fakeSystemOperation(
                 instance = systemOperation,
                 withConsoleEnabled = false,
