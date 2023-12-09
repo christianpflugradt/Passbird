@@ -29,7 +29,7 @@ class ClipboardService @Inject constructor(
     private fun scheduleCleaner() {
         if (isResetEnabled) {
             cleanerThread = Thread { sleep().onSuccess { tryCatching { systemOperation.copyToClipboard("") } } }
-            cleanerThread?.start()
+            cleanerThread!!.start()
         }
     }
 
