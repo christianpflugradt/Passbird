@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.isA
+import strikt.assertions.isEqualTo
 
 class InvalidCommandIT {
 
@@ -44,6 +45,24 @@ class InvalidCommandIT {
 
             // then
             verify { commandBus.post(any(NullCommand::class)) }
+        }
+
+        @Test
+        fun `should handle single char command with invalid input`() {
+            // given
+            val givenCommand = "c"
+            val givenArgument = "1"
+            val input = inputOf(bytesOf("$givenCommand$givenArgument"))
+            val captureSystemErr = captureSystemErr()
+
+            // when
+            captureSystemErr.during {
+                inputHandler.handleInput(input)
+            }
+            val actual = captureSystemErr.capture
+
+            // then
+            expectThat(actual) isEqualTo "Command execution failed: Parameter for command '$givenCommand' not supported: $givenArgument\n"
         }
     }
 
