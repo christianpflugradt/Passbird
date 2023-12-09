@@ -1,0 +1,17 @@
+{
+    "dependencyDashboardOSVVulnerabilitySummary": "all",
+    "separateMultipleMajor": true,
+    "prCreation": "status-success",
+    "packageRules": [
+        {
+            "matchFileNames": [ ".github/**" ],
+            "groupName": "github-actions",
+            "separateMajorMinor": false
+        },
+        {
+            "matchFileNames": [ "build.gradle.kts" ],
+            "matchUpdateTypes": [ "patch", "minor" ],
+            "groupName": "non-major"
+        }
+    ]
+}
