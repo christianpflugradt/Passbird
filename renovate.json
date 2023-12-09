@@ -1,4 +1,5 @@
 {
+    "dependencyDashboard": true,
     "dependencyDashboardOSVVulnerabilitySummary": "all",
     "separateMultipleMajor": true,
     "prCreation": "status-success",
