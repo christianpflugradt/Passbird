@@ -67,7 +67,7 @@ ktlint {
     }
 }
 
-mapOf("unitTests" to "Test", "integrationTests" to "IT", "architectureTests" to "AT",).forEach {
+mapOf("unitTests" to "Test", "integrationTests" to "IT", "architectureTests" to "AT").forEach {
     tasks.register<Test>(it.key) {
         useJUnitPlatform()
         group = VERIFICATION_GROUP
