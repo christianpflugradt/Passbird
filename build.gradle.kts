@@ -67,18 +67,11 @@ ktlint {
     }
 }
 
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
-}
-
-listOf(
-    Pair("unitTests", "Test"),
-    Pair("integrationTests", "IT"),
-    Pair("architectureTests", "AT"),
-).forEach {
-    tasks.register<Test>(it.first) {
+mapOf("unitTests" to "Test", "integrationTests" to "IT", "architectureTests" to "AT",).forEach {
+    tasks.register<Test>(it.key) {
+        useJUnitPlatform()
         group = VERIFICATION_GROUP
-        include("**/*${it.second}.class")
+        include("**/*${it.value}.class")
     }
 }
 
