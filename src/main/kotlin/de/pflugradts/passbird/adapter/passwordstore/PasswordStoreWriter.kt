@@ -1,8 +1,11 @@
 package de.pflugradts.passbird.adapter.passwordstore
 
 import com.google.inject.Inject
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.DATABASE_FILENAME
+import de.pflugradts.passbird.application.failure.WritePasswordDatabaseFailure
+import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.copyInt
@@ -51,7 +54,9 @@ class PasswordStoreWriter @Inject constructor(
         return incrementedOffset
     }
 
-    private fun writeToDisk(bytes: Bytes) = systemOperation.writeBytesToFile(filePath!!, cryptoProvider.encrypt(bytes))
+    private fun writeToDisk(bytes: Bytes) =
+        tryCatching { systemOperation.writeBytesToFile(filePath!!, cryptoProvider.encrypt(bytes)) }
+            .onFailure { reportFailure(WritePasswordDatabaseFailure(filePath!!, it)) }
 
     private fun calcRequiredContentSize(passwordEntries: Supplier<Stream<PasswordEntry>>): Int {
         val dataSize = passwordEntries.get()
