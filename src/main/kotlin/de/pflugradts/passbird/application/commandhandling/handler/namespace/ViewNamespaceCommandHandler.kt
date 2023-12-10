@@ -14,7 +14,7 @@ class ViewNamespaceCommandHandler @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler, CanListAvailableNamespaces(namespaceService) {
     @Subscribe
-    private fun handleViewNamespaceCommand(viewNamespaceCommand: ViewNamespaceCommand) {
+    private fun handleViewNamespaceCommand(@Suppress("UNUSED_PARAMETER") viewNamespaceCommand: ViewNamespaceCommand) {
         userInterfaceAdapterPort.send(
             outputOf(
                 bytesOf(

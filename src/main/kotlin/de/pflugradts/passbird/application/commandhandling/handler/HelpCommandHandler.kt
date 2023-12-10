@@ -13,7 +13,7 @@ class HelpCommandHandler @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
-    private fun handleHelpCommand(helpCommand: HelpCommand) {
+    private fun handleHelpCommand(@Suppress("UNUSED_PARAMETER") helpCommand: HelpCommand) {
         userInterfaceAdapterPort.send(
             outputOf(
                 bytesOf(

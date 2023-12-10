@@ -23,11 +23,13 @@ value class TryResult<R> private constructor(
         else -> null
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun getOrNull() = when (value) {
         is Failure -> null
         else -> value as R
     }
 
+    @Suppress("UNCHECKED_CAST")
     infix fun getOrElse(other: R) = when (value) {
         is Failure -> other
         else -> value as R

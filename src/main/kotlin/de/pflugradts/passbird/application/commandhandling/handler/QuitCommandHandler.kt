@@ -14,7 +14,7 @@ class QuitCommandHandler @Inject constructor(
     @Inject private val bootable: Bootable,
 ) : CommandHandler {
     @Subscribe
-    private fun handleQuitCommand(quitCommand: QuitCommand) {
+    private fun handleQuitCommand(@Suppress("UNUSED_PARAMETER") quitCommand: QuitCommand) {
         userInterfaceAdapterPort.send(outputOf(bytesOf("goodbye")))
         bootable.terminate(SystemOperation())
     }

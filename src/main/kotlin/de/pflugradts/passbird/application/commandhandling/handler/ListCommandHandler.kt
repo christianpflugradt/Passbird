@@ -15,7 +15,7 @@ class ListCommandHandler @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
-    private fun handleListCommand(listCommand: ListCommand) {
+    private fun handleListCommand(@Suppress("UNUSED_PARAMETER") listCommand: ListCommand) {
         userInterfaceAdapterPort.send(outputOf(join(passwordService.findAllKeys().toList())))
         userInterfaceAdapterPort.sendLineBreak()
     }

@@ -50,7 +50,6 @@ class ViewCommandIT {
     fun `should handle view command for non existing password`() {
         // given
         val key = "key"
-        val password = "password"
         val command = bytesOf("v$key")
         val reference = command.copy()
         fakePasswordService(
