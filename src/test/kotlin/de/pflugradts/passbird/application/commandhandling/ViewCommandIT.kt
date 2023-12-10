@@ -45,4 +45,25 @@ class ViewCommandIT {
         expectThat(outputSlot.captured.bytes.asString()) isEqualTo password
         expectThat(command) isNotEqualTo reference
     }
+
+    @Test
+    fun `should handle view command for non existing password`() {
+        // given
+        val key = "key"
+        val password = "password"
+        val command = bytesOf("v$key")
+        val reference = command.copy()
+        fakePasswordService(
+            instance = passwordService,
+            withPasswordEntries = emptyList(),
+        )
+
+        // when
+        expectThat(command) isEqualTo reference
+        inputHandler.handleInput(inputOf(command))
+
+        // then
+        verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
+        expectThat(command) isNotEqualTo reference
+    }
 }
