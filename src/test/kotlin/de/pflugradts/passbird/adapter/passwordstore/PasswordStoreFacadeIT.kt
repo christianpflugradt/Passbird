@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.adapter.passwordstore
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
@@ -23,10 +24,16 @@ import de.pflugradts.passbird.domain.service.createNamespaceServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.spyk
+import io.mockk.unmockkAll
+import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
+import strikt.assertions.contains
 import strikt.assertions.containsExactly
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
@@ -41,7 +48,7 @@ class PasswordStoreFacadeIT {
     private val configuration = mockk<Configuration>()
     private val cryptoProvider = mockk<CryptoProvider>()
     private val namespaceService = createNamespaceServiceForTesting()
-    private val systemOperation = SystemOperation()
+    private val systemOperation = spyk(SystemOperation())
     private var passwordStoreFacade: PasswordStoreFacade = PasswordStoreFacade(
         passwordStoreReader = PasswordStoreReader(
             configuration = configuration,
@@ -77,10 +84,7 @@ class PasswordStoreFacadeIT {
     @Test
     fun `should write to and them read from database`() {
         // given
-        val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1"))
-        val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2"))
-        val passwordEntry3 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key3"), withPasswordBytes = bytesOf("password3"))
-        val passwordEntries = listOf(passwordEntry1, passwordEntry2, passwordEntry3)
+        val passwordEntries = somePasswordEntries()
 
         // when
         passwordStoreFacade.sync { passwordEntries.stream() }
@@ -176,4 +180,72 @@ class PasswordStoreFacadeIT {
         // then
         expectThat(actual.get().count()) isEqualTo 0
     }
+
+    @Nested
+    inner class SignatureAndCheckSumFailureTest {
+
+        @Test
+        fun `should shut down on invalid signature with verifySignature set to true`() {
+            // given
+            val passwordEntries = somePasswordEntries()
+            val manipulatedSignature = signature().reversedArray()
+            every { systemOperation.exit() } returns Unit
+            fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifySignature = true)
+
+            mockkStatic(::signature)
+            every { signature() } returns manipulatedSignature
+            passwordStoreFacade.sync { passwordEntries.stream() }
+            expectThat(File(databaseFilename)).exists()
+            unmockkAll()
+
+            val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+            // when
+            captureSystemErr.during {
+                passwordStoreFacade.restore()
+            }
+            val actual = captureSystemErr.capture
+
+            // then
+            expectThat(actual) contains "Signature of password database could not be verified."
+            expectThat(actual) contains "Shutting down due to signature failure."
+            verify(exactly = 1) { systemOperation.exit() }
+        }
+
+        @Test
+        fun `should report failure on invalid signature with verifySignature set to false`() {
+            // given
+            val passwordEntries = somePasswordEntries()
+            val manipulatedSignature = signature().reversedArray()
+            every { systemOperation.exit() } returns Unit
+            fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifySignature = false)
+
+            mockkStatic(::signature)
+            every { signature() } returns manipulatedSignature
+            passwordStoreFacade.sync { passwordEntries.stream() }
+            expectThat(File(databaseFilename)).exists()
+            unmockkAll()
+
+            val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+            // when
+            var restored = 0
+            captureSystemErr.during {
+                restored = passwordStoreFacade.restore().get().count().toInt()
+            }
+            val actual = captureSystemErr.capture
+
+            // then
+            expectThat(restored) isEqualTo passwordEntries.size
+            expectThat(actual) contains "Signature of password database could not be verified."
+            expectThat(actual.contains("Shutting down due to signature failure.")).isFalse()
+            verify(exactly = 0) { systemOperation.exit() }
+        }
+    }
+
+    private fun somePasswordEntries() = listOf(
+        createPasswordEntryForTesting(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1")),
+        createPasswordEntryForTesting(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2")),
+        createPasswordEntryForTesting(withKeyBytes = bytesOf("key3"), withPasswordBytes = bytesOf("password3")),
+    )
 }
