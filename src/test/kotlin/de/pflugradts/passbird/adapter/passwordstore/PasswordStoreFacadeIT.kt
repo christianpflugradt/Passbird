@@ -241,6 +241,62 @@ class PasswordStoreFacadeIT {
             expectThat(actual.contains("Shutting down due to signature failure.")).isFalse()
             verify(exactly = 0) { systemOperation.exit() }
         }
+
+        @Test
+        fun `should shut down on invalid checksum with verifyChecksum set to true`() {
+            // given
+            val passwordEntries = somePasswordEntries()
+            every { systemOperation.exit() } returns Unit
+            fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifyChecksum = true)
+
+            mockkStatic(::checksum)
+            every { checksum(any()) } returns 0
+            passwordStoreFacade.sync { passwordEntries.stream() }
+            expectThat(File(databaseFilename)).exists()
+            unmockkAll()
+
+            val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+            // when
+            captureSystemErr.during {
+                passwordStoreFacade.restore()
+            }
+            val actual = captureSystemErr.capture
+
+            // then
+            expectThat(actual) contains "Checksum of password database could not be verified."
+            expectThat(actual) contains "Shutting down due to checksum failure."
+            verify(exactly = 1) { systemOperation.exit() }
+        }
+
+        @Test
+        fun `should report failure on invalid checksum with verifyChecksum set to false`() {
+            // given
+            val passwordEntries = somePasswordEntries()
+            every { systemOperation.exit() } returns Unit
+            fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifyChecksum = false)
+
+            mockkStatic(::checksum)
+            every { checksum(any()) } returns 0
+            passwordStoreFacade.sync { passwordEntries.stream() }
+            expectThat(File(databaseFilename)).exists()
+            unmockkAll()
+
+            val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+            // when
+            var restored = 0
+            captureSystemErr.during {
+                restored = passwordStoreFacade.restore().get().count().toInt()
+            }
+            val actual = captureSystemErr.capture
+
+            // then
+            expectThat(restored) isEqualTo passwordEntries.size
+            expectThat(actual) contains "Checksum of password database could not be verified."
+            expectThat(actual.contains("Shutting down due to checksum failure.")).isFalse()
+            verify(exactly = 0) { systemOperation.exit() }
+        }
     }
 
     private fun somePasswordEntries() = listOf(

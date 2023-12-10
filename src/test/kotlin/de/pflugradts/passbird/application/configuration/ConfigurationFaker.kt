@@ -15,6 +15,7 @@ fun fakeConfiguration(
     withPasswordStoreLocation: String = "",
     withPromptOnRemoval: Boolean = false,
     withSecureInputEnabled: Boolean = true,
+    withVerifyChecksum: Boolean = true,
     withVerifySignature: Boolean = true,
 ) {
     val clipboardReset = mockk<ClipboardReset>()
@@ -28,6 +29,7 @@ fun fakeConfiguration(
     every { keyStore.location } returns withKeyStoreLocation
     val passwordStore = mockk<Configuration.PasswordStore>()
     every { passwordStore.location } returns withPasswordStoreLocation
+    every { passwordStore.verifyChecksum } returns withVerifyChecksum
     every { passwordStore.verifySignature } returns withVerifySignature
     val adapter = mockk<Configuration.Adapter>()
     every { adapter.clipboard } returns clipboard
