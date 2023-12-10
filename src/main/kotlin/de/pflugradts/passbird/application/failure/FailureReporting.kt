@@ -27,15 +27,6 @@ fun reportFailure(importFailure: ImportFailure) =
     } else {
         err("Password database could not be imported.")
     }
-fun reportFailure(passwordEntriesFailure: PasswordEntriesFailure) = err("Password Entries could not be accessed.")
-fun reportFailure(passwordEntryFailure: PasswordEntryFailure) =
-    if (passwordEntryFailure.ex is InvalidKeyException) {
-        err("Password alias cannot contain digits or special characters. Please choose a different alias.")
-    } else {
-        err("Password entry could not be accessed.")
-    }
-fun reportFailure(renamePasswordEntryFailure: RenamePasswordEntryFailure) =
-    err("Password alias could not be renamed: ${renamePasswordEntryFailure.ex.message}")
 fun reportFailure(signatureCheckFailure: SignatureCheckFailure) {
     err("Signature of password database could not be verified.")
     if (signatureCheckFailure.critical) {
