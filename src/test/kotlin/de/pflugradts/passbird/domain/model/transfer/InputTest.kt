@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 
 class InputTest {
@@ -183,5 +184,77 @@ class InputTest {
         }
 
         private fun inputOf(index: Int) = inputOf(bytesOf(index.toString()))
+    }
+
+    @Nested
+    inner class EqualsTest {
+
+        @Test
+        fun `should be equal to itself`() {
+            // given
+            val input1 = inputOf(bytesOf("abc"))
+            val input2 = input1
+
+            // when
+            val actual = input1.equals(input2)
+
+            // then
+            expectThat(actual).isTrue()
+        }
+
+        @Test
+        fun `should be equal to input with equal bytes`() {
+            // given
+            val bytes = bytesOf("abc")
+            val sameBytes = bytesOf("abc")
+            val input1 = inputOf(bytes)
+            val input2 = inputOf(sameBytes)
+
+            // when
+            val actual = input1.equals(input2)
+
+            // then
+            expectThat(actual).isTrue()
+        }
+
+        @Test
+        fun `should not be equal to input with other bytes`() {
+            // given
+            val bytes = bytesOf("abc")
+            val otherBytes = bytesOf("abd")
+            val input1 = inputOf(bytes)
+            val input2 = inputOf(otherBytes)
+
+            // when
+            val actual = input1.equals(input2)
+
+            // then
+            expectThat(actual).isFalse()
+        }
+
+        @Test
+        fun `should not be equal to other class`() {
+            // given
+            val bytes = bytesOf("abc")
+            val input = inputOf(bytes)
+
+            // when
+            val actual = input.equals(bytes)
+
+            // then
+            expectThat(actual).isFalse()
+        }
+
+        @Test
+        fun `should not be equal to null`() {
+            // given
+            val input = inputOf(bytesOf("abc"))
+
+            // when
+            val actual = input.equals(null)
+
+            // then
+            expectThat(actual).isFalse()
+        }
     }
 }

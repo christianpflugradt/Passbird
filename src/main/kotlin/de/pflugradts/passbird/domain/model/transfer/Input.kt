@@ -34,6 +34,14 @@ class Input private constructor(val bytes: Bytes) : ValueObject {
         if (it in FIRST_NAMESPACE - 1..LAST_NAMESPACE) at(it) else INVALID
     } ?: INVALID
 
+    override fun equals(other: Any?): Boolean = when {
+        (this === other) -> true
+        (javaClass != other?.javaClass) -> false
+        else -> bytes == (other as Input).bytes
+    }
+
+    override fun hashCode() = bytes.hashCode()
+
     companion object {
         fun inputOf(bytes: Bytes) = Input(bytes)
         fun emptyInput() = inputOf(emptyBytes())
