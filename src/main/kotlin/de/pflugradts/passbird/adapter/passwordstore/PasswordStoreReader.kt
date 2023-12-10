@@ -1,9 +1,11 @@
 package de.pflugradts.passbird.adapter.passwordstore
 
 import com.google.inject.Inject
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.DATABASE_FILENAME
 import de.pflugradts.passbird.application.failure.ChecksumFailure
+import de.pflugradts.passbird.application.failure.DecryptPasswordDatabaseFailure
 import de.pflugradts.passbird.application.failure.SignatureCheckFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -15,6 +17,7 @@ import de.pflugradts.passbird.domain.model.password.PasswordEntry
 import de.pflugradts.passbird.domain.model.password.PasswordEntry.Companion.createPasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 import de.pflugradts.passbird.domain.service.NamespaceService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import java.util.ArrayDeque
@@ -33,7 +36,7 @@ class PasswordStoreReader @Inject constructor(
 ) {
     fun restore(): Supplier<Stream<PasswordEntry>> {
         val passwordEntries = ArrayDeque<PasswordEntry>()
-        val bytes = readFromDisk()
+        val bytes = readFromDisk() ?: emptyBytes()
         val byteArray = bytes.toByteArray()
         if (byteArray.isNotEmpty()) {
             verifySignature(byteArray)
@@ -50,7 +53,10 @@ class PasswordStoreReader @Inject constructor(
         return Supplier { Stream.empty() }
     }
 
-    private fun readFromDisk() = systemOperation.readBytesFromFile(filePath!!).let { if (it.isEmpty) it else cryptoProvider.decrypt(it) }
+    private fun readFromDisk() =
+        tryCatching { systemOperation.readBytesFromFile(filePath!!).let { if (it.isEmpty) it else cryptoProvider.decrypt(it) } }
+            .onFailure { reportFailure(DecryptPasswordDatabaseFailure(filePath!!, it)) }
+            .getOrNull()
 
     private fun verifySignature(bytes: ByteArray) {
         val expectedSignature = signature()

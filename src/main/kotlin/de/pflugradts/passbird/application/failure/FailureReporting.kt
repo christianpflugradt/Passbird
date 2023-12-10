@@ -15,8 +15,8 @@ fun reportFailure(checksumFailure: ChecksumFailure) {
 fun reportFailure(clipboardFailure: ClipboardFailure) =
     err("Clipboard could not be updated. Please check your Java version. Exception: ${clipboardFailure.ex.message}")
 fun reportFailure(commandFailure: CommandFailure) = err("Command execution failed: ${commandFailure.ex.message}")
-fun reportFailure(decryptPasswordDatabaseFailure: DecryptPasswordDatabaseFailure) =
-    err("Password database could not be decrypted. Please delete the file '${decryptPasswordDatabaseFailure.path.name}' and reboot PwMan3.")
+fun reportFailure(passwordDatabaseFailure: DecryptPasswordDatabaseFailure) =
+    err("Password database at '${passwordDatabaseFailure.path.name}' could not be decrypted: ${passwordDatabaseFailure.ex.message}")
 fun reportFailure(exportFailure: ExportFailure) = err("Password database could not be exported: ${exportFailure.ex.message}")
 fun reportFailure(importFailure: ImportFailure) =
     if (importFailure.ex is InvalidKeyException) {
