@@ -15,6 +15,15 @@ class BytesComparatorTest {
     private val comparator = BytesComparator()
 
     @Test
+    fun `should compare instance to itself`() {
+        // given
+        val bytes = bytesOf("1")
+
+        // when / then
+        expectThat(comparator.compare(bytes, bytes)) isEqualTo 0
+    }
+
+    @Test
     fun `should compare empty and non empty`() {
         // given
         val bytes1 = emptyBytes()
