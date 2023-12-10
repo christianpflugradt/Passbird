@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.adapter.clipboard
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -11,6 +12,8 @@ import io.mockk.verify
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 import java.util.concurrent.TimeUnit
 
 class ClipboardServiceTest {
@@ -28,16 +31,32 @@ class ClipboardServiceTest {
     fun `should copy message to clipboard`() {
         // given
         val message = "write this to clipboard"
-        fakeConfiguration(
-            instance = configuration,
-            withClipboardResetEnabled = false,
-        )
+        fakeConfiguration(instance = configuration)
 
         // when
         clipboardService.post(outputOf(bytesOf(message)))
 
         // then
         verify(exactly = 1) { systemOperation.copyToClipboard(message) }
+    }
+
+    @Test
+    fun `should report error on copy to clipboard`() {
+        // given
+        val message = "write this to clipboard"
+        val error = "clipboard unavailable"
+        fakeConfiguration(instance = configuration)
+        every { systemOperation.copyToClipboard(message) } throws IllegalStateException(error)
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        // when
+        captureSystemErr.during {
+            clipboardService.post(outputOf(bytesOf(message)))
+        }
+
+        // then
+        val actual = captureSystemErr.capture
+        expectThat(actual) isEqualTo "Clipboard could not be updated. Please check your Java version. Exception: $error\n"
     }
 
     @Test
