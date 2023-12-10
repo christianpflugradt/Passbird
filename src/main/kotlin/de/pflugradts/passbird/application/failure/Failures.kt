@@ -11,7 +11,6 @@ data class CommandFailure(val ex: Exception) : Failure
 data class DecryptPasswordDatabaseFailure(val path: Path, val ex: Exception) : Failure
 data class ExportFailure(val ex: Exception) : Failure
 data class ImportFailure(val ex: Exception) : Failure
-data class InputFailure(val ex: Exception) : Failure
 data class PasswordEntriesFailure(val ex: Exception) : Failure
 data class PasswordEntryFailure(val bytes: Bytes, val ex: Exception) : Failure
 data class RenamePasswordEntryFailure(val ex: Exception) : Failure

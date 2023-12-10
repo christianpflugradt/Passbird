@@ -27,7 +27,6 @@ fun reportFailure(importFailure: ImportFailure) =
     } else {
         err("Password database could not be imported.")
     }
-fun reportFailure(inputFailure: InputFailure) = err("Input could not be processed: ${inputFailure.ex.message}")
 fun reportFailure(passwordEntriesFailure: PasswordEntriesFailure) = err("Password Entries could not be accessed.")
 fun reportFailure(passwordEntryFailure: PasswordEntryFailure) =
     if (passwordEntryFailure.ex is InvalidKeyException) {
