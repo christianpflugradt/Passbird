@@ -54,6 +54,21 @@ class FixedNamespaceServiceTest {
     }
 
     @Test
+    fun `should not populate namespaces if number of namespaces does not match`() {
+        // given
+        val namespaceBytes = listOf(bytesOf("namespace1"), bytesOf("namespace2"), bytesOf("namespace3"))
+
+        // when
+        namespaceService.populate(namespaceBytes)
+        val actual = namespaceService.all().toList()
+
+        // then
+        (0..<9).forEach {
+            expectThat(actual[it].isEmpty).isTrue()
+        }
+    }
+
+    @Test
     fun `should return default namespace for default slot`() {
         // given / when / then
         expectThat(namespaceService.atSlot(NamespaceSlot.DEFAULT).getOrNull()) isEqualTo DEFAULT
