@@ -3,7 +3,7 @@ import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.password.KeyAlreadyExistsException
 import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
@@ -31,17 +31,17 @@ internal class MovePasswordServiceTest {
     fun `should move password entry`() {
         // given
         val givenKey = bytesOf("key123")
-        val givenNamespace = NamespaceSlot.N1
-        val newNamespace = NamespaceSlot.N2
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = givenKey, withNamespace = givenNamespace)
+        val givenNestSlot = Slot.N1
+        val newNestSlot = Slot.N2
+        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = givenKey, withNestSlot = givenNestSlot)
         fakeCryptoProvider(instance = cryptoProvider)
         fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(givenPasswordEntry))
 
         // when
-        passwordService.movePassword(givenKey, newNamespace)
+        passwordService.movePassword(givenKey, newNestSlot)
 
         // then
-        expectThat(givenPasswordEntry.associatedNamespace()) isEqualTo newNamespace isNotEqualTo givenNamespace
+        expectThat(givenPasswordEntry.associatedNest()) isEqualTo newNestSlot isNotEqualTo givenNestSlot
     }
 
     @Test
@@ -52,7 +52,7 @@ internal class MovePasswordServiceTest {
         fakePasswordEntryRepository(instance = passwordEntryRepository)
 
         // when
-        passwordService.movePassword(givenKey, NamespaceSlot.N1)
+        passwordService.movePassword(givenKey, Slot.N1)
 
         // then
         verify(exactly = 1) { passbirdEventRegistry.register(eq(PasswordEntryNotFound(givenKey))) }
@@ -60,13 +60,13 @@ internal class MovePasswordServiceTest {
     }
 
     @Test
-    fun `should not move password entry if alias already exists in target namespace`() {
+    fun `should not move password entry if alias already exists in target nest`() {
         // given
         val givenKey = bytesOf("key123")
-        val givenNamespace = NamespaceSlot.N1
-        val newNamespace = NamespaceSlot.N2
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = givenKey, withNamespace = givenNamespace)
-        val conflictingPasswordEntry = createPasswordEntryForTesting(withKeyBytes = givenKey, withNamespace = newNamespace)
+        val givenNestSlot = Slot.N1
+        val newNestSlot = Slot.N2
+        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = givenKey, withNestSlot = givenNestSlot)
+        val conflictingPasswordEntry = createPasswordEntryForTesting(withKeyBytes = givenKey, withNestSlot = newNestSlot)
         fakeCryptoProvider(instance = cryptoProvider)
         fakePasswordEntryRepository(
             instance = passwordEntryRepository,
@@ -74,10 +74,10 @@ internal class MovePasswordServiceTest {
         )
 
         // when
-        val actual = tryCatching { passwordService.movePassword(givenKey, newNamespace) }
+        val actual = tryCatching { passwordService.movePassword(givenKey, newNestSlot) }
 
         // then
         expectThat(actual.exceptionOrNull()).isNotNull().isA<KeyAlreadyExistsException>()
-        expectThat(givenPasswordEntry.associatedNamespace()) isEqualTo givenNamespace isNotEqualTo newNamespace
+        expectThat(givenPasswordEntry.associatedNest()) isEqualTo givenNestSlot isNotEqualTo newNestSlot
     }
 }

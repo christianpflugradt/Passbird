@@ -1,11 +1,11 @@
-package de.pflugradts.passbird.domain.model.password
+package de.pflugradts.passbird.domain.service.password.storage
 
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.password.PasswordEntry
+import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.service.createNamespaceServiceSpyForTesting
-import de.pflugradts.passbird.domain.service.password.storage.NamespaceBasedPasswordEntryRepository
-import de.pflugradts.passbird.domain.service.password.storage.fakePasswordStoreAdapterPort
+import de.pflugradts.passbird.domain.service.createNestServiceSpyForTesting
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -20,16 +20,16 @@ import strikt.java.isPresent
 import java.util.function.Supplier
 import java.util.stream.Stream
 
-class NamespaceBasedPasswordEntryRepositoryTest {
+class NestBasedPasswordEntryRepositoryTest {
 
     private val givenPasswordEntry1 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key1"))
     private val givenPasswordEntry2 = createPasswordEntryForTesting(withKeyBytes = bytesOf("key2"))
     private val givenPasswordEntries = listOf(givenPasswordEntry1, givenPasswordEntry2)
 
     private val passwordStoreAdapterPort = fakePasswordStoreAdapterPort(givenPasswordEntries)
-    private val namespaceService = createNamespaceServiceSpyForTesting()
+    private val nestService = createNestServiceSpyForTesting()
     private val passbirdEventRegistry = mockk<PassbirdEventRegistry>(relaxed = true)
-    private val repository = NamespaceBasedPasswordEntryRepository(passwordStoreAdapterPort, namespaceService, passbirdEventRegistry)
+    private val repository = NestBasedPasswordEntryRepository(passwordStoreAdapterPort, nestService, passbirdEventRegistry)
 
     @Test
     fun `should initialize`() {
@@ -104,23 +104,23 @@ class NamespaceBasedPasswordEntryRepositoryTest {
     }
 
     @Nested
-    inner class NamespaceTest {
+    inner class NestTest {
         @Test
-        fun `should find all in current namespace`() {
+        fun `should find all in current nest`() {
             // given
-            val activeNamespace = NamespaceSlot.N2
-            val otherNamespace = NamespaceSlot.N3
-            namespaceService.deploy(bytesOf("namespace"), activeNamespace)
-            namespaceService.deploy(bytesOf("namespace"), otherNamespace)
-            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = bytesOf("first"), withNamespace = activeNamespace)
-            val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = bytesOf("second"), withNamespace = activeNamespace)
-            val passwordEntry3 = createPasswordEntryForTesting(withKeyBytes = bytesOf("third"), withNamespace = otherNamespace)
+            val activeNestSlot = Slot.N2
+            val otherNestSlot = Slot.N3
+            nestService.deploy(bytesOf("nest"), activeNestSlot)
+            nestService.deploy(bytesOf("nest"), otherNestSlot)
+            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = bytesOf("first"), withNestSlot = activeNestSlot)
+            val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = bytesOf("second"), withNestSlot = activeNestSlot)
+            val passwordEntry3 = createPasswordEntryForTesting(withKeyBytes = bytesOf("third"), withNestSlot = otherNestSlot)
             repository.add(passwordEntry1)
             repository.add(passwordEntry2)
             repository.add(passwordEntry3)
 
             // when
-            namespaceService.updateCurrentNamespace(activeNamespace)
+            nestService.moveToNestAt(activeNestSlot)
             val actual = repository.findAll()
 
             // then
@@ -128,22 +128,22 @@ class NamespaceBasedPasswordEntryRepositoryTest {
         }
 
         @Test
-        fun `should store multiple password entries with identical keys in different namespaces`() {
+        fun `should store multiple password entries with identical keys in different nests`() {
             // given
             val keyBytes = bytesOf("key")
-            val firstNamespace = NamespaceSlot.N1
-            val secondNamespace = NamespaceSlot.N2
-            namespaceService.deploy(bytesOf("namespace"), firstNamespace)
-            namespaceService.deploy(bytesOf("namespace"), secondNamespace)
-            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = keyBytes, withNamespace = firstNamespace)
-            val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = keyBytes, withNamespace = secondNamespace)
+            val firstNestSlot = Slot.N1
+            val secondNestSlot = Slot.N2
+            nestService.deploy(bytesOf("nest"), firstNestSlot)
+            nestService.deploy(bytesOf("nest"), secondNestSlot)
+            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = keyBytes, withNestSlot = firstNestSlot)
+            val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = keyBytes, withNestSlot = secondNestSlot)
             repository.add(passwordEntry1)
             repository.add(passwordEntry2)
 
             // when
-            namespaceService.updateCurrentNamespace(firstNamespace)
+            nestService.moveToNestAt(firstNestSlot)
             val actualFirstEntry = repository.find(keyBytes)
-            namespaceService.updateCurrentNamespace(secondNamespace)
+            nestService.moveToNestAt(secondNestSlot)
             val actualSecondEntry = repository.find(keyBytes)
 
             // then

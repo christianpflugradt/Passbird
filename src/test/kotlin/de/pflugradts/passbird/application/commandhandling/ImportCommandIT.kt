@@ -6,11 +6,11 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT
+import de.pflugradts.passbird.domain.model.nest.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
-import de.pflugradts.passbird.domain.service.createNamespaceServiceForTesting
+import de.pflugradts.passbird.domain.service.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
@@ -27,11 +27,11 @@ class ImportCommandIT {
     private val importExportService = mockk<ImportExportService>(relaxed = true)
     private val configuration = mockk<Configuration>()
     private val passwordService = mockk<PasswordService>()
-    private val namespaceService = createNamespaceServiceForTesting()
+    private val nestService = createNestServiceForTesting()
     private val importCommandHandler = ImportCommandHandler(
         configuration,
         importExportService,
-        namespaceService,
+        nestService,
         passwordService,
         userInterfaceAdapterPort,
     )

@@ -8,13 +8,13 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.service.NamespaceService
+import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class ImportCommandHandler@Inject constructor(
     @Inject private val configuration: ReadableConfiguration,
     @Inject private val importExportService: ImportExportService,
-    @Inject private val namespaceService: NamespaceService,
+    @Inject private val nestService: NestService,
     @Inject private val passwordService: PasswordService,
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
@@ -32,7 +32,7 @@ class ImportCommandHandler@Inject constructor(
     private fun commandConfirmed(importCommand: ImportCommand): Boolean {
         if (configuration.application.password.promptOnRemoval) {
             val overlaps = importExportService.peekImportKeyBytes(importCommand.argument.asString())
-                .map { (namespace, keyBytes) -> keyBytes.map { Triple(namespace, it, passwordService.entryExists(it, namespace)) } }
+                .map { (nestSlot, keyBytes) -> keyBytes.map { Triple(nestSlot, it, passwordService.entryExists(it, nestSlot)) } }
                 .flatten()
                 .filter { it.third }
                 .map { Pair(it.first, it.second) }

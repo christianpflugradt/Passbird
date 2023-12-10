@@ -12,13 +12,13 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.readBytes
 import de.pflugradts.passbird.application.util.readInt
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.password.PasswordEntry
 import de.pflugradts.passbird.domain.model.password.PasswordEntry.Companion.createPasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
-import de.pflugradts.passbird.domain.service.NamespaceService
+import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import java.util.ArrayDeque
 import java.util.Arrays
@@ -31,7 +31,7 @@ private const val SECTOR = -1
 class PasswordStoreReader @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
     @Inject private val configuration: ReadableConfiguration,
-    @Inject private val namespaceService: NamespaceService,
+    @Inject private val nestService: NestService,
     @Inject private val cryptoProvider: CryptoProvider,
 ) {
     fun restore(): Supplier<Stream<PasswordEntry>> {
@@ -42,7 +42,7 @@ class PasswordStoreReader @Inject constructor(
             verifySignature(byteArray)
             verifyChecksum(byteArray)
             var offset = signatureSize()
-            offset = populateNamespaces(byteArray, offset)
+            offset = populateNests(byteArray, offset)
             while (EOF != readInt(byteArray, offset)) {
                 val res = byteArray.asPasswordEntry(offset)
                 passwordEntries.add(res.first)
@@ -80,18 +80,18 @@ class PasswordStoreReader @Inject constructor(
         }
     }
 
-    private fun populateNamespaces(bytes: ByteArray, offset: Int): Int {
+    private fun populateNests(bytes: ByteArray, offset: Int): Int {
         var incrementedOffset = offset
         if (SECTOR == readInt(bytes, incrementedOffset)) {
             incrementedOffset += intBytes()
-            val namespaceBytes: MutableList<Bytes> = ArrayList()
-            for (i in 0 until NamespaceSlot.CAPACITY) {
-                bytes.asNamespaceBytes(incrementedOffset).let {
-                    namespaceBytes.add(it.first)
+            val nestBytes: MutableList<Bytes> = ArrayList()
+            for (i in 0 until Slot.CAPACITY) {
+                bytes.asNestBytes(incrementedOffset).let {
+                    nestBytes.add(it.first)
                     incrementedOffset += it.second
                 }
             }
-            namespaceService.populate(namespaceBytes)
+            nestService.populate(nestBytes)
         }
         return incrementedOffset
     }
@@ -99,15 +99,15 @@ class PasswordStoreReader @Inject constructor(
     private val filePath get() = systemOperation.resolvePath(configuration.adapter.passwordStore.location, DATABASE_FILENAME)
     private fun calcActualContentSize(totalSize: Int) = totalSize - signatureSize() - checksumBytes() - eofBytes()
 
-    private fun ByteArray.asNamespaceBytes(offset: Int): Pair<Bytes, Int> {
+    private fun ByteArray.asNestBytes(offset: Int): Pair<Bytes, Int> {
         var incrementedOffset = offset
-        val namespaceSize = readInt(this, incrementedOffset)
+        val nestSize = readInt(this, incrementedOffset)
         incrementedOffset += Integer.BYTES
         val result: Bytes
-        if (namespaceSize > 0) {
-            val namespaceBytes = readBytes(this, incrementedOffset, namespaceSize)
-            incrementedOffset += namespaceBytes.size
-            result = bytesOf(namespaceBytes)
+        if (nestSize > 0) {
+            val nestBytes = readBytes(this, incrementedOffset, nestSize)
+            incrementedOffset += nestBytes.size
+            result = bytesOf(nestBytes)
         } else {
             result = Bytes.emptyBytes()
         }
@@ -116,7 +116,7 @@ class PasswordStoreReader @Inject constructor(
 
     private fun ByteArray.asPasswordEntry(offset: Int): Pair<PasswordEntry, Int> {
         var incrementedOffset = offset
-        val namespaceSlot = readInt(this, incrementedOffset)
+        val nestSlot = readInt(this, incrementedOffset)
         incrementedOffset += Integer.BYTES
         val keySize = readInt(this, incrementedOffset)
         incrementedOffset += Integer.BYTES
@@ -127,7 +127,7 @@ class PasswordStoreReader @Inject constructor(
         val passwordBytes = readBytes(this, incrementedOffset, passwordSize)
         incrementedOffset += passwordSize
         return Pair(
-            createPasswordEntry(NamespaceSlot.at(namespaceSlot), bytesOf(keyBytes), bytesOf(passwordBytes)),
+            createPasswordEntry(Slot.at(nestSlot), bytesOf(keyBytes), bytesOf(passwordBytes)),
             incrementedOffset,
         )
     }

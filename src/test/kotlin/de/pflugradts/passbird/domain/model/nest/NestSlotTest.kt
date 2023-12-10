@@ -1,16 +1,16 @@
-package de.pflugradts.passbird.domain.model.namespace
+package de.pflugradts.passbird.domain.model.nest
 
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.Companion.at
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N1
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N2
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N3
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N4
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N5
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N6
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N7
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N8
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N9
+import de.pflugradts.passbird.domain.model.nest.Slot.Companion.at
+import de.pflugradts.passbird.domain.model.nest.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.nest.Slot.N1
+import de.pflugradts.passbird.domain.model.nest.Slot.N2
+import de.pflugradts.passbird.domain.model.nest.Slot.N3
+import de.pflugradts.passbird.domain.model.nest.Slot.N4
+import de.pflugradts.passbird.domain.model.nest.Slot.N5
+import de.pflugradts.passbird.domain.model.nest.Slot.N6
+import de.pflugradts.passbird.domain.model.nest.Slot.N7
+import de.pflugradts.passbird.domain.model.nest.Slot.N8
+import de.pflugradts.passbird.domain.model.nest.Slot.N9
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -20,17 +20,17 @@ import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import java.util.stream.Stream
 
-class NamespaceSlotTest {
+class NestSlotTest {
 
     @ParameterizedTest
-    @MethodSource("provideNamespaceSlotAssignments")
-    fun `should resolve slot`(slot: NamespaceSlot, index: Int) {
+    @MethodSource("provideNestSlotAssignments")
+    fun `should resolve slot`(slot: Slot, index: Int) {
         expectThat(at(index)) isEqualTo slot
     }
 
     @ParameterizedTest
-    @MethodSource("provideNamespaceSlotAssignments")
-    fun `should get index for slot`(slot: NamespaceSlot, index: Int) {
+    @MethodSource("provideNestSlotAssignments")
+    fun `should get index for slot`(slot: Slot, index: Int) {
         expectThat(slot.index()) isEqualTo index
     }
 
@@ -48,7 +48,7 @@ class NamespaceSlotTest {
 
     companion object {
         @JvmStatic
-        private fun provideNamespaceSlotAssignments() = Stream.of(
+        private fun provideNestSlotAssignments() = Stream.of(
             Arguments.of(N1, 1),
             Arguments.of(N2, 2),
             Arguments.of(N3, 3),

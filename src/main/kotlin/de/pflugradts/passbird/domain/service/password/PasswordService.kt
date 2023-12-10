@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
 import de.pflugradts.passbird.domain.model.BytePair
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import java.util.Optional
 import java.util.stream.Stream
@@ -19,7 +19,7 @@ interface PasswordService {
         CREATE_ENTRY_NOT_EXISTS_EVENT,
     }
 
-    fun entryExists(keyBytes: Bytes, namespace: NamespaceSlot): Boolean
+    fun entryExists(keyBytes: Bytes, nestSlot: Slot): Boolean
     fun entryExists(keyBytes: Bytes, entryNotExistsAction: EntryNotExistsAction): Boolean
     fun viewPassword(keyBytes: Bytes): Optional<Bytes>
     fun renamePasswordEntry(keyBytes: Bytes, newKeyBytes: Bytes)
@@ -27,6 +27,6 @@ interface PasswordService {
     fun putPasswordEntries(passwordEntries: Stream<BytePair>)
     fun putPasswordEntry(keyBytes: Bytes, passwordBytes: Bytes)
     fun discardPasswordEntry(keyBytes: Bytes)
-    fun movePasswordEntry(keyBytes: Bytes, targetNamespace: NamespaceSlot)
+    fun movePasswordEntry(keyBytes: Bytes, targetNestSlot: Slot)
     fun findAllKeys(): Stream<Bytes>
 }

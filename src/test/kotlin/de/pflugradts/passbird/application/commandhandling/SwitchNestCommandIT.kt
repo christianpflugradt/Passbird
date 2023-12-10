@@ -1,12 +1,12 @@
 package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
-import de.pflugradts.passbird.application.commandhandling.handler.namespace.SwitchNamespaceCommandHandler
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNestCommandHandler
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
-import de.pflugradts.passbird.domain.service.createNamespaceServiceForTesting
+import de.pflugradts.passbird.domain.service.createNestServiceForTesting
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -16,35 +16,35 @@ import strikt.assertions.contains
 import strikt.assertions.isEqualTo
 import strikt.assertions.isTrue
 
-class SwitchNamespaceCommandIT {
+class SwitchNestCommandIT {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
-    private val namespaceService = createNamespaceServiceForTesting()
-    private val switchNamespaceCommandHandler = SwitchNamespaceCommandHandler(namespaceService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(switchNamespaceCommandHandler)
+    private val nestService = createNestServiceForTesting()
+    private val switchNestCommandHandler = SwitchNestCommandHandler(nestService, userInterfaceAdapterPort)
+    private val inputHandler = createInputHandlerFor(switchNestCommandHandler)
 
     @Test
-    fun `should handle switch namespace command`() {
+    fun `should handle switch nest command`() {
         // given
-        val givenNamespace = NamespaceSlot.N1
-        namespaceService.deploy(bytesOf("namespace"), givenNamespace)
-        val input = inputOf(bytesOf("n" + givenNamespace.index()))
+        val givenNestSlot = Slot.N1
+        nestService.deploy(bytesOf("nest"), givenNestSlot)
+        val input = inputOf(bytesOf("n" + givenNestSlot.index()))
 
         // when
         inputHandler.handleInput(input)
 
         // then
         verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
-        expectThat(namespaceService.getCurrentNamespace().slot) isEqualTo givenNamespace
+        expectThat(nestService.getCurrentNest().slot) isEqualTo givenNestSlot
     }
 
     @Test
-    fun `should do nothing if namespace is already current`() {
+    fun `should do nothing if nest is already current`() {
         // given
-        val givenNamespace = NamespaceSlot.N1
-        namespaceService.deploy(bytesOf("namespace"), givenNamespace)
-        namespaceService.updateCurrentNamespace(givenNamespace)
-        val input = inputOf(bytesOf("n" + givenNamespace.index()))
+        val givenNestSlot = Slot.N1
+        nestService.deploy(bytesOf("nest"), givenNestSlot)
+        nestService.moveToNestAt(givenNestSlot)
+        val input = inputOf(bytesOf("n" + givenNestSlot.index()))
         val outputSlot = slot<Output>()
 
         // when
@@ -56,11 +56,11 @@ class SwitchNamespaceCommandIT {
     }
 
     @Test
-    fun `should do nothing if namespace is not deployed`() {
+    fun `should do nothing if nest is not deployed`() {
         // given
-        val givenNamespace = NamespaceSlot.N1
-        val input = inputOf(bytesOf("n" + givenNamespace.index()))
-        expectThat(namespaceService.atSlot(givenNamespace).isEmpty).isTrue()
+        val givenNestSlot = Slot.N1
+        val input = inputOf(bytesOf("n" + givenNestSlot.index()))
+        expectThat(nestService.atSlot(givenNestSlot).isEmpty).isTrue()
         val outputSlot = slot<Output>()
 
         // when

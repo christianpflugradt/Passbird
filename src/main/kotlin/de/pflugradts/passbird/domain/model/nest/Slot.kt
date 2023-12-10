@@ -1,8 +1,8 @@
-package de.pflugradts.passbird.domain.model.namespace
+package de.pflugradts.passbird.domain.model.nest
 
 import de.pflugradts.kotlinextensions.tryCatching
 
-enum class NamespaceSlot {
+enum class Slot {
     DEFAULT,
     N1,
     N2,
@@ -16,14 +16,14 @@ enum class NamespaceSlot {
     INVALID,
     ;
 
-    fun index() = (FIRST_NAMESPACE..LAST_NAMESPACE).find { at(it) === this } ?: DEFAULT_INDEX
+    fun index() = (FIRST_SLOT..LAST_SLOT).find { at(it) === this } ?: DEFAULT_INDEX
 
     companion object {
         const val CAPACITY = 9
-        const val FIRST_NAMESPACE = 1
-        const val LAST_NAMESPACE = 9
+        const val FIRST_SLOT = 1
+        const val LAST_SLOT = 9
         private const val DEFAULT_INDEX = 10
         fun at(index: Char) = tryCatching { at(index.toString().toInt()) } getOrElse DEFAULT
-        fun at(index: Int) = if (index in FIRST_NAMESPACE..LAST_NAMESPACE) entries[index] else DEFAULT
+        fun at(index: Int) = if (index in FIRST_SLOT..LAST_SLOT) entries[index] else DEFAULT
     }
 }

@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.commandhandling.command.base.AbstractF
 import de.pflugradts.passbird.application.commandhandling.command.base.AbstractSingleCharInputCommand
 import de.pflugradts.passbird.domain.model.transfer.Input
 
-class AssignNamespaceCommand(input: Input) : AbstractSingleCharInputCommand(input)
+class AssignNestCommand(input: Input) : AbstractSingleCharInputCommand(input)
 class CustomSetCommand(input: Input) : AbstractSingleCharInputCommand(input)
 class DiscardCommand(input: Input) : AbstractFilenameCommand(input)
 class GetCommand(input: Input) : AbstractFilenameCommand(input)

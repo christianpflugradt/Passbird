@@ -10,7 +10,7 @@ fun fakePasswordEntryRepository(
 ) {
     every { instance.find(any()) } answers { Optional.ofNullable(withPasswordEntries.find { it.viewKey() == firstArg() }) }
     every { instance.find(any(), any()) } answers {
-        Optional.ofNullable(withPasswordEntries.find { it.viewKey() == firstArg() && it.associatedNamespace() == secondArg() })
+        Optional.ofNullable(withPasswordEntries.find { it.viewKey() == firstArg() && it.associatedNest() == secondArg() })
     }
     every { instance.findAll() } answers { withPasswordEntries.stream() }
     every { instance.sync() } returns Unit

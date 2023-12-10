@@ -4,12 +4,12 @@ import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.BytePair
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.password.InvalidKeyException
 import de.pflugradts.passbird.domain.model.password.PasswordEntry.Companion.createPasswordEntry
 import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.service.createNamespaceServiceForTesting
+import de.pflugradts.passbird.domain.service.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
 import de.pflugradts.passbird.domain.service.password.storage.fakePasswordEntryRepository
@@ -30,8 +30,8 @@ class PutPasswordServiceTest {
     private val cryptoProvider = mockk<CryptoProvider>()
     private val passwordEntryRepository = mockk<PasswordEntryRepository>(relaxed = true)
     private val passbirdEventRegistry = mockk<PassbirdEventRegistry>(relaxed = true)
-    private val namespaceService = createNamespaceServiceForTesting()
-    private val passwordService = PutPasswordService(cryptoProvider, passwordEntryRepository, passbirdEventRegistry, namespaceService)
+    private val nestService = createNestServiceForTesting()
+    private val passwordService = PutPasswordService(cryptoProvider, passwordEntryRepository, passbirdEventRegistry, nestService)
 
     @Nested
     inner class ChallengeAliasTest {
@@ -103,7 +103,7 @@ class PutPasswordServiceTest {
         verify(exactly = 1) { cryptoProvider.encrypt(newKey) }
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
         verify(exactly = 1) { passwordEntryRepository.sync() }
-        verify(exactly = 1) { passwordEntryRepository.add(eq(createPasswordEntry(NamespaceSlot.DEFAULT, newKey, newPassword))) }
+        verify(exactly = 1) { passwordEntryRepository.add(eq(createPasswordEntry(Slot.DEFAULT, newKey, newPassword))) }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 
@@ -161,7 +161,7 @@ class PutPasswordServiceTest {
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(newKey) }
         verify(exactly = 1) { cryptoProvider.encrypt(existingKey) }
-        verify(exactly = 1) { passwordEntryRepository.add(eq(createPasswordEntry(NamespaceSlot.DEFAULT, newKey, newPassword))) }
+        verify(exactly = 1) { passwordEntryRepository.add(eq(createPasswordEntry(Slot.DEFAULT, newKey, newPassword))) }
         verify(exactly = 1) { passwordEntryRepository.sync() }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
         expectThat(

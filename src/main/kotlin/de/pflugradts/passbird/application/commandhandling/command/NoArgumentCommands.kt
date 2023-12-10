@@ -5,6 +5,6 @@ import de.pflugradts.passbird.application.commandhandling.command.base.NoArgumen
 class HelpCommand : NoArgumentCommand
 class ListCommand : NoArgumentCommand
 class QuitCommand : NoArgumentCommand
-class ViewNamespaceCommand : NoArgumentCommand
+class ViewNestCommand : NoArgumentCommand
 
 class NullCommand : NoArgumentCommand

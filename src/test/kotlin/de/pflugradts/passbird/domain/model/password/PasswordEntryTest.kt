@@ -3,7 +3,7 @@ package de.pflugradts.passbird.domain.model.password
 import de.pflugradts.passbird.domain.model.event.PasswordEntryCreated
 import de.pflugradts.passbird.domain.model.event.PasswordEntryDiscarded
 import de.pflugradts.passbird.domain.model.event.PasswordEntryUpdated
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.password.Key.Companion.createKey
 import de.pflugradts.passbird.domain.model.password.PasswordEntry.Companion.createPasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
@@ -99,8 +99,8 @@ class PasswordEntryTest {
         fun `should be equal to itself`() {
             // given
             val givenBytes = bytesOf("key")
-            val givenNamespace = NamespaceSlot.N1
-            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNamespace = givenNamespace)
+            val givenNestSlot = Slot.N1
+            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNestSlot = givenNestSlot)
             val passwordEntry2 = passwordEntry1
 
             // when
@@ -111,12 +111,12 @@ class PasswordEntryTest {
         }
 
         @Test
-        fun `should be equal if key and namespace match`() {
+        fun `should be equal if key and nest slot match`() {
             // given
             val givenBytes = bytesOf("key")
-            val givenNamespace = NamespaceSlot.N1
-            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNamespace = givenNamespace)
-            val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNamespace = givenNamespace)
+            val givenNestSlot = Slot.N1
+            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNestSlot = givenNestSlot)
+            val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNestSlot = givenNestSlot)
 
             // when
             val actual = passwordEntry1.equals(passwordEntry2)
@@ -130,9 +130,9 @@ class PasswordEntryTest {
             // given
             val givenBytes = bytesOf("key")
             val otherBytes = bytesOf("key2")
-            val givenNamespace = NamespaceSlot.N1
-            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNamespace = givenNamespace)
-            val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = otherBytes, withNamespace = givenNamespace)
+            val givenNestSlot = Slot.N1
+            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNestSlot = givenNestSlot)
+            val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = otherBytes, withNestSlot = givenNestSlot)
 
             // when
             val actual = passwordEntry1.equals(passwordEntry2)
@@ -142,13 +142,13 @@ class PasswordEntryTest {
         }
 
         @Test
-        fun `should not be equal if namespace does not match`() {
+        fun `should not be equal if nest slot does not match`() {
             // given
             val givenBytes = bytesOf("key")
-            val givenNamespace = NamespaceSlot.N1
-            val otherNamespace = NamespaceSlot.N2
-            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNamespace = givenNamespace)
-            val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNamespace = otherNamespace)
+            val givenNestSlot = Slot.N1
+            val otherNestSlot = Slot.N2
+            val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNestSlot = givenNestSlot)
+            val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = givenBytes, withNestSlot = otherNestSlot)
 
             // when
             val actual = passwordEntry1.equals(passwordEntry2)
@@ -188,7 +188,7 @@ class PasswordEntryTest {
         @Test
         fun `should have created event when password entry is created`() {
             // given / when
-            val passwordEntry = createPasswordEntry(NamespaceSlot.DEFAULT, bytesOf("key"), bytesOf("password"))
+            val passwordEntry = createPasswordEntry(Slot.DEFAULT, bytesOf("key"), bytesOf("password"))
 
             // then
             expectThat(passwordEntry.getDomainEvents()) hasSize 1

@@ -22,7 +22,7 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 
 @Singleton
 class CommandFactory @Inject constructor(
-    @Inject private val namespaceCommandFactory: NamespaceCommandFactory,
+    @Inject private val nestCommandFactory: NestCommandFactory,
 ) {
     fun construct(commandType: CommandType, input: Input): Command {
         return when (commandType) {
@@ -33,8 +33,8 @@ class CommandFactory @Inject constructor(
             CommandType.HELP -> HelpCommand()
             CommandType.IMPORT -> ImportCommand(input)
             CommandType.LIST -> ListCommand()
-            CommandType.NAMESPACE ->
-                tryCatching { namespaceCommandFactory.constructFromInput(input) }
+            CommandType.NEST ->
+                tryCatching { nestCommandFactory.constructFromInput(input) }
                     .onFailure { reportFailure(CommandFailure(it)) }
                     .getOrElse(NullCommand())
             CommandType.QUIT -> QuitCommand()

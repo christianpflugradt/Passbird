@@ -5,22 +5,22 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.Companion.CAPACITY
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N1
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N2
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N3
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N4
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N5
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N6
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N7
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N8
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N9
+import de.pflugradts.passbird.domain.model.nest.Slot.Companion.CAPACITY
+import de.pflugradts.passbird.domain.model.nest.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.nest.Slot.N1
+import de.pflugradts.passbird.domain.model.nest.Slot.N2
+import de.pflugradts.passbird.domain.model.nest.Slot.N3
+import de.pflugradts.passbird.domain.model.nest.Slot.N4
+import de.pflugradts.passbird.domain.model.nest.Slot.N5
+import de.pflugradts.passbird.domain.model.nest.Slot.N6
+import de.pflugradts.passbird.domain.model.nest.Slot.N7
+import de.pflugradts.passbird.domain.model.nest.Slot.N8
+import de.pflugradts.passbird.domain.model.nest.Slot.N9
 import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
-import de.pflugradts.passbird.domain.service.createNamespaceServiceForTesting
+import de.pflugradts.passbird.domain.service.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.every
 import io.mockk.mockk
@@ -47,19 +47,19 @@ class PasswordStoreFacadeIT {
 
     private val configuration = mockk<Configuration>()
     private val cryptoProvider = mockk<CryptoProvider>()
-    private val namespaceService = createNamespaceServiceForTesting()
+    private val nestService = createNestServiceForTesting()
     private val systemOperation = spyk(SystemOperation())
     private var passwordStoreFacade: PasswordStoreFacade = PasswordStoreFacade(
         passwordStoreReader = PasswordStoreReader(
             configuration = configuration,
             cryptoProvider = cryptoProvider,
-            namespaceService = namespaceService,
+            nestService = nestService,
             systemOperation = systemOperation,
         ),
         passwordStoreWriter = PasswordStoreWriter(
             configuration = configuration,
             cryptoProvider = cryptoProvider,
-            namespaceService = namespaceService,
+            nestService = nestService,
             systemOperation = systemOperation,
         ),
     )
@@ -96,52 +96,52 @@ class PasswordStoreFacadeIT {
     }
 
     @Test
-    fun `should write to and them read from database using namespaces`() {
+    fun `should write to and them read from database using nests`() {
         // given
-        val namespace1 = bytesOf("namespace1")
-        val namespace3 = bytesOf("Namespace3")
-        val namespace9 = bytesOf("+nameSpace*9")
-        namespaceService.deploy(namespace1, N1)
-        namespaceService.deploy(namespace3, N3)
-        namespaceService.deploy(namespace9, N9)
+        val nest1 = bytesOf("nest1")
+        val nest3 = bytesOf("Nest3")
+        val nest9 = bytesOf("+neSt*9")
+        nestService.deploy(nest1, N1)
+        nestService.deploy(nest3, N3)
+        nestService.deploy(nest9, N9)
         val passwordEntry1 = createPasswordEntryForTesting(
             withKeyBytes = bytesOf("key1"),
             withPasswordBytes = bytesOf("password1"),
-            withNamespace = DEFAULT,
+            withNestSlot = DEFAULT,
         )
         val passwordEntry2 = createPasswordEntryForTesting(
             withKeyBytes = bytesOf("key2"),
             withPasswordBytes = bytesOf("password2"),
-            withNamespace = N1,
+            withNestSlot = N1,
         )
         val passwordEntry3 = createPasswordEntryForTesting(
             withKeyBytes = bytesOf("key3"),
             withPasswordBytes = bytesOf("password3"),
-            withNamespace = N3,
+            withNestSlot = N3,
         )
         val passwordEntry3b = createPasswordEntryForTesting(
             withKeyBytes = bytesOf("key3"),
             withPasswordBytes = bytesOf("password3b"),
-            withNamespace = N9,
+            withNestSlot = N9,
         )
         val passwordEntries = listOf(passwordEntry1, passwordEntry2, passwordEntry3, passwordEntry3b)
 
         // when
         passwordStoreFacade.sync { passwordEntries.stream() }
-        namespaceService.populate(Collections.nCopies(CAPACITY, emptyBytes()))
+        nestService.populate(Collections.nCopies(CAPACITY, emptyBytes()))
         expectThat(File(databaseFilename)).exists()
         val actual = passwordStoreFacade.restore()
 
         // then
         expectThat(actual.get().toList()) containsExactly passwordEntries
-        listOf(N2, N4, N5, N6, N7, N8).forEach { expectThat(namespaceService.atSlot(it).isPresent).isFalse() }
+        listOf(N2, N4, N5, N6, N7, N8).forEach { expectThat(nestService.atSlot(it).isPresent).isFalse() }
         mapOf(
-            N1 to namespace1,
-            N3 to namespace3,
-            N9 to namespace9,
+            N1 to nest1,
+            N3 to nest3,
+            N9 to nest9,
         ).forEach { (k, v) ->
-            expectThat(namespaceService.atSlot(k).isPresent)
-            expectThat(namespaceService.atSlot(k).get().bytes) isEqualTo v
+            expectThat(nestService.atSlot(k).isPresent)
+            expectThat(nestService.atSlot(k).get().bytes) isEqualTo v
         }
     }
 

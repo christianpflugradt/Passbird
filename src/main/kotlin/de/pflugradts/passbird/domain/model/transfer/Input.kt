@@ -1,11 +1,11 @@
 package de.pflugradts.passbird.domain.model.transfer
 
 import de.pflugradts.passbird.domain.model.ddd.ValueObject
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.Companion.FIRST_NAMESPACE
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.Companion.LAST_NAMESPACE
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.Companion.at
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.INVALID
+import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.Slot.Companion.FIRST_SLOT
+import de.pflugradts.passbird.domain.model.nest.Slot.Companion.LAST_SLOT
+import de.pflugradts.passbird.domain.model.nest.Slot.Companion.at
+import de.pflugradts.passbird.domain.model.nest.Slot.INVALID
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 import de.pflugradts.passbird.domain.model.transfer.CharValue.Companion.charValueOf
 
@@ -30,8 +30,8 @@ class Input private constructor(val bytes: Bytes) : ValueObject {
     val data get() = if (bytes.size > 1) bytes.slice(command.size, bytes.size) else emptyBytes()
     val isEmpty get() = bytes.isEmpty
     fun invalidate() = bytes.scramble()
-    fun parseNamespace(): NamespaceSlot = bytes.asString().toIntOrNull()?.let {
-        if (it in FIRST_NAMESPACE - 1..LAST_NAMESPACE) at(it) else INVALID
+    fun extractNestSlot(): Slot = bytes.asString().toIntOrNull()?.let {
+        if (it in FIRST_SLOT - 1..LAST_SLOT) at(it) else INVALID
     } ?: INVALID
 
     override fun equals(other: Any?): Boolean = when {

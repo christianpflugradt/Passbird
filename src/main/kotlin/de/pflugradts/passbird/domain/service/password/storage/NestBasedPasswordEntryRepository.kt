@@ -2,22 +2,22 @@ package de.pflugradts.passbird.domain.service.password.storage
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.password.PasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.service.NamespaceService
+import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryFilter.Companion.all
-import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryFilter.Companion.inNamespace
+import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryFilter.Companion.inNest
 import java.util.Optional
 import java.util.function.Predicate
 import java.util.function.Supplier
 import java.util.stream.Stream
 
 @Singleton
-class NamespaceBasedPasswordEntryRepository @Inject constructor(
+class NestBasedPasswordEntryRepository @Inject constructor(
     @Inject private val passwordStoreAdapterPort: PasswordStoreAdapterPort,
-    @Inject private val namespaceService: NamespaceService,
+    @Inject private val nestService: NestService,
     @Inject private val eventRegistry: EventRegistry,
 ) : PasswordEntryRepository {
 
@@ -30,11 +30,11 @@ class NamespaceBasedPasswordEntryRepository @Inject constructor(
         }
     }
 
-    override fun sync() { passwordStoreAdapterPort.sync(getPasswordEntriesSupplier(PasswordEntryFilter.ALL_NAMESPACES)) }
-    override fun find(keyBytes: Bytes, namespace: NamespaceSlot): Optional<PasswordEntry> =
-        find(getPasswordEntriesSupplier(namespace), keyBytes)
+    override fun sync() { passwordStoreAdapterPort.sync(getPasswordEntriesSupplier(PasswordEntryFilter.ALL_NESTS)) }
+    override fun find(keyBytes: Bytes, nestSlot: Slot): Optional<PasswordEntry> =
+        find(getPasswordEntriesSupplier(nestSlot), keyBytes)
     override fun find(keyBytes: Bytes): Optional<PasswordEntry> =
-        find(getPasswordEntriesSupplier(PasswordEntryFilter.CURRENT_NAMESPACE), keyBytes)
+        find(getPasswordEntriesSupplier(PasswordEntryFilter.CURRENT_NEST), keyBytes)
 
     private fun find(supplier: Supplier<Stream<PasswordEntry>>, keyBytes: Bytes): Optional<PasswordEntry> =
         supplier.get().filter { it.viewKey() == keyBytes }.findAny()
@@ -49,18 +49,18 @@ class NamespaceBasedPasswordEntryRepository @Inject constructor(
         eventRegistry.deregister(passwordEntry)
     }
 
-    override fun findAll() = getPasswordEntriesSupplier(PasswordEntryFilter.CURRENT_NAMESPACE).get()
+    override fun findAll() = getPasswordEntriesSupplier(PasswordEntryFilter.CURRENT_NEST).get()
 
     private fun getPasswordEntriesSupplier(passwordEntryFilter: PasswordEntryFilter): Supplier<Stream<PasswordEntry>> =
         getPasswordEntriesSupplier(
-            if ((passwordEntryFilter == PasswordEntryFilter.CURRENT_NAMESPACE)) {
-                inNamespace(namespaceService.getCurrentNamespace().slot)
+            if ((passwordEntryFilter == PasswordEntryFilter.CURRENT_NEST)) {
+                inNest(nestService.getCurrentNest().slot)
             } else {
                 all()
             },
         )
 
-    private fun getPasswordEntriesSupplier(namespace: NamespaceSlot) = getPasswordEntriesSupplier(inNamespace(namespace))
+    private fun getPasswordEntriesSupplier(nestSlot: Slot) = getPasswordEntriesSupplier(inNest(nestSlot))
 
     private fun getPasswordEntriesSupplier(predicate: Predicate<PasswordEntry>) = Supplier { passwordEntries.stream().filter(predicate) }
 }

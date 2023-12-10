@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
 import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.password.InvalidKeyException
 import de.pflugradts.passbird.domain.model.password.PasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
@@ -18,7 +18,7 @@ abstract class CommonPasswordServiceCapabilities(
     private val passwordEntryRepository: PasswordEntryRepository,
     private val eventRegistry: EventRegistry,
 ) {
-    fun find(keyBytes: Bytes, namespace: NamespaceSlot): Optional<PasswordEntry> = passwordEntryRepository.find(keyBytes, namespace)
+    fun find(keyBytes: Bytes, nestSlot: Slot): Optional<PasswordEntry> = passwordEntryRepository.find(keyBytes, nestSlot)
     fun find(keyBytes: Bytes): Optional<PasswordEntry> = passwordEntryRepository.find(keyBytes)
     fun encrypted(bytes: Bytes) = cryptoProvider.encrypt(bytes)
     fun decrypted(bytes: Bytes) = cryptoProvider.decrypt(bytes)
@@ -39,7 +39,7 @@ abstract class CommonPasswordServiceCapabilities(
         return result
     }
 
-    fun entryExists(keyBytes: Bytes, namespace: NamespaceSlot) = find(encrypted(keyBytes), namespace).isPresent
+    fun entryExists(keyBytes: Bytes, nestSlot: Slot) = find(encrypted(keyBytes), nestSlot).isPresent
     fun entryExists(keyBytes: Bytes, entryNotExistsAction: EntryNotExistsAction) =
         encrypted(keyBytes).let {
             find(it).let { match ->

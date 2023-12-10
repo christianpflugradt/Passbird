@@ -1,27 +1,27 @@
-package de.pflugradts.passbird.application.commandhandling.handler.namespace
+package de.pflugradts.passbird.application.commandhandling.handler.nest
 
 import com.google.common.eventbus.Subscribe
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
-import de.pflugradts.passbird.application.commandhandling.command.ViewNamespaceCommand
+import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.service.NamespaceService
+import de.pflugradts.passbird.domain.service.NestService
 
-class ViewNamespaceCommandHandler @Inject constructor(
-    @Inject private val namespaceService: NamespaceService,
+class ViewNestCommandHandler @Inject constructor(
+    @Inject private val nestService: NestService,
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-) : CommandHandler, CanListAvailableNamespaces(namespaceService) {
+) : CommandHandler, CanListAvailableNests(nestService) {
     @Subscribe
-    private fun handleViewNamespaceCommand(@Suppress("UNUSED_PARAMETER") viewNamespaceCommand: ViewNamespaceCommand) {
+    private fun handleViewNestCommand(@Suppress("UNUSED_PARAMETER") viewNestCommand: ViewNestCommand) {
         userInterfaceAdapterPort.send(
             outputOf(
                 bytesOf(
                     """
-Current namespace: $currentNamespace
+Current namespace: $currentNest
 Available namespaces:
-$availableNamespaces
+$availableNests
 Available namespace commands:
 ${'\t'}n (view) displays current namespace, available namespaces and namespace commands
 ${'\t'}n0 (switch to default) switches to the default namespace
@@ -37,8 +37,8 @@ ${'\t'}[NOT YET IMPLEMENTED] n-[1-9] (discard) discards the namespace at the spe
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    private val currentNamespace get() = namespaceService.getCurrentNamespace().bytes.asString()
-    private val availableNamespaces get() = getAvailableNamespaces(includeCurrent = true).let {
-        if (hasCustomNamespaces()) it else "$it\t(use the n+ command to create custom namespaces)\n"
+    private val currentNest get() = nestService.getCurrentNest().bytes.asString()
+    private val availableNests get() = getAvailableNests(includeCurrent = true).let {
+        if (hasCustomNests()) it else "$it\t(use the n+ command to create custom namespaces)\n"
     }
 }

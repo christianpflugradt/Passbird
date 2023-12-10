@@ -5,18 +5,18 @@ import com.google.inject.Singleton
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.commandhandling.InputHandler
-import de.pflugradts.passbird.domain.model.namespace.Namespace
+import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.service.FixedNamespaceService
+import de.pflugradts.passbird.domain.service.FixedNestService
 
 const val INTERRUPT = 0x03.toChar()
 
 @Singleton
 class PassbirdApplication @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-    @Inject private val namespaceService: FixedNamespaceService,
+    @Inject private val nestService: FixedNestService,
     @Inject private val inputHandler: InputHandler,
 ) : Bootable {
 
@@ -26,10 +26,10 @@ class PassbirdApplication @Inject constructor(
         while (!isSigTerm(receiveInput().also { input = it })) { inputHandler.handleInput(input) }
     }
 
-    private fun receiveInput() = userInterfaceAdapterPort.receive(outputOf(bytesOf(namespacePrefix() + "Enter command: ")))
+    private fun receiveInput() = userInterfaceAdapterPort.receive(outputOf(bytesOf(nestPrefix() + "Enter command: ")))
 
-    private fun namespacePrefix() = namespaceService.getCurrentNamespace().let {
-        if (it == Namespace.DEFAULT) "" else "[${it.bytes.asString()}] "
+    private fun nestPrefix() = nestService.getCurrentNest().let {
+        if (it == Nest.DEFAULT) "" else "[${it.bytes.asString()}] "
     }
 
     private fun isSigTerm(input: Input) = input.data.isEmpty && !input.command.isEmpty && input.command.firstByte == INTERRUPT.code.toByte()

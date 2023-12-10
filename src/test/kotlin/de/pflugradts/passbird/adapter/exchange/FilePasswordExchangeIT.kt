@@ -3,7 +3,7 @@ package de.pflugradts.passbird.adapter.exchange
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.BytePair
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -37,7 +37,7 @@ class FilePasswordExchangeIT {
     }
 
     @Test
-    fun `should export and re-import passwords across multiple namespaces`() {
+    fun `should export and re-import passwords across multiple nests`() {
         // given
         val givenPasswordEntry1 = BytePair(Pair(bytesOf("key1"), bytesOf("password1")))
         val givenPasswordEntry2 = BytePair(Pair(bytesOf("key2"), bytesOf("password2")))
@@ -48,17 +48,17 @@ class FilePasswordExchangeIT {
         // whe
         filePasswordExchange.send(
             mapOf(
-                NamespaceSlot.DEFAULT to listOf(givenPasswordEntry1, givenPasswordEntry2),
-                NamespaceSlot.N2 to listOf(givenPasswordEntry3),
-                NamespaceSlot.N9 to listOf(givenPasswordEntry4, givenPasswordEntry5),
+                Slot.DEFAULT to listOf(givenPasswordEntry1, givenPasswordEntry2),
+                Slot.N2 to listOf(givenPasswordEntry3),
+                Slot.N9 to listOf(givenPasswordEntry4, givenPasswordEntry5),
             ),
         )
         val actual = filePasswordExchange.receive()
 
         // then
-        expectThat(actual) hasSize 3 containsKey NamespaceSlot.DEFAULT containsKey NamespaceSlot.N2 containsKey NamespaceSlot.N9
-        expectThat(actual[NamespaceSlot.DEFAULT]!!).containsExactlyInAnyOrder(givenPasswordEntry1, givenPasswordEntry2)
-        expectThat(actual[NamespaceSlot.N2]!!).containsExactlyInAnyOrder(givenPasswordEntry3)
-        expectThat(actual[NamespaceSlot.N9]!!).containsExactlyInAnyOrder(givenPasswordEntry4, givenPasswordEntry5)
+        expectThat(actual) hasSize 3 containsKey Slot.DEFAULT containsKey Slot.N2 containsKey Slot.N9
+        expectThat(actual[Slot.DEFAULT]!!).containsExactlyInAnyOrder(givenPasswordEntry1, givenPasswordEntry2)
+        expectThat(actual[Slot.N2]!!).containsExactlyInAnyOrder(givenPasswordEntry3)
+        expectThat(actual[Slot.N9]!!).containsExactlyInAnyOrder(givenPasswordEntry4, givenPasswordEntry5)
     }
 }

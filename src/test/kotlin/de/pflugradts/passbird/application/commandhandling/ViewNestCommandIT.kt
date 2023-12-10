@@ -1,12 +1,12 @@
 package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
-import de.pflugradts.passbird.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.Companion.at
+import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
+import de.pflugradts.passbird.domain.model.nest.Slot.Companion.at
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
-import de.pflugradts.passbird.domain.service.createNamespaceServiceForTesting
+import de.pflugradts.passbird.domain.service.createNestServiceForTesting
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -14,12 +14,12 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
 
-class ViewNamespaceCommandIT {
+class ViewNestCommandIT {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
-    private val namespaceService = createNamespaceServiceForTesting()
-    private val viewNamespaceCommandHandler = ViewNamespaceCommandHandler(namespaceService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(viewNamespaceCommandHandler)
+    private val nestService = createNestServiceForTesting()
+    private val viewNestCommandHandler = ViewNestCommandHandler(nestService, userInterfaceAdapterPort)
+    private val inputHandler = createInputHandlerFor(viewNestCommandHandler)
 
     @Test
     fun `should print info`() {
@@ -36,7 +36,7 @@ class ViewNamespaceCommandIT {
     }
 
     @Test
-    fun `should print default namespace if current`() {
+    fun `should print default nest if current`() {
         // given
         val input = inputOf(bytesOf("n"))
         val outputSlot = slot<Output>()
@@ -50,12 +50,12 @@ class ViewNamespaceCommandIT {
     }
 
     @Test
-    fun `should print deployed namespace`() {
+    fun `should print deployed nest`() {
         // given
         val input = inputOf(bytesOf("n"))
-        val deployedNamespaceSlot = 3
-        val deployedNamespace = "mynamespace"
-        namespaceService.deploy(bytesOf(deployedNamespace), at(deployedNamespaceSlot))
+        val deployedNestSlot = 3
+        val deployedNest = "mynest"
+        nestService.deploy(bytesOf(deployedNest), at(deployedNestSlot))
         val outputSlot = slot<Output>()
 
         // when
@@ -63,6 +63,6 @@ class ViewNamespaceCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) contains "$deployedNamespaceSlot: $deployedNamespace"
+        expectThat(outputSlot.captured.bytes.asString()) contains "$deployedNestSlot: $deployedNest"
     }
 }

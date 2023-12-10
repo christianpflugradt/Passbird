@@ -14,10 +14,10 @@ import de.pflugradts.passbird.application.commandhandling.handler.QuitCommandHan
 import de.pflugradts.passbird.application.commandhandling.handler.RenameCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ViewCommandHandler
-import de.pflugradts.passbird.application.commandhandling.handler.namespace.AddNamespaceCommandHandler
-import de.pflugradts.passbird.application.commandhandling.handler.namespace.AssignNamespaceCommandHandler
-import de.pflugradts.passbird.application.commandhandling.handler.namespace.SwitchNamespaceCommandHandler
-import de.pflugradts.passbird.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.AssignNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
 import de.pflugradts.passbird.application.eventhandling.ApplicationEventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -37,8 +37,8 @@ class PassbirdMainModuleIT {
         // then
         expectThat(actual.bootable).isA<PassbirdApplication>()
         val expectedCommandHandlers = listOf(
-            AddNamespaceCommandHandler::class.java,
-            AssignNamespaceCommandHandler::class.java,
+            AddNestCommandHandler::class.java,
+            AssignNestCommandHandler::class.java,
             CustomSetCommandHandler::class.java,
             DiscardCommandHandler::class.java,
             ExportCommandHandler::class.java,
@@ -49,9 +49,9 @@ class PassbirdMainModuleIT {
             QuitCommandHandler::class.java,
             RenameCommandHandler::class.java,
             SetCommandHandler::class.java,
-            SwitchNamespaceCommandHandler::class.java,
+            SwitchNestCommandHandler::class.java,
             ViewCommandHandler::class.java,
-            ViewNamespaceCommandHandler::class.java,
+            ViewNestCommandHandler::class.java,
         )
         actual.commandHandlers.forEachIndexed { index, commandHandler ->
             expectThat(commandHandler::class.java) isSameInstanceAs expectedCommandHandlers[index]

@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.domain.service
 
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.password.InvalidKeyException
 import de.pflugradts.passbird.domain.model.password.PasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
@@ -12,14 +12,14 @@ fun fakePasswordService(
     instance: PasswordService,
     withInvalidAlias: Boolean = false,
     withPasswordEntries: List<PasswordEntry> = emptyList(),
-    withNamespaceService: NamespaceService? = null,
+    withNestService: NestService? = null,
 ) {
     every { instance.putPasswordEntry(any(), any()) } returns Unit
     every { instance.putPasswordEntries(any()) } returns Unit
     every { instance.findAllKeys() } answers {
-        if (withNamespaceService != null) {
+        if (withNestService != null) {
             withPasswordEntries
-                .filter { it.associatedNamespace() == withNamespaceService.getCurrentNamespace().slot }
+                .filter { it.associatedNest() == withNestService.getCurrentNest().slot }
                 .map { it.viewKey() }.stream()
         } else {
             withPasswordEntries.map { it.viewKey() }.stream()
@@ -31,8 +31,8 @@ fun fakePasswordService(
     every { instance.entryExists(any(), any<PasswordService.EntryNotExistsAction>()) } answers {
         withPasswordEntries.find { it.viewKey() == firstArg() } != null
     }
-    every { instance.entryExists(any(), any<NamespaceSlot>()) } answers {
-        val res = withPasswordEntries.find { it.viewKey() == firstArg() && it.associatedNamespace() == secondArg() } != null
+    every { instance.entryExists(any(), any<Slot>()) } answers {
+        val res = withPasswordEntries.find { it.viewKey() == firstArg() && it.associatedNest() == secondArg() } != null
         println(res)
         res
     }

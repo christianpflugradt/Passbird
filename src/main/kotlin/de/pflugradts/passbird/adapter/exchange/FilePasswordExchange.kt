@@ -10,7 +10,7 @@ import de.pflugradts.passbird.application.failure.ImportFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.BytePair
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import java.io.IOException
 import java.nio.file.Files
@@ -21,7 +21,7 @@ class FilePasswordExchange @Inject constructor(
 ) : ExchangeAdapterPort {
     private val mapper = JsonMapper()
 
-    override fun send(data: Map<NamespaceSlot, List<BytePair>>) {
+    override fun send(data: Map<Slot, List<BytePair>>) {
         try {
             Files.writeString(
                 systemOperation.resolvePath(uri, EXCHANGE_FILENAME),
@@ -32,7 +32,7 @@ class FilePasswordExchange @Inject constructor(
         }
     }
 
-    override fun receive(): Map<NamespaceSlot, List<BytePair>> {
+    override fun receive(): Map<Slot, List<BytePair>> {
         return try {
             mapper.readValue(
                 Files.readString(systemOperation.resolvePath(uri, EXCHANGE_FILENAME)),
@@ -45,11 +45,11 @@ class FilePasswordExchange @Inject constructor(
     }
 }
 
-private class ExchangeWrapper(val value: Map<NamespaceSlot, List<PlainPasswordEntry>> = emptyMap())
+private class ExchangeWrapper(val value: Map<Slot, List<PlainPasswordEntry>> = emptyMap())
 private class PlainPasswordEntry(var alias: String = "", var password: String = "")
-private fun Map<NamespaceSlot, List<BytePair>>.toSerializable() = entries.associate { namespace ->
-    namespace.key to namespace.value.map { PlainPasswordEntry(it.value.first.asString(), it.value.second.asString()) }
+private fun Map<Slot, List<BytePair>>.toSerializable() = entries.associate { nest ->
+    nest.key to nest.value.map { PlainPasswordEntry(it.value.first.asString(), it.value.second.asString()) }
 }
-private fun Map<NamespaceSlot, List<PlainPasswordEntry>>.toBytePairMap() = entries.associate { namespace ->
-    namespace.key to namespace.value.map { BytePair(Pair(bytesOf(it.alias), bytesOf(it.password))) }
+private fun Map<Slot, List<PlainPasswordEntry>>.toBytePairMap() = entries.associate { nest ->
+    nest.key to nest.value.map { BytePair(Pair(bytesOf(it.alias), bytesOf(it.password))) }
 }

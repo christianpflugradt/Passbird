@@ -1,16 +1,16 @@
 package de.pflugradts.passbird.domain.model.transfer
 
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.DEFAULT
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.INVALID
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N1
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N2
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N3
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N4
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N5
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N6
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N7
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N8
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot.N9
+import de.pflugradts.passbird.domain.model.nest.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.nest.Slot.INVALID
+import de.pflugradts.passbird.domain.model.nest.Slot.N1
+import de.pflugradts.passbird.domain.model.nest.Slot.N2
+import de.pflugradts.passbird.domain.model.nest.Slot.N3
+import de.pflugradts.passbird.domain.model.nest.Slot.N4
+import de.pflugradts.passbird.domain.model.nest.Slot.N5
+import de.pflugradts.passbird.domain.model.nest.Slot.N6
+import de.pflugradts.passbird.domain.model.nest.Slot.N7
+import de.pflugradts.passbird.domain.model.nest.Slot.N8
+import de.pflugradts.passbird.domain.model.nest.Slot.N9
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.emptyInput
@@ -114,70 +114,70 @@ class InputTest {
     }
 
     @Nested
-    inner class ParseNamespeTest {
+    inner class ParseNestTest {
         @Test
-        fun `should parse default namespace`() {
+        fun `should parse default nest`() {
             // given
             val givenIndex = 0
             val input = inputOf(givenIndex)
 
             // when
-            val actual = input.parseNamespace()
+            val actual = input.extractNestSlot()
 
             // then
             expectThat(actual) isEqualTo DEFAULT
         }
 
         @Test
-        fun `should parse namespaces`() {
+        fun `should parse nests`() {
             // given
             (1..9).zip(arrayOf(N1, N2, N3, N4, N5, N6, N7, N8, N9)).forEach {
                 val givenIndex = it.first
-                val expectedNamespaceSlot = it.second
+                val expectedNestSlot = it.second
                 val input = inputOf(givenIndex)
 
                 // when
-                val actual = input.parseNamespace()
+                val actual = input.extractNestSlot()
 
                 // then
-                expectThat(actual) isEqualTo expectedNamespaceSlot
+                expectThat(actual) isEqualTo expectedNestSlot
             }
         }
 
         @Test
-        fun `should parse invalid namespace with lower number`() {
+        fun `should parse invalid nest with lower number`() {
             // given
             val givenIndex = -1
             val input = inputOf(givenIndex)
 
             // when
-            val actual = input.parseNamespace()
+            val actual = input.extractNestSlot()
 
             // then
             expectThat(actual) isEqualTo INVALID
         }
 
         @Test
-        fun `should parse invalid namespace with higher number`() {
+        fun `should parse invalid nest with higher number`() {
             // given
             val givenIndex = 10
             val input = inputOf(givenIndex)
 
             // when
-            val actual = input.parseNamespace()
+            val actual = input.extractNestSlot()
 
             // then
             expectThat(actual) isEqualTo INVALID
         }
 
         @Test
-        fun `should parse invalid namespace with string`() {
+        fun `should parse invalid nest with string`() {
             // given
             val givenIndex = "-A"
             val input = inputOf(bytesOf(givenIndex))
 
             // when
-            val actual = input.parseNamespace()
+            val actual = input.extractNestSlot()
 
             // then
             expectThat(actual) isEqualTo INVALID

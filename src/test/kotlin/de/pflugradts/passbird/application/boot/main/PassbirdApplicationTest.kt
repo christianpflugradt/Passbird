@@ -3,11 +3,11 @@ package de.pflugradts.passbird.application.boot.main
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
-import de.pflugradts.passbird.domain.model.namespace.NamespaceSlot
+import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.fakeInput
-import de.pflugradts.passbird.domain.service.createNamespaceServiceSpyForTesting
+import de.pflugradts.passbird.domain.service.createNestServiceSpyForTesting
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -19,9 +19,9 @@ import strikt.assertions.isEqualTo
 class PassbirdApplicationTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>()
-    private val namespaceService = createNamespaceServiceSpyForTesting()
+    private val nestService = createNestServiceSpyForTesting()
     private val inputHandler = mockk<InputHandler>()
-    private val passbirdApplication = PassbirdApplication(userInterfaceAdapterPort, namespaceService, inputHandler)
+    private val passbirdApplication = PassbirdApplication(userInterfaceAdapterPort, nestService, inputHandler)
 
     @Test
     fun `should delegate input`() {
@@ -48,11 +48,11 @@ class PassbirdApplicationTest {
     }
 
     @Test
-    fun `should display namespace if current is other than default`() {
+    fun `should display nest if current is other than default`() {
         // given
         val input1 = fakeInput("1")
         val interrupt = fakeInput(INTERRUPT)
-        val givenNamespace = "mynamespace"
+        val givenNest = "mynest"
         val expectedOutputSlot = mutableListOf<Output>()
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
@@ -61,18 +61,18 @@ class PassbirdApplicationTest {
         every { inputHandler.handleInput(any()) } returns Unit
 
         // when
-        namespaceService.deploy(bytesOf(givenNamespace), NamespaceSlot.N1)
-        namespaceService.updateCurrentNamespace(NamespaceSlot.N1)
+        nestService.deploy(bytesOf(givenNest), Slot.N1)
+        nestService.moveToNestAt(Slot.N1)
         passbirdApplication.boot()
 
         // then
         verify { userInterfaceAdapterPort.receive(capture(expectedOutputSlot)) }
         expectThat(expectedOutputSlot) hasSize 2
-        expectedOutputSlot.forEach { expectThat(it.bytes.asString()) isEqualTo "[$givenNamespace] Enter command: " }
+        expectedOutputSlot.forEach { expectThat(it.bytes.asString()) isEqualTo "[$givenNest] Enter command: " }
     }
 
     @Test
-    fun `should display no namespace if current is default`() {
+    fun `should display no nest if current is default`() {
         // given
         val input1 = fakeInput("1")
         val interrupt = fakeInput(INTERRUPT)
@@ -84,7 +84,7 @@ class PassbirdApplicationTest {
         every { inputHandler.handleInput(any()) } returns Unit
 
         // when
-        namespaceService.updateCurrentNamespace(NamespaceSlot.DEFAULT)
+        nestService.moveToNestAt(Slot.DEFAULT)
         passbirdApplication.boot()
 
         // then

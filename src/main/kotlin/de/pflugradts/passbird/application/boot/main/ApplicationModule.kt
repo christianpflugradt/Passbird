@@ -28,10 +28,10 @@ import de.pflugradts.passbird.application.commandhandling.handler.QuitCommandHan
 import de.pflugradts.passbird.application.commandhandling.handler.RenameCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ViewCommandHandler
-import de.pflugradts.passbird.application.commandhandling.handler.namespace.AddNamespaceCommandHandler
-import de.pflugradts.passbird.application.commandhandling.handler.namespace.AssignNamespaceCommandHandler
-import de.pflugradts.passbird.application.commandhandling.handler.namespace.SwitchNamespaceCommandHandler
-import de.pflugradts.passbird.application.commandhandling.handler.namespace.ViewNamespaceCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.AssignNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
 import de.pflugradts.passbird.application.configuration.ConfigurationFactory
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.eventhandling.ApplicationEventHandler
@@ -40,8 +40,8 @@ import de.pflugradts.passbird.application.exchange.ExchangeFactory
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.exchange.PasswordImportExportService
 import de.pflugradts.passbird.application.security.CryptoProviderFactory
-import de.pflugradts.passbird.domain.service.FixedNamespaceService
-import de.pflugradts.passbird.domain.service.NamespaceService
+import de.pflugradts.passbird.domain.service.FixedNestService
+import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
@@ -50,7 +50,7 @@ import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
 import de.pflugradts.passbird.domain.service.password.provider.RandomPasswordProvider
-import de.pflugradts.passbird.domain.service.password.storage.NamespaceBasedPasswordEntryRepository
+import de.pflugradts.passbird.domain.service.password.storage.NestBasedPasswordEntryRepository
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
 import de.pflugradts.passbird.domain.service.password.storage.PasswordStoreAdapterPort
 
@@ -67,8 +67,8 @@ class ApplicationModule : AbstractModule() {
         bind(EventRegistry::class.java).to(PassbirdEventRegistry::class.java)
         bind(ImportExportService::class.java).to(PasswordImportExportService::class.java)
         bind(KeyStoreAdapterPort::class.java).to(KeyStoreService::class.java)
-        bind(PasswordEntryRepository::class.java).to(NamespaceBasedPasswordEntryRepository::class.java).`in`(Singleton::class.java)
-        bind(NamespaceService::class.java).to(FixedNamespaceService::class.java)
+        bind(PasswordEntryRepository::class.java).to(NestBasedPasswordEntryRepository::class.java).`in`(Singleton::class.java)
+        bind(NestService::class.java).to(FixedNestService::class.java)
         bind(PasswordProvider::class.java).to(RandomPasswordProvider::class.java)
         bind(PasswordService::class.java).to(PasswordFacade::class.java)
         bind(PasswordStoreAdapterPort::class.java).to(PasswordStoreFacade::class.java)
@@ -78,8 +78,8 @@ class ApplicationModule : AbstractModule() {
     private fun configureMultibinders() {
         val commandHandlerMultibinder = Multibinder.newSetBinder(binder(), CommandHandler::class.java)
         listOf(
-            AddNamespaceCommandHandler::class.java,
-            AssignNamespaceCommandHandler::class.java,
+            AddNestCommandHandler::class.java,
+            AssignNestCommandHandler::class.java,
             CustomSetCommandHandler::class.java,
             DiscardCommandHandler::class.java,
             ExportCommandHandler::class.java,
@@ -90,9 +90,9 @@ class ApplicationModule : AbstractModule() {
             QuitCommandHandler::class.java,
             RenameCommandHandler::class.java,
             SetCommandHandler::class.java,
-            SwitchNamespaceCommandHandler::class.java,
+            SwitchNestCommandHandler::class.java,
             ViewCommandHandler::class.java,
-            ViewNamespaceCommandHandler::class.java,
+            ViewNestCommandHandler::class.java,
         ).forEach { commandHandlerMultibinder.addBinding().to(it) }
         val eventHandlerMultibinder = Multibinder.newSetBinder(binder(), EventHandler::class.java)
         listOf(

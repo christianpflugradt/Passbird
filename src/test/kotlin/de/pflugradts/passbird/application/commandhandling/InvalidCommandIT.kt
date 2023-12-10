@@ -68,7 +68,7 @@ class InvalidCommandIT {
 
     @Nested
     inner class CommandFactoryIT {
-        private val commandFactory = CommandFactory(NamespaceCommandFactory())
+        private val commandFactory = CommandFactory(NestCommandFactory())
 
         @ParameterizedTest
         @ValueSource(
@@ -79,7 +79,7 @@ class InvalidCommandIT {
                 "n(3)",
             ],
         )
-        fun `should handle namespace command with too large command`(givenInput: String) {
+        fun `should handle nest command with too large command`(givenInput: String) {
             // given
             val input = inputOf(bytesOf(givenInput))
 
@@ -105,7 +105,7 @@ class InvalidCommandIT {
                 "n++",
             ],
         )
-        fun `should handle unknown namespace command`(givenInput: String) {
+        fun `should handle unknown nest command`(givenInput: String) {
             // given
             val input = inputOf(bytesOf(givenInput))
 
