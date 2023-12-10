@@ -3,18 +3,22 @@ package de.pflugradts.passbird.domain.service.password
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
+import de.pflugradts.passbird.domain.model.password.InvalidKeyException
 import de.pflugradts.passbird.domain.model.password.KeyAlreadyExistsException
 import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
 import de.pflugradts.passbird.domain.service.password.storage.fakePasswordEntryRepository
+import io.mockk.Called
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
+import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
 
 class RenamePasswordServiceTest {
@@ -77,5 +81,24 @@ class RenamePasswordServiceTest {
 
         // then
         expectThat(givenPasswordEntry.viewKey()) isEqualTo oldKey isNotEqualTo newKey
+    }
+
+    @Test
+    fun `should reject invalid key`() {
+        // given
+        val oldKey = bytesOf("key123")
+        val newKey = bytesOf("123")
+        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = oldKey)
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(givenPasswordEntry))
+
+        // when
+        val actual = tryCatching { passwordService.renamePasswordEntry(oldKey, newKey) }
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidKeyException>()
+        verify { cryptoProvider wasNot Called }
+        verify { passwordEntryRepository wasNot Called }
     }
 }

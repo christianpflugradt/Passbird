@@ -14,6 +14,7 @@ class RenamePasswordService @Inject constructor(
     @Inject private val eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, passwordEntryRepository, eventRegistry) {
     fun renamePasswordEntry(keyBytes: Bytes, newKeyBytes: Bytes) {
+        challengeAlias(newKeyBytes)
         if (entryExists(keyBytes, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             encrypted(newKeyBytes).let { encryptedNewKeyBytes ->
                 if (find(encryptedNewKeyBytes).isEmpty) {
