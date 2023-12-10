@@ -26,9 +26,9 @@ class PassbirdApplicationTest {
     @Test
     fun `should delegate input`() {
         // given
-        val input1 = fakeInput("1")
-        val input2 = fakeInput("2")
-        val input3 = fakeInput("3")
+        val input1 = fakeInput("n1")
+        val input2 = fakeInput("vtest")
+        val input3 = fakeInput("")
         val interrupt = fakeInput(INTERRUPT)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
