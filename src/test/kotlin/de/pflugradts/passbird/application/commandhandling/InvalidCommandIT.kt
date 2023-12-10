@@ -26,7 +26,7 @@ class InvalidCommandIT {
         @Test
         fun `should handle unknown command`() {
             // given
-            val input = inputOf(bytesOf("?"))
+            val input = inputOf(bytesOf("z"))
 
             // when
             inputHandler.handleInput(input)
