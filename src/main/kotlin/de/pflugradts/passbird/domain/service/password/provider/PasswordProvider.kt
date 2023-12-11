@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.domain.service.password.provider
 
-import de.pflugradts.passbird.domain.model.password.PasswordRequirements
+import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 
 /**

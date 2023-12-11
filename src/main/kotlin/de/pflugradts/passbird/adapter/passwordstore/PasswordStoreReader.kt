@@ -12,9 +12,9 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.readBytes
 import de.pflugradts.passbird.application.util.readInt
+import de.pflugradts.passbird.domain.model.egg.Egg
+import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.password.PasswordEntry
-import de.pflugradts.passbird.domain.model.password.PasswordEntry.Companion.createPasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
@@ -34,8 +34,8 @@ class PasswordStoreReader @Inject constructor(
     @Inject private val nestService: NestService,
     @Inject private val cryptoProvider: CryptoProvider,
 ) {
-    fun restore(): Supplier<Stream<PasswordEntry>> {
-        val passwordEntries = ArrayDeque<PasswordEntry>()
+    fun restore(): Supplier<Stream<Egg>> {
+        val eggs = ArrayDeque<Egg>()
         val bytes = readFromDisk() ?: emptyBytes()
         val byteArray = bytes.toByteArray()
         if (byteArray.isNotEmpty()) {
@@ -44,11 +44,11 @@ class PasswordStoreReader @Inject constructor(
             var offset = signatureSize()
             offset = populateNests(byteArray, offset)
             while (EOF != readInt(byteArray, offset)) {
-                val res = byteArray.asPasswordEntry(offset)
-                passwordEntries.add(res.first)
+                val res = byteArray.asEgg(offset)
+                eggs.add(res.first)
                 offset = res.second
             }
-            return Supplier { passwordEntries.stream() }
+            return Supplier { eggs.stream() }
         }
         return Supplier { Stream.empty() }
     }
@@ -114,7 +114,7 @@ class PasswordStoreReader @Inject constructor(
         return Pair(result, incrementedOffset - offset)
     }
 
-    private fun ByteArray.asPasswordEntry(offset: Int): Pair<PasswordEntry, Int> {
+    private fun ByteArray.asEgg(offset: Int): Pair<Egg, Int> {
         var incrementedOffset = offset
         val nestSlot = readInt(this, incrementedOffset)
         incrementedOffset += Integer.BYTES
@@ -127,7 +127,7 @@ class PasswordStoreReader @Inject constructor(
         val passwordBytes = readBytes(this, incrementedOffset, passwordSize)
         incrementedOffset += passwordSize
         return Pair(
-            createPasswordEntry(Slot.at(nestSlot), bytesOf(keyBytes), bytesOf(passwordBytes)),
+            createEgg(Slot.at(nestSlot), bytesOf(keyBytes), bytesOf(passwordBytes)),
             incrementedOffset,
         )
     }

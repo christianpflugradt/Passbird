@@ -6,8 +6,8 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.Slot.DEFAULT
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.service.createNestServiceForTesting
@@ -50,7 +50,7 @@ class ImportCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 1) { importExportService.importPasswordEntries(args) }
+        verify(exactly = 1) { importExportService.importEggs(args) }
         expectThat(bytes) isNotEqualTo reference
     }
 
@@ -64,10 +64,10 @@ class ImportCommandIT {
         val importKey2 = bytesOf("import2")
         val databaseKey1 = bytesOf("database1")
         val databaseKey2 = bytesOf("database2")
-        val givenPasswordEntry1 = createPasswordEntryForTesting(withKeyBytes = databaseKey1)
-        val givenPasswordEntry2 = createPasswordEntryForTesting(withKeyBytes = databaseKey2)
+        val givenEgg1 = createEggForTesting(withKeyBytes = databaseKey1)
+        val givenEgg2 = createEggForTesting(withKeyBytes = databaseKey2)
         every { importExportService.peekImportKeyBytes(args) } returns mapOf(DEFAULT to listOf(importKey1, importKey2))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry1, givenPasswordEntry2))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
         // when
@@ -75,7 +75,7 @@ class ImportCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 1) { importExportService.importPasswordEntries(args) }
+        verify(exactly = 1) { importExportService.importEggs(args) }
         expectThat(bytes) isNotEqualTo reference
     }
 
@@ -89,10 +89,10 @@ class ImportCommandIT {
         val importKey2 = bytesOf("overlap")
         val databaseKey1 = bytesOf("database1")
         val databaseKey2 = bytesOf("overlap")
-        val givenPasswordEntry1 = createPasswordEntryForTesting(withKeyBytes = databaseKey1)
-        val givenPasswordEntry2 = createPasswordEntryForTesting(withKeyBytes = databaseKey2)
+        val givenEgg1 = createEggForTesting(withKeyBytes = databaseKey1)
+        val givenEgg2 = createEggForTesting(withKeyBytes = databaseKey2)
         every { importExportService.peekImportKeyBytes(args) } returns mapOf(DEFAULT to listOf(importKey1, importKey2))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry1, givenPasswordEntry2))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
 
@@ -101,7 +101,7 @@ class ImportCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 1) { importExportService.importPasswordEntries(args) }
+        verify(exactly = 1) { importExportService.importEggs(args) }
         expectThat(bytes) isNotEqualTo reference
     }
 
@@ -115,10 +115,10 @@ class ImportCommandIT {
         val importKey2 = bytesOf("overlap")
         val databaseKey1 = bytesOf("database1")
         val databaseKey2 = bytesOf("overlap")
-        val givenPasswordEntry1 = createPasswordEntryForTesting(withKeyBytes = databaseKey1)
-        val givenPasswordEntry2 = createPasswordEntryForTesting(withKeyBytes = databaseKey2)
+        val givenEgg1 = createEggForTesting(withKeyBytes = databaseKey1)
+        val givenEgg2 = createEggForTesting(withKeyBytes = databaseKey2)
         every { importExportService.peekImportKeyBytes(args) } returns mapOf(DEFAULT to listOf(importKey1, importKey2))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry1, givenPasswordEntry2))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
@@ -127,7 +127,7 @@ class ImportCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 0) { importExportService.importPasswordEntries(args) }
+        verify(exactly = 0) { importExportService.importEggs(args) }
         expectThat(bytes) isNotEqualTo reference
     }
 

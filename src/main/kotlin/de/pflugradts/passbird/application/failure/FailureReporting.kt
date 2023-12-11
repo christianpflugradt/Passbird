@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.application.failure
 
-import de.pflugradts.passbird.domain.model.password.InvalidKeyException
+import de.pflugradts.passbird.domain.model.egg.InvalidKeyException
 import kotlin.io.path.name
 
 fun reportFailure(checksumFailure: ChecksumFailure) {

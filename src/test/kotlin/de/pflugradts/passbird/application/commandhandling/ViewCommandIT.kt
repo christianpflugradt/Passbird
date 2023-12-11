@@ -2,7 +2,7 @@ package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ViewCommandHandler
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
@@ -32,7 +32,7 @@ class ViewCommandIT {
         val reference = command.copy()
         fakePasswordService(
             instance = passwordService,
-            withPasswordEntries = listOf(createPasswordEntryForTesting(withKeyBytes = bytesOf(key), withPasswordBytes = bytesOf(password))),
+            withEggs = listOf(createEggForTesting(withKeyBytes = bytesOf(key), withPasswordBytes = bytesOf(password))),
         )
         val outputSlot = slot<Output>()
 
@@ -54,7 +54,7 @@ class ViewCommandIT {
         val reference = command.copy()
         fakePasswordService(
             instance = passwordService,
-            withPasswordEntries = emptyList(),
+            withEggs = emptyList(),
         )
 
         // when

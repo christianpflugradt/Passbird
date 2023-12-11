@@ -4,15 +4,15 @@ import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.BytePair
+import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
+import de.pflugradts.passbird.domain.model.egg.InvalidKeyException
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.password.InvalidKeyException
-import de.pflugradts.passbird.domain.model.password.PasswordEntry.Companion.createPasswordEntry
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.service.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
-import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
-import de.pflugradts.passbird.domain.service.password.storage.fakePasswordEntryRepository
+import de.pflugradts.passbird.domain.service.password.storage.EggRepository
+import de.pflugradts.passbird.domain.service.password.storage.fakeEggRepository
 import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.verify
@@ -28,10 +28,10 @@ import java.util.stream.Stream
 class PutPasswordServiceTest {
 
     private val cryptoProvider = mockk<CryptoProvider>()
-    private val passwordEntryRepository = mockk<PasswordEntryRepository>(relaxed = true)
+    private val eggRepository = mockk<EggRepository>(relaxed = true)
     private val passbirdEventRegistry = mockk<PassbirdEventRegistry>(relaxed = true)
     private val nestService = createNestServiceForTesting()
-    private val passwordService = PutPasswordService(cryptoProvider, passwordEntryRepository, passbirdEventRegistry, nestService)
+    private val passwordService = PutPasswordService(cryptoProvider, eggRepository, passbirdEventRegistry, nestService)
 
     @Nested
     inner class ChallengeAliasTest {
@@ -87,44 +87,44 @@ class PutPasswordServiceTest {
     }
 
     @Test
-    fun `should insert new password entry`() {
+    fun `should insert new egg`() {
         // given
         val existingKey = bytesOf("Key")
         val newKey = bytesOf("tryThis")
         val newPassword = bytesOf("Password")
-        val matchingPasswordEntry = createPasswordEntryForTesting(withKeyBytes = existingKey)
+        val matchingEgg = createEggForTesting(withKeyBytes = existingKey)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(matchingPasswordEntry))
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
-        passwordService.putPasswordEntry(newKey, newPassword)
+        passwordService.putEgg(newKey, newPassword)
 
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(newKey) }
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
-        verify(exactly = 1) { passwordEntryRepository.sync() }
-        verify(exactly = 1) { passwordEntryRepository.add(eq(createPasswordEntry(Slot.DEFAULT, newKey, newPassword))) }
+        verify(exactly = 1) { eggRepository.sync() }
+        verify(exactly = 1) { eggRepository.add(eq(createEgg(Slot.DEFAULT, newKey, newPassword))) }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 
     @Test
-    fun `should update existing password entry`() {
+    fun `should update existing egg`() {
         // given
         val existingKey = bytesOf("Key")
         val newPassword = bytesOf("Password")
-        val matchingPasswordEntry = createPasswordEntryForTesting(withKeyBytes = existingKey)
+        val matchingEgg = createEggForTesting(withKeyBytes = existingKey)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(matchingPasswordEntry))
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
-        passwordService.putPasswordEntry(existingKey, newPassword)
+        passwordService.putEgg(existingKey, newPassword)
 
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(existingKey) }
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
-        verify(exactly = 1) { passwordEntryRepository.sync() }
+        verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
-        expectThat(passwordEntryRepository.find(keyBytes = existingKey).orElse(null).viewPassword()) isEqualTo newPassword
+        expectThat(eggRepository.find(keyBytes = existingKey).orElse(null).viewPassword()) isEqualTo newPassword
     }
 
     @Test
@@ -133,39 +133,39 @@ class PutPasswordServiceTest {
         val invalidKey = bytesOf("1Key")
 
         // when
-        val actual = tryCatching { passwordService.putPasswordEntry(invalidKey, bytesOf("password")) }
+        val actual = tryCatching { passwordService.putEgg(invalidKey, bytesOf("password")) }
 
         // then
         expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidKeyException>()
         verify { cryptoProvider wasNot Called }
-        verify { passwordEntryRepository wasNot Called }
+        verify { eggRepository wasNot Called }
     }
 
     @Test
-    fun `should upsert multiple password entries`() {
+    fun `should upsert multiple eggs`() {
         // given
         val newKey = bytesOf("trythis")
         val newPassword = bytesOf("dont use this as a password")
         val existingKey = bytesOf("Key")
         val newPasswordForExistingKey = bytesOf("Password")
-        val matchingPasswordEntry = createPasswordEntryForTesting(withKeyBytes = existingKey)
+        val matchingEgg = createEggForTesting(withKeyBytes = existingKey)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(matchingPasswordEntry))
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
-        passwordService.putPasswordEntries(
+        passwordService.putEggs(
             Stream.of(BytePair(Pair(newKey, newPassword)), BytePair(Pair(existingKey, newPasswordForExistingKey))),
         )
 
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(newKey) }
         verify(exactly = 1) { cryptoProvider.encrypt(existingKey) }
-        verify(exactly = 1) { passwordEntryRepository.add(eq(createPasswordEntry(Slot.DEFAULT, newKey, newPassword))) }
-        verify(exactly = 1) { passwordEntryRepository.sync() }
+        verify(exactly = 1) { eggRepository.add(eq(createEgg(Slot.DEFAULT, newKey, newPassword))) }
+        verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
         expectThat(
-            passwordEntryRepository.find(keyBytes = existingKey).orElse(null).viewPassword(),
+            eggRepository.find(keyBytes = existingKey).orElse(null).viewPassword(),
         ) isEqualTo newPasswordForExistingKey
     }
 
@@ -173,14 +173,14 @@ class PutPasswordServiceTest {
     fun `should accept empty stream`() {
         // given
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(instance = passwordEntryRepository)
+        fakeEggRepository(instance = eggRepository)
 
         // when
-        passwordService.putPasswordEntries(Stream.empty())
+        passwordService.putEggs(Stream.empty())
 
         // then
-        verify(exactly = 0) { passwordEntryRepository.add(any()) }
-        verify(exactly = 1) { passwordEntryRepository.sync() }
+        verify(exactly = 0) { eggRepository.add(any()) }
+        verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 }

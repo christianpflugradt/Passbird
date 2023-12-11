@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.domain.service.password.provider
 
-import de.pflugradts.passbird.domain.model.password.createPasswordRequirementsForTesting
+import de.pflugradts.passbird.domain.model.egg.createPasswordRequirementsForTesting
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo

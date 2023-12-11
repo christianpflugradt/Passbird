@@ -21,7 +21,7 @@ class ImportCommandHandler@Inject constructor(
     @Subscribe
     private fun handleImportCommand(importCommand: ImportCommand) {
         if (commandConfirmed(importCommand)) {
-            importExportService.importPasswordEntries(importCommand.argument.asString())
+            importExportService.importEggs(importCommand.argument.asString())
         } else {
             userInterfaceAdapterPort.send(outputOf(bytesOf("Operation aborted.")))
         }
@@ -32,7 +32,7 @@ class ImportCommandHandler@Inject constructor(
     private fun commandConfirmed(importCommand: ImportCommand): Boolean {
         if (configuration.application.password.promptOnRemoval) {
             val overlaps = importExportService.peekImportKeyBytes(importCommand.argument.asString())
-                .map { (nestSlot, keyBytes) -> keyBytes.map { Triple(nestSlot, it, passwordService.entryExists(it, nestSlot)) } }
+                .map { (nestSlot, keyBytes) -> keyBytes.map { Triple(nestSlot, it, passwordService.eggExists(it, nestSlot)) } }
                 .flatten()
                 .filter { it.third }
                 .map { Pair(it.first, it.second) }

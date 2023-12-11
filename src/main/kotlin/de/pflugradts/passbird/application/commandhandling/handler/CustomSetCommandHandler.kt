@@ -5,11 +5,11 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.domain.model.password.InvalidKeyException
+import de.pflugradts.passbird.domain.model.egg.InvalidKeyException
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import de.pflugradts.passbird.domain.service.password.PasswordService.EntryNotExistsAction.DO_NOTHING
+import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.DO_NOTHING
 
 class CustomSetCommandHandler @Inject constructor(
     @Inject private val configuration: ReadableConfiguration,
@@ -25,7 +25,7 @@ class CustomSetCommandHandler @Inject constructor(
                 if (secureInput.isEmpty) {
                     userInterfaceAdapterPort.send(outputOf(bytesOf("Empty input - Operation aborted.")))
                 } else {
-                    passwordService.putPasswordEntry(customSetCommand.argument, secureInput.bytes)
+                    passwordService.putEgg(customSetCommand.argument, secureInput.bytes)
                 }
                 secureInput.invalidate()
             } catch (ex: InvalidKeyException) {
@@ -40,7 +40,7 @@ class CustomSetCommandHandler @Inject constructor(
     }
 
     private fun commandConfirmed(customSetCommand: CustomSetCommand) =
-        if (configuration.application.password.promptOnRemoval && passwordService.entryExists(customSetCommand.argument, DO_NOTHING)) {
+        if (configuration.application.password.promptOnRemoval && passwordService.eggExists(customSetCommand.argument, DO_NOTHING)) {
             userInterfaceAdapterPort
                 .receiveConfirmation(
                     outputOf(

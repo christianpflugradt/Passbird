@@ -1,30 +1,30 @@
 package de.pflugradts.passbird.domain.service.eventhandling
 
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
-import de.pflugradts.passbird.domain.model.event.PasswordEntryDiscarded
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
-import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
+import de.pflugradts.passbird.domain.model.event.EggDiscarded
+import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 
 class DomainEventHandlerIT {
 
-    private val passwordEntryRepository = mockk<PasswordEntryRepository>()
-    private val domainEventHandler = DomainEventHandler(passwordEntryRepository)
+    private val eggRepository = mockk<EggRepository>()
+    private val domainEventHandler = DomainEventHandler(eggRepository)
     private var passbirdEventRegistry = PassbirdEventRegistry(mutableSetOf<EventHandler>(domainEventHandler))
 
     @Test
-    fun `should process password entry discarded`() {
+    fun `should process egg discarded`() {
         // given
-        val giverPasswordEntry = createPasswordEntryForTesting()
-        val passwordEntryDiscarded = PasswordEntryDiscarded(giverPasswordEntry)
+        val giverEgg = createEggForTesting()
+        val eggDiscarded = EggDiscarded(giverEgg)
 
         // when
-        passbirdEventRegistry.register(passwordEntryDiscarded)
+        passbirdEventRegistry.register(eggDiscarded)
         passbirdEventRegistry.processEvents()
 
         // then
-        verify(exactly = 1) { passwordEntryRepository.delete(giverPasswordEntry) }
+        verify(exactly = 1) { eggRepository.delete(giverEgg) }
     }
 }

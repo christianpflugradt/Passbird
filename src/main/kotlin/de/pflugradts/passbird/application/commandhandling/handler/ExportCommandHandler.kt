@@ -12,7 +12,7 @@ class ExportCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleExportCommand(exportCommand: ExportCommand) {
-        importExportService.exportPasswordEntries(exportCommand.argument.asString())
+        importExportService.exportEggs(exportCommand.argument.asString())
         exportCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }

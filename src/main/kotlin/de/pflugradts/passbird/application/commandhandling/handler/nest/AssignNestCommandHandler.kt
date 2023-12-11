@@ -10,7 +10,7 @@ import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import de.pflugradts.passbird.domain.service.password.PasswordService.EntryNotExistsAction
+import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 
 class AssignNestCommandHandler @Inject constructor(
     @Inject private val nestService: NestService,
@@ -19,7 +19,7 @@ class AssignNestCommandHandler @Inject constructor(
 ) : CommandHandler, CanListAvailableNests(nestService) {
     @Subscribe
     private fun handleAssignNestCommand(assignNestCommand: AssignNestCommand) {
-        if (passwordService.entryExists(assignNestCommand.argument, EntryNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT)) {
+        if (passwordService.eggExists(assignNestCommand.argument, EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             userInterfaceAdapterPort.send(
                 outputOf(bytesOf("Available namespaces: \n${getAvailableNests(includeCurrent = false)}")),
             )
@@ -33,12 +33,12 @@ class AssignNestCommandHandler @Inject constructor(
                 )
             } else if (nestService.atSlot(nestSlot).isEmpty) {
                 userInterfaceAdapterPort.send(outputOf(bytesOf("Specified namespace does not exist - Operation aborted.")))
-            } else if (passwordService.entryExists(assignNestCommand.argument, nestSlot)) {
+            } else if (passwordService.eggExists(assignNestCommand.argument, nestSlot)) {
                 userInterfaceAdapterPort.send(
                     outputOf(bytesOf("Password entry with same alias already exists in target namespace - Operation aborted.")),
                 )
             } else {
-                passwordService.movePasswordEntry(assignNestCommand.argument, nestSlot)
+                passwordService.moveEgg(assignNestCommand.argument, nestSlot)
             }
             input.invalidate()
         }

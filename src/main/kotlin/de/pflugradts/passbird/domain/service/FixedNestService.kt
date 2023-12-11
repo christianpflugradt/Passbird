@@ -8,12 +8,12 @@ import de.pflugradts.passbird.domain.model.nest.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.FIRST_SLOT
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.LAST_SLOT
 import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
+import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import java.util.Collections
 import java.util.Optional
 
 class FixedNestService @Inject constructor(
-    @Inject private val passwordEntryRepository: PasswordEntryRepository,
+    @Inject private val eggRepository: EggRepository,
 ) : NestService {
 
     private val nests = Collections.nCopies(CAPACITY, Optional.empty<Nest>()).toMutableList()
@@ -31,7 +31,7 @@ class FixedNestService @Inject constructor(
 
     override fun deploy(nestBytes: Bytes, slot: Slot) {
         nests[slot.index() - 1] = Optional.of(Nest.createNest(nestBytes, slot))
-        passwordEntryRepository.sync()
+        eggRepository.sync()
     }
     override fun atSlot(slot: Slot): Optional<Nest> =
         if (slot === Slot.DEFAULT) Optional.of(DEFAULT) else nests[slot.index() - 1]

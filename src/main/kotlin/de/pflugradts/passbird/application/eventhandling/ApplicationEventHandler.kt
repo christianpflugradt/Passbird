@@ -3,11 +3,11 @@ package de.pflugradts.passbird.application.eventhandling
 import com.google.common.eventbus.Subscribe
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
-import de.pflugradts.passbird.domain.model.event.PasswordEntryCreated
-import de.pflugradts.passbird.domain.model.event.PasswordEntryDiscarded
-import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound
-import de.pflugradts.passbird.domain.model.event.PasswordEntryRenamed
-import de.pflugradts.passbird.domain.model.event.PasswordEntryUpdated
+import de.pflugradts.passbird.domain.model.event.EggCreated
+import de.pflugradts.passbird.domain.model.event.EggDiscarded
+import de.pflugradts.passbird.domain.model.event.EggNotFound
+import de.pflugradts.passbird.domain.model.event.EggRenamed
+import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -19,28 +19,28 @@ class ApplicationEventHandler @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : EventHandler {
     @Subscribe
-    private fun handlePasswordEntryCreated(passwordEntryCreated: PasswordEntryCreated) {
-        send("PasswordEntry '${decrypt(passwordEntryCreated.passwordEntry.viewKey())}' successfully created.")
+    private fun handleEggCreated(eggCreated: EggCreated) {
+        send("PasswordEntry '${decrypt(eggCreated.egg.viewKey())}' successfully created.")
     }
 
     @Subscribe
-    private fun handlePasswordEntryUpdated(passwordEntryUpdated: PasswordEntryUpdated) {
-        send("PasswordEntry '${decrypt(passwordEntryUpdated.passwordEntry.viewKey())}' successfully updated.")
+    private fun handleEggUpdated(eggUpdated: EggUpdated) {
+        send("PasswordEntry '${decrypt(eggUpdated.egg.viewKey())}' successfully updated.")
     }
 
     @Subscribe
-    private fun handlePasswordEntryRenamed(passwordEntryRenamed: PasswordEntryRenamed) {
-        send("PasswordEntry '${decrypt(passwordEntryRenamed.passwordEntry.viewKey())}' successfully renamed.")
+    private fun handleEggRenamed(eggRenamed: EggRenamed) {
+        send("PasswordEntry '${decrypt(eggRenamed.egg.viewKey())}' successfully renamed.")
     }
 
     @Subscribe
-    private fun handlePasswordEntryDiscarded(passwordEntryDiscarded: PasswordEntryDiscarded) {
-        send("PasswordEntry '${decrypt(passwordEntryDiscarded.passwordEntry.viewKey())}' successfully deleted.")
+    private fun handleEggDiscarded(eggDiscarded: EggDiscarded) {
+        send("PasswordEntry '${decrypt(eggDiscarded.egg.viewKey())}' successfully deleted.")
     }
 
     @Subscribe
-    private fun handlePasswordEntryNotFound(passwordEntryNotFound: PasswordEntryNotFound) {
-        send("PasswordEntry '${decrypt(passwordEntryNotFound.keyBytes)}' not found.")
+    private fun handleEggNotFound(eggNotFound: EggNotFound) {
+        send("PasswordEntry '${decrypt(eggNotFound.keyBytes)}' not found.")
     }
 
     private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(bytesOf(str)))

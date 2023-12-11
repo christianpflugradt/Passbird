@@ -45,11 +45,11 @@ class FilePasswordExchange @Inject constructor(
     }
 }
 
-private class ExchangeWrapper(val value: Map<Slot, List<PlainPasswordEntry>> = emptyMap())
-private class PlainPasswordEntry(var alias: String = "", var password: String = "")
+private class ExchangeWrapper(val value: Map<Slot, List<PlainEgg>> = emptyMap())
+private class PlainEgg(var alias: String = "", var password: String = "")
 private fun Map<Slot, List<BytePair>>.toSerializable() = entries.associate { nest ->
-    nest.key to nest.value.map { PlainPasswordEntry(it.value.first.asString(), it.value.second.asString()) }
+    nest.key to nest.value.map { PlainEgg(it.value.first.asString(), it.value.second.asString()) }
 }
-private fun Map<Slot, List<PlainPasswordEntry>>.toBytePairMap() = entries.associate { nest ->
+private fun Map<Slot, List<PlainEgg>>.toBytePairMap() = entries.associate { nest ->
     nest.key to nest.value.map { BytePair(Pair(bytesOf(it.alias), bytesOf(it.password))) }
 }

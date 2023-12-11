@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.domain.model.password
+package de.pflugradts.passbird.domain.model.egg
 
 class PasswordRequirements private constructor(val includeSpecialCharacters: Boolean, val passwordLength: Int) {
     companion object {

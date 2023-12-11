@@ -1,6 +1,6 @@
-package de.pflugradts.passbird.domain.model.password
+package de.pflugradts.passbird.domain.model.egg
 
-import de.pflugradts.passbird.domain.model.password.Password.Companion.createPassword
+import de.pflugradts.passbird.domain.model.egg.Password.Companion.createPassword
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import io.mockk.every

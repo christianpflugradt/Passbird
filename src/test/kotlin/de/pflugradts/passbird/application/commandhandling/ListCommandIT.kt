@@ -2,7 +2,7 @@ package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ListCommandHandler
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
@@ -31,10 +31,10 @@ internal class ListCommandIT {
         val key3 = bytesOf("key3")
         fakePasswordService(
             instance = passwordService,
-            withPasswordEntries = listOf(
-                createPasswordEntryForTesting(withKeyBytes = key1),
-                createPasswordEntryForTesting(withKeyBytes = key2),
-                createPasswordEntryForTesting(withKeyBytes = key3),
+            withEggs = listOf(
+                createEggForTesting(withKeyBytes = key1),
+                createEggForTesting(withKeyBytes = key2),
+                createEggForTesting(withKeyBytes = key3),
             ),
         )
         val outputSlot = slot<Output>()
@@ -51,7 +51,7 @@ internal class ListCommandIT {
     fun `should handle list command with empty database `() {
         // given
         val input = inputOf(bytesOf("l"))
-        fakePasswordService(instance = passwordService, withPasswordEntries = emptyList())
+        fakePasswordService(instance = passwordService, withEggs = emptyList())
         val outputSlot = slot<Output>()
 
         // when

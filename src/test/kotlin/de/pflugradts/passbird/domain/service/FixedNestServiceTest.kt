@@ -5,7 +5,7 @@ import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
-import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
+import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
@@ -20,8 +20,8 @@ import kotlin.jvm.optionals.getOrNull
 
 class FixedNestServiceTest {
 
-    private val passwordEntryRepository = mockk<PasswordEntryRepository>(relaxed = true)
-    private val nestService = FixedNestService(passwordEntryRepository)
+    private val eggRepository = mockk<EggRepository>(relaxed = true)
+    private val nestService = FixedNestService(eggRepository)
 
     @Test
     fun `should have 9 empty slots upon initialisation`() {
@@ -170,6 +170,6 @@ class FixedNestServiceTest {
         expectThat(actual.isPresent).isTrue()
         expectThat(actual.get().bytes) isEqualTo nestBytes
         expectThat(actual.get().slot) isEqualTo Slot.N3
-        verify(exactly = 1) { passwordEntryRepository.sync() }
+        verify(exactly = 1) { eggRepository.sync() }
     }
 }

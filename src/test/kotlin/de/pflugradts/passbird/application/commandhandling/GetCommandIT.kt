@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.GetCommandHandler
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
@@ -35,7 +35,7 @@ class GetCommandIT {
         val expectedPassword = bytesOf("value")
         fakePasswordService(
             instance = passwordService,
-            withPasswordEntries = listOf(createPasswordEntryForTesting(withKeyBytes = bytesOf(args), withPasswordBytes = expectedPassword)),
+            withEggs = listOf(createEggForTesting(withKeyBytes = bytesOf(args), withPasswordBytes = expectedPassword)),
         )
         val outputSlot = slot<Output>()
 
@@ -51,14 +51,14 @@ class GetCommandIT {
     }
 
     @Test
-    fun `should handle get command with invalid password entry`() {
+    fun `should handle get command with invalid egg`() {
         // given
         val args = "key"
         val command = bytesOf("g$args")
         val reference = command.copy()
         fakePasswordService(
             instance = passwordService,
-            withPasswordEntries = listOf(createPasswordEntryForTesting(withKeyBytes = bytesOf("other"))),
+            withEggs = listOf(createEggForTesting(withKeyBytes = bytesOf("other"))),
         )
 
         // when

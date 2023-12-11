@@ -2,9 +2,9 @@ package de.pflugradts.passbird.application.eventhandling
 
 import com.google.common.eventbus.EventBus
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
-import de.pflugradts.passbird.domain.model.event.PasswordEntryCreated
-import de.pflugradts.passbird.domain.model.event.PasswordEntryUpdated
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
+import de.pflugradts.passbird.domain.model.event.EggCreated
+import de.pflugradts.passbird.domain.model.event.EggUpdated
 import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.spyk
@@ -37,10 +37,10 @@ class PassbirdEventRegistryTest {
     @Test
     fun `should process and clear all aggregate events`() {
         // given
-        val aggregate = createPasswordEntryForTesting()
+        val aggregate = createEggForTesting()
         aggregate.clearDomainEvents()
-        val domainEvent1 = PasswordEntryCreated(aggregate)
-        val domainEvent2 = PasswordEntryUpdated(aggregate)
+        val domainEvent1 = EggCreated(aggregate)
+        val domainEvent2 = EggUpdated(aggregate)
         aggregate.registerDomainEvent(domainEvent1)
         aggregate.registerDomainEvent(domainEvent2)
 
@@ -57,8 +57,8 @@ class PassbirdEventRegistryTest {
     @Test
     fun `should deregister aggregate`() {
         // given
-        val aggregate = createPasswordEntryForTesting()
-        val domainEvent1 = PasswordEntryCreated(aggregate)
+        val aggregate = createEggForTesting()
+        val domainEvent1 = EggCreated(aggregate)
         aggregate.registerDomainEvent(domainEvent1)
         passbirdEventRegistry.register(aggregate)
 

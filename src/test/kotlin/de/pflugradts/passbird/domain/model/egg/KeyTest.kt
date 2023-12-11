@@ -1,6 +1,6 @@
-package de.pflugradts.passbird.domain.model.password
+package de.pflugradts.passbird.domain.model.egg
 
-import de.pflugradts.passbird.domain.model.password.Key.Companion.createKey
+import de.pflugradts.passbird.domain.model.egg.Key.Companion.createKey
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

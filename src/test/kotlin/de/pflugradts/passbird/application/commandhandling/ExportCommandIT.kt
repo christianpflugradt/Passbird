@@ -31,7 +31,7 @@ class ExportCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 1) { importExportService.exportPasswordEntries(args) }
+        verify(exactly = 1) { importExportService.exportEggs(args) }
         expectThat(bytes) isNotEqualTo reference
     }
 }

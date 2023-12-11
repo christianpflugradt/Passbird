@@ -5,6 +5,7 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.model.nest.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Slot.N1
@@ -16,7 +17,6 @@ import de.pflugradts.passbird.domain.model.nest.Slot.N6
 import de.pflugradts.passbird.domain.model.nest.Slot.N7
 import de.pflugradts.passbird.domain.model.nest.Slot.N8
 import de.pflugradts.passbird.domain.model.nest.Slot.N9
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
@@ -84,15 +84,15 @@ class PasswordStoreFacadeIT {
     @Test
     fun `should write to and them read from database`() {
         // given
-        val passwordEntries = somePasswordEntries()
+        val eggs = someEggs()
 
         // when
-        passwordStoreFacade.sync { passwordEntries.stream() }
+        passwordStoreFacade.sync { eggs.stream() }
         expectThat(File(databaseFilename)).exists()
         val actual = passwordStoreFacade.restore()
 
         // then
-        expectThat(actual.get().toList()) containsExactly passwordEntries
+        expectThat(actual.get().toList()) containsExactly eggs
     }
 
     @Test
@@ -104,36 +104,36 @@ class PasswordStoreFacadeIT {
         nestService.deploy(nest1, N1)
         nestService.deploy(nest3, N3)
         nestService.deploy(nest9, N9)
-        val passwordEntry1 = createPasswordEntryForTesting(
+        val egg1 = createEggForTesting(
             withKeyBytes = bytesOf("key1"),
             withPasswordBytes = bytesOf("password1"),
             withNestSlot = DEFAULT,
         )
-        val passwordEntry2 = createPasswordEntryForTesting(
+        val egg2 = createEggForTesting(
             withKeyBytes = bytesOf("key2"),
             withPasswordBytes = bytesOf("password2"),
             withNestSlot = N1,
         )
-        val passwordEntry3 = createPasswordEntryForTesting(
+        val egg3 = createEggForTesting(
             withKeyBytes = bytesOf("key3"),
             withPasswordBytes = bytesOf("password3"),
             withNestSlot = N3,
         )
-        val passwordEntry3b = createPasswordEntryForTesting(
+        val egg3b = createEggForTesting(
             withKeyBytes = bytesOf("key3"),
             withPasswordBytes = bytesOf("password3b"),
             withNestSlot = N9,
         )
-        val passwordEntries = listOf(passwordEntry1, passwordEntry2, passwordEntry3, passwordEntry3b)
+        val eggs = listOf(egg1, egg2, egg3, egg3b)
 
         // when
-        passwordStoreFacade.sync { passwordEntries.stream() }
+        passwordStoreFacade.sync { eggs.stream() }
         nestService.populate(Collections.nCopies(CAPACITY, emptyBytes()))
         expectThat(File(databaseFilename)).exists()
         val actual = passwordStoreFacade.restore()
 
         // then
-        expectThat(actual.get().toList()) containsExactly passwordEntries
+        expectThat(actual.get().toList()) containsExactly eggs
         listOf(N2, N4, N5, N6, N7, N8).forEach { expectThat(nestService.atSlot(it).isPresent).isFalse() }
         mapOf(
             N1 to nest1,
@@ -187,14 +187,14 @@ class PasswordStoreFacadeIT {
         @Test
         fun `should shut down on invalid signature with verifySignature set to true`() {
             // given
-            val passwordEntries = somePasswordEntries()
+            val eggs = someEggs()
             val manipulatedSignature = signature().reversedArray()
             every { systemOperation.exit() } returns Unit
             fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifySignature = true)
 
             mockkStatic(::signature)
             every { signature() } returns manipulatedSignature
-            passwordStoreFacade.sync { passwordEntries.stream() }
+            passwordStoreFacade.sync { eggs.stream() }
             expectThat(File(databaseFilename)).exists()
             unmockkAll()
 
@@ -215,14 +215,14 @@ class PasswordStoreFacadeIT {
         @Test
         fun `should report failure on invalid signature with verifySignature set to false`() {
             // given
-            val passwordEntries = somePasswordEntries()
+            val eggs = someEggs()
             val manipulatedSignature = signature().reversedArray()
             every { systemOperation.exit() } returns Unit
             fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifySignature = false)
 
             mockkStatic(::signature)
             every { signature() } returns manipulatedSignature
-            passwordStoreFacade.sync { passwordEntries.stream() }
+            passwordStoreFacade.sync { eggs.stream() }
             expectThat(File(databaseFilename)).exists()
             unmockkAll()
 
@@ -236,7 +236,7 @@ class PasswordStoreFacadeIT {
             val actual = captureSystemErr.capture
 
             // then
-            expectThat(restored) isEqualTo passwordEntries.size
+            expectThat(restored) isEqualTo eggs.size
             expectThat(actual) contains "Signature of password database could not be verified."
             expectThat(actual.contains("Shutting down due to signature failure.")).isFalse()
             verify(exactly = 0) { systemOperation.exit() }
@@ -245,13 +245,13 @@ class PasswordStoreFacadeIT {
         @Test
         fun `should shut down on invalid checksum with verifyChecksum set to true`() {
             // given
-            val passwordEntries = somePasswordEntries()
+            val eggs = someEggs()
             every { systemOperation.exit() } returns Unit
             fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifyChecksum = true)
 
             mockkStatic(::checksum)
             every { checksum(any()) } returns 0
-            passwordStoreFacade.sync { passwordEntries.stream() }
+            passwordStoreFacade.sync { eggs.stream() }
             expectThat(File(databaseFilename)).exists()
             unmockkAll()
 
@@ -272,13 +272,13 @@ class PasswordStoreFacadeIT {
         @Test
         fun `should report failure on invalid checksum with verifyChecksum set to false`() {
             // given
-            val passwordEntries = somePasswordEntries()
+            val eggs = someEggs()
             every { systemOperation.exit() } returns Unit
             fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifyChecksum = false)
 
             mockkStatic(::checksum)
             every { checksum(any()) } returns 0
-            passwordStoreFacade.sync { passwordEntries.stream() }
+            passwordStoreFacade.sync { eggs.stream() }
             expectThat(File(databaseFilename)).exists()
             unmockkAll()
 
@@ -292,16 +292,16 @@ class PasswordStoreFacadeIT {
             val actual = captureSystemErr.capture
 
             // then
-            expectThat(restored) isEqualTo passwordEntries.size
+            expectThat(restored) isEqualTo eggs.size
             expectThat(actual) contains "Checksum of password database could not be verified."
             expectThat(actual.contains("Shutting down due to checksum failure.")).isFalse()
             verify(exactly = 0) { systemOperation.exit() }
         }
     }
 
-    private fun somePasswordEntries() = listOf(
-        createPasswordEntryForTesting(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1")),
-        createPasswordEntryForTesting(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2")),
-        createPasswordEntryForTesting(withKeyBytes = bytesOf("key3"), withPasswordBytes = bytesOf("password3")),
+    private fun someEggs() = listOf(
+        createEggForTesting(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1")),
+        createEggForTesting(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2")),
+        createEggForTesting(withKeyBytes = bytesOf("key3"), withPasswordBytes = bytesOf("password3")),
     )
 }

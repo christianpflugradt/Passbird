@@ -1,31 +1,31 @@
 package de.pflugradts.passbird.domain.service.password
 
-import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound
+import de.pflugradts.passbird.domain.model.egg.Egg
+import de.pflugradts.passbird.domain.model.egg.InvalidKeyException
+import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.password.InvalidKeyException
-import de.pflugradts.passbird.domain.model.password.PasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.CharValue.Companion.charValueOf
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
-import de.pflugradts.passbird.domain.service.password.PasswordService.EntryNotExistsAction
+import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
-import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
+import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import java.util.Optional
 import java.util.function.Predicate
 
 abstract class CommonPasswordServiceCapabilities(
     private val cryptoProvider: CryptoProvider,
-    private val passwordEntryRepository: PasswordEntryRepository,
+    private val eggRepository: EggRepository,
     private val eventRegistry: EventRegistry,
 ) {
-    fun find(keyBytes: Bytes, nestSlot: Slot): Optional<PasswordEntry> = passwordEntryRepository.find(keyBytes, nestSlot)
-    fun find(keyBytes: Bytes): Optional<PasswordEntry> = passwordEntryRepository.find(keyBytes)
+    fun find(keyBytes: Bytes, nestSlot: Slot): Optional<Egg> = eggRepository.find(keyBytes, nestSlot)
+    fun find(keyBytes: Bytes): Optional<Egg> = eggRepository.find(keyBytes)
     fun encrypted(bytes: Bytes) = cryptoProvider.encrypt(bytes)
     fun decrypted(bytes: Bytes) = cryptoProvider.decrypt(bytes)
 
     fun processEventsAndSync() {
         eventRegistry.processEvents()
-        passwordEntryRepository.sync()
+        eggRepository.sync()
     }
 
     fun challengeAlias(bytes: Bytes) {
@@ -39,12 +39,12 @@ abstract class CommonPasswordServiceCapabilities(
         return result
     }
 
-    fun entryExists(keyBytes: Bytes, nestSlot: Slot) = find(encrypted(keyBytes), nestSlot).isPresent
-    fun entryExists(keyBytes: Bytes, entryNotExistsAction: EntryNotExistsAction) =
+    fun eggExists(keyBytes: Bytes, nestSlot: Slot) = find(encrypted(keyBytes), nestSlot).isPresent
+    fun eggExists(keyBytes: Bytes, eggNotExistsAction: EggNotExistsAction) =
         encrypted(keyBytes).let {
             find(it).let { match ->
-                if (match.isEmpty && entryNotExistsAction == EntryNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT) {
-                    eventRegistry.register(PasswordEntryNotFound(it))
+                if (match.isEmpty && eggNotExistsAction == EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT) {
+                    eventRegistry.register(EggNotFound(it))
                     eventRegistry.processEvents()
                 }
                 match.isPresent

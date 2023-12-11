@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.application.configuration
 
-import de.pflugradts.passbird.domain.model.password.PasswordRequirements
+import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 
 private const val DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS = 10
 private const val DEFAULT_PASSWORD_LENGTH = 20

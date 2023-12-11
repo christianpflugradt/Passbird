@@ -5,7 +5,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.CustomSetComma
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
@@ -44,7 +44,7 @@ class CustomSetCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 1) { passwordService.putPasswordEntry(eq(bytesOf(args)), customPassword) }
+        verify(exactly = 1) { passwordService.putEgg(eq(bytesOf(args)), customPassword) }
         verify(exactly = 1) { customPassword.scramble() }
         expectThat(bytes) isNotEqualTo reference
     }
@@ -66,7 +66,7 @@ class CustomSetCommandIT {
         // then
         val errorMsg = "Password alias cannot contain digits or special characters. Please choose a different alias."
         verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(bytesOf(errorMsg)))) }
-        verify(exactly = 0) { passwordService.putPasswordEntry(eq(bytesOf(args)), any()) }
+        verify(exactly = 0) { passwordService.putEgg(eq(bytesOf(args)), any()) }
         expectThat(bytes) isNotEqualTo reference
     }
 
@@ -87,12 +87,12 @@ class CustomSetCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(bytesOf("Empty input - Operation aborted."))) }
-        verify(exactly = 0) { passwordService.putPasswordEntry(eq(bytesOf(args)), any()) }
+        verify(exactly = 0) { passwordService.putEgg(eq(bytesOf(args)), any()) }
         expectThat(bytes) isNotEqualTo reference
     }
 
     @Test
-    fun `should handle custom set command with prompt on removal and new password entry`() {
+    fun `should handle custom set command with prompt on removal and new egg`() {
         // given
         val args = "key"
         val bytes = bytesOf("c$args")
@@ -107,20 +107,20 @@ class CustomSetCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 1) { passwordService.putPasswordEntry(eq(bytesOf(args)), customPassword) }
+        verify(exactly = 1) { passwordService.putEgg(eq(bytesOf(args)), customPassword) }
         verify(exactly = 1) { customPassword.scramble() }
         expectThat(bytes) isNotEqualTo reference
     }
 
     @Test
-    fun `should handle custom set command with prompt on removal and existing password entry`() {
+    fun `should handle custom set command with prompt on removal and existing egg`() {
         // given
         val args = "key"
         val bytes = bytesOf("c$args")
         val reference = bytes.copy()
         val customPassword = mockk<Bytes>(relaxed = true)
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(args))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
             withTheseSecureInputs = listOf(inputOf(customPassword)),
@@ -133,7 +133,7 @@ class CustomSetCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 1) { passwordService.putPasswordEntry(eq(bytesOf(args)), customPassword) }
+        verify(exactly = 1) { passwordService.putEgg(eq(bytesOf(args)), customPassword) }
         verify(exactly = 1) { customPassword.scramble() }
         expectThat(bytes) isNotEqualTo reference
     }
@@ -144,8 +144,8 @@ class CustomSetCommandIT {
         val args = "key"
         val bytes = bytesOf("c$args")
         val reference = bytes.copy()
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(args))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
@@ -155,7 +155,7 @@ class CustomSetCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(bytesOf("Operation aborted."))) }
-        verify(exactly = 0) { passwordService.putPasswordEntry(eq(bytesOf(args)), any()) }
+        verify(exactly = 0) { passwordService.putEgg(eq(bytesOf(args)), any()) }
         expectThat(bytes) isNotEqualTo reference
     }
 }

@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.application.configuration
 
-import de.pflugradts.passbird.domain.model.password.PasswordRequirements
+import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 
 interface ReadableConfiguration {
     fun parsePasswordRequirements(): PasswordRequirements

@@ -39,26 +39,26 @@ class FilePasswordExchangeIT {
     @Test
     fun `should export and re-import passwords across multiple nests`() {
         // given
-        val givenPasswordEntry1 = BytePair(Pair(bytesOf("key1"), bytesOf("password1")))
-        val givenPasswordEntry2 = BytePair(Pair(bytesOf("key2"), bytesOf("password2")))
-        val givenPasswordEntry3 = BytePair(Pair(bytesOf("key3"), bytesOf("password3")))
-        val givenPasswordEntry4 = BytePair(Pair(bytesOf("key4"), bytesOf("password4")))
-        val givenPasswordEntry5 = BytePair(Pair(bytesOf("key5"), bytesOf("password5")))
+        val givenEgg1 = BytePair(Pair(bytesOf("key1"), bytesOf("password1")))
+        val givenEgg2 = BytePair(Pair(bytesOf("key2"), bytesOf("password2")))
+        val givenEgg3 = BytePair(Pair(bytesOf("key3"), bytesOf("password3")))
+        val givenEgg4 = BytePair(Pair(bytesOf("key4"), bytesOf("password4")))
+        val givenEgg5 = BytePair(Pair(bytesOf("key5"), bytesOf("password5")))
 
         // whe
         filePasswordExchange.send(
             mapOf(
-                Slot.DEFAULT to listOf(givenPasswordEntry1, givenPasswordEntry2),
-                Slot.N2 to listOf(givenPasswordEntry3),
-                Slot.N9 to listOf(givenPasswordEntry4, givenPasswordEntry5),
+                Slot.DEFAULT to listOf(givenEgg1, givenEgg2),
+                Slot.N2 to listOf(givenEgg3),
+                Slot.N9 to listOf(givenEgg4, givenEgg5),
             ),
         )
         val actual = filePasswordExchange.receive()
 
         // then
         expectThat(actual) hasSize 3 containsKey Slot.DEFAULT containsKey Slot.N2 containsKey Slot.N9
-        expectThat(actual[Slot.DEFAULT]!!).containsExactlyInAnyOrder(givenPasswordEntry1, givenPasswordEntry2)
-        expectThat(actual[Slot.N2]!!).containsExactlyInAnyOrder(givenPasswordEntry3)
-        expectThat(actual[Slot.N9]!!).containsExactlyInAnyOrder(givenPasswordEntry4, givenPasswordEntry5)
+        expectThat(actual[Slot.DEFAULT]!!).containsExactlyInAnyOrder(givenEgg1, givenEgg2)
+        expectThat(actual[Slot.N2]!!).containsExactlyInAnyOrder(givenEgg3)
+        expectThat(actual[Slot.N9]!!).containsExactlyInAnyOrder(givenEgg4, givenEgg5)
     }
 }

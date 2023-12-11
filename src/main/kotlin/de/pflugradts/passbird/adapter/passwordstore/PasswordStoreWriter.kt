@@ -9,8 +9,8 @@ import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.copyInt
+import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.password.PasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.service.NestService
@@ -30,14 +30,12 @@ class PasswordStoreWriter @Inject constructor(
     @Inject private val cryptoProvider: CryptoProvider,
 ) {
 
-    fun sync(passwordEntriesSupplier: Supplier<Stream<PasswordEntry>>) {
-        val contentSize = calcRequiredContentSize(passwordEntriesSupplier)
+    fun sync(eggSupplier: Supplier<Stream<Egg>>) {
+        val contentSize = calcRequiredContentSize(eggSupplier)
         val bytes = ByteArray(calcActualTotalSize(contentSize))
         var offset = copyBytes(signature(), bytes, 0, signatureSize())
         offset = persistNest(bytes, offset)
-        passwordEntriesSupplier.get().forEach { passwordEntry ->
-            passwordEntry.asByteArray().let { offset += copyBytes(it, bytes, offset, it.size) }
-        }
+        eggSupplier.get().forEach { egg -> egg.asByteArray().let { offset += copyBytes(it, bytes, offset, it.size) } }
         offset += copyInt(EOF, bytes, offset)
         val checksumBytes = byteArrayOf(if (contentSize > 0) checksum(Arrays.copyOfRange(bytes, signatureSize(), contentSize)) else 0x0)
         copyBytes(checksumBytes, bytes, offset, checksumBytes())
@@ -58,15 +56,15 @@ class PasswordStoreWriter @Inject constructor(
         tryCatching { systemOperation.writeBytesToFile(filePath!!, cryptoProvider.encrypt(bytes)) }
             .onFailure { reportFailure(WritePasswordDatabaseFailure(filePath!!, it)) }
 
-    private fun calcRequiredContentSize(passwordEntries: Supplier<Stream<PasswordEntry>>): Int {
-        val dataSize = passwordEntries.get()
-            .map { passwordEntry: PasswordEntry -> intBytes() + passwordEntry.viewKey().size + passwordEntry.viewPassword().size }
+    private fun calcRequiredContentSize(eggs: Supplier<Stream<Egg>>): Int {
+        val dataSize = eggs.get()
+            .map { egg: Egg -> intBytes() + egg.viewKey().size + egg.viewPassword().size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
         val nestSize = intBytes() + Slot.CAPACITY * intBytes() + nestService.all()
             .filter { it.isPresent }
             .map { it.get().bytes.size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
-        val metaSize = passwordEntries.get().count().toInt() * 2 * intBytes()
+        val metaSize = eggs.get().count().toInt() * 2 * intBytes()
         return dataSize + nestSize + metaSize
     }
 
@@ -82,7 +80,7 @@ class PasswordStoreWriter @Inject constructor(
         return bytes
     }
 
-    private fun PasswordEntry.asByteArray(): ByteArray {
+    private fun Egg.asByteArray(): ByteArray {
         val keySize = viewKey().size
         val passwordSize = viewPassword().size
         val metaSize = 2 * Integer.BYTES

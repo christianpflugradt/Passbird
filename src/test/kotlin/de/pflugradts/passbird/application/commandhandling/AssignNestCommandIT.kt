@@ -3,8 +3,8 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AssignNestCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.at
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
@@ -37,9 +37,9 @@ class AssignNestCommandIT {
         val givenInput = bytesOf("n$givenAlias")
         val referenceInput = givenInput.copy()
         val expectedNestSlot = 1
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(givenAlias))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(givenAlias))
         nestService.deploy(bytesOf("nest"), at(expectedNestSlot))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(expectedNestSlot)))
 
         // when
@@ -47,12 +47,12 @@ class AssignNestCommandIT {
         inputHandler.handleInput(inputOf(givenInput))
 
         // then
-        verify(exactly = 1) { passwordService.movePasswordEntry(bytesOf(givenAlias), at(expectedNestSlot)) }
+        verify(exactly = 1) { passwordService.moveEgg(bytesOf(givenAlias), at(expectedNestSlot)) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
     @Test
-    fun `should handle entry not exists`() {
+    fun `should handle egg not exists`() {
         // given
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
@@ -67,7 +67,7 @@ class AssignNestCommandIT {
         inputHandler.handleInput(inputOf(givenInput))
 
         // then
-        verify(exactly = 0) { passwordService.movePasswordEntry(any(), any()) }
+        verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
@@ -77,12 +77,12 @@ class AssignNestCommandIT {
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
         val referenceInput = givenInput.copy()
-        val givenPasswordEntry = createPasswordEntryForTesting(bytesOf(givenAlias))
+        val givenEgg = createEggForTesting(bytesOf(givenAlias))
         val currentNestSlot = 0
         val targetNestSlot = 1
         nestService.moveToNestAt(at(currentNestSlot))
         nestService.deploy(bytesOf("nest"), at(targetNestSlot))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(targetNestSlot)))
         val outputSlot = slot<Output>()
 
@@ -105,10 +105,10 @@ class AssignNestCommandIT {
         val referenceInput = givenInput.copy()
         val currentNestSlot = 1
         val targetNestSlot = 0
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(givenAlias), withNestSlot = at(currentNestSlot))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(givenAlias), withNestSlot = at(currentNestSlot))
         nestService.deploy(bytesOf("nest"), at(currentNestSlot))
         nestService.moveToNestAt(at(currentNestSlot))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(targetNestSlot)))
         val outputSlot = slot<Output>()
 
@@ -129,9 +129,9 @@ class AssignNestCommandIT {
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
         val referenceInput = givenInput.copy()
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(givenAlias))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(givenAlias))
         val invalidNestSlot = -1
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(invalidNestSlot)))
         val outputSlot = mutableListOf<Output>()
 
@@ -143,7 +143,7 @@ class AssignNestCommandIT {
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot) hasSize 2
         expectThat(outputSlot[1].bytes.asString()) contains "Invalid namespace"
-        verify(exactly = 0) { passwordService.movePasswordEntry(any(), any()) }
+        verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
@@ -153,11 +153,11 @@ class AssignNestCommandIT {
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
         val referenceInput = givenInput.copy()
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(givenAlias))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(givenAlias))
         val currentNestSlot = 1
         nestService.deploy(bytesOf("nest"), at(currentNestSlot))
         nestService.moveToNestAt(at(currentNestSlot))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(currentNestSlot)))
         val outputSlot = mutableListOf<Output>()
 
@@ -169,7 +169,7 @@ class AssignNestCommandIT {
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot) hasSize 2
         expectThat(outputSlot[1].bytes.asString()) contains "Password entry is already in the specified namespace"
-        verify(exactly = 0) { passwordService.movePasswordEntry(any(), any()) }
+        verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
@@ -179,9 +179,9 @@ class AssignNestCommandIT {
         val givenAlias = "a"
         val givenInput = bytesOf("n$givenAlias")
         val referenceInput = givenInput.copy()
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(givenAlias))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(givenAlias))
         val targetNestSlot = 1
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(targetNestSlot)))
         expectThat(nestService.atSlot(at(targetNestSlot)).isEmpty).isTrue()
         val outputSlot = mutableListOf<Output>()
@@ -194,7 +194,7 @@ class AssignNestCommandIT {
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot) hasSize 2
         expectThat(outputSlot[1].bytes.asString()) contains "Specified namespace does not exist"
-        verify(exactly = 0) { passwordService.movePasswordEntry(any(), any()) }
+        verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
@@ -206,11 +206,11 @@ class AssignNestCommandIT {
         val referenceInput = givenInput.copy()
         val currentNestSlot = 0
         val targetNestSlot = 1
-        val givenPasswordEntry1 = createPasswordEntryForTesting(withKeyBytes = bytesOf(givenAlias), withNestSlot = at(currentNestSlot))
-        val givenPasswordEntry2 = createPasswordEntryForTesting(withKeyBytes = bytesOf(givenAlias), withNestSlot = at(targetNestSlot))
+        val givenEgg1 = createEggForTesting(withKeyBytes = bytesOf(givenAlias), withNestSlot = at(currentNestSlot))
+        val givenEgg2 = createEggForTesting(withKeyBytes = bytesOf(givenAlias), withNestSlot = at(targetNestSlot))
         nestService.moveToNestAt(at(currentNestSlot))
         nestService.deploy(bytesOf("nest"), at(targetNestSlot))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry1, givenPasswordEntry2))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(targetNestSlot)))
         val outputSlot = mutableListOf<Output>()
 
@@ -222,7 +222,7 @@ class AssignNestCommandIT {
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot) hasSize 2
         expectThat(outputSlot[1].bytes.asString()) contains "Password entry with same alias already exists in target namespace"
-        verify(exactly = 0) { passwordService.movePasswordEntry(any(), any()) }
+        verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 

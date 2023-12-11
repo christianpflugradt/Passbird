@@ -2,13 +2,13 @@ package de.pflugradts.passbird.domain.service.password
 
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
-import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
+import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.service.password.PasswordService.EntryNotExistsAction
+import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
-import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
-import de.pflugradts.passbird.domain.service.password.storage.fakePasswordEntryRepository
+import de.pflugradts.passbird.domain.service.password.storage.EggRepository
+import de.pflugradts.passbird.domain.service.password.storage.fakeEggRepository
 import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.verify
@@ -23,20 +23,20 @@ import strikt.java.isPresent
 class ViewPasswordServiceTest {
 
     private val cryptoProvider = mockk<CryptoProvider>()
-    private val passwordEntryRepository = mockk<PasswordEntryRepository>()
+    private val eggRepository = mockk<EggRepository>()
     private val passbirdEventRegistry = mockk<PassbirdEventRegistry>(relaxed = true)
-    private val passwordService = ViewPasswordService(cryptoProvider, passwordEntryRepository, passbirdEventRegistry)
+    private val passwordService = ViewPasswordService(cryptoProvider, eggRepository, passbirdEventRegistry)
 
     @Test
-    fun `should return true if entry exists`() {
+    fun `should return true if egg exists`() {
         // given
         val givenKey = bytesOf("Key")
-        val matchingPasswordEntry = createPasswordEntryForTesting(withKeyBytes = givenKey)
+        val matchingEgg = createEggForTesting(withKeyBytes = givenKey)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(matchingPasswordEntry))
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
-        val actual = passwordService.entryExists(givenKey, EntryNotExistsAction.DO_NOTHING)
+        val actual = passwordService.eggExists(givenKey, EggNotExistsAction.DO_NOTHING)
 
         // then
         verify { passbirdEventRegistry wasNot Called }
@@ -44,16 +44,16 @@ class ViewPasswordServiceTest {
     }
 
     @Test
-    fun `should return false if entry does not exist`() {
+    fun `should return false if egg does not exist`() {
         // given
         val givenKey = bytesOf("Key")
         val otherKey = bytesOf("try this")
-        val matchingPasswordEntry = createPasswordEntryForTesting(withKeyBytes = givenKey)
+        val matchingEgg = createEggForTesting(withKeyBytes = givenKey)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(matchingPasswordEntry))
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
-        val actual = passwordService.entryExists(otherKey, EntryNotExistsAction.DO_NOTHING)
+        val actual = passwordService.eggExists(otherKey, EggNotExistsAction.DO_NOTHING)
 
         // then
         verify { passbirdEventRegistry wasNot Called }
@@ -65,9 +65,9 @@ class ViewPasswordServiceTest {
         // given
         val givenKey = bytesOf("Key")
         val expectedPassword = bytesOf("Password")
-        val matchingPasswordEntry = createPasswordEntryForTesting(withKeyBytes = givenKey, withPasswordBytes = expectedPassword)
+        val matchingEgg = createEggForTesting(withKeyBytes = givenKey, withPasswordBytes = expectedPassword)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(matchingPasswordEntry))
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
         val actual = passwordService.viewPassword(givenKey)
@@ -80,20 +80,20 @@ class ViewPasswordServiceTest {
     }
 
     @Test
-    fun `should return empty optional if password entry does not exist`() {
+    fun `should return empty optional if egg does not exist`() {
         // given
         val givenKey = bytesOf("Key")
         val otherKey = bytesOf("tryThis")
-        val matchingPasswordEntry = createPasswordEntryForTesting(withKeyBytes = givenKey)
+        val matchingEgg = createEggForTesting(withKeyBytes = givenKey)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(matchingPasswordEntry))
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
         val actual = passwordService.viewPassword(otherKey)
 
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(otherKey) }
-        verify(exactly = 1) { passbirdEventRegistry.register(eq(PasswordEntryNotFound(otherKey))) }
+        verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(otherKey))) }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
         expectThat(actual.isEmpty).isTrue()
     }
@@ -104,13 +104,13 @@ class ViewPasswordServiceTest {
         val key1 = bytesOf("abc")
         val key2 = bytesOf("hij")
         val key3 = bytesOf("xyz")
-        val passwordEntry1 = createPasswordEntryForTesting(withKeyBytes = key1)
-        val passwordEntry2 = createPasswordEntryForTesting(withKeyBytes = key2)
-        val passwordEntry3 = createPasswordEntryForTesting(withKeyBytes = key3)
+        val egg1 = createEggForTesting(withKeyBytes = key1)
+        val egg2 = createEggForTesting(withKeyBytes = key2)
+        val egg3 = createEggForTesting(withKeyBytes = key3)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(
-            instance = passwordEntryRepository,
-            withPasswordEntries = listOf(passwordEntry1, passwordEntry2, passwordEntry3),
+        fakeEggRepository(
+            instance = eggRepository,
+            withEggs = listOf(egg1, egg2, egg3),
         )
 
         // when

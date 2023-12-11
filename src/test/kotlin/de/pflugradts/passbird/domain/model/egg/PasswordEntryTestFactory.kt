@@ -1,13 +1,13 @@
-package de.pflugradts.passbird.domain.model.password
+package de.pflugradts.passbird.domain.model.egg
 
+import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.nest.Slot.DEFAULT
-import de.pflugradts.passbird.domain.model.password.PasswordEntry.Companion.createPasswordEntry
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 
-fun createPasswordEntryForTesting(
+fun createEggForTesting(
     withKeyBytes: Bytes = bytesOf("key"),
     withPasswordBytes: Bytes = bytesOf("password"),
     withNestSlot: Slot = DEFAULT,
-): PasswordEntry = createPasswordEntry(withNestSlot, withKeyBytes, withPasswordBytes)
+): Egg = createEgg(withNestSlot, withKeyBytes, withPasswordBytes)

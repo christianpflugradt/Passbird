@@ -7,7 +7,7 @@ import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import de.pflugradts.passbird.domain.service.password.PasswordService.EntryNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
+import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
 
 class RenameCommandHandler @Inject constructor(
     @Inject private val passwordService: PasswordService,
@@ -15,12 +15,12 @@ class RenameCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleRenameCommand(renameCommand: RenameCommand) {
-        if (passwordService.entryExists(renameCommand.argument, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
+        if (passwordService.eggExists(renameCommand.argument, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             val secureInput = userInterfaceAdapterPort.receive(outputOf(bytesOf("Enter new alias or nothing to abort: ")))
             if (secureInput.isEmpty) {
                 userInterfaceAdapterPort.send(outputOf(bytesOf("Empty input - Operation aborted.")))
             } else {
-                passwordService.renamePasswordEntry(renameCommand.argument, secureInput.bytes)
+                passwordService.renameEgg(renameCommand.argument, secureInput.bytes)
             }
             secureInput.invalidate()
         }

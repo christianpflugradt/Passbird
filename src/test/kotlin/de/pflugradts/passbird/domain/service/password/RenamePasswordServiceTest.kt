@@ -3,13 +3,13 @@ package de.pflugradts.passbird.domain.service.password
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
-import de.pflugradts.passbird.domain.model.password.InvalidKeyException
-import de.pflugradts.passbird.domain.model.password.KeyAlreadyExistsException
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
+import de.pflugradts.passbird.domain.model.egg.InvalidKeyException
+import de.pflugradts.passbird.domain.model.egg.KeyAlreadyExistsException
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
-import de.pflugradts.passbird.domain.service.password.storage.PasswordEntryRepository
-import de.pflugradts.passbird.domain.service.password.storage.fakePasswordEntryRepository
+import de.pflugradts.passbird.domain.service.password.storage.EggRepository
+import de.pflugradts.passbird.domain.service.password.storage.fakeEggRepository
 import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.verify
@@ -24,24 +24,24 @@ import strikt.assertions.isTrue
 class RenamePasswordServiceTest {
 
     private val cryptoProvider = mockk<CryptoProvider>()
-    private val passwordEntryRepository = mockk<PasswordEntryRepository>()
+    private val eggRepository = mockk<EggRepository>()
     private val passbirdEventRegistry = mockk<PassbirdEventRegistry>(relaxed = true)
-    private val passwordService = RenamePasswordService(cryptoProvider, passwordEntryRepository, passbirdEventRegistry)
+    private val passwordService = RenamePasswordService(cryptoProvider, eggRepository, passbirdEventRegistry)
 
     @Test
-    fun `should rename password entry`() {
+    fun `should rename egg`() {
         // given
         val oldKey = bytesOf("key123")
         val newKey = bytesOf("keyABC")
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = oldKey)
+        val givenEgg = createEggForTesting(withKeyBytes = oldKey)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(givenPasswordEntry))
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 
         // when
-        passwordService.renamePasswordEntry(oldKey, newKey)
+        passwordService.renameEgg(oldKey, newKey)
 
         // then
-        expectThat(givenPasswordEntry.viewKey()) isEqualTo newKey isNotEqualTo oldKey
+        expectThat(givenEgg.viewKey()) isEqualTo newKey isNotEqualTo oldKey
     }
 
     @Test
@@ -49,38 +49,38 @@ class RenamePasswordServiceTest {
         // given
         val oldKey = bytesOf("key123")
         val newKey = bytesOf("keyABC")
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = oldKey)
-        val existingPasswordEntry = createPasswordEntryForTesting(withKeyBytes = newKey)
+        val givenEgg = createEggForTesting(withKeyBytes = oldKey)
+        val existingEgg = createEggForTesting(withKeyBytes = newKey)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(
-            instance = passwordEntryRepository,
-            withPasswordEntries = listOf(givenPasswordEntry, existingPasswordEntry),
+        fakeEggRepository(
+            instance = eggRepository,
+            withEggs = listOf(givenEgg, existingEgg),
         )
 
         // when
-        val actual = tryCatching { passwordService.renamePasswordEntry(oldKey, newKey) }
+        val actual = tryCatching { passwordService.renameEgg(oldKey, newKey) }
 
         // then
-        expectThat(givenPasswordEntry.viewKey()) isEqualTo oldKey isNotEqualTo newKey
+        expectThat(givenEgg.viewKey()) isEqualTo oldKey isNotEqualTo newKey
         expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isA<KeyAlreadyExistsException>()
     }
 
     @Test
-    fun `should do nothing if entry does not exist`() {
+    fun `should do nothing if egg does not exist`() {
         // given
         val oldKey = bytesOf("key123")
         val newKey = bytesOf("keyABC")
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = oldKey)
-        val existingPasswordEntry = createPasswordEntryForTesting()
+        val givenEgg = createEggForTesting(withKeyBytes = oldKey)
+        val existingEgg = createEggForTesting()
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(existingPasswordEntry))
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(existingEgg))
 
         // when
-        passwordService.renamePasswordEntry(oldKey, newKey)
+        passwordService.renameEgg(oldKey, newKey)
 
         // then
-        expectThat(givenPasswordEntry.viewKey()) isEqualTo oldKey isNotEqualTo newKey
+        expectThat(givenEgg.viewKey()) isEqualTo oldKey isNotEqualTo newKey
     }
 
     @Test
@@ -88,17 +88,17 @@ class RenamePasswordServiceTest {
         // given
         val oldKey = bytesOf("key123")
         val newKey = bytesOf("123")
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = oldKey)
+        val givenEgg = createEggForTesting(withKeyBytes = oldKey)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakePasswordEntryRepository(instance = passwordEntryRepository, withPasswordEntries = listOf(givenPasswordEntry))
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 
         // when
-        val actual = tryCatching { passwordService.renamePasswordEntry(oldKey, newKey) }
+        val actual = tryCatching { passwordService.renameEgg(oldKey, newKey) }
 
         // then
         expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidKeyException>()
         verify { cryptoProvider wasNot Called }
-        verify { passwordEntryRepository wasNot Called }
+        verify { eggRepository wasNot Called }
     }
 }

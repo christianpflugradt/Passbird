@@ -3,11 +3,11 @@ package de.pflugradts.passbird.application.eventhandling
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
-import de.pflugradts.passbird.domain.model.event.PasswordEntryCreated
-import de.pflugradts.passbird.domain.model.event.PasswordEntryNotFound
-import de.pflugradts.passbird.domain.model.event.PasswordEntryRenamed
-import de.pflugradts.passbird.domain.model.event.PasswordEntryUpdated
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
+import de.pflugradts.passbird.domain.model.event.EggCreated
+import de.pflugradts.passbird.domain.model.event.EggNotFound
+import de.pflugradts.passbird.domain.model.event.EggRenamed
+import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
@@ -34,7 +34,7 @@ class ApplicationEventHandlerIT {
 
     @ParameterizedTest
     @MethodSource("providePasswordEvents")
-    fun `should process password entry created`(domainEvent: DomainEvent) {
+    fun `should process egg created`(domainEvent: DomainEvent) {
         // given
         val expectedBytes = bytesOf("expected key")
         every { cryptoProvider.decrypt(any(Bytes::class)) } answers { expectedBytes }
@@ -53,11 +53,11 @@ class ApplicationEventHandlerIT {
     companion object {
         @JvmStatic
         private fun providePasswordEvents() = Stream.of(
-            Arguments.of(PasswordEntryCreated(createPasswordEntryForTesting())),
-            Arguments.of(PasswordEntryUpdated(createPasswordEntryForTesting())),
-            Arguments.of(PasswordEntryRenamed(createPasswordEntryForTesting())),
-            Arguments.of(PasswordEntryRenamed(createPasswordEntryForTesting())),
-            Arguments.of(PasswordEntryNotFound(emptyBytes())),
+            Arguments.of(EggCreated(createEggForTesting())),
+            Arguments.of(EggUpdated(createEggForTesting())),
+            Arguments.of(EggRenamed(createEggForTesting())),
+            Arguments.of(EggRenamed(createEggForTesting())),
+            Arguments.of(EggNotFound(emptyBytes())),
         )
     }
 }

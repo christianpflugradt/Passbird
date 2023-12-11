@@ -17,7 +17,7 @@ class DiscardCommandHandler @Inject constructor(
     @Subscribe
     private fun handleDiscardCommand(discardCommand: DiscardCommand) {
         if (commandConfirmed()) {
-            passwordService.discardPasswordEntry(discardCommand.argument)
+            passwordService.discardEgg(discardCommand.argument)
         } else {
             userInterfaceAdapterPort.send(outputOf(bytesOf("Operation aborted.")))
         }

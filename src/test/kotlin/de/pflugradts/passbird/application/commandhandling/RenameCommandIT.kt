@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.RenameCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
@@ -31,8 +31,8 @@ internal class RenameCommandIT {
         val bytes = bytesOf("r$args")
         val reference = bytes.copy()
         val newAlias = mockk<Bytes>(relaxed = true)
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(args))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(newAlias)))
 
         // when
@@ -40,9 +40,9 @@ internal class RenameCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 1) { passwordService.renamePasswordEntry(eq(bytesOf(args)), newAlias) }
+        verify(exactly = 1) { passwordService.renameEgg(eq(bytesOf(args)), newAlias) }
         verify(exactly = 1) { newAlias.scramble() }
-        expectThat(givenPasswordEntry.viewKey()) isEqualTo reference.slice(1)
+        expectThat(givenEgg.viewKey()) isEqualTo reference.slice(1)
         expectThat(bytes) isNotEqualTo reference
     }
 
@@ -59,7 +59,7 @@ internal class RenameCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 0) { passwordService.renamePasswordEntry(eq(bytesOf(args)), any()) }
+        verify(exactly = 0) { passwordService.renameEgg(eq(bytesOf(args)), any()) }
         expectThat(bytes) isNotEqualTo reference
     }
 
@@ -70,8 +70,8 @@ internal class RenameCommandIT {
         val bytes = bytesOf("r$args")
         val reference = bytes.copy()
         val newAlias = bytesOf("")
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(args))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(newAlias)))
 
         // when
@@ -79,7 +79,7 @@ internal class RenameCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 0) { passwordService.renamePasswordEntry(eq(bytesOf(args)), any()) }
+        verify(exactly = 0) { passwordService.renameEgg(eq(bytesOf(args)), any()) }
         verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(bytesOf("Empty input - Operation aborted."))) }
         expectThat(bytes) isNotEqualTo reference
     }
@@ -91,8 +91,8 @@ internal class RenameCommandIT {
         val bytes = bytesOf("r$args")
         val reference = bytes.copy()
         val existingAlias = bytesOf("existingkey")
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(args))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(existingAlias)))
 
         // when
@@ -100,7 +100,7 @@ internal class RenameCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        expectThat(givenPasswordEntry.viewKey()) isEqualTo reference.slice(1)
+        expectThat(givenEgg.viewKey()) isEqualTo reference.slice(1)
         expectThat(bytes) isNotEqualTo reference
     }
 }

@@ -5,7 +5,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.DiscardCommand
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
-import de.pflugradts.passbird.domain.model.password.createPasswordEntryForTesting
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -32,8 +32,8 @@ class DiscardCommandIT {
         val args = "key"
         val bytes = bytesOf("d$args")
         val reference = bytes.copy()
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(args))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeConfiguration(instance = configuration)
 
         // when
@@ -41,7 +41,7 @@ class DiscardCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 1) { passwordService.discardPasswordEntry(eq(bytesOf(args))) }
+        verify(exactly = 1) { passwordService.discardEgg(eq(bytesOf(args))) }
         expectThat(bytes) isNotEqualTo reference
     }
 
@@ -51,8 +51,8 @@ class DiscardCommandIT {
         val args = "key"
         val bytes = bytesOf("d$args")
         val reference = bytes.copy()
-        val givenPasswordEntry = createPasswordEntryForTesting(withKeyBytes = bytesOf(args))
-        fakePasswordService(instance = passwordService, withPasswordEntries = listOf(givenPasswordEntry))
+        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
@@ -61,7 +61,7 @@ class DiscardCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 1) { passwordService.discardPasswordEntry(eq(bytesOf(args))) }
+        verify(exactly = 1) { passwordService.discardEgg(eq(bytesOf(args))) }
         expectThat(bytes) isNotEqualTo reference
     }
 
@@ -79,7 +79,7 @@ class DiscardCommandIT {
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 0) { passwordService.discardPasswordEntry(eq(bytesOf(args))) }
+        verify(exactly = 0) { passwordService.discardEgg(eq(bytesOf(args))) }
         verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(bytesOf("Operation aborted.")))) }
         expectThat(bytes) isNotEqualTo reference
     }
