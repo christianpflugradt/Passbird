@@ -4,7 +4,7 @@ import com.google.common.eventbus.Subscribe
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.HelpCommand
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 
 private const val TAB = "\t"
@@ -16,7 +16,7 @@ class HelpCommandHandler @Inject constructor(
     private fun handleHelpCommand(@Suppress("UNUSED_PARAMETER") helpCommand: HelpCommand) {
         userInterfaceAdapterPort.send(
             outputOf(
-                bytesOf(
+                shellOf(
                     """
                     Usage: [command][parameter]
                     A command takes at most one parameter which is either

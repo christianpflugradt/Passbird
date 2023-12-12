@@ -1,8 +1,8 @@
 package de.pflugradts.passbird.domain.model.egg
 
 import de.pflugradts.passbird.domain.model.egg.Password.Companion.createPassword
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -18,72 +18,72 @@ class PasswordTest {
     @Test
     fun `should CreatePassword`() {
         // given
-        val bytes = bytesOf("password")
+        val passwordShell = shellOf("password")
 
         // when
-        val actual = createPassword(bytes)
+        val actual = createPassword(passwordShell)
 
         // then
-        expectThat(actual.view()) isEqualTo bytes
+        expectThat(actual.view()) isEqualTo passwordShell
     }
 
     @Test
     fun `should update password`() {
         // given
-        val originalBytes = bytesOf("password")
-        val password = createPassword(originalBytes)
-        val updatedBytes = bytesOf("p4s5w0rD")
+        val originalPasswordShell = shellOf("password")
+        val password = createPassword(originalPasswordShell)
+        val updatedPasswordShell = shellOf("p4s5w0rD")
 
         // when
-        password.update(updatedBytes)
+        password.update(updatedPasswordShell)
         val actual = password.view()
 
         // then
-        expectThat(actual) isEqualTo updatedBytes isNotEqualTo originalBytes
+        expectThat(actual) isEqualTo updatedPasswordShell isNotEqualTo originalPasswordShell
     }
 
     @Test
     fun `should discard password`() {
         // given
-        val givenBytes = mockk<Bytes>(relaxed = true)
-        every { givenBytes.copy() } returns givenBytes
-        val password = createPassword(givenBytes)
+        val givenShell = mockk<Shell>(relaxed = true)
+        every { givenShell.copy() } returns givenShell
+        val password = createPassword(givenShell)
 
         // when
         password.discard()
 
         // then
-        verify { givenBytes.scramble() }
+        verify { givenShell.scramble() }
     }
 
     @Test
-    fun `should clone bytes on creation`() {
+    fun `should clone passwordShell on creation`() {
         // given
-        val bytes = bytesOf("password")
-        val password = createPassword(bytes)
+        val passwordShell = shellOf("password")
+        val password = createPassword(passwordShell)
 
         // when
-        bytes.scramble()
+        passwordShell.scramble()
         val actual = password.view()
 
         // then
-        expectThat(actual) isNotEqualTo bytes
+        expectThat(actual) isNotEqualTo passwordShell
     }
 
     @Test
-    fun `should clone bytes on update`() {
+    fun `should clone passwordShell on update`() {
         // given
-        val originalBytes = bytesOf("password")
-        val password = createPassword(originalBytes)
-        val updatedBytes = bytesOf("p4s5w0rD")
+        val originalPasswordShell = shellOf("password")
+        val password = createPassword(originalPasswordShell)
+        val updatedPasswordShell = shellOf("p4s5w0rD")
 
         // when
-        password.update(updatedBytes)
-        updatedBytes.scramble()
+        password.update(updatedPasswordShell)
+        updatedPasswordShell.scramble()
         val actual = password.view()
 
         // then
-        expectThat(actual) isNotEqualTo updatedBytes
+        expectThat(actual) isNotEqualTo updatedPasswordShell
     }
 
     @Nested
@@ -92,7 +92,7 @@ class PasswordTest {
         @Test
         fun `should be equal to itself`() {
             // given
-            val password1 = createPassword(bytesOf("abc"))
+            val password1 = createPassword(shellOf("abc"))
             val password2 = password1
 
             // when
@@ -103,12 +103,12 @@ class PasswordTest {
         }
 
         @Test
-        fun `should be equal to password with equal bytes`() {
+        fun `should be equal to password with equal passwordShell`() {
             // given
-            val bytes = bytesOf("abc")
-            val sameBytes = bytesOf("abc")
-            val password1 = createPassword(bytes)
-            val password2 = createPassword(sameBytes)
+            val passwordShell = shellOf("abc")
+            val samePasswordShell = shellOf("abc")
+            val password1 = createPassword(passwordShell)
+            val password2 = createPassword(samePasswordShell)
 
             // when
             val actual = password1.equals(password2)
@@ -118,12 +118,12 @@ class PasswordTest {
         }
 
         @Test
-        fun `should not be equal to password with other bytes`() {
+        fun `should not be equal to password with other passwordShell`() {
             // given
-            val bytes = bytesOf("abc")
-            val otherBytes = bytesOf("abd")
-            val password1 = createPassword(bytes)
-            val password2 = createPassword(otherBytes)
+            val passwordShell = shellOf("abc")
+            val otherPasswordShell = shellOf("abd")
+            val password1 = createPassword(passwordShell)
+            val password2 = createPassword(otherPasswordShell)
 
             // when
             val actual = password1.equals(password2)
@@ -135,11 +135,11 @@ class PasswordTest {
         @Test
         fun `should not be equal to other class`() {
             // given
-            val bytes = bytesOf("abc")
-            val password = createPassword(bytes)
+            val passwordShell = shellOf("abc")
+            val password = createPassword(passwordShell)
 
             // when
-            val actual = password.equals(bytes)
+            val actual = password.equals(passwordShell)
 
             // then
             expectThat(actual).isFalse()
@@ -148,7 +148,7 @@ class PasswordTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val password = createPassword(bytesOf("abc"))
+            val password = createPassword(shellOf("abc"))
 
             // when
             val actual = password.equals(null)

@@ -5,8 +5,8 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.ListCommand
 import de.pflugradts.passbird.application.util.copyBytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
@@ -20,16 +20,16 @@ class ListCommandHandler @Inject constructor(
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    private fun join(eggIdBytesList: List<Bytes>) =
-        if (eggIdBytesList.isEmpty()) {
-            bytesOf("database is empty")
+    private fun join(eggIdShellList: List<Shell>) =
+        if (eggIdShellList.isEmpty()) {
+            shellOf("database is empty")
         } else {
-            val count = eggIdBytesList.stream()
-                .map(Bytes::size)
-                .reduce((eggIdBytesList.size - 1) * 2) { a: Int, b: Int -> Integer.sum(a, b) }
+            val count = eggIdShellList.stream()
+                .map(Shell::size)
+                .reduce((eggIdShellList.size - 1) * 2) { a: Int, b: Int -> Integer.sum(a, b) }
             val bytes = ByteArray(count)
             var index = 0
-            eggIdBytesList.forEach {
+            eggIdShellList.forEach {
                 copyBytes(it.toByteArray(), bytes, index, it.size)
                 index += it.size
                 if (index < count) {
@@ -37,6 +37,6 @@ class ListCommandHandler @Inject constructor(
                     bytes[index++] = ' '.code.toByte()
                 }
             }
-            bytesOf(bytes)
+            shellOf(bytes)
         }
 }

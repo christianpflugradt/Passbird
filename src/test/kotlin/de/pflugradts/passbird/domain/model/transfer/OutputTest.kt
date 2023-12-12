@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.model.transfer
 
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import org.junit.jupiter.api.Nested
@@ -15,35 +15,35 @@ class OutputTest {
     @Nested
     inner class InstantiationTest {
         @Test
-        fun `should have bytes`() {
+        fun `should have shell`() {
             // given
-            val givenBytes = bytesOf(byteArrayOf(1, 2, 3))
-            val givenOutput = outputOf(givenBytes)
+            val givenShell = shellOf(byteArrayOf(1, 2, 3))
+            val givenOutput = outputOf(givenShell)
 
             // when
-            val actual = givenOutput.bytes
+            val actual = givenOutput.shell
 
             // then
-            expectThat(actual) isEqualTo givenBytes
+            expectThat(actual) isEqualTo givenShell
         }
 
         @Test
         fun `should instantiate from byte array`() {
             // given
             val givenByteArray = byteArrayOf(1, 2, 3)
-            val expectedBytes = bytesOf(givenByteArray)
+            val expectedShell = shellOf(givenByteArray)
 
             // when
             val actual = outputOf(givenByteArray)
 
             // then
-            expectThat(actual.bytes) isEqualTo expectedBytes
+            expectThat(actual.shell) isEqualTo expectedShell
         }
 
         @Test
         fun `should instantiate empty output`() {
             // given / when / then
-            expectThat(emptyOutput().bytes) isEqualTo emptyBytes()
+            expectThat(emptyOutput().shell) isEqualTo emptyShell()
         }
     }
 
@@ -53,7 +53,7 @@ class OutputTest {
         @Test
         fun `should be equal to itself`() {
             // given
-            val output1 = outputOf(bytesOf("abc"))
+            val output1 = outputOf(shellOf("abc"))
             val output2 = output1
 
             // when
@@ -64,12 +64,12 @@ class OutputTest {
         }
 
         @Test
-        fun `should be equal to output with equal bytes`() {
+        fun `should be equal to output with equal shell`() {
             // given
-            val bytes = bytesOf("abc")
-            val sameBytes = bytesOf("abc")
-            val output1 = outputOf(bytes)
-            val output2 = outputOf(sameBytes)
+            val shell = shellOf("abc")
+            val sameShell = shellOf("abc")
+            val output1 = outputOf(shell)
+            val output2 = outputOf(sameShell)
 
             // when
             val actual = output1.equals(output2)
@@ -79,12 +79,12 @@ class OutputTest {
         }
 
         @Test
-        fun `should not be equal to output with other bytes`() {
+        fun `should not be equal to output with other shell`() {
             // given
-            val bytes = bytesOf("abc")
-            val otherBytes = bytesOf("abd")
-            val output1 = outputOf(bytes)
-            val output2 = outputOf(otherBytes)
+            val shell = shellOf("abc")
+            val otherShell = shellOf("abd")
+            val output1 = outputOf(shell)
+            val output2 = outputOf(otherShell)
 
             // when
             val actual = output1.equals(output2)
@@ -96,11 +96,11 @@ class OutputTest {
         @Test
         fun `should not be equal to other class`() {
             // given
-            val bytes = bytesOf("abc")
-            val output = outputOf(bytes)
+            val shell = shellOf("abc")
+            val output = outputOf(shell)
 
             // when
-            val actual = output.equals(bytes)
+            val actual = output.equals(shell)
 
             // then
             expectThat(actual).isFalse()
@@ -109,7 +109,7 @@ class OutputTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val output = outputOf(bytesOf("abc"))
+            val output = outputOf(shellOf("abc"))
 
             // when
             val actual = output.equals(null)

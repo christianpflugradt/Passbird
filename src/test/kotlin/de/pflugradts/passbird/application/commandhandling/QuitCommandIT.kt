@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.commandhandling.handler.QuitCommandHandler
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import io.mockk.mockk
 import io.mockk.verify
@@ -19,7 +19,7 @@ class QuitCommandIT {
     @Test
     fun `should handle quit command`() {
         // given
-        val input = inputOf(bytesOf("q"))
+        val input = inputOf(shellOf("q"))
 
         // when
         inputHandler.handleInput(input)

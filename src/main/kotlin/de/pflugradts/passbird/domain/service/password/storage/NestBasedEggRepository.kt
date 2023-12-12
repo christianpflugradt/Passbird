@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.storage.EggFilter.Companion.all
@@ -31,13 +31,13 @@ class NestBasedEggRepository @Inject constructor(
     }
 
     override fun sync() { passwordStoreAdapterPort.sync(getEggsSupplier(EggFilter.ALL_NESTS)) }
-    override fun find(eggIdBytes: Bytes, nestSlot: Slot): Optional<Egg> =
-        find(getEggsSupplier(nestSlot), eggIdBytes)
-    override fun find(eggIdBytes: Bytes): Optional<Egg> =
-        find(getEggsSupplier(EggFilter.CURRENT_NEST), eggIdBytes)
+    override fun find(eggIdShell: Shell, nestSlot: Slot): Optional<Egg> =
+        find(getEggsSupplier(nestSlot), eggIdShell)
+    override fun find(eggIdShell: Shell): Optional<Egg> =
+        find(getEggsSupplier(EggFilter.CURRENT_NEST), eggIdShell)
 
-    private fun find(supplier: Supplier<Stream<Egg>>, eggIdBytes: Bytes): Optional<Egg> =
-        supplier.get().filter { it.viewEggId() == eggIdBytes }.findAny()
+    private fun find(supplier: Supplier<Stream<Egg>>, eggIdShell: Shell): Optional<Egg> =
+        supplier.get().filter { it.viewEggId() == eggIdShell }.findAny()
 
     override fun add(egg: Egg) {
         eventRegistry.register(egg)

@@ -7,7 +7,7 @@ import kotlin.math.min
 private fun Int.asByteArray() = ByteBuffer.allocate(Integer.BYTES).putInt(this).array()
 private fun ByteArray.asInt() = ByteBuffer.wrap(this).getInt()
 fun readInt(array: ByteArray, offset: Int) = readBytes(array, offset, Integer.BYTES).asInt()
-fun readBytes(array: ByteArray, offset: Int, size: Int) = Arrays.copyOfRange(array, offset, size + offset)
+fun readBytes(array: ByteArray, offset: Int, size: Int): ByteArray = Arrays.copyOfRange(array, offset, size + offset)
 fun copyInt(i: Int, target: ByteArray, offset: Int) = copyBytes(i.asByteArray(), target, offset, Integer.BYTES)
 fun copyBytes(
     source: ByteArray,

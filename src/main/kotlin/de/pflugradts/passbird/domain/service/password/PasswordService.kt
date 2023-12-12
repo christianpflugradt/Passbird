@@ -1,8 +1,8 @@
 package de.pflugradts.passbird.domain.service.password
 
-import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.ShellPair
 import java.util.Optional
 import java.util.stream.Stream
 
@@ -12,14 +12,14 @@ interface PasswordService {
         CREATE_ENTRY_NOT_EXISTS_EVENT,
     }
 
-    fun eggExists(eggIdBytes: Bytes, nestSlot: Slot): Boolean
-    fun eggExists(eggIdBytes: Bytes, eggNotExistsAction: EggNotExistsAction): Boolean
-    fun viewPassword(eggIdBytes: Bytes): Optional<Bytes>
-    fun renameEgg(eggIdBytes: Bytes, newEggIdBytes: Bytes)
-    fun challengeEggId(bytes: Bytes)
-    fun putEggs(eggs: Stream<BytePair>)
-    fun putEgg(eggIdBytes: Bytes, passwordBytes: Bytes)
-    fun discardEgg(eggIdBytes: Bytes)
-    fun moveEgg(eggIdBytes: Bytes, targetNestSlot: Slot)
-    fun findAllEggIds(): Stream<Bytes>
+    fun eggExists(eggIdShell: Shell, nestSlot: Slot): Boolean
+    fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction): Boolean
+    fun viewPassword(eggIdShell: Shell): Optional<Shell>
+    fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell)
+    fun challengeEggId(shell: Shell)
+    fun putEggs(eggs: Stream<ShellPair>)
+    fun putEgg(eggIdShell: Shell, passwordShell: Shell)
+    fun discardEgg(eggIdShell: Shell)
+    fun moveEgg(eggIdShell: Shell, targetNestSlot: Slot)
+    fun findAllEggIds(): Stream<Shell>
 }

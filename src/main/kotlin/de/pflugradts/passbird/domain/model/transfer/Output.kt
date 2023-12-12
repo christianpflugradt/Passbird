@@ -1,19 +1,20 @@
 package de.pflugradts.passbird.domain.model.transfer
 
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 
-class Output private constructor(val bytes: Bytes) {
+class Output private constructor(val shell: Shell) {
 
     override fun equals(other: Any?): Boolean = when {
         (this === other) -> true
         (javaClass != other?.javaClass) -> false
-        else -> bytes == (other as Output).bytes
+        else -> shell == (other as Output).shell
     }
-    override fun hashCode() = bytes.hashCode()
+    override fun hashCode() = shell.hashCode()
 
     companion object {
-        fun outputOf(bytes: Bytes) = Output(bytes)
-        fun outputOf(byteArray: ByteArray) = outputOf(Bytes.bytesOf(byteArray))
-        fun emptyOutput() = outputOf(emptyBytes())
+        fun outputOf(shell: Shell) = Output(shell)
+        fun outputOf(byteArray: ByteArray) = outputOf(Shell.shellOf(byteArray))
+        fun emptyOutput() = outputOf(emptyShell())
     }
 }

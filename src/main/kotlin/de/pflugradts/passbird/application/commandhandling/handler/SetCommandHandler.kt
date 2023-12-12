@@ -6,7 +6,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.SetCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
@@ -29,11 +29,11 @@ class SetCommandHandler @Inject constructor(
                 )
             } catch (ex: InvalidEggIdException) {
                 userInterfaceAdapterPort.send(
-                    outputOf(bytesOf("Password alias cannot contain digits or special characters. Please choose a different alias.")),
+                    outputOf(shellOf("Password alias cannot contain digits or special characters. Please choose a different alias.")),
                 )
             }
         } else {
-            userInterfaceAdapterPort.send(outputOf(bytesOf("Operation aborted.")))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
         }
         setCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
@@ -45,7 +45,7 @@ class SetCommandHandler @Inject constructor(
         ) {
             userInterfaceAdapterPort.receiveConfirmation(
                 outputOf(
-                    bytesOf(
+                    shellOf(
                         "Existing Password Entry '${setCommand.argument.asString()}' will be irrevocably overwritten.\n" +
                             "Input 'c' to confirm or anything else to abort.\nYour input: ",
                     ),

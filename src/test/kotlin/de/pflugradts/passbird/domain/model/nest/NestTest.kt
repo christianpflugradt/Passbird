@@ -2,7 +2,7 @@ package de.pflugradts.passbird.domain.model.nest
 
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -15,24 +15,24 @@ class NestTest {
         val name = "nest"
 
         // when
-        val actual = createNest(bytesOf("nest"), Slot.DEFAULT)
+        val actual = createNest(shellOf("nest"), Slot.DEFAULT)
 
         // then
-        expectThat(actual.bytes.asString()) isEqualTo name
+        expectThat(actual.shell.asString()) isEqualTo name
     }
 
     @Test
-    fun `should clone bytes`() {
+    fun `should clone shell`() {
         // given
-        val bytes = bytesOf("eggId")
-        val nest = createNest(bytes, Slot.DEFAULT)
+        val shell = shellOf("eggId")
+        val nest = createNest(shell, Slot.DEFAULT)
 
         // when
-        bytes.scramble()
-        val actual = nest.bytes
+        shell.scramble()
+        val actual = nest.shell
 
         // then
-        expectThat(actual) isNotEqualTo bytes
+        expectThat(actual) isNotEqualTo shell
     }
 
     @Test
@@ -41,7 +41,7 @@ class NestTest {
         val defaultNest = DEFAULT
 
         // then
-        expectThat(defaultNest.bytes) isEqualTo bytesOf("Default")
+        expectThat(defaultNest.shell) isEqualTo shellOf("Default")
         expectThat(defaultNest.slot) isEqualTo Slot.DEFAULT
     }
 }

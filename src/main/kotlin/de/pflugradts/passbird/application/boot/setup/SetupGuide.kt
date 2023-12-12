@@ -2,7 +2,7 @@ package de.pflugradts.passbird.application.boot.setup
 
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 
 class SetupGuide @Inject constructor(
@@ -52,5 +52,5 @@ class SetupGuide @Inject constructor(
     fun sendNonMatchingInputs() { send("Your inputs do not match, please repeat.") }
     fun sendRestart() { send("Now restart PwMan3 to use it.") }
     fun sendGoodbye() { send("Goodbye!") }
-    private fun send(message: String) = userInterfaceAdapterPort.send(outputOf(bytesOf(message)))
+    private fun send(message: String) = userInterfaceAdapterPort.send(outputOf(shellOf(message)))
 }

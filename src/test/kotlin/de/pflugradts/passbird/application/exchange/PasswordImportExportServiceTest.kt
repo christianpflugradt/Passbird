@@ -1,15 +1,15 @@
 package de.pflugradts.passbird.application.exchange
 
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
-import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.nest.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Slot.N2
 import de.pflugradts.passbird.domain.model.nest.Slot.N9
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.service.createNestServiceSpyForTesting
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -33,13 +33,13 @@ class PasswordImportExportServiceTest {
     private val uri = "any uri"
 
     @Test
-    fun `should peek import eggId bytes`() {
+    fun `should peek import eggId shells`() {
         // given
         val eggs = testData()
         fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory, withEggs = eggs)
 
         // when
-        val actual = importExportService.peekImportEggIdBytes(uri)
+        val actual = importExportService.peekImportEggIdShells(uri)
 
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange(uri) }
@@ -54,9 +54,9 @@ class PasswordImportExportServiceTest {
         val eggs = testData()
         fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory, withEggs = eggs)
         fakePasswordService(instance = passwordService)
-        nestService.deploy(bytesOf("n2"), N2)
+        nestService.deploy(shellOf("n2"), N2)
         nestService.moveToNestAt(givenCurrentNestSlot)
-        val importSlot = mutableListOf<Stream<BytePair>>()
+        val importSlot = mutableListOf<Stream<ShellPair>>()
 
         // when
         importExportService.importEggs(uri)
@@ -64,7 +64,7 @@ class PasswordImportExportServiceTest {
         // then
         verify { passwordService.putEggs(capture(importSlot)) }
         verify(exactly = 1) { exchangeFactory.createPasswordExchange(uri) }
-        verify(exactly = 1) { nestService.deploy(bytesOf("Namespace-9"), N9) }
+        verify(exactly = 1) { nestService.deploy(shellOf("Namespace-9"), N9) }
         expectThat(importSlot) hasSize 3
         expectThatActualBytePairsMatchExpected(importSlot[0], eggs.subList(0, 2))
         expectThatActualBytePairsMatchExpected(importSlot[1], eggs.subList(2, 3))
@@ -79,10 +79,10 @@ class PasswordImportExportServiceTest {
         val eggs = testData()
         val exchangeAdapterPort = fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory)
         fakePasswordService(instance = passwordService, withEggs = eggs, withNestService = nestService)
-        nestService.deploy(bytesOf("n2"), N2)
-        nestService.deploy(bytesOf("n2"), N9)
+        nestService.deploy(shellOf("n2"), N2)
+        nestService.deploy(shellOf("n2"), N9)
         nestService.moveToNestAt(givenCurrentNestSlot)
-        val exportSlot = slot<Map<Slot, List<BytePair>>>()
+        val exportSlot = slot<Map<Slot, List<ShellPair>>>()
 
         // when
         importExportService.exportEggs(uri)
@@ -97,7 +97,7 @@ class PasswordImportExportServiceTest {
     }
 }
 
-private fun expectThatActualEggIdsMatchExpected(actual: Map<Slot, List<Bytes>>, expected: List<Egg>) {
+private fun expectThatActualEggIdsMatchExpected(actual: Map<Slot, List<Shell>>, expected: List<Egg>) {
     var index = 0
     actual.keys.forEach { slot ->
         actual[slot]!!.forEach {
@@ -105,7 +105,7 @@ private fun expectThatActualEggIdsMatchExpected(actual: Map<Slot, List<Bytes>>, 
         }
     }
 }
-private fun expectThatActualBytePairsMatchExpected(actual: Stream<BytePair>, expected: List<Egg>) {
+private fun expectThatActualBytePairsMatchExpected(actual: Stream<ShellPair>, expected: List<Egg>) {
     val actualList = actual.toList()
     expectThat(actualList.size) isEqualTo expected.size
     actualList.forEachIndexed { index, _ ->
@@ -114,7 +114,7 @@ private fun expectThatActualBytePairsMatchExpected(actual: Stream<BytePair>, exp
     }
 }
 
-private fun expectThatActualBytePairsMatchExpected(actual: Map<Slot, List<BytePair>>, expected: List<Egg>) {
+private fun expectThatActualBytePairsMatchExpected(actual: Map<Slot, List<ShellPair>>, expected: List<Egg>) {
     var index = 0
     actual.keys.forEach { slot ->
         actual[slot]!!.forEach {
@@ -125,9 +125,9 @@ private fun expectThatActualBytePairsMatchExpected(actual: Map<Slot, List<BytePa
 }
 
 private fun testData() = listOf(
-    createEggForTesting(withEggIdBytes = bytesOf("eggId1"), withPasswordBytes = bytesOf("password1"), withNestSlot = DEFAULT),
-    createEggForTesting(withEggIdBytes = bytesOf("eggId2"), withPasswordBytes = bytesOf("password2"), withNestSlot = DEFAULT),
-    createEggForTesting(withEggIdBytes = bytesOf("eggId3"), withPasswordBytes = bytesOf("password3"), withNestSlot = N2),
-    createEggForTesting(withEggIdBytes = bytesOf("eggId4"), withPasswordBytes = bytesOf("password4"), withNestSlot = N9),
-    createEggForTesting(withEggIdBytes = bytesOf("eggId5"), withPasswordBytes = bytesOf("password5"), withNestSlot = N9),
+    createEggForTesting(withEggIdShell = shellOf("eggId1"), withPasswordShell = shellOf("password1"), withNestSlot = DEFAULT),
+    createEggForTesting(withEggIdShell = shellOf("eggId2"), withPasswordShell = shellOf("password2"), withNestSlot = DEFAULT),
+    createEggForTesting(withEggIdShell = shellOf("eggId3"), withPasswordShell = shellOf("password3"), withNestSlot = N2),
+    createEggForTesting(withEggIdShell = shellOf("eggId4"), withPasswordShell = shellOf("password4"), withNestSlot = N9),
+    createEggForTesting(withEggIdShell = shellOf("eggId5"), withPasswordShell = shellOf("password5"), withNestSlot = N9),
 )

@@ -6,7 +6,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.DO_NOTHING
@@ -21,19 +21,19 @@ class CustomSetCommandHandler @Inject constructor(
         if (commandConfirmed(customSetCommand)) {
             try {
                 passwordService.challengeEggId(customSetCommand.argument)
-                val secureInput = userInterfaceAdapterPort.receiveSecurely(outputOf(bytesOf("Enter custom password: ")))
+                val secureInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter custom password: ")))
                 if (secureInput.isEmpty) {
-                    userInterfaceAdapterPort.send(outputOf(bytesOf("Empty input - Operation aborted.")))
+                    userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted.")))
                 } else {
-                    passwordService.putEgg(customSetCommand.argument, secureInput.bytes)
+                    passwordService.putEgg(customSetCommand.argument, secureInput.shell)
                 }
                 secureInput.invalidate()
             } catch (ex: InvalidEggIdException) {
                 val errorMessage = "Password alias cannot contain digits or special characters. Please choose a different alias."
-                userInterfaceAdapterPort.send(outputOf(bytesOf(errorMessage)))
+                userInterfaceAdapterPort.send(outputOf(shellOf(errorMessage)))
             }
         } else {
-            userInterfaceAdapterPort.send(outputOf(bytesOf("Operation aborted.")))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
         }
         customSetCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
@@ -44,7 +44,7 @@ class CustomSetCommandHandler @Inject constructor(
             userInterfaceAdapterPort
                 .receiveConfirmation(
                     outputOf(
-                        bytesOf(
+                        shellOf(
                             "Existing Password Entry '${customSetCommand.argument.asString()}' will be irrevocably overwritten.\n" +
                                 "Input 'c' to confirm or anything else to abort.\nYour input: ",
                         ),

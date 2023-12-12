@@ -1,15 +1,15 @@
-package de.pflugradts.passbird.domain.model.transfer
+package de.pflugradts.passbird.domain.model.shell
 
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import java.security.SecureRandom
 
-class Chars private constructor(private val charArray: CharArray) {
+class PlainShell private constructor(private val charArray: CharArray) {
 
     fun scramble() = charArray.indices.forEach {
         charArray[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toChar()
     }
 
-    fun toBytes(): Bytes = bytesOf(
+    fun toShell(): Shell = shellOf(
         ByteArray(charArray.size).also { byteArray ->
             charArray.indices.forEach { index -> byteArray[index] = charArray[index].code.toByte() }
         },
@@ -20,7 +20,7 @@ class Chars private constructor(private val charArray: CharArray) {
     override fun equals(other: Any?): Boolean = when {
         (this === other) -> true
         (javaClass != other?.javaClass) -> false
-        else -> charArray contentEquals (other as Chars).charArray
+        else -> charArray contentEquals (other as PlainShell).charArray
     }
 
     override fun hashCode() = charArray.contentHashCode()
@@ -29,6 +29,6 @@ class Chars private constructor(private val charArray: CharArray) {
         val SECURE_RANDOM = SecureRandom()
 
         @JvmStatic
-        fun charsOf(chars: CharArray) = Chars(chars.clone())
+        fun plainShellOf(chars: CharArray) = PlainShell(chars.clone())
     }
 }

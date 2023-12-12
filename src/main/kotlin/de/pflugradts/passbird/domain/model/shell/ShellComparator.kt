@@ -1,6 +1,5 @@
-package de.pflugradts.passbird.domain.model.transfer
+package de.pflugradts.passbird.domain.model.shell
 
-import de.pflugradts.passbird.domain.model.transfer.CharValue.Companion.charValueOf
 import java.util.concurrent.atomic.AtomicInteger
 
 private val sortReference = buildSortReference()
@@ -9,7 +8,7 @@ private fun buildSortReference(): Map<Int, Int> {
     val sortReferenceMap = mutableMapOf<Int, Int>()
     val index = AtomicInteger(0)
     val assignSlot: (Int) -> Unit = { sortReferenceMap[it] = index.getAndIncrement() }
-    (MIN_ASCII_VALUE..MAX_ASCII_VALUE).filter { charValueOf(it).isSymbol }.forEach(assignSlot)
+    (MIN_ASCII_VALUE..MAX_ASCII_VALUE).filter { PlainValue.plainValueOf(it).isSymbol }.forEach(assignSlot)
     (FIRST_DIGIT_INDEX..LAST_DIGIT_INDEX).forEach(assignSlot)
     val lowercaseRange = (FIRST_LOWERCASE_INDEX..LAST_LOWERCASE_INDEX)
     val uppercaseRange = (FIRST_UPPERCASE_INDEX..LAST_UPPERCASE_INDEX)
@@ -20,12 +19,12 @@ private fun buildSortReference(): Map<Int, Int> {
     return sortReferenceMap.toMap()
 }
 
-class BytesComparator : Comparator<Bytes> {
-    override fun compare(bytes1: Bytes, bytes2: Bytes): Int {
-        if (bytes1 == bytes2) return 0
-        val reverse = bytes1.size > bytes2.size
-        val b1 = if (reverse) bytes2.toByteArray() else bytes1.toByteArray()
-        val b2 = if (reverse) bytes1.toByteArray() else bytes2.toByteArray()
+class ShellComparator : Comparator<Shell> {
+    override fun compare(shell1: Shell, shell2: Shell): Int {
+        if (shell1 == shell2) return 0
+        val reverse = shell1.size > shell2.size
+        val b1 = if (reverse) shell2.toByteArray() else shell1.toByteArray()
+        val b2 = if (reverse) shell1.toByteArray() else shell2.toByteArray()
         var index = -1
         var result = if (b1.size == b2.size) 0 else -1
         while (++index < b1.size) {

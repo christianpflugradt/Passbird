@@ -5,7 +5,7 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.NestService
 
@@ -17,7 +17,7 @@ class ViewNestCommandHandler @Inject constructor(
     private fun handleViewNestCommand(@Suppress("UNUSED_PARAMETER") viewNestCommand: ViewNestCommand) {
         userInterfaceAdapterPort.send(
             outputOf(
-                bytesOf(
+                shellOf(
                     """
 Current namespace: $currentNest
 Available namespaces:
@@ -37,7 +37,7 @@ ${'\t'}[NOT YET IMPLEMENTED] n-[1-9] (discard) discards the namespace at the spe
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    private val currentNest get() = nestService.getCurrentNest().bytes.asString()
+    private val currentNest get() = nestService.getCurrentNest().shell.asString()
     private val availableNests get() = getAvailableNests(includeCurrent = true).let {
         if (hasCustomNests()) it else "$it\t(use the n+ command to create custom namespaces)\n"
     }

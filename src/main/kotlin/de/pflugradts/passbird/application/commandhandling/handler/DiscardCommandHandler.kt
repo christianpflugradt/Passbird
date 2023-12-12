@@ -5,7 +5,7 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.DiscardCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
@@ -19,7 +19,7 @@ class DiscardCommandHandler @Inject constructor(
         if (commandConfirmed()) {
             passwordService.discardEgg(discardCommand.argument)
         } else {
-            userInterfaceAdapterPort.send(outputOf(bytesOf("Operation aborted.")))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
         }
         discardCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
@@ -30,7 +30,7 @@ class DiscardCommandHandler @Inject constructor(
             userInterfaceAdapterPort
                 .receiveConfirmation(
                     outputOf(
-                        bytesOf(
+                        shellOf(
                             """
                             Discarding a Password Entry is an irrevocable action.
                             Input 'c' to confirm or anything else to abort.

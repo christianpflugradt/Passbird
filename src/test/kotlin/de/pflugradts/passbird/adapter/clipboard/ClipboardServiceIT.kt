@@ -3,7 +3,7 @@ package de.pflugradts.passbird.adapter.clipboard
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.mockk.mockk
 import org.awaitility.Awaitility.await
@@ -33,7 +33,7 @@ class ClipboardServiceIT {
         )
 
         // when
-        clipboardService.post(outputOf(bytesOf(message)))
+        clipboardService.post(outputOf(shellOf(message)))
 
         // then
         val clipboard = systemClipboard()
@@ -54,7 +54,7 @@ class ClipboardServiceIT {
         )
 
         // when
-        clipboardService.post(outputOf(bytesOf(message)))
+        clipboardService.post(outputOf(shellOf(message)))
 
         // then
         val clipboard = systemClipboard()
@@ -80,9 +80,9 @@ class ClipboardServiceIT {
         )
 
         // when
-        clipboardService.post(outputOf(bytesOf(message)))
+        clipboardService.post(outputOf(shellOf(message)))
         Thread.sleep(almostASecond.toLong())
-        clipboardService.post(outputOf(bytesOf(anotherMessage)))
+        clipboardService.post(outputOf(shellOf(anotherMessage)))
         Thread.sleep(almostASecond.toLong())
 
         // then

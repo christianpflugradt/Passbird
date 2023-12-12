@@ -6,7 +6,7 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.mockk.mockk
@@ -35,7 +35,7 @@ class CommandLineInterfaceServiceTest {
 
             // when
             captureSystemOut.during {
-                commandLineInterfaceService.send(outputOf(Bytes.bytesOf(givenMessage)))
+                commandLineInterfaceService.send(outputOf(Shell.shellOf(givenMessage)))
             }
 
             // then
@@ -71,7 +71,7 @@ class CommandLineInterfaceServiceTest {
             }
 
             // then
-            expectThat(actual.bytes.asString()) isEqualTo givenInput
+            expectThat(actual.shell.asString()) isEqualTo givenInput
         }
 
         @Test
@@ -83,7 +83,7 @@ class CommandLineInterfaceServiceTest {
             // when
             captureSystemOut.during {
                 mockSystemInWith("smth\n") {
-                    commandLineInterfaceService.receive(outputOf(Bytes.bytesOf(givenMessage)))
+                    commandLineInterfaceService.receive(outputOf(Shell.shellOf(givenMessage)))
                 }
             }
 
@@ -112,7 +112,7 @@ class CommandLineInterfaceServiceTest {
 
             // then
             verify(exactly = 1) { systemOperation.readPasswordFromConsole() }
-            expectThat(actual.bytes.asString()) isEqualTo givenInput
+            expectThat(actual.shell.asString()) isEqualTo givenInput
         }
 
         @Test
@@ -131,7 +131,7 @@ class CommandLineInterfaceServiceTest {
 
             // when
             captureSystemOut.during {
-                commandLineInterfaceService.receiveSecurely(outputOf(Bytes.bytesOf(givenMessage)))
+                commandLineInterfaceService.receiveSecurely(outputOf(Shell.shellOf(givenMessage)))
             }
 
             // then
@@ -155,7 +155,7 @@ class CommandLineInterfaceServiceTest {
 
             // then
             verify(exactly = 0) { systemOperation.readPasswordFromConsole() }
-            expectThat(actual.bytes.asString()) isEqualTo givenInput
+            expectThat(actual.shell.asString()) isEqualTo givenInput
         }
 
         @Test
@@ -178,7 +178,7 @@ class CommandLineInterfaceServiceTest {
 
             // then
             verify(exactly = 0) { systemOperation.readPasswordFromConsole() }
-            expectThat(actual.bytes.asString()) isEqualTo givenInput
+            expectThat(actual.shell.asString()) isEqualTo givenInput
         }
     }
 

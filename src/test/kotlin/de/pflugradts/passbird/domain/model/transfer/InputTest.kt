@@ -11,8 +11,9 @@ import de.pflugradts.passbird.domain.model.nest.Slot.N6
 import de.pflugradts.passbird.domain.model.nest.Slot.N7
 import de.pflugradts.passbird.domain.model.nest.Slot.N8
 import de.pflugradts.passbird.domain.model.nest.Slot.N9
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.emptyInput
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import io.mockk.spyk
@@ -30,13 +31,13 @@ class InputTest {
         // given
         val command = "g"
         val data = "foo"
-        val input = inputOf(bytesOf(command + data))
+        val input = inputOf(shellOf(command + data))
 
         // when
         val actual = input.command
 
         // then
-        expectThat(actual) isEqualTo bytesOf(command)
+        expectThat(actual) isEqualTo shellOf(command)
     }
 
     @Test
@@ -44,27 +45,27 @@ class InputTest {
         // given
         val command = "n+1"
         val data = "foo"
-        val input = inputOf(bytesOf(command + data))
+        val input = inputOf(shellOf(command + data))
 
         // when
         val actual = input.command
 
         // then
-        expectThat(actual) isEqualTo bytesOf(command)
+        expectThat(actual) isEqualTo shellOf(command)
     }
 
     @Test
-    fun `should get command and return zero on empty bytes`() {
+    fun `should get command and return zero on empty shell`() {
         // given / when / then
-        expectThat(emptyInput().command) isEqualTo emptyBytes()
+        expectThat(emptyInput().command) isEqualTo emptyShell()
     }
 
     @Test
     fun `should get data`() {
         val command = 'g'
         val data = "foo"
-        val input = inputOf(bytesOf(command.toString() + data))
-        val expected = bytesOf(data)
+        val input = inputOf(shellOf(command.toString() + data))
+        val expected = shellOf(data)
 
         // when
         val actual = input.data
@@ -74,7 +75,7 @@ class InputTest {
     }
 
     @Test
-    fun `should get data and return empty bytes on input without data`() {
+    fun `should get data and return empty shell on input without data`() {
         // given / when / then
         expectThat(emptyInput().data.isEmpty).isTrue()
     }
@@ -82,34 +83,34 @@ class InputTest {
     @Test
     fun `should invalidate input`() {
         // given
-        val bytes = spyk<Bytes>(bytesOf("foo"))
+        val shell = spyk<Shell>(shellOf("foo"))
 
         // when
-        inputOf(bytes).invalidate()
+        inputOf(shell).invalidate()
 
         // then
-        verify(exactly = 1) { bytes.scramble() }
+        verify(exactly = 1) { shell.scramble() }
     }
 
     @Nested
     inner class InstantiationTest {
         @Test
-        fun `should have bytes`() {
+        fun `should have shell`() {
             // given
-            val givenBytes = bytesOf(byteArrayOf(1, 2, 3))
-            val givenInput = inputOf(givenBytes)
+            val givenShell = shellOf(byteArrayOf(1, 2, 3))
+            val givenInput = inputOf(givenShell)
 
             // when
-            val actual = givenInput.bytes
+            val actual = givenInput.shell
 
             // then
-            expectThat(actual) isEqualTo givenBytes
+            expectThat(actual) isEqualTo givenShell
         }
 
         @Test
         fun `should instantiate empty input`() {
             // given / when / then
-            expectThat(emptyInput().bytes.isEmpty).isTrue()
+            expectThat(emptyInput().shell.isEmpty).isTrue()
         }
     }
 
@@ -174,7 +175,7 @@ class InputTest {
         fun `should parse invalid nest with string`() {
             // given
             val givenIndex = "-A"
-            val input = inputOf(bytesOf(givenIndex))
+            val input = inputOf(shellOf(givenIndex))
 
             // when
             val actual = input.extractNestSlot()
@@ -183,7 +184,7 @@ class InputTest {
             expectThat(actual) isEqualTo INVALID
         }
 
-        private fun inputOf(index: Int) = inputOf(bytesOf(index.toString()))
+        private fun inputOf(index: Int) = inputOf(shellOf(index.toString()))
     }
 
     @Nested
@@ -192,7 +193,7 @@ class InputTest {
         @Test
         fun `should be equal to itself`() {
             // given
-            val input1 = inputOf(bytesOf("abc"))
+            val input1 = inputOf(shellOf("abc"))
             val input2 = input1
 
             // when
@@ -203,12 +204,12 @@ class InputTest {
         }
 
         @Test
-        fun `should be equal to input with equal bytes`() {
+        fun `should be equal to input with equal shell`() {
             // given
-            val bytes = bytesOf("abc")
-            val sameBytes = bytesOf("abc")
-            val input1 = inputOf(bytes)
-            val input2 = inputOf(sameBytes)
+            val shell = shellOf("abc")
+            val sameShell = shellOf("abc")
+            val input1 = inputOf(shell)
+            val input2 = inputOf(sameShell)
 
             // when
             val actual = input1.equals(input2)
@@ -218,12 +219,12 @@ class InputTest {
         }
 
         @Test
-        fun `should not be equal to input with other bytes`() {
+        fun `should not be equal to input with other shell`() {
             // given
-            val bytes = bytesOf("abc")
-            val otherBytes = bytesOf("abd")
-            val input1 = inputOf(bytes)
-            val input2 = inputOf(otherBytes)
+            val shell = shellOf("abc")
+            val otherShell = shellOf("abd")
+            val input1 = inputOf(shell)
+            val input2 = inputOf(otherShell)
 
             // when
             val actual = input1.equals(input2)
@@ -235,11 +236,11 @@ class InputTest {
         @Test
         fun `should not be equal to other class`() {
             // given
-            val bytes = bytesOf("abc")
-            val input = inputOf(bytes)
+            val shell = shellOf("abc")
+            val input = inputOf(shell)
 
             // when
-            val actual = input.equals(bytes)
+            val actual = input.equals(shell)
 
             // then
             expectThat(actual).isFalse()
@@ -248,7 +249,7 @@ class InputTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val input = inputOf(bytesOf("abc"))
+            val input = inputOf(shellOf("abc"))
 
             // when
             val actual = input.equals(null)

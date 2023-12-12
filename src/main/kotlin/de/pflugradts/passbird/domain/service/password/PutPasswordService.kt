@@ -1,9 +1,9 @@
 package de.pflugradts.passbird.domain.service.password
 
 import com.google.inject.Inject
-import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -16,19 +16,19 @@ class PutPasswordService @Inject constructor(
     @Inject private val eventRegistry: EventRegistry,
     @Inject private val nestService: NestService,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
-    fun putEggs(eggs: Stream<BytePair>) {
-        eggs.forEach { putEgg(it.value.first, it.value.second, false) }
+    fun putEggs(shellPairs: Stream<ShellPair>) {
+        shellPairs.forEach { putEgg(it.value.first, it.value.second, false) }
         processEventsAndSync()
     }
 
-    fun putEgg(eggIdBytes: Bytes, passwordBytes: Bytes, sync: Boolean = true) {
-        challengeEggId(eggIdBytes)
-        val encryptedEggIdBytes = encrypted(eggIdBytes)
-        val encryptedPasswordBytes = encrypted(passwordBytes)
+    fun putEgg(eggIdShell: Shell, passwordShell: Shell, sync: Boolean = true) {
+        challengeEggId(eggIdShell)
+        val encryptedEggIdShell = encrypted(eggIdShell)
+        val encryptedPasswordShell = encrypted(passwordShell)
         val nestSlot = nestService.getCurrentNest().slot
-        find(encryptedEggIdBytes).ifPresentOrElse(
-            { it.updatePassword(encryptedPasswordBytes) },
-            { eggRepository.add(createEgg(nestSlot, encryptedEggIdBytes, encryptedPasswordBytes)) },
+        find(encryptedEggIdShell).ifPresentOrElse(
+            { it.updatePassword(encryptedPasswordShell) },
+            { eggRepository.add(createEgg(nestSlot, encryptedEggIdShell, encryptedPasswordShell)) },
         )
         if (sync) processEventsAndSync()
     }

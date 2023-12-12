@@ -6,7 +6,7 @@ import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.password.MovePasswordService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
@@ -30,10 +30,10 @@ internal class MovePasswordServiceTest {
     @Test
     fun `should move egg`() {
         // given
-        val givenEggId = bytesOf("eggId123")
+        val givenEggId = shellOf("eggId123")
         val givenNestSlot = Slot.N1
         val newNestSlot = Slot.N2
-        val givenEgg = createEggForTesting(withEggIdBytes = givenEggId, withNestSlot = givenNestSlot)
+        val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withNestSlot = givenNestSlot)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 
@@ -47,7 +47,7 @@ internal class MovePasswordServiceTest {
     @Test
     fun `should not move egg if it does not exist`() {
         // given
-        val givenEggId = bytesOf("eggId123")
+        val givenEggId = shellOf("eggId123")
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository)
 
@@ -62,11 +62,11 @@ internal class MovePasswordServiceTest {
     @Test
     fun `should not move egg if eggId already exists in target nest`() {
         // given
-        val givenEggId = bytesOf("eggId123")
+        val givenEggId = shellOf("eggId123")
         val givenNestSlot = Slot.N1
         val newNestSlot = Slot.N2
-        val givenEgg = createEggForTesting(withEggIdBytes = givenEggId, withNestSlot = givenNestSlot)
-        val conflictingEgg = createEggForTesting(withEggIdBytes = givenEggId, withNestSlot = newNestSlot)
+        val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withNestSlot = givenNestSlot)
+        val conflictingEgg = createEggForTesting(withEggIdShell = givenEggId, withNestSlot = newNestSlot)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(
             instance = eggRepository,

@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.model.egg
 
 import de.pflugradts.passbird.domain.model.egg.EggId.Companion.createEggId
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -15,42 +15,42 @@ class EggIdTest {
     @Test
     fun `should create eggId`() {
         // given
-        val bytes = bytesOf("eggId")
+        val eggIdShell = shellOf("eggId")
 
         // when
-        val eggId = createEggId(bytes)
+        val eggId = createEggId(eggIdShell)
 
         // then
-        expectThat(eggId.view()) isEqualTo bytes
+        expectThat(eggId.view()) isEqualTo eggIdShell
     }
 
     @Test
     fun `should rename eggId`() {
         // given
-        val originalBytes = bytesOf("eggId123")
-        val eggId = createEggId(originalBytes)
-        val updatedBytes = bytesOf("eggIdABC")
+        val originalEggIdShell = shellOf("eggId123")
+        val eggId = createEggId(originalEggIdShell)
+        val updatedEggIdShell = shellOf("eggIdABC")
 
         // when
-        eggId.rename(updatedBytes)
+        eggId.rename(updatedEggIdShell)
         val actual = eggId.view()
 
         // then
-        expectThat(actual) isEqualTo updatedBytes isNotEqualTo originalBytes
+        expectThat(actual) isEqualTo updatedEggIdShell isNotEqualTo originalEggIdShell
     }
 
     @Test
-    fun `should clone bytes`() {
+    fun `should clone eggIdShell`() {
         // given
-        val bytes = bytesOf("eggId")
-        val eggId = createEggId(bytes)
+        val eggIdShell = shellOf("eggId")
+        val eggId = createEggId(eggIdShell)
 
         // when
-        bytes.scramble()
+        eggIdShell.scramble()
         val actual = eggId.view()
 
         // then
-        expectThat(actual) isNotEqualTo bytes
+        expectThat(actual) isNotEqualTo eggIdShell
     }
 
     @Nested
@@ -59,7 +59,7 @@ class EggIdTest {
         @Test
         fun `should be equal to itself`() {
             // given
-            val eggId1 = createEggId(bytesOf("abc"))
+            val eggId1 = createEggId(shellOf("abc"))
             val eggId2 = eggId1
 
             // when
@@ -70,12 +70,12 @@ class EggIdTest {
         }
 
         @Test
-        fun `should be equal to eggId with equal bytes`() {
+        fun `should be equal to eggId with equal eggIdShell`() {
             // given
-            val bytes = bytesOf("abc")
-            val sameBytes = bytesOf("abc")
-            val eggId1 = createEggId(bytes)
-            val eggId2 = createEggId(sameBytes)
+            val eggIdShell = shellOf("abc")
+            val sameEggIdShell = shellOf("abc")
+            val eggId1 = createEggId(eggIdShell)
+            val eggId2 = createEggId(sameEggIdShell)
 
             // when
             val actual = eggId1.equals(eggId2)
@@ -85,12 +85,12 @@ class EggIdTest {
         }
 
         @Test
-        fun `should not be equal to eggId with other bytes`() {
+        fun `should not be equal to eggId with other eggIdShell`() {
             // given
-            val bytes = bytesOf("abc")
-            val otherBytes = bytesOf("abd")
-            val eggId1 = createEggId(bytes)
-            val eggId2 = createEggId(otherBytes)
+            val eggIdShell = shellOf("abc")
+            val otherEggIdShell = shellOf("abd")
+            val eggId1 = createEggId(eggIdShell)
+            val eggId2 = createEggId(otherEggIdShell)
 
             // when
             val actual = eggId1.equals(eggId2)
@@ -102,11 +102,11 @@ class EggIdTest {
         @Test
         fun `should not be equal to other class`() {
             // given
-            val bytes = bytesOf("abc")
-            val eggId = createEggId(bytes)
+            val eggIdShell = shellOf("abc")
+            val eggId = createEggId(eggIdShell)
 
             // when
-            val actual = eggId.equals(bytes)
+            val actual = eggId.equals(eggIdShell)
 
             // then
             expectThat(actual).isFalse()
@@ -115,7 +115,7 @@ class EggIdTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val eggId = createEggId(bytesOf("abc"))
+            val eggId = createEggId(shellOf("abc"))
 
             // when
             val actual = eggId.equals(null)

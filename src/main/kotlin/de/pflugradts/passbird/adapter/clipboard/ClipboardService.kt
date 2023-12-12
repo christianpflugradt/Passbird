@@ -21,7 +21,7 @@ class ClipboardService @Inject constructor(
     private var cleanerThread: Thread? = null
     override fun post(output: Output) {
         cleanerThread?.interrupt()
-        tryCatching { systemOperation.copyToClipboard(output.bytes.asString()) }
+        tryCatching { systemOperation.copyToClipboard(output.shell.asString()) }
             .onFailure { reportFailure(ClipboardFailure(it)) }
         scheduleCleaner()
     }

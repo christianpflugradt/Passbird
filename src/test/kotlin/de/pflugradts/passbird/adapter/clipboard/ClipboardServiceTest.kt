@@ -4,7 +4,7 @@ import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.mockk.every
 import io.mockk.mockk
@@ -34,7 +34,7 @@ class ClipboardServiceTest {
         fakeConfiguration(instance = configuration)
 
         // when
-        clipboardService.post(outputOf(bytesOf(message)))
+        clipboardService.post(outputOf(shellOf(message)))
 
         // then
         verify(exactly = 1) { systemOperation.copyToClipboard(message) }
@@ -51,7 +51,7 @@ class ClipboardServiceTest {
 
         // when
         captureSystemErr.during {
-            clipboardService.post(outputOf(bytesOf(message)))
+            clipboardService.post(outputOf(shellOf(message)))
         }
 
         // then
@@ -71,7 +71,7 @@ class ClipboardServiceTest {
         )
 
         // when
-        clipboardService.post(outputOf(bytesOf(message)))
+        clipboardService.post(outputOf(shellOf(message)))
 
         // then
         verify(exactly = 1) { systemOperation.copyToClipboard(message) }
@@ -94,9 +94,9 @@ class ClipboardServiceTest {
         )
 
         // when
-        clipboardService.post(outputOf(bytesOf(message)))
+        clipboardService.post(outputOf(shellOf(message)))
         Thread.sleep(almostASecond.toLong())
-        clipboardService.post(outputOf(bytesOf(anotherMessage)))
+        clipboardService.post(outputOf(shellOf(anotherMessage)))
         Thread.sleep(almostASecond.toLong())
 
         // then

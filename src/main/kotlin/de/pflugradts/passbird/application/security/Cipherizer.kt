@@ -1,8 +1,8 @@
 package de.pflugradts.passbird.application.security
 
 import de.pflugradts.passbird.application.util.copyBytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import java.security.MessageDigest
 import javax.crypto.Cipher
@@ -14,35 +14,35 @@ private const val AES_ENCRYPTION = "AES"
 private const val BLOCK_SIZE = 16
 private const val SHA512_HASH = "SHA-512"
 
-class Cipherizer(private val keyBytes: Bytes, private val ivBytes: Bytes) : CryptoProvider {
-    override fun encrypt(bytes: Bytes) = cipherize(Cipher.ENCRYPT_MODE, pack(bytes))
+class Cipherizer(private val keyShell: Shell, private val ivShell: Shell) : CryptoProvider {
+    override fun encrypt(shell: Shell) = cipherize(Cipher.ENCRYPT_MODE, pack(shell))
 
-    override fun decrypt(bytes: Bytes) = unpack(cipherize(Cipher.DECRYPT_MODE, bytes))
+    override fun decrypt(shell: Shell) = unpack(cipherize(Cipher.DECRYPT_MODE, shell))
 
-    private fun cipherize(mode: Int, bytes: Bytes): Bytes {
+    private fun cipherize(mode: Int, shell: Shell): Shell {
         val cipher = Cipher.getInstance(AES_CBC_PKCS5PADDING_CIPHER)
         cipher.init(
             mode,
-            SecretKeySpec(MessageDigest.getInstance(SHA512_HASH).digest(keyBytes.toByteArray()).copyOf(BLOCK_SIZE), AES_ENCRYPTION),
-            IvParameterSpec(ivBytes.toByteArray()),
+            SecretKeySpec(MessageDigest.getInstance(SHA512_HASH).digest(keyShell.toByteArray()).copyOf(BLOCK_SIZE), AES_ENCRYPTION),
+            IvParameterSpec(ivShell.toByteArray()),
         )
-        return bytesOf(cipher.doFinal(bytes.toByteArray()))
+        return shellOf(cipher.doFinal(shell.toByteArray()))
     }
 
-    private fun calcPadding(bytes: Bytes) = BLOCK_SIZE - bytes.size % BLOCK_SIZE
+    private fun calcPadding(shell: Shell) = BLOCK_SIZE - shell.size % BLOCK_SIZE
 
-    private fun pack(bytes: Bytes): Bytes {
-        val padding = calcPadding(bytes)
-        val target = ByteArray(bytes.size + padding)
-        copyBytes(bytes.toByteArray(), target, 0)
+    private fun pack(shell: Shell): Shell {
+        val padding = calcPadding(shell)
+        val target = ByteArray(shell.size + padding)
+        copyBytes(shell.toByteArray(), target, 0)
         target[target.size - 1] = padding.toByte()
-        return bytesOf(target)
+        return shellOf(target)
     }
 
-    private fun unpack(bytes: Bytes): Bytes {
-        val padding = bytes.getByte(bytes.size - 1).toInt()
-        val target = ByteArray(bytes.size - padding)
-        copyBytes(bytes.toByteArray(), target, 0, target.size)
-        return bytesOf(target)
+    private fun unpack(shell: Shell): Shell {
+        val padding = shell.getByte(shell.size - 1).toInt()
+        val target = ByteArray(shell.size - padding)
+        copyBytes(shell.toByteArray(), target, 0, target.size)
+        return shellOf(target)
     }
 }

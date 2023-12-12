@@ -11,8 +11,8 @@ import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.copyInt
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import java.util.Arrays
@@ -39,7 +39,7 @@ class PasswordStoreWriter @Inject constructor(
         offset += copyInt(EOF, bytes, offset)
         val checksumBytes = byteArrayOf(if (contentSize > 0) checksum(Arrays.copyOfRange(bytes, signatureSize(), contentSize)) else 0x0)
         copyBytes(checksumBytes, bytes, offset, checksumBytes())
-        writeToDisk(bytesOf(bytes))
+        writeToDisk(shellOf(bytes))
     }
 
     private fun persistNest(bytes: ByteArray, offset: Int): Int {
@@ -52,8 +52,8 @@ class PasswordStoreWriter @Inject constructor(
         return incrementedOffset
     }
 
-    private fun writeToDisk(bytes: Bytes) =
-        tryCatching { systemOperation.writeBytesToFile(filePath!!, cryptoProvider.encrypt(bytes)) }
+    private fun writeToDisk(shell: Shell) =
+        tryCatching { systemOperation.writeBytesToFile(filePath!!, cryptoProvider.encrypt(shell)) }
             .onFailure { reportFailure(WritePasswordDatabaseFailure(filePath!!, it)) }
 
     private fun calcRequiredContentSize(eggs: Supplier<Stream<Egg>>): Int {
@@ -62,7 +62,7 @@ class PasswordStoreWriter @Inject constructor(
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
         val nestSize = intBytes() + Slot.CAPACITY * intBytes() + nestService.all()
             .filter { it.isPresent }
-            .map { it.get().bytes.size }
+            .map { it.get().shell.size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
         val metaSize = eggs.get().count().toInt() * 2 * intBytes()
         return dataSize + nestSize + metaSize
@@ -72,11 +72,11 @@ class PasswordStoreWriter @Inject constructor(
     private fun calcActualTotalSize(contentSize: Int) = signatureSize() + contentSize + eofBytes() + checksumBytes()
 
     private fun Slot.asByteArray(): ByteArray {
-        val nestBytes = nestService.atSlot(this).map { it.bytes }.orElse(Bytes.emptyBytes())
-        val nestBytesSize = nestBytes.size
+        val nestShell = nestService.atSlot(this).map { it.shell }.orElse(Shell.emptyShell())
+        val nestBytesSize = nestShell.size
         val bytes = ByteArray(Integer.BYTES + nestBytesSize)
-        copyInt(if (nestBytes.isEmpty) EMPTY_NEST else nestBytesSize, bytes, 0)
-        if (!nestBytes.isEmpty) { copyBytes(nestBytes.toByteArray(), bytes, Integer.BYTES, nestBytesSize) }
+        copyInt(if (nestShell.isEmpty) EMPTY_NEST else nestBytesSize, bytes, 0)
+        if (!nestShell.isEmpty) { copyBytes(nestShell.toByteArray(), bytes, Integer.BYTES, nestBytesSize) }
         return bytes
     }
 

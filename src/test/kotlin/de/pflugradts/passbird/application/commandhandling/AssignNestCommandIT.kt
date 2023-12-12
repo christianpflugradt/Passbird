@@ -5,7 +5,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.nest.AssignNes
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.at
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.createNestServiceForTesting
@@ -34,11 +34,11 @@ class AssignNestCommandIT {
     fun `should handle assign nest command`() {
         // given
         val givenEggId = "a"
-        val givenInput = bytesOf("n$givenEggId")
+        val givenInput = shellOf("n$givenEggId")
         val referenceInput = givenInput.copy()
         val expectedNestSlot = 1
-        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(givenEggId))
-        nestService.deploy(bytesOf("nest"), at(expectedNestSlot))
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(givenEggId))
+        nestService.deploy(shellOf("nest"), at(expectedNestSlot))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(expectedNestSlot)))
 
@@ -47,7 +47,7 @@ class AssignNestCommandIT {
         inputHandler.handleInput(inputOf(givenInput))
 
         // then
-        verify(exactly = 1) { passwordService.moveEgg(bytesOf(givenEggId), at(expectedNestSlot)) }
+        verify(exactly = 1) { passwordService.moveEgg(shellOf(givenEggId), at(expectedNestSlot)) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
@@ -55,10 +55,10 @@ class AssignNestCommandIT {
     fun `should handle egg not exists`() {
         // given
         val givenEggId = "a"
-        val givenInput = bytesOf("n$givenEggId")
+        val givenInput = shellOf("n$givenEggId")
         val referenceInput = givenInput.copy()
         val expectedNestSlot = 1
-        nestService.deploy(bytesOf("nest"), at(expectedNestSlot))
+        nestService.deploy(shellOf("nest"), at(expectedNestSlot))
         fakePasswordService(instance = passwordService)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(expectedNestSlot)))
 
@@ -75,13 +75,13 @@ class AssignNestCommandIT {
     fun `should display target nest`() {
         // given
         val givenEggId = "a"
-        val givenInput = bytesOf("n$givenEggId")
+        val givenInput = shellOf("n$givenEggId")
         val referenceInput = givenInput.copy()
-        val givenEgg = createEggForTesting(bytesOf(givenEggId))
+        val givenEgg = createEggForTesting(shellOf(givenEggId))
         val currentNestSlot = 0
         val targetNestSlot = 1
         nestService.moveToNestAt(at(currentNestSlot))
-        nestService.deploy(bytesOf("nest"), at(targetNestSlot))
+        nestService.deploy(shellOf("nest"), at(targetNestSlot))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(targetNestSlot)))
         val outputSlot = slot<Output>()
@@ -92,8 +92,8 @@ class AssignNestCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()).contains("$targetNestSlot: ")
-        expectThat(outputSlot.captured.bytes.asString()).not().contains("$currentNestSlot: ")
+        expectThat(outputSlot.captured.shell.asString()).contains("$targetNestSlot: ")
+        expectThat(outputSlot.captured.shell.asString()).not().contains("$currentNestSlot: ")
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
@@ -101,12 +101,12 @@ class AssignNestCommandIT {
     fun `should display target nest when not default`() {
         // given
         val givenEggId = "a"
-        val givenInput = bytesOf("n$givenEggId")
+        val givenInput = shellOf("n$givenEggId")
         val referenceInput = givenInput.copy()
         val currentNestSlot = 1
         val targetNestSlot = 0
-        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(givenEggId), withNestSlot = at(currentNestSlot))
-        nestService.deploy(bytesOf("nest"), at(currentNestSlot))
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(givenEggId), withNestSlot = at(currentNestSlot))
+        nestService.deploy(shellOf("nest"), at(currentNestSlot))
         nestService.moveToNestAt(at(currentNestSlot))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(targetNestSlot)))
@@ -118,8 +118,8 @@ class AssignNestCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()).contains("$targetNestSlot: ")
-        expectThat(outputSlot.captured.bytes.asString()).not().contains("$currentNestSlot: ")
+        expectThat(outputSlot.captured.shell.asString()).contains("$targetNestSlot: ")
+        expectThat(outputSlot.captured.shell.asString()).not().contains("$currentNestSlot: ")
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
@@ -127,9 +127,9 @@ class AssignNestCommandIT {
     fun `should handle invalid nest entered`() {
         // given
         val givenEggId = "a"
-        val givenInput = bytesOf("n$givenEggId")
+        val givenInput = shellOf("n$givenEggId")
         val referenceInput = givenInput.copy()
-        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(givenEggId))
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(givenEggId))
         val invalidNestSlot = -1
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(invalidNestSlot)))
@@ -142,7 +142,7 @@ class AssignNestCommandIT {
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot) hasSize 2
-        expectThat(outputSlot[1].bytes.asString()) contains "Invalid namespace"
+        expectThat(outputSlot[1].shell.asString()) contains "Invalid namespace"
         verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
@@ -151,11 +151,11 @@ class AssignNestCommandIT {
     fun `should handle current nest entered`() {
         // given
         val givenEggId = "a"
-        val givenInput = bytesOf("n$givenEggId")
+        val givenInput = shellOf("n$givenEggId")
         val referenceInput = givenInput.copy()
-        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(givenEggId))
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(givenEggId))
         val currentNestSlot = 1
-        nestService.deploy(bytesOf("nest"), at(currentNestSlot))
+        nestService.deploy(shellOf("nest"), at(currentNestSlot))
         nestService.moveToNestAt(at(currentNestSlot))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(currentNestSlot)))
@@ -168,7 +168,7 @@ class AssignNestCommandIT {
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot) hasSize 2
-        expectThat(outputSlot[1].bytes.asString()) contains "Password entry is already in the specified namespace"
+        expectThat(outputSlot[1].shell.asString()) contains "Password entry is already in the specified namespace"
         verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
@@ -177,9 +177,9 @@ class AssignNestCommandIT {
     fun `should handle empty nest entered`() {
         // given
         val givenEggId = "a"
-        val givenInput = bytesOf("n$givenEggId")
+        val givenInput = shellOf("n$givenEggId")
         val referenceInput = givenInput.copy()
-        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(givenEggId))
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(givenEggId))
         val targetNestSlot = 1
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(targetNestSlot)))
@@ -193,7 +193,7 @@ class AssignNestCommandIT {
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot) hasSize 2
-        expectThat(outputSlot[1].bytes.asString()) contains "Specified namespace does not exist"
+        expectThat(outputSlot[1].shell.asString()) contains "Specified namespace does not exist"
         verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
@@ -202,14 +202,14 @@ class AssignNestCommandIT {
     fun `should handle other password with same eggId in target nest`() {
         // given
         val givenEggId = "a"
-        val givenInput = bytesOf("n$givenEggId")
+        val givenInput = shellOf("n$givenEggId")
         val referenceInput = givenInput.copy()
         val currentNestSlot = 0
         val targetNestSlot = 1
-        val givenEgg1 = createEggForTesting(withEggIdBytes = bytesOf(givenEggId), withNestSlot = at(currentNestSlot))
-        val givenEgg2 = createEggForTesting(withEggIdBytes = bytesOf(givenEggId), withNestSlot = at(targetNestSlot))
+        val givenEgg1 = createEggForTesting(withEggIdShell = shellOf(givenEggId), withNestSlot = at(currentNestSlot))
+        val givenEgg2 = createEggForTesting(withEggIdShell = shellOf(givenEggId), withNestSlot = at(targetNestSlot))
         nestService.moveToNestAt(at(currentNestSlot))
-        nestService.deploy(bytesOf("nest"), at(targetNestSlot))
+        nestService.deploy(shellOf("nest"), at(targetNestSlot))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(targetNestSlot)))
         val outputSlot = mutableListOf<Output>()
@@ -221,10 +221,10 @@ class AssignNestCommandIT {
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot) hasSize 2
-        expectThat(outputSlot[1].bytes.asString()) contains "Password entry with same alias already exists in target namespace"
+        expectThat(outputSlot[1].shell.asString()) contains "Password entry with same alias already exists in target namespace"
         verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
-    private fun inputOf(index: Int) = inputOf(bytesOf(index.toString()))
+    private fun inputOf(index: Int) = inputOf(shellOf(index.toString()))
 }

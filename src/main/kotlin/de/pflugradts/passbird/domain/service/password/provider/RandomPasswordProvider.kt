@@ -1,42 +1,42 @@
 package de.pflugradts.passbird.domain.service.password.provider
 
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
-import de.pflugradts.passbird.domain.model.transfer.CharValue
-import de.pflugradts.passbird.domain.model.transfer.CharValue.Companion.charValueOf
-import de.pflugradts.passbird.domain.model.transfer.MAX_ASCII_VALUE
-import de.pflugradts.passbird.domain.model.transfer.MIN_ASCII_VALUE
+import de.pflugradts.passbird.domain.model.shell.MAX_ASCII_VALUE
+import de.pflugradts.passbird.domain.model.shell.MIN_ASCII_VALUE
+import de.pflugradts.passbird.domain.model.shell.PlainValue
+import de.pflugradts.passbird.domain.model.shell.PlainValue.Companion.plainValueOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import java.security.SecureRandom
 import kotlin.reflect.KProperty1
 
 private val random = SecureRandom()
 
 class RandomPasswordProvider : PasswordProvider {
-    override fun createNewPassword(passwordRequirements: PasswordRequirements): Bytes {
-        var passwordBytes = emptyBytes()
-        while (!isStrong(passwordBytes, passwordRequirements)) {
-            passwordBytes = randomPassword(passwordRequirements)
+    override fun createNewPassword(passwordRequirements: PasswordRequirements): Shell {
+        var passwordShell = emptyShell()
+        while (!isStrong(passwordShell, passwordRequirements)) {
+            passwordShell = randomPassword(passwordRequirements)
         }
-        return passwordBytes
+        return passwordShell
     }
 
     private fun randomPassword(passwordRequirements: PasswordRequirements) =
-        bytesOf((0..<passwordRequirements.passwordLength).map { randomByte(!passwordRequirements.includeSpecialCharacters) }.toList())
+        shellOf((0..<passwordRequirements.passwordLength).map { randomByte(!passwordRequirements.includeSpecialCharacters) }.toList())
 
     private fun randomByte(avoidSymbols: Boolean): Byte {
         val getRandom = { (random.nextInt(MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toByte() }
         var result: Byte
-        do { result = getRandom() } while (avoidSymbols && charValueOf(result).isSymbol)
+        do { result = getRandom() } while (avoidSymbols && plainValueOf(result).isSymbol)
         return result
     }
 
-    private fun isStrong(passwordBytes: Bytes, requirements: PasswordRequirements) =
-        passwordBytes.anyMatch(CharValue::isDigit) &&
-            passwordBytes.anyMatch(CharValue::isUppercaseCharacter) &&
-            passwordBytes.anyMatch(CharValue::isLowercaseCharacter) &&
-            (!requirements.includeSpecialCharacters || passwordBytes.anyMatch(CharValue::isSymbol))
+    private fun isStrong(passwordShell: Shell, requirements: PasswordRequirements) =
+        passwordShell.anyMatch(PlainValue::isDigit) &&
+            passwordShell.anyMatch(PlainValue::isUppercaseCharacter) &&
+            passwordShell.anyMatch(PlainValue::isLowercaseCharacter) &&
+            (!requirements.includeSpecialCharacters || passwordShell.anyMatch(PlainValue::isSymbol))
 
-    private fun Bytes.anyMatch(property: KProperty1<CharValue, Boolean>) = copy().stream().anyMatch { property.get(charValueOf(it)) }
+    private fun Shell.anyMatch(property: KProperty1<PlainValue, Boolean>) = copy().stream().anyMatch { property.get(plainValueOf(it)) }
 }

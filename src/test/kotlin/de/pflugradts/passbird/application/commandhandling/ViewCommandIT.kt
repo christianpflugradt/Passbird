@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ViewCommandHandler
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.fakePasswordService
@@ -28,11 +28,11 @@ class ViewCommandIT {
         // given
         val eggId = "eggId"
         val password = "password"
-        val command = bytesOf("v$eggId")
+        val command = shellOf("v$eggId")
         val reference = command.copy()
         fakePasswordService(
             instance = passwordService,
-            withEggs = listOf(createEggForTesting(withEggIdBytes = bytesOf(eggId), withPasswordBytes = bytesOf(password))),
+            withEggs = listOf(createEggForTesting(withEggIdShell = shellOf(eggId), withPasswordShell = shellOf(password))),
         )
         val outputSlot = slot<Output>()
 
@@ -42,7 +42,7 @@ class ViewCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) isEqualTo password
+        expectThat(outputSlot.captured.shell.asString()) isEqualTo password
         expectThat(command) isNotEqualTo reference
     }
 
@@ -50,7 +50,7 @@ class ViewCommandIT {
     fun `should handle view command for non existing password`() {
         // given
         val eggId = "eggId"
-        val command = bytesOf("v$eggId")
+        val command = shellOf("v$eggId")
         val reference = command.copy()
         fakePasswordService(
             instance = passwordService,

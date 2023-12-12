@@ -3,7 +3,7 @@ package de.pflugradts.passbird.domain.service
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
 import java.util.Optional
@@ -37,7 +37,7 @@ fun fakePasswordService(
         res
     }
     if (withInvalidEggId) {
-        every { instance.challengeEggId(any()) } throws InvalidEggIdException(emptyBytes())
+        every { instance.challengeEggId(any()) } throws InvalidEggIdException(emptyShell())
     } else {
         every { instance.challengeEggId(any()) } returns Unit
     }

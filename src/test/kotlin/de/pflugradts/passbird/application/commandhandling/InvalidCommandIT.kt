@@ -2,8 +2,8 @@ package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import io.mockk.spyk
 import io.mockk.verify
@@ -26,7 +26,7 @@ class InvalidCommandIT {
         @Test
         fun `should handle unknown command`() {
             // given
-            val input = inputOf(bytesOf("z"))
+            val input = inputOf(shellOf("z"))
 
             // when
             inputHandler.handleInput(input)
@@ -38,7 +38,7 @@ class InvalidCommandIT {
         @Test
         fun `should handle empty command`() {
             // given
-            val input = inputOf(emptyBytes())
+            val input = inputOf(emptyShell())
 
             // when
             inputHandler.handleInput(input)
@@ -52,7 +52,7 @@ class InvalidCommandIT {
             // given
             val givenCommand = "c"
             val givenArgument = "1"
-            val input = inputOf(bytesOf("$givenCommand$givenArgument"))
+            val input = inputOf(shellOf("$givenCommand$givenArgument"))
             val captureSystemErr = captureSystemErr()
 
             // when
@@ -81,7 +81,7 @@ class InvalidCommandIT {
         )
         fun `should handle nest command with too large command`(givenInput: String) {
             // given
-            val input = inputOf(bytesOf(givenInput))
+            val input = inputOf(shellOf(givenInput))
 
             // when
             val captureSystemErr = captureSystemErr()
@@ -107,7 +107,7 @@ class InvalidCommandIT {
         )
         fun `should handle unknown nest command`(givenInput: String) {
             // given
-            val input = inputOf(bytesOf(givenInput))
+            val input = inputOf(shellOf(givenInput))
 
             // when
             val actual = commandFactory.construct(CommandType.resolveCommandTypeFrom(input.command), input)

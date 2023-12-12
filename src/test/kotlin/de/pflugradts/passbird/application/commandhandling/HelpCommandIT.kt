@@ -2,7 +2,7 @@ package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHandler
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output
 import io.mockk.mockk
@@ -21,7 +21,7 @@ class HelpCommandIT {
     @Test
     fun `should handle help command`() {
         // given
-        val input = Input.inputOf(Bytes.bytesOf("h"))
+        val input = Input.inputOf(Shell.shellOf("h"))
         val outputSlot = slot<Output>()
 
         // when
@@ -29,6 +29,6 @@ class HelpCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()).contains("Usage")
+        expectThat(outputSlot.captured.shell.asString()).contains("Usage")
     }
 }

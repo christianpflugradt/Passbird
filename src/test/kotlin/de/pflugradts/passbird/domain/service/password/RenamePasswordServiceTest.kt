@@ -6,7 +6,7 @@ import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import de.pflugradts.passbird.domain.service.password.storage.fakeEggRepository
@@ -31,9 +31,9 @@ class RenamePasswordServiceTest {
     @Test
     fun `should rename egg`() {
         // given
-        val oldEggId = bytesOf("eggId123")
-        val newEggId = bytesOf("eggIdABC")
-        val givenEgg = createEggForTesting(withEggIdBytes = oldEggId)
+        val oldEggId = shellOf("eggId123")
+        val newEggId = shellOf("eggIdABC")
+        val givenEgg = createEggForTesting(withEggIdShell = oldEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 
@@ -47,10 +47,10 @@ class RenamePasswordServiceTest {
     @Test
     fun `should throw EggIdAlreadyExistsException if new eggId already exists`() {
         // given
-        val oldEggId = bytesOf("eggId123")
-        val newEggId = bytesOf("eggIdABC")
-        val givenEgg = createEggForTesting(withEggIdBytes = oldEggId)
-        val existingEgg = createEggForTesting(withEggIdBytes = newEggId)
+        val oldEggId = shellOf("eggId123")
+        val newEggId = shellOf("eggIdABC")
+        val givenEgg = createEggForTesting(withEggIdShell = oldEggId)
+        val existingEgg = createEggForTesting(withEggIdShell = newEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(
             instance = eggRepository,
@@ -69,9 +69,9 @@ class RenamePasswordServiceTest {
     @Test
     fun `should do nothing if egg does not exist`() {
         // given
-        val oldEggId = bytesOf("eggId123")
-        val newEggId = bytesOf("eggIdABC")
-        val givenEgg = createEggForTesting(withEggIdBytes = oldEggId)
+        val oldEggId = shellOf("eggId123")
+        val newEggId = shellOf("eggIdABC")
+        val givenEgg = createEggForTesting(withEggIdShell = oldEggId)
         val existingEgg = createEggForTesting()
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(existingEgg))
@@ -86,9 +86,9 @@ class RenamePasswordServiceTest {
     @Test
     fun `should reject invalid eggId`() {
         // given
-        val oldEggId = bytesOf("eggId123")
-        val newEggId = bytesOf("123")
-        val givenEgg = createEggForTesting(withEggIdBytes = oldEggId)
+        val oldEggId = shellOf("eggId123")
+        val newEggId = shellOf("123")
+        val givenEgg = createEggForTesting(withEggIdShell = oldEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 

@@ -2,8 +2,8 @@ package de.pflugradts.passbird.domain.service.password
 
 import com.google.inject.Inject
 import de.pflugradts.passbird.domain.model.event.EggNotFound
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.BytesComparator
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.ShellComparator
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
@@ -15,13 +15,13 @@ class ViewPasswordService @Inject constructor(
     @Inject private val eggRepository: EggRepository,
     @Inject private val eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
-    fun findAllEggIds(): Stream<Bytes> = eggRepository.findAll().map { decrypted(it.viewEggId()) }.sorted(BytesComparator())
-    fun viewPassword(eggIdBytes: Bytes): Optional<Bytes> =
-        encrypted(eggIdBytes).let { encryptedEggIdBytes ->
-            find(encryptedEggIdBytes)
+    fun findAllEggIds(): Stream<Shell> = eggRepository.findAll().map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
+    fun viewPassword(eggIdShell: Shell): Optional<Shell> =
+        encrypted(eggIdShell).let { encryptedEggIdShell ->
+            find(encryptedEggIdShell)
                 .map { decrypted(it.viewPassword()) }
                 .or {
-                    eventRegistry.register(EggNotFound(encryptedEggIdBytes))
+                    eventRegistry.register(EggNotFound(encryptedEggIdShell))
                     eventRegistry.processEvents()
                     Optional.empty()
                 }

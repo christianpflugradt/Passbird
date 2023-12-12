@@ -15,9 +15,9 @@ import de.pflugradts.passbird.application.util.readInt
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import java.util.ArrayDeque
@@ -36,8 +36,8 @@ class PasswordStoreReader @Inject constructor(
 ) {
     fun restore(): Supplier<Stream<Egg>> {
         val eggs = ArrayDeque<Egg>()
-        val bytes = readFromDisk() ?: emptyBytes()
-        val byteArray = bytes.toByteArray()
+        val shell = readFromDisk() ?: emptyShell()
+        val byteArray = shell.toByteArray()
         if (byteArray.isNotEmpty()) {
             verifySignature(byteArray)
             verifyChecksum(byteArray)
@@ -61,10 +61,10 @@ class PasswordStoreReader @Inject constructor(
     private fun verifySignature(bytes: ByteArray) {
         val expectedSignature = signature()
         val actualSignature = ByteArray(signatureSize())
-        copyBytes(bytesOf(bytes).toByteArray(), actualSignature, 0, signatureSize())
+        copyBytes(shellOf(bytes).toByteArray(), actualSignature, 0, signatureSize())
         if (!expectedSignature.contentEquals(actualSignature)) {
             val critical = configuration.adapter.passwordStore.verifySignature
-            reportFailure(SignatureCheckFailure(bytesOf(actualSignature), critical))
+            reportFailure(SignatureCheckFailure(shellOf(actualSignature), critical))
             if (critical) systemOperation.exit()
         }
     }
@@ -84,14 +84,14 @@ class PasswordStoreReader @Inject constructor(
         var incrementedOffset = offset
         if (SECTOR == readInt(bytes, incrementedOffset)) {
             incrementedOffset += intBytes()
-            val nestBytes: MutableList<Bytes> = ArrayList()
+            val nestShells: MutableList<Shell> = ArrayList()
             for (i in 0 until Slot.CAPACITY) {
-                bytes.asNestBytes(incrementedOffset).let {
-                    nestBytes.add(it.first)
+                bytes.asNestShell(incrementedOffset).let {
+                    nestShells.add(it.first)
                     incrementedOffset += it.second
                 }
             }
-            nestService.populate(nestBytes)
+            nestService.populate(nestShells)
         }
         return incrementedOffset
     }
@@ -99,17 +99,17 @@ class PasswordStoreReader @Inject constructor(
     private val filePath get() = systemOperation.resolvePath(configuration.adapter.passwordStore.location, DATABASE_FILENAME)
     private fun calcActualContentSize(totalSize: Int) = totalSize - signatureSize() - checksumBytes() - eofBytes()
 
-    private fun ByteArray.asNestBytes(offset: Int): Pair<Bytes, Int> {
+    private fun ByteArray.asNestShell(offset: Int): Pair<Shell, Int> {
         var incrementedOffset = offset
         val nestSize = readInt(this, incrementedOffset)
         incrementedOffset += Integer.BYTES
-        val result: Bytes
+        val result: Shell
         if (nestSize > 0) {
             val nestBytes = readBytes(this, incrementedOffset, nestSize)
             incrementedOffset += nestBytes.size
-            result = bytesOf(nestBytes)
+            result = shellOf(nestBytes)
         } else {
-            result = Bytes.emptyBytes()
+            result = Shell.emptyShell()
         }
         return Pair(result, incrementedOffset - offset)
     }
@@ -127,7 +127,7 @@ class PasswordStoreReader @Inject constructor(
         val passwordBytes = readBytes(this, incrementedOffset, passwordSize)
         incrementedOffset += passwordSize
         return Pair(
-            createEgg(Slot.at(nestSlot), bytesOf(eggIdBytes), bytesOf(passwordBytes)),
+            createEgg(Slot.at(nestSlot), shellOf(eggIdBytes), shellOf(passwordBytes)),
             incrementedOffset,
         )
     }

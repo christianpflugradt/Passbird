@@ -1,9 +1,9 @@
 package de.pflugradts.passbird.application.util
 
 import de.pflugradts.kotlinextensions.tryCatching
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.io.InputStream
@@ -31,8 +31,8 @@ class SystemOperation {
         if (uri.size > 1) Paths.get(uri[0], *Arrays.copyOfRange(uri, 1, uri.size)) else Paths.get(uri[0])
     fun newInputStream(path: Path): InputStream = Files.newInputStream(path)
     fun newOutputStream(path: Path): OutputStream = Files.newOutputStream(path)
-    fun writeBytesToFile(path: Path, bytes: Bytes): Path = Files.write(path, bytes.toByteArray())
-    fun readBytesFromFile(path: Path) = tryCatching { bytesOf(Files.readAllBytes(path)) } getOrElse emptyBytes()
+    fun writeBytesToFile(path: Path, shell: Shell): Path = Files.write(path, shell.toByteArray())
+    fun readBytesFromFile(path: Path) = tryCatching { shellOf(Files.readAllBytes(path)) } getOrElse emptyShell()
     fun copyToClipboard(text: String) = StringSelection(text).let { Toolkit.getDefaultToolkit().systemClipboard.setContents(it, it) }
     fun exit() { exitProcess(0) }
 }

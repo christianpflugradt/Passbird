@@ -6,8 +6,8 @@ import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -25,71 +25,71 @@ class EggTest {
     @Test
     fun `should view eggId`() {
         // given
-        val givenBytes = bytesOf("myEggId")
-        val egg = createEggForTesting(withEggIdBytes = givenBytes)
+        val givenEggIdShell = shellOf("myEggId")
+        val egg = createEggForTesting(withEggIdShell = givenEggIdShell)
 
         // when
         val actual = egg.viewEggId()
 
         // then
-        expectThat(actual) isEqualTo givenBytes
+        expectThat(actual) isEqualTo givenEggIdShell
     }
 
     @Test
     fun `should rename eggId`() {
         // given
-        val givenBytes = bytesOf("eggId123")
-        val updatedBytes = bytesOf("eggIdABC")
-        val egg = createEggForTesting(withEggIdBytes = givenBytes)
+        val givenEggIdShell = shellOf("eggId123")
+        val updatedEggIdShell = shellOf("eggIdABC")
+        val egg = createEggForTesting(withEggIdShell = givenEggIdShell)
 
         // when
-        egg.rename(updatedBytes)
+        egg.rename(updatedEggIdShell)
         val actual = egg.viewEggId()
 
         // then
-        expectThat(actual) isEqualTo updatedBytes isNotEqualTo givenBytes
+        expectThat(actual) isEqualTo updatedEggIdShell isNotEqualTo givenEggIdShell
     }
 
     @Test
     fun `should view password`() {
         // given
-        val givenBytes = bytesOf("myPassword")
-        val egg = createEggForTesting(withPasswordBytes = givenBytes)
+        val givenEggIdShell = shellOf("myPassword")
+        val egg = createEggForTesting(withPasswordShell = givenEggIdShell)
 
         // when
         val actual = egg.viewPassword()
 
         // then
-        expectThat(actual) isEqualTo givenBytes
+        expectThat(actual) isEqualTo givenEggIdShell
     }
 
     @Test
     fun `should update password`() {
         // given
-        val givenBytes = bytesOf("myPassword")
-        val updatedBytes = bytesOf("newPassword")
-        val egg = createEggForTesting(withPasswordBytes = givenBytes)
+        val givenEggIdShell = shellOf("myPassword")
+        val updatedEggIdShell = shellOf("newPassword")
+        val egg = createEggForTesting(withPasswordShell = givenEggIdShell)
 
         // when
-        egg.updatePassword(updatedBytes)
+        egg.updatePassword(updatedEggIdShell)
         val actual = egg.viewPassword()
 
         // then
-        expectThat(actual) isEqualTo updatedBytes isNotEqualTo givenBytes
+        expectThat(actual) isEqualTo updatedEggIdShell isNotEqualTo givenEggIdShell
     }
 
     @Test
     fun `should discard`() {
         // given
-        val givenBytes = mockk<Bytes>(relaxed = true)
-        every { givenBytes.copy() } returns givenBytes
-        val egg = createEggForTesting(withPasswordBytes = givenBytes)
+        val givenShell = mockk<Shell>(relaxed = true)
+        every { givenShell.copy() } returns givenShell
+        val egg = createEggForTesting(withPasswordShell = givenShell)
 
         // when
         egg.discard()
 
         // then
-        verify { givenBytes.scramble() }
+        verify { givenShell.scramble() }
     }
 
     @Nested
@@ -98,9 +98,9 @@ class EggTest {
         @Test
         fun `should be equal to itself`() {
             // given
-            val givenBytes = bytesOf("eggId")
+            val givenEggIdShell = shellOf("eggId")
             val givenNestSlot = Slot.N1
-            val egg1 = createEggForTesting(withEggIdBytes = givenBytes, withNestSlot = givenNestSlot)
+            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
             val egg2 = egg1
 
             // when
@@ -113,10 +113,10 @@ class EggTest {
         @Test
         fun `should be equal if eggId and nest slot match`() {
             // given
-            val givenBytes = bytesOf("eggId")
+            val givenEggIdShell = shellOf("eggId")
             val givenNestSlot = Slot.N1
-            val egg1 = createEggForTesting(withEggIdBytes = givenBytes, withNestSlot = givenNestSlot)
-            val egg2 = createEggForTesting(withEggIdBytes = givenBytes, withNestSlot = givenNestSlot)
+            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
+            val egg2 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
 
             // when
             val actual = egg1.equals(egg2)
@@ -128,11 +128,11 @@ class EggTest {
         @Test
         fun `should not be equal if eggId does not match`() {
             // given
-            val givenBytes = bytesOf("eggId")
-            val otherBytes = bytesOf("eggId2")
+            val givenEggIdShell = shellOf("eggId")
+            val otherEggIdShell = shellOf("eggId2")
             val givenNestSlot = Slot.N1
-            val egg1 = createEggForTesting(withEggIdBytes = givenBytes, withNestSlot = givenNestSlot)
-            val egg2 = createEggForTesting(withEggIdBytes = otherBytes, withNestSlot = givenNestSlot)
+            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
+            val egg2 = createEggForTesting(withEggIdShell = otherEggIdShell, withNestSlot = givenNestSlot)
 
             // when
             val actual = egg1.equals(egg2)
@@ -144,11 +144,11 @@ class EggTest {
         @Test
         fun `should not be equal if nest slot does not match`() {
             // given
-            val givenBytes = bytesOf("eggId")
+            val givenEggIdShell = shellOf("eggId")
             val givenNestSlot = Slot.N1
             val otherNestSlot = Slot.N2
-            val egg1 = createEggForTesting(withEggIdBytes = givenBytes, withNestSlot = givenNestSlot)
-            val egg2 = createEggForTesting(withEggIdBytes = givenBytes, withNestSlot = otherNestSlot)
+            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
+            val egg2 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = otherNestSlot)
 
             // when
             val actual = egg1.equals(egg2)
@@ -160,11 +160,11 @@ class EggTest {
         @Test
         fun `should not be equal to other classes`() {
             // given
-            val givenBytes = bytesOf("eggId")
-            val egg = createEggForTesting(withEggIdBytes = givenBytes)
+            val givenEggIdShell = shellOf("eggId")
+            val egg = createEggForTesting(withEggIdShell = givenEggIdShell)
 
             // when
-            val actual = egg.equals(createEggId(givenBytes))
+            val actual = egg.equals(createEggId(givenEggIdShell))
 
             // then
             expectThat(actual).isFalse()
@@ -173,7 +173,7 @@ class EggTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val egg = createEggForTesting(withEggIdBytes = bytesOf("eggId"))
+            val egg = createEggForTesting(withEggIdShell = shellOf("eggId"))
 
             // when
             val actual = egg.equals(null)
@@ -188,7 +188,7 @@ class EggTest {
         @Test
         fun `should have created event when egg is created`() {
             // given / when
-            val egg = createEgg(Slot.DEFAULT, bytesOf("eggId"), bytesOf("password"))
+            val egg = createEgg(Slot.DEFAULT, shellOf("eggId"), shellOf("password"))
 
             // then
             expectThat(egg.getDomainEvents()) hasSize 1
@@ -204,7 +204,7 @@ class EggTest {
 
             // when
             egg.clearDomainEvents()
-            egg.updatePassword(bytesOf("new password"))
+            egg.updatePassword(shellOf("new password"))
 
             // then
             expectThat(egg.getDomainEvents()) hasSize 1

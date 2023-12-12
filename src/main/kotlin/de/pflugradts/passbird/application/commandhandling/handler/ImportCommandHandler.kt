@@ -6,7 +6,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.ImportCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.exchange.ImportExportService
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -23,7 +23,7 @@ class ImportCommandHandler@Inject constructor(
         if (commandConfirmed(importCommand)) {
             importExportService.importEggs(importCommand.argument.asString())
         } else {
-            userInterfaceAdapterPort.send(outputOf(bytesOf("Operation aborted.")))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
         }
         importCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
@@ -31,15 +31,15 @@ class ImportCommandHandler@Inject constructor(
 
     private fun commandConfirmed(importCommand: ImportCommand): Boolean {
         if (configuration.application.password.promptOnRemoval) {
-            val overlaps = importExportService.peekImportEggIdBytes(importCommand.argument.asString())
-                .map { (nestSlot, eggIdBytes) -> eggIdBytes.map { Triple(nestSlot, it, passwordService.eggExists(it, nestSlot)) } }
+            val overlaps = importExportService.peekImportEggIdShells(importCommand.argument.asString())
+                .map { (nestSlot, eggIdShell) -> eggIdShell.map { Triple(nestSlot, it, passwordService.eggExists(it, nestSlot)) } }
                 .flatten()
                 .filter { it.third }
                 .map { Pair(it.first, it.second) }
             if (overlaps.isNotEmpty()) {
                 return userInterfaceAdapterPort.receiveConfirmation(
                     outputOf(
-                        bytesOf(
+                        shellOf(
                             "By importing this file ${overlaps.size} existing Passwords" +
                                 "will be irrevocably overwritten.\n" +
                                 "The following Password Entries will be affected: " +

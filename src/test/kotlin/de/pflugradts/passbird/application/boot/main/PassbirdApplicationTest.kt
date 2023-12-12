@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.fakeInput
 import de.pflugradts.passbird.domain.service.createNestServiceSpyForTesting
@@ -61,14 +61,14 @@ class PassbirdApplicationTest {
         every { inputHandler.handleInput(any()) } returns Unit
 
         // when
-        nestService.deploy(bytesOf(givenNest), Slot.N1)
+        nestService.deploy(shellOf(givenNest), Slot.N1)
         nestService.moveToNestAt(Slot.N1)
         passbirdApplication.boot()
 
         // then
         verify { userInterfaceAdapterPort.receive(capture(expectedOutputSlot)) }
         expectThat(expectedOutputSlot) hasSize 2
-        expectedOutputSlot.forEach { expectThat(it.bytes.asString()) isEqualTo "[$givenNest] Enter command: " }
+        expectedOutputSlot.forEach { expectThat(it.shell.asString()) isEqualTo "[$givenNest] Enter command: " }
     }
 
     @Test
@@ -90,6 +90,6 @@ class PassbirdApplicationTest {
         // then
         verify { userInterfaceAdapterPort.receive(capture(expectedOutputSlot)) }
         expectThat(expectedOutputSlot) hasSize 2
-        expectedOutputSlot.forEach { expectThat(it.bytes.asString()) isEqualTo "Enter command: " }
+        expectedOutputSlot.forEach { expectThat(it.shell.asString()) isEqualTo "Enter command: " }
     }
 }

@@ -1,9 +1,9 @@
 package de.pflugradts.passbird.adapter.passwordstore
 
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.shell.Shell
 import java.util.stream.StreamSupport
 
-fun checksum(bytes: ByteArray) = StreamSupport.stream(Bytes.bytesOf(bytes).spliterator(), false)
+fun checksum(bytes: ByteArray) = StreamSupport.stream(Shell.shellOf(bytes).spliterator(), false)
     .mapToInt { it.toInt() }
     .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }.toByte()
 fun signature() = byteArrayOf(0x0, 0x50, 0x77, 0x4D, 0x61, 0x6E, 0x34, 0x0)

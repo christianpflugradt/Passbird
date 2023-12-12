@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ListCommandHandler
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.fakePasswordService
@@ -25,16 +25,16 @@ internal class ListCommandIT {
     @Test
     fun `should handle list command`() {
         // given
-        val input = inputOf(bytesOf("l"))
-        val eggId1 = bytesOf("eggId1")
-        val eggId2 = bytesOf("eggId2")
-        val eggId3 = bytesOf("eggId3")
+        val input = inputOf(shellOf("l"))
+        val eggId1 = shellOf("eggId1")
+        val eggId2 = shellOf("eggId2")
+        val eggId3 = shellOf("eggId3")
         fakePasswordService(
             instance = passwordService,
             withEggs = listOf(
-                createEggForTesting(withEggIdBytes = eggId1),
-                createEggForTesting(withEggIdBytes = eggId2),
-                createEggForTesting(withEggIdBytes = eggId3),
+                createEggForTesting(withEggIdShell = eggId1),
+                createEggForTesting(withEggIdShell = eggId2),
+                createEggForTesting(withEggIdShell = eggId3),
             ),
         )
         val outputSlot = slot<Output>()
@@ -44,13 +44,13 @@ internal class ListCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) isEqualTo "${eggId1.asString()}, ${eggId2.asString()}, ${eggId3.asString()}"
+        expectThat(outputSlot.captured.shell.asString()) isEqualTo "${eggId1.asString()}, ${eggId2.asString()}, ${eggId3.asString()}"
     }
 
     @Test
     fun `should handle list command with empty database `() {
         // given
-        val input = inputOf(bytesOf("l"))
+        val input = inputOf(shellOf("l"))
         fakePasswordService(instance = passwordService, withEggs = emptyList())
         val outputSlot = slot<Output>()
 
@@ -59,6 +59,6 @@ internal class ListCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) isEqualTo "database is empty"
+        expectThat(outputSlot.captured.shell.asString()) isEqualTo "database is empty"
     }
 }

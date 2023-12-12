@@ -6,7 +6,7 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
@@ -30,57 +30,57 @@ class DiscardCommandIT {
     fun `should handle discard command`() {
         // given
         val args = "eggId"
-        val bytes = bytesOf("d$args")
-        val reference = bytes.copy()
-        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
+        val shell = shellOf("d$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeConfiguration(instance = configuration)
 
         // when
-        expectThat(bytes) isEqualTo reference
-        inputHandler.handleInput(inputOf(bytes))
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 1) { passwordService.discardEgg(eq(bytesOf(args))) }
-        expectThat(bytes) isNotEqualTo reference
+        verify(exactly = 1) { passwordService.discardEgg(eq(shellOf(args))) }
+        expectThat(shell) isNotEqualTo reference
     }
 
     @Test
     fun `should handle discard command with prompt on removal`() {
         // given
         val args = "eggId"
-        val bytes = bytesOf("d$args")
-        val reference = bytes.copy()
-        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
+        val shell = shellOf("d$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
         // when
-        expectThat(bytes) isEqualTo reference
-        inputHandler.handleInput(inputOf(bytes))
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 1) { passwordService.discardEgg(eq(bytesOf(args))) }
-        expectThat(bytes) isNotEqualTo reference
+        verify(exactly = 1) { passwordService.discardEgg(eq(shellOf(args))) }
+        expectThat(shell) isNotEqualTo reference
     }
 
     @Test
     fun `should handle discard command with prompt on removal and operation aborted`() {
         // given
         val args = "eggId"
-        val bytes = bytesOf("d$args")
-        val reference = bytes.copy()
+        val shell = shellOf("d$args")
+        val reference = shell.copy()
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
         // when
-        expectThat(bytes) isEqualTo reference
-        inputHandler.handleInput(inputOf(bytes))
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 0) { passwordService.discardEgg(eq(bytesOf(args))) }
-        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(bytesOf("Operation aborted.")))) }
-        expectThat(bytes) isNotEqualTo reference
+        verify(exactly = 0) { passwordService.discardEgg(eq(shellOf(args))) }
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+        expectThat(shell) isNotEqualTo reference
     }
 }

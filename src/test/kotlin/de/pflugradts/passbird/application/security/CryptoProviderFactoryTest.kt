@@ -12,8 +12,8 @@ import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import io.mockk.every
@@ -42,7 +42,7 @@ class CryptoProviderFactoryTest {
     @Test
     fun `should create crypto provider`() {
         // given
-        val correctPassword = inputOf(bytesOf("letmein"))
+        val correctPassword = inputOf(shellOf("letmein"))
         val keyStoreDirectory = "tmp"
         val keyStoreFilePath = fakePath()
         val keyStoreDirPath = fakePath(resolvingTo = Pair(keyStoreFilePath, ReadableConfiguration.KEYSTORE_FILENAME))
@@ -61,9 +61,9 @@ class CryptoProviderFactoryTest {
     @Test
     fun `should create crypto provider on 3rd password input attempt`() {
         // given
-        val incorrectPassword1 = inputOf(bytesOf("letmeout"))
-        val incorrectPassword2 = inputOf(bytesOf("letmeout"))
-        val correctPassword = inputOf(bytesOf("letmein"))
+        val incorrectPassword1 = inputOf(shellOf("letmeout"))
+        val incorrectPassword2 = inputOf(shellOf("letmeout"))
+        val correctPassword = inputOf(shellOf("letmein"))
         val keyStoreDirectory = "tmp"
         val keyStoreFilePath = fakePath()
         val keyStoreDirPath = fakePath(resolvingTo = Pair(keyStoreFilePath, ReadableConfiguration.KEYSTORE_FILENAME))
@@ -87,7 +87,7 @@ class CryptoProviderFactoryTest {
     @Test
     fun `should create crypto provider and terminate application after 3 failed attempts`() {
         // given
-        val incorrectPassword = inputOf(bytesOf("letmeout"))
+        val incorrectPassword = inputOf(shellOf("letmeout"))
         val keyStoreDirectory = "tmp"
         val keyStoreFilePath = fakePath()
         val keyStoreDirPath = fakePath(resolvingTo = Pair(keyStoreFilePath, ReadableConfiguration.KEYSTORE_FILENAME))
@@ -108,10 +108,10 @@ class CryptoProviderFactoryTest {
     }
 
     private fun givenLoginSucceeds(password: Input, keyStoreFilePath: Path) = every {
-        keyStoreAdapterPort.loadKey(eq(password.bytes.toChars()), eq(keyStoreFilePath))
-    } returns success(value = Key(emptyBytes(), emptyBytes()))
+        keyStoreAdapterPort.loadKey(eq(password.shell.toPlainShell()), eq(keyStoreFilePath))
+    } returns success(value = Key(emptyShell(), emptyShell()))
 
     private fun givenLoginFails(password: Input, keyStoreFilePath: Path) = every {
-        keyStoreAdapterPort.loadKey(eq(password.bytes.toChars()), eq(keyStoreFilePath))
+        keyStoreAdapterPort.loadKey(eq(password.shell.toPlainShell()), eq(keyStoreFilePath))
     } returns failure(ex = RuntimeException())
 }

@@ -5,7 +5,7 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.GetCommand
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import kotlin.jvm.optionals.getOrNull
@@ -21,7 +21,7 @@ class GetCommandHandler @Inject constructor(
         // passwordService.viewPassword(getCommand.argument).ifPresent {
         passwordService.viewPassword(getCommand.argument).getOrNull()?.also {
             clipboardAdapterPort.post(outputOf(it))
-            userInterfaceAdapterPort.send(outputOf(bytesOf("Password copied to clipboard.")))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Password copied to clipboard.")))
         }
         getCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

@@ -6,7 +6,7 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
@@ -33,103 +33,103 @@ class SetCommandIT {
     fun `should handle set command`() {
         // given
         val args = "eggId"
-        val bytes = bytesOf("s$args")
-        val reference = bytes.copy()
-        val generatedPassword = bytesOf("p4s5w0rD")
+        val shell = shellOf("s$args")
+        val reference = shell.copy()
+        val generatedPassword = shellOf("p4s5w0rD")
         fakePasswordProvider(instance = passwordProvider, withCreatedPassword = generatedPassword)
         fakePasswordService(instance = passwordService)
         fakeConfiguration(instance = configuration)
 
         // when
-        expectThat(bytes) isEqualTo reference
-        inputHandler.handleInput(inputOf(bytes))
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 1) { passwordService.putEgg(eq(bytesOf(args)), generatedPassword) }
-        expectThat(bytes) isNotEqualTo reference
+        verify(exactly = 1) { passwordService.putEgg(eq(shellOf(args)), generatedPassword) }
+        expectThat(shell) isNotEqualTo reference
     }
 
     @Test
     fun `should handle set command with invalid eggId`() {
         // given
         val args = "invalideggId1!"
-        val bytes = bytesOf("s$args")
-        val reference = bytes.copy()
+        val shell = shellOf("s$args")
+        val reference = shell.copy()
         fakePasswordService(instance = passwordService, withInvalidEggId = true)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakeConfiguration(instance = configuration)
 
         // when
-        expectThat(bytes) isEqualTo reference
-        inputHandler.handleInput(inputOf(bytes))
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
 
         // then
         val expectedOutput = "Password alias cannot contain digits or special characters. Please choose a different alias."
-        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(bytesOf(expectedOutput)))) }
-        verify(exactly = 0) { passwordService.putEgg(eq(bytesOf(args)), any()) }
-        expectThat(bytes) isNotEqualTo reference
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf(expectedOutput)))) }
+        verify(exactly = 0) { passwordService.putEgg(eq(shellOf(args)), any()) }
+        expectThat(shell) isNotEqualTo reference
     }
 
     @Test
     fun `should handle set command with prompt on removal and new egg`() {
         // given
         val args = "eggId"
-        val bytes = bytesOf("s$args")
-        val reference = bytes.copy()
-        val generatedPassword = bytesOf("p4s5w0rD")
+        val shell = shellOf("s$args")
+        val reference = shell.copy()
+        val generatedPassword = shellOf("p4s5w0rD")
         fakePasswordProvider(instance = passwordProvider, withCreatedPassword = generatedPassword)
         fakePasswordService(instance = passwordService)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
         // when
-        expectThat(bytes) isEqualTo reference
-        inputHandler.handleInput(inputOf(bytes))
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 1) { passwordService.putEgg(eq(bytesOf(args)), generatedPassword) }
-        expectThat(bytes) isNotEqualTo reference
+        verify(exactly = 1) { passwordService.putEgg(eq(shellOf(args)), generatedPassword) }
+        expectThat(shell) isNotEqualTo reference
     }
 
     @Test
     fun `should handle set command with prompt on removal and existing egg`() {
         // given
         val args = "eggId"
-        val bytes = bytesOf("s$args")
-        val reference = bytes.copy()
-        val generatedPassword = bytesOf("p4s5w0rD")
-        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
+        val shell = shellOf("s$args")
+        val reference = shell.copy()
+        val generatedPassword = shellOf("p4s5w0rD")
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
         fakePasswordProvider(instance = passwordProvider, withCreatedPassword = generatedPassword)
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
         // when
-        expectThat(bytes) isEqualTo reference
-        inputHandler.handleInput(inputOf(bytes))
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 1) { passwordService.putEgg(eq(bytesOf(args)), generatedPassword) }
-        expectThat(bytes) isNotEqualTo reference
+        verify(exactly = 1) { passwordService.putEgg(eq(shellOf(args)), generatedPassword) }
+        expectThat(shell) isNotEqualTo reference
     }
 
     @Test
     fun `should handle set command with prompt on removal and operation aborted`() {
         // given
         val args = "eggId"
-        val bytes = bytesOf("s$args")
-        val reference = bytes.copy()
-        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
+        val shell = shellOf("s$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
         // when
-        expectThat(bytes) isEqualTo reference
-        inputHandler.handleInput(inputOf(bytes))
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 0) { passwordService.putEgg(eq(bytesOf(args)), any()) }
-        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(bytesOf("Operation aborted.")))) }
-        expectThat(bytes) isNotEqualTo reference
+        verify(exactly = 0) { passwordService.putEgg(eq(shellOf(args)), any()) }
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+        expectThat(shell) isNotEqualTo reference
     }
 }

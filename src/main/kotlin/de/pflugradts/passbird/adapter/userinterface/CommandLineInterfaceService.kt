@@ -5,8 +5,8 @@ import com.google.inject.Singleton
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
+import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
@@ -26,7 +26,7 @@ class CommandLineInterfaceService @Inject constructor(
         val bytes = ArrayList<Byte>()
         var next: Char
         while (!isLinebreak(stdin().also { next = it })) { bytes.add(next.code.toByte()) }
-        return inputOf(Bytes.bytesOf(bytes))
+        return inputOf(Shell.shellOf(bytes))
     }
 
     private fun stdin(): Char = System.`in`.read().toChar()
@@ -35,13 +35,13 @@ class CommandLineInterfaceService @Inject constructor(
     override fun receiveSecurely(output: Output): Input {
         sendWithoutLineBreak(output)
         return if (configuration.adapter.userInterface.secureInput && systemOperation.isConsoleAvailable) {
-            inputOf(charsOf(systemOperation.readPasswordFromConsole()).toBytes())
+            inputOf(plainShellOf(systemOperation.readPasswordFromConsole()).toShell())
         } else {
             receive()
         }
     }
 
-    private fun sendWithoutLineBreak(output: Output) = Bytes.bytesOf(output.bytes.toByteArray()).forEach {
+    private fun sendWithoutLineBreak(output: Output) = Shell.shellOf(output.shell.toByteArray()).forEach {
         sendChar(Char(it.toUShort()))
     }
 

@@ -1,9 +1,9 @@
 package de.pflugradts.passbird.domain.model.nest
 
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 
-class Nest private constructor(val bytes: Bytes, val slot: Slot) {
+class Nest private constructor(val shell: Shell, val slot: Slot) {
     override fun toString() = "Nest(slot=$slot)"
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -13,7 +13,7 @@ class Nest private constructor(val bytes: Bytes, val slot: Slot) {
     }
     override fun hashCode() = slot.hashCode()
     companion object {
-        val DEFAULT = Nest(bytesOf("Default"), Slot.DEFAULT)
-        fun createNest(bytes: Bytes, slot: Slot) = Nest(bytes.copy(), slot)
+        val DEFAULT = Nest(shellOf("Default"), Slot.DEFAULT)
+        fun createNest(shell: Shell, slot: Slot) = Nest(shell.copy(), slot)
     }
 }

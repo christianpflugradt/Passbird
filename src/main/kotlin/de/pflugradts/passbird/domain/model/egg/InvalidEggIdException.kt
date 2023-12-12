@@ -1,5 +1,5 @@
 package de.pflugradts.passbird.domain.model.egg
 
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.shell.Shell
 
-class InvalidEggIdException(val eggIdBytes: Bytes) : RuntimeException("Key '${eggIdBytes.asString()}' contains non alphabetic characters!")
+class InvalidEggIdException(val eggIdShell: Shell) : RuntimeException("Key '${eggIdShell.asString()}' contains non alphabetic characters!")

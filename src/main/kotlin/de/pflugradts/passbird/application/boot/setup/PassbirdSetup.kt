@@ -7,7 +7,7 @@ import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.ConfigurationSync
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.emptyInput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -38,7 +38,7 @@ class PassbirdSetup @Inject constructor(
         terminate(systemOperation)
     }
 
-    private fun continueRoute() = userInterfaceAdapterPort.receiveConfirmation(outputOf(bytesOf("Your input: ")))
+    private fun continueRoute() = userInterfaceAdapterPort.receiveConfirmation(outputOf(shellOf("Your input: ")))
 
     private fun configTemplateRoute() {
         setupGuide.sendInputPath("configuration")
@@ -62,8 +62,8 @@ class PassbirdSetup @Inject constructor(
         var inputRepeated = emptyInput()
         while (input.isEmpty || input != inputRepeated) {
             setupGuide.sendNonMatchingInputs()
-            input = userInterfaceAdapterPort.receiveSecurely(outputOf(bytesOf("first input: ")))
-            inputRepeated = userInterfaceAdapterPort.receiveSecurely(outputOf(bytesOf("second input: ")))
+            input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("first input: ")))
+            inputRepeated = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("second input: ")))
         }
         userInterfaceAdapterPort.sendLineBreak()
         return input
@@ -71,7 +71,7 @@ class PassbirdSetup @Inject constructor(
 
     private fun createKeyStore(directory: String, password: Input) {
         keyStoreAdapterPort.storeKey(
-            password.bytes.toChars(),
+            password.shell.toPlainShell(),
             Paths.get(directory).resolve(ReadableConfiguration.KEYSTORE_FILENAME),
         )
         setupGuide.sendCreateKeyStoreSucceeded()
@@ -80,7 +80,7 @@ class PassbirdSetup @Inject constructor(
     private fun verifyValidDirectory(source: String): String {
         var directory = source
         while (!isValidDirectory(directory)) {
-            directory = userInterfaceAdapterPort.receive(outputOf(bytesOf("your input: "))).bytes.asString()
+            directory = userInterfaceAdapterPort.receive(outputOf(shellOf("your input: "))).shell.asString()
         }
         return directory
     }

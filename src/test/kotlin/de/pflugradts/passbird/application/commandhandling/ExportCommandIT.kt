@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ExportCommandHandler
 import de.pflugradts.passbird.application.exchange.ImportExportService
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import io.mockk.mockk
 import io.mockk.verify
@@ -23,15 +23,15 @@ class ExportCommandIT {
     fun `should handle export command`() {
         // given
         val args = "tmp"
-        val bytes = bytesOf("e$args")
-        val reference = bytes.copy()
+        val shell = shellOf("e$args")
+        val reference = shell.copy()
 
         // when
-        expectThat(bytes) isEqualTo reference
-        inputHandler.handleInput(inputOf(bytes))
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
 
         // then
         verify(exactly = 1) { importExportService.exportEggs(args) }
-        expectThat(bytes) isNotEqualTo reference
+        expectThat(shell) isNotEqualTo reference
     }
 }

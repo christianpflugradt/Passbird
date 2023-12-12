@@ -6,7 +6,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.AssignNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -21,21 +21,21 @@ class AssignNestCommandHandler @Inject constructor(
     private fun handleAssignNestCommand(assignNestCommand: AssignNestCommand) {
         if (passwordService.eggExists(assignNestCommand.argument, EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             userInterfaceAdapterPort.send(
-                outputOf(bytesOf("Available namespaces: \n${getAvailableNests(includeCurrent = false)}")),
+                outputOf(shellOf("Available namespaces: \n${getAvailableNests(includeCurrent = false)}")),
             )
-            val input = userInterfaceAdapterPort.receive(outputOf(bytesOf("Enter namespace you want to move password entry to: ")))
+            val input = userInterfaceAdapterPort.receive(outputOf(shellOf("Enter namespace you want to move password entry to: ")))
             val nestSlot = input.extractNestSlot()
             if (nestSlot === Slot.INVALID) {
-                userInterfaceAdapterPort.send(outputOf(bytesOf("Invalid namespace - Operation aborted.")))
+                userInterfaceAdapterPort.send(outputOf(shellOf("Invalid namespace - Operation aborted.")))
             } else if (nestSlot === nestService.getCurrentNest().slot) {
                 userInterfaceAdapterPort.send(
-                    outputOf(bytesOf("Password entry is already in the specified namespace - Operation aborted.")),
+                    outputOf(shellOf("Password entry is already in the specified namespace - Operation aborted.")),
                 )
             } else if (nestService.atSlot(nestSlot).isEmpty) {
-                userInterfaceAdapterPort.send(outputOf(bytesOf("Specified namespace does not exist - Operation aborted.")))
+                userInterfaceAdapterPort.send(outputOf(shellOf("Specified namespace does not exist - Operation aborted.")))
             } else if (passwordService.eggExists(assignNestCommand.argument, nestSlot)) {
                 userInterfaceAdapterPort.send(
-                    outputOf(bytesOf("Password entry with same alias already exists in target namespace - Operation aborted.")),
+                    outputOf(shellOf("Password entry with same alias already exists in target namespace - Operation aborted.")),
                 )
             } else {
                 passwordService.moveEgg(assignNestCommand.argument, nestSlot)

@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.domain.model.transfer
+package de.pflugradts.passbird.domain.model.shell
 
 const val MIN_ASCII_VALUE = 32
 const val MAX_ASCII_VALUE = 126
@@ -9,7 +9,7 @@ const val LAST_UPPERCASE_INDEX = 90
 const val FIRST_LOWERCASE_INDEX = 97
 const val LAST_LOWERCASE_INDEX = 122
 
-class CharValue private constructor(private val value: Char) {
+class PlainValue private constructor(private val value: Char) {
 
     val isDigit get() = value.code in FIRST_DIGIT_INDEX..LAST_DIGIT_INDEX
     val isUppercaseCharacter get() = value.code in FIRST_UPPERCASE_INDEX..LAST_UPPERCASE_INDEX
@@ -18,8 +18,8 @@ class CharValue private constructor(private val value: Char) {
     val isSymbol get() = !(isDigit || isAlphabeticCharacter)
 
     companion object {
-        fun charValueOf(b: Byte) = CharValue(Char(b.toUShort()))
-        fun charValueOf(i: Int) = CharValue(i.toChar())
-        fun charValueOf(c: Char) = CharValue(c)
+        fun plainValueOf(b: Byte) = PlainValue(Char(b.toUShort()))
+        fun plainValueOf(i: Int) = PlainValue(i.toChar())
+        fun plainValueOf(c: Char) = PlainValue(c)
     }
 }

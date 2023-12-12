@@ -2,9 +2,9 @@ package de.pflugradts.passbird.adapter.exchange
 
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.ShellPair
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,11 +39,11 @@ class FilePasswordExchangeIT {
     @Test
     fun `should export and re-import passwords across multiple nests`() {
         // given
-        val givenEgg1 = BytePair(Pair(bytesOf("eggId1"), bytesOf("password1")))
-        val givenEgg2 = BytePair(Pair(bytesOf("eggId2"), bytesOf("password2")))
-        val givenEgg3 = BytePair(Pair(bytesOf("eggId3"), bytesOf("password3")))
-        val givenEgg4 = BytePair(Pair(bytesOf("eggId4"), bytesOf("password4")))
-        val givenEgg5 = BytePair(Pair(bytesOf("eggId5"), bytesOf("password5")))
+        val givenEgg1 = ShellPair(Pair(shellOf("eggId1"), shellOf("password1")))
+        val givenEgg2 = ShellPair(Pair(shellOf("eggId2"), shellOf("password2")))
+        val givenEgg3 = ShellPair(Pair(shellOf("eggId3"), shellOf("password3")))
+        val givenEgg4 = ShellPair(Pair(shellOf("eggId4"), shellOf("password4")))
+        val givenEgg5 = ShellPair(Pair(shellOf("eggId5"), shellOf("password5")))
 
         // whe
         filePasswordExchange.send(

@@ -5,8 +5,8 @@ import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCo
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.at
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.NestService
@@ -33,10 +33,10 @@ class AddNestCommandIT {
     fun `should handle add nest command`() {
         // given
         val slotIndex = 1
-        val givenInput = bytesOf("n+$slotIndex")
+        val givenInput = shellOf("n+$slotIndex")
         val slotFromInput = at(slotIndex)
-        val referenceNest = bytesOf("mynest")
-        val givenNest = bytesOf("mynest")
+        val referenceNest = shellOf("mynest")
+        val givenNest = shellOf("mynest")
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(givenNest)))
 
         // when
@@ -44,7 +44,7 @@ class AddNestCommandIT {
 
         // then
         verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
-        expectThat(nestService.nestBytesAtSlot(slotFromInput)) isEqualTo referenceNest
+        expectThat(nestService.nestShellAtSlot(slotFromInput)) isEqualTo referenceNest
         expectThat(givenNest) isNotEqualTo referenceNest
     }
 
@@ -52,21 +52,21 @@ class AddNestCommandIT {
     fun `should update existing nest`() {
         // given
         val slotIndex = 1
-        val input = inputOf(bytesOf("n+$slotIndex"))
+        val input = inputOf(shellOf("n+$slotIndex"))
         val slotFromInput = at(slotIndex)
-        val referenceNest = bytesOf("mynest")
-        val givenNest = bytesOf("mynest")
-        val otherNest = bytesOf("othernest")
+        val referenceNest = shellOf("mynest")
+        val givenNest = shellOf("mynest")
+        val otherNest = shellOf("othernest")
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(givenNest)))
         nestService.deploy(otherNest, slotFromInput)
-        expectThat(nestService.nestBytesAtSlot(slotFromInput)) isEqualTo otherNest
+        expectThat(nestService.nestShellAtSlot(slotFromInput)) isEqualTo otherNest
 
         // when
         inputHandler.handleInput(input)
 
         // then
         verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
-        expectThat(nestService.nestBytesAtSlot(slotFromInput)) isEqualTo referenceNest
+        expectThat(nestService.nestShellAtSlot(slotFromInput)) isEqualTo referenceNest
         expectThat(givenNest) isNotEqualTo referenceNest
     }
 
@@ -74,9 +74,9 @@ class AddNestCommandIT {
     fun `should handle empty input`() {
         // given
         val slotIndex = 1
-        val input = inputOf(bytesOf("n+$slotIndex"))
+        val input = inputOf(shellOf("n+$slotIndex"))
         val slotFromInput = at(slotIndex)
-        val givenNest = bytesOf("")
+        val givenNest = shellOf("")
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(givenNest)))
         val outputSlot = slot<Output>()
 
@@ -85,7 +85,7 @@ class AddNestCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) contains "Empty input"
+        expectThat(outputSlot.captured.shell.asString()) contains "Empty input"
         expectThat(nestService.atSlot(slotFromInput).isEmpty).isTrue()
     }
 
@@ -93,7 +93,7 @@ class AddNestCommandIT {
     fun `should handle add nest command for default slot`() {
         // given
         val slotIndex = 0
-        val input = inputOf(bytesOf("n+$slotIndex"))
+        val input = inputOf(shellOf("n+$slotIndex"))
         val outputSlot = slot<Output>()
 
         // when
@@ -102,8 +102,8 @@ class AddNestCommandIT {
         // then
         verify(exactly = 0) { userInterfaceAdapterPort.receive(any()) }
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) contains "Default namespace cannot be replaced"
+        expectThat(outputSlot.captured.shell.asString()) contains "Default namespace cannot be replaced"
     }
 
-    private fun NestService.nestBytesAtSlot(slot: Slot) = atSlot(slot).getOrNull()?.bytes ?: emptyBytes()
+    private fun NestService.nestShellAtSlot(slot: Slot) = atSlot(slot).getOrNull()?.shell ?: emptyShell()
 }

@@ -1,23 +1,12 @@
-package de.pflugradts.passbird.domain.model.transfer
+package de.pflugradts.passbird.domain.model.shell
 
 import de.pflugradts.passbird.domain.model.ddd.ValueObject
-import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
+import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
 import java.security.SecureRandom
 import java.util.stream.Stream
 import java.util.stream.StreamSupport
 
-/**
- *
- * A Bytes instance is the basic structure to represent information.
- *
- * Any content, be it public or sensitive data, should always be represented as Bytes.
- * A Bytes can be constructed from and converted to other data structures such as String, byte[] or
- * [Chars]. Sensitive data should never be converted to String unless it's inevitable.
- *
- * A [CryptoProvider] can encrypt/decrypt a Bytes.
- * On an unencrypted Bytes [.scramble] should always be called after using it.
- */
-class Bytes private constructor(
+class Shell private constructor(
     private val byteArray: ByteArray,
 ) : ValueObject,
     Iterable<Byte> {
@@ -28,15 +17,15 @@ class Bytes private constructor(
     val firstByte get() = byteArray[0]
     fun getByte(index: Int) = byteArray[index]
     fun getChar(index: Int) = Char(getByte(index).toUShort())
-    override fun iterator() = BytesIterator(byteArray.clone())
-    fun copy() = bytesOf(byteArray.clone())
+    override fun iterator() = ShellIterator(byteArray.clone())
+    fun copy() = shellOf(byteArray.clone())
     fun stream(): Stream<Byte> = StreamSupport.stream(spliterator(), false)
     fun toByteArray() = byteArray.clone()
 
-    fun toChars(): Chars {
+    fun toPlainShell(): PlainShell {
         val c = CharArray(size)
         for (i in 0 until size) { c[i] = Char(byteArray[i].toUShort()) }
-        return charsOf(c)
+        return plainShellOf(c)
     }
 
     fun asString(): String {
@@ -48,20 +37,20 @@ class Bytes private constructor(
     }
 
     @JvmOverloads
-    fun slice(fromInclusive: Int, toExclusive: Int = byteArray.size): Bytes =
+    fun slice(fromInclusive: Int, toExclusive: Int = byteArray.size): Shell =
         if (toExclusive - fromInclusive > 0) {
             val sub = ByteArray(toExclusive - fromInclusive)
             System.arraycopy(byteArray, fromInclusive, sub, 0, sub.size)
-            bytesOf(sub)
+            shellOf(sub)
         } else {
-            emptyBytes()
+            emptyShell()
         }
 
     fun scramble() = byteArray.indices.forEach {
         byteArray[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toByte()
     }
 
-    class BytesIterator(private val byteArray: ByteArray) : Iterator<Byte> {
+    class ShellIterator(private val byteArray: ByteArray) : Iterator<Byte> {
         private var index = 0
         override fun hasNext() = index < byteArray.size
         override fun next() = if (hasNext()) byteArray[index++] else throw NoSuchElementException()
@@ -70,7 +59,7 @@ class Bytes private constructor(
     override fun equals(other: Any?): Boolean = when {
         (this === other) -> true
         (javaClass != other?.javaClass) -> false
-        else -> byteArray contentEquals (other as Bytes).byteArray
+        else -> byteArray contentEquals (other as Shell).byteArray
     }
 
     override fun hashCode() = byteArray.contentHashCode()
@@ -79,21 +68,24 @@ class Bytes private constructor(
         private val SECURE_RANDOM = SecureRandom()
 
         @JvmStatic
-        fun bytesOf(bytes: ByteArray) = Bytes(bytes.clone())
+        fun shellOf(bytes: ByteArray) = Shell(bytes.clone())
 
         @JvmStatic
-        fun bytesOf(b: List<Byte>): Bytes {
+        fun shellOf(b: List<Byte>): Shell {
             val bytes = ByteArray(b.size)
             for (i in b.indices) {
                 bytes[i] = b[i]
             }
-            return bytesOf(bytes)
+            return shellOf(bytes)
         }
 
         @JvmStatic
-        fun bytesOf(s: String): Bytes = charsOf(s.toCharArray()).toBytes()
+        fun shellOf(s: String): Shell = plainShellOf(s.toCharArray()).toShell()
 
         @JvmStatic
-        fun emptyBytes(): Bytes = bytesOf(ByteArray(0))
+        fun emptyShell(): Shell = shellOf(ByteArray(0))
     }
 }
+
+@JvmInline
+value class ShellPair(val value: Pair<Shell, Shell>)

@@ -8,8 +8,8 @@ import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -40,9 +40,9 @@ class ApplicationEventHandler @Inject constructor(
 
     @Subscribe
     private fun handleEggNotFound(eggNotFound: EggNotFound) {
-        send("PasswordEntry '${decrypt(eggNotFound.eggIdBytes)}' not found.")
+        send("PasswordEntry '${decrypt(eggNotFound.eggIdShell)}' not found.")
     }
 
-    private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(bytesOf(str)))
-    private fun decrypt(bytes: Bytes) = cryptoProvider.decrypt(bytes).asString()
+    private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str)))
+    private fun decrypt(shell: Shell) = cryptoProvider.decrypt(shell).asString()
 }

@@ -1,14 +1,14 @@
 package de.pflugradts.passbird.domain.model.egg
 
 import de.pflugradts.passbird.domain.model.ddd.DomainEntity
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.shell.Shell
 
-class EggId private constructor(private var bytes: Bytes) : DomainEntity {
-    fun rename(newBytes: Bytes) { bytes = newBytes.copy() }
-    fun view() = bytes.copy()
-    override fun equals(other: Any?) = (other as? EggId)?.view() == bytes
-    override fun hashCode() = bytes.hashCode()
+class EggId private constructor(private var shell: Shell) : DomainEntity {
+    fun rename(newShell: Shell) { shell = newShell.copy() }
+    fun view() = shell.copy()
+    override fun equals(other: Any?) = (other as? EggId)?.view() == shell
+    override fun hashCode() = shell.hashCode()
     companion object {
-        fun createEggId(bytes: Bytes) = EggId(bytes.copy())
+        fun createEggId(shell: Shell) = EggId(shell.copy())
     }
 }

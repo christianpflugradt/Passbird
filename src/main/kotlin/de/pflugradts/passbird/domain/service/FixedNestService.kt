@@ -7,7 +7,7 @@ import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.FIRST_SLOT
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.LAST_SLOT
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import java.util.Collections
 import java.util.Optional
@@ -19,18 +19,18 @@ class FixedNestService @Inject constructor(
     private val nests = Collections.nCopies(CAPACITY, Optional.empty<Nest>()).toMutableList()
     private var currentNest = Slot.DEFAULT
 
-    override fun populate(nestBytes: List<Bytes>) {
-        if (nestBytes.size == CAPACITY) {
+    override fun populate(nestShells: List<Shell>) {
+        if (nestShells.size == CAPACITY) {
             (FIRST_SLOT..LAST_SLOT).forEach {
-                if (nestBytes[it - 1].isNotEmpty) {
-                    nests[it - 1] = Optional.of(Nest.createNest(nestBytes[it - 1], Slot.at(it)))
+                if (nestShells[it - 1].isNotEmpty) {
+                    nests[it - 1] = Optional.of(Nest.createNest(nestShells[it - 1], Slot.at(it)))
                 }
             }
         }
     }
 
-    override fun deploy(nestBytes: Bytes, slot: Slot) {
-        nests[slot.index() - 1] = Optional.of(Nest.createNest(nestBytes, slot))
+    override fun deploy(nestShell: Shell, slot: Slot) {
+        nests[slot.index() - 1] = Optional.of(Nest.createNest(nestShell, slot))
         eggRepository.sync()
     }
     override fun atSlot(slot: Slot): Optional<Nest> =

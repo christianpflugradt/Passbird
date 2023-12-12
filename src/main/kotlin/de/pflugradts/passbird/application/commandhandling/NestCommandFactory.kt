@@ -8,7 +8,7 @@ import de.pflugradts.passbird.application.commandhandling.command.SwitchNestComm
 import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.base.Command
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.at
-import de.pflugradts.passbird.domain.model.transfer.CharValue.Companion.charValueOf
+import de.pflugradts.passbird.domain.model.shell.PlainValue.Companion.plainValueOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 
 private const val MAX_COMMAND_SIZE = 3
@@ -23,7 +23,7 @@ class NestCommandFactory() {
             return ViewNestCommand()
         } else if (command.size == 1 && !input.data.isEmpty) {
             return AssignNestCommand(input)
-        } else if (command.size == 2 && charValueOf(command.getChar(1)).isDigit) {
+        } else if (command.size == 2 && plainValueOf(command.getChar(1)).isDigit) {
             return SwitchNestCommand(at(command.getChar(1)))
         } else if (command.size == 3 && command.getChar(1) == CommandVariant.ADD.value && command.getChar(2).isDigit()) {
             return AddNestCommand(at(command.getChar(2)))

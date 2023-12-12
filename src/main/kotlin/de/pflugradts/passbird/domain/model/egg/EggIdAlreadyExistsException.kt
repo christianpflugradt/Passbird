@@ -1,5 +1,5 @@
 package de.pflugradts.passbird.domain.model.egg
 
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.shell.Shell
 
-class EggIdAlreadyExistsException(val eggIdBytes: Bytes) : RuntimeException("Key '${eggIdBytes.asString()}' already exists!")
+class EggIdAlreadyExistsException(val eggIdShell: Shell) : RuntimeException("Key '${eggIdShell.asString()}' already exists!")

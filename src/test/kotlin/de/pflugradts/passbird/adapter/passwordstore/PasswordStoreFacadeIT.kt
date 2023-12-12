@@ -17,9 +17,9 @@ import de.pflugradts.passbird.domain.model.nest.Slot.N6
 import de.pflugradts.passbird.domain.model.nest.Slot.N7
 import de.pflugradts.passbird.domain.model.nest.Slot.N8
 import de.pflugradts.passbird.domain.model.nest.Slot.N9
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.every
@@ -71,8 +71,8 @@ class PasswordStoreFacadeIT {
     fun setup() {
         expectThat(File(tempPasswordStoreDirectory).mkdir()).isTrue()
         fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory)
-        every { cryptoProvider.encrypt(any(Bytes::class)) } answers { firstArg() }
-        every { cryptoProvider.decrypt(any(Bytes::class)) } answers { firstArg() }
+        every { cryptoProvider.encrypt(any(Shell::class)) } answers { firstArg() }
+        every { cryptoProvider.decrypt(any(Shell::class)) } answers { firstArg() }
     }
 
     @AfterEach
@@ -98,37 +98,37 @@ class PasswordStoreFacadeIT {
     @Test
     fun `should write to and them read from database using nests`() {
         // given
-        val nest1 = bytesOf("nest1")
-        val nest3 = bytesOf("Nest3")
-        val nest9 = bytesOf("+neSt*9")
+        val nest1 = shellOf("nest1")
+        val nest3 = shellOf("Nest3")
+        val nest9 = shellOf("+neSt*9")
         nestService.deploy(nest1, N1)
         nestService.deploy(nest3, N3)
         nestService.deploy(nest9, N9)
         val egg1 = createEggForTesting(
-            withEggIdBytes = bytesOf("eggId1"),
-            withPasswordBytes = bytesOf("password1"),
+            withEggIdShell = shellOf("eggId1"),
+            withPasswordShell = shellOf("password1"),
             withNestSlot = DEFAULT,
         )
         val egg2 = createEggForTesting(
-            withEggIdBytes = bytesOf("eggId2"),
-            withPasswordBytes = bytesOf("password2"),
+            withEggIdShell = shellOf("eggId2"),
+            withPasswordShell = shellOf("password2"),
             withNestSlot = N1,
         )
         val egg3 = createEggForTesting(
-            withEggIdBytes = bytesOf("eggId3"),
-            withPasswordBytes = bytesOf("password3"),
+            withEggIdShell = shellOf("eggId3"),
+            withPasswordShell = shellOf("password3"),
             withNestSlot = N3,
         )
         val egg3b = createEggForTesting(
-            withEggIdBytes = bytesOf("eggId3"),
-            withPasswordBytes = bytesOf("password3b"),
+            withEggIdShell = shellOf("eggId3"),
+            withPasswordShell = shellOf("password3b"),
             withNestSlot = N9,
         )
         val eggs = listOf(egg1, egg2, egg3, egg3b)
 
         // when
         passwordStoreFacade.sync { eggs.stream() }
-        nestService.populate(Collections.nCopies(CAPACITY, emptyBytes()))
+        nestService.populate(Collections.nCopies(CAPACITY, emptyShell()))
         expectThat(File(databaseFilename)).exists()
         val actual = passwordStoreFacade.restore()
 
@@ -141,7 +141,7 @@ class PasswordStoreFacadeIT {
             N9 to nest9,
         ).forEach { (k, v) ->
             expectThat(nestService.atSlot(k).isPresent)
-            expectThat(nestService.atSlot(k).get().bytes) isEqualTo v
+            expectThat(nestService.atSlot(k).get().shell) isEqualTo v
         }
     }
 
@@ -300,8 +300,8 @@ class PasswordStoreFacadeIT {
     }
 
     private fun someEggs() = listOf(
-        createEggForTesting(withEggIdBytes = bytesOf("eggId1"), withPasswordBytes = bytesOf("password1")),
-        createEggForTesting(withEggIdBytes = bytesOf("eggId2"), withPasswordBytes = bytesOf("password2")),
-        createEggForTesting(withEggIdBytes = bytesOf("eggId3"), withPasswordBytes = bytesOf("password3")),
+        createEggForTesting(withEggIdShell = shellOf("eggId1"), withPasswordShell = shellOf("password1")),
+        createEggForTesting(withEggIdShell = shellOf("eggId2"), withPasswordShell = shellOf("password2")),
+        createEggForTesting(withEggIdShell = shellOf("eggId3"), withPasswordShell = shellOf("password3")),
     )
 }

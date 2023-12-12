@@ -8,9 +8,9 @@ import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -36,8 +36,8 @@ class ApplicationEventHandlerIT {
     @MethodSource("providePasswordEvents")
     fun `should process egg created`(domainEvent: DomainEvent) {
         // given
-        val expectedBytes = bytesOf("expected eggId")
-        every { cryptoProvider.decrypt(any(Bytes::class)) } answers { expectedBytes }
+        val expectedEggIdShell = shellOf("expected eggId")
+        every { cryptoProvider.decrypt(any(Shell::class)) } answers { expectedEggIdShell }
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         val outputSlot = slot<Output>()
 
@@ -47,7 +47,7 @@ class ApplicationEventHandlerIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) contains expectedBytes.asString()
+        expectThat(outputSlot.captured.shell.asString()) contains expectedEggIdShell.asString()
     }
 
     companion object {
@@ -57,7 +57,7 @@ class ApplicationEventHandlerIT {
             Arguments.of(EggUpdated(createEggForTesting())),
             Arguments.of(EggRenamed(createEggForTesting())),
             Arguments.of(EggRenamed(createEggForTesting())),
-            Arguments.of(EggNotFound(emptyBytes())),
+            Arguments.of(EggNotFound(emptyShell())),
         )
     }
 }

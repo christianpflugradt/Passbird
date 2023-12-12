@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import de.pflugradts.passbird.domain.service.password.storage.fakeEggRepository
@@ -25,9 +25,9 @@ class DiscardPasswordServiceTest {
     @Test
     fun `should discard egg`() {
         // given
-        val givenEggId = bytesOf("EggId")
-        val givenPassword = bytesOf("Password")
-        val givenEgg = createEggForTesting(withEggIdBytes = givenEggId, withPasswordBytes = givenPassword)
+        val givenEggId = shellOf("EggId")
+        val givenPassword = shellOf("Password")
+        val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withPasswordShell = givenPassword)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 
@@ -44,9 +44,9 @@ class DiscardPasswordServiceTest {
     @Test
     fun `should not discard anything if there is no match`() {
         // given
-        val givenEggId = bytesOf("EggId")
-        val otherEggId = bytesOf("try this")
-        val givenEgg = createEggForTesting(withEggIdBytes = givenEggId)
+        val givenEggId = shellOf("EggId")
+        val otherEggId = shellOf("try this")
+        val givenEgg = createEggForTesting(withEggIdShell = givenEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 

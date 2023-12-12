@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNestCommandHandler
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.createNestServiceForTesting
@@ -27,8 +27,8 @@ class SwitchNestCommandIT {
     fun `should handle switch nest command`() {
         // given
         val givenNestSlot = Slot.N1
-        nestService.deploy(bytesOf("nest"), givenNestSlot)
-        val input = inputOf(bytesOf("n" + givenNestSlot.index()))
+        nestService.deploy(shellOf("nest"), givenNestSlot)
+        val input = inputOf(shellOf("n" + givenNestSlot.index()))
 
         // when
         inputHandler.handleInput(input)
@@ -42,9 +42,9 @@ class SwitchNestCommandIT {
     fun `should do nothing if nest is already current`() {
         // given
         val givenNestSlot = Slot.N1
-        nestService.deploy(bytesOf("nest"), givenNestSlot)
+        nestService.deploy(shellOf("nest"), givenNestSlot)
         nestService.moveToNestAt(givenNestSlot)
-        val input = inputOf(bytesOf("n" + givenNestSlot.index()))
+        val input = inputOf(shellOf("n" + givenNestSlot.index()))
         val outputSlot = slot<Output>()
 
         // when
@@ -52,14 +52,14 @@ class SwitchNestCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) contains "is already the current namespace"
+        expectThat(outputSlot.captured.shell.asString()) contains "is already the current namespace"
     }
 
     @Test
     fun `should do nothing if nest is not deployed`() {
         // given
         val givenNestSlot = Slot.N1
-        val input = inputOf(bytesOf("n" + givenNestSlot.index()))
+        val input = inputOf(shellOf("n" + givenNestSlot.index()))
         expectThat(nestService.atSlot(givenNestSlot).isEmpty).isTrue()
         val outputSlot = slot<Output>()
 
@@ -68,6 +68,6 @@ class SwitchNestCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) contains "Specified namespace does not exist"
+        expectThat(outputSlot.captured.shell.asString()) contains "Specified namespace does not exist"
     }
 }

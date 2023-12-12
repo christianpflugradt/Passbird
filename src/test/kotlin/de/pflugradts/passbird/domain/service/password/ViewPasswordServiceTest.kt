@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
@@ -30,8 +30,8 @@ class ViewPasswordServiceTest {
     @Test
     fun `should return true if egg exists`() {
         // given
-        val givenEggId = bytesOf("EggId")
-        val matchingEgg = createEggForTesting(withEggIdBytes = givenEggId)
+        val givenEggId = shellOf("EggId")
+        val matchingEgg = createEggForTesting(withEggIdShell = givenEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
@@ -46,9 +46,9 @@ class ViewPasswordServiceTest {
     @Test
     fun `should return false if egg does not exist`() {
         // given
-        val givenEggId = bytesOf("EggId")
-        val otherEggId = bytesOf("try this")
-        val matchingEgg = createEggForTesting(withEggIdBytes = givenEggId)
+        val givenEggId = shellOf("EggId")
+        val otherEggId = shellOf("try this")
+        val matchingEgg = createEggForTesting(withEggIdShell = givenEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
@@ -63,9 +63,9 @@ class ViewPasswordServiceTest {
     @Test
     fun `should find existing password`() {
         // given
-        val givenEggId = bytesOf("EggId")
-        val expectedPassword = bytesOf("Password")
-        val matchingEgg = createEggForTesting(withEggIdBytes = givenEggId, withPasswordBytes = expectedPassword)
+        val givenEggId = shellOf("EggId")
+        val expectedPassword = shellOf("Password")
+        val matchingEgg = createEggForTesting(withEggIdShell = givenEggId, withPasswordShell = expectedPassword)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
@@ -82,9 +82,9 @@ class ViewPasswordServiceTest {
     @Test
     fun `should return empty optional if egg does not exist`() {
         // given
-        val givenEggId = bytesOf("EggId")
-        val otherEggId = bytesOf("tryThis")
-        val matchingEgg = createEggForTesting(withEggIdBytes = givenEggId)
+        val givenEggId = shellOf("EggId")
+        val otherEggId = shellOf("tryThis")
+        val matchingEgg = createEggForTesting(withEggIdShell = givenEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
@@ -101,12 +101,12 @@ class ViewPasswordServiceTest {
     @Test
     fun `should find all eggIds in alphabetical order`() {
         // given
-        val eggId1 = bytesOf("abc")
-        val eggId2 = bytesOf("hij")
-        val eggId3 = bytesOf("xyz")
-        val egg1 = createEggForTesting(withEggIdBytes = eggId1)
-        val egg2 = createEggForTesting(withEggIdBytes = eggId2)
-        val egg3 = createEggForTesting(withEggIdBytes = eggId3)
+        val eggId1 = shellOf("abc")
+        val eggId2 = shellOf("hij")
+        val eggId3 = shellOf("xyz")
+        val egg1 = createEggForTesting(withEggIdShell = eggId1)
+        val egg2 = createEggForTesting(withEggIdShell = eggId2)
+        val egg3 = createEggForTesting(withEggIdShell = eggId3)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(
             instance = eggRepository,

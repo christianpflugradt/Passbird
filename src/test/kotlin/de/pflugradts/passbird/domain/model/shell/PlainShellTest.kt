@@ -1,7 +1,7 @@
-package de.pflugradts.passbird.domain.model.transfer
+package de.pflugradts.passbird.domain.model.shell
 
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
-import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
+import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -10,79 +10,79 @@ import strikt.assertions.isFalse
 import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
 
-class CharsTest {
+class PlainShellTest {
     @Test
-    fun `should convert to bytes`() {
+    fun `should convert to shell`() {
         // given
-        val givenChars = charsOf('a', 'b', 'c')
-        val referenceChars = charsOf('a', 'b', 'c')
+        val givenPlainShell = plainShellOf('a', 'b', 'c')
+        val referencePlainShell = plainShellOf('a', 'b', 'c')
 
         // when
-        val actual = givenChars.toBytes()
+        val actual = givenPlainShell.toShell()
 
         // then
-        expectThat(actual.toChars()) isEqualTo referenceChars
+        expectThat(actual.toPlainShell()) isEqualTo referencePlainShell
     }
 
     @Test
-    fun `should convert empty chars to bytes`() {
+    fun `should convert empty plainShell to shell`() {
         // given
-        val givenChars = charsOf()
+        val givenPlainShell = plainShellOf()
 
         // when
-        val actual = givenChars.toBytes()
+        val actual = givenPlainShell.toShell()
 
         // then
-        expectThat(actual) isEqualTo emptyBytes()
+        expectThat(actual) isEqualTo emptyShell()
     }
 
     @Test
-    fun `should scramble chars when converting to bytes`() {
+    fun `should scramble plainShell when converting to shell`() {
         // given
-        val givenCharArray = charsOf('a', 'b', 'c')
-        val referenceCharArray = charsOf('a', 'b', 'c')
+        val givenCharArray = plainShellOf('a', 'b', 'c')
+        val referenceCharArray = plainShellOf('a', 'b', 'c')
 
         // when
         expectThat(givenCharArray) isEqualTo referenceCharArray
-        givenCharArray.toBytes()
+        givenCharArray.toShell()
 
         // then
         expectThat(givenCharArray) isNotEqualTo referenceCharArray
     }
 
     @Test
-    fun `should convert chars to char array`() {
+    fun `should convert plainShell to char array`() {
         // given
         val givenCharArray = charArrayOf('a', 'b', 'c')
 
         // when
-        val actual = charsOf(givenCharArray).toCharArray()
+        val actual = plainShellOf(givenCharArray).toCharArray()
 
         // then
         expectThat(actual) isEqualTo givenCharArray
     }
 
     @Test
-    fun `should convert empty chars to char array`() {
+    fun `should convert empty plainShell to char array`() {
         // given
         val givenCharArray = charArrayOf()
 
         // when
-        val actual = charsOf(givenCharArray).toCharArray()
+        val actual = plainShellOf(givenCharArray).toCharArray()
 
         // then
         expectThat(actual) isEqualTo givenCharArray
     }
 
     @Test
-    fun `should scramble chars`() {
+    fun `should scramble plainShell`() {
         // given
         val givenCharArray = charArrayOf('a', 'b', 'c')
         val referenceCharArray = charArrayOf('a', 'b', 'c')
 
         // when
         expectThat(givenCharArray) isEqualTo referenceCharArray
-        charsOf(givenCharArray).scramble()
+        plainShellOf(givenCharArray).scramble()
 
         // then
         expectThat(givenCharArray) isNotEqualTo referenceCharArray
@@ -94,41 +94,41 @@ class CharsTest {
         @Test
         fun `should be equal to itself`() {
             // given
-            val chars1 = charsOf(charArrayOf('a', 'b', 'c'))
-            val chars2 = chars1
+            val plainShell1 = plainShellOf(charArrayOf('a', 'b', 'c'))
+            val plainShell2 = plainShell1
 
             // when
-            val actual = chars1.equals(chars2)
+            val actual = plainShell1.equals(plainShell2)
 
             // then
             expectThat(actual).isTrue()
         }
 
         @Test
-        fun `should be equal to chars with equal char array`() {
+        fun `should be equal to plainShell with equal char array`() {
             // given
             val charArray = charArrayOf('a', 'b', 'c')
             val sameCharArray = charArrayOf('a', 'b', 'c')
-            val chars1 = charsOf(charArray)
-            val chars2 = charsOf(sameCharArray)
+            val plainShell1 = plainShellOf(charArray)
+            val plainShell2 = plainShellOf(sameCharArray)
 
             // when
-            val actual = chars1.equals(chars2)
+            val actual = plainShell1.equals(plainShell2)
 
             // then
             expectThat(actual).isTrue()
         }
 
         @Test
-        fun `should not be equal to chars with other char array`() {
+        fun `should not be equal to plainShell with other char array`() {
             // given
             val charArray = charArrayOf('a', 'b', 'c')
             val otherCharArray = charArrayOf('a', 'b', 'd')
-            val chars1 = charsOf(charArray)
-            val chars2 = charsOf(otherCharArray)
+            val plainShell1 = plainShellOf(charArray)
+            val plainShell2 = plainShellOf(otherCharArray)
 
             // when
-            val actual = chars1.equals(chars2)
+            val actual = plainShell1.equals(plainShell2)
 
             // then
             expectThat(actual).isFalse()
@@ -138,10 +138,10 @@ class CharsTest {
         fun `should not be equal to other class`() {
             // given
             val charArray = charArrayOf('a', 'b', 'c')
-            val chars = charsOf(charArray)
+            val plainShell = plainShellOf(charArray)
 
             // when
-            val actual = chars.equals(charArray)
+            val actual = plainShell.equals(charArray)
 
             // then
             expectThat(actual).isFalse()
@@ -150,15 +150,15 @@ class CharsTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val chars = charsOf(charArrayOf('a', 'b', 'c'))
+            val plainShell = plainShellOf(charArrayOf('a', 'b', 'c'))
 
             // when
-            val actual = chars.equals(null)
+            val actual = plainShell.equals(null)
 
             // then
             expectThat(actual).isFalse()
         }
     }
 
-    private fun charsOf(vararg chars: Char) = charsOf(chars)
+    private fun plainShellOf(vararg plainShell: Char) = plainShellOf(plainShell)
 }

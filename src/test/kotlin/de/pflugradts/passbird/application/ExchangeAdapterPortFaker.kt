@@ -1,9 +1,9 @@
 package de.pflugradts.passbird.application
 
 import de.pflugradts.passbird.application.exchange.ExchangeFactory
-import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.shell.ShellPair
 import io.mockk.every
 import io.mockk.mockk
 
@@ -14,10 +14,10 @@ fun fakeExchangeAdapterPort(
     val instance = mockk<ExchangeAdapterPort>()
     every { instance.send(any()) } returns Unit
     every { instance.receive() } answers {
-        val result = mutableMapOf<Slot, MutableList<BytePair>>()
+        val result = mutableMapOf<Slot, MutableList<ShellPair>>()
         withEggs.forEach {
             if (!result.containsKey(it.associatedNest())) { result[it.associatedNest()] = mutableListOf() }
-            result[it.associatedNest()]!!.add(BytePair(Pair(it.viewEggId(), it.viewPassword())))
+            result[it.associatedNest()]!!.add(ShellPair(Pair(it.viewEggId(), it.viewPassword())))
         }
         result
     }

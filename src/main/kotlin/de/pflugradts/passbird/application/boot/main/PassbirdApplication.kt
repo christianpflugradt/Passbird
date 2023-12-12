@@ -6,7 +6,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.domain.model.nest.Nest
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.FixedNestService
@@ -26,10 +26,10 @@ class PassbirdApplication @Inject constructor(
         while (!isSigTerm(receiveInput().also { input = it })) { inputHandler.handleInput(input) }
     }
 
-    private fun receiveInput() = userInterfaceAdapterPort.receive(outputOf(bytesOf(nestPrefix() + "Enter command: ")))
+    private fun receiveInput() = userInterfaceAdapterPort.receive(outputOf(shellOf(nestPrefix() + "Enter command: ")))
 
     private fun nestPrefix() = nestService.getCurrentNest().let {
-        if (it == Nest.DEFAULT) "" else "[${it.bytes.asString()}] "
+        if (it == Nest.DEFAULT) "" else "[${it.shell.asString()}] "
     }
 
     private fun isSigTerm(input: Input) = input.data.isEmpty && !input.command.isEmpty && input.command.firstByte == INTERRUPT.code.toByte()

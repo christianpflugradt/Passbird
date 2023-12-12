@@ -1,12 +1,12 @@
 package de.pflugradts.passbird.domain.service.password.provider
 
-import de.pflugradts.passbird.domain.model.transfer.Bytes
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import io.mockk.every
 
 fun fakePasswordProvider(
     instance: PasswordProvider,
-    withCreatedPassword: Bytes = bytesOf("password"),
+    withCreatedPassword: Shell = shellOf("password"),
 ) {
     every { instance.createNewPassword(any()) } returns withCreatedPassword
 }

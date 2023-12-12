@@ -1,9 +1,9 @@
-package de.pflugradts.passbird.domain.model.transfer
+package de.pflugradts.passbird.domain.model.shell
 
 import de.pflugradts.kotlinextensions.tryCatching
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
-import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
+import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -18,25 +18,25 @@ import strikt.assertions.isNotSameInstanceAs
 import strikt.assertions.isTrue
 import java.util.Collections
 
-class BytesTest {
+class ShellTest {
 
     @Test
     fun test() {
-        val givenBytes = byteArrayOf(1, 2, 3)
-        val bytes = bytesOf(givenBytes)
-        println(bytes.toByteArray().toList())
-        println(bytes.toMutableList().also { it.remove(1.toByte()) })
+        val givenShell = byteArrayOf(1, 2, 3)
+        val shell = shellOf(givenShell)
+        println(shell.toByteArray().toList())
+        println(shell.toMutableList().also { it.remove(1.toByte()) })
     }
 
     @Test
     fun `should have correct size`() {
         // given
-        val givenBytes = byteArrayOf(1, 2, 3)
-        val bytes = bytesOf(givenBytes)
+        val givenShell = byteArrayOf(1, 2, 3)
+        val shell = shellOf(givenShell)
         val expectedSize = 3
 
         // when
-        val actual = bytes.size
+        val actual = shell.size
 
         // then
         expectThat(actual) isEqualTo expectedSize
@@ -45,25 +45,25 @@ class BytesTest {
     @Test
     fun `should get byte`() {
         // given
-        val givenBytes = byteArrayOf(1, 2, 3)
-        val bytes = bytesOf(givenBytes)
+        val givenShell = byteArrayOf(1, 2, 3)
+        val shell = shellOf(givenShell)
 
         // when / then
-        expectThat(givenBytes.size) isEqualTo 3
-        givenBytes.indices.forEach {
-            expectThat(bytes.getByte(it)) isEqualTo givenBytes[it]
+        expectThat(givenShell.size) isEqualTo 3
+        givenShell.indices.forEach {
+            expectThat(shell.getByte(it)) isEqualTo givenShell[it]
         }
     }
 
     @Test
     fun `should throw exception on invalid index`() {
         // given
-        val givenBytes = byteArrayOf(1, 2, 3)
+        val givenShell = byteArrayOf(1, 2, 3)
         val invalidIndex = 4
-        val bytes = bytesOf(givenBytes)
+        val shell = shellOf(givenShell)
 
         // when
-        val exception = tryCatching { bytes.getByte(invalidIndex) }.exceptionOrNull()
+        val exception = tryCatching { shell.getByte(invalidIndex) }.exceptionOrNull()
 
         // then
         expectThat(exception).isA<ArrayIndexOutOfBoundsException>()
@@ -72,24 +72,24 @@ class BytesTest {
     @Test
     fun `should return slice`() {
         // given
-        val givenBytes = byteArrayOf(1, 2, 3, 4)
-        val bytes = bytesOf(givenBytes)
+        val givenShell = byteArrayOf(1, 2, 3, 4)
+        val shell = shellOf(givenShell)
 
         // when
-        val actual = bytes.slice(1, 3)
+        val actual = shell.slice(1, 3)
 
         // then
-        expectThat(actual).containsExactly(givenBytes[1], givenBytes[2])
+        expectThat(actual).containsExactly(givenShell[1], givenShell[2])
     }
 
     @Test
-    fun `should return empty bytes on negative range`() {
+    fun `should return empty shell on negative range`() {
         // given
-        val givenBytes = byteArrayOf(1, 2, 3, 4)
-        val bytes = bytesOf(givenBytes)
+        val givenShell = byteArrayOf(1, 2, 3, 4)
+        val shell = shellOf(givenShell)
 
         // when
-        val actual = bytes.slice(3, 1)
+        val actual = shell.slice(3, 1)
 
         // then
         expectThat(actual.isEmpty).isTrue()
@@ -98,35 +98,35 @@ class BytesTest {
     @Test
     fun `should throw exception on out of bounds range`() {
         // given
-        val givenBytes = byteArrayOf(1, 2, 3)
+        val givenShell = byteArrayOf(1, 2, 3)
         val invalidIndex = 4
-        val bytes = bytesOf(givenBytes)
+        val shell = shellOf(givenShell)
 
         // when
-        val exception = tryCatching { bytes.slice(invalidIndex, invalidIndex + 1) }.exceptionOrNull()
+        val exception = tryCatching { shell.slice(invalidIndex, invalidIndex + 1) }.exceptionOrNull()
 
         // then
         expectThat(exception).isA<ArrayIndexOutOfBoundsException>()
     }
 
     @Test
-    fun `should scramble all bytes`() {
+    fun `should scramble all shell`() {
         // given
         val minAsciiValue = 32
         val maxAsciiValue = 126
         val size = 100
         val byteList = Collections.nCopies(size, (maxAsciiValue + 1).toString().toByte())
-        val bytes = bytesOf(byteList)
+        val shell = shellOf(byteList)
 
         // when
-        bytes.forEach {
+        shell.forEach {
             expectThat(it) isEqualTo (maxAsciiValue + 1).toByte()
         }
-        bytes.scramble()
+        shell.scramble()
 
         // then
-        expectThat(bytes.size) isEqualTo size
-        bytes.forEach {
+        expectThat(shell.size) isEqualTo size
+        shell.forEach {
             expectThat(it) isGreaterThanOrEqualTo minAsciiValue.toByte() isLessThanOrEqualTo maxAsciiValue.toByte()
         }
     }
@@ -136,75 +136,75 @@ class BytesTest {
         @Test
         fun `should instantiate from byte array`() {
             // given
-            val givenBytes = byteArrayOf(1, 2, 3)
-            val expectedBytes = byteArrayOf(givenBytes[0], givenBytes[1], givenBytes[2])
+            val givenShell = byteArrayOf(1, 2, 3)
+            val expectedShell = byteArrayOf(givenShell[0], givenShell[1], givenShell[2])
 
             // when
-            val actual = bytesOf(givenBytes)
+            val actual = shellOf(givenShell)
 
             // then
-            expectThat(actual).containsExactly(*expectedBytes.toTypedArray())
+            expectThat(actual).containsExactly(*expectedShell.toTypedArray())
         }
 
         @Test
         fun `should instantiate from char array`() {
             // given
             val givenChars = charArrayOf('a', 'b', 'c')
-            val expectedBytes = byteArrayOf(givenChars[0].code.toByte(), givenChars[1].code.toByte(), givenChars[2].code.toByte())
+            val expectedShell = byteArrayOf(givenChars[0].code.toByte(), givenChars[1].code.toByte(), givenChars[2].code.toByte())
 
             // when
-            val actual = charsOf(givenChars).toBytes()
+            val actual = plainShellOf(givenChars).toShell()
 
             // then
-            expectThat(actual).containsExactly(*expectedBytes.toTypedArray())
+            expectThat(actual).containsExactly(*expectedShell.toTypedArray())
         }
 
         @Test
         fun `should instantiate from byte list`() {
             // given
-            val givenBytes = listOf("1".toByte(), "2".toByte(), "3".toByte())
-            val expectedBytes = byteArrayOf(givenBytes[0], givenBytes[1], givenBytes[2])
+            val givenShell = listOf("1".toByte(), "2".toByte(), "3".toByte())
+            val expectedShell = byteArrayOf(givenShell[0], givenShell[1], givenShell[2])
 
             // when
-            val actual = bytesOf(givenBytes)
+            val actual = shellOf(givenShell)
 
             // then
-            expectThat(actual).containsExactly(*expectedBytes.toTypedArray())
+            expectThat(actual).containsExactly(*expectedShell.toTypedArray())
         }
 
         @Test
         fun `should instantiate from string`() {
             // given
             val givenString = "hello"
-            val primitiveBytes = givenString.toByteArray()
-            val expectedBytes = primitiveBytes.copyOf()
+            val primitiveShell = givenString.toByteArray()
+            val expectedShell = primitiveShell.copyOf()
 
             // when
-            val actual = bytesOf(givenString)
+            val actual = shellOf(givenString)
 
             // then
-            expectThat(actual).containsExactly(*expectedBytes.toTypedArray())
+            expectThat(actual).containsExactly(*expectedShell.toTypedArray())
         }
 
         @Test
-        fun `should instantiate empty bytes`() {
+        fun `should instantiate empty shell`() {
             // given / when / then
-            expectThat(emptyBytes().isEmpty).isTrue()
+            expectThat(emptyShell().isEmpty).isTrue()
         }
 
         @Test
         fun `should clone constructor input`() {
             // given
-            val givenBytes = byteArrayOf(1, 2, 3)
-            val expectedBytes = byteArrayOf(1, 2, 3)
+            val givenShell = byteArrayOf(1, 2, 3)
+            val expectedShell = byteArrayOf(1, 2, 3)
 
             // when
-            val actual = bytesOf(givenBytes)
-            givenBytes[0] = 4 // change original array
+            val actual = shellOf(givenShell)
+            givenShell[0] = 4 // change original array
 
             // then
-            expectThat(actual).containsExactly(*expectedBytes.toTypedArray())
-            expectThat(givenBytes) isEqualTo byteArrayOf(4, 2, 3)
+            expectThat(actual).containsExactly(*expectedShell.toTypedArray())
+            expectThat(givenShell) isEqualTo byteArrayOf(4, 2, 3)
         }
     }
 
@@ -213,53 +213,53 @@ class BytesTest {
         @Test
         fun `should instantiate from empty byte array`() {
             // given
-            val givenBytes = byteArrayOf()
-            val expectedBytes = emptyBytes()
+            val givenShell = byteArrayOf()
+            val expectedShell = emptyShell()
 
             // when
-            val actual = bytesOf(givenBytes)
+            val actual = shellOf(givenShell)
 
             // then
-            expectThat(actual).containsExactly(*expectedBytes.toByteArray().toTypedArray())
+            expectThat(actual).containsExactly(*expectedShell.toByteArray().toTypedArray())
         }
 
         @Test
         fun `should instantiate from empty char array`() {
             // given
             val givenChars = charArrayOf()
-            val expectedBytes = emptyBytes()
+            val expectedShell = emptyShell()
 
             // when
-            val actual = charsOf(givenChars).toBytes()
+            val actual = plainShellOf(givenChars).toShell()
 
             // then
-            expectThat(actual).containsExactly(*expectedBytes.toByteArray().toTypedArray())
+            expectThat(actual).containsExactly(*expectedShell.toByteArray().toTypedArray())
         }
 
         @Test
         fun `should instantiate from empty byte list`() {
             // given
-            val givenBytes = emptyList<Byte>()
-            val expectedBytes = emptyBytes()
+            val givenShell = emptyList<Byte>()
+            val expectedShell = emptyShell()
 
             // when
-            val actual = bytesOf(givenBytes)
+            val actual = shellOf(givenShell)
 
             // then
-            expectThat(actual).containsExactly(*expectedBytes.toByteArray().toTypedArray())
+            expectThat(actual).containsExactly(*expectedShell.toByteArray().toTypedArray())
         }
 
         @Test
         fun `should instantiate from empty string`() {
             // given
             val givenString = ""
-            val expectedBytes = emptyBytes()
+            val expectedShell = emptyShell()
 
             // when
-            val actual = bytesOf(givenString)
+            val actual = shellOf(givenString)
 
             // then
-            expectThat(actual).containsExactly(*expectedBytes.toByteArray().toTypedArray())
+            expectThat(actual).containsExactly(*expectedShell.toByteArray().toTypedArray())
         }
     }
 
@@ -268,14 +268,14 @@ class BytesTest {
         @Test
         fun `should transform to byte array`() {
             // given
-            val givenBytes = byteArrayOf(1, 2, 3)
-            val bytes = bytesOf(givenBytes)
+            val givenShell = byteArrayOf(1, 2, 3)
+            val shell = shellOf(givenShell)
 
             // when
-            val actual = bytes.toByteArray()
+            val actual = shell.toByteArray()
 
             // then
-            expectThat(actual) isEqualTo givenBytes isNotSameInstanceAs givenBytes
+            expectThat(actual) isEqualTo givenShell isNotSameInstanceAs givenShell
         }
 
         @Test
@@ -283,10 +283,10 @@ class BytesTest {
             // given
             val givenChars = charArrayOf('a', 'b', 'c')
             val referenceChars = charArrayOf('a', 'b', 'c')
-            val bytes = charsOf(givenChars).toBytes()
+            val shell = plainShellOf(givenChars).toShell()
 
             // when
-            val actual = bytes.toChars()
+            val actual = shell.toPlainShell()
 
             // then
             expectThat(actual.toCharArray()) isEqualTo referenceChars
@@ -296,59 +296,59 @@ class BytesTest {
         fun `should transform to string`() {
             // given
             val givenString = "hello"
-            val bytes = bytesOf(givenString)
+            val shell = shellOf(givenString)
 
             // when
-            val actual = bytes.asString()
+            val actual = shell.asString()
 
             // then
             expectThat(actual).isEqualTo(givenString)
         }
 
         @Test
-        fun `should clone bytes on copy`() {
+        fun `should clone shell on copy`() {
             // given
-            val givenBytes = byteArrayOf(1, 2, 3)
-            val bytes = bytesOf(givenBytes)
+            val givenShell = byteArrayOf(1, 2, 3)
+            val shell = shellOf(givenShell)
 
             // when
-            val clonedBytes = bytes.copy()
-            val actual = bytes.copy()
+            val clonedShell = shell.copy()
+            val actual = shell.copy()
 
             // then
-            expectThat(actual) isEqualTo clonedBytes isNotSameInstanceAs clonedBytes
+            expectThat(actual) isEqualTo clonedShell isNotSameInstanceAs clonedShell
         }
 
         @Test
         fun `should transform to stream`() {
             // given
-            val givenBytes = bytesOf("myBytes")
+            val givenShell = shellOf("myShell")
 
             // when
-            val actual = givenBytes.stream()
+            val actual = givenShell.stream()
 
             // then
             expectThat(actual.toList()).containsExactly(
                 'm'.code.toByte(),
                 'y'.code.toByte(),
-                'B'.code.toByte(),
-                'y'.code.toByte(),
-                't'.code.toByte(),
+                'S'.code.toByte(),
+                'h'.code.toByte(),
                 'e'.code.toByte(),
-                's'.code.toByte(),
+                'l'.code.toByte(),
+                'l'.code.toByte(),
             )
         }
     }
 
     @Nested
-    inner class TransformEmptyBytesTest {
+    inner class TransformEmptyShellTest {
         @Test
         fun `should transform to byte array`() {
             // given
-            val bytes = emptyBytes()
+            val shell = emptyShell()
 
             // when
-            val actual = bytes.toByteArray()
+            val actual = shell.toByteArray()
 
             // then
             expectThat(actual).isEmpty()
@@ -357,10 +357,10 @@ class BytesTest {
         @Test
         fun `should transform to char array`() {
             // given
-            val bytes = emptyBytes()
+            val shell = emptyShell()
 
             // when
-            val actual = bytes.toChars()
+            val actual = shell.toPlainShell()
 
             // then
             expectThat(actual.toCharArray()) isEqualTo charArrayOf()
@@ -369,10 +369,10 @@ class BytesTest {
         @Test
         fun `should transform to string`() {
             // given
-            val bytes = emptyBytes()
+            val shell = emptyShell()
 
             // when
-            val actual = bytes.asString()
+            val actual = shell.asString()
 
             // then
             expectThat(actual).isEmpty()
@@ -384,25 +384,25 @@ class BytesTest {
         @Test
         fun `should iterate over elements`() {
             // given
-            val givenBytes = byteArrayOf(1, 2, 3)
-            val actualBytes = ByteArray(givenBytes.size)
-            val iterator = bytesOf(givenBytes).iterator()
+            val givenShell = byteArrayOf(1, 2, 3)
+            val actualShell = ByteArray(givenShell.size)
+            val iterator = shellOf(givenShell).iterator()
 
             // when
             var index = 0
             while (iterator.hasNext()) {
-                actualBytes[index++] = iterator.next()
+                actualShell[index++] = iterator.next()
             }
 
             // then
-            expectThat(actualBytes) isEqualTo givenBytes
+            expectThat(actualShell) isEqualTo givenShell
         }
 
         @Test
         fun `should throw NoSuchElementException on next when there is no more element`() {
             // given
-            val givenBytes = byteArrayOf(1, 2, 3)
-            val iterator = bytesOf(givenBytes).iterator()
+            val givenShell = byteArrayOf(1, 2, 3)
+            val iterator = shellOf(givenShell).iterator()
             while (iterator.hasNext()) {
                 iterator.next()
             }
@@ -421,41 +421,41 @@ class BytesTest {
         @Test
         fun `should be equal to itself`() {
             // given
-            val bytes1 = bytesOf("abc")
-            val bytes2 = bytes1
+            val shell1 = shellOf("abc")
+            val shell2 = shell1
 
             // when
-            val actual = bytes1.equals(bytes2)
+            val actual = shell1.equals(shell2)
 
             // then
             expectThat(actual).isTrue()
         }
 
         @Test
-        fun `should be equal to bytes with equal string`() {
+        fun `should be equal to shell with equal string`() {
             // given
             val str = "abc"
             val sameStr = "abc"
-            val bytes1 = bytesOf(str)
-            val bytes2 = bytesOf(sameStr)
+            val shell1 = shellOf(str)
+            val shell2 = shellOf(sameStr)
 
             // when
-            val actual = bytes1.equals(bytes2)
+            val actual = shell1.equals(shell2)
 
             // then
             expectThat(actual).isTrue()
         }
 
         @Test
-        fun `should not be equal to bytes with other string`() {
+        fun `should not be equal to shell with other string`() {
             // given
             val str = "abc"
             val otherStr = "abd"
-            val bytes1 = bytesOf(str)
-            val bytes2 = bytesOf(otherStr)
+            val shell1 = shellOf(str)
+            val shell2 = shellOf(otherStr)
 
             // when
-            val actual = bytes1.equals(bytes2)
+            val actual = shell1.equals(shell2)
 
             // then
             expectThat(actual).isFalse()
@@ -465,10 +465,10 @@ class BytesTest {
         fun `should not be equal to other class`() {
             // given
             val str = "abc"
-            val bytes = bytesOf(str)
+            val shell = shellOf(str)
 
             // when
-            val actual = bytes.equals(str)
+            val actual = shell.equals(str)
 
             // then
             expectThat(actual).isFalse()
@@ -477,10 +477,10 @@ class BytesTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val bytes = bytesOf("abc")
+            val shell = shellOf("abc")
 
             // when
-            val actual = bytes.equals(null)
+            val actual = shell.equals(null)
 
             // then
             expectThat(actual).isFalse()

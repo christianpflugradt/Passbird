@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.at
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.createNestServiceForTesting
@@ -24,7 +24,7 @@ class ViewNestCommandIT {
     @Test
     fun `should print info`() {
         // given
-        val input = inputOf(bytesOf("n"))
+        val input = inputOf(shellOf("n"))
         val outputSlot = slot<Output>()
 
         // when
@@ -32,13 +32,13 @@ class ViewNestCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) contains "Available namespace commands"
+        expectThat(outputSlot.captured.shell.asString()) contains "Available namespace commands"
     }
 
     @Test
     fun `should print default nest if current`() {
         // given
-        val input = inputOf(bytesOf("n"))
+        val input = inputOf(shellOf("n"))
         val outputSlot = slot<Output>()
 
         // when
@@ -46,16 +46,16 @@ class ViewNestCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) contains "Current namespace: Default"
+        expectThat(outputSlot.captured.shell.asString()) contains "Current namespace: Default"
     }
 
     @Test
     fun `should print deployed nest`() {
         // given
-        val input = inputOf(bytesOf("n"))
+        val input = inputOf(shellOf("n"))
         val deployedNestSlot = 3
         val deployedNest = "mynest"
-        nestService.deploy(bytesOf(deployedNest), at(deployedNestSlot))
+        nestService.deploy(shellOf(deployedNest), at(deployedNestSlot))
         val outputSlot = slot<Output>()
 
         // when
@@ -63,6 +63,6 @@ class ViewNestCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) contains "$deployedNestSlot: $deployedNest"
+        expectThat(outputSlot.captured.shell.asString()) contains "$deployedNestSlot: $deployedNest"
     }
 }

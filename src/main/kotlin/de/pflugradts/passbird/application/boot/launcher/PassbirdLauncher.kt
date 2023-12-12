@@ -8,7 +8,7 @@ import de.pflugradts.passbird.application.boot.main.ApplicationModule
 import de.pflugradts.passbird.application.boot.setup.SetupModule
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 
 private const val COPYRIGHT = "\tCopyright 2020 - 2023 Christian Pflugradt"
@@ -35,15 +35,15 @@ class PassbirdLauncher @Inject constructor(
 
     private fun sendBanner() {
         userInterfaceAdapterPort.sendLineBreak()
-        userInterfaceAdapterPort.send(outputOf(bytesOf(banner())))
-        userInterfaceAdapterPort.send(outputOf(bytesOf("\t${javaClass.getPackage().implementationVersion}")))
+        userInterfaceAdapterPort.send(outputOf(shellOf(banner())))
+        userInterfaceAdapterPort.send(outputOf(shellOf("\t${javaClass.getPackage().implementationVersion}")))
         userInterfaceAdapterPort.sendLineBreak()
     }
 
     private fun sendLicenseNotice() {
         userInterfaceAdapterPort.sendLineBreak()
-        userInterfaceAdapterPort.send(outputOf(bytesOf(COPYRIGHT)))
-        userInterfaceAdapterPort.send(outputOf(bytesOf(LICENSE)))
+        userInterfaceAdapterPort.send(outputOf(shellOf(COPYRIGHT)))
+        userInterfaceAdapterPort.send(outputOf(shellOf(LICENSE)))
     }
 
     private fun banner() = byteArrayOf(

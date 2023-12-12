@@ -5,9 +5,9 @@ import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.security.Key
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
-import de.pflugradts.passbird.domain.model.transfer.Chars
-import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
+import de.pflugradts.passbird.domain.model.shell.PlainShell
+import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Path
@@ -24,22 +24,22 @@ class KeyStoreService @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
 ) : KeyStoreAdapterPort {
 
-    override fun loadKey(password: Chars, path: Path) = tryCatching { load(password, systemOperation.newInputStream(path)) }
+    override fun loadKey(password: PlainShell, path: Path) = tryCatching { load(password, systemOperation.newInputStream(path)) }
 
-    private fun load(password: Chars, inputStream: InputStream) = inputStream.use {
+    private fun load(password: PlainShell, inputStream: InputStream) = inputStream.use {
         val keyStore = systemOperation.jceksInstance
         val passwordChars = password.toCharArray()
         keyStore.load(it, passwordChars)
         val secret = keyStore.getKey(SECRET_ALIAS, passwordChars)
         val iv = keyStore.getKey(IV_ALIAS, passwordChars)
-        charsOf(passwordChars).scramble()
+        plainShellOf(passwordChars).scramble()
         password.scramble()
-        Key(bytesOf(secret.encoded), bytesOf(iv.encoded))
+        Key(shellOf(secret.encoded), shellOf(iv.encoded))
     }
 
-    override fun storeKey(password: Chars, path: Path) = store(password, systemOperation.newOutputStream(path))
+    override fun storeKey(password: PlainShell, path: Path) = store(password, systemOperation.newOutputStream(path))
 
-    private fun store(password: Chars, outputStream: OutputStream) = outputStream.use {
+    private fun store(password: PlainShell, outputStream: OutputStream) = outputStream.use {
         val keyStore = systemOperation.jceksInstance
         val passwordChars = password.toCharArray()
         keyStore.load(null, null)
@@ -56,7 +56,7 @@ class KeyStoreService @Inject constructor(
             PasswordProtection(passwordChars),
         )
         keyStore.store(outputStream, passwordChars)
-        charsOf(passwordChars).scramble()
+        plainShellOf(passwordChars).scramble()
         password.scramble()
     }
 }

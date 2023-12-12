@@ -64,7 +64,7 @@ class PassbirdSetupTest {
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
         every { configurationSync.sync(configurationDirectory) } returns Unit
-        every { keyStoreAdapterPort.storeKey(eq(password.bytes.toChars()), capture(pathSlot)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(password.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
@@ -116,7 +116,7 @@ class PassbirdSetupTest {
             instance = systemOperation,
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
-        every { keyStoreAdapterPort.storeKey(eq(password.bytes.toChars()), capture(pathSlot)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(password.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
@@ -177,7 +177,7 @@ class PassbirdSetupTest {
                 Pair(nonexistentConfigurationDirectory, fakePath(exists = false, isDirectory = true)),
             ),
         )
-        every { keyStoreAdapterPort.storeKey(eq(password.bytes.toChars()), capture(pathSlot)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(password.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
@@ -216,7 +216,7 @@ class PassbirdSetupTest {
             instance = systemOperation,
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
-        every { keyStoreAdapterPort.storeKey(eq(passwordMatched.bytes.toChars()), capture(pathSlot)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(passwordMatched.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()

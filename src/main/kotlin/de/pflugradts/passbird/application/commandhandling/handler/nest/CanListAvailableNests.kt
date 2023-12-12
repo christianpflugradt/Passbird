@@ -8,11 +8,11 @@ abstract class CanListAvailableNests(
 ) {
     fun hasCustomNests() = nestService.all().anyMatch { it.isPresent }
     fun getAvailableNests(includeCurrent: Boolean) =
-        (if (includeCurrent || nestService.getCurrentNest() != DEFAULT) "\t0: ${DEFAULT.bytes.asString()}\n" else "") +
+        (if (includeCurrent || nestService.getCurrentNest() != DEFAULT) "\t0: ${DEFAULT.shell.asString()}\n" else "") +
             nestService.all()
                 .filter { it.isPresent }
                 .map { it.get() }
                 .filter { includeCurrent || it != nestService.getCurrentNest() }
-                .map { "\t${it.slot.index()}: ${it.bytes.asString()}" }
+                .map { "\t${it.slot.index()}: ${it.shell.asString()}" }
                 .toList().joinToString("\n")
 }

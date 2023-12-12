@@ -22,7 +22,7 @@ fun reportFailure(importFailure: ImportFailure) =
     if (importFailure.ex is InvalidEggIdException) {
         err(
             "Password database could not be imported because at least one alias contains digits or special characters. " +
-                "Please correct invalid aliases and try again. Erroneous alias: ${importFailure.ex.eggIdBytes.asString()}",
+                "Please correct invalid aliases and try again. Erroneous alias: ${importFailure.ex.eggIdShell.asString()}",
         )
     } else {
         err("Password database could not be imported.")

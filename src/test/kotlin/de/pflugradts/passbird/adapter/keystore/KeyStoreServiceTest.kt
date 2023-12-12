@@ -3,7 +3,7 @@ package de.pflugradts.passbird.adapter.keystore
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
-import de.pflugradts.passbird.domain.model.transfer.Chars.Companion.charsOf
+import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -24,7 +24,7 @@ class KeyStoreServiceTest {
         val invalidPath = mockk<Path>()
 
         // when
-        val actual = tryCatching { keyStoreService.storeKey(charsOf("password".toCharArray()), invalidPath) }
+        val actual = tryCatching { keyStoreService.storeKey(plainShellOf("password".toCharArray()), invalidPath) }
 
         // then
         expectThat(actual.failure).isTrue()
@@ -36,7 +36,7 @@ class KeyStoreServiceTest {
         val invalidPath = mockk<Path>()
 
         // when
-        val actual = keyStoreService.loadKey(charsOf("password".toCharArray()), invalidPath)
+        val actual = keyStoreService.loadKey(plainShellOf("password".toCharArray()), invalidPath)
 
         // then
         expectThat(actual.failure).isTrue()
@@ -51,7 +51,7 @@ class KeyStoreServiceTest {
         )
 
         // when
-        val actual = tryCatching { keyStoreService.storeKey(charsOf("password".toCharArray()), Paths.get("")) }
+        val actual = tryCatching { keyStoreService.storeKey(plainShellOf("password".toCharArray()), Paths.get("")) }
 
         // then
         expectThat(actual.failure).isTrue()
@@ -67,7 +67,7 @@ class KeyStoreServiceTest {
         )
 
         // when
-        val actual = keyStoreService.loadKey(charsOf("password".toCharArray()), Paths.get(""))
+        val actual = keyStoreService.loadKey(plainShellOf("password".toCharArray()), Paths.get(""))
 
         // then
         expectThat(actual.failure).isTrue()

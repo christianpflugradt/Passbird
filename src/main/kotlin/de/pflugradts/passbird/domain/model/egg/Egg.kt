@@ -8,7 +8,7 @@ import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.transfer.Bytes
+import de.pflugradts.passbird.domain.model.shell.Shell
 
 /**
  * An Egg represents an [EggName] and an associated [Password] stored in the
@@ -25,13 +25,13 @@ class Egg private constructor(
     fun viewEggId() = eggId.view()
     fun viewPassword() = password.view()
 
-    fun rename(eggIdBytes: Bytes) {
-        eggId.rename(eggIdBytes)
+    fun rename(eggIdShell: Shell) {
+        eggId.rename(eggIdShell)
         registerDomainEvent(EggRenamed(this))
     }
 
-    fun updatePassword(bytes: Bytes) {
-        password.update(bytes)
+    fun updatePassword(shell: Shell) {
+        password.update(shell)
         registerDomainEvent(EggUpdated(this))
     }
 
@@ -47,7 +47,7 @@ class Egg private constructor(
     override fun hashCode() = nestSlot.hashCode() + 31 * eggId.hashCode()
 
     companion object {
-        fun createEgg(slot: Slot, eggIdBytes: Bytes, passwordBytes: Bytes) =
-            Egg(slot, createEggId(eggIdBytes), createPassword(passwordBytes))
+        fun createEgg(slot: Slot, eggIdShell: Shell, passwordShell: Shell) =
+            Egg(slot, createEggId(eggIdShell), createPassword(passwordShell))
     }
 }

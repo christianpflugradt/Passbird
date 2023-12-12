@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.GetCommandHandler
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.fakePasswordService
@@ -30,12 +30,12 @@ class GetCommandIT {
     fun `should handle get command`() {
         // given
         val args = "eggId"
-        val command = bytesOf("g$args")
+        val command = shellOf("g$args")
         val reference = command.copy()
-        val expectedPassword = bytesOf("value")
+        val expectedPassword = shellOf("value")
         fakePasswordService(
             instance = passwordService,
-            withEggs = listOf(createEggForTesting(withEggIdBytes = bytesOf(args), withPasswordBytes = expectedPassword)),
+            withEggs = listOf(createEggForTesting(withEggIdShell = shellOf(args), withPasswordShell = expectedPassword)),
         )
         val outputSlot = slot<Output>()
 
@@ -45,7 +45,7 @@ class GetCommandIT {
 
         // then
         verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes) isEqualTo expectedPassword
+        expectThat(outputSlot.captured.shell) isEqualTo expectedPassword
         verify(exactly = 1) { userInterfaceAdapterPort.send(any()) }
         expectThat(command) isNotEqualTo reference
     }
@@ -54,11 +54,11 @@ class GetCommandIT {
     fun `should handle get command with invalid egg`() {
         // given
         val args = "eggId"
-        val command = bytesOf("g$args")
+        val command = shellOf("g$args")
         val reference = command.copy()
         fakePasswordService(
             instance = passwordService,
-            withEggs = listOf(createEggForTesting(withEggIdBytes = bytesOf("other"))),
+            withEggs = listOf(createEggForTesting(withEggIdShell = shellOf("other"))),
         )
 
         // when

@@ -7,7 +7,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 
 @Singleton
@@ -24,7 +24,7 @@ class CryptoProviderFactory @Inject constructor(
         .fold(
             onSuccess = { Cipherizer(it.secret, it.iv) },
             onFailure = {
-                userInterfaceAdapterPort.send(outputOf(bytesOf("Login failed. Shutting down.")))
+                userInterfaceAdapterPort.send(outputOf(shellOf("Login failed. Shutting down.")))
                 application.terminate(systemOperation)
                 null
             },
@@ -36,5 +36,5 @@ class CryptoProviderFactory @Inject constructor(
             .resolve(ReadableConfiguration.KEYSTORE_FILENAME),
     )
 
-    private fun receiveLogin() = userInterfaceAdapterPort.receiveSecurely(outputOf(bytesOf("Enter key: "))).bytes.toChars()
+    private fun receiveLogin() = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter key: "))).shell.toPlainShell()
 }
