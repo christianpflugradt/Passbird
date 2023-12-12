@@ -5,7 +5,7 @@ import de.pflugradts.passbird.domain.model.egg.EggId.Companion.createEggId
 import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggUpdated
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import io.mockk.every
@@ -99,7 +99,7 @@ class EggTest {
         fun `should be equal to itself`() {
             // given
             val givenEggIdShell = shellOf("eggId")
-            val givenNestSlot = Slot.N1
+            val givenNestSlot = NestSlot.N1
             val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
             val egg2 = egg1
 
@@ -114,7 +114,7 @@ class EggTest {
         fun `should be equal if eggId and nest slot match`() {
             // given
             val givenEggIdShell = shellOf("eggId")
-            val givenNestSlot = Slot.N1
+            val givenNestSlot = NestSlot.N1
             val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
             val egg2 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
 
@@ -130,7 +130,7 @@ class EggTest {
             // given
             val givenEggIdShell = shellOf("eggId")
             val otherEggIdShell = shellOf("eggId2")
-            val givenNestSlot = Slot.N1
+            val givenNestSlot = NestSlot.N1
             val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
             val egg2 = createEggForTesting(withEggIdShell = otherEggIdShell, withNestSlot = givenNestSlot)
 
@@ -145,8 +145,8 @@ class EggTest {
         fun `should not be equal if nest slot does not match`() {
             // given
             val givenEggIdShell = shellOf("eggId")
-            val givenNestSlot = Slot.N1
-            val otherNestSlot = Slot.N2
+            val givenNestSlot = NestSlot.N1
+            val otherNestSlot = NestSlot.N2
             val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
             val egg2 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = otherNestSlot)
 
@@ -188,7 +188,7 @@ class EggTest {
         @Test
         fun `should have created event when egg is created`() {
             // given / when
-            val egg = createEgg(Slot.DEFAULT, shellOf("eggId"), shellOf("password"))
+            val egg = createEgg(NestSlot.DEFAULT, shellOf("eggId"), shellOf("password"))
 
             // then
             expectThat(egg.getDomainEvents()) hasSize 1

@@ -1,16 +1,16 @@
 package de.pflugradts.passbird.domain.model.transfer
 
-import de.pflugradts.passbird.domain.model.nest.Slot.DEFAULT
-import de.pflugradts.passbird.domain.model.nest.Slot.INVALID
-import de.pflugradts.passbird.domain.model.nest.Slot.N1
-import de.pflugradts.passbird.domain.model.nest.Slot.N2
-import de.pflugradts.passbird.domain.model.nest.Slot.N3
-import de.pflugradts.passbird.domain.model.nest.Slot.N4
-import de.pflugradts.passbird.domain.model.nest.Slot.N5
-import de.pflugradts.passbird.domain.model.nest.Slot.N6
-import de.pflugradts.passbird.domain.model.nest.Slot.N7
-import de.pflugradts.passbird.domain.model.nest.Slot.N8
-import de.pflugradts.passbird.domain.model.nest.Slot.N9
+import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
+import de.pflugradts.passbird.domain.model.nest.NestSlot.INVALID
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N1
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N2
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N3
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N4
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N5
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N6
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N7
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N8
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N9
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf

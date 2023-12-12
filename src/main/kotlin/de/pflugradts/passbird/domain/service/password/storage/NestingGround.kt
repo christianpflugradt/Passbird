@@ -3,7 +3,7 @@ package de.pflugradts.passbird.domain.service.password.storage
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import de.pflugradts.passbird.domain.model.egg.Egg
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
@@ -31,7 +31,7 @@ class NestingGround @Inject constructor(
     }
 
     override fun sync() { passwordStoreAdapterPort.sync(getEggsSupplier(EggFilter.ALL_NESTS)) }
-    override fun find(eggIdShell: Shell, nestSlot: Slot): Optional<Egg> =
+    override fun find(eggIdShell: Shell, nestSlot: NestSlot): Optional<Egg> =
         find(getEggsSupplier(nestSlot), eggIdShell)
     override fun find(eggIdShell: Shell): Optional<Egg> =
         find(getEggsSupplier(EggFilter.CURRENT_NEST), eggIdShell)
@@ -54,13 +54,13 @@ class NestingGround @Inject constructor(
     private fun getEggsSupplier(eggFilter: EggFilter): Supplier<Stream<Egg>> =
         getEggsSupplier(
             if ((eggFilter == EggFilter.CURRENT_NEST)) {
-                inNest(nestService.getCurrentNest().slot)
+                inNest(nestService.currentNest().nestSlot)
             } else {
                 all()
             },
         )
 
-    private fun getEggsSupplier(nestSlot: Slot) = getEggsSupplier(inNest(nestSlot))
+    private fun getEggsSupplier(nestSlot: NestSlot) = getEggsSupplier(inNest(nestSlot))
 
     private fun getEggsSupplier(predicate: Predicate<Egg>) = Supplier { eggs.stream().filter(predicate) }
 }

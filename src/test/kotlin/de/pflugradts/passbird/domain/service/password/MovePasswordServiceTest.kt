@@ -5,7 +5,7 @@ import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.password.MovePasswordService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -31,8 +31,8 @@ internal class MovePasswordServiceTest {
     fun `should move egg`() {
         // given
         val givenEggId = shellOf("eggId123")
-        val givenNestSlot = Slot.N1
-        val newNestSlot = Slot.N2
+        val givenNestSlot = NestSlot.N1
+        val newNestSlot = NestSlot.N2
         val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withNestSlot = givenNestSlot)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
@@ -52,7 +52,7 @@ internal class MovePasswordServiceTest {
         fakeEggRepository(instance = eggRepository)
 
         // when
-        passwordService.movePassword(givenEggId, Slot.N1)
+        passwordService.movePassword(givenEggId, NestSlot.N1)
 
         // then
         verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(givenEggId))) }
@@ -63,8 +63,8 @@ internal class MovePasswordServiceTest {
     fun `should not move egg if eggId already exists in target nest`() {
         // given
         val givenEggId = shellOf("eggId123")
-        val givenNestSlot = Slot.N1
-        val newNestSlot = Slot.N2
+        val givenNestSlot = NestSlot.N1
+        val newNestSlot = NestSlot.N2
         val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withNestSlot = givenNestSlot)
         val conflictingEgg = createEggForTesting(withEggIdShell = givenEggId, withNestSlot = newNestSlot)
         fakeCryptoProvider(instance = cryptoProvider)

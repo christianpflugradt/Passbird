@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.domain.service.password
 
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import java.util.Optional
@@ -12,7 +12,7 @@ interface PasswordService {
         CREATE_ENTRY_NOT_EXISTS_EVENT,
     }
 
-    fun eggExists(eggIdShell: Shell, nestSlot: Slot): Boolean
+    fun eggExists(eggIdShell: Shell, nestSlot: NestSlot): Boolean
     fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction): Boolean
     fun viewPassword(eggIdShell: Shell): Optional<Shell>
     fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell)
@@ -20,6 +20,6 @@ interface PasswordService {
     fun putEggs(eggs: Stream<ShellPair>)
     fun putEgg(eggIdShell: Shell, passwordShell: Shell)
     fun discardEgg(eggIdShell: Shell)
-    fun moveEgg(eggIdShell: Shell, targetNestSlot: Slot)
+    fun moveEgg(eggIdShell: Shell, targetNestSlot: NestSlot)
     fun findAllEggIds(): Stream<Shell>
 }

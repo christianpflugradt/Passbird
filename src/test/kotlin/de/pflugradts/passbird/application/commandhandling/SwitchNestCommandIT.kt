@@ -2,7 +2,7 @@ package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNestCommandHandler
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
@@ -26,8 +26,8 @@ class SwitchNestCommandIT {
     @Test
     fun `should handle switch nest command`() {
         // given
-        val givenNestSlot = Slot.N1
-        nestService.deploy(shellOf("nest"), givenNestSlot)
+        val givenNestSlot = NestSlot.N1
+        nestService.place(shellOf("nest"), givenNestSlot)
         val input = inputOf(shellOf("n" + givenNestSlot.index()))
 
         // when
@@ -35,14 +35,14 @@ class SwitchNestCommandIT {
 
         // then
         verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
-        expectThat(nestService.getCurrentNest().slot) isEqualTo givenNestSlot
+        expectThat(nestService.currentNest().nestSlot) isEqualTo givenNestSlot
     }
 
     @Test
     fun `should do nothing if nest is already current`() {
         // given
-        val givenNestSlot = Slot.N1
-        nestService.deploy(shellOf("nest"), givenNestSlot)
+        val givenNestSlot = NestSlot.N1
+        nestService.place(shellOf("nest"), givenNestSlot)
         nestService.moveToNestAt(givenNestSlot)
         val input = inputOf(shellOf("n" + givenNestSlot.index()))
         val outputSlot = slot<Output>()
@@ -58,9 +58,9 @@ class SwitchNestCommandIT {
     @Test
     fun `should do nothing if nest is not deployed`() {
         // given
-        val givenNestSlot = Slot.N1
+        val givenNestSlot = NestSlot.N1
         val input = inputOf(shellOf("n" + givenNestSlot.index()))
-        expectThat(nestService.atSlot(givenNestSlot).isEmpty).isTrue()
+        expectThat(nestService.atNestSlot(givenNestSlot).isEmpty).isTrue()
         val outputSlot = slot<Output>()
 
         // when

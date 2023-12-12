@@ -1,16 +1,16 @@
 package de.pflugradts.passbird.domain.model.nest
 
-import de.pflugradts.passbird.domain.model.nest.Slot.Companion.at
-import de.pflugradts.passbird.domain.model.nest.Slot.DEFAULT
-import de.pflugradts.passbird.domain.model.nest.Slot.N1
-import de.pflugradts.passbird.domain.model.nest.Slot.N2
-import de.pflugradts.passbird.domain.model.nest.Slot.N3
-import de.pflugradts.passbird.domain.model.nest.Slot.N4
-import de.pflugradts.passbird.domain.model.nest.Slot.N5
-import de.pflugradts.passbird.domain.model.nest.Slot.N6
-import de.pflugradts.passbird.domain.model.nest.Slot.N7
-import de.pflugradts.passbird.domain.model.nest.Slot.N8
-import de.pflugradts.passbird.domain.model.nest.Slot.N9
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.at
+import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N1
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N2
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N3
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N4
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N5
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N6
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N7
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N8
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N9
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -24,24 +24,24 @@ class NestSlotTest {
 
     @ParameterizedTest
     @MethodSource("provideNestSlotAssignments")
-    fun `should resolve slot`(slot: Slot, index: Int) {
-        expectThat(at(index)) isEqualTo slot
+    fun `should resolve nest slot`(nestSlot: NestSlot, index: Int) {
+        expectThat(at(index)) isEqualTo nestSlot
     }
 
     @ParameterizedTest
     @MethodSource("provideNestSlotAssignments")
-    fun `should get index for slot`(slot: Slot, index: Int) {
-        expectThat(slot.index()) isEqualTo index
+    fun `should get index for nest slot`(nestSlot: NestSlot, index: Int) {
+        expectThat(nestSlot.index()) isEqualTo index
     }
 
     @ParameterizedTest
     @ValueSource(ints = [-9999, -1, 0, 10, 11, 9999])
-    fun `should resolve indices less than 1 or greater than 9 to default slot`(index: Int) {
+    fun `should resolve indices less than 1 or greater than 9 to default nest slot`(index: Int) {
         expectThat(at(index)) isEqualTo DEFAULT
     }
 
     @Test
-    fun `should return index 10 for default slot`() {
+    fun `should return index 10 for default nest slot`() {
         // given // when // then
         expectThat(DEFAULT.index()) isEqualTo 10
     }

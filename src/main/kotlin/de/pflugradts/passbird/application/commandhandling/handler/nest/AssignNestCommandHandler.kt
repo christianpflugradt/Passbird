@@ -5,7 +5,7 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.AssignNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.NestService
@@ -25,13 +25,13 @@ class AssignNestCommandHandler @Inject constructor(
             )
             val input = userInterfaceAdapterPort.receive(outputOf(shellOf("Enter namespace you want to move password entry to: ")))
             val nestSlot = input.extractNestSlot()
-            if (nestSlot === Slot.INVALID) {
+            if (nestSlot === NestSlot.INVALID) {
                 userInterfaceAdapterPort.send(outputOf(shellOf("Invalid namespace - Operation aborted.")))
-            } else if (nestSlot === nestService.getCurrentNest().slot) {
+            } else if (nestSlot === nestService.currentNest().nestSlot) {
                 userInterfaceAdapterPort.send(
                     outputOf(shellOf("Password entry is already in the specified namespace - Operation aborted.")),
                 )
-            } else if (nestService.atSlot(nestSlot).isEmpty) {
+            } else if (nestService.atNestSlot(nestSlot).isEmpty) {
                 userInterfaceAdapterPort.send(outputOf(shellOf("Specified namespace does not exist - Operation aborted.")))
             } else if (passwordService.eggExists(assignNestCommand.argument, nestSlot)) {
                 userInterfaceAdapterPort.send(

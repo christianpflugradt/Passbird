@@ -7,7 +7,7 @@ import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
 
 /**
@@ -15,7 +15,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
  * [PasswordStore][PasswordStoreAdapterPort].
  */
 class Egg private constructor(
-    private var nestSlot: Slot,
+    private var nestSlot: NestSlot,
     private val eggId: EggId,
     private val password: Password,
 ) : AggregateRoot() {
@@ -35,7 +35,7 @@ class Egg private constructor(
         registerDomainEvent(EggUpdated(this))
     }
 
-    fun moveToNestAt(slot: Slot) { nestSlot = slot }
+    fun moveToNestAt(nestSlot: NestSlot) { this.nestSlot = nestSlot }
 
     fun discard() {
         password.discard()
@@ -47,7 +47,7 @@ class Egg private constructor(
     override fun hashCode() = nestSlot.hashCode() + 31 * eggId.hashCode()
 
     companion object {
-        fun createEgg(slot: Slot, eggIdShell: Shell, passwordShell: Shell) =
-            Egg(slot, createEggId(eggIdShell), createPassword(passwordShell))
+        fun createEgg(nestSlot: NestSlot, eggIdShell: Shell, passwordShell: Shell) =
+            Egg(nestSlot, createEggId(eggIdShell), createPassword(passwordShell))
     }
 }

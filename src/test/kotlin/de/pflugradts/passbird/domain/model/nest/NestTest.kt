@@ -15,7 +15,7 @@ class NestTest {
         val name = "nest"
 
         // when
-        val actual = createNest(shellOf("nest"), Slot.DEFAULT)
+        val actual = createNest(shellOf("nest"), NestSlot.DEFAULT)
 
         // then
         expectThat(actual.shell.asString()) isEqualTo name
@@ -25,7 +25,7 @@ class NestTest {
     fun `should clone shell`() {
         // given
         val shell = shellOf("eggId")
-        val nest = createNest(shell, Slot.DEFAULT)
+        val nest = createNest(shell, NestSlot.DEFAULT)
 
         // when
         shell.scramble()
@@ -42,6 +42,6 @@ class NestTest {
 
         // then
         expectThat(defaultNest.shell) isEqualTo shellOf("Default")
-        expectThat(defaultNest.slot) isEqualTo Slot.DEFAULT
+        expectThat(defaultNest.nestSlot) isEqualTo NestSlot.DEFAULT
     }
 }

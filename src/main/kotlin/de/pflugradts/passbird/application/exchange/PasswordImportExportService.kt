@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.application.exchange
 
 import com.google.inject.Inject
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.service.NestService
@@ -17,28 +17,28 @@ class PasswordImportExportService @Inject constructor(
     }
 
     override fun importEggs(uri: String) {
-        val currentNest = nestService.getCurrentNest()
+        val currentNest = nestService.currentNest()
         val eggsByNest = exchangeFactory.createPasswordExchange(uri).receive()
-        eggsByNest.keys.forEach { slot ->
-            val deployedNest = nestService.atSlot(slot)
+        eggsByNest.keys.forEach { nestSlot ->
+            val deployedNest = nestService.atNestSlot(nestSlot)
             if (deployedNest.isEmpty) {
-                nestService.deploy(shellOf("Namespace-${slot.index()}"), slot)
+                nestService.place(shellOf("Namespace-${nestSlot.index()}"), nestSlot)
             }
-            nestService.moveToNestAt(slot)
-            passwordService.putEggs(eggsByNest[slot]!!.stream())
+            nestService.moveToNestAt(nestSlot)
+            passwordService.putEggs(eggsByNest[nestSlot]!!.stream())
         }
-        nestService.moveToNestAt(currentNest.slot)
+        nestService.moveToNestAt(currentNest.nestSlot)
     }
 
     override fun exportEggs(uri: String) {
-        val currentNest = nestService.getCurrentNest()
-        val eggsByNest = mutableMapOf<Slot, List<ShellPair>>()
+        val currentNest = nestService.currentNest()
+        val eggsByNest = mutableMapOf<NestSlot, List<ShellPair>>()
         nestService.all(includeDefault = true).filter { it.isPresent }.map { it.get() }.forEach { nest ->
-            nestService.moveToNestAt(nest.slot)
-            eggsByNest[nest.slot] = passwordService.findAllEggIds()
+            nestService.moveToNestAt(nest.nestSlot)
+            eggsByNest[nest.nestSlot] = passwordService.findAllEggIds()
                 .map { eggId -> ShellPair(Pair(eggId, passwordService.viewPassword(eggId).get())) }.toList()
         }
         exchangeFactory.createPasswordExchange(uri).send(eggsByNest)
-        nestService.moveToNestAt(currentNest.slot)
+        nestService.moveToNestAt(currentNest.nestSlot)
     }
 }

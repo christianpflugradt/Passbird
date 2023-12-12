@@ -4,10 +4,10 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
-import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.nest.Slot.Companion.CAPACITY
-import de.pflugradts.passbird.domain.model.nest.Slot.Companion.FIRST_SLOT
-import de.pflugradts.passbird.domain.model.nest.Slot.Companion.LAST_SLOT
+import de.pflugradts.passbird.domain.model.nest.NestSlot
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.CAPACITY
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.FIRST_SLOT
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.LAST_SLOT
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import java.util.Collections
@@ -18,28 +18,28 @@ class NestingGroundService @Inject constructor(
 ) : NestService {
 
     private val nests = Collections.nCopies(CAPACITY, Optional.empty<Nest>()).toMutableList()
-    private var currentNest = Slot.DEFAULT
+    private var currentNest = NestSlot.DEFAULT
 
     override fun populate(nestShells: List<Shell>) {
         if (nestShells.size == CAPACITY) {
             (FIRST_SLOT..LAST_SLOT).forEach {
                 if (nestShells[it - 1].isNotEmpty) {
-                    nests[it - 1] = Optional.of(createNest(nestShells[it - 1], Slot.at(it)))
+                    nests[it - 1] = Optional.of(createNest(nestShells[it - 1], NestSlot.at(it)))
                 }
             }
         }
     }
 
-    override fun deploy(nestShell: Shell, slot: Slot) {
-        nests[slot.index() - 1] = Optional.of(createNest(nestShell, slot))
+    override fun place(nestShell: Shell, nestSlot: NestSlot) {
+        nests[nestSlot.index() - 1] = Optional.of(createNest(nestShell, nestSlot))
         eggRepository.sync()
     }
-    override fun atSlot(slot: Slot): Optional<Nest> =
-        if (slot === Slot.DEFAULT) Optional.of(DEFAULT) else nests[slot.index() - 1]
+    override fun atNestSlot(nestSlot: NestSlot): Optional<Nest> =
+        if (nestSlot === NestSlot.DEFAULT) Optional.of(DEFAULT) else nests[nestSlot.index() - 1]
     override fun all(includeDefault: Boolean) = nests.let { if (includeDefault) DEFAULT.asOptionalInList() + it else it }.stream()
-    override fun getCurrentNest(): Nest = atSlot(currentNest).orElse(DEFAULT)
-    override fun moveToNestAt(slot: Slot) {
-        if (atSlot(slot).isPresent) { currentNest = slot }
+    override fun currentNest(): Nest = atNestSlot(currentNest).orElse(DEFAULT)
+    override fun moveToNestAt(nestSlot: NestSlot) {
+        if (atNestSlot(nestSlot).isPresent) { currentNest = nestSlot }
     }
 }
 

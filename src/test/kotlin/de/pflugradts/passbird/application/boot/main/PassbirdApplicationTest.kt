@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.boot.main
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.fakeInput
@@ -61,8 +61,8 @@ class PassbirdApplicationTest {
         every { inputHandler.handleInput(any()) } returns Unit
 
         // when
-        nestService.deploy(shellOf(givenNest), Slot.N1)
-        nestService.moveToNestAt(Slot.N1)
+        nestService.place(shellOf(givenNest), NestSlot.N1)
+        nestService.moveToNestAt(NestSlot.N1)
         passbirdApplication.boot()
 
         // then
@@ -84,7 +84,7 @@ class PassbirdApplicationTest {
         every { inputHandler.handleInput(any()) } returns Unit
 
         // when
-        nestService.moveToNestAt(Slot.DEFAULT)
+        nestService.moveToNestAt(NestSlot.DEFAULT)
         passbirdApplication.boot()
 
         // then

@@ -14,7 +14,7 @@ import de.pflugradts.passbird.application.util.readBytes
 import de.pflugradts.passbird.application.util.readInt
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -85,7 +85,7 @@ class PasswordStoreReader @Inject constructor(
         if (SECTOR == readInt(bytes, incrementedOffset)) {
             incrementedOffset += intBytes()
             val nestShells: MutableList<Shell> = ArrayList()
-            for (i in 0 until Slot.CAPACITY) {
+            for (i in 0 until NestSlot.CAPACITY) {
                 bytes.asNestShell(incrementedOffset).let {
                     nestShells.add(it.first)
                     incrementedOffset += it.second
@@ -127,7 +127,7 @@ class PasswordStoreReader @Inject constructor(
         val passwordBytes = readBytes(this, incrementedOffset, passwordSize)
         incrementedOffset += passwordSize
         return Pair(
-            createEgg(Slot.at(nestSlot), shellOf(eggIdBytes), shellOf(passwordBytes)),
+            createEgg(NestSlot.at(nestSlot), shellOf(eggIdBytes), shellOf(passwordBytes)),
             incrementedOffset,
         )
     }

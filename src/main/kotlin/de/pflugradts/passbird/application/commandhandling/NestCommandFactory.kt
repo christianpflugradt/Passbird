@@ -7,7 +7,7 @@ import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.command.SwitchNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.base.Command
-import de.pflugradts.passbird.domain.model.nest.Slot.Companion.at
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.at
 import de.pflugradts.passbird.domain.model.shell.PlainValue.Companion.plainValueOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 

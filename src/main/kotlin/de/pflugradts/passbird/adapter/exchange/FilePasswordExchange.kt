@@ -9,7 +9,7 @@ import de.pflugradts.passbird.application.failure.ExportFailure
 import de.pflugradts.passbird.application.failure.ImportFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import java.io.IOException
@@ -21,7 +21,7 @@ class FilePasswordExchange @Inject constructor(
 ) : ExchangeAdapterPort {
     private val mapper = JsonMapper()
 
-    override fun send(data: Map<Slot, List<ShellPair>>) {
+    override fun send(data: Map<NestSlot, List<ShellPair>>) {
         try {
             Files.writeString(
                 systemOperation.resolvePath(uri, EXCHANGE_FILENAME),
@@ -32,7 +32,7 @@ class FilePasswordExchange @Inject constructor(
         }
     }
 
-    override fun receive(): Map<Slot, List<ShellPair>> {
+    override fun receive(): Map<NestSlot, List<ShellPair>> {
         return try {
             mapper.readValue(
                 Files.readString(systemOperation.resolvePath(uri, EXCHANGE_FILENAME)),
@@ -45,11 +45,11 @@ class FilePasswordExchange @Inject constructor(
     }
 }
 
-private class ExchangeWrapper(val value: Map<Slot, List<PlainEgg>> = emptyMap())
+private class ExchangeWrapper(val value: Map<NestSlot, List<PlainEgg>> = emptyMap())
 private class PlainEgg(var eggId: String = "", var password: String = "")
-private fun Map<Slot, List<ShellPair>>.toSerializable() = entries.associate { nest ->
+private fun Map<NestSlot, List<ShellPair>>.toSerializable() = entries.associate { nest ->
     nest.key to nest.value.map { PlainEgg(it.value.first.asString(), it.value.second.asString()) }
 }
-private fun Map<Slot, List<PlainEgg>>.toBytePairMap() = entries.associate { nest ->
+private fun Map<NestSlot, List<PlainEgg>>.toBytePairMap() = entries.associate { nest ->
     nest.key to nest.value.map { ShellPair(Pair(shellOf(it.eggId), shellOf(it.password))) }
 }

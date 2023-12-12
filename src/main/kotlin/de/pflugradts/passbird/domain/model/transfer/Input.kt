@@ -1,11 +1,11 @@
 package de.pflugradts.passbird.domain.model.transfer
 
 import de.pflugradts.passbird.domain.model.ddd.ValueObject
-import de.pflugradts.passbird.domain.model.nest.Slot
-import de.pflugradts.passbird.domain.model.nest.Slot.Companion.FIRST_SLOT
-import de.pflugradts.passbird.domain.model.nest.Slot.Companion.LAST_SLOT
-import de.pflugradts.passbird.domain.model.nest.Slot.Companion.at
-import de.pflugradts.passbird.domain.model.nest.Slot.INVALID
+import de.pflugradts.passbird.domain.model.nest.NestSlot
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.FIRST_SLOT
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.LAST_SLOT
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.at
+import de.pflugradts.passbird.domain.model.nest.NestSlot.INVALID
 import de.pflugradts.passbird.domain.model.shell.PlainValue.Companion.plainValueOf
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
@@ -27,7 +27,7 @@ class Input private constructor(val shell: Shell) : ValueObject {
     val data get() = if (shell.size > 1) shell.slice(command.size, shell.size) else emptyShell()
     val isEmpty get() = shell.isEmpty
     fun invalidate() = shell.scramble()
-    fun extractNestSlot(): Slot = shell.asString().toIntOrNull()?.let {
+    fun extractNestSlot(): NestSlot = shell.asString().toIntOrNull()?.let {
         if (it in FIRST_SLOT - 1..LAST_SLOT) at(it) else INVALID
     } ?: INVALID
 

@@ -25,7 +25,7 @@ class PutPasswordService @Inject constructor(
         challengeEggId(eggIdShell)
         val encryptedEggIdShell = encrypted(eggIdShell)
         val encryptedPasswordShell = encrypted(passwordShell)
-        val nestSlot = nestService.getCurrentNest().slot
+        val nestSlot = nestService.currentNest().nestSlot
         find(encryptedEggIdShell).ifPresentOrElse(
             { it.updatePassword(encryptedPasswordShell) },
             { eggRepository.add(createEgg(nestSlot, encryptedEggIdShell, encryptedPasswordShell)) },

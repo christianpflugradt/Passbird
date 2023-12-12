@@ -10,7 +10,7 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.copyInt
 import de.pflugradts.passbird.domain.model.egg.Egg
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.NestService
@@ -46,8 +46,8 @@ class PasswordStoreWriter @Inject constructor(
         var incrementedOffset = offset
         copyInt(SECTOR, bytes, incrementedOffset)
         incrementedOffset += intBytes()
-        for (index in Slot.FIRST_SLOT..Slot.LAST_SLOT) {
-            Slot.at(index).asByteArray().let { incrementedOffset += copyBytes(it, bytes, incrementedOffset, it.size) }
+        for (index in NestSlot.FIRST_SLOT..NestSlot.LAST_SLOT) {
+            NestSlot.at(index).asByteArray().let { incrementedOffset += copyBytes(it, bytes, incrementedOffset, it.size) }
         }
         return incrementedOffset
     }
@@ -60,7 +60,7 @@ class PasswordStoreWriter @Inject constructor(
         val dataSize = eggs.get()
             .map { egg: Egg -> intBytes() + egg.viewEggId().size + egg.viewPassword().size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
-        val nestSize = intBytes() + Slot.CAPACITY * intBytes() + nestService.all()
+        val nestSize = intBytes() + NestSlot.CAPACITY * intBytes() + nestService.all()
             .filter { it.isPresent }
             .map { it.get().shell.size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
@@ -71,8 +71,8 @@ class PasswordStoreWriter @Inject constructor(
     private val filePath get() = systemOperation.resolvePath(configuration.adapter.passwordStore.location, DATABASE_FILENAME)
     private fun calcActualTotalSize(contentSize: Int) = signatureSize() + contentSize + eofBytes() + checksumBytes()
 
-    private fun Slot.asByteArray(): ByteArray {
-        val nestShell = nestService.atSlot(this).map { it.shell }.orElse(Shell.emptyShell())
+    private fun NestSlot.asByteArray(): ByteArray {
+        val nestShell = nestService.atNestSlot(this).map { it.shell }.orElse(Shell.emptyShell())
         val nestBytesSize = nestShell.size
         val bytes = ByteArray(Integer.BYTES + nestBytesSize)
         copyInt(if (nestShell.isEmpty) EMPTY_NEST else nestBytesSize, bytes, 0)

@@ -28,7 +28,7 @@ class PassbirdApplication @Inject constructor(
 
     private fun receiveInput() = userInterfaceAdapterPort.receive(outputOf(shellOf(nestPrefix() + "Enter command: ")))
 
-    private fun nestPrefix() = nestService.getCurrentNest().let {
+    private fun nestPrefix() = nestService.currentNest().let {
         if (it == Nest.DEFAULT) "" else "[${it.shell.asString()}] "
     }
 

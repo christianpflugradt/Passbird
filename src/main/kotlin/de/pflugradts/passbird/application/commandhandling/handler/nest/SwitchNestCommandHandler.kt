@@ -15,12 +15,12 @@ class SwitchNestCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleSwitchNestCommand(switchNestCommand: SwitchNestCommand) {
-        if (nestService.getCurrentNest().slot == switchNestCommand.slot) {
+        if (nestService.currentNest().nestSlot == switchNestCommand.nestSlot) {
             userInterfaceAdapterPort.send(
-                outputOf(shellOf("'${nestService.getCurrentNest().shell.asString()}' is already the current namespace.")),
+                outputOf(shellOf("'${nestService.currentNest().shell.asString()}' is already the current namespace.")),
             )
-        } else if (nestService.atSlot(switchNestCommand.slot).isPresent) {
-            nestService.moveToNestAt(switchNestCommand.slot)
+        } else if (nestService.atNestSlot(switchNestCommand.nestSlot).isPresent) {
+            nestService.moveToNestAt(switchNestCommand.nestSlot)
         } else {
             userInterfaceAdapterPort.send(outputOf(shellOf("Specified namespace does not exist - Operation aborted.")))
         }

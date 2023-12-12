@@ -2,7 +2,7 @@ package de.pflugradts.passbird.domain.model.nest
 
 import de.pflugradts.kotlinextensions.tryCatching
 
-enum class Slot {
+enum class NestSlot {
     DEFAULT,
     N1,
     N2,

@@ -37,7 +37,7 @@ ${'\t'}[NOT YET IMPLEMENTED] n-[1-9] (discard) discards the namespace at the spe
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    private val currentNest get() = nestService.getCurrentNest().shell.asString()
+    private val currentNest get() = nestService.currentNest().shell.asString()
     private val availableNests get() = getAvailableNests(includeCurrent = true).let {
         if (hasCustomNests()) it else "$it\t(use the n+ command to create custom namespaces)\n"
     }

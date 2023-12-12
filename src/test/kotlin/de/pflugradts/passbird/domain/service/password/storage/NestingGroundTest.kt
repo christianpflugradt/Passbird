@@ -3,7 +3,7 @@ package de.pflugradts.passbird.domain.service.password.storage
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.nest.Slot
+import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.createNestServiceSpyForTesting
 import io.mockk.mockk
@@ -108,10 +108,10 @@ class NestingGroundTest {
         @Test
         fun `should find all in current nest`() {
             // given
-            val activeNestSlot = Slot.N2
-            val otherNestSlot = Slot.N3
-            nestService.deploy(shellOf("nest"), activeNestSlot)
-            nestService.deploy(shellOf("nest"), otherNestSlot)
+            val activeNestSlot = NestSlot.N2
+            val otherNestSlot = NestSlot.N3
+            nestService.place(shellOf("nest"), activeNestSlot)
+            nestService.place(shellOf("nest"), otherNestSlot)
             val egg1 = createEggForTesting(withEggIdShell = shellOf("first"), withNestSlot = activeNestSlot)
             val egg2 = createEggForTesting(withEggIdShell = shellOf("second"), withNestSlot = activeNestSlot)
             val egg3 = createEggForTesting(withEggIdShell = shellOf("third"), withNestSlot = otherNestSlot)
@@ -131,10 +131,10 @@ class NestingGroundTest {
         fun `should store multiple ewith identical eggIds in different nests`() {
             // given
             val eggIdShells = shellOf("eggId")
-            val firstNestSlot = Slot.N1
-            val secondNestSlot = Slot.N2
-            nestService.deploy(shellOf("nest"), firstNestSlot)
-            nestService.deploy(shellOf("nest"), secondNestSlot)
+            val firstNestSlot = NestSlot.N1
+            val secondNestSlot = NestSlot.N2
+            nestService.place(shellOf("nest"), firstNestSlot)
+            nestService.place(shellOf("nest"), secondNestSlot)
             val egg1 = createEggForTesting(withEggIdShell = eggIdShells, withNestSlot = firstNestSlot)
             val egg2 = createEggForTesting(withEggIdShell = eggIdShells, withNestSlot = secondNestSlot)
             nestingGround.add(egg1)
