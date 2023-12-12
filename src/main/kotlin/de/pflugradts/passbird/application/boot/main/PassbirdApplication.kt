@@ -9,14 +9,14 @@ import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.service.FixedNestService
+import de.pflugradts.passbird.domain.service.NestingGroundService
 
 const val INTERRUPT = 0x03.toChar()
 
 @Singleton
 class PassbirdApplication @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-    @Inject private val nestService: FixedNestService,
+    @Inject private val nestService: NestingGroundService,
     @Inject private val inputHandler: InputHandler,
 ) : Bootable {
 

@@ -18,15 +18,15 @@ import strikt.assertions.isTrue
 import strikt.java.isPresent
 import kotlin.jvm.optionals.getOrNull
 
-class FixedNestServiceTest {
+class NestingGroundServiceTest {
 
     private val eggRepository = mockk<EggRepository>(relaxed = true)
-    private val nestService = FixedNestService(eggRepository)
+    private val nestingGroundService = NestingGroundService(eggRepository)
 
     @Test
     fun `should have 9 empty slots upon initialisation`() {
         // given / when
-        val actual = nestService.all().toList()
+        val actual = nestingGroundService.all().toList()
 
         // then
         expectThat(actual) hasSize CAPACITY
@@ -42,8 +42,8 @@ class FixedNestServiceTest {
         )
 
         // when
-        nestService.populate(nestShells)
-        val actual = nestService.all().toList()
+        nestingGroundService.populate(nestShells)
+        val actual = nestingGroundService.all().toList()
 
         // then
         intArrayOf(1, 3, 7).forEach {
@@ -59,8 +59,8 @@ class FixedNestServiceTest {
         val nestShells = listOf(shellOf("nest1"), shellOf("nest2"), shellOf("nest3"))
 
         // when
-        nestService.populate(nestShells)
-        val actual = nestService.all().toList()
+        nestingGroundService.populate(nestShells)
+        val actual = nestingGroundService.all().toList()
 
         // then
         (0..<9).forEach {
@@ -71,7 +71,7 @@ class FixedNestServiceTest {
     @Test
     fun `should return default nest for default slot`() {
         // given / when / then
-        expectThat(nestService.atSlot(Slot.DEFAULT).getOrNull()) isEqualTo DEFAULT
+        expectThat(nestingGroundService.atSlot(Slot.DEFAULT).getOrNull()) isEqualTo DEFAULT
     }
 
     @Test
@@ -84,10 +84,10 @@ class FixedNestServiceTest {
         )
 
         // when
-        nestService.populate(nestShells)
+        nestingGroundService.populate(nestShells)
 
         // then
-        val nest2 = nestService.atSlot(Slot.N2)
+        val nest2 = nestingGroundService.atSlot(Slot.N2)
         expectThat(nest2).isPresent()
         expectThat(nest2.get().slot) isEqualTo Slot.N2
         expectThat(nest2.get().shell) isEqualTo givenNestShell
@@ -102,10 +102,10 @@ class FixedNestServiceTest {
         )
 
         // when
-        nestService.populate(nestShells)
+        nestingGroundService.populate(nestShells)
 
         // then
-        expectThat(nestService.atSlot(Slot.N1).isPresent).isFalse()
+        expectThat(nestingGroundService.atSlot(Slot.N1).isPresent).isFalse()
     }
 
     @Test
@@ -117,10 +117,10 @@ class FixedNestServiceTest {
         )
 
         // when
-        nestService.populate(nestShells)
+        nestingGroundService.populate(nestShells)
 
         // then
-        expectThat(nestService.getCurrentNest().slot) isEqualTo Slot.DEFAULT
+        expectThat(nestingGroundService.getCurrentNest().slot) isEqualTo Slot.DEFAULT
     }
 
     @Test
@@ -130,14 +130,14 @@ class FixedNestServiceTest {
             emptyShell(), shellOf("slot2"), emptyShell(), emptyShell(),
             emptyShell(), emptyShell(), emptyShell(), emptyShell(), emptyShell(),
         )
-        nestService.populate(nestShells)
+        nestingGroundService.populate(nestShells)
         val wantedCurrentNestSlot = Slot.N2
 
         // when
-        nestService.moveToNestAt(wantedCurrentNestSlot)
+        nestingGroundService.moveToNestAt(wantedCurrentNestSlot)
 
         // then
-        expectThat(nestService.getCurrentNest().slot) isEqualTo wantedCurrentNestSlot
+        expectThat(nestingGroundService.getCurrentNest().slot) isEqualTo wantedCurrentNestSlot
     }
 
     @Test
@@ -147,14 +147,14 @@ class FixedNestServiceTest {
             emptyShell(), shellOf("slot2"), emptyShell(), emptyShell(),
             emptyShell(), emptyShell(), emptyShell(), emptyShell(), emptyShell(),
         )
-        nestService.populate(nestShells)
+        nestingGroundService.populate(nestShells)
         val wantedCurrentNestSlot = Slot.N1
 
         // when
-        nestService.moveToNestAt(wantedCurrentNestSlot)
+        nestingGroundService.moveToNestAt(wantedCurrentNestSlot)
 
         // then
-        expectThat(nestService.getCurrentNest().slot) isNotEqualTo wantedCurrentNestSlot
+        expectThat(nestingGroundService.getCurrentNest().slot) isNotEqualTo wantedCurrentNestSlot
     }
 
     @Test
@@ -163,8 +163,8 @@ class FixedNestServiceTest {
         val nestShells = shellOf("name space")
 
         // when
-        nestService.deploy(nestShells, Slot.N3)
-        val actual = nestService.atSlot(Slot.N3)
+        nestingGroundService.deploy(nestShells, Slot.N3)
+        val actual = nestingGroundService.atSlot(Slot.N3)
 
         // then
         expectThat(actual.isPresent).isTrue()

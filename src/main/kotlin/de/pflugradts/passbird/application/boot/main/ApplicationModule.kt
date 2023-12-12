@@ -40,8 +40,8 @@ import de.pflugradts.passbird.application.exchange.ExchangeFactory
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.exchange.PasswordImportExportService
 import de.pflugradts.passbird.application.security.CryptoProviderFactory
-import de.pflugradts.passbird.domain.service.FixedNestService
 import de.pflugradts.passbird.domain.service.NestService
+import de.pflugradts.passbird.domain.service.NestingGroundService
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
@@ -68,7 +68,7 @@ class ApplicationModule : AbstractModule() {
         bind(ImportExportService::class.java).to(PasswordImportExportService::class.java)
         bind(KeyStoreAdapterPort::class.java).to(KeyStoreService::class.java)
         bind(EggRepository::class.java).to(NestingGround::class.java).`in`(Singleton::class.java)
-        bind(NestService::class.java).to(FixedNestService::class.java)
+        bind(NestService::class.java).to(NestingGroundService::class.java)
         bind(PasswordProvider::class.java).to(RandomPasswordProvider::class.java)
         bind(PasswordService::class.java).to(PasswordFacade::class.java)
         bind(PasswordStoreAdapterPort::class.java).to(PasswordStoreFacade::class.java)

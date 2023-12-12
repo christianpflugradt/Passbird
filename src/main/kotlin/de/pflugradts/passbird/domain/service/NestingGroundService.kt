@@ -3,6 +3,7 @@ package de.pflugradts.passbird.domain.service
 import com.google.inject.Inject
 import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
+import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.model.nest.Slot.Companion.FIRST_SLOT
@@ -12,7 +13,7 @@ import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import java.util.Collections
 import java.util.Optional
 
-class FixedNestService @Inject constructor(
+class NestingGroundService @Inject constructor(
     @Inject private val eggRepository: EggRepository,
 ) : NestService {
 
@@ -23,14 +24,14 @@ class FixedNestService @Inject constructor(
         if (nestShells.size == CAPACITY) {
             (FIRST_SLOT..LAST_SLOT).forEach {
                 if (nestShells[it - 1].isNotEmpty) {
-                    nests[it - 1] = Optional.of(Nest.createNest(nestShells[it - 1], Slot.at(it)))
+                    nests[it - 1] = Optional.of(createNest(nestShells[it - 1], Slot.at(it)))
                 }
             }
         }
     }
 
     override fun deploy(nestShell: Shell, slot: Slot) {
-        nests[slot.index() - 1] = Optional.of(Nest.createNest(nestShell, slot))
+        nests[slot.index() - 1] = Optional.of(createNest(nestShell, slot))
         eggRepository.sync()
     }
     override fun atSlot(slot: Slot): Optional<Nest> =
