@@ -15,7 +15,7 @@ import java.util.function.Supplier
 import java.util.stream.Stream
 
 @Singleton
-class NestBasedEggRepository @Inject constructor(
+class NestingGround @Inject constructor(
     @Inject private val passwordStoreAdapterPort: PasswordStoreAdapterPort,
     @Inject private val nestService: NestService,
     @Inject private val eventRegistry: EventRegistry,
