@@ -31,8 +31,8 @@ class ImportCommandHandler@Inject constructor(
 
     private fun commandConfirmed(importCommand: ImportCommand): Boolean {
         if (configuration.application.password.promptOnRemoval) {
-            val overlaps = importExportService.peekImportKeyBytes(importCommand.argument.asString())
-                .map { (nestSlot, keyBytes) -> keyBytes.map { Triple(nestSlot, it, passwordService.eggExists(it, nestSlot)) } }
+            val overlaps = importExportService.peekImportEggIdBytes(importCommand.argument.asString())
+                .map { (nestSlot, eggIdBytes) -> eggIdBytes.map { Triple(nestSlot, it, passwordService.eggExists(it, nestSlot)) } }
                 .flatten()
                 .filter { it.third }
                 .map { Pair(it.first, it.second) }

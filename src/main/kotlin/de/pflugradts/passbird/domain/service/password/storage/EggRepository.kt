@@ -9,8 +9,8 @@ import java.util.stream.Stream
 
 interface EggRepository : Repository {
     fun sync()
-    fun find(keyBytes: Bytes, nestSlot: Slot): Optional<Egg>
-    fun find(keyBytes: Bytes): Optional<Egg>
+    fun find(eggIdBytes: Bytes, nestSlot: Slot): Optional<Egg>
+    fun find(eggIdBytes: Bytes): Optional<Egg>
     fun add(egg: Egg)
     fun delete(egg: Egg)
     fun findAll(): Stream<Egg>

@@ -32,7 +32,7 @@ class SetCommandIT {
     @Test
     fun `should handle set command`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("s$args")
         val reference = bytes.copy()
         val generatedPassword = bytesOf("p4s5w0rD")
@@ -50,12 +50,12 @@ class SetCommandIT {
     }
 
     @Test
-    fun `should handle set command with invalid alias`() {
+    fun `should handle set command with invalid eggId`() {
         // given
-        val args = "invalidkey1!"
+        val args = "invalideggId1!"
         val bytes = bytesOf("s$args")
         val reference = bytes.copy()
-        fakePasswordService(instance = passwordService, withInvalidAlias = true)
+        fakePasswordService(instance = passwordService, withInvalidEggId = true)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakeConfiguration(instance = configuration)
 
@@ -73,7 +73,7 @@ class SetCommandIT {
     @Test
     fun `should handle set command with prompt on removal and new egg`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("s$args")
         val reference = bytes.copy()
         val generatedPassword = bytesOf("p4s5w0rD")
@@ -93,11 +93,11 @@ class SetCommandIT {
     @Test
     fun `should handle set command with prompt on removal and existing egg`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("s$args")
         val reference = bytes.copy()
         val generatedPassword = bytesOf("p4s5w0rD")
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
         fakePasswordProvider(instance = passwordProvider, withCreatedPassword = generatedPassword)
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
@@ -115,10 +115,10 @@ class SetCommandIT {
     @Test
     fun `should handle set command with prompt on removal and operation aborted`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("s$args")
         val reference = bytes.copy()
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)

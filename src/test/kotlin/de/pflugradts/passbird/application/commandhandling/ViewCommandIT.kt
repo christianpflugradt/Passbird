@@ -26,13 +26,13 @@ class ViewCommandIT {
     @Test
     fun `should handle view command`() {
         // given
-        val key = "key"
+        val eggId = "eggId"
         val password = "password"
-        val command = bytesOf("v$key")
+        val command = bytesOf("v$eggId")
         val reference = command.copy()
         fakePasswordService(
             instance = passwordService,
-            withEggs = listOf(createEggForTesting(withKeyBytes = bytesOf(key), withPasswordBytes = bytesOf(password))),
+            withEggs = listOf(createEggForTesting(withEggIdBytes = bytesOf(eggId), withPasswordBytes = bytesOf(password))),
         )
         val outputSlot = slot<Output>()
 
@@ -49,8 +49,8 @@ class ViewCommandIT {
     @Test
     fun `should handle view command for non existing password`() {
         // given
-        val key = "key"
-        val command = bytesOf("v$key")
+        val eggId = "eggId"
+        val command = bytesOf("v$eggId")
         val reference = command.copy()
         fakePasswordService(
             instance = passwordService,

@@ -3,8 +3,8 @@ package de.pflugradts.passbird.domain.service.password
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
-import de.pflugradts.passbird.domain.model.egg.InvalidKeyException
-import de.pflugradts.passbird.domain.model.egg.KeyAlreadyExistsException
+import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
+import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -31,26 +31,26 @@ class RenamePasswordServiceTest {
     @Test
     fun `should rename egg`() {
         // given
-        val oldKey = bytesOf("key123")
-        val newKey = bytesOf("keyABC")
-        val givenEgg = createEggForTesting(withKeyBytes = oldKey)
+        val oldEggId = bytesOf("eggId123")
+        val newEggId = bytesOf("eggIdABC")
+        val givenEgg = createEggForTesting(withEggIdBytes = oldEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 
         // when
-        passwordService.renameEgg(oldKey, newKey)
+        passwordService.renameEgg(oldEggId, newEggId)
 
         // then
-        expectThat(givenEgg.viewKey()) isEqualTo newKey isNotEqualTo oldKey
+        expectThat(givenEgg.viewEggId()) isEqualTo newEggId isNotEqualTo oldEggId
     }
 
     @Test
-    fun `should throw KeyAlreadyExistsException if new alias already exists`() {
+    fun `should throw EggIdAlreadyExistsException if new eggId already exists`() {
         // given
-        val oldKey = bytesOf("key123")
-        val newKey = bytesOf("keyABC")
-        val givenEgg = createEggForTesting(withKeyBytes = oldKey)
-        val existingEgg = createEggForTesting(withKeyBytes = newKey)
+        val oldEggId = bytesOf("eggId123")
+        val newEggId = bytesOf("eggIdABC")
+        val givenEgg = createEggForTesting(withEggIdBytes = oldEggId)
+        val existingEgg = createEggForTesting(withEggIdBytes = newEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(
             instance = eggRepository,
@@ -58,46 +58,46 @@ class RenamePasswordServiceTest {
         )
 
         // when
-        val actual = tryCatching { passwordService.renameEgg(oldKey, newKey) }
+        val actual = tryCatching { passwordService.renameEgg(oldEggId, newEggId) }
 
         // then
-        expectThat(givenEgg.viewKey()) isEqualTo oldKey isNotEqualTo newKey
+        expectThat(givenEgg.viewEggId()) isEqualTo oldEggId isNotEqualTo newEggId
         expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isA<KeyAlreadyExistsException>()
+        expectThat(actual.exceptionOrNull()).isA<EggIdAlreadyExistsException>()
     }
 
     @Test
     fun `should do nothing if egg does not exist`() {
         // given
-        val oldKey = bytesOf("key123")
-        val newKey = bytesOf("keyABC")
-        val givenEgg = createEggForTesting(withKeyBytes = oldKey)
+        val oldEggId = bytesOf("eggId123")
+        val newEggId = bytesOf("eggIdABC")
+        val givenEgg = createEggForTesting(withEggIdBytes = oldEggId)
         val existingEgg = createEggForTesting()
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(existingEgg))
 
         // when
-        passwordService.renameEgg(oldKey, newKey)
+        passwordService.renameEgg(oldEggId, newEggId)
 
         // then
-        expectThat(givenEgg.viewKey()) isEqualTo oldKey isNotEqualTo newKey
+        expectThat(givenEgg.viewEggId()) isEqualTo oldEggId isNotEqualTo newEggId
     }
 
     @Test
-    fun `should reject invalid key`() {
+    fun `should reject invalid eggId`() {
         // given
-        val oldKey = bytesOf("key123")
-        val newKey = bytesOf("123")
-        val givenEgg = createEggForTesting(withKeyBytes = oldKey)
+        val oldEggId = bytesOf("eggId123")
+        val newEggId = bytesOf("123")
+        val givenEgg = createEggForTesting(withEggIdBytes = oldEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 
         // when
-        val actual = tryCatching { passwordService.renameEgg(oldKey, newKey) }
+        val actual = tryCatching { passwordService.renameEgg(oldEggId, newEggId) }
 
         // then
         expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidKeyException>()
+        expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidEggIdException>()
         verify { cryptoProvider wasNot Called }
         verify { eggRepository wasNot Called }
     }

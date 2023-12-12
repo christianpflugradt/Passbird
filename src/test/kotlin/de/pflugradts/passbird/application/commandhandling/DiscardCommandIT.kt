@@ -29,10 +29,10 @@ class DiscardCommandIT {
     @Test
     fun `should handle discard command`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("d$args")
         val reference = bytes.copy()
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeConfiguration(instance = configuration)
 
@@ -48,10 +48,10 @@ class DiscardCommandIT {
     @Test
     fun `should handle discard command with prompt on removal`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("d$args")
         val reference = bytes.copy()
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
@@ -68,7 +68,7 @@ class DiscardCommandIT {
     @Test
     fun `should handle discard command with prompt on removal and operation aborted`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("d$args")
         val reference = bytes.copy()
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)

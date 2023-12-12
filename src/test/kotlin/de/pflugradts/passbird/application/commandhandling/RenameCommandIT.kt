@@ -27,32 +27,32 @@ internal class RenameCommandIT {
     @Test
     fun `should handle rename command`() {
         // given
-        val args = "key123"
+        val args = "eggId123"
         val bytes = bytesOf("r$args")
         val reference = bytes.copy()
-        val newAlias = mockk<Bytes>(relaxed = true)
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        val newEggId = mockk<Bytes>(relaxed = true)
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
-        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(newAlias)))
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(newEggId)))
 
         // when
         expectThat(bytes) isEqualTo reference
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        verify(exactly = 1) { passwordService.renameEgg(eq(bytesOf(args)), newAlias) }
-        verify(exactly = 1) { newAlias.scramble() }
-        expectThat(givenEgg.viewKey()) isEqualTo reference.slice(1)
+        verify(exactly = 1) { passwordService.renameEgg(eq(bytesOf(args)), newEggId) }
+        verify(exactly = 1) { newEggId.scramble() }
+        expectThat(givenEgg.viewEggId()) isEqualTo reference.slice(1)
         expectThat(bytes) isNotEqualTo reference
     }
 
     @Test
-    fun `should handle rename command with unknown alias`() {
+    fun `should handle rename command with unknown eggId`() {
         // given
-        val args = "invalidkey1!"
+        val args = "invalideggId1!"
         val bytes = bytesOf("r$args")
         val reference = bytes.copy()
-        fakePasswordService(instance = passwordService, withInvalidAlias = true)
+        fakePasswordService(instance = passwordService, withInvalidEggId = true)
 
         // when
         expectThat(bytes) isEqualTo reference
@@ -64,15 +64,15 @@ internal class RenameCommandIT {
     }
 
     @Test
-    fun `should handle rename command with empty alias entered`() {
+    fun `should handle rename command with empty eggId entered`() {
         // given
-        val args = "key123"
+        val args = "eggId123"
         val bytes = bytesOf("r$args")
         val reference = bytes.copy()
-        val newAlias = bytesOf("")
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        val newEggId = bytesOf("")
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
-        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(newAlias)))
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(newEggId)))
 
         // when
         expectThat(bytes) isEqualTo reference
@@ -85,22 +85,22 @@ internal class RenameCommandIT {
     }
 
     @Test
-    fun `should handle rename command with existing alias entered`() {
+    fun `should handle rename command with existing eggId entered`() {
         // given
-        val args = "key123"
+        val args = "eggId123"
         val bytes = bytesOf("r$args")
         val reference = bytes.copy()
-        val existingAlias = bytesOf("existingkey")
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        val existingEggId = bytesOf("existingeggId")
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
-        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(existingAlias)))
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(existingEggId)))
 
         // when
         expectThat(bytes) isEqualTo reference
         inputHandler.handleInput(inputOf(bytes))
 
         // then
-        expectThat(givenEgg.viewKey()) isEqualTo reference.slice(1)
+        expectThat(givenEgg.viewEggId()) isEqualTo reference.slice(1)
         expectThat(bytes) isNotEqualTo reference
     }
 }

@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.application.failure
 
-import de.pflugradts.passbird.domain.model.egg.InvalidKeyException
+import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import kotlin.io.path.name
 
 fun reportFailure(checksumFailure: ChecksumFailure) {
@@ -19,10 +19,10 @@ fun reportFailure(passwordDatabaseFailure: DecryptPasswordDatabaseFailure) =
     err("Password database at '${passwordDatabaseFailure.path.name}' could not be decrypted: ${passwordDatabaseFailure.ex.message}")
 fun reportFailure(exportFailure: ExportFailure) = err("Password database could not be exported: ${exportFailure.ex.message}")
 fun reportFailure(importFailure: ImportFailure) =
-    if (importFailure.ex is InvalidKeyException) {
+    if (importFailure.ex is InvalidEggIdException) {
         err(
             "Password database could not be imported because at least one alias contains digits or special characters. " +
-                "Please correct invalid aliases and try again. Erroneous alias: ${importFailure.ex.keyBytes.asString()}",
+                "Please correct invalid aliases and try again. Erroneous alias: ${importFailure.ex.eggIdBytes.asString()}",
         )
     } else {
         err("Password database could not be imported.")

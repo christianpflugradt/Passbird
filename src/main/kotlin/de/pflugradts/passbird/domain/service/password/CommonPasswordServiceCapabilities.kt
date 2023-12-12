@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
 import de.pflugradts.passbird.domain.model.egg.Egg
-import de.pflugradts.passbird.domain.model.egg.InvalidKeyException
+import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.transfer.Bytes
@@ -18,8 +18,8 @@ abstract class CommonPasswordServiceCapabilities(
     private val eggRepository: EggRepository,
     private val eventRegistry: EventRegistry,
 ) {
-    fun find(keyBytes: Bytes, nestSlot: Slot): Optional<Egg> = eggRepository.find(keyBytes, nestSlot)
-    fun find(keyBytes: Bytes): Optional<Egg> = eggRepository.find(keyBytes)
+    fun find(eggIdBytes: Bytes, nestSlot: Slot): Optional<Egg> = eggRepository.find(eggIdBytes, nestSlot)
+    fun find(eggIdBytes: Bytes): Optional<Egg> = eggRepository.find(eggIdBytes)
     fun encrypted(bytes: Bytes) = cryptoProvider.encrypt(bytes)
     fun decrypted(bytes: Bytes) = cryptoProvider.decrypt(bytes)
 
@@ -28,9 +28,9 @@ abstract class CommonPasswordServiceCapabilities(
         eggRepository.sync()
     }
 
-    fun challengeAlias(bytes: Bytes) {
+    fun challengeEggId(bytes: Bytes) {
         if (charValueOf(bytes.getByte(0)).isDigit || anyMatch(bytes.copy()) { charValueOf(it).isSymbol }) {
-            throw InvalidKeyException(bytes)
+            throw InvalidEggIdException(bytes)
         }
     }
     private fun anyMatch(bytes: Bytes, predicate: Predicate<Byte>): Boolean {
@@ -39,9 +39,9 @@ abstract class CommonPasswordServiceCapabilities(
         return result
     }
 
-    fun eggExists(keyBytes: Bytes, nestSlot: Slot) = find(encrypted(keyBytes), nestSlot).isPresent
-    fun eggExists(keyBytes: Bytes, eggNotExistsAction: EggNotExistsAction) =
-        encrypted(keyBytes).let {
+    fun eggExists(eggIdBytes: Bytes, nestSlot: Slot) = find(encrypted(eggIdBytes), nestSlot).isPresent
+    fun eggExists(eggIdBytes: Bytes, eggNotExistsAction: EggNotExistsAction) =
+        encrypted(eggIdBytes).let {
             find(it).let { match ->
                 if (match.isEmpty && eggNotExistsAction == EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT) {
                     eventRegistry.register(EggNotFound(it))

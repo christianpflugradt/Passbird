@@ -118,16 +118,16 @@ class PasswordStoreReader @Inject constructor(
         var incrementedOffset = offset
         val nestSlot = readInt(this, incrementedOffset)
         incrementedOffset += Integer.BYTES
-        val keySize = readInt(this, incrementedOffset)
+        val eggIdSize = readInt(this, incrementedOffset)
         incrementedOffset += Integer.BYTES
-        val keyBytes = readBytes(this, incrementedOffset, keySize)
-        incrementedOffset += keySize
+        val eggIdBytes = readBytes(this, incrementedOffset, eggIdSize)
+        incrementedOffset += eggIdSize
         val passwordSize = readInt(this, incrementedOffset)
         incrementedOffset += Integer.BYTES
         val passwordBytes = readBytes(this, incrementedOffset, passwordSize)
         incrementedOffset += passwordSize
         return Pair(
-            createEgg(Slot.at(nestSlot), bytesOf(keyBytes), bytesOf(passwordBytes)),
+            createEgg(Slot.at(nestSlot), bytesOf(eggIdBytes), bytesOf(passwordBytes)),
             incrementedOffset,
         )
     }

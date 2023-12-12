@@ -5,7 +5,7 @@ import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.BytePair
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
-import de.pflugradts.passbird.domain.model.egg.InvalidKeyException
+import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
@@ -34,110 +34,110 @@ class PutPasswordServiceTest {
     private val passwordService = PutPasswordService(cryptoProvider, eggRepository, passbirdEventRegistry, nestService)
 
     @Nested
-    inner class ChallengeAliasTest {
+    inner class ChallengeEggIdTest {
         @Test
-        fun `should succeed when challenging alphabetic alias`() {
+        fun `should succeed when challenging alphabetic eggId`() {
             // given
-            val givenAlias = bytesOf("abcDEF")
+            val givenEggId = bytesOf("abcDEF")
 
             // when
-            val actual = tryCatching { passwordService.challengeAlias(givenAlias) }
+            val actual = tryCatching { passwordService.challengeEggId(givenEggId) }
 
             // then
             expectThat(actual.success).isTrue()
         }
 
         @Test
-        fun `should succeed when challenging alias with digit at other than first position`() {
+        fun `should succeed when challenging eggId with digit at other than first position`() {
             // given
-            val givenAlias = bytesOf("abc123")
+            val givenEggId = bytesOf("abc123")
 
             // when
-            val actual = tryCatching { passwordService.challengeAlias(givenAlias) }
+            val actual = tryCatching { passwordService.challengeEggId(givenEggId) }
 
             // then
             expectThat(actual.success).isTrue()
         }
 
         @Test
-        fun `should fail when challenging alias with digit at first position`() {
+        fun `should fail when challenging eggId with digit at first position`() {
             // given
-            val givenAlias = bytesOf("123abc")
+            val givenEggId = bytesOf("123abc")
 
             // when
-            val actual = tryCatching { passwordService.challengeAlias(givenAlias) }
+            val actual = tryCatching { passwordService.challengeEggId(givenEggId) }
 
             // then
             expectThat(actual.failure).isTrue()
-            expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidKeyException>()
+            expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidEggIdException>()
         }
 
         @Test
-        fun `should fail when challenging alias with special characters`() {
+        fun `should fail when challenging eggId with special characters`() {
             // given
-            val givenAlias = bytesOf("abc!")
+            val givenEggId = bytesOf("abc!")
 
             // when
-            val actual = tryCatching { passwordService.challengeAlias(givenAlias) }
+            val actual = tryCatching { passwordService.challengeEggId(givenEggId) }
 
             // then
             expectThat(actual.failure).isTrue()
-            expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidKeyException>()
+            expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidEggIdException>()
         }
     }
 
     @Test
     fun `should insert new egg`() {
         // given
-        val existingKey = bytesOf("Key")
-        val newKey = bytesOf("tryThis")
+        val existingEggId = bytesOf("EggId")
+        val newEggId = bytesOf("tryThis")
         val newPassword = bytesOf("Password")
-        val matchingEgg = createEggForTesting(withKeyBytes = existingKey)
+        val matchingEgg = createEggForTesting(withEggIdBytes = existingEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
-        passwordService.putEgg(newKey, newPassword)
+        passwordService.putEgg(newEggId, newPassword)
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(newKey) }
+        verify(exactly = 1) { cryptoProvider.encrypt(newEggId) }
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
         verify(exactly = 1) { eggRepository.sync() }
-        verify(exactly = 1) { eggRepository.add(eq(createEgg(Slot.DEFAULT, newKey, newPassword))) }
+        verify(exactly = 1) { eggRepository.add(eq(createEgg(Slot.DEFAULT, newEggId, newPassword))) }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 
     @Test
     fun `should update existing egg`() {
         // given
-        val existingKey = bytesOf("Key")
+        val existingEggId = bytesOf("EggId")
         val newPassword = bytesOf("Password")
-        val matchingEgg = createEggForTesting(withKeyBytes = existingKey)
+        val matchingEgg = createEggForTesting(withEggIdBytes = existingEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
-        passwordService.putEgg(existingKey, newPassword)
+        passwordService.putEgg(existingEggId, newPassword)
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(existingKey) }
+        verify(exactly = 1) { cryptoProvider.encrypt(existingEggId) }
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
         verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
-        expectThat(eggRepository.find(keyBytes = existingKey).orElse(null).viewPassword()) isEqualTo newPassword
+        expectThat(eggRepository.find(eggIdBytes = existingEggId).orElse(null).viewPassword()) isEqualTo newPassword
     }
 
     @Test
-    fun `should reject invalid key`() {
+    fun `should reject invalid eggId`() {
         // given
-        val invalidKey = bytesOf("1Key")
+        val invalidEggId = bytesOf("1EggId")
 
         // when
-        val actual = tryCatching { passwordService.putEgg(invalidKey, bytesOf("password")) }
+        val actual = tryCatching { passwordService.putEgg(invalidEggId, bytesOf("password")) }
 
         // then
         expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidKeyException>()
+        expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidEggIdException>()
         verify { cryptoProvider wasNot Called }
         verify { eggRepository wasNot Called }
     }
@@ -145,28 +145,28 @@ class PutPasswordServiceTest {
     @Test
     fun `should upsert multiple eggs`() {
         // given
-        val newKey = bytesOf("trythis")
+        val newEggId = bytesOf("trythis")
         val newPassword = bytesOf("dont use this as a password")
-        val existingKey = bytesOf("Key")
-        val newPasswordForExistingKey = bytesOf("Password")
-        val matchingEgg = createEggForTesting(withKeyBytes = existingKey)
+        val existingEggId = bytesOf("EggId")
+        val newPasswordForExistingEggId = bytesOf("Password")
+        val matchingEgg = createEggForTesting(withEggIdBytes = existingEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
         passwordService.putEggs(
-            Stream.of(BytePair(Pair(newKey, newPassword)), BytePair(Pair(existingKey, newPasswordForExistingKey))),
+            Stream.of(BytePair(Pair(newEggId, newPassword)), BytePair(Pair(existingEggId, newPasswordForExistingEggId))),
         )
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(newKey) }
-        verify(exactly = 1) { cryptoProvider.encrypt(existingKey) }
-        verify(exactly = 1) { eggRepository.add(eq(createEgg(Slot.DEFAULT, newKey, newPassword))) }
+        verify(exactly = 1) { cryptoProvider.encrypt(newEggId) }
+        verify(exactly = 1) { cryptoProvider.encrypt(existingEggId) }
+        verify(exactly = 1) { eggRepository.add(eq(createEgg(Slot.DEFAULT, newEggId, newPassword))) }
         verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
         expectThat(
-            eggRepository.find(keyBytes = existingKey).orElse(null).viewPassword(),
-        ) isEqualTo newPasswordForExistingKey
+            eggRepository.find(eggIdBytes = existingEggId).orElse(null).viewPassword(),
+        ) isEqualTo newPasswordForExistingEggId
     }
 
     @Test

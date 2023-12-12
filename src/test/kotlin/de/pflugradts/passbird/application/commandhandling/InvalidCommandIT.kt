@@ -97,11 +97,11 @@ class InvalidCommandIT {
         @ParameterizedTest
         @ValueSource(
             strings = [
-                "n*1alias",
-                "n-1alias",
-                "n/1alias",
-                "n()alias",
-                "n_alias",
+                "n*1eggId",
+                "n-1eggId",
+                "n/1eggId",
+                "n()eggId",
+                "n_eggId",
                 "n++",
             ],
         )

@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.model.egg
 
 import de.pflugradts.passbird.domain.model.ddd.AggregateRoot
-import de.pflugradts.passbird.domain.model.egg.Key.Companion.createKey
+import de.pflugradts.passbird.domain.model.egg.EggId.Companion.createEggId
 import de.pflugradts.passbird.domain.model.egg.Password.Companion.createPassword
 import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
@@ -16,17 +16,17 @@ import de.pflugradts.passbird.domain.model.transfer.Bytes
  */
 class Egg private constructor(
     private var nestSlot: Slot,
-    private val key: Key,
+    private val eggId: EggId,
     private val password: Password,
 ) : AggregateRoot() {
 
     init { registerDomainEvent(EggCreated(this)) }
     fun associatedNest() = nestSlot
-    fun viewKey() = key.view()
+    fun viewEggId() = eggId.view()
     fun viewPassword() = password.view()
 
-    fun rename(keyBytes: Bytes) {
-        key.rename(keyBytes)
+    fun rename(eggIdBytes: Bytes) {
+        eggId.rename(eggIdBytes)
         registerDomainEvent(EggRenamed(this))
     }
 
@@ -43,11 +43,11 @@ class Egg private constructor(
     }
 
     override fun equals(other: Any?) =
-        (other as? Egg)?.let { it.viewKey() == viewKey() && it.associatedNest() == nestSlot } ?: false
-    override fun hashCode() = nestSlot.hashCode() + 31 * key.hashCode()
+        (other as? Egg)?.let { it.viewEggId() == viewEggId() && it.associatedNest() == nestSlot } ?: false
+    override fun hashCode() = nestSlot.hashCode() + 31 * eggId.hashCode()
 
     companion object {
-        fun createEgg(slot: Slot, keyBytes: Bytes, passwordBytes: Bytes) =
-            Egg(slot, createKey(keyBytes), createPassword(passwordBytes))
+        fun createEgg(slot: Slot, eggIdBytes: Bytes, passwordBytes: Bytes) =
+            Egg(slot, createEggId(eggIdBytes), createPassword(passwordBytes))
     }
 }

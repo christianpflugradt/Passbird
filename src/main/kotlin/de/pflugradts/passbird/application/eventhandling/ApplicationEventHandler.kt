@@ -20,27 +20,27 @@ class ApplicationEventHandler @Inject constructor(
 ) : EventHandler {
     @Subscribe
     private fun handleEggCreated(eggCreated: EggCreated) {
-        send("PasswordEntry '${decrypt(eggCreated.egg.viewKey())}' successfully created.")
+        send("PasswordEntry '${decrypt(eggCreated.egg.viewEggId())}' successfully created.")
     }
 
     @Subscribe
     private fun handleEggUpdated(eggUpdated: EggUpdated) {
-        send("PasswordEntry '${decrypt(eggUpdated.egg.viewKey())}' successfully updated.")
+        send("PasswordEntry '${decrypt(eggUpdated.egg.viewEggId())}' successfully updated.")
     }
 
     @Subscribe
     private fun handleEggRenamed(eggRenamed: EggRenamed) {
-        send("PasswordEntry '${decrypt(eggRenamed.egg.viewKey())}' successfully renamed.")
+        send("PasswordEntry '${decrypt(eggRenamed.egg.viewEggId())}' successfully renamed.")
     }
 
     @Subscribe
     private fun handleEggDiscarded(eggDiscarded: EggDiscarded) {
-        send("PasswordEntry '${decrypt(eggDiscarded.egg.viewKey())}' successfully deleted.")
+        send("PasswordEntry '${decrypt(eggDiscarded.egg.viewEggId())}' successfully deleted.")
     }
 
     @Subscribe
     private fun handleEggNotFound(eggNotFound: EggNotFound) {
-        send("PasswordEntry '${decrypt(eggNotFound.keyBytes)}' not found.")
+        send("PasswordEntry '${decrypt(eggNotFound.eggIdBytes)}' not found.")
     }
 
     private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(bytesOf(str)))

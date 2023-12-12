@@ -24,7 +24,7 @@ class NestTest {
     @Test
     fun `should clone bytes`() {
         // given
-        val bytes = bytesOf("key")
+        val bytes = bytesOf("eggId")
         val nest = createNest(bytes, Slot.DEFAULT)
 
         // when

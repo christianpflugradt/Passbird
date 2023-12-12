@@ -9,10 +9,6 @@ import de.pflugradts.passbird.domain.model.nest.Slot.INVALID
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 import de.pflugradts.passbird.domain.model.transfer.CharValue.Companion.charValueOf
 
-/**
- * An Input represents data given by the user through the
- * [UserInterface][de.pflugradts.passbird.application.UserInterfaceAdapterPort].
- */
 class Input private constructor(val bytes: Bytes) : ValueObject {
 
     val command get(): Bytes {

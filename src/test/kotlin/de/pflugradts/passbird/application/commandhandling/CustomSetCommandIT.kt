@@ -31,7 +31,7 @@ class CustomSetCommandIT {
     @Test
     fun `should handle custom set command`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("c$args")
         val reference = bytes.copy()
         val customPassword = mockk<Bytes>(relaxed = true)
@@ -50,12 +50,12 @@ class CustomSetCommandIT {
     }
 
     @Test
-    fun `should handle custom set command with invalid alias`() {
+    fun `should handle custom set command with invalid eggId`() {
         // given
-        val args = "invalidkey1!"
+        val args = "invalideggId1!"
         val bytes = bytesOf("c$args")
         val reference = bytes.copy()
-        fakePasswordService(instance = passwordService, withInvalidAlias = true)
+        fakePasswordService(instance = passwordService, withInvalidEggId = true)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
@@ -73,7 +73,7 @@ class CustomSetCommandIT {
     @Test
     fun `should handle custom set command with empty password entered`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("c$args")
         val reference = bytes.copy()
         val customPassword = emptyBytes()
@@ -94,7 +94,7 @@ class CustomSetCommandIT {
     @Test
     fun `should handle custom set command with prompt on removal and new egg`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("c$args")
         val reference = bytes.copy()
         val customPassword = mockk<Bytes>(relaxed = true)
@@ -115,11 +115,11 @@ class CustomSetCommandIT {
     @Test
     fun `should handle custom set command with prompt on removal and existing egg`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("c$args")
         val reference = bytes.copy()
         val customPassword = mockk<Bytes>(relaxed = true)
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
@@ -141,10 +141,10 @@ class CustomSetCommandIT {
     @Test
     fun `should handle custom set command with prompt on removal and operation aborted`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val bytes = bytesOf("c$args")
         val reference = bytes.copy()
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(args))
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(args))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)

@@ -12,14 +12,14 @@ interface PasswordService {
         CREATE_ENTRY_NOT_EXISTS_EVENT,
     }
 
-    fun eggExists(keyBytes: Bytes, nestSlot: Slot): Boolean
-    fun eggExists(keyBytes: Bytes, eggNotExistsAction: EggNotExistsAction): Boolean
-    fun viewPassword(keyBytes: Bytes): Optional<Bytes>
-    fun renameEgg(keyBytes: Bytes, newKeyBytes: Bytes)
-    fun challengeAlias(bytes: Bytes)
+    fun eggExists(eggIdBytes: Bytes, nestSlot: Slot): Boolean
+    fun eggExists(eggIdBytes: Bytes, eggNotExistsAction: EggNotExistsAction): Boolean
+    fun viewPassword(eggIdBytes: Bytes): Optional<Bytes>
+    fun renameEgg(eggIdBytes: Bytes, newEggIdBytes: Bytes)
+    fun challengeEggId(bytes: Bytes)
     fun putEggs(eggs: Stream<BytePair>)
-    fun putEgg(keyBytes: Bytes, passwordBytes: Bytes)
-    fun discardEgg(keyBytes: Bytes)
-    fun moveEgg(keyBytes: Bytes, targetNestSlot: Slot)
-    fun findAllKeys(): Stream<Bytes>
+    fun putEgg(eggIdBytes: Bytes, passwordBytes: Bytes)
+    fun discardEgg(eggIdBytes: Bytes)
+    fun moveEgg(eggIdBytes: Bytes, targetNestSlot: Slot)
+    fun findAllEggIds(): Stream<Bytes>
 }

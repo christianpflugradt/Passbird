@@ -21,14 +21,14 @@ class PutPasswordService @Inject constructor(
         processEventsAndSync()
     }
 
-    fun putEgg(keyBytes: Bytes, passwordBytes: Bytes, sync: Boolean = true) {
-        challengeAlias(keyBytes)
-        val encryptedKeyBytes = encrypted(keyBytes)
+    fun putEgg(eggIdBytes: Bytes, passwordBytes: Bytes, sync: Boolean = true) {
+        challengeEggId(eggIdBytes)
+        val encryptedEggIdBytes = encrypted(eggIdBytes)
         val encryptedPasswordBytes = encrypted(passwordBytes)
         val nestSlot = nestService.getCurrentNest().slot
-        find(encryptedKeyBytes).ifPresentOrElse(
+        find(encryptedEggIdBytes).ifPresentOrElse(
             { it.updatePassword(encryptedPasswordBytes) },
-            { eggRepository.add(createEgg(nestSlot, encryptedKeyBytes, encryptedPasswordBytes)) },
+            { eggRepository.add(createEgg(nestSlot, encryptedEggIdBytes, encryptedPasswordBytes)) },
         )
         if (sync) processEventsAndSync()
     }

@@ -16,20 +16,20 @@ class ListCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleListCommand(@Suppress("UNUSED_PARAMETER") listCommand: ListCommand) {
-        userInterfaceAdapterPort.send(outputOf(join(passwordService.findAllKeys().toList())))
+        userInterfaceAdapterPort.send(outputOf(join(passwordService.findAllEggIds().toList())))
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    private fun join(keyBytesList: List<Bytes>) =
-        if (keyBytesList.isEmpty()) {
+    private fun join(eggIdBytesList: List<Bytes>) =
+        if (eggIdBytesList.isEmpty()) {
             bytesOf("database is empty")
         } else {
-            val count = keyBytesList.stream()
+            val count = eggIdBytesList.stream()
                 .map(Bytes::size)
-                .reduce((keyBytesList.size - 1) * 2) { a: Int, b: Int -> Integer.sum(a, b) }
+                .reduce((eggIdBytesList.size - 1) * 2) { a: Int, b: Int -> Integer.sum(a, b) }
             val bytes = ByteArray(count)
             var index = 0
-            keyBytesList.forEach {
+            eggIdBytesList.forEach {
                 copyBytes(it.toByteArray(), bytes, index, it.size)
                 index += it.size
                 if (index < count) {

@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
 import com.google.inject.Inject
-import de.pflugradts.passbird.domain.model.egg.KeyAlreadyExistsException
+import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
 import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
@@ -13,15 +13,15 @@ class RenamePasswordService @Inject constructor(
     @Inject private val eggRepository: EggRepository,
     @Inject private val eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
-    fun renameEgg(keyBytes: Bytes, newKeyBytes: Bytes) {
-        challengeAlias(newKeyBytes)
-        if (eggExists(keyBytes, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
-            encrypted(newKeyBytes).let { encryptedNewKeyBytes ->
-                if (find(encryptedNewKeyBytes).isEmpty) {
-                    encrypted(keyBytes).let { find(it).get().rename(newKeyBytes) }
+    fun renameEgg(eggIdBytes: Bytes, newEggIdBytes: Bytes) {
+        challengeEggId(newEggIdBytes)
+        if (eggExists(eggIdBytes, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
+            encrypted(newEggIdBytes).let { encryptedNewEggIdBytes ->
+                if (find(encryptedNewEggIdBytes).isEmpty) {
+                    encrypted(eggIdBytes).let { find(it).get().rename(newEggIdBytes) }
                     processEventsAndSync()
                 } else {
-                    throw KeyAlreadyExistsException(newKeyBytes)
+                    throw EggIdAlreadyExistsException(newEggIdBytes)
                 }
             }
         }

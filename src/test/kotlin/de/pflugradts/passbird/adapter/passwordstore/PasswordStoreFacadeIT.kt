@@ -105,22 +105,22 @@ class PasswordStoreFacadeIT {
         nestService.deploy(nest3, N3)
         nestService.deploy(nest9, N9)
         val egg1 = createEggForTesting(
-            withKeyBytes = bytesOf("key1"),
+            withEggIdBytes = bytesOf("eggId1"),
             withPasswordBytes = bytesOf("password1"),
             withNestSlot = DEFAULT,
         )
         val egg2 = createEggForTesting(
-            withKeyBytes = bytesOf("key2"),
+            withEggIdBytes = bytesOf("eggId2"),
             withPasswordBytes = bytesOf("password2"),
             withNestSlot = N1,
         )
         val egg3 = createEggForTesting(
-            withKeyBytes = bytesOf("key3"),
+            withEggIdBytes = bytesOf("eggId3"),
             withPasswordBytes = bytesOf("password3"),
             withNestSlot = N3,
         )
         val egg3b = createEggForTesting(
-            withKeyBytes = bytesOf("key3"),
+            withEggIdBytes = bytesOf("eggId3"),
             withPasswordBytes = bytesOf("password3b"),
             withNestSlot = N9,
         )
@@ -300,8 +300,8 @@ class PasswordStoreFacadeIT {
     }
 
     private fun someEggs() = listOf(
-        createEggForTesting(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1")),
-        createEggForTesting(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2")),
-        createEggForTesting(withKeyBytes = bytesOf("key3"), withPasswordBytes = bytesOf("password3")),
+        createEggForTesting(withEggIdBytes = bytesOf("eggId1"), withPasswordBytes = bytesOf("password1")),
+        createEggForTesting(withEggIdBytes = bytesOf("eggId2"), withPasswordBytes = bytesOf("password2")),
+        createEggForTesting(withEggIdBytes = bytesOf("eggId3"), withPasswordBytes = bytesOf("password3")),
     )
 }

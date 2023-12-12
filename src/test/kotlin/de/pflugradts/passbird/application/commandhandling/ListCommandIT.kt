@@ -26,15 +26,15 @@ internal class ListCommandIT {
     fun `should handle list command`() {
         // given
         val input = inputOf(bytesOf("l"))
-        val key1 = bytesOf("key1")
-        val key2 = bytesOf("key2")
-        val key3 = bytesOf("key3")
+        val eggId1 = bytesOf("eggId1")
+        val eggId2 = bytesOf("eggId2")
+        val eggId3 = bytesOf("eggId3")
         fakePasswordService(
             instance = passwordService,
             withEggs = listOf(
-                createEggForTesting(withKeyBytes = key1),
-                createEggForTesting(withKeyBytes = key2),
-                createEggForTesting(withKeyBytes = key3),
+                createEggForTesting(withEggIdBytes = eggId1),
+                createEggForTesting(withEggIdBytes = eggId2),
+                createEggForTesting(withEggIdBytes = eggId3),
             ),
         )
         val outputSlot = slot<Output>()
@@ -44,7 +44,7 @@ internal class ListCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.bytes.asString()) isEqualTo "${key1.asString()}, ${key2.asString()}, ${key3.asString()}"
+        expectThat(outputSlot.captured.bytes.asString()) isEqualTo "${eggId1.asString()}, ${eggId2.asString()}, ${eggId3.asString()}"
     }
 
     @Test

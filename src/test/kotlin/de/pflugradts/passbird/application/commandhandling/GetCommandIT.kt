@@ -29,13 +29,13 @@ class GetCommandIT {
     @Test
     fun `should handle get command`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val command = bytesOf("g$args")
         val reference = command.copy()
         val expectedPassword = bytesOf("value")
         fakePasswordService(
             instance = passwordService,
-            withEggs = listOf(createEggForTesting(withKeyBytes = bytesOf(args), withPasswordBytes = expectedPassword)),
+            withEggs = listOf(createEggForTesting(withEggIdBytes = bytesOf(args), withPasswordBytes = expectedPassword)),
         )
         val outputSlot = slot<Output>()
 
@@ -53,12 +53,12 @@ class GetCommandIT {
     @Test
     fun `should handle get command with invalid egg`() {
         // given
-        val args = "key"
+        val args = "eggId"
         val command = bytesOf("g$args")
         val reference = command.copy()
         fakePasswordService(
             instance = passwordService,
-            withEggs = listOf(createEggForTesting(withKeyBytes = bytesOf("other"))),
+            withEggs = listOf(createEggForTesting(withEggIdBytes = bytesOf("other"))),
         )
 
         // when

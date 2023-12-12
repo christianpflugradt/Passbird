@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
 import com.google.inject.Inject
-import de.pflugradts.passbird.domain.model.egg.KeyAlreadyExistsException
+import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.nest.Slot
 import de.pflugradts.passbird.domain.model.transfer.Bytes
@@ -14,14 +14,14 @@ class MovePasswordService @Inject constructor(
     @Inject private val eggRepository: EggRepository,
     @Inject private val eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
-    fun movePassword(keyBytes: Bytes, targetNestSlot: Slot) {
-        if (eggExists(keyBytes, targetNestSlot)) {
-            throw KeyAlreadyExistsException(keyBytes)
+    fun movePassword(eggIdBytes: Bytes, targetNestSlot: Slot) {
+        if (eggExists(eggIdBytes, targetNestSlot)) {
+            throw EggIdAlreadyExistsException(eggIdBytes)
         } else {
-            encrypted(keyBytes).let { encryptedKeyBytes ->
-                find(encryptedKeyBytes).ifPresentOrElse(
+            encrypted(eggIdBytes).let { encryptedEggIdBytes ->
+                find(encryptedEggIdBytes).ifPresentOrElse(
                     { it.moveToNestAt(targetNestSlot) },
-                    { eventRegistry.register(EggNotFound(encryptedKeyBytes)) },
+                    { eventRegistry.register(EggNotFound(encryptedEggIdBytes)) },
                 )
             }
             processEventsAndSync()

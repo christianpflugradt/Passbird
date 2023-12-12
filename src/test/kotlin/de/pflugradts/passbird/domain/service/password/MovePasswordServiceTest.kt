@@ -2,7 +2,7 @@
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
-import de.pflugradts.passbird.domain.model.egg.KeyAlreadyExistsException
+import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.nest.Slot
@@ -30,15 +30,15 @@ internal class MovePasswordServiceTest {
     @Test
     fun `should move egg`() {
         // given
-        val givenKey = bytesOf("key123")
+        val givenEggId = bytesOf("eggId123")
         val givenNestSlot = Slot.N1
         val newNestSlot = Slot.N2
-        val givenEgg = createEggForTesting(withKeyBytes = givenKey, withNestSlot = givenNestSlot)
+        val givenEgg = createEggForTesting(withEggIdBytes = givenEggId, withNestSlot = givenNestSlot)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 
         // when
-        passwordService.movePassword(givenKey, newNestSlot)
+        passwordService.movePassword(givenEggId, newNestSlot)
 
         // then
         expectThat(givenEgg.associatedNest()) isEqualTo newNestSlot isNotEqualTo givenNestSlot
@@ -47,26 +47,26 @@ internal class MovePasswordServiceTest {
     @Test
     fun `should not move egg if it does not exist`() {
         // given
-        val givenKey = bytesOf("key123")
+        val givenEggId = bytesOf("eggId123")
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository)
 
         // when
-        passwordService.movePassword(givenKey, Slot.N1)
+        passwordService.movePassword(givenEggId, Slot.N1)
 
         // then
-        verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(givenKey))) }
+        verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(givenEggId))) }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 
     @Test
-    fun `should not move egg if alias already exists in target nest`() {
+    fun `should not move egg if eggId already exists in target nest`() {
         // given
-        val givenKey = bytesOf("key123")
+        val givenEggId = bytesOf("eggId123")
         val givenNestSlot = Slot.N1
         val newNestSlot = Slot.N2
-        val givenEgg = createEggForTesting(withKeyBytes = givenKey, withNestSlot = givenNestSlot)
-        val conflictingEgg = createEggForTesting(withKeyBytes = givenKey, withNestSlot = newNestSlot)
+        val givenEgg = createEggForTesting(withEggIdBytes = givenEggId, withNestSlot = givenNestSlot)
+        val conflictingEgg = createEggForTesting(withEggIdBytes = givenEggId, withNestSlot = newNestSlot)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(
             instance = eggRepository,
@@ -74,10 +74,10 @@ internal class MovePasswordServiceTest {
         )
 
         // when
-        val actual = tryCatching { passwordService.movePassword(givenKey, newNestSlot) }
+        val actual = tryCatching { passwordService.movePassword(givenEggId, newNestSlot) }
 
         // then
-        expectThat(actual.exceptionOrNull()).isNotNull().isA<KeyAlreadyExistsException>()
+        expectThat(actual.exceptionOrNull()).isNotNull().isA<EggIdAlreadyExistsException>()
         expectThat(givenEgg.associatedNest()) isEqualTo givenNestSlot isNotEqualTo newNestSlot
     }
 }

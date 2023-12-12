@@ -5,7 +5,7 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.domain.model.egg.InvalidKeyException
+import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -20,7 +20,7 @@ class CustomSetCommandHandler @Inject constructor(
     private fun handleCustomSetCommand(customSetCommand: CustomSetCommand) {
         if (commandConfirmed(customSetCommand)) {
             try {
-                passwordService.challengeAlias(customSetCommand.argument)
+                passwordService.challengeEggId(customSetCommand.argument)
                 val secureInput = userInterfaceAdapterPort.receiveSecurely(outputOf(bytesOf("Enter custom password: ")))
                 if (secureInput.isEmpty) {
                     userInterfaceAdapterPort.send(outputOf(bytesOf("Empty input - Operation aborted.")))
@@ -28,7 +28,7 @@ class CustomSetCommandHandler @Inject constructor(
                     passwordService.putEgg(customSetCommand.argument, secureInput.bytes)
                 }
                 secureInput.invalidate()
-            } catch (ex: InvalidKeyException) {
+            } catch (ex: InvalidEggIdException) {
                 val errorMessage = "Password alias cannot contain digits or special characters. Please choose a different alias."
                 userInterfaceAdapterPort.send(outputOf(bytesOf(errorMessage)))
             }

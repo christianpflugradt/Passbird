@@ -58,7 +58,7 @@ class PasswordStoreWriter @Inject constructor(
 
     private fun calcRequiredContentSize(eggs: Supplier<Stream<Egg>>): Int {
         val dataSize = eggs.get()
-            .map { egg: Egg -> intBytes() + egg.viewKey().size + egg.viewPassword().size }
+            .map { egg: Egg -> intBytes() + egg.viewEggId().size + egg.viewPassword().size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
         val nestSize = intBytes() + Slot.CAPACITY * intBytes() + nestService.all()
             .filter { it.isPresent }
@@ -81,13 +81,13 @@ class PasswordStoreWriter @Inject constructor(
     }
 
     private fun Egg.asByteArray(): ByteArray {
-        val keySize = viewKey().size
+        val eggIdSize = viewEggId().size
         val passwordSize = viewPassword().size
         val metaSize = 2 * Integer.BYTES
-        val bytes = ByteArray(Integer.BYTES + keySize + passwordSize + metaSize)
+        val bytes = ByteArray(Integer.BYTES + eggIdSize + passwordSize + metaSize)
         var offset = copyInt(associatedNest().index(), bytes, 0)
-        offset += copyInt(keySize, bytes, offset)
-        offset += copyBytes(viewKey().toByteArray(), bytes, offset, keySize)
+        offset += copyInt(eggIdSize, bytes, offset)
+        offset += copyBytes(viewEggId().toByteArray(), bytes, offset, eggIdSize)
         offset += copyInt(passwordSize, bytes, offset)
         copyBytes(viewPassword().toByteArray(), bytes, offset, passwordSize)
         return bytes

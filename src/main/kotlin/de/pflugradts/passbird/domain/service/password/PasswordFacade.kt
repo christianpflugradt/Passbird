@@ -14,16 +14,16 @@ class PasswordFacade @Inject constructor(
     @Inject private val renamePasswordService: RenamePasswordService,
     @Inject private val movePasswordService: MovePasswordService,
 ) : PasswordService {
-    override fun eggExists(keyBytes: Bytes, nestSlot: Slot) = viewPasswordService.eggExists(keyBytes, nestSlot)
-    override fun eggExists(keyBytes: Bytes, eggNotExistsAction: EggNotExistsAction) =
-        viewPasswordService.eggExists(keyBytes, eggNotExistsAction)
-    override fun viewPassword(keyBytes: Bytes) = viewPasswordService.viewPassword(keyBytes)
-    override fun renameEgg(keyBytes: Bytes, newKeyBytes: Bytes) = renamePasswordService.renameEgg(keyBytes, newKeyBytes)
-    override fun findAllKeys() = viewPasswordService.findAllKeys()
-    override fun challengeAlias(bytes: Bytes) = putPasswordService.challengeAlias(bytes)
+    override fun eggExists(eggIdBytes: Bytes, nestSlot: Slot) = viewPasswordService.eggExists(eggIdBytes, nestSlot)
+    override fun eggExists(eggIdBytes: Bytes, eggNotExistsAction: EggNotExistsAction) =
+        viewPasswordService.eggExists(eggIdBytes, eggNotExistsAction)
+    override fun viewPassword(eggIdBytes: Bytes) = viewPasswordService.viewPassword(eggIdBytes)
+    override fun renameEgg(eggIdBytes: Bytes, newEggIdBytes: Bytes) = renamePasswordService.renameEgg(eggIdBytes, newEggIdBytes)
+    override fun findAllEggIds() = viewPasswordService.findAllEggIds()
+    override fun challengeEggId(bytes: Bytes) = putPasswordService.challengeEggId(bytes)
     override fun putEggs(eggs: Stream<BytePair>) = putPasswordService.putEggs(eggs)
-    override fun putEgg(keyBytes: Bytes, passwordBytes: Bytes) = putPasswordService.putEgg(keyBytes, passwordBytes)
-    override fun discardEgg(keyBytes: Bytes) = discardPasswordService.discardEgg(keyBytes)
-    override fun moveEgg(keyBytes: Bytes, targetNestSlot: Slot) =
-        movePasswordService.movePassword(keyBytes, targetNestSlot)
+    override fun putEgg(eggIdBytes: Bytes, passwordBytes: Bytes) = putPasswordService.putEgg(eggIdBytes, passwordBytes)
+    override fun discardEgg(eggIdBytes: Bytes) = discardPasswordService.discardEgg(eggIdBytes)
+    override fun moveEgg(eggIdBytes: Bytes, targetNestSlot: Slot) =
+        movePasswordService.movePassword(eggIdBytes, targetNestSlot)
 }

@@ -5,7 +5,7 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.SetCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.domain.model.egg.InvalidKeyException
+import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -22,12 +22,12 @@ class SetCommandHandler @Inject constructor(
     private fun handleSetCommand(setCommand: SetCommand) {
         if (commandConfirmed(setCommand)) {
             try {
-                passwordService.challengeAlias(setCommand.argument)
+                passwordService.challengeEggId(setCommand.argument)
                 passwordService.putEgg(
                     setCommand.argument,
                     passwordProvider.createNewPassword(configuration.parsePasswordRequirements()),
                 )
-            } catch (ex: InvalidKeyException) {
+            } catch (ex: InvalidEggIdException) {
                 userInterfaceAdapterPort.send(
                     outputOf(bytesOf("Password alias cannot contain digits or special characters. Please choose a different alias.")),
                 )

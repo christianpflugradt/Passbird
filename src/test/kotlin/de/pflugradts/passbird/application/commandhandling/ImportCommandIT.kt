@@ -60,13 +60,13 @@ class ImportCommandIT {
         val args = "tmp"
         val bytes = bytesOf("i$args")
         val reference = bytes.copy()
-        val importKey1 = bytesOf("import1")
-        val importKey2 = bytesOf("import2")
-        val databaseKey1 = bytesOf("database1")
-        val databaseKey2 = bytesOf("database2")
-        val givenEgg1 = createEggForTesting(withKeyBytes = databaseKey1)
-        val givenEgg2 = createEggForTesting(withKeyBytes = databaseKey2)
-        every { importExportService.peekImportKeyBytes(args) } returns mapOf(DEFAULT to listOf(importKey1, importKey2))
+        val importEggId1 = bytesOf("import1")
+        val importEggId2 = bytesOf("import2")
+        val databaseEggId1 = bytesOf("database1")
+        val databaseEggId2 = bytesOf("database2")
+        val givenEgg1 = createEggForTesting(withEggIdBytes = databaseEggId1)
+        val givenEgg2 = createEggForTesting(withEggIdBytes = databaseEggId2)
+        every { importExportService.peekImportEggIdBytes(args) } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
@@ -85,13 +85,13 @@ class ImportCommandIT {
         val args = "tmp"
         val bytes = bytesOf("i$args")
         val reference = bytes.copy()
-        val importKey1 = bytesOf("import1")
-        val importKey2 = bytesOf("overlap")
-        val databaseKey1 = bytesOf("database1")
-        val databaseKey2 = bytesOf("overlap")
-        val givenEgg1 = createEggForTesting(withKeyBytes = databaseKey1)
-        val givenEgg2 = createEggForTesting(withKeyBytes = databaseKey2)
-        every { importExportService.peekImportKeyBytes(args) } returns mapOf(DEFAULT to listOf(importKey1, importKey2))
+        val importEggId1 = bytesOf("import1")
+        val importEggId2 = bytesOf("overlap")
+        val databaseEggId1 = bytesOf("database1")
+        val databaseEggId2 = bytesOf("overlap")
+        val givenEgg1 = createEggForTesting(withEggIdBytes = databaseEggId1)
+        val givenEgg2 = createEggForTesting(withEggIdBytes = databaseEggId2)
+        every { importExportService.peekImportEggIdBytes(args) } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
@@ -111,13 +111,13 @@ class ImportCommandIT {
         val args = "tmp"
         val bytes = bytesOf("i$args")
         val reference = bytes.copy()
-        val importKey1 = bytesOf("import1")
-        val importKey2 = bytesOf("overlap")
-        val databaseKey1 = bytesOf("database1")
-        val databaseKey2 = bytesOf("overlap")
-        val givenEgg1 = createEggForTesting(withKeyBytes = databaseKey1)
-        val givenEgg2 = createEggForTesting(withKeyBytes = databaseKey2)
-        every { importExportService.peekImportKeyBytes(args) } returns mapOf(DEFAULT to listOf(importKey1, importKey2))
+        val importEggId1 = bytesOf("import1")
+        val importEggId2 = bytesOf("overlap")
+        val databaseEggId1 = bytesOf("database1")
+        val databaseEggId2 = bytesOf("overlap")
+        val givenEgg1 = createEggForTesting(withEggIdBytes = databaseEggId1)
+        val givenEgg2 = createEggForTesting(withEggIdBytes = databaseEggId2)
+        every { importExportService.peekImportEggIdBytes(args) } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
@@ -131,5 +131,5 @@ class ImportCommandIT {
         expectThat(bytes) isNotEqualTo reference
     }
 
-    // FIXME add tests for keys across multiple namespaces
+    // FIXME add tests for eggIds across multiple namespaces
 }

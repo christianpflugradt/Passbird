@@ -33,11 +33,11 @@ class AssignNestCommandIT {
     @Test
     fun `should handle assign nest command`() {
         // given
-        val givenAlias = "a"
-        val givenInput = bytesOf("n$givenAlias")
+        val givenEggId = "a"
+        val givenInput = bytesOf("n$givenEggId")
         val referenceInput = givenInput.copy()
         val expectedNestSlot = 1
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(givenAlias))
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(givenEggId))
         nestService.deploy(bytesOf("nest"), at(expectedNestSlot))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(expectedNestSlot)))
@@ -47,15 +47,15 @@ class AssignNestCommandIT {
         inputHandler.handleInput(inputOf(givenInput))
 
         // then
-        verify(exactly = 1) { passwordService.moveEgg(bytesOf(givenAlias), at(expectedNestSlot)) }
+        verify(exactly = 1) { passwordService.moveEgg(bytesOf(givenEggId), at(expectedNestSlot)) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
     @Test
     fun `should handle egg not exists`() {
         // given
-        val givenAlias = "a"
-        val givenInput = bytesOf("n$givenAlias")
+        val givenEggId = "a"
+        val givenInput = bytesOf("n$givenEggId")
         val referenceInput = givenInput.copy()
         val expectedNestSlot = 1
         nestService.deploy(bytesOf("nest"), at(expectedNestSlot))
@@ -74,10 +74,10 @@ class AssignNestCommandIT {
     @Test
     fun `should display target nest`() {
         // given
-        val givenAlias = "a"
-        val givenInput = bytesOf("n$givenAlias")
+        val givenEggId = "a"
+        val givenInput = bytesOf("n$givenEggId")
         val referenceInput = givenInput.copy()
-        val givenEgg = createEggForTesting(bytesOf(givenAlias))
+        val givenEgg = createEggForTesting(bytesOf(givenEggId))
         val currentNestSlot = 0
         val targetNestSlot = 1
         nestService.moveToNestAt(at(currentNestSlot))
@@ -100,12 +100,12 @@ class AssignNestCommandIT {
     @Test
     fun `should display target nest when not default`() {
         // given
-        val givenAlias = "a"
-        val givenInput = bytesOf("n$givenAlias")
+        val givenEggId = "a"
+        val givenInput = bytesOf("n$givenEggId")
         val referenceInput = givenInput.copy()
         val currentNestSlot = 1
         val targetNestSlot = 0
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(givenAlias), withNestSlot = at(currentNestSlot))
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(givenEggId), withNestSlot = at(currentNestSlot))
         nestService.deploy(bytesOf("nest"), at(currentNestSlot))
         nestService.moveToNestAt(at(currentNestSlot))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
@@ -126,10 +126,10 @@ class AssignNestCommandIT {
     @Test
     fun `should handle invalid nest entered`() {
         // given
-        val givenAlias = "a"
-        val givenInput = bytesOf("n$givenAlias")
+        val givenEggId = "a"
+        val givenInput = bytesOf("n$givenEggId")
         val referenceInput = givenInput.copy()
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(givenAlias))
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(givenEggId))
         val invalidNestSlot = -1
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(invalidNestSlot)))
@@ -150,10 +150,10 @@ class AssignNestCommandIT {
     @Test
     fun `should handle current nest entered`() {
         // given
-        val givenAlias = "a"
-        val givenInput = bytesOf("n$givenAlias")
+        val givenEggId = "a"
+        val givenInput = bytesOf("n$givenEggId")
         val referenceInput = givenInput.copy()
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(givenAlias))
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(givenEggId))
         val currentNestSlot = 1
         nestService.deploy(bytesOf("nest"), at(currentNestSlot))
         nestService.moveToNestAt(at(currentNestSlot))
@@ -176,10 +176,10 @@ class AssignNestCommandIT {
     @Test
     fun `should handle empty nest entered`() {
         // given
-        val givenAlias = "a"
-        val givenInput = bytesOf("n$givenAlias")
+        val givenEggId = "a"
+        val givenInput = bytesOf("n$givenEggId")
         val referenceInput = givenInput.copy()
-        val givenEgg = createEggForTesting(withKeyBytes = bytesOf(givenAlias))
+        val givenEgg = createEggForTesting(withEggIdBytes = bytesOf(givenEggId))
         val targetNestSlot = 1
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(targetNestSlot)))
@@ -199,15 +199,15 @@ class AssignNestCommandIT {
     }
 
     @Test
-    fun `should handle other password with same alias in target nest`() {
+    fun `should handle other password with same eggId in target nest`() {
         // given
-        val givenAlias = "a"
-        val givenInput = bytesOf("n$givenAlias")
+        val givenEggId = "a"
+        val givenInput = bytesOf("n$givenEggId")
         val referenceInput = givenInput.copy()
         val currentNestSlot = 0
         val targetNestSlot = 1
-        val givenEgg1 = createEggForTesting(withKeyBytes = bytesOf(givenAlias), withNestSlot = at(currentNestSlot))
-        val givenEgg2 = createEggForTesting(withKeyBytes = bytesOf(givenAlias), withNestSlot = at(targetNestSlot))
+        val givenEgg1 = createEggForTesting(withEggIdBytes = bytesOf(givenEggId), withNestSlot = at(currentNestSlot))
+        val givenEgg2 = createEggForTesting(withEggIdBytes = bytesOf(givenEggId), withNestSlot = at(targetNestSlot))
         nestService.moveToNestAt(at(currentNestSlot))
         nestService.deploy(bytesOf("nest"), at(targetNestSlot))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))

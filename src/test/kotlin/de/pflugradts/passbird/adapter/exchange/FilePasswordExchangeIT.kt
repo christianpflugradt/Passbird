@@ -39,11 +39,11 @@ class FilePasswordExchangeIT {
     @Test
     fun `should export and re-import passwords across multiple nests`() {
         // given
-        val givenEgg1 = BytePair(Pair(bytesOf("key1"), bytesOf("password1")))
-        val givenEgg2 = BytePair(Pair(bytesOf("key2"), bytesOf("password2")))
-        val givenEgg3 = BytePair(Pair(bytesOf("key3"), bytesOf("password3")))
-        val givenEgg4 = BytePair(Pair(bytesOf("key4"), bytesOf("password4")))
-        val givenEgg5 = BytePair(Pair(bytesOf("key5"), bytesOf("password5")))
+        val givenEgg1 = BytePair(Pair(bytesOf("eggId1"), bytesOf("password1")))
+        val givenEgg2 = BytePair(Pair(bytesOf("eggId2"), bytesOf("password2")))
+        val givenEgg3 = BytePair(Pair(bytesOf("eggId3"), bytesOf("password3")))
+        val givenEgg4 = BytePair(Pair(bytesOf("eggId4"), bytesOf("password4")))
+        val givenEgg5 = BytePair(Pair(bytesOf("eggId5"), bytesOf("password5")))
 
         // whe
         filePasswordExchange.send(

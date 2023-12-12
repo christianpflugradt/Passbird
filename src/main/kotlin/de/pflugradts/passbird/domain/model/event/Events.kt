@@ -6,6 +6,6 @@ import de.pflugradts.passbird.domain.model.transfer.Bytes
 
 data class EggCreated(val egg: Egg) : DomainEvent
 data class EggDiscarded(val egg: Egg) : DomainEvent
-data class EggNotFound(val keyBytes: Bytes) : DomainEvent
+data class EggNotFound(val eggIdBytes: Bytes) : DomainEvent
 data class EggRenamed(val egg: Egg) : DomainEvent
 data class EggUpdated(val egg: Egg) : DomainEvent

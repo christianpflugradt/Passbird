@@ -7,7 +7,7 @@ import de.pflugradts.passbird.domain.model.transfer.Bytes
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.bytesOf
 
 fun createEggForTesting(
-    withKeyBytes: Bytes = bytesOf("key"),
+    withEggIdBytes: Bytes = bytesOf("eggId"),
     withPasswordBytes: Bytes = bytesOf("password"),
     withNestSlot: Slot = DEFAULT,
-): Egg = createEgg(withNestSlot, withKeyBytes, withPasswordBytes)
+): Egg = createEgg(withNestSlot, withEggIdBytes, withPasswordBytes)

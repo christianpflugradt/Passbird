@@ -2,10 +2,6 @@ package de.pflugradts.passbird.domain.model.transfer
 
 import de.pflugradts.passbird.domain.model.transfer.Bytes.Companion.emptyBytes
 
-/**
- * An Output represents data sent to the user through the
- * [UserInterface][de.pflugradts.passbird.application.UserInterfaceAdapterPort].
- */
 class Output private constructor(val bytes: Bytes) {
 
     override fun equals(other: Any?): Boolean = when {

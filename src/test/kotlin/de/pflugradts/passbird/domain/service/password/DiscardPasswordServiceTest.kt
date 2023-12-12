@@ -25,18 +25,18 @@ class DiscardPasswordServiceTest {
     @Test
     fun `should discard egg`() {
         // given
-        val givenKey = bytesOf("Key")
+        val givenEggId = bytesOf("EggId")
         val givenPassword = bytesOf("Password")
-        val givenEgg = createEggForTesting(withKeyBytes = givenKey, withPasswordBytes = givenPassword)
+        val givenEgg = createEggForTesting(withEggIdBytes = givenEggId, withPasswordBytes = givenPassword)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 
         // when
         expectThat(givenEgg.viewPassword()) isEqualTo givenPassword
-        passwordService.discardEgg(givenKey)
+        passwordService.discardEgg(givenEggId)
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(givenKey) }
+        verify(exactly = 1) { cryptoProvider.encrypt(givenEggId) }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
         expectThat(givenEgg.viewPassword()) isNotEqualTo givenPassword
     }
@@ -44,18 +44,18 @@ class DiscardPasswordServiceTest {
     @Test
     fun `should not discard anything if there is no match`() {
         // given
-        val givenKey = bytesOf("Key")
-        val otherKey = bytesOf("try this")
-        val givenEgg = createEggForTesting(withKeyBytes = givenKey)
+        val givenEggId = bytesOf("EggId")
+        val otherEggId = bytesOf("try this")
+        val givenEgg = createEggForTesting(withEggIdBytes = givenEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 
         // when
-        passwordService.discardEgg(otherKey)
+        passwordService.discardEgg(otherEggId)
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(otherKey) }
-        verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(otherKey))) }
+        verify(exactly = 1) { cryptoProvider.encrypt(otherEggId) }
+        verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(otherEggId))) }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 }

@@ -30,13 +30,13 @@ class ViewPasswordServiceTest {
     @Test
     fun `should return true if egg exists`() {
         // given
-        val givenKey = bytesOf("Key")
-        val matchingEgg = createEggForTesting(withKeyBytes = givenKey)
+        val givenEggId = bytesOf("EggId")
+        val matchingEgg = createEggForTesting(withEggIdBytes = givenEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
-        val actual = passwordService.eggExists(givenKey, EggNotExistsAction.DO_NOTHING)
+        val actual = passwordService.eggExists(givenEggId, EggNotExistsAction.DO_NOTHING)
 
         // then
         verify { passbirdEventRegistry wasNot Called }
@@ -46,14 +46,14 @@ class ViewPasswordServiceTest {
     @Test
     fun `should return false if egg does not exist`() {
         // given
-        val givenKey = bytesOf("Key")
-        val otherKey = bytesOf("try this")
-        val matchingEgg = createEggForTesting(withKeyBytes = givenKey)
+        val givenEggId = bytesOf("EggId")
+        val otherEggId = bytesOf("try this")
+        val matchingEgg = createEggForTesting(withEggIdBytes = givenEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
-        val actual = passwordService.eggExists(otherKey, EggNotExistsAction.DO_NOTHING)
+        val actual = passwordService.eggExists(otherEggId, EggNotExistsAction.DO_NOTHING)
 
         // then
         verify { passbirdEventRegistry wasNot Called }
@@ -63,17 +63,17 @@ class ViewPasswordServiceTest {
     @Test
     fun `should find existing password`() {
         // given
-        val givenKey = bytesOf("Key")
+        val givenEggId = bytesOf("EggId")
         val expectedPassword = bytesOf("Password")
-        val matchingEgg = createEggForTesting(withKeyBytes = givenKey, withPasswordBytes = expectedPassword)
+        val matchingEgg = createEggForTesting(withEggIdBytes = givenEggId, withPasswordBytes = expectedPassword)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
-        val actual = passwordService.viewPassword(givenKey)
+        val actual = passwordService.viewPassword(givenEggId)
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(givenKey) }
+        verify(exactly = 1) { cryptoProvider.encrypt(givenEggId) }
         verify(exactly = 1) { cryptoProvider.decrypt(expectedPassword) }
         verify { passbirdEventRegistry wasNot Called }
         expectThat(actual).isPresent() isEqualTo expectedPassword
@@ -82,31 +82,31 @@ class ViewPasswordServiceTest {
     @Test
     fun `should return empty optional if egg does not exist`() {
         // given
-        val givenKey = bytesOf("Key")
-        val otherKey = bytesOf("tryThis")
-        val matchingEgg = createEggForTesting(withKeyBytes = givenKey)
+        val givenEggId = bytesOf("EggId")
+        val otherEggId = bytesOf("tryThis")
+        val matchingEgg = createEggForTesting(withEggIdBytes = givenEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
 
         // when
-        val actual = passwordService.viewPassword(otherKey)
+        val actual = passwordService.viewPassword(otherEggId)
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(otherKey) }
-        verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(otherKey))) }
+        verify(exactly = 1) { cryptoProvider.encrypt(otherEggId) }
+        verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(otherEggId))) }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
         expectThat(actual.isEmpty).isTrue()
     }
 
     @Test
-    fun `should find all keys in alphabetical order`() {
+    fun `should find all eggIds in alphabetical order`() {
         // given
-        val key1 = bytesOf("abc")
-        val key2 = bytesOf("hij")
-        val key3 = bytesOf("xyz")
-        val egg1 = createEggForTesting(withKeyBytes = key1)
-        val egg2 = createEggForTesting(withKeyBytes = key2)
-        val egg3 = createEggForTesting(withKeyBytes = key3)
+        val eggId1 = bytesOf("abc")
+        val eggId2 = bytesOf("hij")
+        val eggId3 = bytesOf("xyz")
+        val egg1 = createEggForTesting(withEggIdBytes = eggId1)
+        val egg2 = createEggForTesting(withEggIdBytes = eggId2)
+        val egg3 = createEggForTesting(withEggIdBytes = eggId3)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(
             instance = eggRepository,
@@ -114,9 +114,9 @@ class ViewPasswordServiceTest {
         )
 
         // when
-        val actual = passwordService.findAllKeys()
+        val actual = passwordService.findAllEggIds()
 
         // then
-        expectThat(actual.toList()).containsExactly(key1, key2, key3)
+        expectThat(actual.toList()).containsExactly(eggId1, eggId2, eggId3)
     }
 }

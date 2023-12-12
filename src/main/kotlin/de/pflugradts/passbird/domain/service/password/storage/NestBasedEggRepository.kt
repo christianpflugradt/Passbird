@@ -31,13 +31,13 @@ class NestBasedEggRepository @Inject constructor(
     }
 
     override fun sync() { passwordStoreAdapterPort.sync(getEggsSupplier(EggFilter.ALL_NESTS)) }
-    override fun find(keyBytes: Bytes, nestSlot: Slot): Optional<Egg> =
-        find(getEggsSupplier(nestSlot), keyBytes)
-    override fun find(keyBytes: Bytes): Optional<Egg> =
-        find(getEggsSupplier(EggFilter.CURRENT_NEST), keyBytes)
+    override fun find(eggIdBytes: Bytes, nestSlot: Slot): Optional<Egg> =
+        find(getEggsSupplier(nestSlot), eggIdBytes)
+    override fun find(eggIdBytes: Bytes): Optional<Egg> =
+        find(getEggsSupplier(EggFilter.CURRENT_NEST), eggIdBytes)
 
-    private fun find(supplier: Supplier<Stream<Egg>>, keyBytes: Bytes): Optional<Egg> =
-        supplier.get().filter { it.viewKey() == keyBytes }.findAny()
+    private fun find(supplier: Supplier<Stream<Egg>>, eggIdBytes: Bytes): Optional<Egg> =
+        supplier.get().filter { it.viewEggId() == eggIdBytes }.findAny()
 
     override fun add(egg: Egg) {
         eventRegistry.register(egg)

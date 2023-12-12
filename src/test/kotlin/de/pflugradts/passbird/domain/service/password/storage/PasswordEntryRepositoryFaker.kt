@@ -8,9 +8,9 @@ fun fakeEggRepository(
     instance: EggRepository,
     withEggs: List<Egg> = emptyList(),
 ) {
-    every { instance.find(any()) } answers { Optional.ofNullable(withEggs.find { it.viewKey() == firstArg() }) }
+    every { instance.find(any()) } answers { Optional.ofNullable(withEggs.find { it.viewEggId() == firstArg() }) }
     every { instance.find(any(), any()) } answers {
-        Optional.ofNullable(withEggs.find { it.viewKey() == firstArg() && it.associatedNest() == secondArg() })
+        Optional.ofNullable(withEggs.find { it.viewEggId() == firstArg() && it.associatedNest() == secondArg() })
     }
     every { instance.findAll() } answers { withEggs.stream() }
     every { instance.sync() } returns Unit

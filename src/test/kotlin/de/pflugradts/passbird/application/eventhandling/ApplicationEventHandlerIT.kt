@@ -36,7 +36,7 @@ class ApplicationEventHandlerIT {
     @MethodSource("providePasswordEvents")
     fun `should process egg created`(domainEvent: DomainEvent) {
         // given
-        val expectedBytes = bytesOf("expected key")
+        val expectedBytes = bytesOf("expected eggId")
         every { cryptoProvider.decrypt(any(Bytes::class)) } answers { expectedBytes }
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         val outputSlot = slot<Output>()

@@ -33,17 +33,17 @@ class PasswordImportExportServiceTest {
     private val uri = "any uri"
 
     @Test
-    fun `should peek import key bytes`() {
+    fun `should peek import eggId bytes`() {
         // given
         val eggs = testData()
         fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory, withEggs = eggs)
 
         // when
-        val actual = importExportService.peekImportKeyBytes(uri)
+        val actual = importExportService.peekImportEggIdBytes(uri)
 
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange(uri) }
-        expectThatActualKeysMatchExpected(actual, eggs)
+        expectThatActualEggIdsMatchExpected(actual, eggs)
         verify { passwordService wasNot Called }
     }
 
@@ -97,11 +97,11 @@ class PasswordImportExportServiceTest {
     }
 }
 
-private fun expectThatActualKeysMatchExpected(actual: Map<Slot, List<Bytes>>, expected: List<Egg>) {
+private fun expectThatActualEggIdsMatchExpected(actual: Map<Slot, List<Bytes>>, expected: List<Egg>) {
     var index = 0
     actual.keys.forEach { slot ->
         actual[slot]!!.forEach {
-            expectThat(it) isEqualTo expected[index++].viewKey()
+            expectThat(it) isEqualTo expected[index++].viewEggId()
         }
     }
 }
@@ -109,7 +109,7 @@ private fun expectThatActualBytePairsMatchExpected(actual: Stream<BytePair>, exp
     val actualList = actual.toList()
     expectThat(actualList.size) isEqualTo expected.size
     actualList.forEachIndexed { index, _ ->
-        expectThat(actualList[index].value.first) isEqualTo expected[index].viewKey()
+        expectThat(actualList[index].value.first) isEqualTo expected[index].viewEggId()
         expectThat(actualList[index].value.second) isEqualTo expected[index].viewPassword()
     }
 }
@@ -118,16 +118,16 @@ private fun expectThatActualBytePairsMatchExpected(actual: Map<Slot, List<BytePa
     var index = 0
     actual.keys.forEach { slot ->
         actual[slot]!!.forEach {
-            expectThat(it.value.first) isEqualTo expected[index].viewKey()
+            expectThat(it.value.first) isEqualTo expected[index].viewEggId()
             expectThat(it.value.second) isEqualTo expected[index++].viewPassword()
         }
     }
 }
 
 private fun testData() = listOf(
-    createEggForTesting(withKeyBytes = bytesOf("key1"), withPasswordBytes = bytesOf("password1"), withNestSlot = DEFAULT),
-    createEggForTesting(withKeyBytes = bytesOf("key2"), withPasswordBytes = bytesOf("password2"), withNestSlot = DEFAULT),
-    createEggForTesting(withKeyBytes = bytesOf("key3"), withPasswordBytes = bytesOf("password3"), withNestSlot = N2),
-    createEggForTesting(withKeyBytes = bytesOf("key4"), withPasswordBytes = bytesOf("password4"), withNestSlot = N9),
-    createEggForTesting(withKeyBytes = bytesOf("key5"), withPasswordBytes = bytesOf("password5"), withNestSlot = N9),
+    createEggForTesting(withEggIdBytes = bytesOf("eggId1"), withPasswordBytes = bytesOf("password1"), withNestSlot = DEFAULT),
+    createEggForTesting(withEggIdBytes = bytesOf("eggId2"), withPasswordBytes = bytesOf("password2"), withNestSlot = DEFAULT),
+    createEggForTesting(withEggIdBytes = bytesOf("eggId3"), withPasswordBytes = bytesOf("password3"), withNestSlot = N2),
+    createEggForTesting(withEggIdBytes = bytesOf("eggId4"), withPasswordBytes = bytesOf("password4"), withNestSlot = N9),
+    createEggForTesting(withEggIdBytes = bytesOf("eggId5"), withPasswordBytes = bytesOf("password5"), withNestSlot = N9),
 )

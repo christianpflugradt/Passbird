@@ -22,8 +22,8 @@ import java.util.stream.Stream
 
 class NestBasedEggRepositoryTest {
 
-    private val givenEgg1 = createEggForTesting(withKeyBytes = bytesOf("key1"))
-    private val givenEgg2 = createEggForTesting(withKeyBytes = bytesOf("key2"))
+    private val givenEgg1 = createEggForTesting(withEggIdBytes = bytesOf("eggId1"))
+    private val givenEgg2 = createEggForTesting(withEggIdBytes = bytesOf("eggId2"))
     private val givenEggs = listOf(givenEgg1, givenEgg2)
 
     private val passwordStoreAdapterPort = fakePasswordStoreAdapterPort(givenEggs)
@@ -54,7 +54,7 @@ class NestBasedEggRepositoryTest {
     @Test
     fun `should find egg`() {
         // given / when
-        val actual = repository.find(givenEgg1.viewKey())
+        val actual = repository.find(givenEgg1.viewEggId())
 
         // then
         expectThat(actual).isPresent() isEqualTo givenEgg1
@@ -63,10 +63,10 @@ class NestBasedEggRepositoryTest {
     @Test
     fun `should return empty optional if requested egg does not exist`() {
         // given
-        val nonExistingEgg = createEggForTesting(withKeyBytes = bytesOf("unknown"))
+        val nonExistingEgg = createEggForTesting(withEggIdBytes = bytesOf("unknown"))
 
         // when
-        val actual = repository.find(nonExistingEgg.viewKey())
+        val actual = repository.find(nonExistingEgg.viewEggId())
 
         // then
         expectThat(actual.isEmpty).isTrue()
@@ -75,14 +75,14 @@ class NestBasedEggRepositoryTest {
     @Test
     fun `should add egg`() {
         // given
-        val newEgg = createEggForTesting(withKeyBytes = bytesOf("new"))
+        val newEgg = createEggForTesting(withEggIdBytes = bytesOf("new"))
 
         // when
         repository.add(newEgg)
 
         // then
         verify(exactly = 1) { passbirdEventRegistry.register(newEgg) }
-        expectThat(repository.find(newEgg.viewKey())).isPresent() isEqualTo newEgg
+        expectThat(repository.find(newEgg.viewEggId())).isPresent() isEqualTo newEgg
     }
 
     @Test
@@ -91,7 +91,7 @@ class NestBasedEggRepositoryTest {
         repository.delete(givenEgg1)
 
         // then
-        expectThat(repository.find(givenEgg1.viewKey()).isEmpty).isTrue()
+        expectThat(repository.find(givenEgg1.viewEggId()).isEmpty).isTrue()
     }
 
     @Test
@@ -112,9 +112,9 @@ class NestBasedEggRepositoryTest {
             val otherNestSlot = Slot.N3
             nestService.deploy(bytesOf("nest"), activeNestSlot)
             nestService.deploy(bytesOf("nest"), otherNestSlot)
-            val egg1 = createEggForTesting(withKeyBytes = bytesOf("first"), withNestSlot = activeNestSlot)
-            val egg2 = createEggForTesting(withKeyBytes = bytesOf("second"), withNestSlot = activeNestSlot)
-            val egg3 = createEggForTesting(withKeyBytes = bytesOf("third"), withNestSlot = otherNestSlot)
+            val egg1 = createEggForTesting(withEggIdBytes = bytesOf("first"), withNestSlot = activeNestSlot)
+            val egg2 = createEggForTesting(withEggIdBytes = bytesOf("second"), withNestSlot = activeNestSlot)
+            val egg3 = createEggForTesting(withEggIdBytes = bytesOf("third"), withNestSlot = otherNestSlot)
             repository.add(egg1)
             repository.add(egg2)
             repository.add(egg3)
@@ -128,23 +128,23 @@ class NestBasedEggRepositoryTest {
         }
 
         @Test
-        fun `should store multiple ewith identical keys in different nests`() {
+        fun `should store multiple ewith identical eggIds in different nests`() {
             // given
-            val keyBytes = bytesOf("key")
+            val eggIdBytes = bytesOf("eggId")
             val firstNestSlot = Slot.N1
             val secondNestSlot = Slot.N2
             nestService.deploy(bytesOf("nest"), firstNestSlot)
             nestService.deploy(bytesOf("nest"), secondNestSlot)
-            val egg1 = createEggForTesting(withKeyBytes = keyBytes, withNestSlot = firstNestSlot)
-            val egg2 = createEggForTesting(withKeyBytes = keyBytes, withNestSlot = secondNestSlot)
+            val egg1 = createEggForTesting(withEggIdBytes = eggIdBytes, withNestSlot = firstNestSlot)
+            val egg2 = createEggForTesting(withEggIdBytes = eggIdBytes, withNestSlot = secondNestSlot)
             repository.add(egg1)
             repository.add(egg2)
 
             // when
             nestService.moveToNestAt(firstNestSlot)
-            val actualFirstEgg = repository.find(keyBytes)
+            val actualFirstEgg = repository.find(eggIdBytes)
             nestService.moveToNestAt(secondNestSlot)
-            val actualSecondEgg = repository.find(keyBytes)
+            val actualSecondEgg = repository.find(eggIdBytes)
 
             // then
             expectThat(actualFirstEgg).isPresent() isEqualTo egg1 isNotEqualTo egg2
