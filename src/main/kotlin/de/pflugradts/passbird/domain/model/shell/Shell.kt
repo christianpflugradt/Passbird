@@ -7,47 +7,47 @@ import java.util.stream.Stream
 import java.util.stream.StreamSupport
 
 class Shell private constructor(
-    private val byteArray: ByteArray,
+    private val content: ByteArray,
 ) : ValueObject,
     Iterable<Byte> {
 
-    val size get() = byteArray.size
+    val size get() = content.size
     val isEmpty get() = size == 0
     val isNotEmpty get() = !isEmpty
-    val firstByte get() = byteArray[0]
-    fun getByte(index: Int) = byteArray[index]
+    val firstByte get() = content[0]
+    fun getByte(index: Int) = content[index]
     fun getChar(index: Int) = Char(getByte(index).toUShort())
-    override fun iterator() = ShellIterator(byteArray.clone())
-    fun copy() = shellOf(byteArray.clone())
+    override fun iterator() = ShellIterator(content.clone())
+    fun copy() = shellOf(content.clone())
     fun stream(): Stream<Byte> = StreamSupport.stream(spliterator(), false)
-    fun toByteArray() = byteArray.clone()
+    fun toByteArray() = content.clone()
 
     fun toPlainShell(): PlainShell {
         val c = CharArray(size)
-        for (i in 0 until size) { c[i] = Char(byteArray[i].toUShort()) }
+        for (i in 0 until size) { c[i] = Char(content[i].toUShort()) }
         return plainShellOf(c)
     }
 
     fun asString(): String {
         val builder = StringBuilder()
         for (i in 0 until size) {
-            builder.append(Char(byteArray[i].toUShort()))
+            builder.append(Char(content[i].toUShort()))
         }
         return builder.toString()
     }
 
     @JvmOverloads
-    fun slice(fromInclusive: Int, toExclusive: Int = byteArray.size): Shell =
+    fun slice(fromInclusive: Int, toExclusive: Int = content.size): Shell =
         if (toExclusive - fromInclusive > 0) {
             val sub = ByteArray(toExclusive - fromInclusive)
-            System.arraycopy(byteArray, fromInclusive, sub, 0, sub.size)
+            System.arraycopy(content, fromInclusive, sub, 0, sub.size)
             shellOf(sub)
         } else {
             emptyShell()
         }
 
-    fun scramble() = byteArray.indices.forEach {
-        byteArray[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toByte()
+    fun scramble() = content.indices.forEach {
+        content[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toByte()
     }
 
     class ShellIterator(private val byteArray: ByteArray) : Iterator<Byte> {
@@ -59,10 +59,10 @@ class Shell private constructor(
     override fun equals(other: Any?): Boolean = when {
         (this === other) -> true
         (javaClass != other?.javaClass) -> false
-        else -> byteArray contentEquals (other as Shell).byteArray
+        else -> content contentEquals (other as Shell).content
     }
 
-    override fun hashCode() = byteArray.contentHashCode()
+    override fun hashCode() = content.contentHashCode()
 
     companion object {
         private val SECURE_RANDOM = SecureRandom()
