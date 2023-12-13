@@ -4,9 +4,6 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
 
-/**
- * AdapterPort for receiving [Input] from and sending [Output] to the user.
- */
 interface UserInterfaceAdapterPort {
     fun receive(output: Output): Input
     fun receive(): Input = receive(emptyOutput())

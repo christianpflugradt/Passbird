@@ -10,10 +10,6 @@ import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
 
-/**
- * An Egg represents an [EggName] and an associated [Password] stored in the
- * [PasswordStore][PasswordStoreAdapterPort].
- */
 class Egg private constructor(
     private var nestSlot: NestSlot,
     private val eggId: EggId,
