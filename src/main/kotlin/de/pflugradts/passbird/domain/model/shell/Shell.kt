@@ -87,5 +87,4 @@ class Shell private constructor(
     }
 }
 
-@JvmInline
-value class ShellPair(val value: Pair<Shell, Shell>)
+typealias ShellPair = Pair<Shell, Shell>

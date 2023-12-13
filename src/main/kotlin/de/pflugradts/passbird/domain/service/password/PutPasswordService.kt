@@ -17,7 +17,7 @@ class PutPasswordService @Inject constructor(
     @Inject private val nestService: NestService,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun putEggs(shellPairs: Stream<ShellPair>) {
-        shellPairs.forEach { putEgg(it.value.first, it.value.second, false) }
+        shellPairs.forEach { putEgg(it.first, it.second, false) }
         processEventsAndSync()
     }
 

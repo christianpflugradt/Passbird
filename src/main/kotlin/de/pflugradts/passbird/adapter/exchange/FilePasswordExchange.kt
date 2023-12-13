@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper
 import com.google.inject.Inject
 import com.google.inject.assistedinject.Assisted
 import de.pflugradts.passbird.application.ExchangeAdapterPort
+import de.pflugradts.passbird.application.ShellPairMap
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.EXCHANGE_FILENAME
 import de.pflugradts.passbird.application.failure.ExportFailure
 import de.pflugradts.passbird.application.failure.ImportFailure
@@ -21,7 +22,7 @@ class FilePasswordExchange @Inject constructor(
 ) : ExchangeAdapterPort {
     private val mapper = JsonMapper()
 
-    override fun send(data: Map<NestSlot, List<ShellPair>>) {
+    override fun send(data: ShellPairMap) {
         try {
             Files.writeString(
                 systemOperation.resolvePath(uri, EXCHANGE_FILENAME),
@@ -32,12 +33,12 @@ class FilePasswordExchange @Inject constructor(
         }
     }
 
-    override fun receive(): Map<NestSlot, List<ShellPair>> {
+    override fun receive(): ShellPairMap {
         return try {
             mapper.readValue(
                 Files.readString(systemOperation.resolvePath(uri, EXCHANGE_FILENAME)),
                 ExchangeWrapper::class.java,
-            ).value.toBytePairMap()
+            ).value.toShellPairMap()
         } catch (e: IOException) {
             reportFailure(ImportFailure(e))
             emptyMap()
@@ -45,11 +46,12 @@ class FilePasswordExchange @Inject constructor(
     }
 }
 
-private class ExchangeWrapper(val value: Map<NestSlot, List<PlainEgg>> = emptyMap())
 private class PlainEgg(var eggId: String = "", var password: String = "")
-private fun Map<NestSlot, List<ShellPair>>.toSerializable() = entries.associate { nest ->
-    nest.key to nest.value.map { PlainEgg(it.value.first.asString(), it.value.second.asString()) }
+private typealias PlainEggMap = Map<NestSlot, List<PlainEgg>>
+private class ExchangeWrapper(val value: PlainEggMap = emptyMap())
+private fun ShellPairMap.toSerializable() = entries.associate { nest ->
+    nest.key to nest.value.map { PlainEgg(it.first.asString(), it.second.asString()) }
 }
-private fun Map<NestSlot, List<PlainEgg>>.toBytePairMap() = entries.associate { nest ->
-    nest.key to nest.value.map { ShellPair(Pair(shellOf(it.eggId), shellOf(it.password))) }
+private fun PlainEggMap.toShellPairMap() = entries.associate { nest ->
+    nest.key to nest.value.map { ShellPair(shellOf(it.eggId), shellOf(it.password)) }
 }

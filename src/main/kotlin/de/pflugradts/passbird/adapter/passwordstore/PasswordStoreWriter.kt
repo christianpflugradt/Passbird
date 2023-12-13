@@ -15,9 +15,8 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
+import de.pflugradts.passbird.domain.service.password.storage.EggStreamSupplier
 import java.util.Arrays
-import java.util.function.Supplier
-import java.util.stream.Stream
 
 private const val EOF = 0
 private const val SECTOR = -1
@@ -30,7 +29,7 @@ class PasswordStoreWriter @Inject constructor(
     @Inject private val cryptoProvider: CryptoProvider,
 ) {
 
-    fun sync(eggSupplier: Supplier<Stream<Egg>>) {
+    fun sync(eggSupplier: EggStreamSupplier) {
         val contentSize = calcRequiredContentSize(eggSupplier)
         val bytes = ByteArray(calcActualTotalSize(contentSize))
         var offset = copyBytes(signature(), bytes, 0, signatureSize())
@@ -56,7 +55,7 @@ class PasswordStoreWriter @Inject constructor(
         tryCatching { systemOperation.writeBytesToFile(filePath!!, cryptoProvider.encrypt(shell)) }
             .onFailure { reportFailure(WritePasswordDatabaseFailure(filePath!!, it)) }
 
-    private fun calcRequiredContentSize(eggs: Supplier<Stream<Egg>>): Int {
+    private fun calcRequiredContentSize(eggs: EggStreamSupplier): Int {
         val dataSize = eggs.get()
             .map { egg: Egg -> intBytes() + egg.viewEggId().size + egg.viewPassword().size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }

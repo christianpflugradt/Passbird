@@ -155,7 +155,7 @@ class PutPasswordServiceTest {
 
         // when
         passwordService.putEggs(
-            Stream.of(ShellPair(Pair(newEggId, newPassword)), ShellPair(Pair(existingEggId, newPasswordForExistingEggId))),
+            Stream.of(ShellPair(newEggId, newPassword), ShellPair(existingEggId, newPasswordForExistingEggId)),
         )
 
         // then

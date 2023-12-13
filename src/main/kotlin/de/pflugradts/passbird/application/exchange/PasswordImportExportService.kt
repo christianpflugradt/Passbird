@@ -13,7 +13,7 @@ class PasswordImportExportService @Inject constructor(
     @Inject private val nestService: NestService,
 ) : ImportExportService {
     override fun peekImportEggIdShells(uri: String) = exchangeFactory.createPasswordExchange(uri).receive().entries.associate {
-        it.key to it.value.map { bytePair -> bytePair.value.first }
+        it.key to it.value.map { bytePair -> bytePair.first }
     }
 
     override fun importEggs(uri: String) {
@@ -36,7 +36,7 @@ class PasswordImportExportService @Inject constructor(
         nestService.all(includeDefault = true).filter { it.isPresent }.map { it.get() }.forEach { nest ->
             nestService.moveToNestAt(nest.nestSlot)
             eggsByNest[nest.nestSlot] = passwordService.findAllEggIds()
-                .map { eggId -> ShellPair(Pair(eggId, passwordService.viewPassword(eggId).get())) }.toList()
+                .map { eggId -> ShellPair(eggId, passwordService.viewPassword(eggId).get()) }.toList()
         }
         exchangeFactory.createPasswordExchange(uri).send(eggsByNest)
         nestService.moveToNestAt(currentNest.nestSlot)

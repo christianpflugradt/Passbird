@@ -20,6 +20,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
+import de.pflugradts.passbird.domain.service.password.storage.EggStreamSupplier
 import java.util.ArrayDeque
 import java.util.Arrays
 import java.util.function.Supplier
@@ -34,7 +35,7 @@ class PasswordStoreReader @Inject constructor(
     @Inject private val nestService: NestService,
     @Inject private val cryptoProvider: CryptoProvider,
 ) {
-    fun restore(): Supplier<Stream<Egg>> {
+    fun restore(): EggStreamSupplier {
         val eggs = ArrayDeque<Egg>()
         val shell = readFromDisk() ?: emptyShell()
         val byteArray = shell.toByteArray()

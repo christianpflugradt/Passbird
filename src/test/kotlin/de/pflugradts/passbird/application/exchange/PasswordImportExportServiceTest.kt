@@ -1,13 +1,12 @@
 package de.pflugradts.passbird.application.exchange
 
+import de.pflugradts.passbird.application.ShellPairMap
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.NestSlot.N2
 import de.pflugradts.passbird.domain.model.nest.NestSlot.N9
-import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.service.createNestServiceSpyForTesting
@@ -82,7 +81,7 @@ class PasswordImportExportServiceTest {
         nestService.place(shellOf("n2"), N2)
         nestService.place(shellOf("n2"), N9)
         nestService.moveToNestAt(givenCurrentNestSlot)
-        val exportNestSlot = slot<Map<NestSlot, List<ShellPair>>>()
+        val exportNestSlot = slot<ShellPairMap>()
 
         // when
         importExportService.exportEggs(uri)
@@ -97,7 +96,7 @@ class PasswordImportExportServiceTest {
     }
 }
 
-private fun expectThatActualEggIdsMatchExpected(actual: Map<NestSlot, List<Shell>>, expected: List<Egg>) {
+private fun expectThatActualEggIdsMatchExpected(actual: ShellMap, expected: List<Egg>) {
     var index = 0
     actual.keys.forEach { nestSlot ->
         actual[nestSlot]!!.forEach {
@@ -109,17 +108,17 @@ private fun expectThatActualBytePairsMatchExpected(actual: Stream<ShellPair>, ex
     val actualList = actual.toList()
     expectThat(actualList.size) isEqualTo expected.size
     actualList.forEachIndexed { index, _ ->
-        expectThat(actualList[index].value.first) isEqualTo expected[index].viewEggId()
-        expectThat(actualList[index].value.second) isEqualTo expected[index].viewPassword()
+        expectThat(actualList[index].first) isEqualTo expected[index].viewEggId()
+        expectThat(actualList[index].second) isEqualTo expected[index].viewPassword()
     }
 }
 
-private fun expectThatActualBytePairsMatchExpected(actual: Map<NestSlot, List<ShellPair>>, expected: List<Egg>) {
+private fun expectThatActualBytePairsMatchExpected(actual: ShellPairMap, expected: List<Egg>) {
     var index = 0
     actual.keys.forEach { nestSlot ->
         actual[nestSlot]!!.forEach {
-            expectThat(it.value.first) isEqualTo expected[index].viewEggId()
-            expectThat(it.value.second) isEqualTo expected[index++].viewPassword()
+            expectThat(it.first) isEqualTo expected[index].viewEggId()
+            expectThat(it.second) isEqualTo expected[index++].viewPassword()
         }
     }
 }

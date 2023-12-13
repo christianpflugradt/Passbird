@@ -17,7 +17,7 @@ fun fakeExchangeAdapterPort(
         val result = mutableMapOf<NestSlot, MutableList<ShellPair>>()
         withEggs.forEach {
             if (!result.containsKey(it.associatedNest())) { result[it.associatedNest()] = mutableListOf() }
-            result[it.associatedNest()]!!.add(ShellPair(Pair(it.viewEggId(), it.viewPassword())))
+            result[it.associatedNest()]!!.add(ShellPair(it.viewEggId(), it.viewPassword()))
         }
         result
     }

@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.domain.service.password.storage
 
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
-import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -17,8 +16,6 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
 import strikt.java.isPresent
-import java.util.function.Supplier
-import java.util.stream.Stream
 
 class NestingGroundTest {
 
@@ -41,7 +38,7 @@ class NestingGroundTest {
     @Test
     fun `should sync`() {
         // given
-        val eggsSlot = slot<Supplier<Stream<Egg>>>()
+        val eggsSlot = slot<EggStreamSupplier>()
 
         // when
         nestingGround.sync()

@@ -30,13 +30,13 @@ class NestingGround @Inject constructor(
         }
     }
 
-    override fun sync() { passwordStoreAdapterPort.sync(getEggsSupplier(EggFilter.ALL_NESTS)) }
+    override fun sync() { passwordStoreAdapterPort.sync(createEggStreamSupplier(EggFilter.ALL_NESTS)) }
     override fun find(eggIdShell: Shell, nestSlot: NestSlot): Optional<Egg> =
-        find(getEggsSupplier(nestSlot), eggIdShell)
+        find(createEggStreamSupplier(nestSlot), eggIdShell)
     override fun find(eggIdShell: Shell): Optional<Egg> =
-        find(getEggsSupplier(EggFilter.CURRENT_NEST), eggIdShell)
+        find(createEggStreamSupplier(EggFilter.CURRENT_NEST), eggIdShell)
 
-    private fun find(supplier: Supplier<Stream<Egg>>, eggIdShell: Shell): Optional<Egg> =
+    private fun find(supplier: EggStreamSupplier, eggIdShell: Shell): Optional<Egg> =
         supplier.get().filter { it.viewEggId() == eggIdShell }.findAny()
 
     override fun add(egg: Egg) {
@@ -49,10 +49,10 @@ class NestingGround @Inject constructor(
         eventRegistry.deregister(egg)
     }
 
-    override fun findAll() = getEggsSupplier(EggFilter.CURRENT_NEST).get()
+    override fun findAll() = createEggStreamSupplier(EggFilter.CURRENT_NEST).get()
 
-    private fun getEggsSupplier(eggFilter: EggFilter): Supplier<Stream<Egg>> =
-        getEggsSupplier(
+    private fun createEggStreamSupplier(eggFilter: EggFilter): EggStreamSupplier =
+        createEggStreamSupplier(
             if ((eggFilter == EggFilter.CURRENT_NEST)) {
                 inNest(nestService.currentNest().nestSlot)
             } else {
@@ -60,7 +60,9 @@ class NestingGround @Inject constructor(
             },
         )
 
-    private fun getEggsSupplier(nestSlot: NestSlot) = getEggsSupplier(inNest(nestSlot))
+    private fun createEggStreamSupplier(nestSlot: NestSlot) = createEggStreamSupplier(inNest(nestSlot))
 
-    private fun getEggsSupplier(predicate: Predicate<Egg>) = Supplier { eggs.stream().filter(predicate) }
+    private fun createEggStreamSupplier(predicate: Predicate<Egg>) = Supplier { eggs.stream().filter(predicate) }
 }
+
+typealias EggStreamSupplier = Supplier<Stream<Egg>>

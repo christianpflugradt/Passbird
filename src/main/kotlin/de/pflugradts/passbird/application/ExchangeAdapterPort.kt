@@ -4,6 +4,8 @@ import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 
 interface ExchangeAdapterPort {
-    fun send(data: Map<NestSlot, List<ShellPair>>)
-    fun receive(): Map<NestSlot, List<ShellPair>>
+    fun send(data: ShellPairMap)
+    fun receive(): ShellPairMap
 }
+
+typealias ShellPairMap = Map<NestSlot, List<ShellPair>>
