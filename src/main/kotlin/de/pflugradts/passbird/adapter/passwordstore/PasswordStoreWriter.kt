@@ -14,6 +14,7 @@ import de.pflugradts.passbird.application.util.copyInt
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -74,7 +75,7 @@ class PasswordStoreWriter @Inject constructor(
     private fun calcActualTotalSize(contentSize: Int) = signatureSize() + contentSize + eofBytes() + checksumBytes()
 
     private fun NestSlot.asByteArray(): ByteArray {
-        val nestShell = nestService.atNestSlot(this).map { it.shell }.orElse(Shell.emptyShell())
+        val nestShell = nestService.atNestSlot(this).map { it.shell }.orElse(emptyShell())
         val nestBytesSize = nestShell.size
         val bytes = ByteArray(Integer.BYTES + nestBytesSize)
         copyInt(if (nestShell.isEmpty) EMPTY_NEST else nestBytesSize, bytes, 0)

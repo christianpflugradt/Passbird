@@ -6,7 +6,7 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
-import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.mockk.mockk
@@ -35,7 +35,7 @@ class CommandLineInterfaceServiceTest {
 
             // when
             captureSystemOut.during {
-                commandLineInterfaceService.send(outputOf(Shell.shellOf(givenMessage)))
+                commandLineInterfaceService.send(outputOf(shellOf(givenMessage)))
             }
 
             // then
@@ -83,7 +83,7 @@ class CommandLineInterfaceServiceTest {
             // when
             captureSystemOut.during {
                 mockSystemInWith("smth\n") {
-                    commandLineInterfaceService.receive(outputOf(Shell.shellOf(givenMessage)))
+                    commandLineInterfaceService.receive(outputOf(shellOf(givenMessage)))
                 }
             }
 
@@ -131,7 +131,7 @@ class CommandLineInterfaceServiceTest {
 
             // when
             captureSystemOut.during {
-                commandLineInterfaceService.receiveSecurely(outputOf(Shell.shellOf(givenMessage)))
+                commandLineInterfaceService.receiveSecurely(outputOf(shellOf(givenMessage)))
             }
 
             // then

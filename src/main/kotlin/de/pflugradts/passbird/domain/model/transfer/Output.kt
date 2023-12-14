@@ -2,6 +2,7 @@ package de.pflugradts.passbird.domain.model.transfer
 
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 
 class Output private constructor(val shell: Shell) {
 
@@ -14,7 +15,7 @@ class Output private constructor(val shell: Shell) {
 
     companion object {
         fun outputOf(shell: Shell) = Output(shell)
-        fun outputOf(byteArray: ByteArray) = outputOf(Shell.shellOf(byteArray))
+        fun outputOf(byteArray: ByteArray) = outputOf(shellOf(byteArray))
         fun emptyOutput() = outputOf(emptyShell())
     }
 }

@@ -2,7 +2,7 @@ package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHandler
-import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output
 import io.mockk.mockk
@@ -21,7 +21,7 @@ class HelpCommandIT {
     @Test
     fun `should handle help command`() {
         // given
-        val input = Input.inputOf(Shell.shellOf("h"))
+        val input = Input.inputOf(shellOf("h"))
         val outputSlot = slot<Output>()
 
         // when

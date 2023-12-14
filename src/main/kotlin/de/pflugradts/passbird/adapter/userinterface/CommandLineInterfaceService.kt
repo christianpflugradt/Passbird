@@ -6,7 +6,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
-import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
@@ -26,7 +26,7 @@ class CommandLineInterfaceService @Inject constructor(
         val bytes = ArrayList<Byte>()
         var next: Char
         while (!isLinebreak(stdin().also { next = it })) { bytes.add(next.code.toByte()) }
-        return inputOf(Shell.shellOf(bytes))
+        return inputOf(shellOf(bytes))
     }
 
     private fun stdin(): Char = System.`in`.read().toChar()
@@ -41,7 +41,7 @@ class CommandLineInterfaceService @Inject constructor(
         }
     }
 
-    private fun sendWithoutLineBreak(output: Output) = Shell.shellOf(output.shell.toByteArray()).forEach {
+    private fun sendWithoutLineBreak(output: Output) = shellOf(output.shell.toByteArray()).forEach {
         sendChar(Char(it.toUShort()))
     }
 
