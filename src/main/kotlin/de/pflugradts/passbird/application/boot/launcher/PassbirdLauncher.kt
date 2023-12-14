@@ -7,6 +7,8 @@ import de.pflugradts.passbird.application.boot.bootModule
 import de.pflugradts.passbird.application.boot.main.ApplicationModule
 import de.pflugradts.passbird.application.boot.setup.SetupModule
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -31,7 +33,7 @@ class PassbirdLauncher @Inject constructor(
     }
 
     private fun keystoreExists() = keyStoreLocation.isNotEmpty() &&
-        systemOperation.getPath(keyStoreLocation).resolve(ReadableConfiguration.KEYSTORE_FILENAME).toFile().exists()
+        systemOperation.resolvePath(keyStoreLocation.toDirectory(), ReadableConfiguration.KEYSTORE_FILENAME.toFileName()).toFile().exists()
 
     private fun sendBanner() {
         userInterfaceAdapterPort.sendLineBreak()

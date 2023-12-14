@@ -6,6 +6,8 @@ import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -32,8 +34,9 @@ class CryptoProviderFactory @Inject constructor(
 
     private fun authenticate() = keyStoreAdapterPort.loadKey(
         receiveLogin(),
-        systemOperation.getPath(configuration.adapter.keyStore.location)
-            .resolve(ReadableConfiguration.KEYSTORE_FILENAME),
+        systemOperation.resolvePath(
+            configuration.adapter.keyStore.location.toDirectory(), ReadableConfiguration.KEYSTORE_FILENAME.toFileName()
+        ),
     )
 
     private fun receiveLogin() = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter key: "))).shell.toPlainShell()

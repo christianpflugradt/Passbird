@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.configuration
 
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_SYSTEM_PROPERTY
+import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import io.mockk.spyk
 import org.junit.jupiter.api.AfterEach
@@ -40,7 +41,7 @@ class ReadableConfigurationIT {
         expectThat(configuration.template).isTrue()
 
         // now persist configuration to file system
-        ConfigurationSyncService(configuration, systemOperation).sync(tempConfigurationDirectory)
+        ConfigurationSyncService(configuration, systemOperation).sync(tempConfigurationDirectory.toDirectory())
 
         // now load the persisted configuration and ensure the given configuration directory has been persisted too
         val loadedConfiguration = configurationFactory.loadConfiguration()

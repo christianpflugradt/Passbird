@@ -9,6 +9,8 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Co
 import de.pflugradts.passbird.application.failure.ExportFailure
 import de.pflugradts.passbird.application.failure.ImportFailure
 import de.pflugradts.passbird.application.failure.reportFailure
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -25,7 +27,7 @@ class FilePasswordExchange @Inject constructor(
     override fun send(data: ShellPairMap) {
         try {
             Files.writeString(
-                systemOperation.resolvePath(uri, EXCHANGE_FILENAME),
+                systemOperation.resolvePath(uri.toDirectory(), EXCHANGE_FILENAME.toFileName()),
                 mapper.writerWithDefaultPrettyPrinter().writeValueAsString(ExchangeWrapper(data.toSerializable())),
             )
         } catch (e: IOException) {
@@ -36,7 +38,7 @@ class FilePasswordExchange @Inject constructor(
     override fun receive(): ShellPairMap {
         return try {
             mapper.readValue(
-                Files.readString(systemOperation.resolvePath(uri, EXCHANGE_FILENAME)),
+                Files.readString(systemOperation.resolvePath(uri.toDirectory(), EXCHANGE_FILENAME.toFileName())),
                 ExchangeWrapper::class.java,
             ).value.toShellPairMap()
         } catch (e: IOException) {

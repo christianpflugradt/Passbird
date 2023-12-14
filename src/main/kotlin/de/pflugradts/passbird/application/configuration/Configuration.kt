@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.configuration
 
+import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 
 private const val DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS = 10
@@ -14,9 +15,9 @@ data class Configuration(
     override fun parsePasswordRequirements(): PasswordRequirements =
         PasswordRequirements.passwordRequirementsOf(application.password.specialCharacters, application.password.length)
 
-    override fun updateDirectory(directory: String) {
-        adapter.keyStore.location = directory
-        adapter.passwordStore.location = directory
+    override fun updateDirectory(directory: Directory) {
+        adapter.keyStore.location = directory.value
+        adapter.passwordStore.location = directory.value
     }
 
     data class Application(override val password: Password = Password()) : ReadableConfiguration.Application

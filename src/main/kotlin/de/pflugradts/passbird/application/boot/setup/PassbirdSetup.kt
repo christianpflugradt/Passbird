@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.boot.setup
 
 import com.google.inject.Inject
+import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
@@ -42,20 +43,20 @@ class PassbirdSetup @Inject constructor(
 
     private fun configTemplateRoute() {
         setupGuide.sendInputPath("configuration")
-        createConfiguration(verifyValidDirectory(configuration.adapter.passwordStore.location))
+        createConfiguration(verifyValidDirectory(Directory(configuration.adapter.passwordStore.location)))
         setupGuide.sendCreateKeyStoreInformation()
-        createKeyStore(configuration.adapter.keyStore.location, receiveMasterPassword())
+        createKeyStore(Directory(configuration.adapter.keyStore.location), receiveMasterPassword())
         setupGuide.sendRestart()
     }
 
     private fun configKeyStoreRoute() {
         setupGuide.sendInputPath("keystore")
         setupGuide.sendCreateKeyStoreInformation()
-        createKeyStore(verifyValidDirectory(configuration.adapter.keyStore.location), receiveMasterPassword())
+        createKeyStore(verifyValidDirectory(Directory(configuration.adapter.keyStore.location)), receiveMasterPassword())
         setupGuide.sendRestart()
     }
 
-    private fun createConfiguration(directory: String) = configurationSync.sync(directory)
+    private fun createConfiguration(directory: Directory) = configurationSync.sync(directory)
 
     private fun receiveMasterPassword(): Input {
         var input = emptyInput()
@@ -69,22 +70,22 @@ class PassbirdSetup @Inject constructor(
         return input
     }
 
-    private fun createKeyStore(directory: String, password: Input) {
+    private fun createKeyStore(directory: Directory, password: Input) {
         keyStoreAdapterPort.storeKey(
             password.shell.toPlainShell(),
-            Paths.get(directory).resolve(ReadableConfiguration.KEYSTORE_FILENAME),
+            Paths.get(directory.value).resolve(ReadableConfiguration.KEYSTORE_FILENAME),
         )
         setupGuide.sendCreateKeyStoreSucceeded()
     }
 
-    private fun verifyValidDirectory(source: String): String {
-        var directory = source
+    private fun verifyValidDirectory(givenDirectory: Directory): Directory {
+        var directory = givenDirectory
         while (!isValidDirectory(directory)) {
-            directory = userInterfaceAdapterPort.receive(outputOf(shellOf("your input: "))).shell.asString()
+            directory = Directory(userInterfaceAdapterPort.receive(outputOf(shellOf("your input: "))).shell.asString())
         }
         return directory
     }
 
-    private fun isValidDirectory(directory: String) =
+    private fun isValidDirectory(directory: Directory) =
         systemOperation.getPath(directory).toFile().let { it.isDirectory && it.exists() }
 }

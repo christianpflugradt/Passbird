@@ -8,6 +8,8 @@ import de.pflugradts.passbird.application.failure.ChecksumFailure
 import de.pflugradts.passbird.application.failure.DecryptPasswordDatabaseFailure
 import de.pflugradts.passbird.application.failure.SignatureCheckFailure
 import de.pflugradts.passbird.application.failure.reportFailure
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.readBytes
@@ -55,8 +57,8 @@ class PasswordStoreReader @Inject constructor(
     }
 
     private fun readFromDisk() =
-        tryCatching { systemOperation.readBytesFromFile(filePath!!).let { if (it.isEmpty) it else cryptoProvider.decrypt(it) } }
-            .onFailure { reportFailure(DecryptPasswordDatabaseFailure(filePath!!, it)) }
+        tryCatching { systemOperation.readBytesFromFile(filePath).let { if (it.isEmpty) it else cryptoProvider.decrypt(it) } }
+            .onFailure { reportFailure(DecryptPasswordDatabaseFailure(filePath, it)) }
             .getOrNull()
 
     private fun verifySignature(bytes: ByteArray) {
@@ -97,7 +99,8 @@ class PasswordStoreReader @Inject constructor(
         return incrementedOffset
     }
 
-    private val filePath get() = systemOperation.resolvePath(configuration.adapter.passwordStore.location, DATABASE_FILENAME)
+    private val filePath get() =
+        systemOperation.resolvePath(configuration.adapter.passwordStore.location.toDirectory(), DATABASE_FILENAME.toFileName())
     private fun calcActualContentSize(totalSize: Int) = totalSize - signatureSize() - checksumBytes() - eofBytes()
 
     private fun ByteArray.asNestShell(offset: Int): Pair<Shell, Int> {
@@ -110,7 +113,7 @@ class PasswordStoreReader @Inject constructor(
             incrementedOffset += nestBytes.size
             result = shellOf(nestBytes)
         } else {
-            result = Shell.emptyShell()
+            result = emptyShell()
         }
         return Pair(result, incrementedOffset - offset)
     }

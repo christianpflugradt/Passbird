@@ -7,6 +7,7 @@ import de.pflugradts.passbird.application.configuration.ConfigurationSync
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
+import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
@@ -63,7 +64,7 @@ class PassbirdSetupTest {
             instance = systemOperation,
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
-        every { configurationSync.sync(configurationDirectory) } returns Unit
+        every { configurationSync.sync(configurationDirectory.toDirectory()) } returns Unit
         every { keyStoreAdapterPort.storeKey(eq(password.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when

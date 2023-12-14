@@ -1,3 +1,5 @@
 package de.pflugradts.passbird.application.configuration
 
-interface ConfigurationSync { fun sync(directory: String) }
+import de.pflugradts.passbird.application.Directory
+
+interface ConfigurationSync { fun sync(directory: Directory) }

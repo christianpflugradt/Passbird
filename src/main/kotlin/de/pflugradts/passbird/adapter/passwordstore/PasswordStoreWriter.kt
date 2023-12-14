@@ -6,6 +6,8 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.DATABASE_FILENAME
 import de.pflugradts.passbird.application.failure.WritePasswordDatabaseFailure
 import de.pflugradts.passbird.application.failure.reportFailure
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.copyInt
@@ -67,7 +69,8 @@ class PasswordStoreWriter @Inject constructor(
         return dataSize + nestSize + metaSize
     }
 
-    private val filePath get() = systemOperation.resolvePath(configuration.adapter.passwordStore.location, DATABASE_FILENAME)
+    private val filePath get() =
+        systemOperation.resolvePath(configuration.adapter.passwordStore.location.toDirectory(), DATABASE_FILENAME.toFileName())
     private fun calcActualTotalSize(contentSize: Int) = signatureSize() + contentSize + eofBytes() + checksumBytes()
 
     private fun NestSlot.asByteArray(): ByteArray {

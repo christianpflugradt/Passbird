@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.util
 
+import de.pflugradts.passbird.application.toDirectory
 import io.mockk.every
 import io.mockk.mockk
 import java.io.IOException
@@ -19,7 +20,7 @@ fun fakeSystemOperation(
     every { instance.isConsoleAvailable } returns withConsoleEnabled
     every { instance.readPasswordFromConsole() } returns withPasswordFromConsole
     if (withKeyStoreUnavailable) every { instance.jceksInstance } throws KeyStoreException()
-    withPaths.forEach { every { instance.getPath(it.first) } returns it.second }
+    withPaths.forEach { every { instance.getPath(it.first.toDirectory()) } returns it.second }
     every { instance.exit() } returns Unit
     if (withIoException) {
         every { instance.resolvePath(any(), any()) } throws IOException()
