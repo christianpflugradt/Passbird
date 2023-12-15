@@ -69,10 +69,13 @@ ktlint {
 
 mapOf("unitTests" to "Test", "integrationTests" to "IT", "architectureTests" to "AT").forEach {
     tasks.register<Test>(it.key) {
-        useJUnitPlatform()
-        group = VERIFICATION_GROUP
         include("**/*${it.value}.class")
     }
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+    group = VERIFICATION_GROUP
 }
 
 val testExecutionData: PatternFilterable = fileTree(project.rootDir.path).include("build/jacoco/*.exec")
