@@ -9,6 +9,8 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
@@ -48,11 +50,13 @@ class PassbirdLauncherTest {
         val keyStoreDirectoryName = "/tmp"
         val keyStoreFileName = KEYSTORE_FILENAME
         fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectoryName)
-        val keyStoreFilePath = fakePath(exists = true)
-        val keyStoreDirPath = fakePath(resolvingTo = Pair(keyStoreFilePath, keyStoreFileName))
         fakeSystemOperation(
             instance = systemOperation,
-            withPaths = listOf(Pair(keyStoreDirectoryName, keyStoreDirPath)),
+            withDirectoryResolvingToFileName = Triple(
+                keyStoreDirectoryName.toDirectory(),
+                keyStoreFileName.toFileName(),
+                fakePath(exists = true),
+            ),
         )
 
         // when

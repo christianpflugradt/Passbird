@@ -6,9 +6,11 @@ import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.Configuration
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
@@ -45,8 +47,14 @@ class CryptoProviderFactoryTest {
         val correctPassword = inputOf(shellOf("letmein"))
         val keyStoreDirectory = "tmp"
         val keyStoreFilePath = fakePath()
-        val keyStoreDirPath = fakePath(resolvingTo = Pair(keyStoreFilePath, ReadableConfiguration.KEYSTORE_FILENAME))
-        fakeSystemOperation(instance = systemOperation, withPaths = listOf(Pair(keyStoreDirectory, keyStoreDirPath)))
+        fakeSystemOperation(
+            instance = systemOperation,
+            withDirectoryResolvingToFileName = Triple(
+                keyStoreDirectory.toDirectory(),
+                KEYSTORE_FILENAME.toFileName(),
+                keyStoreFilePath,
+            ),
+        )
         fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectory)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseSecureInputs = listOf(correctPassword))
         givenLoginSucceeds(correctPassword, keyStoreFilePath)
@@ -66,8 +74,14 @@ class CryptoProviderFactoryTest {
         val correctPassword = inputOf(shellOf("letmein"))
         val keyStoreDirectory = "tmp"
         val keyStoreFilePath = fakePath()
-        val keyStoreDirPath = fakePath(resolvingTo = Pair(keyStoreFilePath, ReadableConfiguration.KEYSTORE_FILENAME))
-        fakeSystemOperation(instance = systemOperation, withPaths = listOf(Pair(keyStoreDirectory, keyStoreDirPath)))
+        fakeSystemOperation(
+            instance = systemOperation,
+            withDirectoryResolvingToFileName = Triple(
+                keyStoreDirectory.toDirectory(),
+                KEYSTORE_FILENAME.toFileName(),
+                keyStoreFilePath,
+            ),
+        )
         fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
@@ -90,8 +104,14 @@ class CryptoProviderFactoryTest {
         val incorrectPassword = inputOf(shellOf("letmeout"))
         val keyStoreDirectory = "tmp"
         val keyStoreFilePath = fakePath()
-        val keyStoreDirPath = fakePath(resolvingTo = Pair(keyStoreFilePath, ReadableConfiguration.KEYSTORE_FILENAME))
-        fakeSystemOperation(instance = systemOperation, withPaths = listOf(Pair(keyStoreDirectory, keyStoreDirPath)))
+        fakeSystemOperation(
+            instance = systemOperation,
+            withDirectoryResolvingToFileName = Triple(
+                keyStoreDirectory.toDirectory(),
+                KEYSTORE_FILENAME.toFileName(),
+                keyStoreFilePath,
+            ),
+        )
         fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,

@@ -21,7 +21,8 @@ class ConfigurationSyncService @Inject constructor(
                 .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
                 .build()
                 .writeValue(
-                    systemOperation.resolvePath(directory, CONFIGURATION_FILENAME.toFileName()).toFile(), updatableConfiguration
+                    systemOperation.resolvePath(directory, CONFIGURATION_FILENAME.toFileName()).toFile(),
+                    updatableConfiguration,
                 )
         } catch (ex: Exception) {
             // FIXME error handling

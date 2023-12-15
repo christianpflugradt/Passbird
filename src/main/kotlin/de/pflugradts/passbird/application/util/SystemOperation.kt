@@ -23,7 +23,7 @@ class SystemOperation {
     val jceksInstance: KeyStore get() = KeyStore.getInstance(JCEKS_KEYSTORE)
 
     fun readPasswordFromConsole(): CharArray = System.console().readPassword()
-    fun resolvePath(directory: Directory, fileName: FileName): Path =  Paths.get(directory.value).resolve(fileName.value)
+    fun resolvePath(directory: Directory, fileName: FileName): Path = Paths.get(directory.value).resolve(fileName.value)
     fun getPath(directory: Directory): Path = Paths.get(directory.value)
     fun newInputStream(path: Path): InputStream = Files.newInputStream(path)
     fun newOutputStream(path: Path): OutputStream = Files.newOutputStream(path)

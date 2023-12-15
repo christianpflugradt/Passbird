@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.application.util
 
+import de.pflugradts.passbird.application.Directory
+import de.pflugradts.passbird.application.FileName
 import de.pflugradts.passbird.application.toDirectory
 import io.mockk.every
 import io.mockk.mockk
@@ -13,6 +15,7 @@ fun fakeSystemOperation(
     withPasswordFromConsole: CharArray = CharArray(0),
     withKeyStoreUnavailable: Boolean = false,
     withPaths: List<Pair<String, Path>> = emptyList(),
+    withDirectoryResolvingToFileName: Triple<Directory, FileName, Path>? = null,
     withIoException: Boolean = false,
 ) {
     every { instance.newInputStream(any()) } returns mockk()
@@ -21,8 +24,7 @@ fun fakeSystemOperation(
     every { instance.readPasswordFromConsole() } returns withPasswordFromConsole
     if (withKeyStoreUnavailable) every { instance.jceksInstance } throws KeyStoreException()
     withPaths.forEach { every { instance.getPath(it.first.toDirectory()) } returns it.second }
+    withDirectoryResolvingToFileName?.run { every { instance.resolvePath(first, second) } returns third }
     every { instance.exit() } returns Unit
-    if (withIoException) {
-        every { instance.resolvePath(any(), any()) } throws IOException()
-    }
+    if (withIoException) { every { instance.resolvePath(any(), any()) } throws IOException() }
 }

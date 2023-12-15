@@ -15,7 +15,7 @@ class ConfigurationFactory @Inject constructor(@Inject private val systemOperati
             YAMLMapper().readValue(
                 systemOperation.resolvePath(
                     System.getProperty(CONFIGURATION_SYSTEM_PROPERTY).toDirectory(),
-                    CONFIGURATION_FILENAME.toFileName()
+                    CONFIGURATION_FILENAME.toFileName(),
                 ).toFile(),
                 Configuration::class.java,
             )

@@ -55,8 +55,8 @@ class PasswordStoreWriter @Inject constructor(
     }
 
     private fun writeToDisk(shell: Shell) =
-        tryCatching { systemOperation.writeBytesToFile(filePath!!, cryptoProvider.encrypt(shell)) }
-            .onFailure { reportFailure(WritePasswordDatabaseFailure(filePath!!, it)) }
+        tryCatching { systemOperation.writeBytesToFile(filePath, cryptoProvider.encrypt(shell)) }
+            .onFailure { reportFailure(WritePasswordDatabaseFailure(filePath, it)) }
 
     private fun calcRequiredContentSize(eggs: EggStreamSupplier): Int {
         val dataSize = eggs.get()
