@@ -47,7 +47,7 @@ tasks.withType<Jar> {
         attributes["Implementation-Version"] = version
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from(sourceSets.main.get().output)
+    from(if (version != "codeql") sourceSets.main.get().output else sourceSets.main.get().output + sourceSets.test.get().output)
     dependsOn(configurations.runtimeClasspath)
     from({ configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) } })
 }
