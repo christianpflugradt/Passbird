@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.domain.service
 
+import com.google.inject.Singleton
 import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
@@ -11,6 +12,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import java.util.Collections
 import java.util.Optional
 
+@Singleton
 class NestingGroundService : NestService {
 
     private val nests = Collections.nCopies(CAPACITY, Optional.empty<Nest>()).toMutableList()
