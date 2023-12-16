@@ -1,136 +1,140 @@
-# PwMan3 #
+# Passbird #
 
-[![version](https://badgen.net/gitlab/release/christianpflugradt/pwman3)](https://gitlab.com/christianpflugradt/pwman3/-/tags) [![pipeline status](https://gitlab.com/christianpflugradt/pwman3/badges/main/pipeline.svg)](https://gitlab.com/christianpflugradt/pwman3/-/commits/main) [![coverage report](https://gitlab.com/christianpflugradt/pwman3/badges/main/coverage.svg?job=📊%20test-coverage-report)](https://gitlab.com/christianpflugradt/pwman3/-/commits/main) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![version](https://badgen.net/gitlab/release/christianpflugradt/passbird)](https://gitlab.com/christianpflugradt/passbird/-/tags) [![pipeline status](https://gitlab.com/christianpflugradt/passbird/badges/main/pipeline.svg)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![coverage report](https://gitlab.com/christianpflugradt/passbird/badges/main/coverage.svg?job=📊%20test-coverage-report)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-PwMan3 is a terminal based password manager written in Java. It works completely offline and encrypts all passwords using an AES/CBC/PKCS5Padding Cipher initialized with a JCEKS (Java Cryptography Extension KeyStore).
+Passbird is a terminal based password manager written in Java. It works completely offline and encrypts all passwords using an AES/CBC/PKCS5Padding Cipher initialized with a JCEKS (Java Cryptography Extension KeyStore).
 
-Check the FAQ at the bottom if you are wondering whether PwMan3 is the right tool for you.
+Check the FAQ at the bottom if you are wondering whether Passbird is the right tool for you.
 
-## Downloading PwMan3 ##
-The latest version of PwMan3 can be downloaded [at my website](https://pflugradts.de/password-manager/).
+## Downloading Passbird ##
+The latest version of Passbird can be downloaded [at my website](https://pflugradts.de/password-manager/).
 
-You may also choose to build PwMan3 yourself by cloning this project and running the jar task with Gradle.
+You may also build Passbird yourself by cloning this project and running the Gradle jar task.
 
-## Running PwMan3 ##
-PwMan3 runs on all major operating systems and requires only Java version 11 or higher to run.
+## Running Passbird ##
+Passbird runs on all major operating systems and requires only Java version 17 or higher to be installed.
 
-Use the following syntax to run PwMan3:
+Use the following syntax to run Passbird:
 
-java -jar pwman3.jar configDirectory
+`java -jar passbird.jar config-directory`
 
-configDirectory must point to an existing directory where you want to store your password database, the keystore and configuration file. An example configurationDirectory for Linux may be */etc/pwman3* and for Windows *"c:\\program files\\pwman3"*. You must use quotes if your configuration path contains spaces.
+`config-directory` must point to an existing directory where you want to store your Password database, the keystore and configuration file. An example configuration directory for Linux may be `/etc/passbird` and for Windows `"c:\\program files\\passbird"`. You must use quotes if your configuration path contains spaces.
 
 ## Setup ##
-The first time you run PwMan3 its setup routine will execute. You will then be asked to to specify a configDirectory and choose a master password for the Keystore. If you omit the configDirectory when running PwMan3 or the specified directory does not contain a PwMan3.yml configuration file or a PwMan3.ks Keystore, setup will also be started. 
+The first time you run Passbird its setup routine will execute. You will then be asked to specify a configuration directory and choose a master Password for the Keystore. If you omit the configuration directory when running Passbird or the specified directory does not contain a `passbird.yml` configuration file or a `passbird.ks` Keystore, setup will also be started. 
 
-The master password you have chosen must be input everytime you start PwMan3 in non setup mode. PwMan3 will terminate if you input the wrong password three times in a row.
+The master Password you have chosen must be input everytime you start Passbird in non setup mode. Passbird will terminate if you input the wrong Password three times in a row.
 
-Don't worry if you start setup by accident, just press any key other than *c* and setup will exit without touching anything.
+Don't worry if you start setup by accident, just press any key other than `c` and setup will exit without touching anything.
 
 ## Configuration ##
-Once set up PwMan3 will create a PwMan3.yml with various configuration parameters. The following parameters are available as of now:
+Once set up Passbird will create a `passbird.yml` with various configuration parameters. The following parameters are available as of now:
 
- * **application.password.length**: specifies the length of generated passwords (default: 20 characters)
- * **application.password.specialCharacters**: specifies whether generated passwords have special characters such as !@#$% or not (default: true)
- * **application.password.promptOnRemoval**: specifies whether manual confirmation is required when an action would delete a previously saved password (default: true)
- * **adapter.clipboard.reset.enabled**: specifies whether clipboard will be cleared after a password is copied to clipboard (default: true)
- * **adapter.clipboard.reset.delaySeconds**: specifies after how many seconds clipboard will be cleared if clipboard reset is enabled (default: 10)
- * **adapter.keyStore.location**: contains path to directory where PwMan3.ks keystore file is stored (no default, specified in setup)
- * **adapter.passwordStore.location**: contains path to directory where PwMan3.pw database file is stored (no default, specified in setup)
- * **adapter.passwordStore.verifySignature**: terminates PwMan3 if the password database signature does not match (default: true)
- * **adapter.passwordStore.verifyChecksum**: terminates PwMan3 if the password database checksum does not match (default: true)
- * **adapter.userInterface.secureInput**: specifies whether your master password and custom passwords will use secure input where the characters you input will not be displayed in your terminal (default: true)
+ * `application.password.length` specifies the length of generated Passwords (default: 20 characters)
+ * `application.password.specialCharacters` specifies whether generated Passwords have special characters such as !@#$% or not (default: true)
+ * `application.password.promptOnRemoval` specifies whether manual confirmation is required when an action would delete a previously saved Password (default: true)
+ * `adapter.clipboard.reset.enabled` specifies whether clipboard will be cleared after a Password is copied to clipboard (default: true)
+ * `adapter.clipboard.reset.delaySeconds` specifies after how many seconds clipboard will be cleared if clipboard reset is enabled (default: 10)
+ * `adapter.keyStore.location` contains path to directory where `passbird.ks` keystore file is stored (no default, specified in setup)
+ * `adapter.passwordStore.location` contains path to directory where `passbird.pw` database file is stored (no default, specified in setup)
+ * `adapter.passwordStore.verifySignature` terminates Passbird if the Password database signature does not match (default: true)
+ * `adapter.passwordStore.verifyChecksum` terminates Passbird if the Password database checksum does not match (default: true)
+ * `adapter.userInterface.secureInput` specifies whether your master Password and custom Passwords will use secure input where the characters you input will not be displayed in your terminal (default: true)
 
-You may adjust the configuration parameters to your needs by editing the yml file with a text editor. The configuration file must retain a valid yaml format and set all configuration parameters or PwMan3 might not be able to read it.
+You may adjust the configuration parameters to your needs by editing the yml file with a text editor. The configuration file must retain a valid yaml format and set all configuration parameters or Passbird might not be able to read it.
 
 ## Usage ##
 
-PwMan3 has a very simple command based usage syntax. You must memorize a key for each password you want to store. 
+Passbird has a very simple command based usage syntax. Each Password is stored in an Egg, and you must set and memorize an identifier for each, which is known as its `EggId`.
 
-Let's say you want to store your Gitlab password and choose *gitlab* as a key. To create and save a password for key *gitlab* you will input *sgitlab* and press enter. *s* stands for the *set* command which sets a password for a key. If the key already exists, it will set a new password for that key. To copy the password to clipboard you must input *ggitlab*. This is the *get* command represented by the character *g*.
+Let's say you want to store your GitLab Password and choose `gitlab` as its EggId. To create and save a Password for EggId `gitlab` you will input `sgitlab` and press enter. `s` stands for the `set` command which sets a Password for an Egg. If the EggId already exists, it will set a new Password for that Egg. To copy the Password to clipboard you must input `ggitlab`. This is the `get` command represented by the character `g`.
 
-The general usage info will be given below and is also available in PwMan3 by pressing *h* and then enter:
+The general usage info will be given below and is also available in Passbird by pressing `h` and then enter:
 
     Usage: [command][parameter]
-	A command takes at most one parameter which is either a key to a password or an absolute path to a file.
+    A command takes at most one parameter which is usually an EggId.
+
     commands:
-        g[key] (get) copies the password for that key to clipboard
-        s[key] (set) sets a random password for a key overwriting any that existed
-        c[key] (custom set) like set but prompts the user to input a new password
-        v[key] (view) prints the password for that key to the console
-        r[key] (rename) renames a key by prompting the user for a new one
-        d[key] (discard) removes key and password from the database
-        e[directory] (export) exports the password database as a human readable json file to the specified directory
-        i[directory] (import) imports a json file containing passwords into the database from the specified directory
-        l (list) non parameterized, lists all keys in the database
-        n (namespaces) view available namespaces and print namespace specific help
-        h (help) non parameterized, prints this help
-        q (quit) quits pwman3 application
+        g[EggId] (get) copies the Password contained in that Egg to clipboard
+        s[EggId] (set) sets a random Password for this Egg overwriting any that existed
+        c[EggId] (custom set) like set but prompts the user to input a new Password
+        v[EggId] (view) prints the Password contained in that Egg to the console
+        r[EggId] (rename) renames an Egg by prompting the user for a new one
+        d[EggId] (discard) removes the Egg entirely from the database
+        e[directory] (export) exports the Password database as a human readable json file to the specified directory
+        i[directory] (import) imports a json file containing Passwords into the database from the specified directory
+        l (list) non parameterized, lists all Eggs in the database
+        n (Nests) view available Nests and print Nest specific help
+        h (help) prints this help
+        q (quit) terminates Passbird application 
 
-        type 'hlicense' to view license for PwMan3
-        type 'hthirdparty' to view a list of 3rd party libraries and their licenses
+Nests are an advanced feature of Passbird. Think of it as categories for your Passwords. You may have a Nest for online shopping and another for social networks, or one for personal and another for work related stuff. Nest related help is available by pressing `n` and then enter:
 
-Namespaces are an advanced feature of PwMan3. Namespace related help is available by pressing *n* and then enter:
+    n (view) displays current Nest, available Nests and Nest commands
+    n0 (switch to default) switches to the default Nest
+    n[1-9] (switch) switches to the Nest at the given Nest Slot (between 1 and 9 inclusively)
+    n[1-9][EggId] (assign) assigns the Password for that EggId to the specified Nest
+    n+[1-9] (create) creates a new Nest at the specified Nest Slot
+    [NOT YET IMPLEMENTED] n-[1-9] (discard) discards the Nest at the specified Nest Slot
 
-    n (view) displays current namespace, available namespaces and namespace commands
-    n0 (switch to default) switches to the default namespace
-    n[1-9] (switch) switches to the namespace at the given slot (between 1 and 9 inclusively)
-    n[1-9][key] (assign) assigns the password for that key to the specified namespace
-    n+[1-9] (create) creates a new namespace at the specified slot
-    [NOT YET IMPLEMENTED] n-[1-9] (discard) discards the namespace at the specified slot
-
-PwMan3 updates the physical database file immediately after every action. As of now there is no backup function and each action is irrevocable, so think carefully before you delete or overwrite a stored password. You might want to back up the password database file and keystore file from time to time.
+Passbird updates the physical database file immediately after every action. As of now there is no backup function and each action is irrevocable, so think carefully before you delete or overwrite a stored Password. You might want to back up the Password database file and keystore file from time to time.
 
 Some example inputs and what they do:
 
-**input**: ggitlab **=> action**: will copy password for key gitlab to clipboard
+`ggitlab` copies the Password for Egg with EggId gitlab to clipboard
 
-**input**: sgitlab **=> action**: will set a random password for key gitlab - by default a string of length 20 with digits, lowercase and uppercase letters and special characters; if the key already exists the existing password will be overwritten
+`sgitlab` sets a random Password for Egg with EggId gitlab - by default a string of length 20 with digits, lowercase and uppercase letters and special characters; if the EggId is already in use, the existing Password will be overwritten
 
-**input**: vgitlab **=> action**: will print the password for key gitlab to the terminal (standardOut)
+`vgitlab` prints the Password for Egg with EggId gitlab to the terminal (standard out stream)
 
-**input**: dgitlab **=> action**: will delete key gitlab and its associated password
+`dgitlab` deletes Egg with EggId gitlab including its associated Password
 
-**input**: cgitlab **=> action**: will prompt for a custom password to be input by the user; the input will be hidden by default. Choose this command if you need a password for a system that does not support standard passwords generated by PwMan3. You don't need to confirm your input, so I advise you to confirm right away that you've input the password you intended to.
+`cgitlab` prompts for a custom Password to be input by the user; the input will be hidden by default. Choose this command if you need a Password for a system that does not support standard Passwords generated by Passbird. You don't need to confirm your input, so I advise you to confirm right away that you've input the Password you intended to.
 
-**input**: rgitlab **=> action**: will prompt for a new key that replaces the previous key *gitlab* - the new key must not yet exist and must not be empty
+`rgitlab` prompts for a new EggId that replaces the previous EggId gitlab - the new EggId must not yet exist
 
-**input**: e/tmp **=> action**: exports all keys and their associated passwords to a file /tmp/PwMan3.json (example for a valid Linux path)
+`e/tmp` exports all Eggs to a file `/tmp/passbird.json` (example for a valid Linux path)
 
-**input**: ic:\ **=> action**: imports all passwords from a file c:\PwMan.json if the file exists (example for a valid Windows path) - please note that this will potentially overwrite all passwords in your database if there are any matching keys!
+`ic:\` imports all Eggs from a file `c:\passbird.json` if the file exists (example for a valid Windows path) - please note that this will potentially overwrite all Passwords in your database if there are any matching Eggs!
+
+## Migrating from 2.x.x to 3.x.x
+
+In 2.x.x Passbird was known as PwMan3. As part of the rebranding the file names have changed. Everything else remains compatible:
+- `pwman3.jar` has been renamed to `passbird.jar` - if you use a script or alias to start the program, make sure you update it accordingly
+- `PwMan3.yml` has been renamed to `passbird.yml`
+- `PwMan3.ks` has been renamed to `passbird.ks`
+- `PwMan3.pw` has been renamed to `passbird.pw`
+- import and export will generate / expect a file named `passbird.json` now
 
 ## <a name="faq"></a>Frequently Asked Questions ##
 
-### Is PwMan3 the right tool for me? ###
-If you prefer the terminal to a graphical user interface, and you don't need to store many hundreds of passwords, you might want to give PwMan3 a chance. Keep in mind that PwMan3 does not use a hierarchy for managing its keys, so you might have a hard time memorizing all those keys or thinking of good names if you want to store hundreds of passwords or also want to store related information such as urls and usernames.
+### Is Passbird the right tool for me? ###
+If you prefer the terminal to a graphical user interface, and you don't need to manage hundreds of Passwords, you might want to give Passbird a chance. Keep in mind that Passbird does not use a hierarchy for managing its Eggs, so you might have a hard time memorizing all those EggId or thinking of good and consistent names if you want to store hundreds of Passwords or also want to store related information such as urls and usernames. Passbird will be able to store such meta information in a future version.
 
-### Is PwMan3 secure? ###
+### Is Passbird secure? ###
 Short answer: No.
 
-Long answer: I am not a security expert and PwMan3 has not been reviewed. PwMan3 uses a Keystore and a Cipher to symmetrically encrypt all data using a master password chosen by the user. All data is generally handled in byte arrays by the application. All user input is read and program output is written as single bytes. Only for copying a password to clipboard I store it in a string because I know no other way to write to the clipboard using Java. Once sensitive decrypted data has been used, like written to the clipboard, the byte array will be overwritten with random bytes. The password database is double encoded so from analyzing it in a hex editor you should not even be able to tell how many passwords are currently stored in the database. PwMan3 is also completely offline. If I were to take a wild guess I would say it is probably reasonably safe.
+Long answer: I am not a security expert and Passbird has not been reviewed by such. Passbird uses a Keystore and a Cipher to symmetrically encrypt all data using a master Password chosen by the user. All data is generally handled in byte arrays by the application. All user input is read and program output is written as single bytes. Only for copying a Password to clipboard I store it in a string because I know no other way to write to the clipboard using Java. Once sensitive decrypted data has been used, like written to the clipboard, the byte array will be overwritten with random bytes. The Password database is encoded twice (first at the individual Egg level, then again for the whole file), so from analyzing it in a hex editor you should not even be able to tell how many Passwords are currently stored in the database. Passbird is also completely offline. If I were to take a wild guess I would say it is probably reasonably safe.
 
-### Does PwMan3 support Unicode? ###
+### Does Passbird support Unicode? ###
 
-No. Many programs don't support unicode characters in passwords. In fact some don't even allow common special characters like backslashes or spaces. Supporting advanced character sets didn't seem worth it to me, thus PwMan3 translates every byte into an ascii character. You may input a unicode character which is represented in several bytes and PwMan3 will interpret it as multiple ascii characters. I advise against doing that. You might have trouble reproducing the correct input and end up with some broken password aliases that you can't delete.
+No. Many programs don't support unicode characters in Passwords. In fact some don't even allow common special characters like backslashes or spaces. Supporting advanced character sets didn't seem worth it to me, thus Passbird translates every byte into an ascii character. You may input a unicode character which is represented in several bytes and Passbird will interpret it as multiple ascii characters. I advise against doing that. You might have trouble reproducing the correct input and end up with some broken Eggs that you can't delete.
 
-### How do I update PwMan3? ###
+### How do I update Passbird? ###
 
-PwMan3 uses semantic versioning in the style of *x.y.z* where x is the major version, y the minor version and z the patch level version. Updating to a minor or patch level version is very simple: Just download the jar file and use it. 
+Passbird uses semantic versioning in the style of *x.y.z* where x is the major version, y the minor version and z the patch level version. Updating to a minor or patch level version is very simple: Just download the jar file and use it. Consult the migration notes in this Readme when upgrading to the next major version. 
 
-### What can I do if I forget my master password? ###
-Without the correct master password you cannot decrypt your password database. There is no way to bypass this protection. The only thing you can do is to try and find out your password via brute force. PwMan3 terminates after 3 wrong attempts so if the program is still running after 3 guesses, you have guessed correctly. I am not aware of any way to protect against brute force attacks by the way, since an attacker could simply brute force the keystore itself instead of using PwMan3 to find out the correct password. The best protection is a secure password that would take a long time to guess, and to keep your keystore file safe.
+### What can I do if I forget my master Password? ###
+Without the correct master Password you cannot decrypt your Password database. There is no way to bypass this protection. The only thing you can do is to try and find out your Password via brute force. Passbird terminates after 3 wrong attempts so if the program is still running after 3 guesses, you have guessed correctly. I am not aware of any way to protect against brute force attacks by the way, since an attacker could simply brute force the keystore itself instead of using Passbird to find out the correct Password. The best protection is a secure Password that would take a long time to guess, and to keep your keystore file safe.
 
 ### What can I do if I lose the keystore file? ###
-Your master password will allow PwMan3 to retrieve the encryption key from the keystore. Without the encryption key your password database cannot be decrypted. If you recreate the keystore with the same master password, the encryption key will NOT be the same. Losing your keystore file means permanently losing access to your password database.
+Your master Password will allow Passbird to retrieve the encryption key from the keystore. Without the encryption key your Password database cannot be decrypted. If you recreate the keystore with the same master Password, the encryption key will NOT be the same. Losing your keystore file means permanently losing access to your Password database.
 
-### Why is it named PwMan3? ###
-PwMan is short for Password Manager. To explain the *3*, a bit of history: In 2010 I felt a need for a password manager that could be worked with using only a keyboard and without memorizing lots of shortcuts. Thus, a tool emerged, and it was titled PwMan in lack of a better name. That tool had a very basic hard coded encryption and lacked many features such as import/export or erasing the clipboard. About 2014 I felt continueing to use PwMan was not appropriate anymore given that I started using it for work related passwords. I did some research how to implement a better encryption and decided to go with javax.crypto.Cipher and a KeyStore. Completely rewritten PwMan2 was born. It served me well over the years, but it had a few minor bugs I never fixed and the code base was not as well-structured as I wanted it to be. So in early 2020 I decided it should get a complete rewrite again. PwMan3 comes with a configuration file, a routine to automatically set up the keystore, all known bugs fixed, a healthy architecture with over 90% test coverage and an automated release process supported by quality assurance tools.
-
-### Can I run multiple instances of PwMan3? ###
-Of course! For example, I use separate password databases for personal and occupational passwords. You can run them in different terminal windows at the same time and the instances won't be aware of each other.
+### Can I run multiple instances of Passbird? ###
+Of course! For example, I use separate Password databases for personal and work related Passwords. You can run them in different terminal windows at the same time and the instances won't be aware of each other.
 
 ### Can you add a graphical interface? ###
-No. The core characteristic of PwMan3 is its gui-less nature. If you want a gui, use one of the popular gui-based password managers such as Keepass.
+No. The core characteristic of Passbird is its gui-less nature. If you want a gui, use one of the popular gui-based Password managers such as Keepass.
 
 ### Can you implement feature xyz? ###
-It depends. If I think that feature is useful, and it fits with PwMan3 I might implement it. Why don't you open a [Gitlab Issue](https://gitlab.com/christianpflugradt/pwman3/-/issues) for it? :-)
+It depends. If I think that feature is useful, and it fits with Passbird I might implement it. Why don't you open a [Gitlab Issue](https://gitlab.com/christianpflugradt/passbird/-/issues) for it? :-)

@@ -38,8 +38,8 @@ class EggTest {
     @Test
     fun `should rename eggId`() {
         // given
-        val givenEggIdShell = shellOf("eggId123")
-        val updatedEggIdShell = shellOf("eggIdABC")
+        val givenEggIdShell = shellOf("EggId123")
+        val updatedEggIdShell = shellOf("EggIdABC")
         val egg = createEggForTesting(withEggIdShell = givenEggIdShell)
 
         // when
@@ -98,7 +98,7 @@ class EggTest {
         @Test
         fun `should be equal to itself`() {
             // given
-            val givenEggIdShell = shellOf("eggId")
+            val givenEggIdShell = shellOf("EggId")
             val givenNestSlot = NestSlot.N1
             val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
             val egg2 = egg1
@@ -113,7 +113,7 @@ class EggTest {
         @Test
         fun `should be equal if eggId and nest slot match`() {
             // given
-            val givenEggIdShell = shellOf("eggId")
+            val givenEggIdShell = shellOf("EggId")
             val givenNestSlot = NestSlot.N1
             val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
             val egg2 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
@@ -128,8 +128,8 @@ class EggTest {
         @Test
         fun `should not be equal if eggId does not match`() {
             // given
-            val givenEggIdShell = shellOf("eggId")
-            val otherEggIdShell = shellOf("eggId2")
+            val givenEggIdShell = shellOf("EggId")
+            val otherEggIdShell = shellOf("EggId2")
             val givenNestSlot = NestSlot.N1
             val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
             val egg2 = createEggForTesting(withEggIdShell = otherEggIdShell, withNestSlot = givenNestSlot)
@@ -144,7 +144,7 @@ class EggTest {
         @Test
         fun `should not be equal if nest slot does not match`() {
             // given
-            val givenEggIdShell = shellOf("eggId")
+            val givenEggIdShell = shellOf("EggId")
             val givenNestSlot = NestSlot.N1
             val otherNestSlot = NestSlot.N2
             val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
@@ -160,7 +160,7 @@ class EggTest {
         @Test
         fun `should not be equal to other classes`() {
             // given
-            val givenEggIdShell = shellOf("eggId")
+            val givenEggIdShell = shellOf("EggId")
             val egg = createEggForTesting(withEggIdShell = givenEggIdShell)
 
             // when
@@ -173,7 +173,7 @@ class EggTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val egg = createEggForTesting(withEggIdShell = shellOf("eggId"))
+            val egg = createEggForTesting(withEggIdShell = shellOf("EggId"))
 
             // when
             val actual = egg.equals(null)
@@ -188,7 +188,7 @@ class EggTest {
         @Test
         fun `should have created event when egg is created`() {
             // given / when
-            val egg = createEgg(NestSlot.DEFAULT, shellOf("eggId"), shellOf("password"))
+            val egg = createEgg(NestSlot.DEFAULT, shellOf("EggId"), shellOf("Password"))
 
             // then
             expectThat(egg.getDomainEvents()) hasSize 1

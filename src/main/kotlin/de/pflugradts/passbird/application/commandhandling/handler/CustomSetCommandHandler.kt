@@ -21,7 +21,7 @@ class CustomSetCommandHandler @Inject constructor(
         if (commandConfirmed(customSetCommand)) {
             try {
                 passwordService.challengeEggId(customSetCommand.argument)
-                val secureInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter custom password: ")))
+                val secureInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter custom Password: ")))
                 if (secureInput.isEmpty) {
                     userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted.")))
                 } else {
@@ -29,7 +29,7 @@ class CustomSetCommandHandler @Inject constructor(
                 }
                 secureInput.invalidate()
             } catch (ex: InvalidEggIdException) {
-                val errorMessage = "Password alias cannot contain digits or special characters. Please choose a different alias."
+                val errorMessage = "EggId cannot contain digits or special characters. Please choose a different EggId."
                 userInterfaceAdapterPort.send(outputOf(shellOf(errorMessage)))
             }
         } else {
@@ -45,7 +45,7 @@ class CustomSetCommandHandler @Inject constructor(
                 .receiveConfirmation(
                     outputOf(
                         shellOf(
-                            "Existing Password Entry '${customSetCommand.argument.asString()}' will be irrevocably overwritten.\n" +
+                            "Existing Egg '${customSetCommand.argument.asString()}' will be irrevocably overwritten.\n" +
                                 "Input 'c' to confirm or anything else to abort.\nYour input: ",
                         ),
                     ),

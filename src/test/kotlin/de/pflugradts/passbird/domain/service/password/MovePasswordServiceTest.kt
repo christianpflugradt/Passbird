@@ -30,7 +30,7 @@ internal class MovePasswordServiceTest {
     @Test
     fun `should move egg`() {
         // given
-        val givenEggId = shellOf("eggId123")
+        val givenEggId = shellOf("EggId123")
         val givenNestSlot = NestSlot.N1
         val newNestSlot = NestSlot.N2
         val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withNestSlot = givenNestSlot)
@@ -47,7 +47,7 @@ internal class MovePasswordServiceTest {
     @Test
     fun `should not move egg if it does not exist`() {
         // given
-        val givenEggId = shellOf("eggId123")
+        val givenEggId = shellOf("EggId123")
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository)
 
@@ -62,7 +62,7 @@ internal class MovePasswordServiceTest {
     @Test
     fun `should not move egg if eggId already exists in target nest`() {
         // given
-        val givenEggId = shellOf("eggId123")
+        val givenEggId = shellOf("EggId123")
         val givenNestSlot = NestSlot.N1
         val newNestSlot = NestSlot.N2
         val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withNestSlot = givenNestSlot)

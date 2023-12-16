@@ -18,7 +18,7 @@ class NestCommandFactory() {
     fun constructFromInput(input: Input): Command {
         val command = input.command
         if (command.size > MAX_COMMAND_SIZE) {
-            throw IllegalArgumentException("namespace command parameter not supported: ${input.command.slice(2).asString()}")
+            throw IllegalArgumentException("Nest command parameter not supported: ${input.command.slice(2).asString()}")
         } else if (command.size == 1 && input.data.isEmpty) {
             return ViewNestCommand()
         } else if (command.size == 1 && !input.data.isEmpty) {

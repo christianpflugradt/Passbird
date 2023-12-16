@@ -42,9 +42,9 @@ class ImportCommandHandler@Inject constructor(
                         shellOf(
                             "By importing this file ${overlaps.size} existing Passwords" +
                                 "will be irrevocably overwritten.\n" +
-                                "The following Password Entries will be affected: " +
+                                "The following Eggs will be affected: " +
                                 "${overlaps.joinToString { "${it.second.asString()} (${it.first})" }}\n" +
-                                "Input 'c' to confirm or anything else to abort.%nYour input: ",
+                                "Input 'c' to confirm or anything else to abort.\nYour input: ",
                         ),
                     ),
                 )

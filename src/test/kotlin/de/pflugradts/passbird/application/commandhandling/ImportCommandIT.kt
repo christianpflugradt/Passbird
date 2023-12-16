@@ -131,5 +131,5 @@ class ImportCommandIT {
         expectThat(shell) isNotEqualTo reference
     }
 
-    // FIXME add tests for eggIds across multiple namespaces
+    // FIXME add tests for eggIds across multiple nests
 }

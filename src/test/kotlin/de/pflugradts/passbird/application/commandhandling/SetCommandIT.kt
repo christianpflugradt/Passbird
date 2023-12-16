@@ -32,7 +32,7 @@ class SetCommandIT {
     @Test
     fun `should handle set command`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("s$args")
         val reference = shell.copy()
         val generatedPassword = shellOf("p4s5w0rD")
@@ -64,7 +64,7 @@ class SetCommandIT {
         inputHandler.handleInput(inputOf(shell))
 
         // then
-        val expectedOutput = "Password alias cannot contain digits or special characters. Please choose a different alias."
+        val expectedOutput = "EggId cannot contain digits or special characters. Please choose a different EggId."
         verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf(expectedOutput)))) }
         verify(exactly = 0) { passwordService.putEgg(eq(shellOf(args)), any()) }
         expectThat(shell) isNotEqualTo reference
@@ -73,7 +73,7 @@ class SetCommandIT {
     @Test
     fun `should handle set command with prompt on removal and new egg`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("s$args")
         val reference = shell.copy()
         val generatedPassword = shellOf("p4s5w0rD")
@@ -93,7 +93,7 @@ class SetCommandIT {
     @Test
     fun `should handle set command with prompt on removal and existing egg`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("s$args")
         val reference = shell.copy()
         val generatedPassword = shellOf("p4s5w0rD")
@@ -115,7 +115,7 @@ class SetCommandIT {
     @Test
     fun `should handle set command with prompt on removal and operation aborted`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("s$args")
         val reference = shell.copy()
         val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))

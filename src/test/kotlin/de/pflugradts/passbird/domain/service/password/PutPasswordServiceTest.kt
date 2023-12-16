@@ -133,7 +133,7 @@ class PutPasswordServiceTest {
         val invalidEggId = shellOf("1EggId")
 
         // when
-        val actual = tryCatching { passwordService.putEgg(invalidEggId, shellOf("password")) }
+        val actual = tryCatching { passwordService.putEgg(invalidEggId, shellOf("Password")) }
 
         // then
         expectThat(actual.failure).isTrue()

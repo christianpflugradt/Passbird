@@ -7,8 +7,6 @@ import de.pflugradts.passbird.application.commandhandling.command.HelpCommand
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 
-private const val TAB = "\t"
-
 class HelpCommandHandler @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
@@ -19,22 +17,21 @@ class HelpCommandHandler @Inject constructor(
                 shellOf(
                     """
                     Usage: [command][parameter]
-                    A command takes at most one parameter which is either
-                    a key to a password or an absolute path to a file.
+                    A command takes at most one parameter which is usually an EggId.
 
                     commands:
-                    ${TAB}g[key] (get) copies the password for that key to clipboard
-                    ${TAB}s[key] (set) sets a random password for a key overwriting any that existed
-                    ${TAB}c[key] (custom set) like set but prompts the user to input a new password
-                    ${TAB}v[key] (view) prints the password for that key to the console
-                    ${TAB}r[key] (rename) renames a key by prompting the user for a new one
-                    ${TAB}d[key] (discard) removes key and password from the database
-                    ${TAB}e[directory] (export) exports the password database as a human readable json file to the specified directory
-                    ${TAB}i[directory] (import) imports a json file containing passwords into the database from the specified directory
-                    ${TAB}l (list) non parameterized, lists all keys in the database
-                    ${TAB}n (namespaces) view available namespaces and print namespace specific help
-                    ${TAB}h (help) non parameterized, prints this help
-                    ${TAB}q (quit) quits pwman3 applicationImpl
+                    ${'\t'}g[EggId] (get) copies the Password contained in that Egg to clipboard
+                    ${'\t'}s[EggId] (set) sets a random Password for this Egg overwriting any that existed
+                    ${'\t'}c[EggId] (custom set) like set but prompts the user to input a new Password
+                    ${'\t'}v[EggId] (view) prints the Password contained in that Egg to the console
+                    ${'\t'}r[EggId] (rename) renames an Egg by prompting the user for a new one
+                    ${'\t'}d[EggId] (discard) removes the Egg entirely from the database
+                    ${'\t'}e[directory] (export) exports the Password database as a human readable json file to the specified directory
+                    ${'\t'}i[directory] (import) imports a json file containing Passwords into the database from the specified directory
+                    ${'\t'}l (list) non parameterized, lists all Eggs in the database
+                    ${'\t'}n (Nests) view available Nests and print Nest specific help
+                    ${'\t'}h (help) prints this help
+                    ${'\t'}q (quit) terminates Passbird application 
 
                     """.trimIndent(),
                 ),

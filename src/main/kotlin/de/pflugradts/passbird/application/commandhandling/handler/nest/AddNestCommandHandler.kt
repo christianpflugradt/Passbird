@@ -17,14 +17,14 @@ class AddNestCommandHandler @Inject constructor(
     @Subscribe
     private fun handleAddNestCommand(addNestCommand: AddNestCommand) {
         if (addNestCommand.nestSlot == DEFAULT) {
-            userInterfaceAdapterPort.send(outputOf(shellOf("Default namespace cannot be replaced - Operation aborted.")))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Default Nest cannot be replaced - Operation aborted.")))
             return
         }
         val prompt = if (nestService.atNestSlot(addNestCommand.nestSlot).isPresent) {
-            "Enter new name for existing namespace '${nestService.atNestSlot(addNestCommand.nestSlot).get().shell.asString()}' " +
-                "or nothing to abort%nYour input: "
+            "Enter new name for existing Nest '${nestService.atNestSlot(addNestCommand.nestSlot).get().shell.asString()}' " +
+                "or nothing to abort\nYour input: "
         } else {
-            "Enter name for namespace or nothing to abort\nYour input: "
+            "Enter name for Nest or nothing to abort\nYour input: "
         }
         val input = userInterfaceAdapterPort.receive(outputOf(shellOf(prompt)))
         if (input.isEmpty) {

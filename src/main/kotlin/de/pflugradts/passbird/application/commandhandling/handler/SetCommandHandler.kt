@@ -29,7 +29,7 @@ class SetCommandHandler @Inject constructor(
                 )
             } catch (ex: InvalidEggIdException) {
                 userInterfaceAdapterPort.send(
-                    outputOf(shellOf("Password alias cannot contain digits or special characters. Please choose a different alias.")),
+                    outputOf(shellOf("EggId cannot contain digits or special characters. Please choose a different EggId.")),
                 )
             }
         } else {
@@ -46,7 +46,7 @@ class SetCommandHandler @Inject constructor(
             userInterfaceAdapterPort.receiveConfirmation(
                 outputOf(
                     shellOf(
-                        "Existing Password Entry '${setCommand.argument.asString()}' will be irrevocably overwritten.\n" +
+                        "Existing Egg '${setCommand.argument.asString()}' will be irrevocably overwritten.\n" +
                             "Input 'c' to confirm or anything else to abort.\nYour input: ",
                     ),
                 ),

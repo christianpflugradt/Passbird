@@ -16,7 +16,7 @@ class RenameCommandHandler @Inject constructor(
     @Subscribe
     private fun handleRenameCommand(renameCommand: RenameCommand) {
         if (passwordService.eggExists(renameCommand.argument, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
-            val secureInput = userInterfaceAdapterPort.receive(outputOf(shellOf("Enter new alias or nothing to abort: ")))
+            val secureInput = userInterfaceAdapterPort.receive(outputOf(shellOf("Enter new EggId or nothing to abort: ")))
             if (secureInput.isEmpty) {
                 userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted.")))
             } else {

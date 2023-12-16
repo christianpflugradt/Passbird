@@ -26,9 +26,9 @@ internal class ListCommandIT {
     fun `should handle list command`() {
         // given
         val input = inputOf(shellOf("l"))
-        val eggId1 = shellOf("eggId1")
-        val eggId2 = shellOf("eggId2")
-        val eggId3 = shellOf("eggId3")
+        val eggId1 = shellOf("EggId1")
+        val eggId2 = shellOf("EggId2")
+        val eggId3 = shellOf("EggId3")
         fakePasswordService(
             instance = passwordService,
             withEggs = listOf(

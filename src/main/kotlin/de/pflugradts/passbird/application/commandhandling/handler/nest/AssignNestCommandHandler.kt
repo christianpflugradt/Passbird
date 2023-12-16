@@ -21,21 +21,21 @@ class AssignNestCommandHandler @Inject constructor(
     private fun handleAssignNestCommand(assignNestCommand: AssignNestCommand) {
         if (passwordService.eggExists(assignNestCommand.argument, EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             userInterfaceAdapterPort.send(
-                outputOf(shellOf("Available namespaces: \n${getAvailableNests(includeCurrent = false)}")),
+                outputOf(shellOf("Available Nests: \n${getAvailableNests(includeCurrent = false)}")),
             )
-            val input = userInterfaceAdapterPort.receive(outputOf(shellOf("Enter namespace you want to move password entry to: ")))
+            val input = userInterfaceAdapterPort.receive(outputOf(shellOf("Enter Nest you want to move Egg to: ")))
             val nestSlot = input.extractNestSlot()
             if (nestSlot === NestSlot.INVALID) {
-                userInterfaceAdapterPort.send(outputOf(shellOf("Invalid namespace - Operation aborted.")))
+                userInterfaceAdapterPort.send(outputOf(shellOf("Invalid Nest - Operation aborted.")))
             } else if (nestSlot === nestService.currentNest().nestSlot) {
                 userInterfaceAdapterPort.send(
-                    outputOf(shellOf("Password entry is already in the specified namespace - Operation aborted.")),
+                    outputOf(shellOf("Egg is already in the specified Nest - Operation aborted.")),
                 )
             } else if (nestService.atNestSlot(nestSlot).isEmpty) {
-                userInterfaceAdapterPort.send(outputOf(shellOf("Specified namespace does not exist - Operation aborted.")))
+                userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted.")))
             } else if (passwordService.eggExists(assignNestCommand.argument, nestSlot)) {
                 userInterfaceAdapterPort.send(
-                    outputOf(shellOf("Password entry with same alias already exists in target namespace - Operation aborted.")),
+                    outputOf(shellOf("Egg with same EggId already exists in target Nest - Operation aborted.")),
                 )
             } else {
                 passwordService.moveEgg(assignNestCommand.argument, nestSlot)

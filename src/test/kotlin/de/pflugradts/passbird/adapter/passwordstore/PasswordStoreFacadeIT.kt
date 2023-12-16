@@ -105,23 +105,23 @@ class PasswordStoreFacadeIT {
         nestService.place(nest3, N3)
         nestService.place(nest9, N9)
         val egg1 = createEggForTesting(
-            withEggIdShell = shellOf("eggId1"),
-            withPasswordShell = shellOf("password1"),
+            withEggIdShell = shellOf("EggId1"),
+            withPasswordShell = shellOf("Password1"),
             withNestSlot = DEFAULT,
         )
         val egg2 = createEggForTesting(
-            withEggIdShell = shellOf("eggId2"),
-            withPasswordShell = shellOf("password2"),
+            withEggIdShell = shellOf("EggId2"),
+            withPasswordShell = shellOf("Password2"),
             withNestSlot = N1,
         )
         val egg3 = createEggForTesting(
-            withEggIdShell = shellOf("eggId3"),
-            withPasswordShell = shellOf("password3"),
+            withEggIdShell = shellOf("EggId3"),
+            withPasswordShell = shellOf("Password3"),
             withNestSlot = N3,
         )
         val egg3b = createEggForTesting(
-            withEggIdShell = shellOf("eggId3"),
-            withPasswordShell = shellOf("password3b"),
+            withEggIdShell = shellOf("EggId3"),
+            withPasswordShell = shellOf("Password3b"),
             withNestSlot = N9,
         )
         val eggs = listOf(egg1, egg2, egg3, egg3b)
@@ -300,8 +300,8 @@ class PasswordStoreFacadeIT {
     }
 
     private fun someEggs() = listOf(
-        createEggForTesting(withEggIdShell = shellOf("eggId1"), withPasswordShell = shellOf("password1")),
-        createEggForTesting(withEggIdShell = shellOf("eggId2"), withPasswordShell = shellOf("password2")),
-        createEggForTesting(withEggIdShell = shellOf("eggId3"), withPasswordShell = shellOf("password3")),
+        createEggForTesting(withEggIdShell = shellOf("EggId1"), withPasswordShell = shellOf("Password1")),
+        createEggForTesting(withEggIdShell = shellOf("EggId2"), withPasswordShell = shellOf("Password2")),
+        createEggForTesting(withEggIdShell = shellOf("EggId3"), withPasswordShell = shellOf("Password3")),
     )
 }

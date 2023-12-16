@@ -32,7 +32,7 @@ class DiscardCommandHandler @Inject constructor(
                     outputOf(
                         shellOf(
                             """
-                            Discarding a Password Entry is an irrevocable action.
+                            Discarding an Egg is an irrevocable action.
                             Input 'c' to confirm or anything else to abort.
                             Your input: 
                             """.trimIndent(),

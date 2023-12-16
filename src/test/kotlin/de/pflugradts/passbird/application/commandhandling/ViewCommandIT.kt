@@ -26,8 +26,8 @@ class ViewCommandIT {
     @Test
     fun `should handle view command`() {
         // given
-        val eggId = "eggId"
-        val password = "password"
+        val eggId = "EggId"
+        val password = "Password"
         val command = shellOf("v$eggId")
         val reference = command.copy()
         fakePasswordService(
@@ -49,7 +49,7 @@ class ViewCommandIT {
     @Test
     fun `should handle view command for non existing password`() {
         // given
-        val eggId = "eggId"
+        val eggId = "EggId"
         val command = shellOf("v$eggId")
         val reference = command.copy()
         fakePasswordService(

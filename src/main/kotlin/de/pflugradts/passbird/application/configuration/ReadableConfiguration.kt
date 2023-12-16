@@ -35,9 +35,9 @@ interface ReadableConfiguration {
 
     companion object {
         const val CONFIGURATION_SYSTEM_PROPERTY = "config"
-        const val CONFIGURATION_FILENAME = "PwMan3.yml"
-        const val KEYSTORE_FILENAME = "PwMan3.ks"
-        const val DATABASE_FILENAME = "PwMan3.pw"
-        const val EXCHANGE_FILENAME = "PwMan3.json"
+        const val CONFIGURATION_FILENAME = "passbird.yml"
+        const val KEYSTORE_FILENAME = "passbird.ks"
+        const val DATABASE_FILENAME = "passbird.pw"
+        const val EXCHANGE_FILENAME = "passbird.json"
     }
 }

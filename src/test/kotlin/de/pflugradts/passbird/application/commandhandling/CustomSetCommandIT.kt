@@ -31,7 +31,7 @@ class CustomSetCommandIT {
     @Test
     fun `should handle custom set command`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("c$args")
         val reference = shell.copy()
         val customPassword = mockk<Shell>(relaxed = true)
@@ -64,7 +64,7 @@ class CustomSetCommandIT {
         inputHandler.handleInput(inputOf(shell))
 
         // then
-        val errorMsg = "Password alias cannot contain digits or special characters. Please choose a different alias."
+        val errorMsg = "EggId cannot contain digits or special characters. Please choose a different EggId."
         verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf(errorMsg)))) }
         verify(exactly = 0) { passwordService.putEgg(eq(shellOf(args)), any()) }
         expectThat(shell) isNotEqualTo reference
@@ -73,7 +73,7 @@ class CustomSetCommandIT {
     @Test
     fun `should handle custom set command with empty password entered`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("c$args")
         val reference = shell.copy()
         val customPassword = emptyShell()
@@ -94,7 +94,7 @@ class CustomSetCommandIT {
     @Test
     fun `should handle custom set command with prompt on removal and new egg`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("c$args")
         val reference = shell.copy()
         val customPassword = mockk<Shell>(relaxed = true)
@@ -115,7 +115,7 @@ class CustomSetCommandIT {
     @Test
     fun `should handle custom set command with prompt on removal and existing egg`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("c$args")
         val reference = shell.copy()
         val customPassword = mockk<Shell>(relaxed = true)
@@ -141,7 +141,7 @@ class CustomSetCommandIT {
     @Test
     fun `should handle custom set command with prompt on removal and operation aborted`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("c$args")
         val reference = shell.copy()
         val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))

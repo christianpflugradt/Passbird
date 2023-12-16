@@ -102,7 +102,7 @@ class AddNestCommandIT {
         // then
         verify(exactly = 0) { userInterfaceAdapterPort.receive(any()) }
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell.asString()) contains "Default namespace cannot be replaced"
+        expectThat(outputSlot.captured.shell.asString()) contains "Default Nest cannot be replaced"
     }
 
     private fun NestService.nestShellAtSlot(nestSlot: NestSlot) = atNestSlot(nestSlot).getOrNull()?.shell ?: emptyShell()

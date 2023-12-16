@@ -18,7 +18,7 @@ class PasswordTest {
     @Test
     fun `should CreatePassword`() {
         // given
-        val passwordShell = shellOf("password")
+        val passwordShell = shellOf("Password")
 
         // when
         val actual = createPassword(passwordShell)
@@ -30,7 +30,7 @@ class PasswordTest {
     @Test
     fun `should update password`() {
         // given
-        val originalPasswordShell = shellOf("password")
+        val originalPasswordShell = shellOf("Password")
         val password = createPassword(originalPasswordShell)
         val updatedPasswordShell = shellOf("p4s5w0rD")
 
@@ -59,7 +59,7 @@ class PasswordTest {
     @Test
     fun `should clone passwordShell on creation`() {
         // given
-        val passwordShell = shellOf("password")
+        val passwordShell = shellOf("Password")
         val password = createPassword(passwordShell)
 
         // when
@@ -73,7 +73,7 @@ class PasswordTest {
     @Test
     fun `should clone passwordShell on update`() {
         // given
-        val originalPasswordShell = shellOf("password")
+        val originalPasswordShell = shellOf("Password")
         val password = createPassword(originalPasswordShell)
         val updatedPasswordShell = shellOf("p4s5w0rD")
 

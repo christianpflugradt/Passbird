@@ -17,12 +17,12 @@ class SwitchNestCommandHandler @Inject constructor(
     private fun handleSwitchNestCommand(switchNestCommand: SwitchNestCommand) {
         if (nestService.currentNest().nestSlot == switchNestCommand.nestSlot) {
             userInterfaceAdapterPort.send(
-                outputOf(shellOf("'${nestService.currentNest().shell.asString()}' is already the current namespace.")),
+                outputOf(shellOf("'${nestService.currentNest().shell.asString()}' is already the current Nest.")),
             )
         } else if (nestService.atNestSlot(switchNestCommand.nestSlot).isPresent) {
             nestService.moveToNestAt(switchNestCommand.nestSlot)
         } else {
-            userInterfaceAdapterPort.send(outputOf(shellOf("Specified namespace does not exist - Operation aborted.")))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted.")))
         }
         userInterfaceAdapterPort.sendLineBreak()
     }

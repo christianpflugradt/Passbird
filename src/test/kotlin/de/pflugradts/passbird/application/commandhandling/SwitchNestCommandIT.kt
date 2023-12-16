@@ -27,7 +27,7 @@ class SwitchNestCommandIT {
     fun `should handle switch nest command`() {
         // given
         val givenNestSlot = NestSlot.N1
-        nestService.place(shellOf("nest"), givenNestSlot)
+        nestService.place(shellOf("Nest"), givenNestSlot)
         val input = inputOf(shellOf("n" + givenNestSlot.index()))
 
         // when
@@ -42,7 +42,7 @@ class SwitchNestCommandIT {
     fun `should do nothing if nest is already current`() {
         // given
         val givenNestSlot = NestSlot.N1
-        nestService.place(shellOf("nest"), givenNestSlot)
+        nestService.place(shellOf("Nest"), givenNestSlot)
         nestService.moveToNestAt(givenNestSlot)
         val input = inputOf(shellOf("n" + givenNestSlot.index()))
         val outputSlot = slot<Output>()
@@ -52,7 +52,7 @@ class SwitchNestCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell.asString()) contains "is already the current namespace"
+        expectThat(outputSlot.captured.shell.asString()) contains "is already the current Nest"
     }
 
     @Test
@@ -68,6 +68,6 @@ class SwitchNestCommandIT {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell.asString()) contains "Specified namespace does not exist"
+        expectThat(outputSlot.captured.shell.asString()) contains "Specified Nest does not exist"
     }
 }

@@ -22,7 +22,7 @@ class PasswordImportExportService @Inject constructor(
         eggsByNest.keys.forEach { nestSlot ->
             val deployedNest = nestService.atNestSlot(nestSlot)
             if (deployedNest.isEmpty) {
-                nestService.place(shellOf("Namespace-${nestSlot.index()}"), nestSlot)
+                nestService.place(shellOf("Nest-${nestSlot.index()}"), nestSlot)
             }
             nestService.moveToNestAt(nestSlot)
             passwordService.putEggs(eggsByNest[nestSlot]!!.stream())

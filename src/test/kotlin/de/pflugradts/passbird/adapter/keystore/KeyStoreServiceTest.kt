@@ -24,7 +24,7 @@ class KeyStoreServiceTest {
         val invalidPath = mockk<Path>()
 
         // when
-        val actual = tryCatching { keyStoreService.storeKey(plainShellOf("password".toCharArray()), invalidPath) }
+        val actual = tryCatching { keyStoreService.storeKey(plainShellOf("Password".toCharArray()), invalidPath) }
 
         // then
         expectThat(actual.failure).isTrue()
@@ -36,7 +36,7 @@ class KeyStoreServiceTest {
         val invalidPath = mockk<Path>()
 
         // when
-        val actual = keyStoreService.loadKey(plainShellOf("password".toCharArray()), invalidPath)
+        val actual = keyStoreService.loadKey(plainShellOf("Password".toCharArray()), invalidPath)
 
         // then
         expectThat(actual.failure).isTrue()
@@ -51,7 +51,7 @@ class KeyStoreServiceTest {
         )
 
         // when
-        val actual = tryCatching { keyStoreService.storeKey(plainShellOf("password".toCharArray()), Paths.get("")) }
+        val actual = tryCatching { keyStoreService.storeKey(plainShellOf("Password".toCharArray()), Paths.get("")) }
 
         // then
         expectThat(actual.failure).isTrue()
@@ -67,7 +67,7 @@ class KeyStoreServiceTest {
         )
 
         // when
-        val actual = keyStoreService.loadKey(plainShellOf("password".toCharArray()), Paths.get(""))
+        val actual = keyStoreService.loadKey(plainShellOf("Password".toCharArray()), Paths.get(""))
 
         // then
         expectThat(actual.failure).isTrue()

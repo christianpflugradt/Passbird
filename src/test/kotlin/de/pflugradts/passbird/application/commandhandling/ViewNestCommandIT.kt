@@ -32,7 +32,7 @@ class ViewNestCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell.asString()) contains "Available namespace commands"
+        expectThat(outputSlot.captured.shell.asString()) contains "Available Nest commands"
     }
 
     @Test
@@ -46,7 +46,7 @@ class ViewNestCommandIT {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell.asString()) contains "Current namespace: Default"
+        expectThat(outputSlot.captured.shell.asString()) contains "Current Nest: Default"
     }
 
     @Test

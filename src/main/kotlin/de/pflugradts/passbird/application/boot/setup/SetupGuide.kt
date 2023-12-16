@@ -9,18 +9,18 @@ class SetupGuide @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) {
     fun sendWelcome() {
-        send("Welcome to PwMan3 Setup!")
+        send("Welcome to Passbird Setup!")
         userInterfaceAdapterPort.sendLineBreak()
     }
 
     fun sendConfigTemplateRouteInformation() {
         send("You have landed here because you did not provide a configuration.")
-        send("If you have a configuration file, then please start PwMan3 as follows:")
-        send("java -jar PwMan3.jar absolute-path-to-directory-with-configuration-file")
+        send("If you have a configuration file, then please start Passbird as follows:")
+        send("java -jar passbird.jar absolute-path-to-directory-with-configuration-file")
         userInterfaceAdapterPort.sendLineBreak()
-        send("Example for a Linux path: /etc/pwman3")
-        send("Example for a Windows path: c:\\programs\\pwman3")
-        send("The configuration file must be in the specified directory and it must be named PwMan3.yml.")
+        send("Example for a Linux path: /etc/passbird")
+        send("Example for a Windows path: c:\\programs\\passbird")
+        send("The configuration file must be in the specified directory and it must be named Passbird.yml.")
         userInterfaceAdapterPort.sendLineBreak()
         send("To (c)ontinue setup, press 'c'. To quit setup, press any other key")
     }
@@ -28,7 +28,7 @@ class SetupGuide @Inject constructor(
     fun sendConfigKeyStoreRouteInformation(location: String) {
         send("You have landed here because the keystore specified in your configuration does not exist.")
         send("Your configuration specifies the keystore to be in the following directory: $location")
-        send("However in that directory there is no file PwMan3.ks")
+        send("However in that directory there is no file Passbird.ks")
     }
 
     fun sendInputPath(fileDescription: String) {
@@ -37,9 +37,9 @@ class SetupGuide @Inject constructor(
 
     fun sendCreateKeyStoreInformation() {
         userInterfaceAdapterPort.sendLineBreak()
-        send("Your PwMan3 Keystore will be secured by a master password.")
-        send("This master password gives access to all passwords stored in PwMan3.")
-        send("If you lose this password, you will not be able to access any passwords stored in PwMan3.")
+        send("Your Passbird Keystore will be secured by a master password.")
+        send("This master password gives access to all passwords stored in Passbird.")
+        send("If you lose this password, you will not be able to access any passwords stored in Passbird.")
         send("Choose your master password wisely.")
         userInterfaceAdapterPort.sendLineBreak()
         send("You have to input your master password twice.")
@@ -50,7 +50,7 @@ class SetupGuide @Inject constructor(
 
     fun sendCreateKeyStoreSucceeded() { send("Keystore has been created successfully!") }
     fun sendNonMatchingInputs() { send("Your inputs do not match, please repeat.") }
-    fun sendRestart() { send("Now restart PwMan3 to use it.") }
+    fun sendRestart() { send("Now restart Passbird to use it.") }
     fun sendGoodbye() { send("Goodbye!") }
     private fun send(message: String) = userInterfaceAdapterPort.send(outputOf(shellOf(message)))
 }

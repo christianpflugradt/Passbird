@@ -29,7 +29,7 @@ class DiscardCommandIT {
     @Test
     fun `should handle discard command`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("d$args")
         val reference = shell.copy()
         val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
@@ -48,7 +48,7 @@ class DiscardCommandIT {
     @Test
     fun `should handle discard command with prompt on removal`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("d$args")
         val reference = shell.copy()
         val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
@@ -68,7 +68,7 @@ class DiscardCommandIT {
     @Test
     fun `should handle discard command with prompt on removal and operation aborted`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val shell = shellOf("d$args")
         val reference = shell.copy()
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)

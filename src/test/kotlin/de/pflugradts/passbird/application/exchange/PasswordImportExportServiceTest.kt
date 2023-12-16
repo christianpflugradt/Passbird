@@ -63,7 +63,7 @@ class PasswordImportExportServiceTest {
         // then
         verify { passwordService.putEggs(capture(importSlot)) }
         verify(exactly = 1) { exchangeFactory.createPasswordExchange(uri) }
-        verify(exactly = 1) { nestService.place(shellOf("Namespace-9"), N9) }
+        verify(exactly = 1) { nestService.place(shellOf("Nest-9"), N9) }
         expectThat(importSlot) hasSize 3
         expectThatActualBytePairsMatchExpected(importSlot[0], eggs.subList(0, 2))
         expectThatActualBytePairsMatchExpected(importSlot[1], eggs.subList(2, 3))
@@ -124,9 +124,9 @@ private fun expectThatActualBytePairsMatchExpected(actual: ShellPairMap, expecte
 }
 
 private fun testData() = listOf(
-    createEggForTesting(withEggIdShell = shellOf("eggId1"), withPasswordShell = shellOf("password1"), withNestSlot = DEFAULT),
-    createEggForTesting(withEggIdShell = shellOf("eggId2"), withPasswordShell = shellOf("password2"), withNestSlot = DEFAULT),
-    createEggForTesting(withEggIdShell = shellOf("eggId3"), withPasswordShell = shellOf("password3"), withNestSlot = N2),
-    createEggForTesting(withEggIdShell = shellOf("eggId4"), withPasswordShell = shellOf("password4"), withNestSlot = N9),
-    createEggForTesting(withEggIdShell = shellOf("eggId5"), withPasswordShell = shellOf("password5"), withNestSlot = N9),
+    createEggForTesting(withEggIdShell = shellOf("EggId1"), withPasswordShell = shellOf("Password1"), withNestSlot = DEFAULT),
+    createEggForTesting(withEggIdShell = shellOf("EggId2"), withPasswordShell = shellOf("Password2"), withNestSlot = DEFAULT),
+    createEggForTesting(withEggIdShell = shellOf("EggId3"), withPasswordShell = shellOf("Password3"), withNestSlot = N2),
+    createEggForTesting(withEggIdShell = shellOf("EggId4"), withPasswordShell = shellOf("Password4"), withNestSlot = N9),
+    createEggForTesting(withEggIdShell = shellOf("EggId5"), withPasswordShell = shellOf("Password5"), withNestSlot = N9),
 )

@@ -162,7 +162,7 @@ class NestingGroundServiceTest {
     @Test
     fun `should deploy nest and sync`() {
         // given
-        val nestShell = shellOf("nest")
+        val nestShell = shellOf("Nest")
 
         // when
         nestingGroundService.place(nestShell, NestSlot.N3)

@@ -27,7 +27,7 @@ internal class RenameCommandIT {
     @Test
     fun `should handle rename command`() {
         // given
-        val args = "eggId123"
+        val args = "EggId123"
         val shell = shellOf("r$args")
         val reference = shell.copy()
         val newEggId = mockk<Shell>(relaxed = true)
@@ -66,7 +66,7 @@ internal class RenameCommandIT {
     @Test
     fun `should handle rename command with empty eggId entered`() {
         // given
-        val args = "eggId123"
+        val args = "EggId123"
         val shell = shellOf("r$args")
         val reference = shell.copy()
         val newEggId = shellOf("")
@@ -87,7 +87,7 @@ internal class RenameCommandIT {
     @Test
     fun `should handle rename command with existing eggId entered`() {
         // given
-        val args = "eggId123"
+        val args = "EggId123"
         val shell = shellOf("r$args")
         val reference = shell.copy()
         val existingEggId = shellOf("existingeggId")

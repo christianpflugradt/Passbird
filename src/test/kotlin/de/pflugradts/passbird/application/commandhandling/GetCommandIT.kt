@@ -29,7 +29,7 @@ class GetCommandIT {
     @Test
     fun `should handle get command`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val command = shellOf("g$args")
         val reference = command.copy()
         val expectedPassword = shellOf("value")
@@ -53,7 +53,7 @@ class GetCommandIT {
     @Test
     fun `should handle get command with invalid egg`() {
         // given
-        val args = "eggId"
+        val args = "EggId"
         val command = shellOf("g$args")
         val reference = command.copy()
         fakePasswordService(

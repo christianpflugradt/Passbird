@@ -6,7 +6,7 @@ import io.mockk.every
 
 fun fakePasswordProvider(
     instance: PasswordProvider,
-    withCreatedPassword: Shell = shellOf("password"),
+    withCreatedPassword: Shell = shellOf("Password"),
 ) {
     every { instance.createNewPassword(any()) } returns withCreatedPassword
 }

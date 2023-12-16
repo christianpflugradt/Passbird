@@ -12,10 +12,10 @@ class NestTest {
     @Test
     fun `should create nest`() {
         // given
-        val name = "nest"
+        val name = "Nest"
 
         // when
-        val actual = createNest(shellOf("nest"), NestSlot.DEFAULT)
+        val actual = createNest(shellOf("Nest"), NestSlot.DEFAULT)
 
         // then
         expectThat(actual.shell.asString()) isEqualTo name
@@ -24,7 +24,7 @@ class NestTest {
     @Test
     fun `should clone shell`() {
         // given
-        val shell = shellOf("eggId")
+        val shell = shellOf("EggId")
         val nest = createNest(shell, NestSlot.DEFAULT)
 
         // when

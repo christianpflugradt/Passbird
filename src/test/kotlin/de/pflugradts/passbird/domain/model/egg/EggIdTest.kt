@@ -15,7 +15,7 @@ class EggIdTest {
     @Test
     fun `should create eggId`() {
         // given
-        val eggIdShell = shellOf("eggId")
+        val eggIdShell = shellOf("EggId")
 
         // when
         val eggId = createEggId(eggIdShell)
@@ -27,9 +27,9 @@ class EggIdTest {
     @Test
     fun `should rename eggId`() {
         // given
-        val originalEggIdShell = shellOf("eggId123")
+        val originalEggIdShell = shellOf("EggId123")
         val eggId = createEggId(originalEggIdShell)
-        val updatedEggIdShell = shellOf("eggIdABC")
+        val updatedEggIdShell = shellOf("EggIdABC")
 
         // when
         eggId.rename(updatedEggIdShell)
@@ -42,7 +42,7 @@ class EggIdTest {
     @Test
     fun `should clone eggIdShell`() {
         // given
-        val eggIdShell = shellOf("eggId")
+        val eggIdShell = shellOf("EggId")
         val eggId = createEggId(eggIdShell)
 
         // when

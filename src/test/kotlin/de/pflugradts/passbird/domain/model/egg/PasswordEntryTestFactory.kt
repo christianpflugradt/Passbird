@@ -7,7 +7,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 
 fun createEggForTesting(
-    withEggIdShell: Shell = shellOf("eggId"),
-    withPasswordShell: Shell = shellOf("password"),
+    withEggIdShell: Shell = shellOf("EggId"),
+    withPasswordShell: Shell = shellOf("Password"),
     withNestSlot: NestSlot = DEFAULT,
 ): Egg = createEgg(withNestSlot, withEggIdShell, withPasswordShell)

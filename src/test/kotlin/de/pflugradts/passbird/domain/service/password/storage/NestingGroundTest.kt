@@ -19,8 +19,8 @@ import strikt.java.isPresent
 
 class NestingGroundTest {
 
-    private val givenEgg1 = createEggForTesting(withEggIdShell = shellOf("eggId1"))
-    private val givenEgg2 = createEggForTesting(withEggIdShell = shellOf("eggId2"))
+    private val givenEgg1 = createEggForTesting(withEggIdShell = shellOf("EggId1"))
+    private val givenEgg2 = createEggForTesting(withEggIdShell = shellOf("EggId2"))
     private val givenEggs = listOf(givenEgg1, givenEgg2)
 
     private val passwordStoreAdapterPort = fakePasswordStoreAdapterPort(givenEggs)
@@ -107,8 +107,8 @@ class NestingGroundTest {
             // given
             val activeNestSlot = NestSlot.N2
             val otherNestSlot = NestSlot.N3
-            nestService.place(shellOf("nest"), activeNestSlot)
-            nestService.place(shellOf("nest"), otherNestSlot)
+            nestService.place(shellOf("Nest"), activeNestSlot)
+            nestService.place(shellOf("Nest"), otherNestSlot)
             val egg1 = createEggForTesting(withEggIdShell = shellOf("first"), withNestSlot = activeNestSlot)
             val egg2 = createEggForTesting(withEggIdShell = shellOf("second"), withNestSlot = activeNestSlot)
             val egg3 = createEggForTesting(withEggIdShell = shellOf("third"), withNestSlot = otherNestSlot)
@@ -127,11 +127,11 @@ class NestingGroundTest {
         @Test
         fun `should store multiple ewith identical eggIds in different nests`() {
             // given
-            val eggIdShells = shellOf("eggId")
+            val eggIdShells = shellOf("EggId")
             val firstNestSlot = NestSlot.N1
             val secondNestSlot = NestSlot.N2
-            nestService.place(shellOf("nest"), firstNestSlot)
-            nestService.place(shellOf("nest"), secondNestSlot)
+            nestService.place(shellOf("Nest"), firstNestSlot)
+            nestService.place(shellOf("Nest"), secondNestSlot)
             val egg1 = createEggForTesting(withEggIdShell = eggIdShells, withNestSlot = firstNestSlot)
             val egg2 = createEggForTesting(withEggIdShell = eggIdShells, withNestSlot = secondNestSlot)
             nestingGround.add(egg1)
