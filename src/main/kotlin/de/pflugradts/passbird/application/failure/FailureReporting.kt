@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.failure
 
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import kotlin.io.path.name
 
@@ -15,6 +16,15 @@ fun reportFailure(checksumFailure: ChecksumFailure) {
 fun reportFailure(clipboardFailure: ClipboardFailure) =
     err("Clipboard could not be updated. Please check your Java version. Exception: ${clipboardFailure.ex.message}")
 fun reportFailure(commandFailure: CommandFailure) = err("Command execution failed: ${commandFailure.ex.message}")
+fun reportFailure(configurationFailure: ConfigurationFailure) =
+    if (configurationFailure.ex is UnrecognizedPropertyException) {
+        err(
+            "Configuration contains unrecognized property and will not be used. Please remove the unrecognized field " +
+                "before restarting pwman3: ${configurationFailure.ex.message?.split("(")?.get(0)}",
+        )
+    } else {
+        err("Configuration could not be loaded: ${configurationFailure.ex.message}")
+    }
 fun reportFailure(passwordDatabaseFailure: DecryptPasswordDatabaseFailure) =
     err("Password database at '${passwordDatabaseFailure.path.name}' could not be decrypted: ${passwordDatabaseFailure.ex.message}")
 fun reportFailure(exportFailure: ExportFailure) = err("Password database could not be exported: ${exportFailure.ex.message}")
