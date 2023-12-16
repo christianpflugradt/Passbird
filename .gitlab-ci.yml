@@ -13,6 +13,7 @@ include:
 
 variables:
   DOCKER_DRIVER: overlay2
+  SAST_JAVA_VERSION: 17
 
 before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 
