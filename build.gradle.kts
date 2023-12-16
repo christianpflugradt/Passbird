@@ -43,7 +43,7 @@ group = "de.pflugradts"
 tasks.withType<Jar> {
     archiveBaseName.set("pwman3")
     manifest {
-        attributes["Main-Class"] = "de.pflugradts.passbird.application.Main"
+        attributes["Main-Class"] = "de.pflugradts.passbird.application.MainKt"
         attributes["Implementation-Version"] = version
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
