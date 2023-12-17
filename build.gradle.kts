@@ -7,10 +7,10 @@ plugins {
     application
     jacoco
     java
-    kotlin("jvm") version "1.9.21"
-    id("org.owasp.dependencycheck") version "9.0.6"
+    kotlin("jvm") version "1.9.20"
+    id("org.owasp.dependencycheck") version "9.0.5"
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
-    id("org.barfuin.gradle.jacocolog") version "3.1.0"
+    id("org.barfuin.gradle.jacocolog") version "2.0.0"
 }
 
 repositories {
@@ -18,8 +18,8 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.16.0")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2")
     implementation("com.google.inject:guice:7.0.0")
     implementation("com.google.inject.extensions:guice-assistedinject:7.0.0")
     implementation("com.google.guava:guava:32.1.3-jre")
@@ -33,7 +33,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:5.10.1")
     testImplementation("org.awaitility:awaitility:4.2.0")
-    testImplementation("com.tngtech.archunit:archunit:1.2.1")
+    testImplementation("com.tngtech.archunit:archunit:0.23.1")
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17

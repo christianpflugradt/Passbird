@@ -1,4 +1,4 @@
-image: eclipse-temurin:21-jdk
+image: eclipse-temurin:20-jdk
 
 stages:
   - 🔎 check
@@ -84,7 +84,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 
 🚀 semver:
   stage: 📦 release
-  image: node:21
+  image: node:20
   variables:
       GIT_STRATEGY: clone
   script:
