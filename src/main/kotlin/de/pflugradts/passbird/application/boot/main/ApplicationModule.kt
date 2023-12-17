@@ -67,7 +67,7 @@ class ApplicationModule : AbstractModule() {
         bind(EventRegistry::class.java).to(PassbirdEventRegistry::class.java)
         bind(ImportExportService::class.java).to(PasswordImportExportService::class.java)
         bind(KeyStoreAdapterPort::class.java).to(KeyStoreService::class.java)
-        bind(EggRepository::class.java).to(NestingGround::class.java).`in`(Singleton::class.java)
+        bind(EggRepository::class.java).to(NestingGround::class.java)
         bind(NestService::class.java).to(NestingGroundService::class.java)
         bind(PasswordProvider::class.java).to(RandomPasswordProvider::class.java)
         bind(PasswordService::class.java).to(PasswordFacade::class.java)
