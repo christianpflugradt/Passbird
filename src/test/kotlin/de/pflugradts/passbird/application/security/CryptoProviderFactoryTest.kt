@@ -34,7 +34,6 @@ class CryptoProviderFactoryTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>()
     private val systemOperation = mockk<SystemOperation>()
     private val cryptoProviderFactory = CryptoProviderFactory(
-        application = application,
         configuration = configuration,
         keyStoreAdapterPort = keyStoreAdapterPort,
         userInterfaceAdapterPort = userInterfaceAdapterPort,
@@ -118,13 +117,12 @@ class CryptoProviderFactoryTest {
             withTheseSecureInputs = listOf(incorrectPassword, incorrectPassword, incorrectPassword),
         )
         givenLoginFails(incorrectPassword, keyStoreFilePath)
-        every { application.terminate(systemOperation) } returns Unit
 
         // when
         cryptoProviderFactory.createCryptoProvider()
 
         // then
-        verify(exactly = 1) { application.terminate(systemOperation) }
+        verify(exactly = 1) { systemOperation.exit() }
     }
 
     private fun givenLoginSucceeds(password: Input, keyStoreFilePath: Path) = every {
