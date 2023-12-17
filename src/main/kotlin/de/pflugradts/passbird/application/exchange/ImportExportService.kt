@@ -4,9 +4,9 @@ import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
 
 interface ImportExportService {
-    fun peekImportEggIdShells(uri: String): ShellMap
-    fun importEggs(uri: String)
-    fun exportEggs(uri: String)
+    fun peekImportEggIdShells(): ShellMap
+    fun importEggs()
+    fun exportEggs()
 }
 
 typealias ShellMap = Map<NestSlot, List<Shell>>

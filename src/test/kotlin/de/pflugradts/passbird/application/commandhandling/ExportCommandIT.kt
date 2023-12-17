@@ -10,7 +10,6 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import strikt.assertions.isNotEqualTo
 
 class ExportCommandIT {
 
@@ -22,8 +21,7 @@ class ExportCommandIT {
     @Test
     fun `should handle export command`() {
         // given
-        val args = "tmp"
-        val shell = shellOf("e$args")
+        val shell = shellOf("e")
         val reference = shell.copy()
 
         // when
@@ -31,7 +29,6 @@ class ExportCommandIT {
         inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 1) { importExportService.exportEggs(args) }
-        expectThat(shell) isNotEqualTo reference
+        verify(exactly = 1) { importExportService.exportEggs() }
     }
 }

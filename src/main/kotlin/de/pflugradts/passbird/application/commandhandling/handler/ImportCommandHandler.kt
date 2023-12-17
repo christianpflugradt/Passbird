@@ -19,19 +19,18 @@ class ImportCommandHandler@Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
-    private fun handleImportCommand(importCommand: ImportCommand) {
-        if (commandConfirmed(importCommand)) {
-            importExportService.importEggs(importCommand.argument.asString())
+    private fun handleImportCommand(@Suppress("UNUSED_PARAMETER") importCommand: ImportCommand) {
+        if (commandConfirmed()) {
+            importExportService.importEggs()
         } else {
             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
         }
-        importCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    private fun commandConfirmed(importCommand: ImportCommand): Boolean {
+    private fun commandConfirmed(): Boolean {
         if (configuration.application.password.promptOnRemoval) {
-            val overlaps = importExportService.peekImportEggIdShells(importCommand.argument.asString())
+            val overlaps = importExportService.peekImportEggIdShells()
                 .map { (nestSlot, eggIdShell) -> eggIdShell.map { Triple(nestSlot, it, passwordService.eggExists(it, nestSlot)) } }
                 .flatten()
                 .filter { it.third }

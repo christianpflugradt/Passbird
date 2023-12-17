@@ -28,10 +28,10 @@ class CommandFactory @Inject constructor(
         return when (commandType) {
             CommandType.CUSTOM_SET -> CustomSetCommand(input)
             CommandType.DISCARD -> DiscardCommand(input)
-            CommandType.EXPORT -> ExportCommand(input)
+            CommandType.EXPORT -> ExportCommand()
             CommandType.GET -> GetCommand(input)
             CommandType.HELP -> HelpCommand()
-            CommandType.IMPORT -> ImportCommand(input)
+            CommandType.IMPORT -> ImportCommand()
             CommandType.LIST -> ListCommand()
             CommandType.NEST ->
                 tryCatching { nestCommandFactory.constructFromInput(input) }

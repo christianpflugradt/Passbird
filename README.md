@@ -61,8 +61,8 @@ The general usage info will be given below and is also available in Passbird by 
         v[EggId] (view) prints the Password contained in that Egg to the console
         r[EggId] (rename) renames an Egg by prompting the user for a new one
         d[EggId] (discard) removes the Egg entirely from the database
-        e[directory] (export) exports the Password database as a human readable json file to the specified directory
-        i[directory] (import) imports a json file containing Passwords into the database from the specified directory
+        e (export) exports the Password database in a human readable json format
+        i (import) imports Passwords into the database from a json file
         l (list) non parameterized, lists all Eggs in the database
         n (Nests) view available Nests and print Nest specific help
         h (help) prints this help
@@ -93,9 +93,9 @@ Some example inputs and what they do:
 
 `rgitlab` prompts for a new EggId that replaces the previous EggId gitlab - the new EggId must not yet exist
 
-`e/tmp` exports all Eggs to a file `/tmp/passbird.json` (example for a valid Linux path)
+`e` exports all Eggs to a file `passbird-export.json` in the directory passed on program start
 
-`ic:\` imports all Eggs from a file `c:\passbird.json` if the file exists (example for a valid Windows path) - please note that this will potentially overwrite all Passwords in your database if there are any matching Eggs!
+`i` imports all Eggs from a file `passbird-export.json` expected in the directory passed on program start - please note that this will potentially overwrite all Passwords in your database if there are any matching Eggs!
 
 ## Migrating from 2.x.x to 3.x.x
 
@@ -104,7 +104,7 @@ In 2.x.x Passbird was known as PwMan3. As part of the rebranding the file names 
 - `PwMan3.yml` has been renamed to `passbird.yml`
 - `PwMan3.ks` has been renamed to `passbird.ks`
 - `PwMan3.pw` has been renamed to `passbird.pw`
-- import and export will generate / expect a file named `passbird.json` now
+- import and export will generate / expect a file named `passbird-export.json` now
 
 ## <a name="faq"></a>Frequently Asked Questions ##
 

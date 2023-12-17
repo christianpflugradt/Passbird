@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.exchange
 
 import de.pflugradts.passbird.application.ShellPairMap
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_SYSTEM_PROPERTY
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
@@ -16,6 +17,7 @@ import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.containsKey
@@ -28,20 +30,25 @@ class PasswordImportExportServiceTest {
     private val exchangeFactory = mockk<ExchangeFactory>()
     private val passwordService = mockk<PasswordService>()
     private val nestService = createNestServiceSpyForTesting()
-    private val importExportService = PasswordImportExportService(exchangeFactory, passwordService, nestService)
-    private val uri = "any uri"
+    private val passbirdHomeUri = "any uri"
+
+    @BeforeEach
+    fun setup() {
+        System.setProperty(CONFIGURATION_SYSTEM_PROPERTY, passbirdHomeUri)
+    }
 
     @Test
     fun `should peek import eggId shells`() {
         // given
+        val importExportService = PasswordImportExportService(exchangeFactory, passwordService, nestService)
         val eggs = testData()
         fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory, withEggs = eggs)
 
         // when
-        val actual = importExportService.peekImportEggIdShells(uri)
+        val actual = importExportService.peekImportEggIdShells()
 
         // then
-        verify(exactly = 1) { exchangeFactory.createPasswordExchange(uri) }
+        verify(exactly = 1) { exchangeFactory.createPasswordExchange(passbirdHomeUri) }
         expectThatActualEggIdsMatchExpected(actual, eggs)
         verify { passwordService wasNot Called }
     }
@@ -49,6 +56,7 @@ class PasswordImportExportServiceTest {
     @Test
     fun `should import passwords across multiple nests`() {
         // given
+        val importExportService = PasswordImportExportService(exchangeFactory, passwordService, nestService)
         val givenCurrentNestSlot = N2
         val eggs = testData()
         fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory, withEggs = eggs)
@@ -58,11 +66,11 @@ class PasswordImportExportServiceTest {
         val importSlot = mutableListOf<Stream<ShellPair>>()
 
         // when
-        importExportService.importEggs(uri)
+        importExportService.importEggs()
 
         // then
         verify { passwordService.putEggs(capture(importSlot)) }
-        verify(exactly = 1) { exchangeFactory.createPasswordExchange(uri) }
+        verify(exactly = 1) { exchangeFactory.createPasswordExchange(passbirdHomeUri) }
         verify(exactly = 1) { nestService.place(shellOf("Nest-9"), N9) }
         expectThat(importSlot) hasSize 3
         expectThatActualBytePairsMatchExpected(importSlot[0], eggs.subList(0, 2))
@@ -74,6 +82,7 @@ class PasswordImportExportServiceTest {
     @Test
     fun `should export passwords across multiple nests`() {
         // given
+        val importExportService = PasswordImportExportService(exchangeFactory, passwordService, nestService)
         val givenCurrentNestSlot = N2
         val eggs = testData()
         val exchangeAdapterPort = fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory)
@@ -84,10 +93,10 @@ class PasswordImportExportServiceTest {
         val exportNestSlot = slot<ShellPairMap>()
 
         // when
-        importExportService.exportEggs(uri)
+        importExportService.exportEggs()
 
         // then
-        verify(exactly = 1) { exchangeFactory.createPasswordExchange(uri) }
+        verify(exactly = 1) { exchangeFactory.createPasswordExchange(passbirdHomeUri) }
         verify { exchangeAdapterPort.send(capture(exportNestSlot)) }
         val actual = exportNestSlot.captured
         expectThatActualBytePairsMatchExpected(actual, eggs)

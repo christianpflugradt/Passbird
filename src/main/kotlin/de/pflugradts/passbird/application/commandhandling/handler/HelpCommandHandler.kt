@@ -26,8 +26,8 @@ class HelpCommandHandler @Inject constructor(
                     ${'\t'}v[EggId] (view) prints the Password contained in that Egg to the console
                     ${'\t'}r[EggId] (rename) renames an Egg by prompting the user for a new one
                     ${'\t'}d[EggId] (discard) removes the Egg entirely from the database
-                    ${'\t'}e[directory] (export) exports the Password database as a human readable json file to the specified directory
-                    ${'\t'}i[directory] (import) imports a json file containing Passwords into the database from the specified directory
+                    ${'\t'}e (export) exports the Password database in a human readable json format
+                    ${'\t'}i (import) imports Passwords into the database from a json file
                     ${'\t'}l (list) non parameterized, lists all Eggs in the database
                     ${'\t'}n (Nests) view available Nests and print Nest specific help
                     ${'\t'}h (help) prints this help

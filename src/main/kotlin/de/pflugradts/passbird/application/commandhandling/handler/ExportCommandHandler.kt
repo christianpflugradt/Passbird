@@ -11,9 +11,8 @@ class ExportCommandHandler @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
-    private fun handleExportCommand(exportCommand: ExportCommand) {
-        importExportService.exportEggs(exportCommand.argument.asString())
-        exportCommand.invalidateInput()
+    private fun handleExportCommand(@Suppress("UNUSED_PARAMETER") exportCommand: ExportCommand) {
+        importExportService.exportEggs()
         userInterfaceAdapterPort.sendLineBreak()
     }
 }

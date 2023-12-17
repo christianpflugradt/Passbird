@@ -38,6 +38,6 @@ interface ReadableConfiguration {
         const val CONFIGURATION_FILENAME = "passbird.yml"
         const val KEYSTORE_FILENAME = "passbird.ks"
         const val DATABASE_FILENAME = "passbird.pw"
-        const val EXCHANGE_FILENAME = "passbird.json"
+        const val EXCHANGE_FILENAME = "passbird-export.json"
     }
 }

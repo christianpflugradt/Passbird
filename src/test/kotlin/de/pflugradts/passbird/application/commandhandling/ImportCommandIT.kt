@@ -17,9 +17,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
-import strikt.assertions.isNotEqualTo
 
 class ImportCommandIT {
 
@@ -40,95 +37,79 @@ class ImportCommandIT {
     @Test
     fun `should handle import command`() {
         // given
-        val args = "tmp"
-        val shell = shellOf("i$args")
-        val reference = shell.copy()
+        val shell = shellOf("i")
         fakeConfiguration(instance = configuration)
 
         // when
-        expectThat(shell) isEqualTo reference
         inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 1) { importExportService.importEggs(args) }
-        expectThat(shell) isNotEqualTo reference
+        verify(exactly = 1) { importExportService.importEggs() }
     }
 
     @Test
     fun `should handle import command with prompt on removal but no overlapping entries`() {
         // given
-        val args = "tmp"
-        val shell = shellOf("i$args")
-        val reference = shell.copy()
+        val shell = shellOf("i")
         val importEggId1 = shellOf("import1")
         val importEggId2 = shellOf("import2")
         val databaseEggId1 = shellOf("database1")
         val databaseEggId2 = shellOf("database2")
         val givenEgg1 = createEggForTesting(withEggIdShell = databaseEggId1)
         val givenEgg2 = createEggForTesting(withEggIdShell = databaseEggId2)
-        every { importExportService.peekImportEggIdShells(args) } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
+        every { importExportService.peekImportEggIdShells() } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
         // when
-        expectThat(shell) isEqualTo reference
         inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 1) { importExportService.importEggs(args) }
-        expectThat(shell) isNotEqualTo reference
+        verify(exactly = 1) { importExportService.importEggs() }
     }
 
     @Test
     fun `should handle import command with prompt on removal and overlapping entries`() {
         // given
-        val args = "tmp"
-        val shell = shellOf("i$args")
-        val reference = shell.copy()
+        val shell = shellOf("i")
         val importEggId1 = shellOf("import1")
         val importEggId2 = shellOf("overlap")
         val databaseEggId1 = shellOf("database1")
         val databaseEggId2 = shellOf("overlap")
         val givenEgg1 = createEggForTesting(withEggIdShell = databaseEggId1)
         val givenEgg2 = createEggForTesting(withEggIdShell = databaseEggId2)
-        every { importExportService.peekImportEggIdShells(args) } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
+        every { importExportService.peekImportEggIdShells() } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
 
         // when
-        expectThat(shell) isEqualTo reference
         inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 1) { importExportService.importEggs(args) }
-        expectThat(shell) isNotEqualTo reference
+        verify(exactly = 1) { importExportService.importEggs() }
     }
 
     @Test
     fun `should handle import command with prompt on removal and operation aborted`() {
         // given
-        val args = "tmp"
-        val shell = shellOf("i$args")
-        val reference = shell.copy()
+        val shell = shellOf("i")
         val importEggId1 = shellOf("import1")
         val importEggId2 = shellOf("overlap")
         val databaseEggId1 = shellOf("database1")
         val databaseEggId2 = shellOf("overlap")
         val givenEgg1 = createEggForTesting(withEggIdShell = databaseEggId1)
         val givenEgg2 = createEggForTesting(withEggIdShell = databaseEggId2)
-        every { importExportService.peekImportEggIdShells(args) } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
+        every { importExportService.peekImportEggIdShells() } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
         // when
-        expectThat(shell) isEqualTo reference
         inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 0) { importExportService.importEggs(args) }
-        expectThat(shell) isNotEqualTo reference
+        verify(exactly = 0) { importExportService.importEggs() }
     }
 
     // FIXME add tests for eggIds across multiple nests
