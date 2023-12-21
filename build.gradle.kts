@@ -7,8 +7,8 @@ plugins {
     application
     jacoco
     java
-    kotlin("jvm") version "1.9.21"
-    id("org.owasp.dependencycheck") version "9.0.6"
+    kotlin("jvm") version "1.9.22"
+    id("org.owasp.dependencycheck") version "9.0.7"
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
 }
