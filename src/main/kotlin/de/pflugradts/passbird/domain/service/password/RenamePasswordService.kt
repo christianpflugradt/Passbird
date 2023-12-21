@@ -18,7 +18,7 @@ class RenamePasswordService @Inject constructor(
         if (eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             encrypted(newEggIdShell).let { encryptedNewEggIdShell ->
                 if (find(encryptedNewEggIdShell).isEmpty) {
-                    encrypted(eggIdShell).let { find(it).get().rename(newEggIdShell) }
+                    encrypted(eggIdShell).let { find(it).get().rename(encryptedNewEggIdShell) }
                     processEventsAndSync()
                 } else {
                     throw EggIdAlreadyExistsException(newEggIdShell)
