@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.application.exchange
 
 import com.google.inject.Inject
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_SYSTEM_PROPERTY
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
@@ -13,13 +12,13 @@ class PasswordImportExportService @Inject constructor(
     @Inject private val passwordService: PasswordService,
     @Inject private val nestService: NestService,
 ) : ImportExportService {
-    override fun peekImportEggIdShells() = exchangeFactory.createPasswordExchange(PASSBIRD_HOME_URI).receive().entries.associate {
+    override fun peekImportEggIdShells() = exchangeFactory.createPasswordExchange().receive().entries.associate {
         it.key to it.value.map { bytePair -> bytePair.first }
     }
 
     override fun importEggs() {
         val currentNest = nestService.currentNest()
-        val eggsByNest = exchangeFactory.createPasswordExchange(PASSBIRD_HOME_URI).receive()
+        val eggsByNest = exchangeFactory.createPasswordExchange().receive()
         eggsByNest.keys.forEach { nestSlot ->
             val deployedNest = nestService.atNestSlot(nestSlot)
             if (deployedNest.isEmpty) {
@@ -39,11 +38,7 @@ class PasswordImportExportService @Inject constructor(
             eggsByNest[nest.nestSlot] = passwordService.findAllEggIds()
                 .map { eggId -> ShellPair(eggId, passwordService.viewPassword(eggId).get()) }.toList()
         }
-        exchangeFactory.createPasswordExchange(PASSBIRD_HOME_URI).send(eggsByNest)
+        exchangeFactory.createPasswordExchange().send(eggsByNest)
         nestService.moveToNestAt(currentNest.nestSlot)
-    }
-
-    companion object {
-        private val PASSBIRD_HOME_URI = System.getProperty(CONFIGURATION_SYSTEM_PROPERTY)
     }
 }

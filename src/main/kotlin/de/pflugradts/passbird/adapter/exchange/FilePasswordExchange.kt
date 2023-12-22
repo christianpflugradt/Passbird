@@ -2,9 +2,9 @@ package de.pflugradts.passbird.adapter.exchange
 
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.google.inject.Inject
-import com.google.inject.assistedinject.Assisted
 import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.ShellPairMap
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.EXCHANGE_FILENAME
 import de.pflugradts.passbird.application.failure.ExportFailure
 import de.pflugradts.passbird.application.failure.ImportFailure
@@ -19,15 +19,15 @@ import java.io.IOException
 import java.nio.file.Files
 
 class FilePasswordExchange @Inject constructor(
-    @Assisted private val uri: String,
     @Inject private val systemOperation: SystemOperation,
 ) : ExchangeAdapterPort {
     private val mapper = JsonMapper()
+    private val configurationDirectory = System.getProperty(ReadableConfiguration.CONFIGURATION_SYSTEM_PROPERTY).toDirectory()
 
     override fun send(data: ShellPairMap) {
         try {
             Files.writeString(
-                systemOperation.resolvePath(uri.toDirectory(), EXCHANGE_FILENAME.toFileName()),
+                systemOperation.resolvePath(configurationDirectory, EXCHANGE_FILENAME.toFileName()),
                 mapper.writerWithDefaultPrettyPrinter().writeValueAsString(ExchangeWrapper(data.toSerializable())),
             )
         } catch (e: IOException) {
@@ -38,7 +38,7 @@ class FilePasswordExchange @Inject constructor(
     override fun receive(): ShellPairMap {
         return try {
             mapper.readValue(
-                Files.readString(systemOperation.resolvePath(uri.toDirectory(), EXCHANGE_FILENAME.toFileName())),
+                Files.readString(systemOperation.resolvePath(configurationDirectory, EXCHANGE_FILENAME.toFileName())),
                 ExchangeWrapper::class.java,
             ).value.toShellPairMap()
         } catch (e: IOException) {

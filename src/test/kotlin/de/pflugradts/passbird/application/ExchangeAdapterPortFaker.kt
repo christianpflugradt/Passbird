@@ -21,6 +21,6 @@ fun fakeExchangeAdapterPort(
         }
         result
     }
-    every { forExchangeFactory.createPasswordExchange(any()) } returns instance
+    every { forExchangeFactory.createPasswordExchange() } returns instance
     return instance
 }

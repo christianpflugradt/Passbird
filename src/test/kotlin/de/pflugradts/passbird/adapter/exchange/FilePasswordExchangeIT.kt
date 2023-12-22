@@ -20,14 +20,12 @@ class FilePasswordExchangeIT {
 
     private val tempExchangeDirectory = UUID.randomUUID().toString()
     private val exchangeFile = tempExchangeDirectory + File.separator + ReadableConfiguration.EXCHANGE_FILENAME
-    private val filePasswordExchange = FilePasswordExchange(
-        tempExchangeDirectory,
-        SystemOperation(),
-    )
+    private val filePasswordExchange = FilePasswordExchange(SystemOperation())
 
     @BeforeEach
     fun setup() {
         expectThat(File(tempExchangeDirectory).mkdir()).isTrue()
+        System.setProperty(ReadableConfiguration.CONFIGURATION_SYSTEM_PROPERTY, tempExchangeDirectory)
     }
 
     @AfterEach

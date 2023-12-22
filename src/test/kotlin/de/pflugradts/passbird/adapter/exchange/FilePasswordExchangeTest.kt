@@ -2,9 +2,11 @@ package de.pflugradts.passbird.adapter.exchange
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.kotlinextensions.tryCatching
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import io.mockk.mockk
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
@@ -15,7 +17,12 @@ import strikt.assertions.isTrue
 class FilePasswordExchangeTest {
 
     private val systemOperation = mockk<SystemOperation>()
-    private val filePasswordExchange = FilePasswordExchange("", systemOperation)
+    private fun setupFilePasswordExchange() = FilePasswordExchange(systemOperation)
+
+    @BeforeEach
+    fun setup() {
+        System.setProperty(ReadableConfiguration.CONFIGURATION_SYSTEM_PROPERTY, "tmp")
+    }
 
     @Test
     fun `should handle io exception on send`() {
@@ -25,7 +32,7 @@ class FilePasswordExchangeTest {
         // when
         val captureSystemErr = captureSystemErr()
         val actual = captureSystemErr.during {
-            tryCatching { filePasswordExchange.send(emptyMap()) }
+            tryCatching { setupFilePasswordExchange().send(emptyMap()) }
         }
 
         // then
@@ -41,7 +48,7 @@ class FilePasswordExchangeTest {
         // when
         val captureSystemErr = captureSystemErr()
         val actual = captureSystemErr.during {
-            tryCatching { filePasswordExchange.receive() }
+            tryCatching { setupFilePasswordExchange().receive() }
         }
 
         // then

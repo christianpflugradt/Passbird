@@ -3,9 +3,6 @@ package de.pflugradts.passbird.application
 import de.pflugradts.passbird.application.boot.bootModule
 import de.pflugradts.passbird.application.boot.launcher.LauncherModule
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import io.mockk.every
-import io.mockk.mockkStatic
-import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -17,14 +14,10 @@ import strikt.assertions.isNullOrEmpty
 class MainTest {
 
     @BeforeEach
-    fun setup() {
-        System.clearProperty(ReadableConfiguration.CONFIGURATION_SYSTEM_PROPERTY)
-        mockkStatic(::bootModule)
-        every { bootModule(any(LauncherModule::class)) } returns Unit
-    }
+    fun setup() { mockMain() }
 
     @AfterEach
-    fun cleanup() { unmockkAll() }
+    fun cleanup() { unmockMain() }
 
     @Test
     fun `should set system property and boot launcher`() {

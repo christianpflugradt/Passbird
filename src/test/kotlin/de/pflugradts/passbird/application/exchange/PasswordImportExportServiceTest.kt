@@ -48,7 +48,7 @@ class PasswordImportExportServiceTest {
         val actual = importExportService.peekImportEggIdShells()
 
         // then
-        verify(exactly = 1) { exchangeFactory.createPasswordExchange(passbirdHomeUri) }
+        verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
         expectThatActualEggIdsMatchExpected(actual, eggs)
         verify { passwordService wasNot Called }
     }
@@ -70,7 +70,7 @@ class PasswordImportExportServiceTest {
 
         // then
         verify { passwordService.putEggs(capture(importSlot)) }
-        verify(exactly = 1) { exchangeFactory.createPasswordExchange(passbirdHomeUri) }
+        verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
         verify(exactly = 1) { nestService.place(shellOf("Nest-9"), N9) }
         expectThat(importSlot) hasSize 3
         expectThatActualBytePairsMatchExpected(importSlot[0], eggs.subList(0, 2))
@@ -96,7 +96,7 @@ class PasswordImportExportServiceTest {
         importExportService.exportEggs()
 
         // then
-        verify(exactly = 1) { exchangeFactory.createPasswordExchange(passbirdHomeUri) }
+        verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
         verify { exchangeAdapterPort.send(capture(exportNestSlot)) }
         val actual = exportNestSlot.captured
         expectThatActualBytePairsMatchExpected(actual, eggs)
