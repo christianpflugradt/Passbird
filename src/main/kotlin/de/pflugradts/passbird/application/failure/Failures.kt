@@ -12,8 +12,5 @@ data class ConfigurationFailure(val ex: Exception) : Failure
 data class DecryptPasswordDatabaseFailure(val path: Path, val ex: Exception) : Failure
 data class ExportFailure(val ex: Exception) : Failure
 data class ImportFailure(val ex: Exception) : Failure
-data class EggsFailure(val ex: Exception) : Failure
-data class EggFailure(val shell: Shell, val ex: Exception) : Failure
-data class RenameEggFailure(val ex: Exception) : Failure
 data class SignatureCheckFailure(val actualSignature: Shell, val critical: Boolean) : Failure
 data class WritePasswordDatabaseFailure(val path: Path, val ex: Exception) : Failure
