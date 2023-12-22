@@ -2,7 +2,7 @@ package de.pflugradts.passbird.adapter.exchange
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.kotlinextensions.tryCatching
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import io.mockk.mockk
@@ -21,7 +21,7 @@ class FilePasswordExchangeTest {
 
     @BeforeEach
     fun setup() {
-        System.setProperty(ReadableConfiguration.CONFIGURATION_SYSTEM_PROPERTY, "tmp")
+        mainMocked(emptyArray())
     }
 
     @Test

@@ -1,8 +1,8 @@
 package de.pflugradts.passbird.application.exchange
 
 import de.pflugradts.passbird.application.ShellPairMap
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_SYSTEM_PROPERTY
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
+import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
@@ -34,7 +34,7 @@ class PasswordImportExportServiceTest {
 
     @BeforeEach
     fun setup() {
-        System.setProperty(CONFIGURATION_SYSTEM_PROPERTY, passbirdHomeUri)
+        mainMocked(arrayOf(passbirdHomeUri))
     }
 
     @Test

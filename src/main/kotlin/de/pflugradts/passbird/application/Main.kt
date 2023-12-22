@@ -2,11 +2,17 @@ package de.pflugradts.passbird.application
 
 import de.pflugradts.passbird.application.boot.bootModule
 import de.pflugradts.passbird.application.boot.launcher.LauncherModule
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+
+interface RunContext {
+    val homeDirectory: Directory
+}
+
+private lateinit var global: RunContext
+val Global get() = global
 
 fun main(args: Array<String>) {
-    if (args.size == 1) {
-        System.setProperty(ReadableConfiguration.CONFIGURATION_SYSTEM_PROPERTY, args[0])
+    global = object : RunContext {
+        override val homeDirectory = if (args.size == 1) args[0].toDirectory() else "".toDirectory()
     }
     bootModule(LauncherModule())
 }

@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.adapter.exchange
 
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -25,7 +26,7 @@ class FilePasswordExchangeIT {
     @BeforeEach
     fun setup() {
         expectThat(File(tempExchangeDirectory).mkdir()).isTrue()
-        System.setProperty(ReadableConfiguration.CONFIGURATION_SYSTEM_PROPERTY, tempExchangeDirectory)
+        mainMocked(arrayOf(tempExchangeDirectory))
     }
 
     @AfterEach

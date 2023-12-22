@@ -2,23 +2,20 @@ package de.pflugradts.passbird.application.boot.launcher
 
 import com.google.inject.Module
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
-import de.pflugradts.passbird.application.boot.bootModule
 import de.pflugradts.passbird.application.boot.main.ApplicationModule
 import de.pflugradts.passbird.application.boot.setup.SetupModule
 import de.pflugradts.passbird.application.configuration.Configuration
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.mockMain
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
+import de.pflugradts.passbird.application.unmockMain
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.slot
-import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -35,14 +32,10 @@ class PassbirdLauncherTest {
     private val moduleSlot = slot<Module>()
 
     @BeforeEach
-    fun setup() {
-        System.clearProperty(ReadableConfiguration.CONFIGURATION_SYSTEM_PROPERTY)
-        mockkStatic(::bootModule)
-        every { bootModule(capture(moduleSlot)) } returns Unit
-    }
+    fun setup() { mockMain(moduleSlot) }
 
     @AfterEach
-    fun cleanup() { unmockkAll() }
+    fun cleanup() { unmockMain() }
 
     @Test
     fun `should launch main application if key store exists`() {

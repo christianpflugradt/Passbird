@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.application.configuration
 
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_SYSTEM_PROPERTY
+import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import io.mockk.spyk
@@ -25,6 +25,7 @@ class ReadableConfigurationIT {
     @BeforeEach
     fun setup() {
         expectThat(File(tempConfigurationDirectory).mkdir()).isTrue()
+        mainMocked(arrayOf(tempConfigurationDirectory))
     }
 
     @AfterEach
@@ -36,7 +37,6 @@ class ReadableConfigurationIT {
     @Test
     fun `should read, write, and read configuration again`() {
         // first load template if physical files does not exist
-        System.setProperty(CONFIGURATION_SYSTEM_PROPERTY, tempConfigurationDirectory)
         val configuration = configurationFactory.loadConfiguration()
         expectThat(configuration.template).isTrue()
 

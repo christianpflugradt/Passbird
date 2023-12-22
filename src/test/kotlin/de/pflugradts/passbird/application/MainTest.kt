@@ -2,14 +2,12 @@ package de.pflugradts.passbird.application
 
 import de.pflugradts.passbird.application.boot.bootModule
 import de.pflugradts.passbird.application.boot.launcher.LauncherModule
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import strikt.assertions.isNullOrEmpty
 
 class MainTest {
 
@@ -20,7 +18,7 @@ class MainTest {
     fun cleanup() { unmockMain() }
 
     @Test
-    fun `should set system property and boot launcher`() {
+    fun `should set home to args and boot launcher`() {
         // given
         val configurationDirectory = "tmp"
 
@@ -29,16 +27,16 @@ class MainTest {
 
         // then
         verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
-        expectThat(System.getProperty(ReadableConfiguration.CONFIGURATION_SYSTEM_PROPERTY)) isEqualTo configurationDirectory
+        expectThat(Global.homeDirectory) isEqualTo configurationDirectory.toDirectory()
     }
 
     @Test
-    fun `should not set system property if args is not provided`() {
+    fun `should set home to empty string if args is not provided`() {
         // given / when
         main(emptyArray())
 
         // then
         verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
-        expectThat(System.getProperty(ReadableConfiguration.CONFIGURATION_SYSTEM_PROPERTY)).isNullOrEmpty()
+        expectThat(Global.homeDirectory) isEqualTo "".toDirectory()
     }
 }
