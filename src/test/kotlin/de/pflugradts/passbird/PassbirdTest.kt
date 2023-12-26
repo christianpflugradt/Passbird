@@ -57,6 +57,16 @@ class PassbirdTest {
     }
 
     @Nested
+    inner class MainTest {
+        @Test
+        fun `no functions outside of main should use main functions`() {
+            methods().that().haveNameMatching("^main.*")
+                .should().onlyBeCalled().byClassesThat().haveNameMatching(".*MainKt$")
+                .check(classes)
+        }
+    }
+
+    @Nested
     inner class AdapterTest {
         @Test
         fun `adapter port implementations should be in adapter packages`() {
