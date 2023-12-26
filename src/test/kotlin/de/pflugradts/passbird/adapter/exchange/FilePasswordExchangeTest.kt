@@ -21,7 +21,7 @@ class FilePasswordExchangeTest {
 
     @BeforeEach
     fun setup() {
-        mainMocked(emptyArray())
+        mainMocked(arrayOf("/tmp"))
     }
 
     @Test

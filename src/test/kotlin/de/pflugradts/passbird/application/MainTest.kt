@@ -12,15 +12,15 @@ import strikt.assertions.isEqualTo
 class MainTest {
 
     @BeforeEach
-    fun setup() { mockMain() }
+    fun setup() { mockMain(withMockedFileCheck = false) }
 
     @AfterEach
-    fun cleanup() { unmockMain() }
+    fun cleanup() { unmockMain(withMockedFileCheck = false) }
 
     @Test
     fun `should set home to args and boot launcher`() {
         // given
-        val configurationDirectory = "tmp"
+        val configurationDirectory = "/tmp"
 
         // when
         main(arrayOf(configurationDirectory))
@@ -28,15 +28,5 @@ class MainTest {
         // then
         verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
         expectThat(Global.homeDirectory) isEqualTo configurationDirectory.toDirectory()
-    }
-
-    @Test
-    fun `should set home to empty string if args is not provided`() {
-        // given / when
-        main(emptyArray())
-
-        // then
-        verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
-        expectThat(Global.homeDirectory) isEqualTo "".toDirectory()
     }
 }

@@ -1,6 +1,9 @@
 package de.pflugradts.passbird.application.failure
 
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
+import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.DOES_NOT_EXIST
+import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.IS_NOT_A_DIRECTORY
+import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.IS_NULL
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import kotlin.io.path.name
 
@@ -28,6 +31,13 @@ fun reportFailure(configurationFailure: ConfigurationFailure) =
 fun reportFailure(passwordDatabaseFailure: DecryptPasswordDatabaseFailure) =
     err("Password database at '${passwordDatabaseFailure.path.name}' could not be decrypted: ${passwordDatabaseFailure.ex.message}")
 fun reportFailure(exportFailure: ExportFailure) = err("Password database could not be exported: ${exportFailure.ex.message}")
+fun reportFailure(homeDirectoryFailure: HomeDirectoryFailure) = err(
+    "Shutting down: " + when (homeDirectoryFailure.case) {
+        IS_NULL -> "No home directory was given upon starting Passbird."
+        DOES_NOT_EXIST -> "Specified home directory does not exist: ${homeDirectoryFailure.homeDirectory}"
+        IS_NOT_A_DIRECTORY -> "Specified home directory is actually not a directory: ${homeDirectoryFailure.homeDirectory}"
+    },
+)
 fun reportFailure(importFailure: ImportFailure) =
     if (importFailure.ex is InvalidEggIdException) {
         err(

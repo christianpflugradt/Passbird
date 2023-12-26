@@ -16,12 +16,12 @@ Passbird runs on all major operating systems and requires only Java version 17 o
 
 Use the following syntax to run Passbird:
 
-`java -jar passbird.jar config-directory`
+`java -jar passbird.jar home-directory`
 
-`config-directory` must point to an existing directory where you want to store your Password database, the keystore and configuration file. An example configuration directory for Linux may be `/etc/passbird` and for Windows `"c:\\program files\\passbird"`. You must use quotes if your configuration path contains spaces.
+`home-directory` must point to an existing directory where your configuration file is stored and the import and export commands read from respectively write to. An example configuration directory for Linux may be `/etc/passbird` and for Windows `"c:\\program files\\passbird"`. You must use quotes if your configuration path contains spaces.
 
 ## Setup ##
-The first time you run Passbird its setup routine will execute. You will then be asked to specify a configuration directory and choose a master Password for the Keystore. If you omit the configuration directory when running Passbird or the specified directory does not contain a `passbird.yml` configuration file or a `passbird.ks` Keystore, setup will also be started. 
+The first time you run Passbird its setup routine will execute. You will then be asked to specify a home directory and choose a master Password for the Keystore.
 
 The master Password you have chosen must be input everytime you start Passbird in non setup mode. Passbird will terminate if you input the wrong Password three times in a row.
 
