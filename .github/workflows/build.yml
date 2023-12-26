@@ -146,7 +146,7 @@ jobs:
           path: build/jacoco/architecture.exec
       - name: verify code coverage
         # for some reason downloaded test execution data is not used, so we'll run all tests again for jacoco to work
-        run: ./gradlew test jacocoTestCoverageVerification
+        run: ./gradlew test integration architecture jacocoTestCoverageVerification
 
   test-coverage-report:
     runs-on: ubuntu-latest
