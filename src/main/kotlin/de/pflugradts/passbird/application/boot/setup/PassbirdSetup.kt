@@ -36,7 +36,7 @@ class PassbirdSetup @Inject constructor(
             }
         }
         setupGuide.sendGoodbye()
-        terminate(systemOperation)
+        systemOperation.exit()
     }
 
     private fun continueRoute() = userInterfaceAdapterPort.receiveConfirmation(outputOf(shellOf("Your input: ")))

@@ -16,7 +16,6 @@ import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -93,14 +92,5 @@ class PassbirdLauncherTest {
         // then
         expectThat(moduleSlot.captured).isA<SetupModule>()
         expectThat(moduleSlot.captured).not().isA<ApplicationModule>()
-    }
-
-    @Test
-    fun `should terminate application`() {
-        // given / when
-        passbirdLauncher.terminate(systemOperation)
-
-        // then
-        verify(exactly = 1) { systemOperation.exit() }
     }
 }
