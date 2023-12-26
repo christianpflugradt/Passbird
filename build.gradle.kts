@@ -18,8 +18,8 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.16.0")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.1")
     implementation("com.google.inject:guice:7.0.0")
     implementation("com.google.inject.extensions:guice-assistedinject:7.0.0")
     implementation("com.google.guava:guava:33.0.0-jre")
