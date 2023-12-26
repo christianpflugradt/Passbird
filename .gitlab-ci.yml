@@ -42,8 +42,8 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
   needs: [ ⚙ compile]
   artifacts:
     paths:
-      - build/reports/tests/unitTests/*
-      - build/jacoco/unitTests.exec
+      - build/reports/tests/test/*
+      - build/jacoco/test.exec
 
 🛠 integration-tests:
   stage: ✅ test
@@ -51,8 +51,8 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
   needs: [ ⚙ compile]
   artifacts:
     paths:
-      - build/reports/tests/integrationTests/*
-      - build/jacoco/integrationTests.exec
+      - build/reports/tests/integration/*
+      - build/jacoco/integration.exec
 
 🧱 architecture-tests:
   stage: ✅ test
@@ -60,8 +60,8 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
   needs: [ ⚙ compile]
   artifacts:
     paths:
-      - build/reports/tests/architectureTests/*
-      - build/jacoco/architectureTests.exec
+      - build/reports/tests/architecture/*
+      - build/jacoco/architecture.exec
 
 🏆 test-coverage-verification:
   stage: 📘 report
