@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.configuration
 
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.toDirectory
@@ -7,6 +8,7 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import io.mockk.spyk
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -15,7 +17,8 @@ import strikt.assertions.isTrue
 import java.io.File
 import java.util.UUID
 
-class ReadableConfigurationIT {
+@Tag(INTEGRATION)
+class ReadableConfigurationTest {
 
     private val systemOperation = spyk(SystemOperation())
     private val configurationFactory = ConfigurationFactory(systemOperation)

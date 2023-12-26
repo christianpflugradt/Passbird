@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.eventhandling
 
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
@@ -18,6 +19,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -25,7 +27,8 @@ import strikt.api.expectThat
 import strikt.assertions.contains
 import java.util.stream.Stream
 
-class ApplicationEventHandlerIT {
+@Tag(INTEGRATION)
+class ApplicationEventHandlerTest {
 
     private val cryptoProvider = mockk<CryptoProvider>()
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>()

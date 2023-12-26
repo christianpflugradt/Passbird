@@ -1,11 +1,13 @@
 package de.pflugradts.passbird.adapter.keystore
 
 import de.pflugradts.kotlinextensions.tryCatching
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -16,7 +18,8 @@ import java.io.File
 import java.nio.file.Paths
 import java.util.UUID
 
-class KeyStoreServiceIT {
+@Tag(INTEGRATION)
+class KeyStoreServiceIntegrationTest {
 
     private var keyStoreService: KeyStoreService? = null
     private var tempKeyStoreDirectory: String? = null

@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling
 
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.SetCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -15,12 +16,14 @@ import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
 import de.pflugradts.passbird.domain.service.password.provider.fakePasswordProvider
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
 
-class SetCommandIT {
+@Tag(INTEGRATION)
+class SetCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val configuration = mockk<Configuration>()

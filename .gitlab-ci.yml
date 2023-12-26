@@ -38,7 +38,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 
 🗃 unit-tests:
   stage: ✅ test
-  script: ./gradlew unitTests
+  script: ./gradlew test
   needs: [ ⚙ compile]
   artifacts:
     paths:
@@ -47,7 +47,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 
 🛠 integration-tests:
   stage: ✅ test
-  script: ./gradlew integrationTests
+  script: ./gradlew integration
   needs: [ ⚙ compile]
   artifacts:
     paths:
@@ -56,7 +56,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 
 🧱 architecture-tests:
   stage: ✅ test
-  script: ./gradlew architectureTests
+  script: ./gradlew architecture
   needs: [ ⚙ compile]
   artifacts:
     paths:

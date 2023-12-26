@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.adapter.passwordstore
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
@@ -31,6 +32,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
@@ -43,7 +45,8 @@ import java.io.File
 import java.util.Collections
 import java.util.UUID
 
-class PasswordStoreFacadeIT {
+@Tag(INTEGRATION)
+class PasswordStoreFacadeTest {
 
     private val configuration = mockk<Configuration>()
     private val cryptoProvider = mockk<CryptoProvider>()

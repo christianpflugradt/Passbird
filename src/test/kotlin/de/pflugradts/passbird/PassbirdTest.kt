@@ -21,6 +21,7 @@ import de.pflugradts.passbird.domain.model.ddd.Repository
 import de.pflugradts.passbird.domain.model.ddd.ValueObject
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
 private const val ROOT = "de.pflugradts.passbird"
@@ -35,7 +36,8 @@ private const val KEYSTORE_ADAPTER = "keystore"
 private const val PASSWORDSTORE_ADAPTER = "passwordstore"
 private const val USERINTERFACE_ADAPTER = "userinterface"
 
-class PassbirdAT {
+@Tag(ARCHITECTURE)
+class PassbirdTest {
     private var classes = ClassFileImporter().withImportOption(DoNotIncludeTests()).importPackages(ROOT)
     private fun path(vararg segments: String) = "${segments.joinToString(".")}.."
 

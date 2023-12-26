@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling
 
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ImportCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -16,9 +17,11 @@ import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
-class ImportCommandIT {
+@Tag(INTEGRATION)
+class ImportCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val importExportService = mockk<ImportExportService>(relaxed = true)

@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.adapter.clipboard
 
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -8,6 +9,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.mockk.mockk
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -17,7 +19,8 @@ import java.awt.datatransfer.DataFlavor
 import java.util.concurrent.TimeUnit
 
 @Disabled
-class ClipboardServiceIT {
+@Tag(INTEGRATION)
+class ClipboardServiceIntegrationTest {
 
     private val systemOperation = SystemOperation()
     private val configuration = mockk<Configuration>()

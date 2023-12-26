@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling
 
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
@@ -14,6 +15,7 @@ import de.pflugradts.passbird.domain.service.createNestServiceForTesting
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
@@ -22,7 +24,8 @@ import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
 import kotlin.jvm.optionals.getOrNull
 
-class AddNestCommandIT {
+@Tag(INTEGRATION)
+class AddNestCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val nestService = createNestServiceForTesting()

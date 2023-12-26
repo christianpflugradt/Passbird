@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType.HTML
@@ -66,14 +67,33 @@ ktlint {
     }
 }
 
-mapOf("unitTests" to "Test", "integrationTests" to "IT", "architectureTests" to "AT").forEach {
-    tasks.register<Test>(it.key) {
-        include("**/*${it.value}.class")
+tasks.test {
+    useJUnitPlatform {
+        excludeTags("architecture", "integration")
+    }
+}
+
+tasks.register<Test>("integration") {
+    useJUnitPlatform {
+        includeTags("integration")
+    }
+}
+
+tasks.register<Test>("architecture") {
+    useJUnitPlatform {
+        includeTags("architecture")
     }
 }
 
 tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
+    testLogging {
+        events(
+            TestLogEvent.FAILED,
+            TestLogEvent.PASSED,
+            TestLogEvent.SKIPPED,
+            TestLogEvent.STANDARD_OUT
+        )
+    }
     group = VERIFICATION_GROUP
 }
 

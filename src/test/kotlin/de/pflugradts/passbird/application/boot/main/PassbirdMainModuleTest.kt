@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.boot.main
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import com.google.inject.util.Modules
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.commandhandling.handler.CustomSetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.DiscardCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ExportCommandHandler
@@ -22,12 +23,14 @@ import de.pflugradts.passbird.application.eventhandling.ApplicationEventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.mockk
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
 import strikt.assertions.isSameInstanceAs
 
-class PassbirdMainModuleIT {
+@Tag(INTEGRATION)
+class PassbirdMainModuleTest {
     @Test
     fun `should resolve all dependencies`() {
         // given / when

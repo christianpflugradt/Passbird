@@ -1,14 +1,17 @@
 package de.pflugradts.passbird.domain.service.eventhandling
 
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
-class DomainEventHandlerIT {
+@Tag(INTEGRATION)
+class DomainEventHandlerTest {
 
     private val eggRepository = mockk<EggRepository>()
     private val domainEventHandler = DomainEventHandler(eggRepository)

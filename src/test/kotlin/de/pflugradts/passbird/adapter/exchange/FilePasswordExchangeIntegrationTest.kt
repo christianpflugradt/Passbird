@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.adapter.exchange
 
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -8,6 +9,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.containsExactlyInAnyOrder
@@ -17,7 +19,8 @@ import strikt.assertions.isTrue
 import java.io.File
 import java.util.UUID
 
-class FilePasswordExchangeIT {
+@Tag(INTEGRATION)
+class FilePasswordExchangeIntegrationTest {
 
     private val tempExchangeDirectory = UUID.randomUUID().toString()
     private val exchangeFile = tempExchangeDirectory + File.separator + ReadableConfiguration.EXCHANGE_FILENAME

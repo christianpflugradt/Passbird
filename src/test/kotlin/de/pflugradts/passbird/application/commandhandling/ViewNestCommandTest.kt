@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling
 
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
 import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.at
@@ -10,11 +11,13 @@ import de.pflugradts.passbird.domain.service.createNestServiceForTesting
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
 
-class ViewNestCommandIT {
+@Tag(INTEGRATION)
+class ViewNestCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val nestService = createNestServiceForTesting()

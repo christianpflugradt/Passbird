@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
+import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -8,6 +9,7 @@ import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -16,10 +18,11 @@ import strikt.assertions.contains
 import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 
-class InvalidCommandIT {
+@Tag(INTEGRATION)
+class InvalidCommandTest {
 
     @Nested
-    inner class InputHandlerIT {
+    inner class InputHandlerTest {
         private val commandBus = spyk(CommandBus(emptySet()))
         private val inputHandler = createInputHandlerFor(commandBus)
 
@@ -67,7 +70,7 @@ class InvalidCommandIT {
     }
 
     @Nested
-    inner class CommandFactoryIT {
+    inner class CommandFactoryTest {
         private val commandFactory = CommandFactory(NestCommandFactory())
 
         @ParameterizedTest
