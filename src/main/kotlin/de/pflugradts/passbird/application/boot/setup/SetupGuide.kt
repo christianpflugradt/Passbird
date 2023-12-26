@@ -16,11 +16,11 @@ class SetupGuide @Inject constructor(
     fun sendConfigTemplateRouteInformation() {
         send("You have landed here because you did not provide a configuration.")
         send("If you have a configuration file, then please start Passbird as follows:")
-        send("java -jar passbird.jar absolute-path-to-directory-with-configuration-file")
+        send("java -jar passbird.jar \"absolute-path-to-directory-with-configuration-file\"")
         userInterfaceAdapterPort.sendLineBreak()
         send("Example for a Linux path: /etc/passbird")
         send("Example for a Windows path: c:\\programs\\passbird")
-        send("The configuration file must be in the specified directory and it must be named Passbird.yml.")
+        send("The configuration file must be in the specified directory and it must be named 'passbird.yml.'")
         userInterfaceAdapterPort.sendLineBreak()
         send("To (c)ontinue setup, press 'c'. To quit setup, press any other key")
     }
@@ -28,11 +28,11 @@ class SetupGuide @Inject constructor(
     fun sendConfigKeyStoreRouteInformation(location: String) {
         send("You have landed here because the keystore specified in your configuration does not exist.")
         send("Your configuration specifies the keystore to be in the following directory: $location")
-        send("However in that directory there is no file Passbird.ks")
+        send("However in that directory there is no file 'passbird.ks'")
     }
 
     fun sendInputPath(fileDescription: String) {
-        send("Please input an absolute path to a directory in which to create the $fileDescription file.")
+        send("Please input an absolute path to a directory in which to create the '$fileDescription' file.")
     }
 
     fun sendCreateKeyStoreInformation() {
@@ -43,7 +43,7 @@ class SetupGuide @Inject constructor(
         send("Choose your master password wisely.")
         userInterfaceAdapterPort.sendLineBreak()
         send("You have to input your master password twice.")
-        send("Your input will be hidden unless secureInput is disabled in your configuration.")
+        send("Your input will be hidden unless secure input is disabled in your configuration.")
         send("If your inputs do not match, you will have to repeat the procedure.")
         userInterfaceAdapterPort.sendLineBreak()
     }
