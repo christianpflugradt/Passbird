@@ -61,7 +61,6 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
   artifacts:
     paths:
       - build/reports/tests/architecture/*
-      - build/jacoco/architecture.exec
 
 🏆 test-coverage-verification:
   stage: 📘 report

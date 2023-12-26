@@ -109,10 +109,6 @@ jobs:
         with:
           name: architecture-test-report
           path: build/reports/tests/architecture/*
-      - uses: actions/upload-artifact@v4
-        with:
-          name: architecture-test-execution-data
-          path: build/jacoco/architecture.exec
 
   test-coverage-verification:
     runs-on: ubuntu-latest
@@ -140,13 +136,9 @@ jobs:
         with:
           name: integration-test-execution-data
           path: build/jacoco/integration.exec
-      - uses: actions/download-artifact@v4
-        with:
-          name: architecture-test-execution-data
-          path: build/jacoco/architecture.exec
       - name: verify code coverage
         # for some reason downloaded test execution data is not used, so we'll run all tests again for jacoco to work
-        run: ./gradlew test integration architecture jacocoTestCoverageVerification
+        run: ./gradlew test integration jacocoTestCoverageVerification
 
   test-coverage-report:
     runs-on: ubuntu-latest
@@ -174,13 +166,9 @@ jobs:
         with:
           name: integration-test-execution-data
           path: build/jacoco/integration.exec
-      - uses: actions/download-artifact@v4
-        with:
-          name: architecture-test-execution-data
-          path: build/jacoco/architecture.exec
       - name: create code coverage report
         # for some reason downloaded test execution data is not used, so we'll run all tests again for jacoco to work
-        run: ./gradlew test jacocoTestReport
+        run: ./gradlew test integration jacocoTestReport
       - uses: actions/upload-artifact@v4
         with:
           name: test-coverage-report
