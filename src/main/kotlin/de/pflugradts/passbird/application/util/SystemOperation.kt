@@ -25,6 +25,8 @@ class SystemOperation {
     fun readPasswordFromConsole(): CharArray = System.console().readPassword()
     fun resolvePath(directory: Directory, fileName: FileName): Path = Paths.get(directory.value).resolve(fileName.value)
     fun getPath(directory: Directory): Path = Paths.get(directory.value)
+    fun exists(directory: Directory): Boolean = Files.exists(Paths.get(directory.value))
+    fun isDirectory(directory: Directory): Boolean = Files.isDirectory(Paths.get(directory.value))
     fun newInputStream(path: Path): InputStream = Files.newInputStream(path)
     fun newOutputStream(path: Path): OutputStream = Files.newOutputStream(path)
     fun writeBytesToFile(path: Path, shell: Shell): Path = Files.write(path, shell.toByteArray())

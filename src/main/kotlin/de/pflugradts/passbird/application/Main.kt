@@ -8,8 +8,6 @@ import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.IS_NO
 import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.IS_NULL
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
-import java.nio.file.Files
-import java.nio.file.Paths
 
 interface RunContext {
     val homeDirectory: Directory
@@ -20,20 +18,24 @@ val Global get() = global
 
 fun mainGetSystemOperation() = SystemOperation()
 
-fun mainCheckHomeDirectory(dir: String?) {
+fun mainHasValidHomeDirectory(dir: String?): Boolean {
+    var valid = false
     when {
         dir == null -> reportFailure(HomeDirectoryFailure(case = IS_NULL))
-        !Files.exists(Paths.get(dir)) -> reportFailure(HomeDirectoryFailure(dir, DOES_NOT_EXIST))
-        !Files.isDirectory(Paths.get(dir)) -> reportFailure(HomeDirectoryFailure(dir, IS_NOT_A_DIRECTORY))
-        else -> return
+        !mainGetSystemOperation().exists(dir.toDirectory()) -> reportFailure(HomeDirectoryFailure(dir, DOES_NOT_EXIST))
+        !mainGetSystemOperation().isDirectory(dir.toDirectory()) -> reportFailure(HomeDirectoryFailure(dir, IS_NOT_A_DIRECTORY))
+        else -> valid = true
     }
-    mainGetSystemOperation().exit()
+    return valid
 }
 
 fun main(args: Array<String>) {
-    mainCheckHomeDirectory(args.getOrNull(0))
-    global = object : RunContext {
-        override val homeDirectory = args[0].toDirectory()
+    if (mainHasValidHomeDirectory(args.getOrNull(0))) {
+        global = object : RunContext {
+            override val homeDirectory = args[0].toDirectory()
+        }
+        bootModule(LauncherModule())
+    } else {
+        mainGetSystemOperation().exit()
     }
-    bootModule(LauncherModule())
 }

@@ -20,8 +20,8 @@ fun mockMain(
     mockkStatic(::mainGetSystemOperation)
     every { mainGetSystemOperation() } returns systemOperationMock
     if (withMockedFileCheck) {
-        mockkStatic(::mainCheckHomeDirectory)
-        every { mainCheckHomeDirectory(any()) } returns Unit
+        mockkStatic(::mainHasValidHomeDirectory)
+        every { mainHasValidHomeDirectory(any()) } returns true
     }
     every { systemOperationMock.exit() } returns Unit
 }
@@ -29,7 +29,7 @@ fun mockMain(
 fun unmockMain(withMockedFileCheck: Boolean = true) {
     unmockkStatic(::bootModule)
     unmockkStatic(::mainGetSystemOperation)
-    if (withMockedFileCheck) unmockkStatic(::mainCheckHomeDirectory)
+    if (withMockedFileCheck) unmockkStatic(::mainHasValidHomeDirectory)
 }
 
 fun mainMocked(args: Array<String>, withMockedFileCheck: Boolean = true) {
