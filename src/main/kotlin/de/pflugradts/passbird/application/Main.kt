@@ -18,18 +18,20 @@ interface RunContext {
 private lateinit var global: RunContext
 val Global get() = global
 
-fun checkHomeDirectory(dir: String?) {
+fun mainGetSystemOperation() = SystemOperation()
+
+fun mainCheckHomeDirectory(dir: String?) {
     when {
         dir == null -> reportFailure(HomeDirectoryFailure(case = IS_NULL))
         !Files.exists(Paths.get(dir)) -> reportFailure(HomeDirectoryFailure(dir, DOES_NOT_EXIST))
         !Files.isDirectory(Paths.get(dir)) -> reportFailure(HomeDirectoryFailure(dir, IS_NOT_A_DIRECTORY))
         else -> return
     }
-    SystemOperation().exit()
+    mainGetSystemOperation().exit()
 }
 
 fun main(args: Array<String>) {
-    checkHomeDirectory(args.getOrNull(0))
+    mainCheckHomeDirectory(args.getOrNull(0))
     global = object : RunContext {
         override val homeDirectory = args[0].toDirectory()
     }

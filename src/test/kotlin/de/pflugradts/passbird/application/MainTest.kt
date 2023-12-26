@@ -20,13 +20,13 @@ class MainTest {
     @Test
     fun `should set home to args and boot launcher`() {
         // given
-        val configurationDirectory = "/tmp"
+        val homeDirectory = "/tmp"
 
         // when
-        main(arrayOf(configurationDirectory))
+        main(arrayOf(homeDirectory))
 
         // then
         verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
-        expectThat(Global.homeDirectory) isEqualTo configurationDirectory.toDirectory()
+        expectThat(Global.homeDirectory) isEqualTo homeDirectory.toDirectory()
     }
 }
