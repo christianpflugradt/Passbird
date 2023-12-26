@@ -11,7 +11,10 @@ import io.mockk.unmockkStatic
 fun mockMain(moduleSlot: CapturingSlot<Module>? = null, withMockedFileCheck: Boolean = true) {
     mockkStatic(::bootModule)
     every { bootModule(if (moduleSlot != null) capture(moduleSlot) else any(LauncherModule::class)) } returns Unit
-    if (withMockedFileCheck) mockkStatic(::checkHomeDirectory)
+    if (withMockedFileCheck) {
+        mockkStatic(::checkHomeDirectory)
+        every { checkHomeDirectory(any()) } returns Unit
+    }
 }
 
 fun unmockMain(withMockedFileCheck: Boolean = true) {
