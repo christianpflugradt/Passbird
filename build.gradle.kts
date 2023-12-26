@@ -91,7 +91,7 @@ tasks.withType<Test>().configureEach {
             TestLogEvent.FAILED,
             TestLogEvent.PASSED,
             TestLogEvent.SKIPPED,
-            TestLogEvent.STANDARD_OUT
+            TestLogEvent.STANDARD_OUT,
         )
     }
     group = VERIFICATION_GROUP
