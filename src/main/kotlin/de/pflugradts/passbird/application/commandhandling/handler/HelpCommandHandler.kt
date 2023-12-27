@@ -19,7 +19,7 @@ class HelpCommandHandler @Inject constructor(
                     
                     Usage: [command][parameter]
                     A command takes at most one parameter which is usually an EggId.
-
+                    
                     commands:
                     ${'\t'}g[EggId] (get) copies the Password contained in that Egg to clipboard
                     ${'\t'}s[EggId] (set) sets a random Password for this Egg overwriting any that existed
