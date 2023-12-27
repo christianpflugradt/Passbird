@@ -1,16 +1,19 @@
 package de.pflugradts.passbird.application.exchange
 
 import com.google.inject.Inject
+import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.service.NestService
+import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class PasswordImportExportService @Inject constructor(
     @Inject private val exchangeFactory: ExchangeFactory,
     @Inject private val passwordService: PasswordService,
     @Inject private val nestService: NestService,
+    @Inject private val eventRegistry: EventRegistry,
 ) : ImportExportService {
     override fun peekImportEggIdShells() = exchangeFactory.createPasswordExchange().receive().entries.associate {
         it.key to it.value.map { bytePair -> bytePair.first }
@@ -40,5 +43,7 @@ class PasswordImportExportService @Inject constructor(
         }
         exchangeFactory.createPasswordExchange().send(eggsByNest)
         nestService.moveToNestAt(currentNest.nestSlot)
+        eventRegistry.register(EggsExported(eggsByNest.values.sumOf { it.size }))
+        eventRegistry.processEvents()
     }
 }
