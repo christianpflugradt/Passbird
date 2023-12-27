@@ -49,6 +49,25 @@ class DiscardCommandTest {
     }
 
     @Test
+    fun `should handle discard command for non existing egg`() {
+        // given
+        val args = "EggId"
+        val shell = shellOf("d$args")
+        val reference = shell.copy()
+        fakePasswordService(instance = passwordService, withEggs = emptyList())
+        fakeConfiguration(instance = configuration)
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) { passwordService.viewPassword(eq(shellOf(args))) }
+        verify(exactly = 0) { passwordService.discardEgg(eq(shellOf(args))) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
     fun `should handle discard command with prompt on removal`() {
         // given
         val args = "EggId"
@@ -74,6 +93,8 @@ class DiscardCommandTest {
         val args = "EggId"
         val shell = shellOf("d$args")
         val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
@@ -84,6 +105,27 @@ class DiscardCommandTest {
         // then
         verify(exactly = 0) { passwordService.discardEgg(eq(shellOf(args))) }
         verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should not prompt for removal for non existing egg`() {
+        // given
+        val args = "EggId"
+        val shell = shellOf("d$args")
+        val reference = shell.copy()
+        fakePasswordService(instance = passwordService, withEggs = emptyList())
+        fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) { passwordService.viewPassword(eq(shellOf(args))) }
+        verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
+        verify(exactly = 0) { userInterfaceAdapterPort.receiveConfirmation(any()) }
+        verify(exactly = 0) { passwordService.discardEgg(eq(shellOf(args))) }
         expectThat(shell) isNotEqualTo reference
     }
 }
