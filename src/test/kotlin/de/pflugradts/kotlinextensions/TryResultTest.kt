@@ -8,7 +8,7 @@ import strikt.assertions.isFalse
 import strikt.assertions.isNull
 import strikt.assertions.isTrue
 
-class TryCatchingTest {
+class TryResultTest {
 
     @Test
     fun `should run block successfully`() {

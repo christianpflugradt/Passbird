@@ -1,6 +1,6 @@
 package de.pflugradts.kotlinextensions
 
-inline fun <T, R> T.tryCatching(block: T.() -> R): TryResult<R> {
+inline fun <R> tryCatching(block: () -> R): TryResult<R> {
     return try {
         TryResult.success(block())
     } catch (ex: Exception) {
