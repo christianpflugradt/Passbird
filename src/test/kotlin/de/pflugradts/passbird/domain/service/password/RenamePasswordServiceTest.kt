@@ -1,12 +1,12 @@
 package de.pflugradts.passbird.domain.service.password
 
 import de.pflugradts.kotlinextensions.tryCatching
-import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import de.pflugradts.passbird.domain.service.password.storage.fakeEggRepository
@@ -25,8 +25,8 @@ class RenamePasswordServiceTest {
 
     private val cryptoProvider = mockk<CryptoProvider>()
     private val eggRepository = mockk<EggRepository>()
-    private val passbirdEventRegistry = mockk<PassbirdEventRegistry>(relaxed = true)
-    private val passwordService = RenamePasswordService(cryptoProvider, eggRepository, passbirdEventRegistry)
+    private val eventRegistry = mockk<EventRegistry>(relaxed = true)
+    private val passwordService = RenamePasswordService(cryptoProvider, eggRepository, eventRegistry)
 
     @Test
     fun `should rename egg`() {

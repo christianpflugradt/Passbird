@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.domain.service.password
 
 import de.pflugradts.kotlinextensions.tryCatching
-import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
@@ -10,6 +9,7 @@ import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.service.createNestServiceForTesting
+import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import de.pflugradts.passbird.domain.service.password.storage.fakeEggRepository
@@ -29,9 +29,9 @@ class PutPasswordServiceTest {
 
     private val cryptoProvider = mockk<CryptoProvider>()
     private val eggRepository = mockk<EggRepository>(relaxed = true)
-    private val passbirdEventRegistry = mockk<PassbirdEventRegistry>(relaxed = true)
+    private val eventRegistry = mockk<EventRegistry>(relaxed = true)
     private val nestService = createNestServiceForTesting()
-    private val passwordService = PutPasswordService(cryptoProvider, eggRepository, passbirdEventRegistry, nestService)
+    private val passwordService = PutPasswordService(cryptoProvider, eggRepository, eventRegistry, nestService)
 
     @Nested
     inner class ChallengeEggIdTest {
@@ -104,7 +104,7 @@ class PutPasswordServiceTest {
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
         verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { eggRepository.add(eq(createEgg(NestSlot.DEFAULT, newEggId, newPassword))) }
-        verify(exactly = 1) { passbirdEventRegistry.processEvents() }
+        verify(exactly = 1) { eventRegistry.processEvents() }
     }
 
     @Test
@@ -123,7 +123,7 @@ class PutPasswordServiceTest {
         verify(exactly = 1) { cryptoProvider.encrypt(existingEggId) }
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
         verify(exactly = 1) { eggRepository.sync() }
-        verify(exactly = 1) { passbirdEventRegistry.processEvents() }
+        verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(eggRepository.find(eggIdShell = existingEggId).orElse(null).viewPassword()) isEqualTo newPassword
     }
 
@@ -163,7 +163,7 @@ class PutPasswordServiceTest {
         verify(exactly = 1) { cryptoProvider.encrypt(existingEggId) }
         verify(exactly = 1) { eggRepository.add(eq(createEgg(NestSlot.DEFAULT, newEggId, newPassword))) }
         verify(exactly = 1) { eggRepository.sync() }
-        verify(exactly = 1) { passbirdEventRegistry.processEvents() }
+        verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(
             eggRepository.find(eggIdShell = existingEggId).orElse(null).viewPassword(),
         ) isEqualTo newPasswordForExistingEggId
@@ -181,6 +181,6 @@ class PutPasswordServiceTest {
         // then
         verify(exactly = 0) { eggRepository.add(any()) }
         verify(exactly = 1) { eggRepository.sync() }
-        verify(exactly = 1) { passbirdEventRegistry.processEvents() }
+        verify(exactly = 1) { eventRegistry.processEvents() }
     }
 }

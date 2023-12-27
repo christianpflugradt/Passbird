@@ -1,10 +1,10 @@
 package de.pflugradts.passbird.domain.service.password
 
-import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
@@ -24,8 +24,8 @@ class ViewPasswordServiceTest {
 
     private val cryptoProvider = mockk<CryptoProvider>()
     private val eggRepository = mockk<EggRepository>()
-    private val passbirdEventRegistry = mockk<PassbirdEventRegistry>(relaxed = true)
-    private val passwordService = ViewPasswordService(cryptoProvider, eggRepository, passbirdEventRegistry)
+    private val eventRegistry = mockk<EventRegistry>(relaxed = true)
+    private val passwordService = ViewPasswordService(cryptoProvider, eggRepository, eventRegistry)
 
     @Test
     fun `should return true if egg exists`() {
@@ -39,7 +39,7 @@ class ViewPasswordServiceTest {
         val actual = passwordService.eggExists(givenEggId, EggNotExistsAction.DO_NOTHING)
 
         // then
-        verify { passbirdEventRegistry wasNot Called }
+        verify { eventRegistry wasNot Called }
         expectThat(actual).isTrue()
     }
 
@@ -56,7 +56,7 @@ class ViewPasswordServiceTest {
         val actual = passwordService.eggExists(otherEggId, EggNotExistsAction.DO_NOTHING)
 
         // then
-        verify { passbirdEventRegistry wasNot Called }
+        verify { eventRegistry wasNot Called }
         expectThat(actual).isFalse()
     }
 
@@ -75,7 +75,7 @@ class ViewPasswordServiceTest {
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(givenEggId) }
         verify(exactly = 1) { cryptoProvider.decrypt(expectedPassword) }
-        verify { passbirdEventRegistry wasNot Called }
+        verify { eventRegistry wasNot Called }
         expectThat(actual).isPresent() isEqualTo expectedPassword
     }
 
@@ -93,8 +93,8 @@ class ViewPasswordServiceTest {
 
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(otherEggId) }
-        verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(otherEggId))) }
-        verify(exactly = 1) { passbirdEventRegistry.processEvents() }
+        verify(exactly = 1) { eventRegistry.register(eq(EggNotFound(otherEggId))) }
+        verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(actual.isEmpty).isTrue()
     }
 

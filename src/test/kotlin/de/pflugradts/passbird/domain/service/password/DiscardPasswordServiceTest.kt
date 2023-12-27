@@ -1,10 +1,10 @@
 package de.pflugradts.passbird.domain.service.password
 
-import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import de.pflugradts.passbird.domain.service.password.storage.fakeEggRepository
@@ -19,8 +19,8 @@ class DiscardPasswordServiceTest {
 
     private val cryptoProvider = mockk<CryptoProvider>()
     private val eggRepository = mockk<EggRepository>()
-    private val passbirdEventRegistry = mockk<PassbirdEventRegistry>(relaxed = true)
-    private val passwordService = DiscardPasswordService(cryptoProvider, eggRepository, passbirdEventRegistry)
+    private val eventRegistry = mockk<EventRegistry>(relaxed = true)
+    private val passwordService = DiscardPasswordService(cryptoProvider, eggRepository, eventRegistry)
 
     @Test
     fun `should discard egg`() {
@@ -37,7 +37,7 @@ class DiscardPasswordServiceTest {
 
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(givenEggId) }
-        verify(exactly = 1) { passbirdEventRegistry.processEvents() }
+        verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(givenEgg.viewPassword()) isNotEqualTo givenPassword
     }
 
@@ -55,7 +55,7 @@ class DiscardPasswordServiceTest {
 
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(otherEggId) }
-        verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(otherEggId))) }
-        verify(exactly = 1) { passbirdEventRegistry.processEvents() }
+        verify(exactly = 1) { eventRegistry.register(eq(EggNotFound(otherEggId))) }
+        verify(exactly = 1) { eventRegistry.processEvents() }
     }
 }

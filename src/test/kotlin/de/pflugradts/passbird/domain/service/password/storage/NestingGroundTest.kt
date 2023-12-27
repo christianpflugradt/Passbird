@@ -1,10 +1,10 @@
 package de.pflugradts.passbird.domain.service.password.storage
 
-import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.createNestServiceSpyForTesting
+import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -25,14 +25,14 @@ class NestingGroundTest {
 
     private val passwordStoreAdapterPort = fakePasswordStoreAdapterPort(givenEggs)
     private val nestService = createNestServiceSpyForTesting()
-    private val passbirdEventRegistry = mockk<PassbirdEventRegistry>(relaxed = true)
-    private val nestingGround = NestingGround(passwordStoreAdapterPort, nestService, passbirdEventRegistry)
+    private val eventRegistry = mockk<EventRegistry>(relaxed = true)
+    private val nestingGround = NestingGround(passwordStoreAdapterPort, nestService, eventRegistry)
 
     @Test
     fun `should initialize`() {
         // given / when / then
-        verify(exactly = 1) { passbirdEventRegistry.register(givenEgg1) }
-        verify(exactly = 1) { passbirdEventRegistry.register(givenEgg2) }
+        verify(exactly = 1) { eventRegistry.register(givenEgg1) }
+        verify(exactly = 1) { eventRegistry.register(givenEgg2) }
     }
 
     @Test
@@ -78,7 +78,7 @@ class NestingGroundTest {
         nestingGround.add(newEgg)
 
         // then
-        verify(exactly = 1) { passbirdEventRegistry.register(newEgg) }
+        verify(exactly = 1) { eventRegistry.register(newEgg) }
         expectThat(nestingGround.find(newEgg.viewEggId())).isPresent() isEqualTo newEgg
     }
 
