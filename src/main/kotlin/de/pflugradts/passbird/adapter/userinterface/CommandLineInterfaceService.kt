@@ -17,10 +17,7 @@ class CommandLineInterfaceService @Inject constructor(
     @Inject private val configuration: ReadableConfiguration,
 ) : UserInterfaceAdapterPort {
 
-    override fun receive(output: Output): Input {
-        sendWithoutLineBreak(output)
-        return receivePlain()
-    }
+    override fun receive(vararg output: Output) = output.forEach { sendWithoutLineBreak(it) }.run { receivePlain() }
 
     private fun receivePlain(): Input {
         val bytes = ArrayList<Byte>()
@@ -41,15 +38,14 @@ class CommandLineInterfaceService @Inject constructor(
         }
     }
 
-    private fun sendWithoutLineBreak(output: Output) = shellOf(output.shell.toByteArray()).forEach {
-        sendChar(Char(it.toUShort()))
+    private fun sendWithoutLineBreak(vararg output: Output) = output.forEach {
+        if (escapeCodesEnabled) beginEscape(it.formatting)
+        shellOf(it.shell.toByteArray()).forEach { char -> sendChar(Char(char.toUShort())) }
+        if (escapeCodesEnabled) endEscape()
     }
 
-    private fun sendWithLineBreak(output: Output) {
-        sendWithoutLineBreak(output)
-        sendChar('\n')
-    }
-
+    private fun sendWithLineBreak(vararg output: Output) = output.forEach { sendWithoutLineBreak(it) }.also { sendChar('\n') }
     private fun sendChar(chr: Char) = print(chr)
-    override fun send(output: Output) = sendWithLineBreak(output)
+    override fun send(vararg output: Output) = output.forEach { sendWithLineBreak(it) }
+    private val escapeCodesEnabled: Boolean get() = configuration.adapter.userInterface.ansiEscapeCodes.enabled
 }

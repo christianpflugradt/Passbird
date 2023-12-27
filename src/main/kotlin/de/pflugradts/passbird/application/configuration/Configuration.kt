@@ -43,5 +43,9 @@ data class Configuration(
         override val verifyChecksum: Boolean = true,
     ) : ReadableConfiguration.PasswordStore
     data class KeyStore(override var location: String = "") : ReadableConfiguration.KeyStore
-    data class UserInterface(override val secureInput: Boolean = true) : ReadableConfiguration.UserInterface
+    data class UserInterface(
+        override val ansiEscapeCodes: AnsiEscapeCodes = AnsiEscapeCodes(),
+        override val secureInput: Boolean = true,
+    ) : ReadableConfiguration.UserInterface
+    data class AnsiEscapeCodes(override val enabled: Boolean = false) : ReadableConfiguration.AnsiEscapeCodes
 }

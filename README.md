@@ -43,6 +43,7 @@ Once set up Passbird will create a `passbird.yml` with various configuration par
  * `adapter.passwordStore.location` contains path to directory where `passbird.pw` database file is stored (no default, specified in setup)
  * `adapter.passwordStore.verifySignature` terminates Passbird if the Password database signature does not match (default: true)
  * `adapter.passwordStore.verifyChecksum` terminates Passbird if the Password database checksum does not match (default: true)
+ * `adapter.userInterface.ansiEscapeCodes.enabled` specifies whether ansi escape codes are used to display text in multiple colors (default: false) 
  * `adapter.userInterface.secureInput` specifies whether your master Password and custom Passwords will use secure input where the characters you input will not be displayed in your terminal (default: true)
 
 You may adjust the configuration parameters to your needs by editing the yml file with a text editor. The configuration file must retain a valid yaml format and set all configuration parameters or Passbird might not be able to read it.

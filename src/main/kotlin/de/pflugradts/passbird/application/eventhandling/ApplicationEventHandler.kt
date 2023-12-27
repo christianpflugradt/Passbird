@@ -13,6 +13,7 @@ import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 
@@ -55,6 +56,6 @@ class ApplicationEventHandler @Inject constructor(
         send("${eggsImported.count} eggs successfully imported.")
     }
 
-    private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str)))
+    private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), OutputFormatting.BRIGHT_GREEN))
     private fun decrypt(shell: Shell) = cryptoProvider.decrypt(shell).asString()
 }

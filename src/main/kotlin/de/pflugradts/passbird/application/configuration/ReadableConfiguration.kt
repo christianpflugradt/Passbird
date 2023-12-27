@@ -31,7 +31,11 @@ interface ReadableConfiguration {
         val verifyChecksum: Boolean
     }
     interface KeyStore { val location: String }
-    interface UserInterface { val secureInput: Boolean }
+    interface UserInterface {
+        val ansiEscapeCodes: AnsiEscapeCodes
+        val secureInput: Boolean
+    }
+    interface AnsiEscapeCodes { val enabled: Boolean }
 
     companion object {
         const val CONFIGURATION_FILENAME = "passbird.yml"

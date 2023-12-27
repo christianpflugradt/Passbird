@@ -7,6 +7,7 @@ import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.BRIGHT_YELLOW
 
 class QuitCommandHandler @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -14,7 +15,7 @@ class QuitCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleQuitCommand(@Suppress("UNUSED_PARAMETER") quitCommand: QuitCommand) {
-        userInterfaceAdapterPort.send(outputOf(shellOf(randomGoodBye())))
+        userInterfaceAdapterPort.send(outputOf(shellOf(randomGoodBye()), BRIGHT_YELLOW))
         systemOperation.exit()
     }
 

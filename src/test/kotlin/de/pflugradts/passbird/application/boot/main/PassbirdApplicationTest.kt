@@ -63,7 +63,8 @@ class PassbirdApplicationTest {
         val input1 = fakeInput("h")
         val interrupt = fakeInput(INTERRUPT)
         val givenNest = createNest(shellOf("mynest"), NestSlot.N1)
-        val expectedOutputSlot = mutableListOf<Output>()
+        val expectedNestPrefixSlot = mutableListOf<Output>()
+        val expectedPromptPrefixSlot = mutableListOf<Output>()
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
             withTheseInputs = listOf(input1, interrupt),
@@ -75,9 +76,10 @@ class PassbirdApplicationTest {
         passbirdApplication.boot()
 
         // then
-        verify { userInterfaceAdapterPort.receive(capture(expectedOutputSlot)) }
-        expectThat(expectedOutputSlot) hasSize 2
-        expectedOutputSlot.forEach { expectThat(it.shell.asString()) isEqualTo "[${givenNest.shell.asString()}] Enter command: " }
+        verify { userInterfaceAdapterPort.receive(capture(expectedNestPrefixSlot), capture(expectedPromptPrefixSlot)) }
+        expectThat(expectedNestPrefixSlot) hasSize 2
+        expectedNestPrefixSlot.forEach { expectThat(it.shell.asString()) isEqualTo "[${givenNest.shell.asString()}] " }
+        expectedPromptPrefixSlot.forEach { expectThat(it.shell.asString()) isEqualTo "Enter command: " }
     }
 
     @Test
@@ -85,7 +87,8 @@ class PassbirdApplicationTest {
         // given
         val input1 = fakeInput("h")
         val interrupt = fakeInput(INTERRUPT)
-        val expectedOutputSlot = mutableListOf<Output>()
+        val expectedNestPrefixSlot = mutableListOf<Output>()
+        val expectedPromptPrefixSlot = mutableListOf<Output>()
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
             withTheseInputs = listOf(input1, interrupt),
@@ -97,9 +100,10 @@ class PassbirdApplicationTest {
         passbirdApplication.boot()
 
         // then
-        verify { userInterfaceAdapterPort.receive(capture(expectedOutputSlot)) }
-        expectThat(expectedOutputSlot) hasSize 2
-        expectedOutputSlot.forEach { expectThat(it.shell.asString()) isEqualTo "Enter command: " }
+        verify { userInterfaceAdapterPort.receive(capture(expectedNestPrefixSlot), capture(expectedPromptPrefixSlot)) }
+        expectThat(expectedNestPrefixSlot) hasSize 2
+        expectedNestPrefixSlot.forEach { expectThat(it.shell.asString()) isEqualTo "" }
+        expectedPromptPrefixSlot.forEach { expectThat(it.shell.asString()) isEqualTo "Enter command: " }
     }
 
     @Test

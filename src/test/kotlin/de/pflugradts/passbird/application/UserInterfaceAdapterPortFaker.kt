@@ -13,11 +13,11 @@ fun fakeUserInterfaceAdapterPort(
 ) {
     val inputCount = AtomicInteger(0)
     every { instance.receive() } answers { withTheseInputs[inputCount.getAndIncrement()] }
-    every { instance.receive(any(Output::class)) } answers { withTheseInputs[inputCount.getAndIncrement()] }
+    every { instance.receive(*anyVararg<Output>()) } answers { withTheseInputs[inputCount.getAndIncrement()] }
     val secureInputCount = AtomicInteger(0)
     every { instance.receiveSecurely() } answers { withTheseSecureInputs[secureInputCount.getAndIncrement()] }
-    every { instance.receiveSecurely(any(Output::class)) } answers { withTheseSecureInputs[secureInputCount.getAndIncrement()] }
-    every { instance.receiveConfirmation(any(Output::class)) } returns withReceiveConfirmation
+    every { instance.receiveSecurely(any<Output>()) } answers { withTheseSecureInputs[secureInputCount.getAndIncrement()] }
+    every { instance.receiveConfirmation(any<Output>()) } returns withReceiveConfirmation
     every { instance.send(any()) } returns Unit
     every { instance.sendLineBreak() } returns Unit
 }

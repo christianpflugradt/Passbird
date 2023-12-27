@@ -9,8 +9,10 @@ import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -23,6 +25,9 @@ class CommandLineInterfaceServiceTest {
     private val systemOperation = mockk<SystemOperation>()
     private val configuration = mockk<Configuration>()
     private val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration)
+
+    @BeforeEach
+    fun setup() { fakeConfiguration(instance = configuration) }
 
     @Nested
     inner class SendTest {
@@ -55,6 +60,22 @@ class CommandLineInterfaceServiceTest {
 
             // then
             expectThat(captureSystemOut.capture) isEqualTo expectedMessage
+        }
+
+        @Test
+        fun `should send output with escape codes`() {
+            // given
+            val givenMessage = "hello world"
+            fakeConfiguration(instance = configuration, withAnsiEscapeCodesEnabled = true)
+            val captureSystemOut = captureSystemOut()
+
+            // when
+            captureSystemOut.during {
+                commandLineInterfaceService.send(outputOf(shellOf(givenMessage), OutputFormatting.BRIGHT_YELLOW))
+            }
+
+            // then
+            expectThat(captureSystemOut.capture) isEqualTo "\u001B[93m$givenMessage\u001B[0m\n"
         }
     }
 

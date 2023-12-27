@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.configuration
 
+import de.pflugradts.passbird.application.configuration.Configuration.AnsiEscapeCodes
 import de.pflugradts.passbird.application.configuration.Configuration.Clipboard
 import de.pflugradts.passbird.application.configuration.Configuration.ClipboardReset
 import de.pflugradts.passbird.application.configuration.Configuration.UserInterface
@@ -8,6 +9,7 @@ import io.mockk.mockk
 
 fun fakeConfiguration(
     instance: Configuration,
+    withAnsiEscapeCodesEnabled: Boolean = false,
     withClipboardResetDelaySeconds: Int = 0,
     withClipboardResetEnabled: Boolean = false,
     withConfigurationTemplate: Boolean = false,
@@ -23,8 +25,11 @@ fun fakeConfiguration(
     every { clipboardReset.delaySeconds } returns withClipboardResetDelaySeconds
     val clipboard = mockk<Clipboard>()
     every { clipboard.reset } returns clipboardReset
+    val ansiEscapeCodes = mockk<AnsiEscapeCodes>()
+    every { ansiEscapeCodes.enabled } returns withAnsiEscapeCodesEnabled
     val userInterface = mockk<UserInterface>()
     every { userInterface.secureInput } returns withSecureInputEnabled
+    every { userInterface.ansiEscapeCodes } returns ansiEscapeCodes
     val keyStore = mockk<Configuration.KeyStore>()
     every { keyStore.location } returns withKeyStoreLocation
     val passwordStore = mockk<Configuration.PasswordStore>()
