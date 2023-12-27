@@ -10,7 +10,7 @@ import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.BRIGHT_BLUE
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.BLUE
 import de.pflugradts.passbird.domain.service.NestingGroundService
 
 const val INTERRUPT = 0x03.toChar()
@@ -30,7 +30,7 @@ class PassbirdApplication @Inject constructor(
     }
 
     private fun receiveInput() = userInterfaceAdapterPort.receive(
-        outputOf(shellOf(nestPrefix()), BRIGHT_BLUE),
+        outputOf(shellOf(nestPrefix()), BLUE),
         outputOf(shellOf("Enter command: ")),
     )
 

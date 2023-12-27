@@ -56,6 +56,6 @@ class ApplicationEventHandler @Inject constructor(
         send("${eggsImported.count} eggs successfully imported.")
     }
 
-    private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), OutputFormatting.BRIGHT_GREEN))
+    private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), OutputFormatting.GREEN))
     private fun decrypt(shell: Shell) = cryptoProvider.decrypt(shell).asString()
 }

@@ -71,11 +71,11 @@ class CommandLineInterfaceServiceTest {
 
             // when
             captureSystemOut.during {
-                commandLineInterfaceService.send(outputOf(shellOf(givenMessage), OutputFormatting.BRIGHT_YELLOW))
+                commandLineInterfaceService.send(outputOf(shellOf(givenMessage), OutputFormatting.YELLOW))
             }
 
             // then
-            expectThat(captureSystemOut.capture) isEqualTo "\u001B[93m$givenMessage\u001B[0m\n"
+            expectThat(captureSystemOut.capture) isEqualTo "\u001B[38;5;220m$givenMessage\u001B[0m\n"
         }
     }
 
