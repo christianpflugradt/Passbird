@@ -41,7 +41,7 @@ class PassbirdLauncherTest {
         // given
         val keyStoreDirectoryName = "/tmp"
         val keyStoreFileName = KEYSTORE_FILENAME
-        fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectoryName)
+        fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectoryName, withAnsiEscapeCodesEnabled = true)
         fakeSystemOperation(
             instance = systemOperation,
             withDirectoryResolvingToFileName = Triple(
