@@ -9,7 +9,8 @@
 # the `language` matrix defined below to confirm you have the correct set of
 # supported CodeQL languages.
 #
-name: "CodeQL"
+name: "codeql"
+run-name: "codeql scanning ${{ github.ref_name }}: \"${{ github.event.head_commit.message }}\""
 
 on:
   push:

@@ -1,5 +1,5 @@
 name: owasp
-run-name: "checking for known vulnerabilities"
+run-name: "owasp checking latest commit for ${{ github.ref_name }}"
 
 on:
     schedule: [ cron: "0 0 * * *" ]

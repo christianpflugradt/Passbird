@@ -1,5 +1,5 @@
 name: build
-run-name: "${{ github.ref_name }}: verifying \"${{ github.event.head_commit.message }}\""
+run-name: "verifying ${{ github.ref_name }}: \"${{ github.event.head_commit.message }}\""
 
 on:
     push:

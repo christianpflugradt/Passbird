@@ -16,6 +16,7 @@ class HelpCommandHandler @Inject constructor(
             outputOf(
                 shellOf(
                     """
+                    
                     Usage: [command][parameter]
                     A command takes at most one parameter which is usually an EggId.
 
@@ -32,7 +33,6 @@ class HelpCommandHandler @Inject constructor(
                     ${'\t'}n (Nests) view available Nests and print Nest specific help
                     ${'\t'}h (help) prints this help
                     ${'\t'}q (quit) terminates Passbird application 
-
                     """.trimIndent(),
                 ),
             ),
