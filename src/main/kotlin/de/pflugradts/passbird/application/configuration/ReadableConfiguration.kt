@@ -34,7 +34,6 @@ interface ReadableConfiguration {
     interface UserInterface { val secureInput: Boolean }
 
     companion object {
-        const val CONFIGURATION_SYSTEM_PROPERTY = "config"
         const val CONFIGURATION_FILENAME = "passbird.yml"
         const val KEYSTORE_FILENAME = "passbird.ks"
         const val DATABASE_FILENAME = "passbird.pw"
