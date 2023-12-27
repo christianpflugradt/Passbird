@@ -23,13 +23,13 @@ import java.util.stream.Stream
 class NestSlotTest {
 
     @ParameterizedTest
-    @MethodSource("provideNestSlotAssignments")
+    @MethodSource("providedNestSlotAssignments")
     fun `should resolve nest slot`(nestSlot: NestSlot, index: Int) {
         expectThat(at(index)) isEqualTo nestSlot
     }
 
     @ParameterizedTest
-    @MethodSource("provideNestSlotAssignments")
+    @MethodSource("providedNestSlotAssignments")
     fun `should get index for nest slot`(nestSlot: NestSlot, index: Int) {
         expectThat(nestSlot.index()) isEqualTo index
     }
@@ -48,7 +48,7 @@ class NestSlotTest {
 
     companion object {
         @JvmStatic
-        private fun provideNestSlotAssignments() = Stream.of(
+        private fun providedNestSlotAssignments() = Stream.of(
             Arguments.of(N1, 1),
             Arguments.of(N2, 2),
             Arguments.of(N3, 3),
