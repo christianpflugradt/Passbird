@@ -10,3 +10,4 @@ data class EggNotFound(val eggIdShell: Shell) : DomainEvent
 data class EggRenamed(val egg: Egg) : DomainEvent
 data class EggUpdated(val egg: Egg) : DomainEvent
 data class EggsExported(val count: Int) : DomainEvent
+data class EggsImported(val count: Int) : DomainEvent

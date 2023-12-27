@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.exchange
 
 import com.google.inject.Inject
 import de.pflugradts.passbird.domain.model.event.EggsExported
+import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
@@ -31,6 +32,8 @@ class PasswordImportExportService @Inject constructor(
             passwordService.putEggs(eggsByNest[nestSlot]!!.stream())
         }
         nestService.moveToNestAt(currentNest.nestSlot)
+        eventRegistry.register(EggsImported(eggsByNest.values.sumOf { it.size }))
+        eventRegistry.processEvents()
     }
 
     override fun exportEggs() {

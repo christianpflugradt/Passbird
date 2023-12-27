@@ -39,7 +39,7 @@ class ImportCommandHandler@Inject constructor(
                 return userInterfaceAdapterPort.receiveConfirmation(
                     outputOf(
                         shellOf(
-                            "By importing this file ${overlaps.size} existing Passwords" +
+                            "By importing this file ${overlaps.size} existing Passwords " +
                                 "will be irrevocably overwritten.\n" +
                                 "The following Eggs will be affected: " +
                                 "${overlaps.joinToString { "${it.second.asString()} (${it.first})" }}\n" +

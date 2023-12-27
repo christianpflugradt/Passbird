@@ -48,7 +48,7 @@ class PasswordStoreReader @Inject constructor(
             offset = populateNests(byteArray, offset)
             while (EOF != readInt(byteArray, offset)) {
                 val res = byteArray.asEgg(offset)
-                eggs.add(res.first)
+                if (cryptoProvider.decrypt(res.first.viewEggId()).slice(0, 1).asString() !in listOf("1", "2")) eggs.add(res.first)
                 offset = res.second
             }
             return Supplier { eggs.stream() }

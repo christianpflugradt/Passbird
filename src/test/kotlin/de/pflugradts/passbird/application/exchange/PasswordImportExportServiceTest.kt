@@ -6,6 +6,7 @@ import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggsExported
+import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.NestSlot.N2
 import de.pflugradts.passbird.domain.model.nest.NestSlot.N9
@@ -66,6 +67,7 @@ class PasswordImportExportServiceTest {
         nestService.place(shellOf("n2"), N2)
         nestService.moveToNestAt(givenCurrentNestSlot)
         val importSlot = mutableListOf<Stream<ShellPair>>()
+        val eggCountSlot = slot<EggsImported>()
 
         // when
         importExportServiceSupplier.get().importEggs()
@@ -79,6 +81,10 @@ class PasswordImportExportServiceTest {
         expectThatActualBytePairsMatchExpected(importSlot[1], eggs.subList(2, 3))
         expectThatActualBytePairsMatchExpected(importSlot[2], eggs.subList(3, 5))
         expectThat(nestService.currentNest().nestSlot) isEqualTo givenCurrentNestSlot
+        verify { eventRegistry.register(capture(eggCountSlot)) }
+        verify(exactly = 1) { eventRegistry.processEvents() }
+        expectThat(eggCountSlot.isCaptured)
+        expectThat(eggCountSlot.captured.count) isEqualTo testData().size
     }
 
     @Test
