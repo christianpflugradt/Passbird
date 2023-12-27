@@ -13,7 +13,7 @@ import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.at
 
 interface RunContext {
     val homeDirectory: Directory
-    val initialNest: NestSlot
+    val initialNestSlot: NestSlot
 }
 
 private lateinit var global: RunContext
@@ -36,7 +36,7 @@ fun main(args: Array<String>) {
     if (mainHasValidHomeDirectory(args.getOrNull(0))) {
         global = object : RunContext {
             override val homeDirectory = args[0].toDirectory()
-            override val initialNest = at(args.getOrElse(1) { "0" })
+            override val initialNestSlot = at(args.getOrElse(1) { 0.toString() })
         }
         bootModule(LauncherModule())
     } else {

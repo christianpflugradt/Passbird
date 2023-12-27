@@ -3,6 +3,9 @@ package de.pflugradts.passbird.application.boot.main
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
+import de.pflugradts.passbird.application.mainMocked
+import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
+import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output
@@ -11,6 +14,7 @@ import de.pflugradts.passbird.domain.service.createNestServiceSpyForTesting
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.hasSize
@@ -22,6 +26,9 @@ class PassbirdApplicationTest {
     private val nestService = createNestServiceSpyForTesting()
     private val inputHandler = mockk<InputHandler>()
     private val passbirdApplication = PassbirdApplication(userInterfaceAdapterPort, nestService, inputHandler)
+
+    @BeforeEach
+    fun setup() { mainMocked(args = arrayOf("/tmp"), withMockedFileCheck = true) }
 
     @Test
     fun `should delegate input`() {
@@ -52,23 +59,22 @@ class PassbirdApplicationTest {
         // given
         val input1 = fakeInput("1")
         val interrupt = fakeInput(INTERRUPT)
-        val givenNest = "mynest"
+        val givenNest = createNest(shellOf("mynest"), NestSlot.N1)
         val expectedOutputSlot = mutableListOf<Output>()
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
             withTheseInputs = listOf(input1, interrupt),
         )
         every { inputHandler.handleInput(any()) } returns Unit
+        every { nestService.currentNest() } returns givenNest
 
         // when
-        nestService.place(shellOf(givenNest), NestSlot.N1)
-        nestService.moveToNestAt(NestSlot.N1)
         passbirdApplication.boot()
 
         // then
         verify { userInterfaceAdapterPort.receive(capture(expectedOutputSlot)) }
         expectThat(expectedOutputSlot) hasSize 2
-        expectedOutputSlot.forEach { expectThat(it.shell.asString()) isEqualTo "[$givenNest] Enter command: " }
+        expectedOutputSlot.forEach { expectThat(it.shell.asString()) isEqualTo "[${givenNest.shell.asString()}] Enter command: " }
     }
 
     @Test
@@ -82,9 +88,9 @@ class PassbirdApplicationTest {
             withTheseInputs = listOf(input1, interrupt),
         )
         every { inputHandler.handleInput(any()) } returns Unit
+        every { nestService.currentNest() } returns DEFAULT
 
         // when
-        nestService.moveToNestAt(NestSlot.DEFAULT)
         passbirdApplication.boot()
 
         // then

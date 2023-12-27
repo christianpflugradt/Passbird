@@ -4,14 +4,29 @@ import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.application.boot.bootModule
 import de.pflugradts.passbird.application.boot.launcher.LauncherModule
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.nest.NestSlot
+import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N1
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N2
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N3
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N4
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N5
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N6
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N7
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N8
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N9
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import java.util.stream.Stream
 
 class MainTest {
 
@@ -86,5 +101,42 @@ class MainTest {
         // then
         expectThat(captureSystemErr.capture) isEqualTo "Shutting down: Specified home directory is actually not a directory: $givenHome\n"
         verify(exactly = 1) { systemOperation.exit() }
+    }
+
+    @ParameterizedTest
+    @MethodSource("expectedNestSlotMapping")
+    fun `should persist initial nest`(givenParam: String, expectedInitialNestSlot: NestSlot) {
+        // given
+        val givenHome = "/foo"
+        every { systemOperation.exists(givenHome.toDirectory()) } returns true
+        every { systemOperation.isDirectory(givenHome.toDirectory()) } returns true
+
+        // when
+        main(arrayOf(givenHome, givenParam))
+
+        // then
+        verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
+        expectThat(Global.initialNestSlot) isEqualTo expectedInitialNestSlot
+    }
+
+    companion object {
+        @JvmStatic
+        private fun expectedNestSlotMapping() = Stream.of(
+            Arguments.of("1", N1),
+            Arguments.of("2", N2),
+            Arguments.of("3", N3),
+            Arguments.of("4", N4),
+            Arguments.of("5", N5),
+            Arguments.of("6", N6),
+            Arguments.of("7", N7),
+            Arguments.of("8", N8),
+            Arguments.of("9", N9),
+            Arguments.of("", DEFAULT),
+            Arguments.of("0", DEFAULT),
+            Arguments.of("-1", DEFAULT),
+            Arguments.of("10", DEFAULT),
+            Arguments.of("foo", DEFAULT),
+            Arguments.of("n1", DEFAULT),
+        )
     }
 }

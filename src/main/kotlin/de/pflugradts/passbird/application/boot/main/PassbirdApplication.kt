@@ -23,7 +23,7 @@ class PassbirdApplication @Inject constructor(
 
     override fun boot() {
         userInterfaceAdapterPort.sendLineBreak()
-        nestService.moveToNestAt(Global.initialNest)
+        nestService.moveToNestAt(Global.initialNestSlot)
         var input: Input
         while (!isSigTerm(receiveInput().also { input = it })) { inputHandler.handleInput(input) }
     }
