@@ -5,7 +5,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.nest.NestSlot
-import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.at
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
@@ -37,7 +37,7 @@ class AddNestCommandTest {
         // given
         val nestSlotIndex = 1
         val givenInput = shellOf("n+$nestSlotIndex")
-        val nestSlotFromInput = at(nestSlotIndex)
+        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
         val referenceNest = shellOf("mynest")
         val givenNest = shellOf("mynest")
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(givenNest)))
@@ -56,7 +56,7 @@ class AddNestCommandTest {
         // given
         val nestSlotIndex = 1
         val input = inputOf(shellOf("n+$nestSlotIndex"))
-        val nestSlotFromInput = at(nestSlotIndex)
+        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
         val referenceNest = shellOf("mynest")
         val givenNest = shellOf("mynest")
         val otherNest = shellOf("othernest")
@@ -78,7 +78,7 @@ class AddNestCommandTest {
         // given
         val nestSlotIndex = 1
         val input = inputOf(shellOf("n+$nestSlotIndex"))
-        val nestSlotFromInput = at(nestSlotIndex)
+        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
         val givenNest = shellOf("")
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(givenNest)))
         val outputSlot = slot<Output>()

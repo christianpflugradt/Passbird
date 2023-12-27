@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.domain.model.nest
 
-import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.at
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
 import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.NestSlot.N1
 import de.pflugradts.passbird.domain.model.nest.NestSlot.N2
@@ -25,7 +25,7 @@ class NestSlotTest {
     @ParameterizedTest
     @MethodSource("providedNestSlotAssignments")
     fun `should resolve nest slot`(nestSlot: NestSlot, index: Int) {
-        expectThat(at(index)) isEqualTo nestSlot
+        expectThat(nestSlotAt(index)) isEqualTo nestSlot
     }
 
     @ParameterizedTest
@@ -37,7 +37,7 @@ class NestSlotTest {
     @ParameterizedTest
     @ValueSource(ints = [-9999, -1, 0, 10, 11, 9999])
     fun `should resolve indices less than 1 or greater than 9 to default nest slot`(index: Int) {
-        expectThat(at(index)) isEqualTo DEFAULT
+        expectThat(nestSlotAt(index)) isEqualTo DEFAULT
     }
 
     @Test

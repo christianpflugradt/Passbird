@@ -9,7 +9,7 @@ import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.IS_NU
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.nest.NestSlot
-import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.at
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
 
 interface RunContext {
     val homeDirectory: Directory
@@ -36,7 +36,7 @@ fun main(args: Array<String>) {
     if (mainHasValidHomeDirectory(args.getOrNull(0))) {
         global = object : RunContext {
             override val homeDirectory = args[0].toDirectory()
-            override val initialNestSlot = at(args.getOrElse(1) { 0.toString() })
+            override val initialNestSlot = nestSlotAt(args.getOrElse(1) { 0.toString() })
         }
         bootModule(LauncherModule())
     } else {

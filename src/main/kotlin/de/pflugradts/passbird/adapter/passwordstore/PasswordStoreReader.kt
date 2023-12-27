@@ -131,7 +131,7 @@ class PasswordStoreReader @Inject constructor(
         val passwordBytes = readBytes(this, incrementedOffset, passwordSize)
         incrementedOffset += passwordSize
         return Pair(
-            createEgg(NestSlot.at(nestSlot), shellOf(eggIdBytes), shellOf(passwordBytes)),
+            createEgg(NestSlot.nestSlotAt(nestSlot), shellOf(eggIdBytes), shellOf(passwordBytes)),
             incrementedOffset,
         )
     }

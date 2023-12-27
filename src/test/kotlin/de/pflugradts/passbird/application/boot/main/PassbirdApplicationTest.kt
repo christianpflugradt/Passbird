@@ -7,7 +7,7 @@ import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.nest.NestSlot
-import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.at
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.fakeInput
@@ -119,7 +119,7 @@ class PassbirdApplicationTest {
         passbirdApplication.boot()
 
         // then
-        verify(exactly = 1) { nestService.moveToNestAt(at(initialNestSlot)) }
-        expectThat(nestService.currentNest().nestSlot) isEqualTo at(initialNestSlot)
+        verify(exactly = 1) { nestService.moveToNestAt(nestSlotAt(initialNestSlot)) }
+        expectThat(nestService.currentNest().nestSlot) isEqualTo nestSlotAt(initialNestSlot)
     }
 }

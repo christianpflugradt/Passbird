@@ -3,7 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
-import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.at
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
@@ -58,7 +58,7 @@ class ViewNestCommandTest {
         val input = inputOf(shellOf("n"))
         val deployedNestSlot = 3
         val deployedNest = "mynest"
-        nestService.place(shellOf(deployedNest), at(deployedNestSlot))
+        nestService.place(shellOf(deployedNest), nestSlotAt(deployedNestSlot))
         val outputSlot = slot<Output>()
 
         // when

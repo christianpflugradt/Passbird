@@ -49,7 +49,7 @@ class PasswordStoreWriter @Inject constructor(
         copyInt(SECTOR, bytes, incrementedOffset)
         incrementedOffset += intBytes()
         for (index in NestSlot.FIRST_SLOT..NestSlot.LAST_SLOT) {
-            NestSlot.at(index).asByteArray().let { incrementedOffset += copyBytes(it, bytes, incrementedOffset, it.size) }
+            NestSlot.nestSlotAt(index).asByteArray().let { incrementedOffset += copyBytes(it, bytes, incrementedOffset, it.size) }
         }
         return incrementedOffset
     }

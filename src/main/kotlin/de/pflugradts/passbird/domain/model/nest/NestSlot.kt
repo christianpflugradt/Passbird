@@ -16,15 +16,15 @@ enum class NestSlot {
     INVALID,
     ;
 
-    fun index() = (FIRST_SLOT..LAST_SLOT).find { at(it) === this } ?: DEFAULT_INDEX
+    fun index() = (FIRST_SLOT..LAST_SLOT).find { nestSlotAt(it) === this } ?: DEFAULT_INDEX
 
     companion object {
         const val CAPACITY = 9
         const val FIRST_SLOT = 1
         const val LAST_SLOT = 9
         private const val DEFAULT_INDEX = 10
-        fun at(index: String) = at(if (index.length == 1) index[0] else 0.toChar())
-        fun at(index: Char) = tryCatching { at(index.toString().toInt()) } getOrElse DEFAULT
-        fun at(index: Int) = if (index in FIRST_SLOT..LAST_SLOT) entries[index] else DEFAULT
+        fun nestSlotAt(index: String) = nestSlotAt(if (index.length == 1) index[0] else 0.toChar())
+        fun nestSlotAt(index: Char) = tryCatching { nestSlotAt(index.toString().toInt()) } getOrElse DEFAULT
+        fun nestSlotAt(index: Int) = if (index in FIRST_SLOT..LAST_SLOT) entries[index] else DEFAULT
     }
 }

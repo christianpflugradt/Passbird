@@ -22,7 +22,7 @@ class NestingGroundService : NestService {
         if (nestShells.size == CAPACITY) {
             (FIRST_SLOT..LAST_SLOT).forEach {
                 if (nestShells[it - 1].isNotEmpty) {
-                    nests[it - 1] = Optional.of(createNest(nestShells[it - 1], NestSlot.at(it)))
+                    nests[it - 1] = Optional.of(createNest(nestShells[it - 1], NestSlot.nestSlotAt(it)))
                 }
             }
         }
