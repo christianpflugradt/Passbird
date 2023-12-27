@@ -23,6 +23,7 @@ enum class NestSlot {
         const val FIRST_SLOT = 1
         const val LAST_SLOT = 9
         private const val DEFAULT_INDEX = 10
+        fun at(index: String) = at(index.first())
         fun at(index: Char) = tryCatching { at(index.toString().toInt()) } getOrElse DEFAULT
         fun at(index: Int) = if (index in FIRST_SLOT..LAST_SLOT) entries[index] else DEFAULT
     }

@@ -20,6 +20,10 @@ Use the following syntax to run Passbird:
 
 `home-directory` must point to an existing directory where your configuration file is stored and the import and export commands read from respectively write to. An example configuration directory for Linux may be `/etc/passbird` and for Windows `"c:\\program files\\passbird"`. You must use quotes if your configuration path contains spaces.
 
+You may specify the initial Nest as a second optional argument. Nests are an advanced feature explained further below. Nests are specified by their Nest Slot ranging from 1 to 9. Any other value results in the default Nest being initially selected.
+
+The following example starts Passbird with Nest at Nest Slot 1 as the initial Nest: `java -jar pasbird.jar home-directory 1`
+
 ## Setup ##
 The first time you run Passbird its setup routine will execute. You will then be asked to specify a home directory and choose a master Password for the Keystore.
 

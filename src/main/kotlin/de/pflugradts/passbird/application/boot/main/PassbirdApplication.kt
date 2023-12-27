@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.boot.main
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import de.pflugradts.passbird.application.Global
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.commandhandling.InputHandler
@@ -22,6 +23,7 @@ class PassbirdApplication @Inject constructor(
 
     override fun boot() {
         userInterfaceAdapterPort.sendLineBreak()
+        nestService.moveToNestAt(Global.initialNest)
         var input: Input
         while (!isSigTerm(receiveInput().also { input = it })) { inputHandler.handleInput(input) }
     }
