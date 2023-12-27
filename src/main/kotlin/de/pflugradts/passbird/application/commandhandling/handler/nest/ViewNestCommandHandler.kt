@@ -20,8 +20,10 @@ class ViewNestCommandHandler @Inject constructor(
                 shellOf(
                     """
 Current Nest: $currentNest
+
 Available Nests:
 $availableNests
+
 Available Nest commands:
 ${'\t'}n (view) displays current Nest, available Nests and Nest commands
 ${'\t'}n0 (switch to default) switches to the default Nest
@@ -29,12 +31,10 @@ ${'\t'}n[1-9] (switch) switches to the Nest at the given Nest Slot (between 1 an
 ${'\t'}n[1-9][EggId] (assign) assigns the Password for that EggId to the specified Nest
 ${'\t'}n+[1-9] (create) creates a new Nest at the specified Nest Slot
 ${'\t'}[NOT YET IMPLEMENTED] n-[1-9] (discard) discards the Nest at the specified Nest Slot
-"""
-                        .let { "\n$it\n" },
+""",
                 ),
             ),
         )
-        userInterfaceAdapterPort.sendLineBreak()
     }
 
     private val currentNest get() = nestService.currentNest().shell.asString()
