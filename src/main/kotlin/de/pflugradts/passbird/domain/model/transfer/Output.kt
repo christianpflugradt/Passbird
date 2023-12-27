@@ -22,6 +22,7 @@ class Output private constructor(val shell: Shell, val formatting: OutputFormatt
 }
 
 enum class OutputFormatting {
+    IMPLIED,
     BLUE,
     CYAN,
     GREEN,

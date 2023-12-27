@@ -15,6 +15,7 @@ private fun mapColorCode(outputFormatting: OutputFormatting) = when (outputForma
     OutputFormatting.BRIGHT_MAGENTA -> 95
     OutputFormatting.BRIGHT_YELLOW -> 93
     OutputFormatting.BRIGHT_WHITE -> 97
+    else -> 0
 }
 
 private fun initEscape(code: Int) = print("\u001B[${code}m")

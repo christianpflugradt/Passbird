@@ -10,6 +10,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.IMPLIED
 
 @Singleton
 class CommandLineInterfaceService @Inject constructor(
@@ -39,7 +40,7 @@ class CommandLineInterfaceService @Inject constructor(
     }
 
     private fun sendWithoutLineBreak(vararg output: Output) = output.forEach {
-        if (escapeCodesEnabled) beginEscape(it.formatting)
+        if (escapeCodesEnabled && it.formatting != IMPLIED) beginEscape(it.formatting)
         shellOf(it.shell.toByteArray()).forEach { char -> sendChar(Char(char.toUShort())) }
         if (escapeCodesEnabled) endEscape()
     }
