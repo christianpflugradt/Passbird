@@ -7,6 +7,7 @@ import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.nest.NestSlot
+import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.at
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.fakeInput
@@ -28,7 +29,9 @@ class PassbirdApplicationTest {
     private val passbirdApplication = PassbirdApplication(userInterfaceAdapterPort, nestService, inputHandler)
 
     @BeforeEach
-    fun setup() { mainMocked(args = arrayOf("/tmp"), withMockedFileCheck = true) }
+    fun setup() {
+        mainMocked(args = arrayOf("/tmp"), withMockedFileCheck = true)
+    }
 
     @Test
     fun `should delegate input`() {
@@ -57,7 +60,7 @@ class PassbirdApplicationTest {
     @Test
     fun `should display nest if current is other than default`() {
         // given
-        val input1 = fakeInput("1")
+        val input1 = fakeInput("h")
         val interrupt = fakeInput(INTERRUPT)
         val givenNest = createNest(shellOf("mynest"), NestSlot.N1)
         val expectedOutputSlot = mutableListOf<Output>()
@@ -80,7 +83,7 @@ class PassbirdApplicationTest {
     @Test
     fun `should display no nest if current is default`() {
         // given
-        val input1 = fakeInput("1")
+        val input1 = fakeInput("h")
         val interrupt = fakeInput(INTERRUPT)
         val expectedOutputSlot = mutableListOf<Output>()
         fakeUserInterfaceAdapterPort(
@@ -97,5 +100,26 @@ class PassbirdApplicationTest {
         verify { userInterfaceAdapterPort.receive(capture(expectedOutputSlot)) }
         expectThat(expectedOutputSlot) hasSize 2
         expectedOutputSlot.forEach { expectThat(it.shell.asString()) isEqualTo "Enter command: " }
+    }
+
+    @Test
+    fun `should set initial nest`() {
+        // given
+        val initialNestSlot = "5"
+        val interrupt = fakeInput(INTERRUPT)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(interrupt),
+        )
+        every { inputHandler.handleInput(any()) } returns Unit
+
+        // when
+        mainMocked(args = arrayOf("/tmp", initialNestSlot), withMockedFileCheck = true)
+        nestService.place(shellOf("nest5"), NestSlot.N5)
+        passbirdApplication.boot()
+
+        // then
+        verify(exactly = 1) { nestService.moveToNestAt(at(initialNestSlot)) }
+        expectThat(nestService.currentNest().nestSlot) isEqualTo at(initialNestSlot)
     }
 }
