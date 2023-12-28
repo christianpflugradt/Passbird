@@ -5,7 +5,9 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
-import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N5
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.createNestServiceForTesting
@@ -34,9 +36,9 @@ class DiscardNestCommandTest {
     fun `should handle discard nest command`() {
         // given
         val nestSlotIndex = 1
-        val givenInput = Shell.shellOf("n-$nestSlotIndex")
+        val givenInput = shellOf("n-$nestSlotIndex")
         val nestSlotFromInput = nestSlotAt(nestSlotIndex)
-        val givenNest = Shell.shellOf("mynest")
+        val givenNest = shellOf("mynest")
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakePasswordService(instance = passwordService, withEggs = emptyList())
         nestService.place(givenNest, nestSlotFromInput)
@@ -53,7 +55,7 @@ class DiscardNestCommandTest {
     fun `should abort discard nest if specified nest is default nest`() {
         // given
         val nestSlotIndex = 0
-        val givenInput = Shell.shellOf("n-$nestSlotIndex")
+        val givenInput = shellOf("n-$nestSlotIndex")
         val nestSlotFromInput = nestSlotAt(nestSlotIndex)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakePasswordService(instance = passwordService, withEggs = emptyList())
@@ -72,7 +74,7 @@ class DiscardNestCommandTest {
     fun `should abort discard nest if specified nest does not exist`() {
         // given
         val nestSlotIndex = 1
-        val givenInput = Shell.shellOf("n-$nestSlotIndex")
+        val givenInput = shellOf("n-$nestSlotIndex")
         val nestSlotFromInput = nestSlotAt(nestSlotIndex)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakePasswordService(instance = passwordService, withEggs = emptyList())
@@ -85,5 +87,47 @@ class DiscardNestCommandTest {
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot.captured.shell.asString()) isEqualTo "Specified Nest does not exist - Operation aborted."
+    }
+
+    @Test
+    fun `should remain in current nest`() {
+        // given
+        val nestSlotIndex = 1
+        val givenInput = shellOf("n-$nestSlotIndex")
+        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val givenNest = shellOf("mynest")
+        val currentNestSlot = N5
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
+        fakePasswordService(instance = passwordService, withEggs = emptyList())
+        nestService.place(givenNest, nestSlotFromInput)
+        nestService.place(shellOf("current"), currentNestSlot)
+        nestService.moveToNestAt(currentNestSlot)
+
+        // when
+        inputHandler.handleInput(inputOf(givenInput))
+
+        // then
+        expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isTrue()
+        expectThat(nestService.currentNest().nestSlot) isEqualTo currentNestSlot
+    }
+
+    @Test
+    fun `should move to default nest if current nest is discarded`() {
+        // given
+        val nestSlotIndex = 1
+        val givenInput = shellOf("n-$nestSlotIndex")
+        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val givenNest = shellOf("mynest")
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
+        fakePasswordService(instance = passwordService, withEggs = emptyList())
+        nestService.place(givenNest, nestSlotFromInput)
+        nestService.moveToNestAt(nestSlotFromInput)
+
+        // when
+        inputHandler.handleInput(inputOf(givenInput))
+
+        // then
+        expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isTrue()
+        expectThat(nestService.currentNest().nestSlot) isEqualTo DEFAULT
     }
 }

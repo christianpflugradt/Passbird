@@ -60,8 +60,8 @@ class DiscardNestCommandHandler @Inject constructor(
                 } else {
                     userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
                 }
-                nestService.moveToNestAt(if (discardNestCommand.nestSlot == currentNest.nestSlot) DEFAULT else currentNest.nestSlot)
             }
+            nestService.moveToNestAt(if (discardNestCommand.nestSlot == currentNest.nestSlot) DEFAULT else currentNest.nestSlot)
         }
         userInterfaceAdapterPort.sendLineBreak()
     }
