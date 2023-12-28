@@ -47,6 +47,7 @@ fun reportFailure(importFailure: ImportFailure) =
     } else {
         err("Password database could not be imported.")
     }
+fun reportFailure(loginFailure: LoginFailure) = err("Login failed. Shutting down after ${loginFailure.attempts} unsuccessful attempts.")
 fun reportFailure(signatureCheckFailure: SignatureCheckFailure) {
     err("Signature of password database could not be verified.")
     if (signatureCheckFailure.critical) {

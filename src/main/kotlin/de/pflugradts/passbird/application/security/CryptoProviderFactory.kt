@@ -5,6 +5,8 @@ import com.google.inject.Singleton
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.failure.LoginFailure
+import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -24,7 +26,7 @@ class CryptoProviderFactory @Inject constructor(
         .fold(
             onSuccess = { Cipherizer(it.secret, it.iv) },
             onFailure = {
-                userInterfaceAdapterPort.send(outputOf(shellOf("Login failed. Shutting down.")))
+                reportFailure(LoginFailure(3))
                 systemOperation.exit()
                 null
             },
