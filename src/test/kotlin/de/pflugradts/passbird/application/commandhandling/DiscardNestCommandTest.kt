@@ -4,6 +4,7 @@ import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
 import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.NestSlot.N5
@@ -19,6 +20,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
+import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
@@ -129,5 +131,121 @@ class DiscardNestCommandTest {
         // then
         expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isTrue()
         expectThat(nestService.currentNest().nestSlot) isEqualTo DEFAULT
+    }
+
+    @Test
+    fun `should move eggs to specified nest if discarded nest is not empty`() {
+        // given
+        val nestSlotIndex = 1
+        val givenInput = shellOf("n-$nestSlotIndex")
+        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val givenNest = shellOf("discardnest")
+        val targetNest = shellOf("keepnest")
+        val targetNestSlot = N5
+        val eggId1 = shellOf("EggId1")
+        val eggId2 = shellOf("EggId2")
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf("${targetNestSlot.index()}"))),
+        )
+        fakePasswordService(
+            instance = passwordService,
+            withNestService = nestService,
+            withEggs = listOf(
+                createEggForTesting(withEggIdShell = eggId1, withNestSlot = nestSlotFromInput),
+                createEggForTesting(withEggIdShell = eggId2, withNestSlot = nestSlotFromInput),
+            ),
+        )
+        nestService.place(givenNest, nestSlotFromInput)
+        nestService.place(targetNest, targetNestSlot)
+
+        // when
+        inputHandler.handleInput(inputOf(givenInput))
+        nestService.moveToNestAt(targetNestSlot)
+
+        // then
+        verify(exactly = 1) { passwordService.moveEgg(eggId1, targetNestSlot) }
+        verify(exactly = 1) { passwordService.moveEgg(eggId2, targetNestSlot) }
+        expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isTrue()
+    }
+
+    @Test
+    fun `should abort if target nest for eggs to move does not exist`() {
+        // given
+        val nestSlotIndex = 1
+        val givenInput = shellOf("n-$nestSlotIndex")
+        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val givenNest = shellOf("discardnest")
+        val nonexistentNestSlot = N5
+        val eggId1 = shellOf("EggId1")
+        val eggId2 = shellOf("EggId2")
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf("${nonexistentNestSlot.index()}"))),
+        )
+        fakePasswordService(
+            instance = passwordService,
+            withNestService = nestService,
+            withEggs = listOf(
+                createEggForTesting(withEggIdShell = eggId1, withNestSlot = nestSlotFromInput),
+                createEggForTesting(withEggIdShell = eggId2, withNestSlot = nestSlotFromInput),
+            ),
+        )
+        nestService.place(givenNest, nestSlotFromInput)
+        val outputSlot = slot<Output>()
+
+        // when
+        inputHandler.handleInput(inputOf(givenInput))
+
+        // then
+        verify(exactly = 0) { passwordService.moveEgg(eggId1, nonexistentNestSlot) }
+        verify(exactly = 0) { passwordService.moveEgg(eggId2, nonexistentNestSlot) }
+        verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell.asString()) isEqualTo "Nest Slot ${nonexistentNestSlot.index()} is empty - Operation aborted."
+        expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isFalse()
+    }
+
+    @Test
+    fun `should abort if target nest contains eggs present in nest to be discarded`() {
+        // given
+        val nestSlotIndex = 1
+        val givenInput = shellOf("n-$nestSlotIndex")
+        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val givenNest = shellOf("discardnest")
+        val targetNest = shellOf("keepnest")
+        val targetNestSlot = N5
+        val eggId1 = shellOf("EggId1")
+        val eggId2 = shellOf("EggId2")
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf("${targetNestSlot.index()}"))),
+        )
+        fakePasswordService(
+            instance = passwordService,
+            withNestService = nestService,
+            withEggs = listOf(
+                createEggForTesting(withEggIdShell = eggId1, withNestSlot = nestSlotFromInput),
+                createEggForTesting(withEggIdShell = eggId2, withNestSlot = nestSlotFromInput),
+                createEggForTesting(withEggIdShell = eggId1, withNestSlot = targetNestSlot),
+                createEggForTesting(withEggIdShell = eggId2, withNestSlot = targetNestSlot),
+            ),
+        )
+        nestService.place(givenNest, nestSlotFromInput)
+        nestService.place(targetNest, targetNestSlot)
+        val outputSlot = mutableListOf<Output>()
+
+        // when
+        inputHandler.handleInput(inputOf(givenInput))
+        nestService.moveToNestAt(targetNestSlot)
+
+        // then
+        verify(exactly = 0) { passwordService.moveEgg(eggId1, targetNestSlot) }
+        verify(exactly = 0) { passwordService.moveEgg(eggId2, targetNestSlot) }
+        verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot) hasSize 2
+        expectThat(outputSlot[0].shell.asString()) isEqualTo "The following EggIds exist in both Nests. " +
+            "Please move them manually before discarding the Nest: \n- EggId1\n- EggId2"
+        expectThat(outputSlot[1].shell.asString()) isEqualTo "Operation aborted."
+        expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isFalse()
     }
 }
