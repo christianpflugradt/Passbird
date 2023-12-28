@@ -30,6 +30,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.SetCommandHand
 import de.pflugradts.passbird.application.commandhandling.handler.ViewCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AssignNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
 import de.pflugradts.passbird.application.configuration.ConfigurationFactory
@@ -82,6 +83,7 @@ class ApplicationModule : AbstractModule() {
             AssignNestCommandHandler::class.java,
             CustomSetCommandHandler::class.java,
             DiscardCommandHandler::class.java,
+            DiscardNestCommandHandler::class.java,
             ExportCommandHandler::class.java,
             GetCommandHandler::class.java,
             HelpCommandHandler::class.java,
