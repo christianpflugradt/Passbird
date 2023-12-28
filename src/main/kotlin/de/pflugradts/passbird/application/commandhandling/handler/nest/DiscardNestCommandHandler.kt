@@ -5,8 +5,8 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.DiscardNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
-import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
+import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.NestService
@@ -20,7 +20,7 @@ class DiscardNestCommandHandler @Inject constructor(
 
     @Subscribe
     private fun handleDiscardNestCommand(discardNestCommand: DiscardNestCommand) {
-        if (discardNestCommand.nestSlot == NestSlot.DEFAULT) {
+        if (discardNestCommand.nestSlot == DEFAULT) {
             userInterfaceAdapterPort.send(outputOf(shellOf("Default Nest cannot be discarded - Operation aborted.")))
             return
         } else if (nestService.atNestSlot(discardNestCommand.nestSlot).isEmpty) {
@@ -60,7 +60,7 @@ class DiscardNestCommandHandler @Inject constructor(
                 } else {
                     userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
                 }
-                nestService.moveToNestAt(currentNest.nestSlot)
+                nestService.moveToNestAt(if (discardNestCommand.nestSlot == currentNest.nestSlot) DEFAULT else currentNest.nestSlot)
             }
         }
         userInterfaceAdapterPort.sendLineBreak()
