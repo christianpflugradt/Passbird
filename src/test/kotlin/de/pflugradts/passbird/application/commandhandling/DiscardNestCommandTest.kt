@@ -37,7 +37,7 @@ class DiscardNestCommandTest {
         val givenInput = Shell.shellOf("n-$nestSlotIndex")
         val nestSlotFromInput = nestSlotAt(nestSlotIndex)
         val givenNest = Shell.shellOf("mynest")
-        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(givenInput)))
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakePasswordService(instance = passwordService, withEggs = emptyList())
         nestService.place(givenNest, nestSlotFromInput)
 
@@ -55,7 +55,7 @@ class DiscardNestCommandTest {
         val nestSlotIndex = 0
         val givenInput = Shell.shellOf("n-$nestSlotIndex")
         val nestSlotFromInput = nestSlotAt(nestSlotIndex)
-        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(givenInput)))
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakePasswordService(instance = passwordService, withEggs = emptyList())
         val outputSlot = slot<Output>()
 
@@ -66,5 +66,24 @@ class DiscardNestCommandTest {
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot.captured.shell.asString()) isEqualTo "Default Nest cannot be discarded - Operation aborted."
         expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isFalse()
+    }
+
+    @Test
+    fun `should abort discard nest if specified nest does not exist`() {
+        // given
+        val nestSlotIndex = 1
+        val givenInput = Shell.shellOf("n-$nestSlotIndex")
+        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
+        fakePasswordService(instance = passwordService, withEggs = emptyList())
+        val outputSlot = slot<Output>()
+
+        // when
+        expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isTrue()
+        inputHandler.handleInput(inputOf(givenInput))
+
+        // then
+        verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell.asString()) isEqualTo "Specified Nest does not exist - Operation aborted."
     }
 }
