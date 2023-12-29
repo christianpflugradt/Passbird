@@ -4,6 +4,7 @@ import com.google.common.eventbus.Subscribe
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
+import de.pflugradts.passbird.domain.model.egg.EggIdException
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -20,7 +21,11 @@ class RenameCommandHandler @Inject constructor(
             if (secureInput.isEmpty) {
                 userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted.")))
             } else {
-                passwordService.renameEgg(renameCommand.argument, secureInput.shell)
+                try {
+                    passwordService.renameEgg(renameCommand.argument, secureInput.shell)
+                } catch (ex: EggIdException) {
+                    userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted.")))
+                }
             }
             secureInput.invalidate()
         }
