@@ -10,6 +10,7 @@ import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.RED
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
@@ -67,8 +68,8 @@ class SetCommandTest {
         inputHandler.handleInput(inputOf(shell))
 
         // then
-        val expectedOutput = "EggId cannot contain digits or special characters. Please choose a different EggId."
-        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf(expectedOutput)))) }
+        val expectedOutput = "EggId '$args' contains non alphabetic characters - Operation aborted."
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf(expectedOutput), RED))) }
         verify(exactly = 0) { passwordService.putEgg(eq(shellOf(args)), any()) }
         expectThat(shell) isNotEqualTo reference
     }

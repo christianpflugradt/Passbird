@@ -7,6 +7,7 @@ import de.pflugradts.passbird.application.commandhandling.command.DiscardCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.RED
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class DiscardCommandHandler @Inject constructor(
@@ -20,7 +21,7 @@ class DiscardCommandHandler @Inject constructor(
             if (commandConfirmed()) {
                 passwordService.discardEgg(discardCommand.argument)
             } else {
-                userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
+                userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), RED))
             }
         }
         discardCommand.invalidateInput()

@@ -4,7 +4,6 @@ import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.nest.NestSlot
-import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
@@ -38,7 +37,7 @@ fun fakePasswordService(
         res
     }
     if (withInvalidEggId) {
-        every { instance.challengeEggId(any()) } throws InvalidEggIdException(emptyShell())
+        every { instance.challengeEggId(any()) } answers { throw InvalidEggIdException(firstArg()) }
     } else {
         every { instance.challengeEggId(any()) } returns Unit
     }

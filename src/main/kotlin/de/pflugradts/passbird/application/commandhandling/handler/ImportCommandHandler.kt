@@ -8,13 +8,12 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.service.nest.NestService
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.RED
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class ImportCommandHandler@Inject constructor(
     @Inject private val configuration: ReadableConfiguration,
     @Inject private val importExportService: ImportExportService,
-    @Inject private val nestService: NestService,
     @Inject private val passwordService: PasswordService,
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
@@ -23,7 +22,7 @@ class ImportCommandHandler@Inject constructor(
         if (commandConfirmed()) {
             importExportService.importEggs()
         } else {
-            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), RED))
         }
         userInterfaceAdapterPort.sendLineBreak()
     }

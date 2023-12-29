@@ -12,7 +12,6 @@ import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
-import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
 import io.mockk.mockk
@@ -27,14 +26,7 @@ class ImportCommandTest {
     private val importExportService = mockk<ImportExportService>(relaxed = true)
     private val configuration = mockk<Configuration>()
     private val passwordService = mockk<PasswordService>()
-    private val nestService = createNestServiceForTesting()
-    private val importCommandHandler = ImportCommandHandler(
-        configuration,
-        importExportService,
-        nestService,
-        passwordService,
-        userInterfaceAdapterPort,
-    )
+    private val importCommandHandler = ImportCommandHandler(configuration, importExportService, passwordService, userInterfaceAdapterPort)
     private val inputHandler = createInputHandlerFor(importCommandHandler)
 
     @Test
