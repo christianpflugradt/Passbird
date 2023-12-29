@@ -21,16 +21,16 @@ class NestingGround @Inject constructor(
     @Inject private val nestService: NestService,
     @Inject private val eventRegistry: EventRegistry,
 ) : EggRepository {
-    private var lazyEggs: MutableList<Egg>? = null
+    private var lazyEggs: Optional<MutableList<Egg>> = Optional.empty()
     private val eggs: MutableList<Egg> get() {
-        if (lazyEggs == null) {
-            lazyEggs = passwordStoreAdapterPort.restore().get().toList().toMutableList()
-            lazyEggs?.forEach {
+        if (lazyEggs.isEmpty) {
+            lazyEggs = Optional.of(passwordStoreAdapterPort.restore().get().toList().toMutableList())
+            lazyEggs.get().forEach {
                 it.clearDomainEvents()
                 eventRegistry.register(it)
             }
         }
-        return lazyEggs!!
+        return lazyEggs.get()
     }
 
     override fun add(egg: Egg) {

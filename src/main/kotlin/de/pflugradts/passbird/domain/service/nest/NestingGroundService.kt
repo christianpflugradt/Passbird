@@ -6,13 +6,24 @@ import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
+import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import java.util.Collections
 import java.util.Optional
 
 @Singleton
-class NestingGroundService @Inject constructor(@Inject private val eventRegistry: EventRegistry) : NestService {
+class NestingGroundService @Inject constructor(
+    @Inject private val eggRepository: EggRepository,
+    @Inject private val eventRegistry: EventRegistry,
+) : NestService {
 
-    private val nests = Collections.nCopies(NestSlot.CAPACITY, EMPTY_NEST).toMutableList()
+    private val lazyNests = mutableListOf<Optional<Nest>>()
+    private val nests: MutableList<Optional<Nest>> get() {
+        if (lazyNests.isEmpty()) {
+            lazyNests.addAll(Collections.nCopies(NestSlot.CAPACITY, EMPTY_NEST).toMutableList())
+            eggRepository.sync()
+        }
+        return lazyNests
+    }
     private var currentNest = NestSlot.DEFAULT
 
     override fun populate(nestShells: List<Shell>) {

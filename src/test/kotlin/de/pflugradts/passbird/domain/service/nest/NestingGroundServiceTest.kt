@@ -24,7 +24,7 @@ class NestingGroundServiceTest {
 
     private val eggRepository = mockk<EggRepository>(relaxed = true)
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
-    private val nestingGroundService = NestingGroundService(eventRegistry)
+    private val nestingGroundService = NestingGroundService(eggRepository, eventRegistry)
 
     @Test
     fun `should have 9 empty nest slots upon initialisation`() {
