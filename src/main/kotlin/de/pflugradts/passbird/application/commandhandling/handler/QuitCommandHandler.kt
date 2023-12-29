@@ -40,7 +40,7 @@ class QuitCommandHandler @Inject constructor(
         Triple(
             "Tweet farewell to the passwords,",
             "my little hatchlings, and may they stay",
-            "encrypted in the skies of cyberspace.(",
+            "encrypted in the skies of cyberspace.",
         ),
         Triple(
             "Feathered guardians, it's time to spread",
