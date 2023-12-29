@@ -87,6 +87,10 @@ tasks.register<Test>("architecture") {
     }
 }
 
+tasks.register<Test>("all") {
+    useJUnitPlatform()
+}
+
 tasks.withType<Test>().configureEach {
     testLogging {
         events(FAILED, PASSED, SKIPPED)
