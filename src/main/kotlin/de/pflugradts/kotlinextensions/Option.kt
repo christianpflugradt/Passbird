@@ -1,5 +1,8 @@
 package de.pflugradts.kotlinextensions
 
+import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
+import java.util.Optional
+
 interface Option<T> {
     val isPresent: Boolean
     val isEmpty: Boolean
@@ -9,6 +12,7 @@ interface Option<T> {
     fun ifPresent(block: (T) -> Unit)
     fun ifPresentOrElse(block: (T) -> Unit, other: () -> Unit)
     fun <U> map(block: (T) -> U): Option<U>
+    fun or(block: () -> Option<T>): Option<T>
 }
 
 class MutableOption<T> private constructor(private var value: T?) : Option<T> {
@@ -25,6 +29,7 @@ class MutableOption<T> private constructor(private var value: T?) : Option<T> {
         value ?: other()
     }
     override fun <U> map(block: (T) -> U) = value?.let { optionOf(block(it)) } ?: emptyOption()
+    override fun or(block: () -> Option<T>) = if (isPresent) this else block()
     fun set(value: T?) {
         this.value = value
     }
@@ -34,3 +39,5 @@ class MutableOption<T> private constructor(private var value: T?) : Option<T> {
         fun <T> mutableOptionOf(value: T? = null): MutableOption<T> = MutableOption(value)
     }
 }
+
+fun <T> Optional<T>.toOption() = optionOf(this.orElse(null))

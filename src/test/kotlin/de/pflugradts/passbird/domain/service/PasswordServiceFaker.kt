@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.domain.service
 
+import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.nest.NestSlot
@@ -7,7 +8,6 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
-import java.util.Optional
 
 fun fakePasswordService(
     instance: PasswordService,
@@ -27,7 +27,7 @@ fun fakePasswordService(
         }
     }
     every { instance.viewPassword(any()) } answers {
-        Optional.ofNullable(withEggs.find { it.viewEggId() == firstArg() }?.viewPassword())
+        optionOf(withEggs.find { it.viewEggId() == firstArg() }?.viewPassword())
     }
     every { instance.eggExists(any(), any<PasswordService.EggNotExistsAction>()) } answers {
         withEggs.find { it.viewEggId() == firstArg() } != null

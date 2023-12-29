@@ -124,7 +124,7 @@ class PutPasswordServiceTest {
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
         verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { eventRegistry.processEvents() }
-        expectThat(eggRepository.find(eggIdShell = existingEggId).orElse(null).viewPassword()) isEqualTo newPassword
+        expectThat(eggRepository.find(eggIdShell = existingEggId).orNull()?.viewPassword()) isEqualTo newPassword
     }
 
     @Test
@@ -164,9 +164,7 @@ class PutPasswordServiceTest {
         verify(exactly = 1) { eggRepository.add(eq(createEgg(NestSlot.DEFAULT, newEggId, newPassword))) }
         verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { eventRegistry.processEvents() }
-        expectThat(
-            eggRepository.find(eggIdShell = existingEggId).orElse(null).viewPassword(),
-        ) isEqualTo newPasswordForExistingEggId
+        expectThat(eggRepository.find(eggIdShell = existingEggId).orNull()?.viewPassword()) isEqualTo newPasswordForExistingEggId
     }
 
     @Test

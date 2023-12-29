@@ -8,7 +8,6 @@ import de.pflugradts.passbird.application.commandhandling.command.GetCommand
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import kotlin.jvm.optionals.getOrNull
 
 class GetCommandHandler @Inject constructor(
     @Inject private val passwordService: PasswordService,
@@ -19,7 +18,7 @@ class GetCommandHandler @Inject constructor(
     private fun handleGetCommand(getCommand: GetCommand) {
         // below line results in an arch unit violation due to https://github.com/TNG/ArchUnit/issues/981
         // passwordService.viewPassword(getCommand.argument).ifPresent {
-        passwordService.viewPassword(getCommand.argument).getOrNull()?.also {
+        passwordService.viewPassword(getCommand.argument).orNull()?.also {
             clipboardAdapterPort.post(outputOf(it))
             userInterfaceAdapterPort.send(outputOf(shellOf("Password copied to clipboard.")))
         }

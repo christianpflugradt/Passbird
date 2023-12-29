@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.domain.service.password
 
+import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.event.EggNotFound
@@ -10,7 +11,6 @@ import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
-import java.util.Optional
 import java.util.function.Predicate
 
 abstract class CommonPasswordServiceCapabilities(
@@ -18,8 +18,8 @@ abstract class CommonPasswordServiceCapabilities(
     private val eggRepository: EggRepository,
     private val eventRegistry: EventRegistry,
 ) {
-    fun find(eggIdShell: Shell, nestSlot: NestSlot): Optional<Egg> = eggRepository.find(eggIdShell, nestSlot)
-    fun find(eggIdShell: Shell): Optional<Egg> = eggRepository.find(eggIdShell)
+    fun find(eggIdShell: Shell, nestSlot: NestSlot): Option<Egg> = eggRepository.find(eggIdShell, nestSlot)
+    fun find(eggIdShell: Shell): Option<Egg> = eggRepository.find(eggIdShell)
     fun encrypted(shell: Shell) = cryptoProvider.encrypt(shell)
     fun decrypted(shell: Shell) = cryptoProvider.decrypt(shell)
 

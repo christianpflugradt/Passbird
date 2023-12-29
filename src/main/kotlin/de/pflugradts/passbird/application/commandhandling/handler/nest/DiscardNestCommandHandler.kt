@@ -38,14 +38,14 @@ class DiscardNestCommandHandler @Inject constructor(
                 val input = userInterfaceAdapterPort.receive(outputOf(shellOf(prompt)))
                 val nestSlot = input.shell.asString()
                 if (nestSlot.length == 1 && nestSlot[0].isDigit()) {
-                    val targetNestOptional = nestService.atNestSlot(nestSlotAt(nestSlot))
-                    if (targetNestOptional.isPresent) {
-                        nestService.moveToNestAt(targetNestOptional.get().nestSlot)
+                    val targetNestOption = nestService.atNestSlot(nestSlotAt(nestSlot))
+                    if (targetNestOption.isPresent) {
+                        nestService.moveToNestAt(targetNestOption.get().nestSlot)
                         val otherEggIds = passwordService.findAllEggIds().toList()
                         val overlaps = eggIds.filter { eggId -> otherEggIds.contains(eggId) }
                         if (overlaps.isEmpty()) {
                             nestService.moveToNestAt(discardNestCommand.nestSlot)
-                            eggIds.forEach { eggId -> passwordService.moveEgg(eggId, targetNestOptional.get().nestSlot) }
+                            eggIds.forEach { eggId -> passwordService.moveEgg(eggId, targetNestOption.get().nestSlot) }
                             nestService.discardNestAt(discardNestCommand.nestSlot)
                         } else {
                             val overlapsMessage = "The following EggIds exist in both Nests. " +

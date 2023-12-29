@@ -18,7 +18,6 @@ import strikt.assertions.containsExactly
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
-import strikt.java.isPresent
 
 class ViewPasswordServiceTest {
 
@@ -76,7 +75,8 @@ class ViewPasswordServiceTest {
         verify(exactly = 1) { cryptoProvider.encrypt(givenEggId) }
         verify(exactly = 1) { cryptoProvider.decrypt(expectedPassword) }
         verify { eventRegistry wasNot Called }
-        expectThat(actual).isPresent() isEqualTo expectedPassword
+        expectThat(actual.isPresent).isTrue()
+        expectThat(actual.get()) isEqualTo expectedPassword
     }
 
     @Test

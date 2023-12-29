@@ -6,7 +6,6 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.ViewCommand
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import kotlin.jvm.optionals.getOrNull
 
 class ViewCommandHandler @Inject constructor(
     @Inject private val passwordService: PasswordService,
@@ -16,7 +15,7 @@ class ViewCommandHandler @Inject constructor(
     private fun handleViewCommand(viewCommand: ViewCommand) {
         // below line results in an arch unit violation due to https://github.com/TNG/ArchUnit/issues/981
         // passwordService.viewPassword(viewCommand.argument).ifPresent { userInterfaceAdapterPort.send(outputOf(it)) }
-        passwordService.viewPassword(viewCommand.argument).getOrNull()?.also { userInterfaceAdapterPort.send(outputOf(it)) }
+        passwordService.viewPassword(viewCommand.argument).orNull()?.also { userInterfaceAdapterPort.send(outputOf(it)) }
         viewCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }

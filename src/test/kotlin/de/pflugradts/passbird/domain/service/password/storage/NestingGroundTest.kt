@@ -16,7 +16,6 @@ import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
-import strikt.java.isPresent
 
 class NestingGroundTest {
 
@@ -56,7 +55,8 @@ class NestingGroundTest {
         val actual = nestingGround.find(givenEgg1.viewEggId())
 
         // then
-        expectThat(actual).isPresent() isEqualTo givenEgg1
+        expectThat(actual.isPresent).isTrue()
+        expectThat(actual.get()) isEqualTo givenEgg1
     }
 
     @Test
@@ -81,7 +81,10 @@ class NestingGroundTest {
 
         // then
         verify(exactly = 1) { eventRegistry.register(newEgg) }
-        expectThat(nestingGround.find(newEgg.viewEggId())).isPresent() isEqualTo newEgg
+        nestingGround.find(newEgg.viewEggId()).let {
+            expectThat(it.isPresent).isTrue()
+            expectThat(it.get()) isEqualTo newEgg
+        }
     }
 
     @Test
@@ -146,8 +149,10 @@ class NestingGroundTest {
             val actualSecondEgg = nestingGround.find(eggIdShells)
 
             // then
-            expectThat(actualFirstEgg).isPresent() isEqualTo egg1 isNotEqualTo egg2
-            expectThat(actualSecondEgg).isPresent() isEqualTo egg2 isNotEqualTo egg1
+            expectThat(actualFirstEgg.isPresent).isTrue()
+            expectThat(actualFirstEgg.get()) isEqualTo egg1 isNotEqualTo egg2
+            expectThat(actualSecondEgg.isPresent).isTrue()
+            expectThat(actualSecondEgg.get()) isEqualTo egg2 isNotEqualTo egg1
         }
     }
 }
