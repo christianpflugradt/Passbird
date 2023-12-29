@@ -2,6 +2,7 @@ package de.pflugradts.passbird.domain.service.password.storage
 
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.NestSlot
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.createNestServiceSpyForTesting
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
@@ -31,6 +32,7 @@ class NestingGroundTest {
     @Test
     fun `should initialize`() {
         // given / when / then
+        nestingGround.find(emptyShell())
         verify(exactly = 1) { eventRegistry.register(givenEgg1) }
         verify(exactly = 1) { eventRegistry.register(givenEgg2) }
     }

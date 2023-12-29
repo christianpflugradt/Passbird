@@ -10,6 +10,7 @@ import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
+import de.pflugradts.passbird.domain.model.event.NestCreated
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -54,6 +55,11 @@ class ApplicationEventHandler @Inject constructor(
     @Subscribe
     private fun handleEggsImported(eggsImported: EggsImported) {
         send("${eggsImported.count} eggs successfully imported.")
+    }
+
+    @Subscribe
+    private fun handleNestCreated(nestCreated: NestCreated) {
+        send("Nest '${nestCreated.nest.shell.asString()}' successfully created.")
     }
 
     private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), OutputFormatting.GREEN))

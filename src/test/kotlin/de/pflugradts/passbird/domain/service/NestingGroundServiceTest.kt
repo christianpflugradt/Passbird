@@ -5,6 +5,7 @@ import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import io.mockk.mockk
 import io.mockk.verify
@@ -22,7 +23,8 @@ import kotlin.jvm.optionals.getOrNull
 class NestingGroundServiceTest {
 
     private val eggRepository = mockk<EggRepository>(relaxed = true)
-    private val nestingGroundService = NestingGroundService()
+    private val eventRegistry = mockk<EventRegistry>(relaxed = true)
+    private val nestingGroundService = NestingGroundService(eventRegistry)
 
     @Test
     fun `should have 9 empty nest slots upon initialisation`() {
