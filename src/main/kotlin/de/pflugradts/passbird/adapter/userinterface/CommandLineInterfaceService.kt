@@ -38,14 +38,12 @@ class CommandLineInterfaceService @Inject constructor(
         }
     }
 
+    override fun send(vararg output: Output) = output.forEach { sendWithoutLineBreak(it) }.also { sendChar('\n') }
     private fun sendWithoutLineBreak(vararg output: Output) = output.forEach {
         it.formatting?.also { formatting -> if (escapeCodesEnabled) beginEscape(formatting) }
         shellOf(it.shell.toByteArray()).forEach { char -> sendChar(Char(char.toUShort())) }
         it.formatting?.also { if (escapeCodesEnabled) endEscape() }
     }
-
-    private fun sendWithLineBreak(vararg output: Output) = output.forEach { sendWithoutLineBreak(it) }.also { sendChar('\n') }
     private fun sendChar(chr: Char) = print(chr)
-    override fun send(vararg output: Output) = output.forEach { sendWithLineBreak(it) }
     private val escapeCodesEnabled: Boolean get() = configuration.adapter.userInterface.ansiEscapeCodes.enabled
 }

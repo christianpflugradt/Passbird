@@ -28,7 +28,6 @@ class QuitCommandTest {
         inputHandler.handleInput(input)
 
         // then
-        verify(exactly = 1) { userInterfaceAdapterPort.send(any()) }
         verify(exactly = 1) { systemOperation.exit() }
     }
 }

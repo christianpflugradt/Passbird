@@ -25,6 +25,7 @@ enum class OutputFormatting {
     WHITE,
     YELLOW,
     ORANGE,
+    RED,
     PURPLE,
     BLUE,
     GREEN,
