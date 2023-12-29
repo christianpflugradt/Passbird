@@ -11,7 +11,7 @@ import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.fakeInput
-import de.pflugradts.passbird.domain.service.createNestServiceSpyForTesting
+import de.pflugradts.passbird.domain.service.nest.createNestServiceSpyForTesting
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

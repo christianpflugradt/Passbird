@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.domain.service
+package de.pflugradts.passbird.domain.service.nest
 
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.NestSlot

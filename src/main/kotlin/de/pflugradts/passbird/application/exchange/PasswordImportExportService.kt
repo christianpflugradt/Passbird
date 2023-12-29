@@ -6,8 +6,8 @@ import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
-import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
+import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class PasswordImportExportService @Inject constructor(

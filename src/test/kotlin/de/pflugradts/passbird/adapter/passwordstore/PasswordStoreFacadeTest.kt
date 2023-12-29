@@ -21,7 +21,7 @@ import de.pflugradts.passbird.domain.model.nest.NestSlot.N9
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
-import de.pflugradts.passbird.domain.service.createNestServiceForTesting
+import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.every
 import io.mockk.mockk

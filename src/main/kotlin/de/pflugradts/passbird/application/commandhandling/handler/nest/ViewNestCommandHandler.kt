@@ -7,7 +7,7 @@ import de.pflugradts.passbird.application.commandhandling.command.ViewNestComman
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.service.NestService
+import de.pflugradts.passbird.domain.service.nest.NestService
 
 class ViewNestCommandHandler @Inject constructor(
     @Inject private val nestService: NestService,

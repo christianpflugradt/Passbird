@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.handler.nest
 
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
-import de.pflugradts.passbird.domain.service.NestService
+import de.pflugradts.passbird.domain.service.nest.NestService
 
 abstract class CanListAvailableNests(
     private val nestService: NestService,

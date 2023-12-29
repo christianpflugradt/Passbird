@@ -11,7 +11,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.BLUE
-import de.pflugradts.passbird.domain.service.NestingGroundService
+import de.pflugradts.passbird.domain.service.nest.NestingGroundService
 
 const val INTERRUPT = 0x03.toChar()
 

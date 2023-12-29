@@ -12,9 +12,9 @@ import de.pflugradts.passbird.domain.model.nest.NestSlot.N2
 import de.pflugradts.passbird.domain.model.nest.NestSlot.N9
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
-import de.pflugradts.passbird.domain.service.createNestServiceSpyForTesting
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.fakePasswordService
+import de.pflugradts.passbird.domain.service.nest.createNestServiceSpyForTesting
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.Called
 import io.mockk.mockk

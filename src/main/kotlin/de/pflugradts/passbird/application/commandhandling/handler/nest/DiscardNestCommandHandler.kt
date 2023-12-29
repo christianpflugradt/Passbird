@@ -9,7 +9,7 @@ import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
 import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.service.NestService
+import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class DiscardNestCommandHandler @Inject constructor(

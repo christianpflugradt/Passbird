@@ -5,8 +5,8 @@ import com.google.inject.Singleton
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
-import de.pflugradts.passbird.domain.service.NestService
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
+import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.storage.EggFilter.CURRENT_NEST
 import de.pflugradts.passbird.domain.service.password.storage.EggFilter.Companion.all
 import de.pflugradts.passbird.domain.service.password.storage.EggFilter.Companion.inNest

@@ -41,11 +41,11 @@ import de.pflugradts.passbird.application.exchange.ExchangeFactory
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.exchange.PasswordImportExportService
 import de.pflugradts.passbird.application.security.CryptoProviderFactory
-import de.pflugradts.passbird.domain.service.NestService
-import de.pflugradts.passbird.domain.service.NestingGroundService
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
+import de.pflugradts.passbird.domain.service.nest.NestService
+import de.pflugradts.passbird.domain.service.nest.NestingGroundService
 import de.pflugradts.passbird.domain.service.password.PasswordFacade
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
