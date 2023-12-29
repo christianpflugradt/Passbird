@@ -25,8 +25,8 @@ class NestingGroundTest {
     private val givenEggs = listOf(givenEgg1, givenEgg2)
 
     private val passwordStoreAdapterPort = fakePasswordStoreAdapterPort(givenEggs)
-    private val nestService = createNestServiceSpyForTesting()
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
+    private val nestService = createNestServiceSpyForTesting()
     private val nestingGround = NestingGround(passwordStoreAdapterPort, nestService, eventRegistry)
 
     @Test
@@ -127,7 +127,7 @@ class NestingGroundTest {
         }
 
         @Test
-        fun `should store multiple ewith identical eggIds in different nests`() {
+        fun `should store multiple eggs with identical eggIds in different nests`() {
             // given
             val eggIdShells = shellOf("EggId")
             val firstNestSlot = NestSlot.N1

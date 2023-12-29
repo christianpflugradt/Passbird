@@ -22,7 +22,6 @@ import strikt.assertions.contains
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
-import kotlin.jvm.optionals.getOrNull
 
 @Tag(INTEGRATION)
 class AddNestCommandTest {
@@ -108,5 +107,5 @@ class AddNestCommandTest {
         expectThat(outputSlot.captured.shell.asString()) contains "Default Nest cannot be replaced"
     }
 
-    private fun NestService.nestShellAtSlot(nestSlot: NestSlot) = atNestSlot(nestSlot).getOrNull()?.viewNestId() ?: emptyShell()
+    private fun NestService.nestShellAtSlot(nestSlot: NestSlot) = atNestSlot(nestSlot).orNull()?.viewNestId() ?: emptyShell()
 }

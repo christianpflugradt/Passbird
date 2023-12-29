@@ -2,6 +2,8 @@ package de.pflugradts.passbird.domain.service.password.storage
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import de.pflugradts.kotlinextensions.MutableOption
+import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
@@ -21,10 +23,10 @@ class NestingGround @Inject constructor(
     @Inject private val nestService: NestService,
     @Inject private val eventRegistry: EventRegistry,
 ) : EggRepository {
-    private var lazyEggs: Optional<MutableList<Egg>> = Optional.empty()
+    private val lazyEggs: MutableOption<MutableList<Egg>> = mutableOptionOf()
     private val eggs: MutableList<Egg> get() {
         if (lazyEggs.isEmpty) {
-            lazyEggs = Optional.of(passwordStoreAdapterPort.restore().get().toList().toMutableList())
+            lazyEggs.set(passwordStoreAdapterPort.restore().get().toList().toMutableList())
             lazyEggs.get().forEach {
                 it.clearDomainEvents()
                 eventRegistry.register(it)

@@ -17,8 +17,6 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
-import strikt.java.isPresent
-import kotlin.jvm.optionals.getOrNull
 
 class NestingGroundServiceTest {
 
@@ -74,7 +72,7 @@ class NestingGroundServiceTest {
     @Test
     fun `should return default nest for default nest slot`() {
         // given / when / then
-        expectThat(nestingGroundService.atNestSlot(NestSlot.DEFAULT).getOrNull()) isEqualTo DEFAULT
+        expectThat(nestingGroundService.atNestSlot(NestSlot.DEFAULT).orNull()) isEqualTo DEFAULT
     }
 
     @Test
@@ -91,7 +89,7 @@ class NestingGroundServiceTest {
 
         // then
         val nest2 = nestingGroundService.atNestSlot(NestSlot.N2)
-        expectThat(nest2).isPresent()
+        expectThat(nest2.isPresent).isTrue()
         expectThat(nest2.get().nestSlot) isEqualTo NestSlot.N2
         expectThat(nest2.get().viewNestId()) isEqualTo givenNestShell
     }
