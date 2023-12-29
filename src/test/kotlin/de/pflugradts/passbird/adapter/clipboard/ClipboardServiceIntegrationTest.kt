@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.adapter.clipboard
 
-import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.NON_HEADLESS
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -8,7 +8,6 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.mockk.mockk
 import org.awaitility.Awaitility.await
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -18,8 +17,7 @@ import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.DataFlavor
 import java.util.concurrent.TimeUnit
 
-@Disabled
-@Tag(INTEGRATION)
+@Tag(NON_HEADLESS)
 class ClipboardServiceIntegrationTest {
 
     private val systemOperation = SystemOperation()

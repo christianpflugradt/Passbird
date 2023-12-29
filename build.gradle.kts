@@ -71,7 +71,7 @@ ktlint {
 
 tasks.test {
     useJUnitPlatform {
-        excludeTags("architecture", "integration")
+        excludeTags("architecture", "integration", "non-headless")
     }
 }
 
