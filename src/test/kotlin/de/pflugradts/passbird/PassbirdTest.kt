@@ -57,6 +57,15 @@ class PassbirdTest {
     }
 
     @Nested
+    inner class UndesiredClassesTest {
+
+        @Test
+        fun `no classes should depend on Optional`() {
+            noClasses().should().dependOnClassesThat().haveFullyQualifiedName("java.util.Optional").check(classes)
+        }
+    }
+
+    @Nested
     inner class MainTest {
         @Test
         fun `no functions outside of main should use main functions`() {
