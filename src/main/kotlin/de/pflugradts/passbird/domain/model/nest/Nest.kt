@@ -5,8 +5,9 @@ import de.pflugradts.passbird.domain.model.event.NestCreated
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 
-class Nest private constructor(val shell: Shell, val nestSlot: NestSlot) : AggregateRoot() {
+class Nest private constructor(private val shell: Shell, val nestSlot: NestSlot) : AggregateRoot() {
     init { registerDomainEvent(NestCreated(this)) }
+    fun viewNestId() = shell.copy()
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

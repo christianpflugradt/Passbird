@@ -35,7 +35,7 @@ class PassbirdApplication @Inject constructor(
     )
 
     private fun nestPrefix() = nestService.currentNest().let {
-        if (it == Nest.DEFAULT) "" else "[${it.shell.asString()}] "
+        if (it == Nest.DEFAULT) "" else "[${it.viewNestId().asString()}] "
     }
 
     private fun isSigTerm(input: Input) = input.data.isEmpty && !input.command.isEmpty && input.command.firstByte == INTERRUPT.code.toByte()

@@ -21,7 +21,7 @@ class AddNestCommandHandler @Inject constructor(
             return
         }
         val prompt = if (nestService.atNestSlot(addNestCommand.nestSlot).isPresent) {
-            "Enter new name for existing Nest '${nestService.atNestSlot(addNestCommand.nestSlot).get().shell.asString()}' " +
+            "Enter new name for existing Nest '${nestService.atNestSlot(addNestCommand.nestSlot).get().viewNestId().asString()}' " +
                 "or nothing to abort\nYour input: "
         } else {
             "Enter name for Nest or nothing to abort\nYour input: "

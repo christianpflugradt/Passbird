@@ -144,7 +144,7 @@ class PasswordStoreFacadeTest {
             N9 to nest9,
         ).forEach { (k, v) ->
             expectThat(nestService.atNestSlot(k).isPresent)
-            expectThat(nestService.atNestSlot(k).get().shell) isEqualTo v
+            expectThat(nestService.atNestSlot(k).get().viewNestId()) isEqualTo v
         }
     }
 

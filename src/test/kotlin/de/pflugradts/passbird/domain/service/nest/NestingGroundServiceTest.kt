@@ -51,7 +51,7 @@ class NestingGroundServiceTest {
         // then
         intArrayOf(1, 3, 7).forEach {
             expectThat(actual[it].isPresent).isTrue()
-            expectThat(actual[it].get().shell) isEqualTo nestShells[it]
+            expectThat(actual[it].get().viewNestId()) isEqualTo nestShells[it]
         }
         intArrayOf(0, 2, 4, 5, 6, 8).forEach { expectThat(actual[it].isPresent).isFalse() }
     }
@@ -93,7 +93,7 @@ class NestingGroundServiceTest {
         val nest2 = nestingGroundService.atNestSlot(NestSlot.N2)
         expectThat(nest2).isPresent()
         expectThat(nest2.get().nestSlot) isEqualTo NestSlot.N2
-        expectThat(nest2.get().shell) isEqualTo givenNestShell
+        expectThat(nest2.get().viewNestId()) isEqualTo givenNestShell
     }
 
     @Test
@@ -172,7 +172,7 @@ class NestingGroundServiceTest {
 
         // then
         expectThat(actual.isPresent).isTrue()
-        expectThat(actual.get().shell) isEqualTo nestShell
+        expectThat(actual.get().viewNestId()) isEqualTo nestShell
         expectThat(actual.get().nestSlot) isEqualTo NestSlot.N3
         verify(exactly = 1) { eggRepository.sync() }
     }

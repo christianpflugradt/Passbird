@@ -78,7 +78,7 @@ class PassbirdApplicationTest {
         // then
         verify { userInterfaceAdapterPort.receive(capture(expectedNestPrefixSlot), capture(expectedPromptPrefixSlot)) }
         expectThat(expectedNestPrefixSlot) hasSize 2
-        expectedNestPrefixSlot.forEach { expectThat(it.shell.asString()) isEqualTo "[${givenNest.shell.asString()}] " }
+        expectedNestPrefixSlot.forEach { expectThat(it.shell.asString()) isEqualTo "[${givenNest.viewNestId().asString()}] " }
         expectedPromptPrefixSlot.forEach { expectThat(it.shell.asString()) isEqualTo "Enter command: " }
     }
 

@@ -33,7 +33,7 @@ class DiscardNestCommandHandler @Inject constructor(
             if (eggIds.isEmpty()) {
                 nestService.discard(discardNestCommand.nestSlot)
             } else {
-                val prompt = "Nest '${nestService.currentNest().shell.asString()}' contains ${eggIds.size} Eggs. " +
+                val prompt = "Nest '${nestService.currentNest().viewNestId().asString()}' contains ${eggIds.size} Eggs. " +
                     "Specify a Nest Slot 0-9 to move them to or anything else to abort: "
                 val input = userInterfaceAdapterPort.receive(outputOf(shellOf(prompt)))
                 val nestSlot = input.shell.asString()

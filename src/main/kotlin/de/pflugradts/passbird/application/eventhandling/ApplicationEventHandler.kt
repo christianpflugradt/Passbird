@@ -59,7 +59,7 @@ class ApplicationEventHandler @Inject constructor(
 
     @Subscribe
     private fun handleNestCreated(nestCreated: NestCreated) {
-        send("Nest '${nestCreated.nest.shell.asString()}' successfully created.")
+        send("Nest '${nestCreated.nest.viewNestId().asString()}' successfully created.")
     }
 
     private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), OutputFormatting.GREEN))

@@ -64,7 +64,7 @@ class PasswordStoreWriter @Inject constructor(
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
         val nestSize = intBytes() + NestSlot.CAPACITY * intBytes() + nestService.all()
             .filter { it.isPresent }
-            .map { it.get().shell.size }
+            .map { it.get().viewNestId().size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
         val metaSize = eggs.get().count().toInt() * 2 * intBytes()
         return dataSize + nestSize + metaSize
@@ -75,7 +75,7 @@ class PasswordStoreWriter @Inject constructor(
     private fun calcActualTotalSize(contentSize: Int) = signatureSize() + contentSize + eofBytes() + checksumBytes()
 
     private fun NestSlot.asByteArray(): ByteArray {
-        val nestShell = nestService.atNestSlot(this).map { it.shell }.orElse(emptyShell())
+        val nestShell = nestService.atNestSlot(this).map { it.viewNestId() }.orElse(emptyShell())
         val nestBytesSize = nestShell.size
         val bytes = ByteArray(Integer.BYTES + nestBytesSize)
         copyInt(if (nestShell.isEmpty) EMPTY_NEST else nestBytesSize, bytes, 0)

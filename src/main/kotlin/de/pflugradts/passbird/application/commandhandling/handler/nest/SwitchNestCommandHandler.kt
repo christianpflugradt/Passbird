@@ -17,7 +17,7 @@ class SwitchNestCommandHandler @Inject constructor(
     private fun handleSwitchNestCommand(switchNestCommand: SwitchNestCommand) {
         if (nestService.currentNest().nestSlot == switchNestCommand.nestSlot) {
             userInterfaceAdapterPort.send(
-                outputOf(shellOf("'${nestService.currentNest().shell.asString()}' is already the current Nest.")),
+                outputOf(shellOf("'${nestService.currentNest().viewNestId().asString()}' is already the current Nest.")),
             )
         } else if (nestService.atNestSlot(switchNestCommand.nestSlot).isPresent) {
             nestService.moveToNestAt(switchNestCommand.nestSlot)

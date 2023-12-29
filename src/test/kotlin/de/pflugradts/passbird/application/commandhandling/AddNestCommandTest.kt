@@ -108,5 +108,5 @@ class AddNestCommandTest {
         expectThat(outputSlot.captured.shell.asString()) contains "Default Nest cannot be replaced"
     }
 
-    private fun NestService.nestShellAtSlot(nestSlot: NestSlot) = atNestSlot(nestSlot).getOrNull()?.shell ?: emptyShell()
+    private fun NestService.nestShellAtSlot(nestSlot: NestSlot) = atNestSlot(nestSlot).getOrNull()?.viewNestId() ?: emptyShell()
 }

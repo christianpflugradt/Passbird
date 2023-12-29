@@ -37,7 +37,7 @@ ${'\t'}n-[1-9] (discard) discards the Nest at the specified Nest Slot
         )
     }
 
-    private val currentNest get() = nestService.currentNest().shell.asString()
+    private val currentNest get() = nestService.currentNest().viewNestId().asString()
     private val availableNests get() = getAvailableNests(includeCurrent = true).let {
         if (hasCustomNests()) it else "$it\t(use the n+ command to create custom Nests)\n"
     }

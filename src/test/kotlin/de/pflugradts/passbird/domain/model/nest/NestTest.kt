@@ -18,7 +18,7 @@ class NestTest {
         val actual = createNest(shellOf("Nest"), NestSlot.DEFAULT)
 
         // then
-        expectThat(actual.shell.asString()) isEqualTo name
+        expectThat(actual.viewNestId().asString()) isEqualTo name
     }
 
     @Test
@@ -29,7 +29,7 @@ class NestTest {
 
         // when
         shell.scramble()
-        val actual = nest.shell
+        val actual = nest.viewNestId()
 
         // then
         expectThat(actual) isNotEqualTo shell
@@ -41,7 +41,7 @@ class NestTest {
         val defaultNest = DEFAULT
 
         // then
-        expectThat(defaultNest.shell) isEqualTo shellOf("Default")
+        expectThat(defaultNest.viewNestId()) isEqualTo shellOf("Default")
         expectThat(defaultNest.nestSlot) isEqualTo NestSlot.DEFAULT
     }
 }
