@@ -11,6 +11,7 @@ import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.event.NestCreated
+import de.pflugradts.passbird.domain.model.event.NestDiscarded
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -39,7 +40,7 @@ class ApplicationEventHandler @Inject constructor(
 
     @Subscribe
     private fun handleEggDiscarded(eggDiscarded: EggDiscarded) {
-        send("Egg '${decrypt(eggDiscarded.egg.viewEggId())}' successfully deleted.")
+        send("Egg '${decrypt(eggDiscarded.egg.viewEggId())}' successfully discarded.")
     }
 
     @Subscribe
@@ -60,6 +61,11 @@ class ApplicationEventHandler @Inject constructor(
     @Subscribe
     private fun handleNestCreated(nestCreated: NestCreated) {
         send("Nest '${nestCreated.nest.viewNestId().asString()}' successfully created.")
+    }
+
+    @Subscribe
+    private fun handleNestDiscarded(nestDiscarded: NestDiscarded) {
+        send("Nest '${nestDiscarded.nest.viewNestId().asString()}' successfully discarded.")
     }
 
     private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), OutputFormatting.GREEN))

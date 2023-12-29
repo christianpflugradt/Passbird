@@ -13,3 +13,4 @@ data class EggUpdated(val egg: Egg) : DomainEvent
 data class EggsExported(val count: Int) : DomainEvent
 data class EggsImported(val count: Int) : DomainEvent
 data class NestCreated(val nest: Nest) : DomainEvent
+data class NestDiscarded(val nest: Nest) : DomainEvent

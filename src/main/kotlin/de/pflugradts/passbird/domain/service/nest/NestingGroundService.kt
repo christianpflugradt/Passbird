@@ -33,7 +33,11 @@ class NestingGroundService @Inject constructor(@Inject private val eventRegistry
             if (publish) eventRegistry.processEvents() else it.clearDomainEvents()
         }
     }
-    override fun discard(nestSlot: NestSlot) { nests[nestSlot.nestIndex()] = EMPTY_NEST }
+    override fun discardNestAt(nestSlot: NestSlot) {
+        atNestSlot(nestSlot).ifPresent { it.discard() }
+        nests[nestSlot.nestIndex()] = EMPTY_NEST
+        eventRegistry.processEvents()
+    }
     override fun atNestSlot(nestSlot: NestSlot): Optional<Nest> =
         if (nestSlot === NestSlot.DEFAULT) Nest.DEFAULT.optional() else nests[nestSlot.nestIndex()]
     override fun all(includeDefault: Boolean) = nests.let { if (includeDefault) Nest.DEFAULT.asOptionalInList() + it else it }.stream()

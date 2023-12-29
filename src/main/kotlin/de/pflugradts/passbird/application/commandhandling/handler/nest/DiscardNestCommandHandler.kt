@@ -31,7 +31,7 @@ class DiscardNestCommandHandler @Inject constructor(
             nestService.moveToNestAt(discardNestCommand.nestSlot)
             val eggIds = passwordService.findAllEggIds().toList()
             if (eggIds.isEmpty()) {
-                nestService.discard(discardNestCommand.nestSlot)
+                nestService.discardNestAt(discardNestCommand.nestSlot)
             } else {
                 val prompt = "Nest '${nestService.currentNest().viewNestId().asString()}' contains ${eggIds.size} Eggs. " +
                     "Specify a Nest Slot 0-9 to move them to or anything else to abort: "
@@ -46,7 +46,7 @@ class DiscardNestCommandHandler @Inject constructor(
                         if (overlaps.isEmpty()) {
                             nestService.moveToNestAt(discardNestCommand.nestSlot)
                             eggIds.forEach { eggId -> passwordService.moveEgg(eggId, targetNestOptional.get().nestSlot) }
-                            nestService.discard(discardNestCommand.nestSlot)
+                            nestService.discardNestAt(discardNestCommand.nestSlot)
                         } else {
                             val overlapsMessage = "The following EggIds exist in both Nests. " +
                                 "Please move them manually before discarding the Nest: ${System.lineSeparator()}- " +

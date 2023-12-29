@@ -9,7 +9,7 @@ import java.util.stream.Stream
 interface NestService {
     fun populate(nestShells: List<Shell>)
     fun place(nestShell: Shell, nestSlot: NestSlot)
-    fun discard(nestSlot: NestSlot)
+    fun discardNestAt(nestSlot: NestSlot)
     fun atNestSlot(nestSlot: NestSlot): Optional<Nest>
     fun all(includeDefault: Boolean = false): Stream<Optional<Nest>>
     fun currentNest(): Nest
