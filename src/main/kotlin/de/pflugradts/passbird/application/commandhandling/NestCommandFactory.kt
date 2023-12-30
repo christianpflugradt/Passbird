@@ -4,8 +4,8 @@ import com.google.inject.Singleton
 import de.pflugradts.passbird.application.commandhandling.CommandVariant.ADD
 import de.pflugradts.passbird.application.commandhandling.CommandVariant.DISCARD
 import de.pflugradts.passbird.application.commandhandling.command.AddNestCommand
-import de.pflugradts.passbird.application.commandhandling.command.AssignNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.DiscardNestCommand
+import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.command.SwitchNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
@@ -25,7 +25,7 @@ class NestCommandFactory() {
         } else if (command.size == 1 && input.data.isEmpty) {
             return ViewNestCommand()
         } else if (command.size == 1 && !input.data.isEmpty) {
-            return AssignNestCommand(input)
+            return MoveToNestCommand(input)
         } else if (command.size == 2 && input.data.isEmpty && command.getChar(1).isDigit()) {
             return SwitchNestCommand(nestSlotAt(command.getChar(1)))
         } else if (command.size == 3 && input.data.isEmpty && command.getChar(1) == ADD.value && command.isDigit(2)) {

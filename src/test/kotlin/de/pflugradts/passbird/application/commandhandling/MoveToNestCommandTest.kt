@@ -2,7 +2,7 @@ package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
-import de.pflugradts.passbird.application.commandhandling.handler.nest.AssignNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.MoveToNestCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
@@ -25,13 +25,13 @@ import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
 
 @Tag(INTEGRATION)
-class AssignNestCommandTest {
+class MoveToNestCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val nestService = createNestServiceForTesting()
     private val passwordService = mockk<PasswordService>()
-    private val assignNestCommandHandler = AssignNestCommandHandler(nestService, passwordService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(assignNestCommandHandler)
+    private val moveToNestCommandHandler = MoveToNestCommandHandler(nestService, passwordService, userInterfaceAdapterPort)
+    private val inputHandler = createInputHandlerFor(moveToNestCommandHandler)
 
     @Test
     fun `should handle assign nest command`() {
