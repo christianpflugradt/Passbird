@@ -8,7 +8,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.RED
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ORANGE
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
@@ -29,10 +29,10 @@ class SetCommandHandler @Inject constructor(
                     passwordProvider.createNewPassword(configuration.parsePasswordRequirements()),
                 )
             } catch (ex: InvalidEggIdException) {
-                userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), RED))
+                userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), ORANGE))
             }
         } else {
-            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), RED))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), ORANGE))
         }
         setCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

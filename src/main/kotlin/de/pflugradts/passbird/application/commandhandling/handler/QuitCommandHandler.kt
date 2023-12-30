@@ -8,7 +8,7 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.BLUE
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.RED
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ORANGE
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.YELLOW
 
 class QuitCommandHandler @Inject constructor(
@@ -21,7 +21,7 @@ class QuitCommandHandler @Inject constructor(
         val goodbye = randomGoodBye()
         userInterfaceAdapterPort.send(outputOf(shellOf("  -,     "), BLUE), outputOf(shellOf(goodbye.first), YELLOW))
         userInterfaceAdapterPort.send(outputOf(shellOf(" ( '<    "), YELLOW), outputOf(shellOf(goodbye.second), YELLOW))
-        userInterfaceAdapterPort.send(outputOf(shellOf("/ ) )    "), RED), outputOf(shellOf(goodbye.third), YELLOW))
+        userInterfaceAdapterPort.send(outputOf(shellOf("/ ) )    "), ORANGE), outputOf(shellOf(goodbye.third), YELLOW))
         userInterfaceAdapterPort.sendLineBreak()
         systemOperation.exit()
     }

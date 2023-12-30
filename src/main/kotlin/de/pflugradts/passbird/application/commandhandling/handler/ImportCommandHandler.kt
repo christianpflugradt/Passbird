@@ -8,7 +8,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.RED
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ORANGE
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class ImportCommandHandler@Inject constructor(
@@ -22,7 +22,7 @@ class ImportCommandHandler@Inject constructor(
         if (commandConfirmed()) {
             importExportService.importEggs()
         } else {
-            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), RED))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), ORANGE))
         }
         userInterfaceAdapterPort.sendLineBreak()
     }

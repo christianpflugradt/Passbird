@@ -7,7 +7,7 @@ import de.pflugradts.passbird.application.commandhandling.command.SwitchNestComm
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.RED
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ORANGE
 import de.pflugradts.passbird.domain.service.nest.NestService
 
 class SwitchNestCommandHandler @Inject constructor(
@@ -23,7 +23,7 @@ class SwitchNestCommandHandler @Inject constructor(
         } else if (nestService.atNestSlot(switchNestCommand.nestSlot).isPresent) {
             nestService.moveToNestAt(switchNestCommand.nestSlot)
         } else {
-            userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted."), RED))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted."), ORANGE))
         }
         userInterfaceAdapterPort.sendLineBreak()
     }
