@@ -7,6 +7,8 @@ import de.pflugradts.passbird.application.commandhandling.command.ViewNestComman
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.PURPLE
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.WHITE
 import de.pflugradts.passbird.domain.service.nest.NestService
 
 class ViewNestCommandHandler @Inject constructor(
@@ -16,24 +18,17 @@ class ViewNestCommandHandler @Inject constructor(
     @Subscribe
     private fun handleViewNestCommand(@Suppress("UNUSED_PARAMETER") viewNestCommand: ViewNestCommand) {
         userInterfaceAdapterPort.send(
-            outputOf(
-                shellOf(
-                    """
-Current Nest: $currentNest
-
-Available Nests:
-$availableNests
-
-Available Nest commands:
-${'\t'}n (view) displays current Nest, available Nests and Nest commands
-${'\t'}n0 (switch to default) switches to the default Nest
-${'\t'}n[1-9] (switch) switches to the Nest at the given Nest Slot (1-9 inclusively)
-${'\t'}n[1-9][EggId] (move) moves the Egg from the current to the specified Nest
-${'\t'}n+[1-9] (create) creates a new Nest at the specified Nest Slot
-${'\t'}n-[1-9] (discard) discards the Nest at the specified Nest Slot
-""",
-                ),
-            ),
+            outBold("\nCurrent Nest: "), out(currentNest),
+            outBold("\n\nAvailable Nests:\n"),
+            out(availableNests),
+            outBold("\n\nAvailable Nest commands:\n"),
+            outBold("\n\tn"), out(" (view) displays current Nest, available Nests and Nest commands"),
+            outBold("\n\tn0"), out(" (switch) switches to the default Nest"),
+            outBold("\n\tn[1-9]"), out(" (switch) switches to the Nest at the given Nest Slot (1-9 inclusively)"),
+            outBold("\n\tn[1-9][EggId]"), out(" (move) moves the Egg from the current to the specified Nest"),
+            outBold("\n\tn+[1-9]"), out(" (create) creates a new Nest at the specified Nest Slot"),
+            outBold("\n\tn-[1-9]"), out(" (discard) discards the Nest at the specified Nest Slot"),
+            out("\n"),
         )
     }
 
@@ -42,3 +37,6 @@ ${'\t'}n-[1-9] (discard) discards the Nest at the specified Nest Slot
         if (hasCustomNests()) it else "$it\t(use the n+ command to create custom Nests)\n"
     }
 }
+
+private fun outBold(text: String) = outputOf(shellOf(text), PURPLE)
+private fun out(text: String) = outputOf(shellOf(text), WHITE)
