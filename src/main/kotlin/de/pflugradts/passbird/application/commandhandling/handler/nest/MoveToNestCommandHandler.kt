@@ -5,10 +5,11 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
-import de.pflugradts.passbird.domain.model.nest.NestSlot
+import de.pflugradts.passbird.domain.model.nest.NestSlot.INVALID
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ORANGE
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.PURPLE
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
@@ -21,12 +22,11 @@ class MoveToNestCommandHandler @Inject constructor(
     @Subscribe
     private fun handleMoveToNestCommand(moveToNestCommand: MoveToNestCommand) {
         if (passwordService.eggExists(moveToNestCommand.argument, EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT)) {
-            userInterfaceAdapterPort.send(
-                outputOf(shellOf("Available Nests: \n${getAvailableNests(includeCurrent = false)}")),
-            )
-            val input = userInterfaceAdapterPort.receive(outputOf(shellOf("Enter Nest you want to move Egg to: ")))
+            userInterfaceAdapterPort.send(outputOf(shellOf("\nAvailable Nests: \n"), PURPLE))
+            userInterfaceAdapterPort.send(outputOf(shellOf(getAvailableNests(includeCurrent = false))))
+            val input = userInterfaceAdapterPort.receive(outputOf(shellOf("\nEnter Nest you want to move Egg to: ")))
             val nestSlot = input.extractNestSlot()
-            if (nestSlot === NestSlot.INVALID) {
+            if (nestSlot === INVALID) {
                 userInterfaceAdapterPort.send(outputOf(shellOf("Invalid Nest - Operation aborted."), ORANGE))
             } else if (nestSlot === nestService.currentNest().nestSlot) {
                 userInterfaceAdapterPort.send(

@@ -7,6 +7,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 
 data class EggCreated(val egg: Egg) : DomainEvent
 data class EggDiscarded(val egg: Egg) : DomainEvent
+data class EggMoved(val egg: Egg) : DomainEvent
 data class EggNotFound(val eggIdShell: Shell) : DomainEvent
 data class EggRenamed(val egg: Egg) : DomainEvent
 data class EggUpdated(val egg: Egg) : DomainEvent

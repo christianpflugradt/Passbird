@@ -5,6 +5,7 @@ import de.pflugradts.passbird.domain.model.egg.EggId.Companion.createEggId
 import de.pflugradts.passbird.domain.model.egg.Password.Companion.createPassword
 import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
+import de.pflugradts.passbird.domain.model.event.EggMoved
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.nest.NestSlot
@@ -31,7 +32,10 @@ class Egg private constructor(
         registerDomainEvent(EggUpdated(this))
     }
 
-    fun moveToNestAt(nestSlot: NestSlot) { this.nestSlot = nestSlot }
+    fun moveToNestAt(nestSlot: NestSlot) {
+        this.nestSlot = nestSlot
+        registerDomainEvent(EggMoved(this))
+    }
 
     fun discard() {
         password.discard()

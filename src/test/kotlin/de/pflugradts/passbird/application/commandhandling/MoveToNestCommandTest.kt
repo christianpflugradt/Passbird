@@ -13,7 +13,6 @@ import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -87,7 +86,7 @@ class MoveToNestCommandTest {
         nestService.place(shellOf("Nest"), nestSlotAt(targetNestSlot))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(targetNestSlot)))
-        val outputSlot = slot<Output>()
+        val outputSlot = mutableListOf<Output>()
 
         // when
         expectThat(givenInput) isEqualTo referenceInput
@@ -95,8 +94,9 @@ class MoveToNestCommandTest {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell.asString()).contains("$targetNestSlot: ")
-        expectThat(outputSlot.captured.shell.asString()).not().contains("$currentNestSlot: ")
+        expectThat(outputSlot) hasSize 2
+        expectThat(outputSlot[1].shell.asString()).contains("$targetNestSlot: ")
+        expectThat(outputSlot[1].shell.asString()).not().contains("$currentNestSlot: ")
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
@@ -113,7 +113,7 @@ class MoveToNestCommandTest {
         nestService.moveToNestAt(nestSlotAt(currentNestSlot))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(targetNestSlot)))
-        val outputSlot = slot<Output>()
+        val outputSlot = mutableListOf<Output>()
 
         // when
         expectThat(givenInput) isEqualTo referenceInput
@@ -121,8 +121,9 @@ class MoveToNestCommandTest {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell.asString()).contains("$targetNestSlot: ")
-        expectThat(outputSlot.captured.shell.asString()).not().contains("$currentNestSlot: ")
+        expectThat(outputSlot) hasSize 2
+        expectThat(outputSlot[1].shell.asString()).contains("$targetNestSlot: ")
+        expectThat(outputSlot[1].shell.asString()).not().contains("$currentNestSlot: ")
         expectThat(givenInput) isNotEqualTo referenceInput
     }
 
@@ -144,8 +145,8 @@ class MoveToNestCommandTest {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot) hasSize 2
-        expectThat(outputSlot[1].shell.asString()) contains "Invalid Nest"
+        expectThat(outputSlot) hasSize 3
+        expectThat(outputSlot[2].shell.asString()) contains "Invalid Nest"
         verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
@@ -170,8 +171,8 @@ class MoveToNestCommandTest {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot) hasSize 2
-        expectThat(outputSlot[1].shell.asString()) contains "Egg is already in the specified Nest"
+        expectThat(outputSlot) hasSize 3
+        expectThat(outputSlot[2].shell.asString()) contains "Egg is already in the specified Nest"
         verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
@@ -195,8 +196,8 @@ class MoveToNestCommandTest {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot) hasSize 2
-        expectThat(outputSlot[1].shell.asString()) contains "Specified Nest does not exist"
+        expectThat(outputSlot) hasSize 3
+        expectThat(outputSlot[2].shell.asString()) contains "Specified Nest does not exist"
         verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
@@ -223,8 +224,8 @@ class MoveToNestCommandTest {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot) hasSize 2
-        expectThat(outputSlot[1].shell.asString()) contains "Egg with same EggId already exists in target Nest"
+        expectThat(outputSlot) hasSize 3
+        expectThat(outputSlot[2].shell.asString()) contains "Egg with same EggId already exists in target Nest"
         verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }

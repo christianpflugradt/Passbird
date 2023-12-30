@@ -5,6 +5,7 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
+import de.pflugradts.passbird.domain.model.event.EggMoved
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
@@ -44,6 +45,11 @@ class ApplicationEventHandler @Inject constructor(
     }
 
     @Subscribe
+    private fun handleEggMoved(eggMoved: EggMoved) {
+        send("Egg '${decrypt(eggMoved.egg.viewEggId())}' successfully moved to ${nestSlotText(eggMoved.egg.associatedNest().index())}.")
+    }
+
+    @Subscribe
     private fun handleEggNotFound(eggNotFound: EggNotFound) {
         send("Egg '${decrypt(eggNotFound.eggIdShell)}' not found.")
     }
@@ -71,3 +77,5 @@ class ApplicationEventHandler @Inject constructor(
     private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), OutputFormatting.GREEN))
     private fun decrypt(shell: Shell) = cryptoProvider.decrypt(shell).asString()
 }
+
+private fun nestSlotText(nestSlotIndex: Int) = if (nestSlotIndex in 1..9) "Nest at Slot $nestSlotIndex" else "Default Nest"
