@@ -6,6 +6,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.HelpCommand
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 
 class HelpCommandHandler @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -13,30 +14,25 @@ class HelpCommandHandler @Inject constructor(
     @Subscribe
     private fun handleHelpCommand(@Suppress("UNUSED_PARAMETER") helpCommand: HelpCommand) {
         userInterfaceAdapterPort.send(
-            outputOf(
-                shellOf(
-                    """
-                    
-                    Usage: [command][parameter]
-                    A command takes at most one parameter which is usually an EggId.
-                    
-                    commands:
-                    ${'\t'}g[EggId] (get) copies the Password contained in that Egg to clipboard
-                    ${'\t'}s[EggId] (set) sets a random Password for this Egg overwriting any that existed
-                    ${'\t'}c[EggId] (custom set) like set but prompts the user to input a new Password
-                    ${'\t'}v[EggId] (view) prints the Password contained in that Egg to the console
-                    ${'\t'}r[EggId] (rename) renames an Egg by prompting the user for a new one
-                    ${'\t'}d[EggId] (discard) removes the Egg entirely from the database
-                    ${'\t'}e (export) exports the Password database in a human readable json format
-                    ${'\t'}i (import) imports Passwords into the database from a json file
-                    ${'\t'}l (list) non parameterized, lists all Eggs in the database
-                    ${'\t'}n (Nests) view available Nests and print Nest specific help
-                    ${'\t'}h (help) prints this help
-                    ${'\t'}q (quit) terminates Passbird application 
-                    """.trimIndent(),
-                ),
-            ),
+            outBold("\nUsage: [command][parameter]\n"),
+            out("A command takes at most one parameter which is usually an EggId.\n\n"),
+            outBold("Commands:\n\n"),
+            outBold("\tg[EggId]"), out(" (get) copies the Password contained in that Egg to clipboard\n"),
+            outBold("\ts[EggId]"), out(" (set) sets a random Password for this Egg overwriting any that existed\n"),
+            outBold("\tc[EggId]"), out(" (custom set) like set but prompts the user to input a new Password\n"),
+            outBold("\tv[EggId]"), out(" (view) prints the Password contained in that Egg to the console\n"),
+            outBold("\tr[EggId]"), out(" (rename) renames an Egg by prompting the user for a new one\n"),
+            outBold("\td[EggId]"), out(" (discard) removes the Egg entirely from the database\n"),
+            out("\n"),
+            outBold("\te"), out(" (export) exports the Password database in a human readable json format\n"),
+            outBold("\ti"), out(" (import) imports Passwords into the database from a json file\n"),
+            outBold("\tl"), out(" (list) non parameterized, lists all Eggs in the database\n"),
+            outBold("\tn"), out(" (view Nests) view available Nests and print Nest specific help\n"),
+            outBold("\th"), out(" (help) prints this help\n"),
+            outBold("\tq"), out(" (quit) terminates Passbird application \n"),
         )
-        userInterfaceAdapterPort.sendLineBreak()
     }
 }
+
+private fun outBold(text: String) = outputOf(shellOf(text), OutputFormatting.PURPLE)
+private fun out(text: String) = outputOf(shellOf(text), OutputFormatting.WHITE)
