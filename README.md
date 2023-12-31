@@ -129,6 +129,10 @@ No. Many programs don't support unicode characters in Passwords. In fact some do
 
 Passbird uses semantic versioning in the style of *x.y.z* where x is the major version, y the minor version and z the patch level version. Updating to a minor or patch level version is very simple: Just download the jar file and use it. Consult the migration notes in this Readme when upgrading to the next major version. 
 
+You will always find the ten most recent versions of Passbird [at my website](https://pflugradts.de/password-manager/). There you will also find the checksum for each jar file. You can use the program `md5sum`, pre-installed on many operating systems, to verify file integrity: `md5sum filename`
+
+A more automated but less secure alternative to manually updating Passbird is [Passbird-Updater](https://gitlab.com/christianpflugradt/passbird-updater). Please consult its [README](https://gitlab.com/christianpflugradt/passbird-updater#passbird-updater) before using it. Passbird Updater is not part of Passbird and the recommended way is to manually update Passbird.
+
 ### What can I do if I forget my master Password? ###
 Without the correct master Password you cannot decrypt your Password database. There is no way to bypass this protection. The only thing you can do is to try and find out your Password via brute force. Passbird terminates after 3 wrong attempts so if the program is still running after 3 guesses, you have guessed correctly. I am not aware of any way to protect against brute force attacks by the way, since an attacker could simply brute force the keystore itself instead of using Passbird to find out the correct Password. The best protection is a secure Password that would take a long time to guess, and to keep your keystore file safe.
 
