@@ -11,8 +11,8 @@ plugins {
     jacoco
     java
     kotlin("jvm") version "1.9.22"
-    id("org.owasp.dependencycheck") version "9.0.7"
-    id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
+    id("org.owasp.dependencycheck") version "9.0.8"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
 }
 
@@ -29,7 +29,7 @@ dependencies {
 
     testImplementation("io.strikt:strikt-core:0.34.1")
     testImplementation("io.strikt:strikt-jvm:0.34.1")
-    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation("io.mockk:mockk:1.13.9")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
