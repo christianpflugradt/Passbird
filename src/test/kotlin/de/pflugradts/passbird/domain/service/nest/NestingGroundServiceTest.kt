@@ -9,7 +9,6 @@ import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.hasSize
@@ -158,7 +157,6 @@ class NestingGroundServiceTest {
         expectThat(nestingGroundService.currentNest().nestSlot) isNotEqualTo wantedCurrentNestSlot
     }
 
-    @Disabled // FIXME needs to be resolved without creating a circular dependency
     @Test
     fun `should deploy nest and sync`() {
         // given
