@@ -4,8 +4,11 @@ import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.egg.EggId.Companion.createEggId
 import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
+import de.pflugradts.passbird.domain.model.event.EggMoved
+import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.nest.NestSlot
+import de.pflugradts.passbird.domain.model.nest.NestSlot.N1
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import io.mockk.every
@@ -227,6 +230,38 @@ class EggTest {
             val actual = egg.getDomainEvents()[0]
             expectThat(actual).isA<EggDiscarded>()
             expectThat((actual as EggDiscarded).egg) isEqualTo egg
+        }
+
+        @Test
+        fun `should have renamed event when egg is renamed`() {
+            // given
+            val egg = createEggForTesting()
+
+            // when
+            egg.clearDomainEvents()
+            egg.rename(shellOf("newEggId"))
+
+            // then
+            expectThat(egg.getDomainEvents()) hasSize 1
+            val actual = egg.getDomainEvents()[0]
+            expectThat(actual).isA<EggRenamed>()
+            expectThat((actual as EggRenamed).egg) isEqualTo egg
+        }
+
+        @Test
+        fun `should have moved event when egg is moved`() {
+            // given
+            val egg = createEggForTesting()
+
+            // when
+            egg.clearDomainEvents()
+            egg.moveToNestAt(N1)
+
+            // then
+            expectThat(egg.getDomainEvents()) hasSize 1
+            val actual = egg.getDomainEvents()[0]
+            expectThat(actual).isA<EggMoved>()
+            expectThat((actual as EggMoved).egg) isEqualTo egg
         }
     }
 }
