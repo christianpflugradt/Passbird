@@ -33,6 +33,7 @@ interface ReadableConfiguration {
     interface KeyStore { val location: String }
     interface UserInterface {
         val ansiEscapeCodes: AnsiEscapeCodes
+        val audibleBell: Boolean
         val secureInput: Boolean
     }
     interface AnsiEscapeCodes { val enabled: Boolean }

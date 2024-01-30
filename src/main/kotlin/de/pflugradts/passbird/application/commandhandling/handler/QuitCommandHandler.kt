@@ -7,9 +7,9 @@ import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.BLUE
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.RED
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.YELLOW
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ERROR_MESSAGE
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
 
 class QuitCommandHandler @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -19,9 +19,9 @@ class QuitCommandHandler @Inject constructor(
     private fun handleQuitCommand(@Suppress("UNUSED_PARAMETER") quitCommand: QuitCommand) {
         userInterfaceAdapterPort.sendLineBreak()
         val goodbye = randomGoodBye()
-        userInterfaceAdapterPort.send(outputOf(shellOf("  -,     "), BLUE), outputOf(shellOf(goodbye.first), YELLOW))
-        userInterfaceAdapterPort.send(outputOf(shellOf(" ( '<    "), YELLOW), outputOf(shellOf(goodbye.second), YELLOW))
-        userInterfaceAdapterPort.send(outputOf(shellOf("/ ) )    "), RED), outputOf(shellOf(goodbye.third), YELLOW))
+        userInterfaceAdapterPort.send(outputOf(shellOf("  -,     "), NEST), outputOf(shellOf(goodbye.first), SPECIAL))
+        userInterfaceAdapterPort.send(outputOf(shellOf(" ( '<    "), SPECIAL), outputOf(shellOf(goodbye.second), SPECIAL))
+        userInterfaceAdapterPort.send(outputOf(shellOf("/ ) )    "), ERROR_MESSAGE), outputOf(shellOf(goodbye.third), SPECIAL))
         userInterfaceAdapterPort.sendLineBreak()
         systemOperation.exit()
     }

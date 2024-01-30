@@ -12,8 +12,8 @@ import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.BLUE
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.YELLOW
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
 
 private const val COPYRIGHT = "\tCopyright 2020 - 2024 Christian Pflugradt"
 private const val LICENSE = """${'\t'}This software is licensed under the Apache License, Version 2.0 (APLv2)
@@ -42,9 +42,9 @@ class PassbirdLauncher @Inject constructor(
     private fun sendBanner() {
         userInterfaceAdapterPort.sendLineBreak()
         userInterfaceAdapterPort.send(outputOf(shellOf(if (ansiEscapeCodesEnabled) coloredBanner() else plainBanner())))
-        userInterfaceAdapterPort.send(outputOf(shellOf("\t${javaClass.getPackage().implementationVersion}"), BLUE))
+        userInterfaceAdapterPort.send(outputOf(shellOf("\t${javaClass.getPackage().implementationVersion}"), NEST))
         userInterfaceAdapterPort.sendLineBreak()
-        userInterfaceAdapterPort.send(outputOf(shellOf(SLOGAN), YELLOW))
+        userInterfaceAdapterPort.send(outputOf(shellOf(SLOGAN), SPECIAL))
         userInterfaceAdapterPort.sendLineBreak()
     }
 

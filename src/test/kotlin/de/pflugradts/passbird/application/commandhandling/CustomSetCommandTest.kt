@@ -12,7 +12,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ORANGE
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.mockk
@@ -69,7 +69,7 @@ class CustomSetCommandTest {
 
         // then
         val expectedOutput = "EggId '$args' contains non alphabetic characters - Operation aborted."
-        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf(expectedOutput), ORANGE))) }
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf(expectedOutput), OPERATION_ABORTED))) }
         verify(exactly = 0) { passwordService.putEgg(eq(shellOf(args)), any()) }
         expectThat(shell) isNotEqualTo reference
     }

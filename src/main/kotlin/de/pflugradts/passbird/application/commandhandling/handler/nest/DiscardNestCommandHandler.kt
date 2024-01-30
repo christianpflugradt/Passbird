@@ -9,7 +9,7 @@ import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
 import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ORANGE
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
@@ -22,10 +22,10 @@ class DiscardNestCommandHandler @Inject constructor(
     @Subscribe
     private fun handleDiscardNestCommand(discardNestCommand: DiscardNestCommand) {
         if (discardNestCommand.nestSlot == DEFAULT) {
-            userInterfaceAdapterPort.send(outputOf(shellOf("Default Nest cannot be discarded - Operation aborted."), ORANGE))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Default Nest cannot be discarded - Operation aborted."), OPERATION_ABORTED))
             return
         } else if (nestService.atNestSlot(discardNestCommand.nestSlot).isEmpty) {
-            userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted."), ORANGE))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted."), OPERATION_ABORTED))
             return
         } else {
             val currentNest = nestService.currentNest()
@@ -56,10 +56,12 @@ class DiscardNestCommandHandler @Inject constructor(
                             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
                         }
                     } else {
-                        userInterfaceAdapterPort.send(outputOf(shellOf("Nest Slot $nestSlot is empty - Operation aborted."), ORANGE))
+                        userInterfaceAdapterPort.send(
+                            outputOf(shellOf("Nest Slot $nestSlot is empty - Operation aborted."), OPERATION_ABORTED),
+                        )
                     }
                 } else {
-                    userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), ORANGE))
+                    userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
                 }
             }
             nestService.moveToNestAt(if (discardNestCommand.nestSlot == currentNest.nestSlot) DEFAULT else currentNest.nestSlot)

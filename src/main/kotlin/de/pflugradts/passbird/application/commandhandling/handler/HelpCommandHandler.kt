@@ -6,7 +6,8 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.HelpCommand
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.DEFAULT
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.HIGHLIGHT
 
 class HelpCommandHandler @Inject constructor(
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -34,5 +35,5 @@ class HelpCommandHandler @Inject constructor(
     }
 }
 
-private fun outBold(text: String) = outputOf(shellOf(text), OutputFormatting.PURPLE)
-private fun out(text: String) = outputOf(shellOf(text), OutputFormatting.WHITE)
+private fun outBold(text: String) = outputOf(shellOf(text), HIGHLIGHT)
+private fun out(text: String) = outputOf(shellOf(text), DEFAULT)

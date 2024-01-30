@@ -7,8 +7,8 @@ import de.pflugradts.passbird.application.commandhandling.command.ViewNestComman
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.PURPLE
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.WHITE
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.DEFAULT
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.HIGHLIGHT
 import de.pflugradts.passbird.domain.service.nest.NestService
 
 class ViewNestCommandHandler @Inject constructor(
@@ -38,5 +38,5 @@ class ViewNestCommandHandler @Inject constructor(
     }
 }
 
-private fun outBold(text: String) = outputOf(shellOf(text), PURPLE)
-private fun out(text: String) = outputOf(shellOf(text), WHITE)
+private fun outBold(text: String) = outputOf(shellOf(text), HIGHLIGHT)
+private fun out(text: String) = outputOf(shellOf(text), DEFAULT)

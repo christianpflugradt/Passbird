@@ -9,7 +9,7 @@ import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
@@ -71,7 +71,7 @@ class CommandLineInterfaceServiceTest {
 
             // when
             captureSystemOut.during {
-                commandLineInterfaceService.send(outputOf(shellOf(givenMessage), OutputFormatting.YELLOW))
+                commandLineInterfaceService.send(outputOf(shellOf(givenMessage), SPECIAL))
             }
 
             // then

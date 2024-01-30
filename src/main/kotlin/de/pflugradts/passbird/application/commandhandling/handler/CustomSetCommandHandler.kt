@@ -8,7 +8,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ORANGE
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.DO_NOTHING
 
@@ -24,16 +24,16 @@ class CustomSetCommandHandler @Inject constructor(
                 passwordService.challengeEggId(customSetCommand.argument)
                 val secureInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter custom Password: ")))
                 if (secureInput.isEmpty) {
-                    userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), ORANGE))
+                    userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
                 } else {
                     passwordService.putEgg(customSetCommand.argument, secureInput.shell)
                 }
                 secureInput.invalidate()
             } catch (ex: InvalidEggIdException) {
-                userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), ORANGE))
+                userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
             }
         } else {
-            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), ORANGE))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
         }
         customSetCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

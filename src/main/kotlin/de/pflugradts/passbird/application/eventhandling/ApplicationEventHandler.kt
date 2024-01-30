@@ -16,7 +16,7 @@ import de.pflugradts.passbird.domain.model.event.NestDiscarded
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.EVENT_HANDLED
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 
@@ -74,7 +74,7 @@ class ApplicationEventHandler @Inject constructor(
         send("Nest '${nestDiscarded.nest.viewNestId().asString()}' successfully discarded.")
     }
 
-    private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), OutputFormatting.GREEN))
+    private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), EVENT_HANDLED))
     private fun decrypt(shell: Shell) = cryptoProvider.decrypt(shell).asString()
 }
 
