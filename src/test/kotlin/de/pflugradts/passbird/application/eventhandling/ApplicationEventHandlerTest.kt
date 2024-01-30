@@ -6,6 +6,7 @@ import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggCreated
+import de.pflugradts.passbird.domain.model.event.EggMoved
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
@@ -59,7 +60,7 @@ class ApplicationEventHandlerTest {
             Arguments.of(EggCreated(createEggForTesting())),
             Arguments.of(EggUpdated(createEggForTesting())),
             Arguments.of(EggRenamed(createEggForTesting())),
-            Arguments.of(EggRenamed(createEggForTesting())),
+            Arguments.of(EggMoved(createEggForTesting())),
             Arguments.of(EggNotFound(emptyShell())),
         )
     }
