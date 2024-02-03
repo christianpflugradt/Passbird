@@ -52,6 +52,7 @@ class ApplicationEventHandler @Inject constructor(
     @Subscribe
     private fun handleEggNotFound(eggNotFound: EggNotFound) {
         send("Egg '${decrypt(eggNotFound.eggIdShell)}' not found.")
+        userInterfaceAdapterPort.warningSound()
     }
 
     @Subscribe

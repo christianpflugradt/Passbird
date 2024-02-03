@@ -12,4 +12,5 @@ interface UserInterfaceAdapterPort {
     fun send(vararg output: Output)
     fun sendLineBreak() = send(emptyOutput())
     fun receiveConfirmation(output: Output) = receive(output).run { !isEmpty && data.isEmpty && command.firstByte == 'c'.code.toByte() }
+    fun warningSound()
 }

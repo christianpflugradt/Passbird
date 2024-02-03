@@ -10,6 +10,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 
 @Singleton
 class CommandLineInterfaceService @Inject constructor(
@@ -43,7 +44,11 @@ class CommandLineInterfaceService @Inject constructor(
         it.formatting?.also { formatting -> if (escapeCodesEnabled) beginEscape(formatting) }
         shellOf(it.shell.toByteArray()).forEach { char -> sendChar(Char(char.toUShort())) }
         it.formatting?.also { if (escapeCodesEnabled) endEscape() }
+        it.formatting?.let { formatting -> if (formatting == OutputFormatting.OPERATION_ABORTED) warningSound() }
     }
+
     private fun sendChar(chr: Char) = print(chr)
+    override fun warningSound() { if (audibleBell) sendChar('\u0007') }
     private val escapeCodesEnabled: Boolean get() = configuration.adapter.userInterface.ansiEscapeCodes.enabled
+    private val audibleBell: Boolean get() = configuration.adapter.userInterface.audibleBell
 }
