@@ -32,24 +32,52 @@ The master Password you have chosen must be input everytime you start Passbird i
 Don't worry if you start setup by accident, just press any key other than `c` and setup will exit without touching anything.
 
 ## Configuration ##
-Once set up Passbird will create a `passbird.yml` with various configuration parameters. The following parameters are available as of now:
+Once set up Passbird will create a `passbird.yml` with various configuration parameters. The following structure represents the default in the latest release of Passbird, enriched by explanatory comments:
 
- * `application.inactivityLimit.enabled` specifies whether passbird should auto terminate after a specified time (default: false)
-* `application.inactivityLimit.limitInMinutes` specifies after how many minutes of inactivity (not pressing enter) passbird should auto terminate if enabled (default: 10)
- * `application.password.length` specifies the length of generated Passwords (default: 20 characters)
- * `application.password.specialCharacters` specifies whether generated Passwords have special characters such as !@#$% or not (default: true)
- * `application.password.promptOnRemoval` specifies whether manual confirmation is required when an action would delete a previously saved Password (default: true)
- * `adapter.clipboard.reset.enabled` specifies whether clipboard will be cleared after a Password is copied to clipboard (default: true)
- * `adapter.clipboard.reset.delaySeconds` specifies after how many seconds clipboard will be cleared if clipboard reset is enabled (default: 10)
- * `adapter.keyStore.location` contains path to directory where `passbird.ks` keystore file is stored (no default, specified in setup)
- * `adapter.passwordStore.location` contains path to directory where `passbird.pw` database file is stored (no default, specified in setup)
- * `adapter.passwordStore.verifySignature` terminates Passbird if the Password database signature does not match (default: true)
- * `adapter.passwordStore.verifyChecksum` terminates Passbird if the Password database checksum does not match (default: true)
- * `adapter.userInterface.ansiEscapeCodes.enabled` specifies whether ansi escape codes are used to display text in multiple colors (default: false, requires terminal to support 8-bit colors)
-* `adapter.userInterface.audibleBell` specifies whether an acoustic signal is played to indicate an input error (default: false, requires terminal to support the bell character)
- * `adapter.userInterface.secureInput` specifies whether your master Password and custom Passwords will use secure input where the characters you input will not be displayed in your terminal (default: true)
+```yaml
+application:
+  inactivityLimit:
+    # terminates Passbird after a period of inactivity if enabled
+    enabled: false
+    # required minutes of continuous inactivity to pass before termination
+    limitInMinutes: 10
+  password:
+    # length of passwords generated through Passbird
+    length: 20
+    # enables non-alphanumeric characters in passwords such as !@#$^&.)"\
+    specialCharacters: true
+    # requires confirmation before actions that delete or update passwords
+    promptOnRemoval: true
+adapter:
+  clipboard:
+    reset:
+      # empties clipboard after a password is copied to it
+      enabled: true
+      # number of seconds to pass before clipboard is emptied
+      delaySeconds: 10
+  keyStore:
+    # directory where keystore is located
+    location:
+  passwordStore:
+    # directory where password database is located
+    location:
+    # terminates Passbird if database checksum doesn't meet expectations
+    verifyChecksum: true
+    # terminates Passbird if database signature doesn't meet expectations
+    verifySignature: true
+  # some of these settings are not supported by all terminals
+  userInterface:
+    ansiEscapeCodes:
+      # enables colorful mode
+      enabled: true 
+    # gives acoustic feedback on invalid input
+    audibleBell: false
+    # hides sensitive user input such as passwords
+    secureInput: true
+```
+You may adjust the configuration parameters to your needs by editing the yaml file with a text editor. The configuration file must retain a valid yaml format and may only contain parameters known to Passbird. While not advised it is possible to omit most parameters in which case the defaults will be used.
 
-You may adjust the configuration parameters to your needs by editing the yml file with a text editor. The configuration file must retain a valid yaml format and set all configuration parameters or Passbird might not be able to read it.
+Defaults are subject to change in major updates of Passbird. When new parameters are introduced in minor updates they're usually inactive by default to change the experience as little as possible.
 
 ## Usage ##
 
