@@ -20,7 +20,14 @@ data class Configuration(
         adapter.passwordStore.location = directory.value
     }
 
-    data class Application(override val password: Password = Password()) : ReadableConfiguration.Application
+    data class Application(
+        override val inactivityLimit: InactivityLimit = InactivityLimit(),
+        override val password: Password = Password(),
+    ) : ReadableConfiguration.Application
+    data class InactivityLimit(
+        override val enabled: Boolean = false,
+        override val limitInMinutes: Int = 10,
+    ) : ReadableConfiguration.InactivityLimit
     data class Password(
         override val length: Int = DEFAULT_PASSWORD_LENGTH,
         override val specialCharacters: Boolean = true,

@@ -2,8 +2,11 @@ package de.pflugradts.passbird.application.boot.main
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.InputHandler
+import de.pflugradts.passbird.application.configuration.Configuration
+import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.application.mainMocked
+import de.pflugradts.passbird.application.process.inactivity.InactivityHandler
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.nest.NestSlot
@@ -23,14 +26,18 @@ import strikt.assertions.isEqualTo
 
 class PassbirdApplicationTest {
 
+    private val configuration = mockk<Configuration>()
+    private val inactivityHandler = mockk<InactivityHandler>(relaxed = true)
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>()
     private val nestService = createNestServiceSpyForTesting()
     private val inputHandler = mockk<InputHandler>()
-    private val passbirdApplication = PassbirdApplication(userInterfaceAdapterPort, nestService, inputHandler)
+    private val passbirdApplication =
+        PassbirdApplication(configuration, inactivityHandler, userInterfaceAdapterPort, nestService, inputHandler)
 
     @BeforeEach
     fun setup() {
         mainMocked(args = arrayOf("/tmp"), withMockedFileCheck = true)
+        fakeConfiguration(instance = configuration)
     }
 
     @Test

@@ -34,6 +34,8 @@ Don't worry if you start setup by accident, just press any key other than `c` an
 ## Configuration ##
 Once set up Passbird will create a `passbird.yml` with various configuration parameters. The following parameters are available as of now:
 
+ * `application.inactivityLimit.enabled` specifies whether passbird should auto terminate after a specified time (default: false)
+* `application.inactivityLimit.limitInMinutes` specifies after how many minutes of inactivity (not pressing enter) passbird should auto terminate if enabled (default: 10)
  * `application.password.length` specifies the length of generated Passwords (default: 20 characters)
  * `application.password.specialCharacters` specifies whether generated Passwords have special characters such as !@#$% or not (default: true)
  * `application.password.promptOnRemoval` specifies whether manual confirmation is required when an action would delete a previously saved Password (default: true)

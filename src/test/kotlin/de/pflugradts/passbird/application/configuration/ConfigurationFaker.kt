@@ -44,9 +44,12 @@ fun fakeConfiguration(
     every { adapter.keyStore } returns keyStore
     every { adapter.passwordStore } returns passwordStore
     every { instance.adapter } returns adapter
+    val inactivityLimit = mockk<Configuration.InactivityLimit>()
+    every { inactivityLimit.enabled } returns false
     val password = mockk<Configuration.Password>()
     every { password.promptOnRemoval } returns withPromptOnRemoval
     val application = mockk<Configuration.Application>()
+    every { application.inactivityLimit } returns inactivityLimit
     every { application.password } returns password
     every { instance.application } returns application
     every { instance.template } returns withConfigurationTemplate

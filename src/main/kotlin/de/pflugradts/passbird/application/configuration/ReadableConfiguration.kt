@@ -8,7 +8,14 @@ interface ReadableConfiguration {
     val application: Application
     val adapter: Adapter
 
-    interface Application { val password: Password }
+    interface Application {
+        val inactivityLimit: InactivityLimit
+        val password: Password
+    }
+    interface InactivityLimit {
+        val enabled: Boolean
+        val limitInMinutes: Int
+    }
     interface Password {
         val length: Int
         val specialCharacters: Boolean

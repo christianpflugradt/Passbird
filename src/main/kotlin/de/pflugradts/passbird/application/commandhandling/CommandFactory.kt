@@ -12,6 +12,7 @@ import de.pflugradts.passbird.application.commandhandling.command.ImportCommand
 import de.pflugradts.passbird.application.commandhandling.command.ListCommand
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
+import de.pflugradts.passbird.application.commandhandling.command.QuitReason.USER
 import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
 import de.pflugradts.passbird.application.commandhandling.command.SetCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewCommand
@@ -37,7 +38,7 @@ class CommandFactory @Inject constructor(
                 tryCatching { nestCommandFactory.constructFromInput(input) }
                     .onFailure { reportFailure(CommandFailure(it)) }
                     .getOrElse(NullCommand())
-            CommandType.QUIT -> QuitCommand()
+            CommandType.QUIT -> QuitCommand(quitReason = USER)
             CommandType.RENAME -> RenameCommand(input)
             CommandType.SET -> SetCommand(input)
             CommandType.VIEW -> ViewCommand(input)

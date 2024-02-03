@@ -4,6 +4,7 @@ import com.google.common.eventbus.Subscribe
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
+import de.pflugradts.passbird.application.commandhandling.command.QuitReason.INACTIVITY
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -16,8 +17,13 @@ class QuitCommandHandler @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
 ) : CommandHandler {
     @Subscribe
-    private fun handleQuitCommand(@Suppress("UNUSED_PARAMETER") quitCommand: QuitCommand) {
+    private fun handleQuitCommand(quitCommand: QuitCommand) {
         userInterfaceAdapterPort.sendLineBreak()
+        if (quitCommand.quitReason == INACTIVITY) {
+            userInterfaceAdapterPort.sendLineBreak()
+            userInterfaceAdapterPort.send(outputOf(shellOf("Terminating Passbird due to inactivity.")))
+            userInterfaceAdapterPort.sendLineBreak()
+        }
         val goodbye = randomGoodBye()
         userInterfaceAdapterPort.send(outputOf(shellOf("  -,     "), NEST), outputOf(shellOf(goodbye.first), SPECIAL))
         userInterfaceAdapterPort.send(outputOf(shellOf(" ( '<    "), SPECIAL), outputOf(shellOf(goodbye.second), SPECIAL))
