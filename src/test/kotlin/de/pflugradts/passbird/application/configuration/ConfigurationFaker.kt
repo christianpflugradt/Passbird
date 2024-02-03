@@ -18,6 +18,7 @@ fun fakeConfiguration(
     withPasswordStoreLocation: String = "",
     withPromptOnRemoval: Boolean = false,
     withSecureInputEnabled: Boolean = true,
+    withInactivityTimeLimit: Int = 0,
     withVerifyChecksum: Boolean = true,
     withVerifySignature: Boolean = true,
 ) {
@@ -45,7 +46,8 @@ fun fakeConfiguration(
     every { adapter.passwordStore } returns passwordStore
     every { instance.adapter } returns adapter
     val inactivityLimit = mockk<Configuration.InactivityLimit>()
-    every { inactivityLimit.enabled } returns false
+    every { inactivityLimit.enabled } returns (withInactivityTimeLimit > 0)
+    every { inactivityLimit.limitInMinutes } returns withInactivityTimeLimit
     val password = mockk<Configuration.Password>()
     every { password.promptOnRemoval } returns withPromptOnRemoval
     val application = mockk<Configuration.Application>()

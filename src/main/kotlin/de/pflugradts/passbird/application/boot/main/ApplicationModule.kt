@@ -112,15 +112,15 @@ class ApplicationModule : AbstractModule() {
         )
     }
 
-    private class CryptoProviderDependencyProvider @Inject constructor(
-        @Inject private val cryptoProviderFactory: CryptoProviderFactory,
-    ) : Provider<CryptoProvider> {
-        override fun get() = cryptoProviderFactory.createCryptoProvider()
-    }
-
     private class ConfigurationDependencyProvider @Inject constructor(
         @Inject private val configurationFactory: ConfigurationFactory,
     ) : Provider<ReadableConfiguration> {
         override fun get(): ReadableConfiguration = configurationFactory.loadConfiguration()
+    }
+
+    private class CryptoProviderDependencyProvider @Inject constructor(
+        @Inject private val cryptoProviderFactory: CryptoProviderFactory,
+    ) : Provider<CryptoProvider> {
+        override fun get() = cryptoProviderFactory.createCryptoProvider()
     }
 }

@@ -14,11 +14,13 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.KeyStore
+import java.time.Clock
 import kotlin.system.exitProcess
 
 private const val JCEKS_KEYSTORE = "JCEKS"
 
 class SystemOperation {
+    val clock = Clock.systemUTC()
     val isConsoleAvailable: Boolean get() = System.console() != null
     val jceksInstance: KeyStore get() = KeyStore.getInstance(JCEKS_KEYSTORE)
 

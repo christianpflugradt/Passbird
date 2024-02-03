@@ -5,17 +5,19 @@ import de.pflugradts.passbird.application.commandhandling.CommandBus
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitReason.INACTIVITY
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.util.SystemOperation
 
 class InactivityHandler @Inject constructor(
     @Inject private val commandBus: CommandBus,
     @Inject private val configuration: ReadableConfiguration,
+    @Inject private val systemOperation: SystemOperation,
 ) {
     private val inactivityLimitInMinutes get() = configuration.application.inactivityLimit.limitInMinutes
     private var lastInteraction = now()
-    private fun now() = System.currentTimeMillis()
+    private fun now() = systemOperation.clock.instant().epochSecond
     fun registerInteraction() { lastInteraction = now() }
     fun checkInactivity() {
-        if (((now() - lastInteraction) / 60_000) > inactivityLimitInMinutes) {
+        if ((now() - lastInteraction) > (inactivityLimitInMinutes * 60)) {
             commandBus.post(QuitCommand(quitReason = INACTIVITY))
         }
     }
