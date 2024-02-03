@@ -31,7 +31,7 @@ fun fakeConfiguration(
     val userInterface = mockk<UserInterface>()
     every { userInterface.secureInput } returns withSecureInputEnabled
     every { userInterface.ansiEscapeCodes } returns ansiEscapeCodes
-    every { userInterface.audibleBell} returns withAudibleBellEnabled
+    every { userInterface.audibleBell } returns withAudibleBellEnabled
     val keyStore = mockk<Configuration.KeyStore>()
     every { keyStore.location } returns withKeyStoreLocation
     val passwordStore = mockk<Configuration.PasswordStore>()
