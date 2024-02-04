@@ -35,12 +35,12 @@ class SetInfoCommandHandler @Inject constructor(
             }
             if (!it.hasSpecialCharacters) {
                 userInterfaceAdapterPort.send(out("\tno special characters"))
-            } else if (it.unusedSpecialCharacters != null && it.unusedSpecialCharacters.isNotEmpty()) {
+            } else if (it.unusedSpecialCharacters.isNotEmpty()) {
                 userInterfaceAdapterPort.send(out("\tunused special characters: ${it.unusedSpecialCharacters}"))
             }
         }
         userInterfaceAdapterPort.send(
-            outBold("\nAvailable Set Commands:\n"),
+            outBold("\nAvailable Set commands:\n"),
             outBold("\n\ts[EggId] "),
             out("sets a random Password with default configuration"),
             outBold("\n\ts[1-9][EggId] "),

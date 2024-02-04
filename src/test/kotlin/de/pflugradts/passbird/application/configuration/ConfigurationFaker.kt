@@ -17,6 +17,9 @@ fun fakeConfiguration(
     withKeyStoreLocation: String = "",
     withPasswordStoreLocation: String = "",
     withPromptOnRemoval: Boolean = false,
+    withSpecialCharacters: Boolean = true,
+    withPasswordLength: Int = 20,
+    withCustomPasswordConfigurations: List<Configuration.CustomPasswordConfiguration> = emptyList(),
     withSecureInputEnabled: Boolean = true,
     withInactivityTimeLimit: Int = 0,
     withVerifyChecksum: Boolean = true,
@@ -50,6 +53,9 @@ fun fakeConfiguration(
     every { inactivityLimit.limitInMinutes } returns withInactivityTimeLimit
     val password = mockk<Configuration.Password>()
     every { password.promptOnRemoval } returns withPromptOnRemoval
+    every { password.specialCharacters } returns withSpecialCharacters
+    every { password.length } returns withPasswordLength
+    every { password.customPasswordConfigurations } returns withCustomPasswordConfigurations
     val application = mockk<Configuration.Application>()
     every { application.inactivityLimit } returns inactivityLimit
     every { application.password } returns password

@@ -97,7 +97,7 @@ You may define up to nine custom password configurations for specific use cases 
          hasUppercaseLetters: true
          hasSpecialCharacters: true
          # all special characters are used by default
-         unusedSpecialCharacters:
+         unusedSpecialCharacters: ""
        - name: alphanumeric
          length: 32
          hasSpecialCharacters: false
