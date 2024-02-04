@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.domain.service.password.provider
 
-import de.pflugradts.passbird.domain.model.egg.createPasswordRequirementsForTesting
+import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -14,7 +14,7 @@ class RandomPasswordProviderTest {
     fun `should use given length`() {
         // given
         val passwordLength = 25
-        val passwordRequirements = createPasswordRequirementsForTesting(withLength = passwordLength)
+        val passwordRequirements = PasswordRequirements(length = passwordLength)
 
         // when
         val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
@@ -28,7 +28,7 @@ class RandomPasswordProviderTest {
     @Test
     fun `should include digits`() {
         // given
-        val passwordRequirements = createPasswordRequirementsForTesting()
+        val passwordRequirements = PasswordRequirements(length = 20)
 
         // when
         val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
@@ -40,9 +40,23 @@ class RandomPasswordProviderTest {
     }
 
     @Test
+    fun `should not include digits if disabled`() {
+        // given
+        val passwordRequirements = PasswordRequirements(length = 20, hasNumbers = false)
+
+        // when
+        val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
+
+        // then
+        expectManyTimes {
+            expectThat(createPassword().asString()) matches "^[^0-9]+\$".toRegex()
+        }
+    }
+
+    @Test
     fun `should include uppercase`() {
         // given
-        val passwordRequirements = createPasswordRequirementsForTesting()
+        val passwordRequirements = PasswordRequirements(length = 20)
 
         // when
         val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
@@ -54,9 +68,23 @@ class RandomPasswordProviderTest {
     }
 
     @Test
+    fun `should not include uppercase if disabled`() {
+        // given
+        val passwordRequirements = PasswordRequirements(length = 20, hasUppercaseLetters = false)
+
+        // when
+        val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
+
+        // then
+        expectManyTimes {
+            expectThat(createPassword().asString()) matches "^[^A-Z]+\$".toRegex()
+        }
+    }
+
+    @Test
     fun `should include lowercase`() {
         // given
-        val passwordRequirements = createPasswordRequirementsForTesting()
+        val passwordRequirements = PasswordRequirements(length = 20)
 
         // when
         val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
@@ -68,9 +96,23 @@ class RandomPasswordProviderTest {
     }
 
     @Test
-    fun `should include special characters if enabled`() {
+    fun `should not include lowercase if disabled`() {
         // given
-        val passwordRequirements = createPasswordRequirementsForTesting(withSpecialCharacters = true)
+        val passwordRequirements = PasswordRequirements(length = 20, hasLowercaseLetters = false)
+
+        // when
+        val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
+
+        // then
+        expectManyTimes {
+            expectThat(createPassword().asString()) matches "^[^a-z]+\$".toRegex()
+        }
+    }
+
+    @Test
+    fun `should include special characters`() {
+        // given
+        val passwordRequirements = PasswordRequirements(length = 20)
 
         // when
         val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
@@ -84,7 +126,7 @@ class RandomPasswordProviderTest {
     @Test
     fun `should not include special characters if disabled`() {
         // given
-        val passwordRequirements = createPasswordRequirementsForTesting(withSpecialCharacters = false)
+        val passwordRequirements = PasswordRequirements(length = 20, hasSpecialCharacters = false)
 
         // when
         val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
@@ -92,6 +134,20 @@ class RandomPasswordProviderTest {
         // then
         expectManyTimes {
             expectThat(createPassword().asString()) matches "^[0-9A-Za-z]+\$".toRegex()
+        }
+    }
+
+    @Test
+    fun `should not include unused if disabled`() {
+        // given
+        val passwordRequirements = PasswordRequirements(length = 20, hasSpecialCharacters = true, unusedSpecialCharacters = " +#(='")
+
+        // when
+        val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
+
+        // then
+        expectManyTimes {
+            expectThat(createPassword().asString()) matches "^[^ +#(=']+\$".toRegex()
         }
     }
 
