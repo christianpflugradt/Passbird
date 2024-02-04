@@ -16,27 +16,34 @@ private val random = SecureRandom()
 class RandomPasswordProvider : PasswordProvider {
     override fun createNewPassword(passwordRequirements: PasswordRequirements): Shell {
         var passwordShell = emptyShell()
-        while (!isStrong(passwordShell, passwordRequirements)) {
-            passwordShell = randomPassword(passwordRequirements)
-        }
+        while (!isStrong(passwordShell, passwordRequirements)) { passwordShell = randomPassword(passwordRequirements) }
         return passwordShell
     }
 
     private fun randomPassword(passwordRequirements: PasswordRequirements) =
-        shellOf((0..<passwordRequirements.passwordLength).map { randomByte(!passwordRequirements.includeSpecialCharacters) }.toList())
+        shellOf((0..<passwordRequirements.length).map { randomByte(passwordRequirements) }.toList())
 
-    private fun randomByte(avoidSymbols: Boolean): Byte {
+    private fun randomByte(passwordRequirements: PasswordRequirements): Byte {
         val getRandom = { (random.nextInt(MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toByte() }
         var result: Byte
-        do { result = getRandom() } while (avoidSymbols && plainValueOf(result).isSymbol)
+        do { result = getRandom() } while (!result.satisfies(passwordRequirements))
         return result
     }
 
-    private fun isStrong(passwordShell: Shell, requirements: PasswordRequirements) =
-        passwordShell.anyMatch(PlainValue::isDigit) &&
-            passwordShell.anyMatch(PlainValue::isUppercaseCharacter) &&
-            passwordShell.anyMatch(PlainValue::isLowercaseCharacter) &&
-            (!requirements.includeSpecialCharacters || passwordShell.anyMatch(PlainValue::isSymbol))
+    private fun isStrong(passwordShell: Shell, passwordRequirements: PasswordRequirements) =
+        (!passwordRequirements.hasNumbers || passwordShell.anyMatch(PlainValue::isDigit)) &&
+            (!passwordRequirements.hasUppercaseLetters || passwordShell.anyMatch(PlainValue::isUppercaseCharacter)) &&
+            (!passwordRequirements.hasLowercaseLetters || passwordShell.anyMatch(PlainValue::isLowercaseCharacter)) &&
+            (!passwordRequirements.hasSpecialCharacters || passwordShell.anyMatch(PlainValue::isSymbol))
 
     private fun Shell.anyMatch(property: KProperty1<PlainValue, Boolean>) = copy().stream().anyMatch { property.get(plainValueOf(it)) }
+    private fun Byte.matches(property: KProperty1<PlainValue, Boolean>) = property.get(plainValueOf(this))
+    private fun Byte.satisfies(passwordRequirements: PasswordRequirements): Boolean {
+        if (passwordRequirements.hasSpecialCharacters && this.toInt().toChar() in passwordRequirements.unusedSpecialCharacters) return false
+        if (!passwordRequirements.hasSpecialCharacters && matches(PlainValue::isSymbol)) return false
+        if (!passwordRequirements.hasNumbers && passwordRequirements.isValid() && matches(PlainValue::isDigit)) return false
+        if (!passwordRequirements.hasLowercaseLetters && matches(PlainValue::isLowercaseCharacter)) return false
+        if (!passwordRequirements.hasUppercaseLetters && matches(PlainValue::isUppercaseCharacter)) return false
+        return true
+    }
 }

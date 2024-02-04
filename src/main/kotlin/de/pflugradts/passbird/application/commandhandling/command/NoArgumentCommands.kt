@@ -7,6 +7,7 @@ class HelpCommand : NoArgumentCommand
 class ImportCommand : NoArgumentCommand
 class ListCommand : NoArgumentCommand
 class QuitCommand(val quitReason: QuitReason) : NoArgumentCommand
+class SetInfoCommand : NoArgumentCommand
 class ViewNestCommand : NoArgumentCommand
 
 class NullCommand : NoArgumentCommand

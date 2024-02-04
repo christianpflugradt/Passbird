@@ -14,6 +14,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.ListCommandHan
 import de.pflugradts.passbird.application.commandhandling.handler.QuitCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.RenameCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.SetCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.SetInfoCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ViewCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
@@ -54,6 +55,7 @@ class PassbirdMainModuleTest {
             QuitCommandHandler::class.java,
             RenameCommandHandler::class.java,
             SetCommandHandler::class.java,
+            SetInfoCommandHandler::class.java,
             SwitchNestCommandHandler::class.java,
             ViewCommandHandler::class.java,
             ViewNestCommandHandler::class.java,

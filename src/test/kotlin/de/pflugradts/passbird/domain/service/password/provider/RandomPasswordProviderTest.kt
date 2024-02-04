@@ -14,7 +14,7 @@ class RandomPasswordProviderTest {
     fun `should use given length`() {
         // given
         val passwordLength = 25
-        val passwordRequirements = createPasswordRequirementsForTesting(withPasswordLength = passwordLength)
+        val passwordRequirements = createPasswordRequirementsForTesting(withLength = passwordLength)
 
         // when
         val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
@@ -70,7 +70,7 @@ class RandomPasswordProviderTest {
     @Test
     fun `should include special characters if enabled`() {
         // given
-        val passwordRequirements = createPasswordRequirementsForTesting(withIncludeSpecialCharacters = true)
+        val passwordRequirements = createPasswordRequirementsForTesting(withSpecialCharacters = true)
 
         // when
         val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }
@@ -84,7 +84,7 @@ class RandomPasswordProviderTest {
     @Test
     fun `should not include special characters if disabled`() {
         // given
-        val passwordRequirements = createPasswordRequirementsForTesting(withIncludeSpecialCharacters = false)
+        val passwordRequirements = createPasswordRequirementsForTesting(withSpecialCharacters = false)
 
         // when
         val createPassword = { passwordProvider.createNewPassword(passwordRequirements) }

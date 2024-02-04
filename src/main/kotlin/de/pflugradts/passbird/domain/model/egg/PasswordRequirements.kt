@@ -1,8 +1,12 @@
 package de.pflugradts.passbird.domain.model.egg
 
-class PasswordRequirements private constructor(val includeSpecialCharacters: Boolean, val passwordLength: Int) {
-    companion object {
-        fun passwordRequirementsOf(includeSpecialCharacters: Boolean, passwordLength: Int) =
-            PasswordRequirements(includeSpecialCharacters, passwordLength)
-    }
+class PasswordRequirements(
+    val length: Int,
+    val hasNumbers: Boolean = true,
+    val hasLowercaseLetters: Boolean = true,
+    val hasUppercaseLetters: Boolean = true,
+    val hasSpecialCharacters: Boolean = true,
+    val unusedSpecialCharacters: String = "",
+) {
+    fun isValid() = hasNumbers || hasLowercaseLetters || hasUppercaseLetters || hasSpecialCharacters
 }

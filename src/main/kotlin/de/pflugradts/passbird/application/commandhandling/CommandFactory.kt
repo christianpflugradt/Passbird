@@ -14,7 +14,6 @@ import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitReason.USER
 import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
-import de.pflugradts.passbird.application.commandhandling.command.SetCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewCommand
 import de.pflugradts.passbird.application.commandhandling.command.base.Command
 import de.pflugradts.passbird.application.failure.CommandFailure
@@ -24,6 +23,7 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 @Singleton
 class CommandFactory @Inject constructor(
     @Inject private val nestCommandFactory: NestCommandFactory,
+    @Inject private val setCommandFactory: SetCommandFactory,
 ) {
     fun construct(commandType: CommandType, input: Input): Command {
         return when (commandType) {
@@ -40,7 +40,10 @@ class CommandFactory @Inject constructor(
                     .getOrElse(NullCommand())
             CommandType.QUIT -> QuitCommand(quitReason = USER)
             CommandType.RENAME -> RenameCommand(input)
-            CommandType.SET -> SetCommand(input)
+            CommandType.SET ->
+                tryCatching { setCommandFactory.constructFromInput(input) }
+                    .onFailure { reportFailure(CommandFailure(it)) }
+                    .getOrElse(NullCommand())
             CommandType.VIEW -> ViewCommand(input)
             else -> NullCommand()
         }

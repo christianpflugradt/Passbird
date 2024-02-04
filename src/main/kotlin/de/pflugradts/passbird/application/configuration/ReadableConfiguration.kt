@@ -20,6 +20,16 @@ interface ReadableConfiguration {
         val length: Int
         val specialCharacters: Boolean
         val promptOnRemoval: Boolean
+        val customPasswordConfigurations: List<CustomPasswordConfiguration>
+    }
+    interface CustomPasswordConfiguration {
+        val name: String
+        val length: Int
+        val hasNumbers: Boolean
+        val hasLowercaseLetters: Boolean
+        val hasUppercaseLetters: Boolean
+        val hasSpecialCharacters: Boolean
+        val unusedSpecialCharacters: String
     }
     interface Adapter {
         val clipboard: Clipboard

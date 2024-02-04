@@ -12,8 +12,10 @@ data class Configuration(
     override val adapter: Adapter = Adapter(),
 ) : UpdatableConfiguration {
 
-    override fun parsePasswordRequirements(): PasswordRequirements =
-        PasswordRequirements.passwordRequirementsOf(application.password.specialCharacters, application.password.length)
+    override fun parsePasswordRequirements() = PasswordRequirements(
+        length = application.password.length,
+        hasSpecialCharacters = application.password.specialCharacters,
+    )
 
     override fun updateDirectory(directory: Directory) {
         adapter.keyStore.location = directory.value
@@ -32,7 +34,17 @@ data class Configuration(
         override val length: Int = DEFAULT_PASSWORD_LENGTH,
         override val specialCharacters: Boolean = true,
         override val promptOnRemoval: Boolean = true,
+        override val customPasswordConfigurations: List<CustomPasswordConfiguration> = emptyList(),
     ) : ReadableConfiguration.Password
+    data class CustomPasswordConfiguration(
+        override val name: String = "",
+        override val length: Int = DEFAULT_PASSWORD_LENGTH,
+        override val hasNumbers: Boolean = true,
+        override val hasLowercaseLetters: Boolean = true,
+        override val hasUppercaseLetters: Boolean = true,
+        override val hasSpecialCharacters: Boolean = true,
+        override val unusedSpecialCharacters: String = "",
+    ) : ReadableConfiguration.CustomPasswordConfiguration
     data class Adapter(
         override val clipboard: Clipboard = Clipboard(),
         override val keyStore: KeyStore = KeyStore(),
