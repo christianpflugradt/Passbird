@@ -166,7 +166,9 @@ class SetInfoCommandTest {
         val input = inputOf(shellOf("s?"))
         fakeConfiguration(
             instance = configuration,
-            withCustomPasswordConfigurations = listOf(Configuration.CustomPasswordConfiguration(name = "foo", hasSpecialCharacters = false)),
+            withCustomPasswordConfigurations = listOf(
+                Configuration.CustomPasswordConfiguration(name = "foo", hasSpecialCharacters = false),
+            ),
         )
         val captureSystemOut = CapturedOutputPrintStream.captureSystemOut()
 
@@ -186,7 +188,7 @@ class SetInfoCommandTest {
         fakeConfiguration(
             instance = configuration,
             withCustomPasswordConfigurations = listOf(
-                Configuration.CustomPasswordConfiguration(name = "foo", hasSpecialCharacters = true, unusedSpecialCharacters = ": \"`\$")
+                Configuration.CustomPasswordConfiguration(name = "foo", hasSpecialCharacters = true, unusedSpecialCharacters = ": \"`\$"),
             ),
         )
         val captureSystemOut = CapturedOutputPrintStream.captureSystemOut()
@@ -207,7 +209,7 @@ class SetInfoCommandTest {
         fakeConfiguration(
             instance = configuration,
             withCustomPasswordConfigurations = listOf(
-                Configuration.CustomPasswordConfiguration(name = "foo", hasSpecialCharacters = false, unusedSpecialCharacters = ": \"`\$")
+                Configuration.CustomPasswordConfiguration(name = "foo", hasSpecialCharacters = false, unusedSpecialCharacters = ": \"`\$"),
             ),
         )
         val captureSystemOut = CapturedOutputPrintStream.captureSystemOut()

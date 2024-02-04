@@ -6,6 +6,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.SetCommandHand
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
+import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
@@ -15,13 +16,16 @@ import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
 import de.pflugradts.passbird.domain.service.password.provider.fakePasswordProvider
+import io.mockk.Called
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
+import strikt.assertions.isTrue
 
 @Tag(INTEGRATION)
 class SetCommandTest {
@@ -134,6 +138,54 @@ class SetCommandTest {
         // then
         verify(exactly = 0) { passwordService.putEgg(eq(shellOf(args)), any()) }
         verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should handle set command with custom password configuration`() {
+        // given
+        val args = "EggId"
+        val shell = shellOf("s1$args")
+        val reference = shell.copy()
+        val generatedPassword = shellOf("p4s5w0rD")
+        val customPasswordLength = 48
+        fakePasswordProvider(instance = passwordProvider, withCreatedPassword = generatedPassword)
+        fakePasswordService(instance = passwordService)
+        fakeConfiguration(
+            instance = configuration,
+            withCustomPasswordConfigurations = listOf(Configuration.CustomPasswordConfiguration(length = customPasswordLength)),
+        )
+        val passwordRequirementsSlot = slot<PasswordRequirements>()
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify { passwordProvider.createNewPassword(capture(passwordRequirementsSlot)) }
+        expectThat(passwordRequirementsSlot.isCaptured).isTrue()
+        expectThat(passwordRequirementsSlot.captured.length) isEqualTo customPasswordLength
+        verify(exactly = 1) { passwordService.putEgg(eq(shellOf(args)), generatedPassword) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should handle set command with non existing custom password configuration`() {
+        // given
+        val args = "EggId"
+        val shell = shellOf("s1$args")
+        val reference = shell.copy()
+        fakeConfiguration(instance = configuration)
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify { passwordService wasNot Called }
+        verify(exactly = 1) {
+            userInterfaceAdapterPort.send(eq(outputOf(shellOf("Specified configuration does not exist - Operation aborted."))))
+        }
         expectThat(shell) isNotEqualTo reference
     }
 }
