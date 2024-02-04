@@ -28,10 +28,11 @@ class HelpCommandHandler @Inject constructor(
             outBold("\te"), out(" (export) exports the Password database in a human readable json format\n"),
             outBold("\ti"), out(" (import) imports Passwords into the database from a json file\n"),
             outBold("\tl"), out(" (list) non parameterized, lists all Eggs in the database\n"),
-            outBold("\tn"), out(" (view Nests) view available Nests and print Nest specific help\n"),
-            outBold("\ts?"), out(" (view Password configurations) view available configurations and print set specific help\n"),
             outBold("\th"), out(" (help) prints this help\n"),
             outBold("\tq"), out(" (quit) terminates Passbird application \n"),
+            out("\n"),
+            outBold("\tn"), out(" (Nests) view available Nests and print Nest specific help\n"),
+            outBold("\ts?"), out(" (Password configurations) view available configurations and print set specific help\n"),
         )
     }
 }

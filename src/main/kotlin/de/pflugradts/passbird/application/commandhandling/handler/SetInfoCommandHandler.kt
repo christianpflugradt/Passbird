@@ -17,8 +17,8 @@ class SetInfoCommandHandler @Inject constructor(
     private fun handleSetInfoCommand(@Suppress("UNUSED_PARAMETER") setInfoCommand: SetInfoCommand) {
         userInterfaceAdapterPort.send(
             outBold("\n0: Default\n"),
-            out("\t${configuration.application.password.length} characters\n"),
-            out(if (configuration.application.password.specialCharacters) "" else "\tno special characters"),
+            out("\t${configuration.application.password.length} characters"),
+            out(if (configuration.application.password.specialCharacters) "" else "\n\tno special characters"),
         )
         configuration.application.password.customPasswordConfigurations.forEachIndexed { index, it ->
             userInterfaceAdapterPort.send(
@@ -35,19 +35,19 @@ class SetInfoCommandHandler @Inject constructor(
             }
             if (!it.hasSpecialCharacters) {
                 userInterfaceAdapterPort.send(out("\tno special characters"))
-            } else if (it.unusedSpecialCharacters.isNotEmpty()) {
+            } else if (it.unusedSpecialCharacters != null && it.unusedSpecialCharacters.isNotEmpty()) {
                 userInterfaceAdapterPort.send(out("\tunused special characters: ${it.unusedSpecialCharacters}"))
             }
-            userInterfaceAdapterPort.send(
-                outBold("\nAvailable Set Commands:\n"),
-                outBold("\n\ts[EggId] "),
-                out("sets a random Password with default configuration"),
-                outBold("\n\ts[1-9][EggId] "),
-                out("sets a random Password with specified configuration"),
-                outBold("\n\ts? "),
-                out("prints this overview\n"),
-            )
         }
+        userInterfaceAdapterPort.send(
+            outBold("\nAvailable Set Commands:\n"),
+            outBold("\n\ts[EggId] "),
+            out("sets a random Password with default configuration"),
+            outBold("\n\ts[1-9][EggId] "),
+            out("sets a random Password with specified configuration"),
+            outBold("\n\ts? "),
+            out("prints this overview\n"),
+        )
     }
 }
 
