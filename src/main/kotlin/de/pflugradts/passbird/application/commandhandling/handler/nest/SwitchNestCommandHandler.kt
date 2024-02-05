@@ -16,12 +16,12 @@ class SwitchNestCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleSwitchNestCommand(switchNestCommand: SwitchNestCommand) {
-        if (nestService.currentNest().nestSlot == switchNestCommand.nestSlot) {
+        if (nestService.currentNest().slot == switchNestCommand.slot) {
             userInterfaceAdapterPort.send(
                 outputOf(shellOf("'${nestService.currentNest().viewNestId().asString()}' is already the current Nest.")),
             )
-        } else if (nestService.atNestSlot(switchNestCommand.nestSlot).isPresent) {
-            nestService.moveToNestAt(switchNestCommand.nestSlot)
+        } else if (nestService.atNestSlot(switchNestCommand.slot).isPresent) {
+            nestService.moveToNestAt(switchNestCommand.slot)
         } else {
             userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted."), OPERATION_ABORTED))
         }

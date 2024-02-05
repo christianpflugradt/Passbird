@@ -12,10 +12,10 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.copyInt
 import de.pflugradts.passbird.domain.model.egg.Egg
-import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggStreamSupplier
@@ -48,8 +48,8 @@ class PasswordStoreWriter @Inject constructor(
         var incrementedOffset = offset
         copyInt(SECTOR, bytes, incrementedOffset)
         incrementedOffset += intBytes()
-        for (index in NestSlot.FIRST_SLOT..NestSlot.LAST_SLOT) {
-            NestSlot.nestSlotAt(index).asByteArray().let { incrementedOffset += copyBytes(it, bytes, incrementedOffset, it.size) }
+        for (index in Slot.FIRST_SLOT..Slot.LAST_SLOT) {
+            Slot.slotAt(index).asByteArray().let { incrementedOffset += copyBytes(it, bytes, incrementedOffset, it.size) }
         }
         return incrementedOffset
     }
@@ -62,7 +62,7 @@ class PasswordStoreWriter @Inject constructor(
         val dataSize = eggs.get()
             .map { egg: Egg -> intBytes() + egg.viewEggId().size + egg.viewPassword().size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
-        val nestSize = intBytes() + NestSlot.CAPACITY * intBytes() + nestService.all()
+        val nestSize = intBytes() + Slot.CAPACITY * intBytes() + nestService.all()
             .filter { it.isPresent }
             .map { it.get().viewNestId().size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
@@ -74,7 +74,7 @@ class PasswordStoreWriter @Inject constructor(
         systemOperation.resolvePath(configuration.adapter.passwordStore.location.toDirectory(), DATABASE_FILENAME.toFileName())
     private fun calcActualTotalSize(contentSize: Int) = signatureSize() + contentSize + eofBytes() + checksumBytes()
 
-    private fun NestSlot.asByteArray(): ByteArray {
+    private fun Slot.asByteArray(): ByteArray {
         val nestShell = nestService.atNestSlot(this).map { it.viewNestId() }.orElse(emptyShell())
         val nestBytesSize = nestShell.size
         val bytes = ByteArray(Integer.BYTES + nestBytesSize)

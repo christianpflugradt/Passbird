@@ -4,17 +4,17 @@ import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.application.boot.bootModule
 import de.pflugradts.passbird.application.boot.launcher.LauncherModule
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.nest.NestSlot
-import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N1
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N2
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N3
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N4
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N5
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N6
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N7
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N8
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N9
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.slot.Slot.S1
+import de.pflugradts.passbird.domain.model.slot.Slot.S2
+import de.pflugradts.passbird.domain.model.slot.Slot.S3
+import de.pflugradts.passbird.domain.model.slot.Slot.S4
+import de.pflugradts.passbird.domain.model.slot.Slot.S5
+import de.pflugradts.passbird.domain.model.slot.Slot.S6
+import de.pflugradts.passbird.domain.model.slot.Slot.S7
+import de.pflugradts.passbird.domain.model.slot.Slot.S8
+import de.pflugradts.passbird.domain.model.slot.Slot.S9
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -105,7 +105,7 @@ class MainTest {
 
     @ParameterizedTest
     @MethodSource("expectedNestSlotMapping")
-    fun `should persist initial nest`(givenParam: String, expectedInitialNestSlot: NestSlot) {
+    fun `should persist initial nest`(givenParam: String, expectedInitialSlot: Slot) {
         // given
         val givenHome = "/foo"
         every { systemOperation.exists(givenHome.toDirectory()) } returns true
@@ -116,21 +116,21 @@ class MainTest {
 
         // then
         verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
-        expectThat(Global.initialNestSlot) isEqualTo expectedInitialNestSlot
+        expectThat(Global.initialSlot) isEqualTo expectedInitialSlot
     }
 
     companion object {
         @JvmStatic
         private fun expectedNestSlotMapping() = Stream.of(
-            Arguments.of("1", N1),
-            Arguments.of("2", N2),
-            Arguments.of("3", N3),
-            Arguments.of("4", N4),
-            Arguments.of("5", N5),
-            Arguments.of("6", N6),
-            Arguments.of("7", N7),
-            Arguments.of("8", N8),
-            Arguments.of("9", N9),
+            Arguments.of("1", S1),
+            Arguments.of("2", S2),
+            Arguments.of("3", S3),
+            Arguments.of("4", S4),
+            Arguments.of("5", S5),
+            Arguments.of("6", S6),
+            Arguments.of("7", S7),
+            Arguments.of("8", S8),
+            Arguments.of("9", S9),
             Arguments.of("", DEFAULT),
             Arguments.of("0", DEFAULT),
             Arguments.of("-1", DEFAULT),

@@ -7,10 +7,10 @@ import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggMoved
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
-import de.pflugradts.passbird.domain.model.nest.NestSlot
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N1
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.S1
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -102,8 +102,8 @@ class EggTest {
         fun `should be equal to itself`() {
             // given
             val givenEggIdShell = shellOf("EggId")
-            val givenNestSlot = NestSlot.N1
-            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
+            val givenSlot = Slot.S1
+            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withSlot = givenSlot)
             val egg2 = egg1
 
             // when
@@ -117,9 +117,9 @@ class EggTest {
         fun `should be equal if eggId and nest slot match`() {
             // given
             val givenEggIdShell = shellOf("EggId")
-            val givenNestSlot = NestSlot.N1
-            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
-            val egg2 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
+            val givenSlot = Slot.S1
+            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withSlot = givenSlot)
+            val egg2 = createEggForTesting(withEggIdShell = givenEggIdShell, withSlot = givenSlot)
 
             // when
             val actual = egg1.equals(egg2)
@@ -133,9 +133,9 @@ class EggTest {
             // given
             val givenEggIdShell = shellOf("EggId")
             val otherEggIdShell = shellOf("EggId2")
-            val givenNestSlot = NestSlot.N1
-            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
-            val egg2 = createEggForTesting(withEggIdShell = otherEggIdShell, withNestSlot = givenNestSlot)
+            val givenSlot = Slot.S1
+            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withSlot = givenSlot)
+            val egg2 = createEggForTesting(withEggIdShell = otherEggIdShell, withSlot = givenSlot)
 
             // when
             val actual = egg1.equals(egg2)
@@ -148,10 +148,10 @@ class EggTest {
         fun `should not be equal if nest slot does not match`() {
             // given
             val givenEggIdShell = shellOf("EggId")
-            val givenNestSlot = NestSlot.N1
-            val otherNestSlot = NestSlot.N2
-            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = givenNestSlot)
-            val egg2 = createEggForTesting(withEggIdShell = givenEggIdShell, withNestSlot = otherNestSlot)
+            val givenSlot = Slot.S1
+            val otherSlot = Slot.S2
+            val egg1 = createEggForTesting(withEggIdShell = givenEggIdShell, withSlot = givenSlot)
+            val egg2 = createEggForTesting(withEggIdShell = givenEggIdShell, withSlot = otherSlot)
 
             // when
             val actual = egg1.equals(egg2)
@@ -191,7 +191,7 @@ class EggTest {
         @Test
         fun `should have created event when egg is created`() {
             // given / when
-            val egg = createEgg(NestSlot.DEFAULT, shellOf("EggId"), shellOf("Password"))
+            val egg = createEgg(Slot.DEFAULT, shellOf("EggId"), shellOf("Password"))
 
             // then
             expectThat(egg.getDomainEvents()) hasSize 1
@@ -255,7 +255,7 @@ class EggTest {
 
             // when
             egg.clearDomainEvents()
-            egg.moveToNestAt(N1)
+            egg.moveToNestAt(S1)
 
             // then
             expectThat(egg.getDomainEvents()) hasSize 1

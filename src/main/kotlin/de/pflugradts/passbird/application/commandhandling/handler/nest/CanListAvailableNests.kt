@@ -13,6 +13,6 @@ abstract class CanListAvailableNests(
                 .filter { it.isPresent }
                 .map { it.get() }
                 .filter { includeCurrent || it != nestService.currentNest() }
-                .map { "\t${it.nestSlot.index()}: ${it.viewNestId().asString()}" }
+                .map { "\t${it.slot.index()}: ${it.viewNestId().asString()}" }
                 .toList().joinToString("\n")
 }

@@ -1,10 +1,10 @@
 package de.pflugradts.passbird.domain.service.nest
 
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
-import de.pflugradts.passbird.domain.model.nest.NestSlot
-import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import io.mockk.mockk
@@ -71,7 +71,7 @@ class NestingGroundServiceTest {
     @Test
     fun `should return default nest for default nest slot`() {
         // given / when / then
-        expectThat(nestingGroundService.atNestSlot(NestSlot.DEFAULT).orNull()) isEqualTo DEFAULT
+        expectThat(nestingGroundService.atNestSlot(Slot.DEFAULT).orNull()) isEqualTo DEFAULT
     }
 
     @Test
@@ -87,9 +87,9 @@ class NestingGroundServiceTest {
         nestingGroundService.populate(nestShells)
 
         // then
-        val nest2 = nestingGroundService.atNestSlot(NestSlot.N2)
+        val nest2 = nestingGroundService.atNestSlot(Slot.S2)
         expectThat(nest2.isPresent).isTrue()
-        expectThat(nest2.get().nestSlot) isEqualTo NestSlot.N2
+        expectThat(nest2.get().slot) isEqualTo Slot.S2
         expectThat(nest2.get().viewNestId()) isEqualTo givenNestShell
     }
 
@@ -105,7 +105,7 @@ class NestingGroundServiceTest {
         nestingGroundService.populate(nestShells)
 
         // then
-        expectThat(nestingGroundService.atNestSlot(NestSlot.N1).isPresent).isFalse()
+        expectThat(nestingGroundService.atNestSlot(Slot.S1).isPresent).isFalse()
     }
 
     @Test
@@ -120,7 +120,7 @@ class NestingGroundServiceTest {
         nestingGroundService.populate(nestShells)
 
         // then
-        expectThat(nestingGroundService.currentNest().nestSlot) isEqualTo NestSlot.DEFAULT
+        expectThat(nestingGroundService.currentNest().slot) isEqualTo Slot.DEFAULT
     }
 
     @Test
@@ -131,13 +131,13 @@ class NestingGroundServiceTest {
             emptyShell(), emptyShell(), emptyShell(), emptyShell(), emptyShell(),
         )
         nestingGroundService.populate(nestShells)
-        val wantedCurrentNestSlot = NestSlot.N2
+        val wantedCurrentSlot = Slot.S2
 
         // when
-        nestingGroundService.moveToNestAt(wantedCurrentNestSlot)
+        nestingGroundService.moveToNestAt(wantedCurrentSlot)
 
         // then
-        expectThat(nestingGroundService.currentNest().nestSlot) isEqualTo wantedCurrentNestSlot
+        expectThat(nestingGroundService.currentNest().slot) isEqualTo wantedCurrentSlot
     }
 
     @Test
@@ -148,13 +148,13 @@ class NestingGroundServiceTest {
             emptyShell(), emptyShell(), emptyShell(), emptyShell(), emptyShell(),
         )
         nestingGroundService.populate(nestShells)
-        val wantedCurrentNestSlot = NestSlot.N1
+        val wantedCurrentSlot = Slot.S1
 
         // when
-        nestingGroundService.moveToNestAt(wantedCurrentNestSlot)
+        nestingGroundService.moveToNestAt(wantedCurrentSlot)
 
         // then
-        expectThat(nestingGroundService.currentNest().nestSlot) isNotEqualTo wantedCurrentNestSlot
+        expectThat(nestingGroundService.currentNest().slot) isNotEqualTo wantedCurrentSlot
     }
 
     @Test
@@ -163,13 +163,13 @@ class NestingGroundServiceTest {
         val nestShell = shellOf("Nest")
 
         // when
-        nestingGroundService.place(nestShell, NestSlot.N3)
-        val actual = nestingGroundService.atNestSlot(NestSlot.N3)
+        nestingGroundService.place(nestShell, Slot.S3)
+        val actual = nestingGroundService.atNestSlot(Slot.S3)
 
         // then
         expectThat(actual.isPresent).isTrue()
         expectThat(actual.get().viewNestId()) isEqualTo nestShell
-        expectThat(actual.get().nestSlot) isEqualTo NestSlot.N3
+        expectThat(actual.get().slot) isEqualTo Slot.S3
         verify(exactly = 1) { eggRepository.sync() }
     }
 }

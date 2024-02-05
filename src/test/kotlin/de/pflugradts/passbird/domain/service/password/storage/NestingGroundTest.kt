@@ -1,9 +1,9 @@
 package de.pflugradts.passbird.domain.service.password.storage
 
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.createNestServiceSpyForTesting
 import io.mockk.mockk
@@ -110,19 +110,19 @@ class NestingGroundTest {
         @Test
         fun `should find all in current nest`() {
             // given
-            val activeNestSlot = NestSlot.N2
-            val otherNestSlot = NestSlot.N3
-            nestService.place(shellOf("Nest"), activeNestSlot)
-            nestService.place(shellOf("Nest"), otherNestSlot)
-            val egg1 = createEggForTesting(withEggIdShell = shellOf("first"), withNestSlot = activeNestSlot)
-            val egg2 = createEggForTesting(withEggIdShell = shellOf("second"), withNestSlot = activeNestSlot)
-            val egg3 = createEggForTesting(withEggIdShell = shellOf("third"), withNestSlot = otherNestSlot)
+            val activeSlot = Slot.S2
+            val otherSlot = Slot.S3
+            nestService.place(shellOf("Nest"), activeSlot)
+            nestService.place(shellOf("Nest"), otherSlot)
+            val egg1 = createEggForTesting(withEggIdShell = shellOf("first"), withSlot = activeSlot)
+            val egg2 = createEggForTesting(withEggIdShell = shellOf("second"), withSlot = activeSlot)
+            val egg3 = createEggForTesting(withEggIdShell = shellOf("third"), withSlot = otherSlot)
             nestingGround.add(egg1)
             nestingGround.add(egg2)
             nestingGround.add(egg3)
 
             // when
-            nestService.moveToNestAt(activeNestSlot)
+            nestService.moveToNestAt(activeSlot)
             val actual = nestingGround.findAll()
 
             // then
@@ -133,19 +133,19 @@ class NestingGroundTest {
         fun `should store multiple eggs with identical eggIds in different nests`() {
             // given
             val eggIdShells = shellOf("EggId")
-            val firstNestSlot = NestSlot.N1
-            val secondNestSlot = NestSlot.N2
-            nestService.place(shellOf("Nest"), firstNestSlot)
-            nestService.place(shellOf("Nest"), secondNestSlot)
-            val egg1 = createEggForTesting(withEggIdShell = eggIdShells, withNestSlot = firstNestSlot)
-            val egg2 = createEggForTesting(withEggIdShell = eggIdShells, withNestSlot = secondNestSlot)
+            val firstSlot = Slot.S1
+            val secondSlot = Slot.S2
+            nestService.place(shellOf("Nest"), firstSlot)
+            nestService.place(shellOf("Nest"), secondSlot)
+            val egg1 = createEggForTesting(withEggIdShell = eggIdShells, withSlot = firstSlot)
+            val egg2 = createEggForTesting(withEggIdShell = eggIdShells, withSlot = secondSlot)
             nestingGround.add(egg1)
             nestingGround.add(egg2)
 
             // when
-            nestService.moveToNestAt(firstNestSlot)
+            nestService.moveToNestAt(firstSlot)
             val actualFirstEgg = nestingGround.find(eggIdShells)
-            nestService.moveToNestAt(secondNestSlot)
+            nestService.moveToNestAt(secondSlot)
             val actualSecondEgg = nestingGround.find(eggIdShells)
 
             // then

@@ -4,9 +4,9 @@ import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.event.EggNotFound
-import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.PlainValue.Companion.plainValueOf
 import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -18,7 +18,7 @@ abstract class CommonPasswordServiceCapabilities(
     private val eggRepository: EggRepository,
     private val eventRegistry: EventRegistry,
 ) {
-    fun find(eggIdShell: Shell, nestSlot: NestSlot): Option<Egg> = eggRepository.find(eggIdShell, nestSlot)
+    fun find(eggIdShell: Shell, slot: Slot): Option<Egg> = eggRepository.find(eggIdShell, slot)
     fun find(eggIdShell: Shell): Option<Egg> = eggRepository.find(eggIdShell)
     fun encrypted(shell: Shell) = cryptoProvider.encrypt(shell)
     fun decrypted(shell: Shell) = cryptoProvider.decrypt(shell)
@@ -39,7 +39,7 @@ abstract class CommonPasswordServiceCapabilities(
         return result
     }
 
-    fun eggExists(eggIdShell: Shell, nestSlot: NestSlot) = find(encrypted(eggIdShell), nestSlot).isPresent
+    fun eggExists(eggIdShell: Shell, slot: Slot) = find(encrypted(eggIdShell), slot).isPresent
     fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction) =
         encrypted(eggIdShell).let {
             find(it).let { match ->

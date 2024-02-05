@@ -8,9 +8,9 @@ import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
-import de.pflugradts.passbird.domain.model.nest.NestSlot
-import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
 import java.util.function.Supplier
@@ -29,40 +29,40 @@ class NestingGroundService @Inject constructor(
         }
         return lazyNests
     }
-    private var currentNest = NestSlot.DEFAULT
+    private var currentNest = Slot.DEFAULT
 
     override fun populate(nestShells: List<Shell>) {
-        if (nestShells.size == NestSlot.CAPACITY) {
+        if (nestShells.size == Slot.CAPACITY) {
             nestShells.forEachIndexed { index, shell ->
                 if (shell.isNotEmpty) {
-                    place(shell, NestSlot.nestSlotAt(index + 1), publish = false)
+                    place(shell, Slot.slotAt(index + 1), publish = false)
                 }
             }
         }
     }
 
-    override fun place(nestShell: Shell, nestSlot: NestSlot) = place(nestShell, nestSlot, true)
-    fun place(nestShell: Shell, nestSlot: NestSlot, publish: Boolean) {
-        createNest(nestShell, nestSlot).let {
-            nests[nestSlot.nestIndex()].set(it)
+    override fun place(nestShell: Shell, slot: Slot) = place(nestShell, slot, true)
+    fun place(nestShell: Shell, slot: Slot, publish: Boolean) {
+        createNest(nestShell, slot).let {
+            nests[slot.nestIndex()].set(it)
             eventRegistry.register(it)
             if (publish) eventRegistry.processEvents() else it.clearDomainEvents()
         }
     }
-    override fun discardNestAt(nestSlot: NestSlot) {
-        atNestSlot(nestSlot).ifPresent { it.discard() }
-        nests[nestSlot.nestIndex()] = EMPTY_NEST_SUPPLIER.get()
+    override fun discardNestAt(slot: Slot) {
+        atNestSlot(slot).ifPresent { it.discard() }
+        nests[slot.nestIndex()] = EMPTY_NEST_SUPPLIER.get()
         eventRegistry.processEvents()
     }
-    override fun atNestSlot(nestSlot: NestSlot): Option<Nest> =
-        if (nestSlot === NestSlot.DEFAULT) Nest.DEFAULT.option() else nests[nestSlot.nestIndex()]
+    override fun atNestSlot(slot: Slot): Option<Nest> =
+        if (slot === Slot.DEFAULT) Nest.DEFAULT.option() else nests[slot.nestIndex()]
     override fun all(includeDefault: Boolean) = nests.let { if (includeDefault) Nest.DEFAULT.asOptionInList() + it else it }.stream()
     override fun currentNest(): Nest = atNestSlot(currentNest).orElse(Nest.DEFAULT)
-    override fun moveToNestAt(nestSlot: NestSlot) { if (atNestSlot(nestSlot).isPresent) { currentNest = nestSlot } }
+    override fun moveToNestAt(slot: Slot) { if (atNestSlot(slot).isPresent) { currentNest = slot } }
 
     companion object { private val EMPTY_NEST_SUPPLIER = Supplier { mutableOptionOf<Nest>() } }
 }
 
 private fun Nest.asOptionInList() = listOf(optionOf(this))
 private fun Nest.option() = optionOf(this)
-private fun NestSlot.nestIndex() = index() - 1
+private fun Slot.nestIndex() = index() - 1

@@ -3,9 +3,9 @@ package de.pflugradts.passbird.application.exchange
 import com.google.inject.Inject
 import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
-import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -31,21 +31,21 @@ class PasswordImportExportService @Inject constructor(
             nestService.moveToNestAt(nestSlot)
             passwordService.putEggs(eggsByNest[nestSlot]!!.stream())
         }
-        nestService.moveToNestAt(currentNest.nestSlot)
+        nestService.moveToNestAt(currentNest.slot)
         eventRegistry.register(EggsImported(eggsByNest.values.sumOf { it.size }))
         eventRegistry.processEvents()
     }
 
     override fun exportEggs() {
         val currentNest = nestService.currentNest()
-        val eggsByNest = mutableMapOf<NestSlot, List<ShellPair>>()
+        val eggsByNest = mutableMapOf<Slot, List<ShellPair>>()
         nestService.all(includeDefault = true).filter { it.isPresent }.map { it.get() }.forEach { nest ->
-            nestService.moveToNestAt(nest.nestSlot)
-            eggsByNest[nest.nestSlot] = passwordService.findAllEggIds()
+            nestService.moveToNestAt(nest.slot)
+            eggsByNest[nest.slot] = passwordService.findAllEggIds()
                 .map { eggId -> ShellPair(eggId, passwordService.viewPassword(eggId).get()) }.toList()
         }
         exchangeFactory.createPasswordExchange().send(eggsByNest)
-        nestService.moveToNestAt(currentNest.nestSlot)
+        nestService.moveToNestAt(currentNest.slot)
         eventRegistry.register(EggsExported(eggsByNest.values.sumOf { it.size }))
         eventRegistry.processEvents()
     }

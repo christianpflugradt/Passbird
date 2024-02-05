@@ -5,10 +5,10 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
-import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N5
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.slot.Slot.S5
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.fakePasswordService
@@ -39,7 +39,7 @@ class DiscardNestCommandTest {
         // given
         val nestSlotIndex = 1
         val givenInput = shellOf("n-$nestSlotIndex")
-        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val nestSlotFromInput = slotAt(nestSlotIndex)
         val givenNest = shellOf("mynest")
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakePasswordService(instance = passwordService, withEggs = emptyList())
@@ -58,7 +58,7 @@ class DiscardNestCommandTest {
         // given
         val nestSlotIndex = 0
         val givenInput = shellOf("n-$nestSlotIndex")
-        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val nestSlotFromInput = slotAt(nestSlotIndex)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakePasswordService(instance = passwordService, withEggs = emptyList())
         val outputSlot = slot<Output>()
@@ -77,7 +77,7 @@ class DiscardNestCommandTest {
         // given
         val nestSlotIndex = 1
         val givenInput = shellOf("n-$nestSlotIndex")
-        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val nestSlotFromInput = slotAt(nestSlotIndex)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakePasswordService(instance = passwordService, withEggs = emptyList())
         val outputSlot = slot<Output>()
@@ -96,9 +96,9 @@ class DiscardNestCommandTest {
         // given
         val nestSlotIndex = 1
         val givenInput = shellOf("n-$nestSlotIndex")
-        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val nestSlotFromInput = slotAt(nestSlotIndex)
         val givenNest = shellOf("mynest")
-        val currentNestSlot = N5
+        val currentNestSlot = S5
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakePasswordService(instance = passwordService, withEggs = emptyList())
         nestService.place(givenNest, nestSlotFromInput)
@@ -110,7 +110,7 @@ class DiscardNestCommandTest {
 
         // then
         expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isTrue()
-        expectThat(nestService.currentNest().nestSlot) isEqualTo currentNestSlot
+        expectThat(nestService.currentNest().slot) isEqualTo currentNestSlot
     }
 
     @Test
@@ -118,7 +118,7 @@ class DiscardNestCommandTest {
         // given
         val nestSlotIndex = 1
         val givenInput = shellOf("n-$nestSlotIndex")
-        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val nestSlotFromInput = slotAt(nestSlotIndex)
         val givenNest = shellOf("mynest")
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         fakePasswordService(instance = passwordService, withEggs = emptyList())
@@ -130,7 +130,7 @@ class DiscardNestCommandTest {
 
         // then
         expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isTrue()
-        expectThat(nestService.currentNest().nestSlot) isEqualTo DEFAULT
+        expectThat(nestService.currentNest().slot) isEqualTo DEFAULT
     }
 
     @Test
@@ -138,10 +138,10 @@ class DiscardNestCommandTest {
         // given
         val nestSlotIndex = 1
         val givenInput = shellOf("n-$nestSlotIndex")
-        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val nestSlotFromInput = slotAt(nestSlotIndex)
         val givenNest = shellOf("discardnest")
         val targetNest = shellOf("keepnest")
-        val targetNestSlot = N5
+        val targetNestSlot = S5
         val eggId1 = shellOf("EggId1")
         val eggId2 = shellOf("EggId2")
         fakeUserInterfaceAdapterPort(
@@ -152,8 +152,8 @@ class DiscardNestCommandTest {
             instance = passwordService,
             withNestService = nestService,
             withEggs = listOf(
-                createEggForTesting(withEggIdShell = eggId1, withNestSlot = nestSlotFromInput),
-                createEggForTesting(withEggIdShell = eggId2, withNestSlot = nestSlotFromInput),
+                createEggForTesting(withEggIdShell = eggId1, withSlot = nestSlotFromInput),
+                createEggForTesting(withEggIdShell = eggId2, withSlot = nestSlotFromInput),
             ),
         )
         nestService.place(givenNest, nestSlotFromInput)
@@ -174,9 +174,9 @@ class DiscardNestCommandTest {
         // given
         val nestSlotIndex = 1
         val givenInput = shellOf("n-$nestSlotIndex")
-        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val nestSlotFromInput = slotAt(nestSlotIndex)
         val givenNest = shellOf("discardnest")
-        val nonexistentNestSlot = N5
+        val nonexistentNestSlot = S5
         val eggId1 = shellOf("EggId1")
         val eggId2 = shellOf("EggId2")
         fakeUserInterfaceAdapterPort(
@@ -187,8 +187,8 @@ class DiscardNestCommandTest {
             instance = passwordService,
             withNestService = nestService,
             withEggs = listOf(
-                createEggForTesting(withEggIdShell = eggId1, withNestSlot = nestSlotFromInput),
-                createEggForTesting(withEggIdShell = eggId2, withNestSlot = nestSlotFromInput),
+                createEggForTesting(withEggIdShell = eggId1, withSlot = nestSlotFromInput),
+                createEggForTesting(withEggIdShell = eggId2, withSlot = nestSlotFromInput),
             ),
         )
         nestService.place(givenNest, nestSlotFromInput)
@@ -210,10 +210,10 @@ class DiscardNestCommandTest {
         // given
         val nestSlotIndex = 1
         val givenInput = shellOf("n-$nestSlotIndex")
-        val nestSlotFromInput = nestSlotAt(nestSlotIndex)
+        val nestSlotFromInput = slotAt(nestSlotIndex)
         val givenNest = shellOf("discardnest")
         val targetNest = shellOf("keepnest")
-        val targetNestSlot = N5
+        val targetNestSlot = S5
         val eggId1 = shellOf("EggId1")
         val eggId2 = shellOf("EggId2")
         fakeUserInterfaceAdapterPort(
@@ -224,10 +224,10 @@ class DiscardNestCommandTest {
             instance = passwordService,
             withNestService = nestService,
             withEggs = listOf(
-                createEggForTesting(withEggIdShell = eggId1, withNestSlot = nestSlotFromInput),
-                createEggForTesting(withEggIdShell = eggId2, withNestSlot = nestSlotFromInput),
-                createEggForTesting(withEggIdShell = eggId1, withNestSlot = targetNestSlot),
-                createEggForTesting(withEggIdShell = eggId2, withNestSlot = targetNestSlot),
+                createEggForTesting(withEggIdShell = eggId1, withSlot = nestSlotFromInput),
+                createEggForTesting(withEggIdShell = eggId2, withSlot = nestSlotFromInput),
+                createEggForTesting(withEggIdShell = eggId1, withSlot = targetNestSlot),
+                createEggForTesting(withEggIdShell = eggId2, withSlot = targetNestSlot),
             ),
         )
         nestService.place(givenNest, nestSlotFromInput)

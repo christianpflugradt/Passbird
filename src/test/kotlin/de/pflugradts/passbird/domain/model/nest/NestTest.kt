@@ -3,6 +3,7 @@ package de.pflugradts.passbird.domain.model.nest
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -15,7 +16,7 @@ class NestTest {
         val name = "Nest"
 
         // when
-        val actual = createNest(shellOf("Nest"), NestSlot.DEFAULT)
+        val actual = createNest(shellOf("Nest"), Slot.DEFAULT)
 
         // then
         expectThat(actual.viewNestId().asString()) isEqualTo name
@@ -25,7 +26,7 @@ class NestTest {
     fun `should clone shell`() {
         // given
         val shell = shellOf("EggId")
-        val nest = createNest(shell, NestSlot.DEFAULT)
+        val nest = createNest(shell, Slot.DEFAULT)
 
         // when
         shell.scramble()
@@ -42,6 +43,6 @@ class NestTest {
 
         // then
         expectThat(defaultNest.viewNestId()) isEqualTo shellOf("Default")
-        expectThat(defaultNest.nestSlot) isEqualTo NestSlot.DEFAULT
+        expectThat(defaultNest.slot) isEqualTo Slot.DEFAULT
     }
 }

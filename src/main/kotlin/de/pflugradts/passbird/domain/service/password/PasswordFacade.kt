@@ -1,9 +1,9 @@
 package de.pflugradts.passbird.domain.service.password
 
 import com.google.inject.Inject
-import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 import java.util.stream.Stream
 
@@ -14,7 +14,7 @@ class PasswordFacade @Inject constructor(
     @Inject private val renamePasswordService: RenamePasswordService,
     @Inject private val movePasswordService: MovePasswordService,
 ) : PasswordService {
-    override fun eggExists(eggIdShell: Shell, nestSlot: NestSlot) = viewPasswordService.eggExists(eggIdShell, nestSlot)
+    override fun eggExists(eggIdShell: Shell, slot: Slot) = viewPasswordService.eggExists(eggIdShell, slot)
     override fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction) =
         viewPasswordService.eggExists(eggIdShell, eggNotExistsAction)
     override fun viewPassword(eggIdShell: Shell) = viewPasswordService.viewPassword(eggIdShell)
@@ -24,6 +24,6 @@ class PasswordFacade @Inject constructor(
     override fun putEggs(eggs: Stream<ShellPair>) = putPasswordService.putEggs(eggs)
     override fun putEgg(eggIdShell: Shell, passwordShell: Shell) = putPasswordService.putEgg(eggIdShell, passwordShell)
     override fun discardEgg(eggIdShell: Shell) = discardPasswordService.discardEgg(eggIdShell)
-    override fun moveEgg(eggIdShell: Shell, targetNestSlot: NestSlot) =
-        movePasswordService.movePassword(eggIdShell, targetNestSlot)
+    override fun moveEgg(eggIdShell: Shell, targetSlot: Slot) =
+        movePasswordService.movePassword(eggIdShell, targetSlot)
 }

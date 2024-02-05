@@ -5,8 +5,9 @@ import de.pflugradts.passbird.domain.model.event.NestCreated
 import de.pflugradts.passbird.domain.model.event.NestDiscarded
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
 
-class Nest private constructor(private val shell: Shell, val nestSlot: NestSlot) : AggregateRoot() {
+class Nest private constructor(private val shell: Shell, val slot: Slot) : AggregateRoot() {
     init { registerDomainEvent(NestCreated(this)) }
     fun viewNestId() = shell.copy()
 
@@ -18,11 +19,11 @@ class Nest private constructor(private val shell: Shell, val nestSlot: NestSlot)
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
         other as Nest
-        return nestSlot == other.nestSlot
+        return slot == other.slot
     }
-    override fun hashCode() = nestSlot.hashCode()
+    override fun hashCode() = slot.hashCode()
     companion object {
-        val DEFAULT = Nest(shellOf("Default"), NestSlot.DEFAULT)
-        fun createNest(shell: Shell, nestSlot: NestSlot) = Nest(shell.copy(), nestSlot)
+        val DEFAULT = Nest(shellOf("Default"), Slot.DEFAULT)
+        fun createNest(shell: Shell, slot: Slot) = Nest(shell.copy(), slot)
     }
 }

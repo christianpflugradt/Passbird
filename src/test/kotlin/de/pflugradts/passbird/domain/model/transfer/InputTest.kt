@@ -1,19 +1,19 @@
 package de.pflugradts.passbird.domain.model.transfer
 
-import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
-import de.pflugradts.passbird.domain.model.nest.NestSlot.INVALID
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N1
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N2
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N3
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N4
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N5
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N6
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N7
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N8
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N9
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.slot.Slot.INVALID
+import de.pflugradts.passbird.domain.model.slot.Slot.S1
+import de.pflugradts.passbird.domain.model.slot.Slot.S2
+import de.pflugradts.passbird.domain.model.slot.Slot.S3
+import de.pflugradts.passbird.domain.model.slot.Slot.S4
+import de.pflugradts.passbird.domain.model.slot.Slot.S5
+import de.pflugradts.passbird.domain.model.slot.Slot.S6
+import de.pflugradts.passbird.domain.model.slot.Slot.S7
+import de.pflugradts.passbird.domain.model.slot.Slot.S8
+import de.pflugradts.passbird.domain.model.slot.Slot.S9
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.emptyInput
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import io.mockk.spyk
@@ -132,7 +132,7 @@ class InputTest {
         @Test
         fun `should parse nests`() {
             // given
-            (1..9).zip(arrayOf(N1, N2, N3, N4, N5, N6, N7, N8, N9)).forEach {
+            (1..9).zip(arrayOf(S1, S2, S3, S4, S5, S6, S7, S8, S9)).forEach {
                 val givenIndex = it.first
                 val expectedNestSlot = it.second
                 val input = inputOf(givenIndex)

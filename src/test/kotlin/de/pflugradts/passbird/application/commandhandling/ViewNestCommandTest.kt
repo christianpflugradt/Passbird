@@ -6,8 +6,8 @@ import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
-import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import io.mockk.mockk
@@ -64,7 +64,7 @@ class ViewNestCommandTest {
         val input = inputOf(shellOf("n"))
         val deployedNestSlot = 3
         val deployedNest = "mynest"
-        nestService.place(shellOf(deployedNest), nestSlotAt(deployedNestSlot))
+        nestService.place(shellOf(deployedNest), slotAt(deployedNestSlot))
         fakeConfiguration(instance = configuration)
         val captureSystemOut = CapturedOutputPrintStream.captureSystemOut()
 

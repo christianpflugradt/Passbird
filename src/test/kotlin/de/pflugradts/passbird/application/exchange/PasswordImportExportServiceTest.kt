@@ -7,11 +7,11 @@ import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
-import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N2
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N9
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.slot.Slot.S2
+import de.pflugradts.passbird.domain.model.slot.Slot.S9
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.nest.createNestServiceSpyForTesting
@@ -60,11 +60,11 @@ class PasswordImportExportServiceTest {
     @Test
     fun `should import passwords across multiple nests`() {
         // given
-        val givenCurrentNestSlot = N2
+        val givenCurrentNestSlot = S2
         val eggs = testData()
         fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory, withEggs = eggs)
         fakePasswordService(instance = passwordService)
-        nestService.place(shellOf("n2"), N2)
+        nestService.place(shellOf("n2"), S2)
         nestService.moveToNestAt(givenCurrentNestSlot)
         val importSlot = mutableListOf<Stream<ShellPair>>()
         val eggCountSlot = slot<EggsImported>()
@@ -75,12 +75,12 @@ class PasswordImportExportServiceTest {
         // then
         verify { passwordService.putEggs(capture(importSlot)) }
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
-        verify(exactly = 1) { nestService.place(shellOf("Nest-9"), N9) }
+        verify(exactly = 1) { nestService.place(shellOf("Nest-9"), S9) }
         expectThat(importSlot) hasSize 3
         expectThatActualBytePairsMatchExpected(importSlot[0], eggs.subList(0, 2))
         expectThatActualBytePairsMatchExpected(importSlot[1], eggs.subList(2, 3))
         expectThatActualBytePairsMatchExpected(importSlot[2], eggs.subList(3, 5))
-        expectThat(nestService.currentNest().nestSlot) isEqualTo givenCurrentNestSlot
+        expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
         verify { eventRegistry.register(capture(eggCountSlot)) }
         verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(eggCountSlot.isCaptured)
@@ -90,12 +90,12 @@ class PasswordImportExportServiceTest {
     @Test
     fun `should export passwords across multiple nests`() {
         // given
-        val givenCurrentNestSlot = N2
+        val givenCurrentNestSlot = S2
         val eggs = testData()
         val exchangeAdapterPort = fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory)
         fakePasswordService(instance = passwordService, withEggs = eggs, withNestService = nestService)
-        nestService.place(shellOf("n2"), N2)
-        nestService.place(shellOf("n2"), N9)
+        nestService.place(shellOf("n2"), S2)
+        nestService.place(shellOf("n2"), S9)
         nestService.moveToNestAt(givenCurrentNestSlot)
         val exportNestSlot = slot<ShellPairMap>()
         val eggCountSlot = slot<EggsExported>()
@@ -108,8 +108,8 @@ class PasswordImportExportServiceTest {
         verify { exchangeAdapterPort.send(capture(exportNestSlot)) }
         val actual = exportNestSlot.captured
         expectThatActualBytePairsMatchExpected(actual, eggs)
-        expectThat(actual) hasSize 3 containsKey DEFAULT containsKey N2 containsKey N9
-        expectThat(nestService.currentNest().nestSlot) isEqualTo givenCurrentNestSlot
+        expectThat(actual) hasSize 3 containsKey DEFAULT containsKey S2 containsKey S9
+        expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
         verify { eventRegistry.register(capture(eggCountSlot)) }
         verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(eggCountSlot.isCaptured)
@@ -145,9 +145,9 @@ private fun expectThatActualBytePairsMatchExpected(actual: ShellPairMap, expecte
 }
 
 private fun testData() = listOf(
-    createEggForTesting(withEggIdShell = shellOf("EggId1"), withPasswordShell = shellOf("Password1"), withNestSlot = DEFAULT),
-    createEggForTesting(withEggIdShell = shellOf("EggId2"), withPasswordShell = shellOf("Password2"), withNestSlot = DEFAULT),
-    createEggForTesting(withEggIdShell = shellOf("EggId3"), withPasswordShell = shellOf("Password3"), withNestSlot = N2),
-    createEggForTesting(withEggIdShell = shellOf("EggId4"), withPasswordShell = shellOf("Password4"), withNestSlot = N9),
-    createEggForTesting(withEggIdShell = shellOf("EggId5"), withPasswordShell = shellOf("Password5"), withNestSlot = N9),
+    createEggForTesting(withEggIdShell = shellOf("EggId1"), withPasswordShell = shellOf("Password1"), withSlot = DEFAULT),
+    createEggForTesting(withEggIdShell = shellOf("EggId2"), withPasswordShell = shellOf("Password2"), withSlot = DEFAULT),
+    createEggForTesting(withEggIdShell = shellOf("EggId3"), withPasswordShell = shellOf("Password3"), withSlot = S2),
+    createEggForTesting(withEggIdShell = shellOf("EggId4"), withPasswordShell = shellOf("Password4"), withSlot = S9),
+    createEggForTesting(withEggIdShell = shellOf("EggId5"), withPasswordShell = shellOf("Password5"), withSlot = S9),
 )

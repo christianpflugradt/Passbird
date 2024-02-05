@@ -5,8 +5,8 @@ import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
-import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.password.MovePasswordService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggRepository
@@ -31,17 +31,17 @@ internal class MovePasswordServiceTest {
     fun `should move egg`() {
         // given
         val givenEggId = shellOf("EggId123")
-        val givenNestSlot = NestSlot.N1
-        val newNestSlot = NestSlot.N2
-        val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withNestSlot = givenNestSlot)
+        val givenSlot = Slot.S1
+        val newSlot = Slot.S2
+        val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withSlot = givenSlot)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
 
         // when
-        passwordService.movePassword(givenEggId, newNestSlot)
+        passwordService.movePassword(givenEggId, newSlot)
 
         // then
-        expectThat(givenEgg.associatedNest()) isEqualTo newNestSlot isNotEqualTo givenNestSlot
+        expectThat(givenEgg.associatedNest()) isEqualTo newSlot isNotEqualTo givenSlot
     }
 
     @Test
@@ -52,7 +52,7 @@ internal class MovePasswordServiceTest {
         fakeEggRepository(instance = eggRepository)
 
         // when
-        passwordService.movePassword(givenEggId, NestSlot.N1)
+        passwordService.movePassword(givenEggId, Slot.S1)
 
         // then
         verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(givenEggId))) }
@@ -63,10 +63,10 @@ internal class MovePasswordServiceTest {
     fun `should not move egg if eggId already exists in target nest`() {
         // given
         val givenEggId = shellOf("EggId123")
-        val givenNestSlot = NestSlot.N1
-        val newNestSlot = NestSlot.N2
-        val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withNestSlot = givenNestSlot)
-        val conflictingEgg = createEggForTesting(withEggIdShell = givenEggId, withNestSlot = newNestSlot)
+        val givenSlot = Slot.S1
+        val newSlot = Slot.S2
+        val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withSlot = givenSlot)
+        val conflictingEgg = createEggForTesting(withEggIdShell = givenEggId, withSlot = newSlot)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(
             instance = eggRepository,
@@ -74,10 +74,10 @@ internal class MovePasswordServiceTest {
         )
 
         // when
-        val actual = tryCatching { passwordService.movePassword(givenEggId, newNestSlot) }
+        val actual = tryCatching { passwordService.movePassword(givenEggId, newSlot) }
 
         // then
         expectThat(actual.exceptionOrNull()).isNotNull().isA<EggIdAlreadyExistsException>()
-        expectThat(givenEgg.associatedNest()) isEqualTo givenNestSlot isNotEqualTo newNestSlot
+        expectThat(givenEgg.associatedNest()) isEqualTo givenSlot isNotEqualTo newSlot
     }
 }

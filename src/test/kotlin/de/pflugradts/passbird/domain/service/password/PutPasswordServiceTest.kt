@@ -5,9 +5,9 @@ import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.nest.NestSlot
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -103,7 +103,7 @@ class PutPasswordServiceTest {
         verify(exactly = 1) { cryptoProvider.encrypt(newEggId) }
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
         verify(exactly = 1) { eggRepository.sync() }
-        verify(exactly = 1) { eggRepository.add(eq(createEgg(NestSlot.DEFAULT, newEggId, newPassword))) }
+        verify(exactly = 1) { eggRepository.add(eq(createEgg(Slot.DEFAULT, newEggId, newPassword))) }
         verify(exactly = 1) { eventRegistry.processEvents() }
     }
 
@@ -161,7 +161,7 @@ class PutPasswordServiceTest {
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(newEggId) }
         verify(exactly = 1) { cryptoProvider.encrypt(existingEggId) }
-        verify(exactly = 1) { eggRepository.add(eq(createEgg(NestSlot.DEFAULT, newEggId, newPassword))) }
+        verify(exactly = 1) { eggRepository.add(eq(createEgg(Slot.DEFAULT, newEggId, newPassword))) }
         verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(eggRepository.find(eggIdShell = existingEggId).orNull()?.viewPassword()) isEqualTo newPasswordForExistingEggId

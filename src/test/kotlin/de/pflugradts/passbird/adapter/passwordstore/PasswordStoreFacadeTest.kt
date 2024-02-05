@@ -7,20 +7,20 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.CAPACITY
-import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N1
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N2
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N3
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N4
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N5
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N6
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N7
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N8
-import de.pflugradts.passbird.domain.model.nest.NestSlot.N9
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.CAPACITY
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.slot.Slot.S1
+import de.pflugradts.passbird.domain.model.slot.Slot.S2
+import de.pflugradts.passbird.domain.model.slot.Slot.S3
+import de.pflugradts.passbird.domain.model.slot.Slot.S4
+import de.pflugradts.passbird.domain.model.slot.Slot.S5
+import de.pflugradts.passbird.domain.model.slot.Slot.S6
+import de.pflugradts.passbird.domain.model.slot.Slot.S7
+import de.pflugradts.passbird.domain.model.slot.Slot.S8
+import de.pflugradts.passbird.domain.model.slot.Slot.S9
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.every
@@ -104,28 +104,28 @@ class PasswordStoreFacadeTest {
         val nest1 = shellOf("nest1")
         val nest3 = shellOf("Nest3")
         val nest9 = shellOf("+neSt*9")
-        nestService.place(nest1, N1)
-        nestService.place(nest3, N3)
-        nestService.place(nest9, N9)
+        nestService.place(nest1, S1)
+        nestService.place(nest3, S3)
+        nestService.place(nest9, S9)
         val egg1 = createEggForTesting(
             withEggIdShell = shellOf("EggId1"),
             withPasswordShell = shellOf("Password1"),
-            withNestSlot = DEFAULT,
+            withSlot = DEFAULT,
         )
         val egg2 = createEggForTesting(
             withEggIdShell = shellOf("EggId2"),
             withPasswordShell = shellOf("Password2"),
-            withNestSlot = N1,
+            withSlot = S1,
         )
         val egg3 = createEggForTesting(
             withEggIdShell = shellOf("EggId3"),
             withPasswordShell = shellOf("Password3"),
-            withNestSlot = N3,
+            withSlot = S3,
         )
         val egg3b = createEggForTesting(
             withEggIdShell = shellOf("EggId3"),
             withPasswordShell = shellOf("Password3b"),
-            withNestSlot = N9,
+            withSlot = S9,
         )
         val eggs = listOf(egg1, egg2, egg3, egg3b)
 
@@ -137,11 +137,11 @@ class PasswordStoreFacadeTest {
 
         // then
         expectThat(actual.get().toList()) containsExactly eggs
-        listOf(N2, N4, N5, N6, N7, N8).forEach { expectThat(nestService.atNestSlot(it).isPresent).isFalse() }
+        listOf(S2, S4, S5, S6, S7, S8).forEach { expectThat(nestService.atNestSlot(it).isPresent).isFalse() }
         mapOf(
-            N1 to nest1,
-            N3 to nest3,
-            N9 to nest9,
+            S1 to nest1,
+            S3 to nest3,
+            S9 to nest9,
         ).forEach { (k, v) ->
             expectThat(nestService.atNestSlot(k).isPresent)
             expectThat(nestService.atNestSlot(k).get().viewNestId()) isEqualTo v

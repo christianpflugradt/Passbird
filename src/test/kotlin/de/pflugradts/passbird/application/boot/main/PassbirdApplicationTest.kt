@@ -9,9 +9,9 @@ import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.process.inactivity.InactivityHandler
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
-import de.pflugradts.passbird.domain.model.nest.NestSlot
-import de.pflugradts.passbird.domain.model.nest.NestSlot.Companion.nestSlotAt
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.fakeInput
 import de.pflugradts.passbird.domain.service.nest.createNestServiceSpyForTesting
@@ -69,7 +69,7 @@ class PassbirdApplicationTest {
         // given
         val input1 = fakeInput("h")
         val interrupt = fakeInput(INTERRUPT)
-        val givenNest = createNest(shellOf("mynest"), NestSlot.N1)
+        val givenNest = createNest(shellOf("mynest"), Slot.S1)
         val expectedNestPrefixSlot = mutableListOf<Output>()
         val expectedPromptPrefixSlot = mutableListOf<Output>()
         fakeUserInterfaceAdapterPort(
@@ -126,11 +126,11 @@ class PassbirdApplicationTest {
 
         // when
         mainMocked(args = arrayOf("/tmp", initialNestSlot), withMockedFileCheck = true)
-        nestService.place(shellOf("nest5"), NestSlot.N5)
+        nestService.place(shellOf("nest5"), Slot.S5)
         passbirdApplication.boot()
 
         // then
-        verify(exactly = 1) { nestService.moveToNestAt(nestSlotAt(initialNestSlot)) }
-        expectThat(nestService.currentNest().nestSlot) isEqualTo nestSlotAt(initialNestSlot)
+        verify(exactly = 1) { nestService.moveToNestAt(slotAt(initialNestSlot)) }
+        expectThat(nestService.currentNest().slot) isEqualTo slotAt(initialNestSlot)
     }
 }

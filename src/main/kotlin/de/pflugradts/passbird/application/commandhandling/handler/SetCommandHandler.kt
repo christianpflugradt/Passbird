@@ -7,8 +7,8 @@ import de.pflugradts.passbird.application.commandhandling.command.SetCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
-import de.pflugradts.passbird.domain.model.nest.NestSlot.DEFAULT
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.password.PasswordService

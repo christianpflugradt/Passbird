@@ -5,8 +5,8 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
-import de.pflugradts.passbird.domain.model.nest.NestSlot.INVALID
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot.INVALID
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.HIGHLIGHT
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
@@ -28,7 +28,7 @@ class MoveToNestCommandHandler @Inject constructor(
             val nestSlot = input.extractNestSlot()
             if (nestSlot === INVALID) {
                 userInterfaceAdapterPort.send(outputOf(shellOf("Invalid Nest - Operation aborted."), OPERATION_ABORTED))
-            } else if (nestSlot === nestService.currentNest().nestSlot) {
+            } else if (nestSlot === nestService.currentNest().slot) {
                 userInterfaceAdapterPort.send(
                     outputOf(shellOf("Egg is already in the specified Nest - Operation aborted."), OPERATION_ABORTED),
                 )

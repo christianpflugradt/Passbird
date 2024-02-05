@@ -1,5 +1,5 @@
 package de.pflugradts.passbird.application.commandhandling.command.base
 
-import de.pflugradts.passbird.domain.model.nest.NestSlot
+import de.pflugradts.passbird.domain.model.slot.Slot
 
-abstract class AbstractNestSlotCommand(val nestSlot: NestSlot) : Command
+abstract class AbstractNestSlotCommand(val slot: Slot) : Command
