@@ -41,6 +41,8 @@ import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.exchange.ExchangeFactory
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.exchange.PasswordImportExportService
+import de.pflugradts.passbird.application.process.Initializer
+import de.pflugradts.passbird.application.process.inactivity.InactivityHandlerScheduler
 import de.pflugradts.passbird.application.security.CryptoProviderFactory
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
@@ -78,31 +80,38 @@ class ApplicationModule : AbstractModule() {
     }
 
     private fun configureMultibinders() {
-        val commandHandlerMultibinder = Multibinder.newSetBinder(binder(), CommandHandler::class.java)
-        listOf(
-            AddNestCommandHandler::class.java,
-            MoveToNestCommandHandler::class.java,
-            CustomSetCommandHandler::class.java,
-            DiscardCommandHandler::class.java,
-            DiscardNestCommandHandler::class.java,
-            ExportCommandHandler::class.java,
-            GetCommandHandler::class.java,
-            HelpCommandHandler::class.java,
-            ImportCommandHandler::class.java,
-            ListCommandHandler::class.java,
-            QuitCommandHandler::class.java,
-            RenameCommandHandler::class.java,
-            SetCommandHandler::class.java,
-            SetInfoCommandHandler::class.java,
-            SwitchNestCommandHandler::class.java,
-            ViewCommandHandler::class.java,
-            ViewNestCommandHandler::class.java,
-        ).forEach { commandHandlerMultibinder.addBinding().to(it) }
-        val eventHandlerMultibinder = Multibinder.newSetBinder(binder(), EventHandler::class.java)
-        listOf(
-            ApplicationEventHandler::class.java,
-            DomainEventHandler::class.java,
-        ).forEach { eventHandlerMultibinder.addBinding().to(it) }
+        Multibinder.newSetBinder(binder(), CommandHandler::class.java).apply {
+            listOf(
+                AddNestCommandHandler::class.java,
+                MoveToNestCommandHandler::class.java,
+                CustomSetCommandHandler::class.java,
+                DiscardCommandHandler::class.java,
+                DiscardNestCommandHandler::class.java,
+                ExportCommandHandler::class.java,
+                GetCommandHandler::class.java,
+                HelpCommandHandler::class.java,
+                ImportCommandHandler::class.java,
+                ListCommandHandler::class.java,
+                QuitCommandHandler::class.java,
+                RenameCommandHandler::class.java,
+                SetCommandHandler::class.java,
+                SetInfoCommandHandler::class.java,
+                SwitchNestCommandHandler::class.java,
+                ViewCommandHandler::class.java,
+                ViewNestCommandHandler::class.java,
+            ).forEach { this.addBinding().to(it) }
+        }
+        Multibinder.newSetBinder(binder(), EventHandler::class.java).apply {
+            listOf(
+                ApplicationEventHandler::class.java,
+                DomainEventHandler::class.java,
+            ).forEach { this.addBinding().to(it) }
+        }
+        Multibinder.newSetBinder(binder(), Initializer::class.java).apply {
+            listOf(
+                InactivityHandlerScheduler::class.java,
+            ).forEach { this.addBinding().to(it) }
+        }
     }
 
     private fun configureProviders() {

@@ -2,10 +2,9 @@ package de.pflugradts.passbird.application.boot.main
 
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.InputHandler
-import de.pflugradts.passbird.application.configuration.Configuration
-import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.application.mainMocked
+import de.pflugradts.passbird.application.process.Initializer
 import de.pflugradts.passbird.application.process.inactivity.InactivityHandler
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
@@ -26,18 +25,24 @@ import strikt.assertions.isEqualTo
 
 class PassbirdApplicationTest {
 
-    private val configuration = mockk<Configuration>()
+    private val initializer1 = mockk<Initializer>(relaxed = true)
+    private val initializer2 = mockk<Initializer>(relaxed = true)
+    private val initializer3 = mockk<Initializer>(relaxed = true)
     private val inactivityHandler = mockk<InactivityHandler>(relaxed = true)
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>()
     private val nestService = createNestServiceSpyForTesting()
     private val inputHandler = mockk<InputHandler>()
-    private val passbirdApplication =
-        PassbirdApplication(configuration, inactivityHandler, userInterfaceAdapterPort, nestService, inputHandler)
+    private val passbirdApplication = PassbirdApplication(
+        inactivityHandler = inactivityHandler,
+        initializers = setOf(initializer1, initializer2, initializer3),
+        inputHandler = inputHandler,
+        nestService = nestService,
+        userInterfaceAdapterPort = userInterfaceAdapterPort,
+    )
 
     @BeforeEach
     fun setup() {
         mainMocked(args = arrayOf("/tmp"), withMockedFileCheck = true)
-        fakeConfiguration(instance = configuration)
     }
 
     @Test
@@ -132,5 +137,25 @@ class PassbirdApplicationTest {
         // then
         verify(exactly = 1) { nestService.moveToNestAt(slotAt(initialNestSlot)) }
         expectThat(nestService.currentNest().slot) isEqualTo slotAt(initialNestSlot)
+    }
+
+    @Test
+    fun `should run initializers`() {
+        // given
+        val interrupt = fakeInput(INTERRUPT)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(interrupt),
+        )
+        every { inputHandler.handleInput(any()) } returns Unit
+
+        // when
+        mainMocked(args = arrayOf("/tmp"), withMockedFileCheck = true)
+        passbirdApplication.boot()
+
+        // then
+        verify(exactly = 1) { initializer1.run() }
+        verify(exactly = 1) { initializer2.run() }
+        verify(exactly = 1) { initializer3.run() }
     }
 }
