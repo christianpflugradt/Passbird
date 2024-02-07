@@ -42,6 +42,7 @@ import de.pflugradts.passbird.application.exchange.ExchangeFactory
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.exchange.PasswordImportExportService
 import de.pflugradts.passbird.application.process.Initializer
+import de.pflugradts.passbird.application.process.exchange.ExportFileChecker
 import de.pflugradts.passbird.application.process.inactivity.InactivityHandlerScheduler
 import de.pflugradts.passbird.application.security.CryptoProviderFactory
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
@@ -109,6 +110,7 @@ class ApplicationModule : AbstractModule() {
         }
         Multibinder.newSetBinder(binder(), Initializer::class.java).apply {
             listOf(
+                ExportFileChecker::class.java,
                 InactivityHandlerScheduler::class.java,
             ).forEach { this.addBinding().to(it) }
         }

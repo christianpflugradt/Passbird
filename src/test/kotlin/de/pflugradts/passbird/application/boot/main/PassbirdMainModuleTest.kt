@@ -22,6 +22,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.nest.MoveToNes
 import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
 import de.pflugradts.passbird.application.eventhandling.ApplicationEventHandler
+import de.pflugradts.passbird.application.process.exchange.ExportFileChecker
 import de.pflugradts.passbird.application.process.inactivity.InactivityHandlerScheduler
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -72,6 +73,7 @@ class PassbirdMainModuleTest {
             expectThat(eventHandler::class.java) isSameInstanceAs expectedEventHandlers[index]
         }
         val expectedInitializers = listOf(
+            ExportFileChecker::class.java,
             InactivityHandlerScheduler::class.java,
         )
         actual.initializers.forEachIndexed { index, eventHandler ->

@@ -9,8 +9,12 @@ interface ReadableConfiguration {
     val adapter: Adapter
 
     interface Application {
+        val exchange: Exchange
         val inactivityLimit: InactivityLimit
         val password: Password
+    }
+    interface Exchange {
+        val promptOnExportFile: Boolean
     }
     interface InactivityLimit {
         val enabled: Boolean

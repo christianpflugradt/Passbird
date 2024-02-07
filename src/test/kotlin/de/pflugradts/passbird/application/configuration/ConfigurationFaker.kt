@@ -17,6 +17,7 @@ fun fakeConfiguration(
     withKeyStoreLocation: String = "",
     withPasswordStoreLocation: String = "",
     withPromptOnRemoval: Boolean = false,
+    withPromptOnExportFile: Boolean = false,
     withSpecialCharacters: Boolean = true,
     withPasswordLength: Int = 20,
     withCustomPasswordConfigurations: List<Configuration.CustomPasswordConfiguration> = emptyList(),
@@ -48,6 +49,8 @@ fun fakeConfiguration(
     every { adapter.keyStore } returns keyStore
     every { adapter.passwordStore } returns passwordStore
     every { instance.adapter } returns adapter
+    val exchange = mockk<Configuration.Exchange>()
+    every { exchange.promptOnExportFile } returns withPromptOnExportFile
     val inactivityLimit = mockk<Configuration.InactivityLimit>()
     every { inactivityLimit.enabled } returns (withInactivityTimeLimit > 0)
     every { inactivityLimit.limitInMinutes } returns withInactivityTimeLimit
@@ -57,6 +60,7 @@ fun fakeConfiguration(
     every { password.length } returns withPasswordLength
     every { password.customPasswordConfigurations } returns withCustomPasswordConfigurations
     val application = mockk<Configuration.Application>()
+    every { application.exchange } returns exchange
     every { application.inactivityLimit } returns inactivityLimit
     every { application.password } returns password
     every { instance.application } returns application

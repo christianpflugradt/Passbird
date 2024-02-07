@@ -36,6 +36,9 @@ Once set up Passbird will create a `passbird.yml` with various configuration par
 
 ```yaml
 application:
+  exchange:
+      # prompts for deletion if password export file is detected on program start
+      promptOnExportFile: true
   inactivityLimit:
     # terminates Passbird after a period of inactivity if enabled
     enabled: false

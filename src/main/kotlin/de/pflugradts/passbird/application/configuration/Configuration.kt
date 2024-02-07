@@ -23,9 +23,13 @@ data class Configuration(
     }
 
     data class Application(
+        override val exchange: Exchange = Exchange(),
         override val inactivityLimit: InactivityLimit = InactivityLimit(),
         override val password: Password = Password(),
     ) : ReadableConfiguration.Application
+    data class Exchange(
+        override val promptOnExportFile: Boolean = true,
+    ) : ReadableConfiguration.Exchange
     data class InactivityLimit(
         override val enabled: Boolean = false,
         override val limitInMinutes: Int = 10,

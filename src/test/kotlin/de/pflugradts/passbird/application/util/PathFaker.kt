@@ -5,7 +5,7 @@ import io.mockk.mockk
 import java.nio.file.Path
 
 fun fakePath(
-    instance: Path = mockk<Path>(),
+    instance: Path = mockk(relaxed = true),
     resolvingTo: Pair<Path, String>? = null,
     exists: Boolean = false,
     isDirectory: Boolean = false,
