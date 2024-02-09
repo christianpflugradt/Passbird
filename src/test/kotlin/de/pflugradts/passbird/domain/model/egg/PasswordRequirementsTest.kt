@@ -9,6 +9,7 @@ import strikt.assertions.isTrue
 
 class PasswordRequirementsTest {
 
+    @Test
     fun `requirements with positive length should be valid`() {
         // given
         val givenPasswordRequirements = PasswordRequirements(
@@ -27,6 +28,7 @@ class PasswordRequirementsTest {
         expectThat(actual).isTrue()
     }
 
+    @Test
     fun `requirements with only numbers should be valid`() {
         // given
         val givenPasswordRequirements = PasswordRequirements(
@@ -45,6 +47,7 @@ class PasswordRequirementsTest {
         expectThat(actual).isTrue()
     }
 
+    @Test
     fun `requirements with only lowercase should be valid`() {
         // given
         val givenPasswordRequirements = PasswordRequirements(
@@ -63,6 +66,7 @@ class PasswordRequirementsTest {
         expectThat(actual).isTrue()
     }
 
+    @Test
     fun `requirements with only uppercase should be valid`() {
         // given
         val givenPasswordRequirements = PasswordRequirements(
@@ -81,6 +85,7 @@ class PasswordRequirementsTest {
         expectThat(actual).isTrue()
     }
 
+    @Test
     fun `requirements with only special characters should be valid`() {
         // given
         val givenPasswordRequirements = PasswordRequirements(
@@ -97,6 +102,46 @@ class PasswordRequirementsTest {
 
         // then
         expectThat(actual).isTrue()
+    }
+
+    @Test
+    fun `requirements with only special characters and up to 20 unused special characters should be valid`() {
+        // given
+        (1..20).forEach {
+            val givenPasswordRequirements = PasswordRequirements(
+                length = 20,
+                hasNumbers = false,
+                hasLowercaseLetters = false,
+                hasUppercaseLetters = false,
+                hasSpecialCharacters = true,
+                unusedSpecialCharacters = "$".repeat(it),
+            )
+
+            // when
+            val actual = givenPasswordRequirements.isValid()
+
+            // then
+            expectThat(actual).isTrue()
+        }
+    }
+
+    @Test
+    fun `requirements with only special characters and more than 20 unused special characters should be invalid`() {
+        // given
+        val givenPasswordRequirements = PasswordRequirements(
+            length = 20,
+            hasNumbers = false,
+            hasLowercaseLetters = false,
+            hasUppercaseLetters = false,
+            hasSpecialCharacters = true,
+            unusedSpecialCharacters = "$".repeat(21),
+        )
+
+        // when
+        val actual = givenPasswordRequirements.isValid()
+
+        // then
+        expectThat(actual).isFalse()
     }
 
     @ParameterizedTest
