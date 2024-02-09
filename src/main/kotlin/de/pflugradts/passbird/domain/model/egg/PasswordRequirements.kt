@@ -11,5 +11,4 @@ class PasswordRequirements(
     fun isValid() = length > 0 &&
         (hasNumbers || hasLowercaseLetters || hasUppercaseLetters || hasSpecialCharacters) &&
         (hasNumbers || hasLowercaseLetters || hasUppercaseLetters || unusedSpecialCharacters.length <= 20)
-
 }

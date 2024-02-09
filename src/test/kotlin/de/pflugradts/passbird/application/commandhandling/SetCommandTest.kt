@@ -188,4 +188,28 @@ class SetCommandTest {
         }
         expectThat(shell) isNotEqualTo reference
     }
+
+    @Test
+    fun `should handle set command with invalid custom password configuration`() {
+        // given
+        val args = "EggId"
+        val shell = shellOf("s1$args")
+        val reference = shell.copy()
+        val customPasswordLength = 0
+        fakeConfiguration(
+            instance = configuration,
+            withCustomPasswordConfigurations = listOf(Configuration.CustomPasswordConfiguration(length = customPasswordLength)),
+        )
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify { passwordService wasNot Called }
+        verify(exactly = 1) {
+            userInterfaceAdapterPort.send(eq(outputOf(shellOf("Specified configuration is invalid - Operation aborted."))))
+        }
+        expectThat(shell) isNotEqualTo reference
+    }
 }

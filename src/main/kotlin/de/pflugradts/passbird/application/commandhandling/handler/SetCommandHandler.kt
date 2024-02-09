@@ -34,18 +34,12 @@ class SetCommandHandler @Inject constructor(
             val passwordRequirements = if (setCommand.slot == DEFAULT) {
                 configuration.parsePasswordRequirements()
             } else {
-                customPasswordConfigurations[setCommand.slot.index() - 1].let {
-                    PasswordRequirements(
-                        length = it.length,
-                        hasNumbers = it.hasNumbers,
-                        hasLowercaseLetters = it.hasLowercaseLetters,
-                        hasUppercaseLetters = it.hasUppercaseLetters,
-                        hasSpecialCharacters = it.hasSpecialCharacters,
-                        unusedSpecialCharacters = it.unusedSpecialCharacters,
-                    )
-                }
+                customPasswordConfigurations[setCommand.slot.index() - 1].toPasswordRequirements()
             }
-            if (commandConfirmed(setCommand)) {
+            if (!passwordRequirements.isValid()) {
+                val msg = "Specified configuration is invalid - Operation aborted."
+                userInterfaceAdapterPort.send(outputOf(shellOf(msg), OPERATION_ABORTED))
+            } else if (commandConfirmed(setCommand)) {
                 try {
                     passwordService.challengeEggId(setCommand.argument)
                     passwordService.putEgg(setCommand.argument, passwordProvider.createNewPassword(passwordRequirements))
@@ -71,3 +65,12 @@ class SetCommandHandler @Inject constructor(
             true
         }
 }
+
+private fun ReadableConfiguration.CustomPasswordConfiguration.toPasswordRequirements() = PasswordRequirements(
+    length = length,
+    hasNumbers = hasNumbers,
+    hasLowercaseLetters = hasLowercaseLetters,
+    hasUppercaseLetters = hasUppercaseLetters,
+    hasSpecialCharacters = hasSpecialCharacters,
+    unusedSpecialCharacters = unusedSpecialCharacters,
+)

@@ -65,5 +65,5 @@ fun fakeConfiguration(
     every { application.password } returns password
     every { instance.application } returns application
     every { instance.template } returns withConfigurationTemplate
-    every { instance.parsePasswordRequirements() } returns mockk()
+    every { instance.parsePasswordRequirements() } answers { callOriginal() }
 }
