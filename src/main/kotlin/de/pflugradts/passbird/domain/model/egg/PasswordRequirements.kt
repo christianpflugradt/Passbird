@@ -8,5 +8,5 @@ class PasswordRequirements(
     val hasSpecialCharacters: Boolean = true,
     val unusedSpecialCharacters: String = "",
 ) {
-    fun isValid() = hasNumbers || hasLowercaseLetters || hasUppercaseLetters || hasSpecialCharacters
+    fun isValid() = (hasNumbers || hasLowercaseLetters || hasUppercaseLetters || hasSpecialCharacters) && length > 0
 }
