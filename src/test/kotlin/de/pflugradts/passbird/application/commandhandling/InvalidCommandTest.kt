@@ -103,13 +103,61 @@ class InvalidCommandTest {
                 "n*1eggId",
                 "n+1eggId",
                 "n-1eggId",
-                "n/1eggId",
                 "n()eggId",
-                "n_eggId",
+                "n+",
+                "n1+",
                 "n++",
+                "n--",
             ],
         )
         fun `should handle unknown nest command`(givenInput: String) {
+            // given
+            val input = inputOf(shellOf(givenInput))
+
+            // when
+            val actual = commandFactory.construct(CommandType.resolveCommandTypeFrom(input.command), input)
+
+            // then
+            expectThat(actual).isA<NullCommand>()
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "s+34",
+                "s1234",
+                "s---",
+                "s(5)",
+            ],
+        )
+        fun `should handle set command with too large command`(givenInput: String) {
+            // given
+            val input = inputOf(shellOf(givenInput))
+
+            // when
+            val captureSystemErr = captureSystemErr()
+            val actual = captureSystemErr.during {
+                commandFactory.construct(CommandType.resolveCommandTypeFrom(input.command), input)
+            }
+
+            // then
+            expectThat(actual).isA<NullCommand>()
+            expectThat(captureSystemErr.capture) contains "Command execution failed:"
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "s",
+                "s1",
+                "s?1",
+                "s?eggId",
+                "s?3eggId",
+                "s-1eggId",
+                "s++",
+            ],
+        )
+        fun `should handle unknown set command`(givenInput: String) {
             // given
             val input = inputOf(shellOf(givenInput))
 
