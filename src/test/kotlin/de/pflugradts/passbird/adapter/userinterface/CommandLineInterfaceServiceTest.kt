@@ -9,18 +9,23 @@ import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
-import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
+import java.util.stream.Stream
 
 class CommandLineInterfaceServiceTest {
 
@@ -58,20 +63,6 @@ class CommandLineInterfaceServiceTest {
 
             // then
             expectThat(captureSystemOut.capture) isEqualTo expectedMessage
-        }
-
-        @Test
-        fun `should send output with escape codes`() {
-            // given
-            val givenMessage = "hello world"
-            fakeConfiguration(instance = configuration, withAnsiEscapeCodesEnabled = true)
-            val captureSystemOut = captureSystemOut()
-
-            // when
-            captureSystemOut.during { commandLineInterfaceService.send(outputOf(shellOf(givenMessage), SPECIAL)) }
-
-            // then
-            expectThat(captureSystemOut.capture) isEqualTo "\u001B[38;5;220m$givenMessage\u001B[0m\n"
         }
     }
 
@@ -184,37 +175,49 @@ class CommandLineInterfaceServiceTest {
             expectThat(actual).isTrue()
         }
 
-        @Test
-        fun `should return false on input cc`() {
-            // given
-            val givenInput = "cc"
-
-            // when
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "cc",
+                "d",
+                "",
+            ],
+        )
+        fun `should return false on other input`(givenInput: String) {
+            // given / when
             val actual = mockSystemInWith("$givenInput\n") { commandLineInterfaceService.receiveConfirmation(emptyOutput()) }
 
             // then
             expectThat(actual).isFalse()
         }
+    }
 
+    @Nested
+    inner class ReceiveYesTest {
         @Test
-        fun `should return false on input d`() {
+        fun `should return true on input Y`() {
             // given
-            val givenInput = "d"
+            val givenInput = "Y"
 
             // when
-            val actual = mockSystemInWith("$givenInput\n") { commandLineInterfaceService.receiveConfirmation(emptyOutput()) }
+            val actual = mockSystemInWith("$givenInput\n") { commandLineInterfaceService.receiveYes(emptyOutput()) }
 
             // then
-            expectThat(actual).isFalse()
+            expectThat(actual).isTrue()
         }
 
-        @Test
-        fun `should return false on empty input`() {
-            // given
-            val givenInput = ""
-
-            // when
-            val actual = mockSystemInWith("$givenInput\n") { commandLineInterfaceService.receiveConfirmation(emptyOutput()) }
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "n",
+                "y",
+                "Yes",
+                "",
+            ],
+        )
+        fun `should return false on other input`(givenInput: String) {
+            // given / when
+            val actual = mockSystemInWith("$givenInput\n") { commandLineInterfaceService.receiveYes(emptyOutput()) }
 
             // then
             expectThat(actual).isFalse()
@@ -262,5 +265,33 @@ class CommandLineInterfaceServiceTest {
             // then
             expectThat(captureSystemOut.capture) contains "\u0007"
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("providedMapping")
+    fun `should send output with escape codes`(outputFormatting: OutputFormatting, code: Int) {
+        // given
+        val givenMessage = "hello world"
+        fakeConfiguration(instance = configuration, withAnsiEscapeCodesEnabled = true)
+        val captureSystemOut = captureSystemOut()
+
+        // when
+        captureSystemOut.during { commandLineInterfaceService.send(outputOf(shellOf(givenMessage), outputFormatting)) }
+
+        // then
+        expectThat(captureSystemOut.capture) isEqualTo "\u001B[38;5;${code}m$givenMessage\u001B[0m\n"
+    }
+
+    companion object {
+        @JvmStatic
+        fun providedMapping(): Stream<Arguments> = Stream.of(
+            Arguments.of(OutputFormatting.DEFAULT, 231),
+            Arguments.of(OutputFormatting.SPECIAL, 220),
+            Arguments.of(OPERATION_ABORTED, 208),
+            Arguments.of(OutputFormatting.ERROR_MESSAGE, 196),
+            Arguments.of(OutputFormatting.HIGHLIGHT, 207),
+            Arguments.of(OutputFormatting.NEST, 39),
+            Arguments.of(OutputFormatting.EVENT_HANDLED, 118),
+        )
     }
 }
