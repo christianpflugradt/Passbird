@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.configuration
 import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 
+private const val DEFAULT_BACKUP_DIRECTORY = "backups"
 private const val DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS = 10
 private const val DEFAULT_PASSWORD_LENGTH = 20
 
@@ -18,15 +19,27 @@ data class Configuration(
     )
 
     override fun updateDirectory(directory: Directory) {
+        application.backup.location = "${directory.value}/$DEFAULT_BACKUP_DIRECTORY"
         adapter.keyStore.location = directory.value
         adapter.passwordStore.location = directory.value
     }
 
     data class Application(
+        override val backup: Backup = Backup(),
         override val exchange: Exchange = Exchange(),
         override val inactivityLimit: InactivityLimit = InactivityLimit(),
         override val password: Password = Password(),
     ) : ReadableConfiguration.Application
+    data class Backup(
+        override var location: String = DEFAULT_BACKUP_DIRECTORY,
+        override val configuration: BackupSettings = BackupSettings(),
+        override val database: BackupSettings = BackupSettings(),
+        override val keyStore: BackupSettings = BackupSettings(),
+    ) : ReadableConfiguration.Backup
+    data class BackupSettings(
+        override val enabled: Boolean = true,
+        override val numberOfBackups: Int = 10,
+    ) : ReadableConfiguration.BackupSettings
     data class Exchange(
         override val promptOnExportFile: Boolean = true,
     ) : ReadableConfiguration.Exchange

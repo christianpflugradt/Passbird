@@ -9,9 +9,20 @@ interface ReadableConfiguration {
     val adapter: Adapter
 
     interface Application {
+        val backup: Backup
         val exchange: Exchange
         val inactivityLimit: InactivityLimit
         val password: Password
+    }
+    interface Backup {
+        val location: String
+        val configuration: BackupSettings
+        val database: BackupSettings
+        val keyStore: BackupSettings
+    }
+    interface BackupSettings {
+        val enabled: Boolean
+        val numberOfBackups: Int
     }
     interface Exchange {
         val promptOnExportFile: Boolean
