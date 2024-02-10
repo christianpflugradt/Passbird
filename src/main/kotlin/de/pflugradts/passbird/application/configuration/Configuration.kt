@@ -32,13 +32,15 @@ data class Configuration(
     ) : ReadableConfiguration.Application
     data class Backup(
         override var location: String = DEFAULT_BACKUP_DIRECTORY,
+        override var numberOfBackups: Int = 10,
         override val configuration: BackupSettings = BackupSettings(),
         override val database: BackupSettings = BackupSettings(),
         override val keyStore: BackupSettings = BackupSettings(),
     ) : ReadableConfiguration.Backup
     data class BackupSettings(
         override val enabled: Boolean = true,
-        override val numberOfBackups: Int = 10,
+        override val location: String? = null,
+        override val numberOfBackups: Int? = null,
     ) : ReadableConfiguration.BackupSettings
     data class Exchange(
         override val promptOnExportFile: Boolean = true,

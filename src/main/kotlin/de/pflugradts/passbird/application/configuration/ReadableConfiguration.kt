@@ -16,13 +16,15 @@ interface ReadableConfiguration {
     }
     interface Backup {
         val location: String
+        val numberOfBackups: Int
         val configuration: BackupSettings
         val database: BackupSettings
         val keyStore: BackupSettings
     }
     interface BackupSettings {
         val enabled: Boolean
-        val numberOfBackups: Int
+        val location: String?
+        val numberOfBackups: Int?
     }
     interface Exchange {
         val promptOnExportFile: Boolean

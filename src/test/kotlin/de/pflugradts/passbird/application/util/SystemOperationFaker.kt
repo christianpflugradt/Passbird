@@ -29,5 +29,6 @@ fun fakeSystemOperation(
     withPaths.forEach { every { instance.getPath(it.first.toDirectory()) } returns it.second }
     withDirectoryResolvingToFileName?.run { every { instance.resolvePath(first, second) } returns third }
     every { instance.exit() } returns Unit
-    if (withIoException) { every { instance.resolvePath(any(), any()) } throws IOException() }
+    if (withIoException) { every { instance.resolvePath(any(Directory::class), any(FileName::class)) } throws IOException() }
+    if (withIoException) { every { instance.resolvePath(any(Directory::class), any(Directory::class)) } throws IOException() }
 }

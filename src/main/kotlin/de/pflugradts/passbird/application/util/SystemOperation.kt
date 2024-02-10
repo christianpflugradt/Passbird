@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.util
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.application.FileName
+import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -15,6 +16,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.security.KeyStore
 import java.time.Clock
+import kotlin.io.path.name
 import kotlin.system.exitProcess
 
 private const val JCEKS_KEYSTORE = "JCEKS"
@@ -25,8 +27,12 @@ class SystemOperation {
     val jceksInstance: KeyStore get() = KeyStore.getInstance(JCEKS_KEYSTORE)
 
     fun readPasswordFromConsole(): CharArray = System.console().readPassword()
+    fun getFileNames(directory: Directory): List<FileName> = Files.list(getPath(directory)).map { it.name.toFileName() }.toList()
     fun getPath(directory: Directory): Path = Paths.get(directory.value)
     fun resolvePath(directory: Directory, fileName: FileName): Path = getPath(directory).resolve(fileName.value)
+    fun resolvePath(directory: Directory, other: Directory): Path = getPath(directory).resolve(other.value)
+    fun copyTo(source: Path, target: Path) { Files.copy(source, target) }
+    fun createDirectory(directory: Directory) { Files.createDirectories(getPath(directory)) }
     fun delete(path: Path) = Files.delete(path)
     fun exists(directory: Directory): Boolean = exists(getPath(directory))
     fun exists(path: Path): Boolean = Files.exists(path)
