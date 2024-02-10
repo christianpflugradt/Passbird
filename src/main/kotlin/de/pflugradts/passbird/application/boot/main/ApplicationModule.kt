@@ -41,7 +41,9 @@ import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.application.exchange.ExchangeFactory
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.exchange.PasswordImportExportService
+import de.pflugradts.passbird.application.process.Finalizer
 import de.pflugradts.passbird.application.process.Initializer
+import de.pflugradts.passbird.application.process.backup.BackupManager
 import de.pflugradts.passbird.application.process.exchange.ExportFileChecker
 import de.pflugradts.passbird.application.process.inactivity.InactivityHandlerScheduler
 import de.pflugradts.passbird.application.security.CryptoProviderFactory
@@ -112,6 +114,11 @@ class ApplicationModule : AbstractModule() {
             listOf(
                 ExportFileChecker::class.java,
                 InactivityHandlerScheduler::class.java,
+            ).forEach { this.addBinding().to(it) }
+        }
+        Multibinder.newSetBinder(binder(), Finalizer::class.java).apply {
+            listOf(
+                BackupManager::class.java,
             ).forEach { this.addBinding().to(it) }
         }
     }

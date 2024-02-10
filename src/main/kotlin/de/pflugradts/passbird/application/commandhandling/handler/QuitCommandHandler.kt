@@ -5,6 +5,7 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitReason.INACTIVITY
+import de.pflugradts.passbird.application.process.Finalizer
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -13,11 +14,13 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
 
 class QuitCommandHandler @Inject constructor(
+    @Inject private val finalizers: Set<Finalizer>,
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     @Inject private val systemOperation: SystemOperation,
 ) : CommandHandler {
     @Subscribe
     private fun handleQuitCommand(quitCommand: QuitCommand) {
+        finalizers.forEach { it.run() }
         userInterfaceAdapterPort.sendLineBreak()
         if (quitCommand.quitReason == INACTIVITY) {
             userInterfaceAdapterPort.sendLineBreak()

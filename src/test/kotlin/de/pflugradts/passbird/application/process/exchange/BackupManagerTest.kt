@@ -16,7 +16,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class ExportFileCheckerTest {
+class BackupManagerTest {
 
     private val configuration = mockk<Configuration>(relaxed = true)
     private val systemOperation = mockk<SystemOperation>(relaxed = true)

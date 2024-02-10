@@ -8,6 +8,7 @@ import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.exchange.ImportExportService
+import de.pflugradts.passbird.application.process.Finalizer
 import de.pflugradts.passbird.application.process.Initializer
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
@@ -29,4 +30,5 @@ class PassbirdTestMain @Inject constructor(
     @Inject val commandHandlers: Set<CommandHandler>,
     @Inject val eventHandlers: Set<EventHandler>,
     @Inject val initializers: Set<Initializer>,
+    @Inject val finalizers: Set<Finalizer>,
 )

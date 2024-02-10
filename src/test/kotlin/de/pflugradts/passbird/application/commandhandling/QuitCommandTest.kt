@@ -27,7 +27,7 @@ class QuitCommandTest {
     private val configuration = mockk<Configuration>()
     private val commandLineInterfaceService = CommandLineInterfaceService(mockk(), configuration)
     private val systemOperation = mockk<SystemOperation>()
-    private val quitCommandHandler = QuitCommandHandler(commandLineInterfaceService, systemOperation)
+    private val quitCommandHandler = QuitCommandHandler(emptySet(), commandLineInterfaceService, systemOperation)
 
     @BeforeEach
     fun setup() {

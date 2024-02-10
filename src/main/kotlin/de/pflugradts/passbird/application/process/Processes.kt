@@ -4,3 +4,4 @@ interface Process {
     fun run()
 }
 interface Initializer : Process
+interface Finalizer : Process
