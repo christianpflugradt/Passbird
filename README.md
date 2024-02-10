@@ -36,9 +36,39 @@ Once set up Passbird will create a `passbird.yml` with various configuration par
 
 ```yaml
 application:
+  # manages backups of important Passbird files
+  backup:
+    # default location for all backups, can be relative or absolute path
+    location: backups
+    # default number of backups to keep per file
+    numberOfBackups: 10
+    # manages backups for passbird.yml configuration file
+    configuration:
+      # enables backups for this file
+      enabled: true
+      # overrides default location for this file
+      location:
+      # overrides default number of backups for this file
+      numberOfBackups:
+    # manages backups for passbird.pw database file
+    database:
+      # enables backups for this file
+      enabled: true
+      # overrides default location for this file
+      location:
+      # overrides default number of backups for this file
+      numberOfBackups:
+    # manages backups for passbird.ks keystore file
+    keyStore:
+      # enables backups for this file
+      enabled: true
+      # overrides default location for this file
+      location:
+      # overrides default number of backups for this file
+      numberOfBackups:
   exchange:
-      # prompts for deletion if password export file is detected on program start
-      promptOnExportFile: true
+    # prompts for deletion if password export file is detected on program start
+    promptOnExportFile: true
   inactivityLimit:
     # terminates Passbird after a period of inactivity if enabled
     enabled: false
@@ -61,10 +91,10 @@ adapter:
       # number of seconds to pass before clipboard is emptied
       delaySeconds: 10
   keyStore:
-    # directory where keystore is located
+    # path to directory where keystore is located
     location:
   passwordStore:
-    # directory where password database is located
+    # path to directory where password database is located
     location:
     # terminates Passbird if database checksum doesn't meet expectations
     verifyChecksum: true
@@ -212,15 +242,6 @@ Some example inputs and what they do:
 `e` exports all Eggs to a file `passbird-export.json` in the directory passed on program start
 
 `i` imports all Eggs from a file `passbird-export.json` expected in the directory passed on program start - please note that this will potentially overwrite all Passwords in your database if there are any matching Eggs!
-
-## Migrating from 2.x.x to 3.x.x
-
-In 2.x.x Passbird was known as PwMan3. As part of the rebranding the file names have changed. Everything else remains compatible:
-- `pwman3.jar` has been renamed to `passbird.jar` - if you use a script or alias to start the program, make sure you update it accordingly
-- `PwMan3.yml` has been renamed to `passbird.yml`
-- `PwMan3.ks` has been renamed to `passbird.ks`
-- `PwMan3.pw` has been renamed to `passbird.pw`
-- import and export will generate / expect a file named `passbird-export.json` now
 
 ## <a name="faq"></a>Frequently Asked Questions
 
