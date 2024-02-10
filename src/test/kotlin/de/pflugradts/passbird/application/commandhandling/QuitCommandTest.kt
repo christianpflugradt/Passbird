@@ -8,6 +8,7 @@ import de.pflugradts.passbird.application.commandhandling.command.QuitReason.INA
 import de.pflugradts.passbird.application.commandhandling.handler.QuitCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.process.backup.BackupManager
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -24,10 +25,11 @@ import strikt.assertions.contains
 @Tag(INTEGRATION)
 class QuitCommandTest {
 
+    private val backupManager = mockk<BackupManager>(relaxed = true)
     private val configuration = mockk<Configuration>()
     private val commandLineInterfaceService = CommandLineInterfaceService(mockk(), configuration)
     private val systemOperation = mockk<SystemOperation>()
-    private val quitCommandHandler = QuitCommandHandler(emptySet(), commandLineInterfaceService, systemOperation)
+    private val quitCommandHandler = QuitCommandHandler(setOf(backupManager), commandLineInterfaceService, systemOperation)
 
     @BeforeEach
     fun setup() {
@@ -49,6 +51,7 @@ class QuitCommandTest {
             captureSystemOut.during { inputHandler.handleInput(input) }
 
             // then
+            verify(exactly = 1) { backupManager.run() }
             verify(exactly = 1) { systemOperation.exit() }
             expectThat(captureSystemOut.capture).not().contains("Terminating Passbird due to inactivity")
         }
