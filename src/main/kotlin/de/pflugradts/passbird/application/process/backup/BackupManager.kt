@@ -25,11 +25,11 @@ class BackupManager @Inject constructor(
             Triple(backupConfiguration.database, configuration.adapter.passwordStore.location.toDirectory(), DATABASE_FILENAME),
             Triple(backupConfiguration.keyStore, configuration.adapter.keyStore.location.toDirectory(), KEYSTORE_FILENAME),
         ).forEach { (settings, directory, fileName) ->
-            val backupDirectory = systemOperation.getPath(Global.homeDirectory)
-                .resolve(settings.location ?: backupConfiguration.location)
-                .toString().toDirectory()
-            if (!systemOperation.exists(backupDirectory)) systemOperation.createDirectory(backupDirectory)
             if (settings.enabled && numberOfBackups(settings) > 0) {
+                val backupDirectory = systemOperation.getPath(Global.homeDirectory)
+                    .resolve(settings.location ?: backupConfiguration.location)
+                    .toString().toDirectory()
+                if (!systemOperation.exists(backupDirectory)) systemOperation.createDirectory(backupDirectory)
                 val backupPattern = "\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}"
                 val backups = systemOperation.getFileNames(backupDirectory).filter {
                     it.value.matches("${fileName.stem()}_$backupPattern\\.${fileName.extension()}".toRegex())
