@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.domain.model.egg
 
+import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
+import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.domain.model.ddd.AggregateRoot
 import de.pflugradts.passbird.domain.model.egg.EggId.Companion.createEggId
 import de.pflugradts.passbird.domain.model.egg.Password.Companion.createPassword
@@ -15,6 +17,7 @@ class Egg private constructor(
     private var slot: Slot,
     private val eggId: EggId,
     private val password: Password,
+    val proteins: List<Option<Protein>>,
 ) : AggregateRoot() {
 
     init { registerDomainEvent(EggCreated(this)) }
@@ -47,7 +50,26 @@ class Egg private constructor(
     override fun hashCode() = slot.hashCode() + 31 * eggId.hashCode()
 
     companion object {
-        fun createEgg(slot: Slot, eggIdShell: Shell, passwordShell: Shell) =
-            Egg(slot, createEggId(eggIdShell), createPassword(passwordShell))
+        fun createEgg(
+            slot: Slot,
+            eggIdShell: Shell,
+            passwordShell: Shell,
+            proteins: List<Option<Protein>> = emptyProteins(),
+        ) = Egg(slot, createEggId(eggIdShell), createPassword(passwordShell), proteins)
     }
+}
+
+private val emptyProteins = {
+    listOf<Option<Protein>>(
+        emptyOption(),
+        emptyOption(),
+        emptyOption(),
+        emptyOption(),
+        emptyOption(),
+        emptyOption(),
+        emptyOption(),
+        emptyOption(),
+        emptyOption(),
+        emptyOption(),
+    )
 }

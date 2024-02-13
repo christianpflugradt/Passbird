@@ -85,7 +85,7 @@ class PasswordStoreFacadeTest {
     }
 
     @Test
-    fun `should write to and them read from database`() {
+    fun `should write to and then read from database`() {
         // given
         val eggs = someEggs()
 

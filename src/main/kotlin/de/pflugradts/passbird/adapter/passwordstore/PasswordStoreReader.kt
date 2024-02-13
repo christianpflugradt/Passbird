@@ -1,6 +1,8 @@
 package de.pflugradts.passbird.adapter.passwordstore
 
 import com.google.inject.Inject
+import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
+import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.DATABASE_FILENAME
@@ -16,10 +18,12 @@ import de.pflugradts.passbird.application.util.readBytes
 import de.pflugradts.passbird.application.util.readInt
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
+import de.pflugradts.passbird.domain.model.egg.Protein.Companion.createProtein
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.storage.EggStreamSupplier
@@ -27,9 +31,6 @@ import java.util.ArrayDeque
 import java.util.Arrays
 import java.util.function.Supplier
 import java.util.stream.Stream
-
-private const val EOF = 0
-private const val SECTOR = -1
 
 class PasswordStoreReader @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
@@ -46,9 +47,9 @@ class PasswordStoreReader @Inject constructor(
             verifyChecksum(byteArray)
             var offset = signatureSize()
             offset = populateNests(byteArray, offset)
-            while (EOF != readInt(byteArray, offset)) {
+            while (offset < byteArray.size - 2) {
                 val res = byteArray.asEgg(offset)
-                if (cryptoProvider.decrypt(res.first.viewEggId()).slice(0, 1).asString() !in listOf("1", "2")) eggs.add(res.first)
+                eggs.add(res.first)
                 offset = res.second
             }
             return Supplier { eggs.stream() }
@@ -85,23 +86,20 @@ class PasswordStoreReader @Inject constructor(
 
     private fun populateNests(bytes: ByteArray, offset: Int): Int {
         var incrementedOffset = offset
-        if (SECTOR == readInt(bytes, incrementedOffset)) {
-            incrementedOffset += intBytes()
-            val nestShells: MutableList<Shell> = ArrayList()
-            for (i in 0 until Slot.CAPACITY) {
-                bytes.asNestShell(incrementedOffset).let {
-                    nestShells.add(it.first)
-                    incrementedOffset += it.second
-                }
+        val nestShells: MutableList<Shell> = ArrayList()
+        for (i in 0 until Slot.CAPACITY) {
+            bytes.asNestShell(incrementedOffset).let {
+                nestShells.add(it.first)
+                incrementedOffset += it.second
             }
-            nestService.populate(nestShells)
         }
+        nestService.populate(nestShells)
         return incrementedOffset
     }
 
     private val filePath get() =
         systemOperation.resolvePath(configuration.adapter.passwordStore.location.toDirectory(), DATABASE_FILENAME.toFileName())
-    private fun calcActualContentSize(totalSize: Int) = totalSize - signatureSize() - checksumBytes() - eofBytes()
+    private fun calcActualContentSize(totalSize: Int) = totalSize - signatureSize() - checksumBytes()
 
     private fun ByteArray.asNestShell(offset: Int): Pair<Shell, Int> {
         var incrementedOffset = offset
@@ -130,9 +128,17 @@ class PasswordStoreReader @Inject constructor(
         incrementedOffset += Integer.BYTES
         val passwordBytes = readBytes(this, incrementedOffset, passwordSize)
         incrementedOffset += passwordSize
-        return Pair(
-            createEgg(Slot.slotAt(nestSlot), shellOf(eggIdBytes), shellOf(passwordBytes)),
-            incrementedOffset,
-        )
+        val proteins = (0..9).map {
+            val typeSize = readInt(this, incrementedOffset)
+            incrementedOffset += Integer.BYTES
+            val typeBytes = if (typeSize > 0) readBytes(this, incrementedOffset, typeSize) else byteArrayOf()
+            incrementedOffset += typeSize
+            val structureSize = readInt(this, incrementedOffset)
+            incrementedOffset += Integer.BYTES
+            val structureBytes = if (structureSize > 0) readBytes(this, incrementedOffset, structureSize) else byteArrayOf()
+            incrementedOffset += structureSize
+            if (typeSize > 0 && structureSize > 0) optionOf(createProtein(shellOf(typeBytes), shellOf(structureBytes))) else emptyOption()
+        }.toList()
+        return Pair(createEgg(slotAt(nestSlot), shellOf(eggIdBytes), shellOf(passwordBytes), proteins), incrementedOffset)
     }
 }

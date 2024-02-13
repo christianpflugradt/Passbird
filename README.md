@@ -243,6 +243,14 @@ Some example inputs and what they do:
 
 `i` imports all Eggs from a file `passbird-export.json` expected in the directory passed on program start - please note that this will potentially overwrite all Passwords in your database if there are any matching Eggs!
 
+## Migrating from Passbird 3.x.x to Passbird 4.x.x
+
+The database structure has changed to support Proteins in the future. For that reason using Passbird 3.x.x all passwords must be exported using the `export` command (letter `e`). Nest names will get lost because they're not included in the export file. They should be printed using the `Nest` command (letter `n`) and written down.
+
+After that the password file should be renamed (as a backup) and Passbird updated to 4.x.x. Passbird can then be started as usual. The database will be empty but Passbird still start due to the existing KeyStore. The import command may then be used to reimport all passwords and create Nests with default names. Using the `create` command Nests can be renamed to their previous names. E.g. `n+1` will prompt for a new name for the Nest at slot 1. All other Nests can be renamed to their original names the same way, e.g. `n+9` will prompt for a new name for the Nest at slot 9.
+
+As of Passbird 4.x.x the database will not be updated upon renaming a Nest. This will be fixed in the future. To trigger an update a new Egg can be created. It can be deleted right afterward and the new Nest names will be persisted. Assuming you don't have an Egg named `tmp4xx` you can input `stmp4xx` and `dtmp4xx` to trigger an update without leaving traces.
+
 ## <a name="faq"></a>Frequently Asked Questions
 
 ### Is Passbird the right tool for me?
