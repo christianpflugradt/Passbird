@@ -2,7 +2,7 @@
 
 [![version](https://badgen.net/gitlab/release/christianpflugradt/passbird)](https://gitlab.com/christianpflugradt/passbird/-/tags) [![pipeline status](https://gitlab.com/christianpflugradt/passbird/badges/main/pipeline.svg)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![coverage report](https://gitlab.com/christianpflugradt/passbird/badges/main/coverage.svg?job=📊%20test-coverage-report)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Passbird is a terminal based password manager written in Java. It works completely offline and encrypts all passwords using an AES/CBC/PKCS5Padding Cipher initialized with a JCEKS (Java Cryptography Extension KeyStore).
+Passbird is a terminal based password manager written in Kotlin. It works completely offline and encrypts all passwords using an AES/CBC/PKCS5Padding Cipher initialized with a JCEKS (Java Cryptography Extension KeyStore).
 
 Check the FAQ at the bottom if you are wondering whether Passbird is the right tool for you.
 
