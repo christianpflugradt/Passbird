@@ -37,7 +37,7 @@ plugins:
             section: ":package: Build Adjustments"
             hidden: false
           - type: chore
-            section: ":hammer: Dependency Updates"
+            section: ":hammer: Maintenance & Dependencies"
             hidden: false
           - type: perf
             section: ":rocket: Performance Improvements"
