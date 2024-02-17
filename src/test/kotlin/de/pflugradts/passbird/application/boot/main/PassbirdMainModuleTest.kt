@@ -89,6 +89,8 @@ class PassbirdMainModuleTest {
     }
 
     class PassbirdTestModule : AbstractModule() {
-        public override fun configure() { bind(CryptoProvider::class.java).toInstance(mockk<CryptoProvider>()) }
+        public override fun configure() {
+            bind(CryptoProvider::class.java).toInstance(mockk<CryptoProvider>())
+        }
     }
 }

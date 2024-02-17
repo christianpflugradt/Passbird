@@ -23,7 +23,7 @@ class CommandLineInterfaceService @Inject constructor(
     private fun receivePlain(): Input {
         val bytes = ArrayList<Byte>()
         var next: Char
-        while (!isLinebreak(stdin().also { next = it })) { bytes.add(next.code.toByte()) }
+        while (!isLinebreak(stdin().also { next = it })) bytes.add(next.code.toByte())
         return inputOf(shellOf(bytes))
     }
 
@@ -48,7 +48,9 @@ class CommandLineInterfaceService @Inject constructor(
     }
 
     private fun sendChar(chr: Char) = print(chr)
-    override fun warningSound() { if (audibleBell) sendChar('\u0007') }
+    override fun warningSound() {
+        if (audibleBell) sendChar('\u0007')
+    }
     private val escapeCodesEnabled: Boolean get() = configuration.adapter.userInterface.ansiEscapeCodes.enabled
     private val audibleBell: Boolean get() = configuration.adapter.userInterface.audibleBell
 }

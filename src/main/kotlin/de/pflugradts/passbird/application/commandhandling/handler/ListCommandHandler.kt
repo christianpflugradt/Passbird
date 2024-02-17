@@ -20,23 +20,21 @@ class ListCommandHandler @Inject constructor(
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    private fun join(eggIdShellList: List<Shell>) =
-        if (eggIdShellList.isEmpty()) {
-            shellOf("database is empty")
-        } else {
-            val count = eggIdShellList.stream()
-                .map(Shell::size)
-                .reduce((eggIdShellList.size - 1) * 2) { a: Int, b: Int -> Integer.sum(a, b) }
-            val bytes = ByteArray(count)
-            var index = 0
-            eggIdShellList.forEach {
-                copyBytes(it.toByteArray(), bytes, index, it.size)
-                index += it.size
-                if (index < count) {
-                    bytes[index++] = ','.code.toByte()
-                    bytes[index++] = ' '.code.toByte()
-                }
+    private fun join(eggIdShellList: List<Shell>) = if (eggIdShellList.isEmpty()) {
+        shellOf("database is empty")
+    } else {
+        val count = eggIdShellList.stream().map(Shell::size)
+            .reduce((eggIdShellList.size - 1) * 2) { a: Int, b: Int -> Integer.sum(a, b) }
+        val bytes = ByteArray(count)
+        var index = 0
+        eggIdShellList.forEach {
+            copyBytes(it.toByteArray(), bytes, index, it.size)
+            index += it.size
+            if (index < count) {
+                bytes[index++] = ','.code.toByte()
+                bytes[index++] = ' '.code.toByte()
             }
-            shellOf(bytes)
         }
+        shellOf(bytes)
+    }
 }

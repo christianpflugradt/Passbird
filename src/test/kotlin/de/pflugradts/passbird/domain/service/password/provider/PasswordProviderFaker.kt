@@ -4,9 +4,6 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import io.mockk.every
 
-fun fakePasswordProvider(
-    instance: PasswordProvider,
-    withCreatedPassword: Shell = shellOf("Password"),
-) {
+fun fakePasswordProvider(instance: PasswordProvider, withCreatedPassword: Shell = shellOf("Password")) {
     every { instance.createNewPassword(any()) } returns withCreatedPassword
 }

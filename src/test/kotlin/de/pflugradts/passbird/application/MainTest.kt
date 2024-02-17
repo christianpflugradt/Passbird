@@ -33,10 +33,14 @@ class MainTest {
     val systemOperation = mockk<SystemOperation>()
 
     @BeforeEach
-    fun setup() { mockMain(systemOperationMock = systemOperation, withMockedFileCheck = false) }
+    fun setup() {
+        mockMain(systemOperationMock = systemOperation, withMockedFileCheck = false)
+    }
 
     @AfterEach
-    fun cleanup() { unmockMain(withMockedFileCheck = false) }
+    fun cleanup() {
+        unmockMain(withMockedFileCheck = false)
+    }
 
     @Test
     fun `should set home to args and boot launcher`() {

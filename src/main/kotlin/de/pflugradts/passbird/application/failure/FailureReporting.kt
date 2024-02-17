@@ -19,15 +19,14 @@ fun reportFailure(checksumFailure: ChecksumFailure) {
 fun reportFailure(clipboardFailure: ClipboardFailure) =
     err("Clipboard could not be updated. Please check your Java version. Exception: ${clipboardFailure.ex.message}")
 fun reportFailure(commandFailure: CommandFailure) = err("Command execution failed: ${commandFailure.ex.message}")
-fun reportFailure(configurationFailure: ConfigurationFailure) =
-    if (configurationFailure.ex is UnrecognizedPropertyException) {
-        err(
-            "Configuration contains unrecognized property and will not be used. Please remove the unrecognized field " +
-                "before restarting Passbird: ${configurationFailure.ex.message?.split("(")?.get(0)}",
-        )
-    } else {
-        err("Configuration could not be loaded: ${configurationFailure.ex.message}")
-    }
+fun reportFailure(configurationFailure: ConfigurationFailure) = if (configurationFailure.ex is UnrecognizedPropertyException) {
+    err(
+        "Configuration contains unrecognized property and will not be used. Please remove the unrecognized field " +
+            "before restarting Passbird: ${configurationFailure.ex.message?.split("(")?.get(0)}",
+    )
+} else {
+    err("Configuration could not be loaded: ${configurationFailure.ex.message}")
+}
 fun reportFailure(passwordDatabaseFailure: DecryptPasswordDatabaseFailure) =
     err("Password database at '${passwordDatabaseFailure.path.name}' could not be decrypted: ${passwordDatabaseFailure.ex.message}")
 fun reportFailure(exportFailure: ExportFailure) = err("Password database could not be exported: ${exportFailure.ex.message}")
@@ -38,15 +37,14 @@ fun reportFailure(homeDirectoryFailure: HomeDirectoryFailure) = err(
         IS_NOT_A_DIRECTORY -> "Specified home directory is actually not a directory: ${homeDirectoryFailure.homeDirectory}"
     },
 )
-fun reportFailure(importFailure: ImportFailure) =
-    if (importFailure.ex is InvalidEggIdException) {
-        err(
-            "Password database could not be imported because at least one eggId contains digits or special characters. " +
-                "Please correct invalid eggIds and try again. Erroneous eggId: ${importFailure.ex.eggIdShell.asString()}",
-        )
-    } else {
-        err("Password database could not be imported.")
-    }
+fun reportFailure(importFailure: ImportFailure) = if (importFailure.ex is InvalidEggIdException) {
+    err(
+        "Password database could not be imported because at least one eggId contains digits or special characters. " +
+            "Please correct invalid eggIds and try again. Erroneous eggId: ${importFailure.ex.eggIdShell.asString()}",
+    )
+} else {
+    err("Password database could not be imported.")
+}
 fun reportFailure(loginFailure: LoginFailure) = err("Login failed. Shutting down after ${loginFailure.attempts} unsuccessful attempts.")
 fun reportFailure(signatureCheckFailure: SignatureCheckFailure) {
     err("Signature of password database could not be verified.")

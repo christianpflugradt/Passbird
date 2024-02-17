@@ -11,5 +11,5 @@ class PasswordStoreFacade @Inject constructor(
     @Inject val passwordStoreWriter: PasswordStoreWriter,
 ) : PasswordStoreAdapterPort {
     override fun restore(): EggStreamSupplier = passwordStoreReader.restore()
-    override fun sync(supplier: EggStreamSupplier) { passwordStoreWriter.sync(supplier) }
+    override fun sync(supplier: EggStreamSupplier) = passwordStoreWriter.sync(supplier)
 }

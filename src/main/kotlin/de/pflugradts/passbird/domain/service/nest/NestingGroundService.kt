@@ -54,13 +54,16 @@ class NestingGroundService @Inject constructor(
         nests[slot.nestIndex()] = EMPTY_NEST_SUPPLIER.get()
         eventRegistry.processEvents()
     }
-    override fun atNestSlot(slot: Slot): Option<Nest> =
-        if (slot === Slot.DEFAULT) Nest.DEFAULT.option() else nests[slot.nestIndex()]
+    override fun atNestSlot(slot: Slot): Option<Nest> = if (slot === Slot.DEFAULT) Nest.DEFAULT.option() else nests[slot.nestIndex()]
     override fun all(includeDefault: Boolean) = nests.let { if (includeDefault) Nest.DEFAULT.asOptionInList() + it else it }.stream()
     override fun currentNest(): Nest = atNestSlot(currentNest).orElse(Nest.DEFAULT)
-    override fun moveToNestAt(slot: Slot) { if (atNestSlot(slot).isPresent) { currentNest = slot } }
+    override fun moveToNestAt(slot: Slot) {
+        if (atNestSlot(slot).isPresent) currentNest = slot
+    }
 
-    companion object { private val EMPTY_NEST_SUPPLIER = Supplier { mutableOptionOf<Nest>() } }
+    companion object {
+        private val EMPTY_NEST_SUPPLIER = Supplier { mutableOptionOf<Nest>() }
+    }
 }
 
 private fun Nest.asOptionInList() = listOf(optionOf(this))

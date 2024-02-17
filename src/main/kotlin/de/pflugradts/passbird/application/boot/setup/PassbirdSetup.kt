@@ -86,6 +86,5 @@ class PassbirdSetup @Inject constructor(
         return directory
     }
 
-    private fun isValidDirectory(directory: Directory) =
-        systemOperation.getPath(directory).toFile().let { it.isDirectory && it.exists() }
+    private fun isValidDirectory(directory: Directory) = systemOperation.getPath(directory).toFile().let { it.isDirectory && it.exists() }
 }

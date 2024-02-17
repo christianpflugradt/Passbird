@@ -24,7 +24,7 @@ class Shell private constructor(
 
     fun toPlainShell(): PlainShell {
         val c = CharArray(size)
-        for (i in 0 until size) { c[i] = Char(content[i].toUShort()) }
+        for (i in 0 until size) c[i] = Char(content[i].toUShort())
         return plainShellOf(c)
     }
 
@@ -37,14 +37,13 @@ class Shell private constructor(
     }
 
     @JvmOverloads
-    fun slice(fromInclusive: Int, toExclusive: Int = content.size): Shell =
-        if (toExclusive - fromInclusive > 0) {
-            val sub = ByteArray(toExclusive - fromInclusive)
-            System.arraycopy(content, fromInclusive, sub, 0, sub.size)
-            shellOf(sub)
-        } else {
-            emptyShell()
-        }
+    fun slice(fromInclusive: Int, toExclusive: Int = content.size): Shell = if (toExclusive - fromInclusive > 0) {
+        val sub = ByteArray(toExclusive - fromInclusive)
+        System.arraycopy(content, fromInclusive, sub, 0, sub.size)
+        shellOf(sub)
+    } else {
+        emptyShell()
+    }
 
     fun scramble() = content.indices.forEach {
         content[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toByte()

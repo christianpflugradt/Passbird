@@ -31,8 +31,12 @@ class SystemOperation {
     fun getPath(directory: Directory): Path = Paths.get(directory.value)
     fun resolvePath(directory: Directory, fileName: FileName): Path = getPath(directory).resolve(fileName.value)
     fun resolvePath(directory: Directory, other: Directory): Path = getPath(directory).resolve(other.value)
-    fun copyTo(source: Path, target: Path) { Files.copy(source, target) }
-    fun createDirectory(directory: Directory) { Files.createDirectories(getPath(directory)) }
+    fun copyTo(source: Path, target: Path) {
+        Files.copy(source, target)
+    }
+    fun createDirectory(directory: Directory) {
+        Files.createDirectories(getPath(directory))
+    }
     fun delete(path: Path) = Files.delete(path)
     fun exists(directory: Directory): Boolean = exists(getPath(directory))
     fun exists(path: Path): Boolean = Files.exists(path)
@@ -42,5 +46,5 @@ class SystemOperation {
     fun writeBytesToFile(path: Path, shell: Shell): Path = Files.write(path, shell.toByteArray())
     fun readBytesFromFile(path: Path) = tryCatching { shellOf(Files.readAllBytes(path)) } getOrElse emptyShell()
     fun copyToClipboard(text: String) = StringSelection(text).let { Toolkit.getDefaultToolkit().systemClipboard.setContents(it, it) }
-    fun exit() { exitProcess(0) }
+    fun exit(): Unit = exitProcess(0)
 }

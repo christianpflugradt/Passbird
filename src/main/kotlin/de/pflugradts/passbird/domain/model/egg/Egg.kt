@@ -20,7 +20,9 @@ class Egg private constructor(
     val proteins: List<Option<Protein>>,
 ) : AggregateRoot() {
 
-    init { registerDomainEvent(EggCreated(this)) }
+    init {
+        registerDomainEvent(EggCreated(this))
+    }
     fun associatedNest() = slot
     fun viewEggId() = eggId.view()
     fun viewPassword() = password.view()
@@ -45,17 +47,14 @@ class Egg private constructor(
         registerDomainEvent(EggDiscarded(this))
     }
 
-    override fun equals(other: Any?) =
-        (other as? Egg)?.let { it.viewEggId() == viewEggId() && it.associatedNest() == slot } ?: false
+    override fun equals(other: Any?) = (other as? Egg)?.let {
+        it.viewEggId() == viewEggId() && it.associatedNest() == slot
+    } ?: false
     override fun hashCode() = slot.hashCode() + 31 * eggId.hashCode()
 
     companion object {
-        fun createEgg(
-            slot: Slot,
-            eggIdShell: Shell,
-            passwordShell: Shell,
-            proteins: List<Option<Protein>> = emptyProteins(),
-        ) = Egg(slot, createEggId(eggIdShell), createPassword(passwordShell), proteins)
+        fun createEgg(slot: Slot, eggIdShell: Shell, passwordShell: Shell, proteins: List<Option<Protein>> = emptyProteins()) =
+            Egg(slot, createEggId(eggIdShell), createPassword(passwordShell), proteins)
     }
 }
 

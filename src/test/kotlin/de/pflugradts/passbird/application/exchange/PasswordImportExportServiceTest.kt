@@ -40,7 +40,9 @@ class PasswordImportExportServiceTest {
         Supplier { PasswordImportExportService(exchangeFactory, passwordService, nestService, eventRegistry) }
 
     @BeforeEach
-    fun setup() { mainMocked(arrayOf(passbirdHomeUri)) }
+    fun setup() {
+        mainMocked(arrayOf(passbirdHomeUri))
+    }
 
     @Test
     fun `should peek import eggId shells`() {

@@ -19,10 +19,18 @@ class PassbirdEventRegistry @Inject constructor(
     private val domainEvents: Queue<DomainEvent> = ArrayDeque()
     private val abandonedAggregateRoots: Queue<AggregateRoot> = ArrayDeque()
 
-    init { eventHandlers.forEach { eventBus.register(it) } }
-    override fun register(aggregateRoot: AggregateRoot) { aggregateRoots.add(aggregateRoot) }
-    override fun register(domainEvent: DomainEvent) { domainEvents.add(domainEvent) }
-    override fun deregister(aggregateRoot: AggregateRoot) { abandonedAggregateRoots.add(aggregateRoot) }
+    init {
+        eventHandlers.forEach { eventBus.register(it) }
+    }
+    override fun register(aggregateRoot: AggregateRoot) {
+        aggregateRoots.add(aggregateRoot)
+    }
+    override fun register(domainEvent: DomainEvent) {
+        domainEvents.add(domainEvent)
+    }
+    override fun deregister(aggregateRoot: AggregateRoot) {
+        abandonedAggregateRoots.add(aggregateRoot)
+    }
 
     override fun processEvents() {
         processAbandonedAggregateRoots()
@@ -38,9 +46,13 @@ class PassbirdEventRegistry @Inject constructor(
         }
     }
 
-    private fun processDomainEvents() { while (!domainEvents.isEmpty()) { eventBus.post(domainEvents.poll()) } }
+    private fun processDomainEvents() {
+        while (!domainEvents.isEmpty()) {
+            eventBus.post(domainEvents.poll())
+        }
+    }
 
     private fun processAbandonedAggregateRoots() {
-        while (!abandonedAggregateRoots.isEmpty()) { aggregateRoots.remove(abandonedAggregateRoots.poll()) }
+        while (!abandonedAggregateRoots.isEmpty()) aggregateRoots.remove(abandonedAggregateRoots.poll())
     }
 }

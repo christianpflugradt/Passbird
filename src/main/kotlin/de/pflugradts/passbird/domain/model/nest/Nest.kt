@@ -8,7 +8,9 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
 
 class Nest private constructor(private val shell: Shell, val slot: Slot) : AggregateRoot() {
-    init { registerDomainEvent(NestCreated(this)) }
+    init {
+        registerDomainEvent(NestCreated(this))
+    }
     fun viewNestId() = shell.copy()
 
     fun discard() {

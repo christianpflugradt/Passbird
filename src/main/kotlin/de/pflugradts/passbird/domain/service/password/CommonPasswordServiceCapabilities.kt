@@ -40,14 +40,13 @@ abstract class CommonPasswordServiceCapabilities(
     }
 
     fun eggExists(eggIdShell: Shell, slot: Slot) = find(encrypted(eggIdShell), slot).isPresent
-    fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction) =
-        encrypted(eggIdShell).let {
-            find(it).let { match ->
-                if (match.isEmpty && eggNotExistsAction == EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT) {
-                    eventRegistry.register(EggNotFound(it))
-                    eventRegistry.processEvents()
-                }
-                match.isPresent
+    fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction) = encrypted(eggIdShell).let {
+        find(it).let { match ->
+            if (match.isEmpty && eggNotExistsAction == EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT) {
+                eventRegistry.register(EggNotFound(it))
+                eventRegistry.processEvents()
             }
+            match.isPresent
         }
+    }
 }

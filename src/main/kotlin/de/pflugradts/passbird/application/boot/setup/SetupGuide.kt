@@ -48,9 +48,17 @@ class SetupGuide @Inject constructor(
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    fun sendCreateKeyStoreSucceeded() { send("Keystore has been created successfully!") }
-    fun sendNonMatchingInputs() { send("Your inputs do not match, please repeat.") }
-    fun sendRestart() { send("Now restart Passbird to use it.") }
-    fun sendGoodbye() { send("Goodbye!") }
+    fun sendCreateKeyStoreSucceeded() {
+        send("Keystore has been created successfully!")
+    }
+    fun sendNonMatchingInputs() {
+        send("Your inputs do not match, please repeat.")
+    }
+    fun sendRestart() {
+        send("Now restart Passbird to use it.")
+    }
+    fun sendGoodbye() {
+        send("Goodbye!")
+    }
     private fun send(message: String) = userInterfaceAdapterPort.send(outputOf(shellOf(message)))
 }

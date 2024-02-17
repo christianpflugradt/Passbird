@@ -16,7 +16,7 @@ private val random = SecureRandom()
 class RandomPasswordProvider : PasswordProvider {
     override fun createNewPassword(passwordRequirements: PasswordRequirements): Shell {
         var passwordShell = emptyShell()
-        while (!isStrong(passwordShell, passwordRequirements)) { passwordShell = randomPassword(passwordRequirements) }
+        while (!isStrong(passwordShell, passwordRequirements)) passwordShell = randomPassword(passwordRequirements)
         return passwordShell
     }
 
@@ -26,7 +26,7 @@ class RandomPasswordProvider : PasswordProvider {
     private fun randomByte(passwordRequirements: PasswordRequirements): Byte {
         val getRandom = { (random.nextInt(MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toByte() }
         var result: Byte
-        do { result = getRandom() } while (!result.satisfies(passwordRequirements))
+        do result = getRandom() while (!result.satisfies(passwordRequirements))
         return result
     }
 

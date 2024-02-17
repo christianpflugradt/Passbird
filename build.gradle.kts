@@ -61,7 +61,7 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-ktlint.version = "0.50.0"
+ktlint.version = "1.1.1"
 
 ktlint {
     reporters {

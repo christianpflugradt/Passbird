@@ -31,10 +31,14 @@ class PassbirdLauncherTest {
     private val moduleSlot = slot<Module>()
 
     @BeforeEach
-    fun setup() { mockMain(moduleSlot) }
+    fun setup() {
+        mockMain(moduleSlot)
+    }
 
     @AfterEach
-    fun cleanup() { unmockMain() }
+    fun cleanup() {
+        unmockMain()
+    }
 
     @Test
     fun `should launch main application if key store exists`() {

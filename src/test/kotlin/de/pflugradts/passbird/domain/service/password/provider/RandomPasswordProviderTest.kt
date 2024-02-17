@@ -151,5 +151,7 @@ class RandomPasswordProviderTest {
         }
     }
 
-    private fun expectManyTimes(block: () -> Unit) { repeat((1..100).count()) { block() } }
+    private fun expectManyTimes(block: () -> Unit) {
+        repeat((1..100).count()) { block() }
+    }
 }

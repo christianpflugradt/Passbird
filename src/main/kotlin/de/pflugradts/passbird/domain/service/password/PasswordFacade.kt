@@ -24,6 +24,5 @@ class PasswordFacade @Inject constructor(
     override fun putEggs(eggs: Stream<ShellPair>) = putPasswordService.putEggs(eggs)
     override fun putEgg(eggIdShell: Shell, passwordShell: Shell) = putPasswordService.putEgg(eggIdShell, passwordShell)
     override fun discardEgg(eggIdShell: Shell) = discardPasswordService.discardEgg(eggIdShell)
-    override fun moveEgg(eggIdShell: Shell, targetSlot: Slot) =
-        movePasswordService.movePassword(eggIdShell, targetSlot)
+    override fun moveEgg(eggIdShell: Shell, targetSlot: Slot) = movePasswordService.movePassword(eggIdShell, targetSlot)
 }

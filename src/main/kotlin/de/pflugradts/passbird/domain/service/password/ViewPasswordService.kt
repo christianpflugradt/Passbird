@@ -17,14 +17,13 @@ class ViewPasswordService @Inject constructor(
     @Inject private val eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun findAllEggIds(): Stream<Shell> = eggRepository.findAll().map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
-    fun viewPassword(eggIdShell: Shell): Option<Shell> =
-        encrypted(eggIdShell).let { encryptedEggIdShell ->
-            find(encryptedEggIdShell)
-                .map { decrypted(it.viewPassword()) }
-                .or {
-                    eventRegistry.register(EggNotFound(encryptedEggIdShell))
-                    eventRegistry.processEvents()
-                    emptyOption()
-                }
-        }
+    fun viewPassword(eggIdShell: Shell): Option<Shell> = encrypted(eggIdShell).let { encryptedEggIdShell ->
+        find(encryptedEggIdShell)
+            .map { decrypted(it.viewPassword()) }
+            .or {
+                eventRegistry.register(EggNotFound(encryptedEggIdShell))
+                eventRegistry.processEvents()
+                emptyOption()
+            }
+    }
 }

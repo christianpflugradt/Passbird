@@ -24,7 +24,9 @@ class ExportFileCheckerTest {
     private val exportFileChecker = ExportFileChecker(configuration, systemOperation, userInterfaceAdapterPort)
 
     @BeforeEach
-    fun setup() { mainMocked(arrayOf("/tmp")) }
+    fun setup() {
+        mainMocked(arrayOf("/tmp"))
+    }
 
     @Test
     fun `should delete export file if confirmed`() {

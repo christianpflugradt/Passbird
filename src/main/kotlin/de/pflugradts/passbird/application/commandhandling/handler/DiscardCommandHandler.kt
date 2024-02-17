@@ -28,21 +28,20 @@ class DiscardCommandHandler @Inject constructor(
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    private fun commandConfirmed() =
-        if (configuration.application.password.promptOnRemoval) {
-            userInterfaceAdapterPort
-                .receiveConfirmation(
-                    outputOf(
-                        shellOf(
-                            """
-                            Discarding an Egg is an irrevocable action.
-                            Input 'c' to confirm or anything else to abort.
-                            Your input: 
-                            """.trimIndent(),
-                        ),
+    private fun commandConfirmed() = if (configuration.application.password.promptOnRemoval) {
+        userInterfaceAdapterPort
+            .receiveConfirmation(
+                outputOf(
+                    shellOf(
+                        """
+                        Discarding an Egg is an irrevocable action.
+                        Input 'c' to confirm or anything else to abort.
+                        Your input: 
+                        """.trimIndent(),
                     ),
-                )
-        } else {
-            true
-        }
+                ),
+            )
+    } else {
+        true
+    }
 }

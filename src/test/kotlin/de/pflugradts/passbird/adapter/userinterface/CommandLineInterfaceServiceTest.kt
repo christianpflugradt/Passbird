@@ -34,7 +34,9 @@ class CommandLineInterfaceServiceTest {
     private val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration)
 
     @BeforeEach
-    fun setup() { fakeConfiguration(instance = configuration) }
+    fun setup() {
+        fakeConfiguration(instance = configuration)
+    }
 
     @Nested
     inner class SendTest {

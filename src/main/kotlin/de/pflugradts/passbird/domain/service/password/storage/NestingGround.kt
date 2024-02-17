@@ -46,7 +46,7 @@ class NestingGround @Inject constructor(
         eventRegistry.deregister(egg)
     }
 
-    override fun sync() { passwordStoreAdapterPort.sync(createEggStreamSupplier(EggFilter.ALL_NESTS)) }
+    override fun sync() = passwordStoreAdapterPort.sync(createEggStreamSupplier(EggFilter.ALL_NESTS))
     override fun find(eggIdShell: Shell, slot: Slot): Option<Egg> = find(createEggStreamSupplier(slot), eggIdShell)
     override fun find(eggIdShell: Shell): Option<Egg> = find(createEggStreamSupplier(CURRENT_NEST), eggIdShell)
     private fun find(supplier: EggStreamSupplier, eggIdShell: Shell): Option<Egg> =

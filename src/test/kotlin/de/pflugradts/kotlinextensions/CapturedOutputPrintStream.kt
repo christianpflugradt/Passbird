@@ -12,7 +12,7 @@ class CapturedOutputPrintStream private constructor(
     private var closed = false
     val capture get() = String(baos.toByteArray())
     fun <R> during(block: () -> R): R {
-        if (closed) { throw IllegalStateException("stream has already been captured") }
+        if (closed) throw IllegalStateException("stream has already been captured")
         when (target) {
             Target.SYSERR -> System.setErr(this)
             Target.SYSOUT -> System.setOut(this)

@@ -15,7 +15,9 @@ class InactivityHandler @Inject constructor(
     private val inactivityLimitInMinutes get() = configuration.application.inactivityLimit.limitInMinutes
     private var lastInteraction = now()
     private fun now() = systemOperation.clock.instant().epochSecond
-    fun registerInteraction() { lastInteraction = now() }
+    fun registerInteraction() {
+        lastInteraction = now()
+    }
     fun checkInactivity() {
         if ((now() - lastInteraction) > (inactivityLimitInMinutes * 60)) {
             commandBus.post(QuitCommand(quitReason = INACTIVITY))

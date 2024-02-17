@@ -54,16 +54,15 @@ class SetCommandHandler @Inject constructor(
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    private fun commandConfirmed(setCommand: SetCommand) =
-        if (configuration.application.password.promptOnRemoval &&
-            passwordService.eggExists(setCommand.argument, EggNotExistsAction.DO_NOTHING)
-        ) {
-            val msg = "Existing Egg '${setCommand.argument.asString()}' will be irrevocably overwritten.\n" +
-                "Input 'c' to confirm or anything else to abort.\nYour input: "
-            userInterfaceAdapterPort.receiveConfirmation(outputOf(shellOf(msg)))
-        } else {
-            true
-        }
+    private fun commandConfirmed(setCommand: SetCommand) = if (configuration.application.password.promptOnRemoval &&
+        passwordService.eggExists(setCommand.argument, EggNotExistsAction.DO_NOTHING)
+    ) {
+        val msg = "Existing Egg '${setCommand.argument.asString()}' will be irrevocably overwritten.\n" +
+            "Input 'c' to confirm or anything else to abort.\nYour input: "
+        userInterfaceAdapterPort.receiveConfirmation(outputOf(shellOf(msg)))
+    } else {
+        true
+    }
 }
 
 private fun ReadableConfiguration.CustomPasswordConfiguration.toPasswordRequirements() = PasswordRequirements(
