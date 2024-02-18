@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
 import de.pflugradts.passbird.application.commandhandling.handler.nest.MoveToNestCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
@@ -29,7 +30,12 @@ class MoveToNestCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val nestService = createNestServiceForTesting()
     private val passwordService = mockk<PasswordService>()
-    private val moveToNestCommandHandler = MoveToNestCommandHandler(nestService, passwordService, userInterfaceAdapterPort)
+    private val moveToNestCommandHandler = MoveToNestCommandHandler(
+        CanListAvailableNests(nestService),
+        nestService,
+        passwordService,
+        userInterfaceAdapterPort,
+    )
     private val inputHandler = createInputHandlerFor(moveToNestCommandHandler)
 
     @Test

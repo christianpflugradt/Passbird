@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
+import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.handler.SetInfoCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
@@ -19,7 +20,7 @@ class SetInfoCommandTest {
 
     private val configuration = mockk<Configuration>()
     private val commandLineInterfaceService = CommandLineInterfaceService(mockk(), configuration)
-    private val setInfoCommandHandler = SetInfoCommandHandler(configuration, commandLineInterfaceService)
+    private val setInfoCommandHandler = SetInfoCommandHandler(CanPrintInfo(), configuration, commandLineInterfaceService)
     private val inputHandler = createInputHandlerFor(setInfoCommandHandler)
 
     @Test

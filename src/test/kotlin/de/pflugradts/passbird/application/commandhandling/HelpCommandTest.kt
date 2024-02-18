@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
+import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
@@ -19,7 +20,7 @@ class HelpCommandTest {
 
     private val configuration = mockk<Configuration>()
     private val commandLineInterfaceService = CommandLineInterfaceService(mockk(), configuration)
-    private val quitCommandHandler = HelpCommandHandler(commandLineInterfaceService)
+    private val quitCommandHandler = HelpCommandHandler(CanPrintInfo(), commandLineInterfaceService)
     private val inputHandler = createInputHandlerFor(quitCommandHandler)
 
     @Test

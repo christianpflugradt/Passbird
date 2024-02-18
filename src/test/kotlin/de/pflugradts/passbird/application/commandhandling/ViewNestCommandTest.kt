@@ -3,6 +3,8 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
+import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
+import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
@@ -22,7 +24,12 @@ class ViewNestCommandTest {
     private val configuration = mockk<Configuration>()
     private val commandLineInterfaceService = CommandLineInterfaceService(mockk(), configuration)
     private val nestService = createNestServiceForTesting()
-    private val viewNestCommandHandler = ViewNestCommandHandler(nestService, commandLineInterfaceService)
+    private val viewNestCommandHandler = ViewNestCommandHandler(
+        CanPrintInfo(),
+        CanListAvailableNests(nestService),
+        nestService,
+        commandLineInterfaceService,
+    )
     private val inputHandler = createInputHandlerFor(viewNestCommandHandler)
 
     @Test
