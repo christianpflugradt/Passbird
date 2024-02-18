@@ -24,6 +24,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.GetCommandHand
 import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ImportCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ListCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.ProteinInfoCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.QuitCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.RenameCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.SetCommandHandler
@@ -95,6 +96,7 @@ class ApplicationModule : AbstractModule() {
                 HelpCommandHandler::class.java,
                 ImportCommandHandler::class.java,
                 ListCommandHandler::class.java,
+                ProteinInfoCommandHandler::class.java,
                 QuitCommandHandler::class.java,
                 RenameCommandHandler::class.java,
                 SetCommandHandler::class.java,
