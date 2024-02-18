@@ -34,18 +34,16 @@ class CommandFactory @Inject constructor(
             CommandType.HELP -> HelpCommand()
             CommandType.IMPORT -> ImportCommand()
             CommandType.LIST -> ListCommand()
-            CommandType.NEST ->
-                tryCatching { nestCommandFactory.constructFromInput(input) }
-                    .onFailure { reportFailure(CommandFailure(it)) }
-                    .getOrElse(NullCommand())
+            CommandType.NEST -> constructSafely(nestCommandFactory, input)
             CommandType.QUIT -> QuitCommand(quitReason = USER)
             CommandType.RENAME -> RenameCommand(input)
-            CommandType.SET ->
-                tryCatching { setCommandFactory.constructFromInput(input) }
-                    .onFailure { reportFailure(CommandFailure(it)) }
-                    .getOrElse(NullCommand())
+            CommandType.SET -> constructSafely(setCommandFactory, input)
             CommandType.VIEW -> ViewCommand(input)
             else -> NullCommand()
         }
     }
+
+    private fun constructSafely(factory: SpecialCommandFactory, input: Input) = tryCatching { factory.constructFromInput(input) }
+        .onFailure { reportFailure(CommandFailure(it)) }
+        .getOrElse(NullCommand())
 }

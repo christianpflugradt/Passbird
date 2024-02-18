@@ -1,40 +1,23 @@
 package de.pflugradts.passbird.application.commandhandling
 
 import com.google.inject.Singleton
-import de.pflugradts.passbird.application.commandhandling.CommandVariant.ADD
-import de.pflugradts.passbird.application.commandhandling.CommandVariant.DISCARD
 import de.pflugradts.passbird.application.commandhandling.command.AddNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.DiscardNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
-import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.command.SwitchNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
-import de.pflugradts.passbird.application.commandhandling.command.base.Command
-import de.pflugradts.passbird.domain.model.shell.Shell
-import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.model.transfer.Input
 
-private const val MAX_COMMAND_SIZE = 3
-
 @Singleton
-class NestCommandFactory() {
-    fun constructFromInput(input: Input): Command {
-        val command = input.command
-        if (command.size > MAX_COMMAND_SIZE) {
-            throw IllegalArgumentException("Nest command parameter not supported: ${input.command.slice(2).asString()}")
-        } else if (command.size == 1 && input.data.isEmpty) {
-            return ViewNestCommand()
-        } else if (command.size == 1 && !input.data.isEmpty) {
-            return MoveToNestCommand(input)
-        } else if (command.size == 2 && input.data.isEmpty && command.getChar(1).isDigit()) {
-            return SwitchNestCommand(slotAt(command.getChar(1)))
-        } else if (command.size == 3 && input.data.isEmpty && command.getChar(1) == ADD.value && command.isDigit(2)) {
-            return AddNestCommand(slotAt(command.getChar(2)))
-        } else if (command.size == 3 && input.data.isEmpty && command.getChar(1) == DISCARD.value && command.isDigit(2)) {
-            return DiscardNestCommand(slotAt(command.getChar(2)))
+class NestCommandFactory : SpecialCommandFactory() {
+    override fun internalConstruct(input: Input) = input.command.let { cmd ->
+        when {
+            input.hasNoData() && cmd.size1() -> ViewNestCommand()
+            input.hasData() && cmd.size1() -> MoveToNestCommand(input)
+            input.hasNoData() && cmd.size2() && cmd.isSlotted() -> SwitchNestCommand(cmd.getSlot())
+            input.hasNoData() && cmd.size3() && cmd.isAddVariant() && cmd.isSlotted() -> AddNestCommand(cmd.getSlot())
+            input.hasNoData() && cmd.size3() && cmd.isDiscardVariant() && cmd.isSlotted() -> DiscardNestCommand(cmd.getSlot())
+            else -> null
         }
-        return NullCommand()
     }
 }
-
-private fun Shell.isDigit(index: Int) = getChar(index).isDigit()
