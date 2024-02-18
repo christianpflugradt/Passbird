@@ -16,4 +16,20 @@
         <cve>CVE-2023-6378</cve>
     </suppress>
 
+    <suppress>
+        <notes><![CDATA[
+   file name: ktlint-cli-reporter-checkstyle-1.1.1.jar
+   ]]></notes>
+        <sha1>04f930be5c90146a75d1fe24a2953524e4024867</sha1>
+        <cve>CVE-2019-10782</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: ktlint-cli-reporter-checkstyle-1.1.1.jar
+   ]]></notes>
+        <sha1>04f930be5c90146a75d1fe24a2953524e4024867</sha1>
+        <cve>CVE-2019-9658</cve>
+    </suppress>
+
 </suppressions>
