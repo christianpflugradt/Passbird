@@ -15,7 +15,7 @@ fun fakeConfiguration(
     withClipboardResetEnabled: Boolean = false,
     withConfigurationTemplate: Boolean = false,
     withKeyStoreLocation: String = "",
-    withPasswordStoreLocation: String = "",
+    withPasswordTreeLocation: String = "",
     withPromptOnRemoval: Boolean = false,
     withPromptOnExportFile: Boolean = false,
     withSpecialCharacters: Boolean = true,
@@ -39,15 +39,15 @@ fun fakeConfiguration(
     every { userInterface.audibleBell } returns withAudibleBellEnabled
     val keyStore = mockk<Configuration.KeyStore>()
     every { keyStore.location } returns withKeyStoreLocation
-    val passwordStore = mockk<Configuration.PasswordStore>()
-    every { passwordStore.location } returns withPasswordStoreLocation
-    every { passwordStore.verifyChecksum } returns withVerifyChecksum
-    every { passwordStore.verifySignature } returns withVerifySignature
+    val passwordTree = mockk<Configuration.PasswordTree>()
+    every { passwordTree.location } returns withPasswordTreeLocation
+    every { passwordTree.verifyChecksum } returns withVerifyChecksum
+    every { passwordTree.verifySignature } returns withVerifySignature
     val adapter = mockk<Configuration.Adapter>()
     every { adapter.clipboard } returns clipboard
     every { adapter.userInterface } returns userInterface
     every { adapter.keyStore } returns keyStore
-    every { adapter.passwordStore } returns passwordStore
+    every { adapter.passwordTree } returns passwordTree
     every { instance.adapter } returns adapter
     val exchange = mockk<Configuration.Exchange>()
     every { exchange.promptOnExportFile } returns withPromptOnExportFile

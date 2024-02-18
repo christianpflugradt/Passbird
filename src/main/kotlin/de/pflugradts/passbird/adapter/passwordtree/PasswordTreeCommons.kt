@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.adapter.passwordstore
+package de.pflugradts.passbird.adapter.passwordtree
 
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import java.util.stream.StreamSupport

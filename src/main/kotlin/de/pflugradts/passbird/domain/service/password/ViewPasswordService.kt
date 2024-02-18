@@ -8,7 +8,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellComparator
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
-import de.pflugradts.passbird.domain.service.password.storage.EggRepository
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import java.util.stream.Stream
 
 class ViewPasswordService @Inject constructor(

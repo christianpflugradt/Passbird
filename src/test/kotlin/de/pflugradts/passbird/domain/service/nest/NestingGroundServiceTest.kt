@@ -6,7 +6,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
-import de.pflugradts.passbird.domain.service.password.storage.EggRepository
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test

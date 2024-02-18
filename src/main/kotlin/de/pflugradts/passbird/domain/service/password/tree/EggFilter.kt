@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.domain.service.password.storage
+package de.pflugradts.passbird.domain.service.password.tree
 
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.slot.Slot

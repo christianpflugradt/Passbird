@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.domain.service.password.storage
+package de.pflugradts.passbird.domain.service.password.tree
 
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
@@ -23,10 +23,10 @@ class NestingGroundTest {
     private val givenEgg2 = createEggForTesting(withEggIdShell = shellOf("EggId2"))
     private val givenEggs = listOf(givenEgg1, givenEgg2)
 
-    private val passwordStoreAdapterPort = fakePasswordStoreAdapterPort(givenEggs)
+    private val passwordTreeAdapterPort = fakePasswordTreeAdapterPort(givenEggs)
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
     private val nestService = createNestServiceSpyForTesting()
-    private val nestingGround = NestingGround(passwordStoreAdapterPort, nestService, eventRegistry)
+    private val nestingGround = NestingGround(passwordTreeAdapterPort, nestService, eventRegistry)
 
     @Test
     fun `should initialize`() {
@@ -45,7 +45,7 @@ class NestingGroundTest {
         nestingGround.sync()
 
         // then
-        verify { passwordStoreAdapterPort.sync(capture(eggsSlot)) }
+        verify { passwordTreeAdapterPort.sync(capture(eggsSlot)) }
         expectThat(eggsSlot.captured.get().toList()).containsExactlyInAnyOrder(givenEgg1, givenEgg2)
     }
 

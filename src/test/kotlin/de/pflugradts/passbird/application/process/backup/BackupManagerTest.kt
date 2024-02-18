@@ -2,7 +2,7 @@ package de.pflugradts.passbird.application.process.backup
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.Configuration
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.DATABASE_FILENAME
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.toDirectory
@@ -27,7 +27,7 @@ import java.util.UUID
 class BackupManagerTest {
 
     private val tempWorkingDirectory = UUID.randomUUID().toString()
-    private val databaseBackupSettings = mockk<Configuration.BackupSettings>()
+    private val treeBackupSettings = mockk<Configuration.BackupSettings>()
     private val configuration = mockk<Configuration>()
     private val systemOperation = SystemOperation()
     private val backupManager = BackupManager(configuration, systemOperation)
@@ -39,15 +39,15 @@ class BackupManagerTest {
         fakeConfiguration(
             instance = configuration,
             withKeyStoreLocation = tempWorkingDirectory,
-            withPasswordStoreLocation = tempWorkingDirectory,
+            withPasswordTreeLocation = tempWorkingDirectory,
         )
         every { configuration.application.backup.location } returns ""
         every { configuration.application.backup.numberOfBackups } returns 0
         every { configuration.application.backup.configuration } returns mockk<Configuration.BackupSettings>(relaxed = true)
         every { configuration.application.backup.keyStore } returns mockk<Configuration.BackupSettings>(relaxed = true)
-        every { configuration.application.backup.database } returns databaseBackupSettings
-        every { databaseBackupSettings.location } returns ""
-        updateDatabaseFileContent("initial")
+        every { configuration.application.backup.passwordTree } returns treeBackupSettings
+        every { treeBackupSettings.location } returns ""
+        updatePasswordTreeFileContent("initial")
     }
 
     @AfterEach
@@ -58,8 +58,8 @@ class BackupManagerTest {
     @Test
     fun `should not backup anything if number of backups is 0`() {
         // given
-        every { databaseBackupSettings.enabled } returns true
-        every { databaseBackupSettings.numberOfBackups } returns 0
+        every { treeBackupSettings.enabled } returns true
+        every { treeBackupSettings.numberOfBackups } returns 0
 
         // when
         backupManager.run()
@@ -71,8 +71,8 @@ class BackupManagerTest {
     @Test
     fun `should not backup anything if backup is not enabled`() {
         // given
-        every { databaseBackupSettings.enabled } returns false
-        every { databaseBackupSettings.numberOfBackups } returns 3
+        every { treeBackupSettings.enabled } returns false
+        every { treeBackupSettings.numberOfBackups } returns 3
 
         // when
         backupManager.run()
@@ -84,8 +84,8 @@ class BackupManagerTest {
     @Test
     fun `should create a backup if none exists`() {
         // given
-        every { databaseBackupSettings.enabled } returns true
-        every { databaseBackupSettings.numberOfBackups } returns 3
+        every { treeBackupSettings.enabled } returns true
+        every { treeBackupSettings.numberOfBackups } returns 3
 
         // when
         backupManager.run()
@@ -97,12 +97,12 @@ class BackupManagerTest {
     @Test
     fun `should create another backup if file has changed`() {
         // given
-        every { databaseBackupSettings.enabled } returns true
-        every { databaseBackupSettings.numberOfBackups } returns 3
-        updateDatabaseFileContent("initial")
+        every { treeBackupSettings.enabled } returns true
+        every { treeBackupSettings.numberOfBackups } returns 3
+        updatePasswordTreeFileContent("initial")
         backupManager.run()
         wait1Sec()
-        updateDatabaseFileContent("updated")
+        updatePasswordTreeFileContent("updated")
 
         // when
         backupManager.run()
@@ -114,9 +114,9 @@ class BackupManagerTest {
     @Test
     fun `should not create another backup if file has not changed`() {
         // given
-        every { databaseBackupSettings.enabled } returns true
-        every { databaseBackupSettings.numberOfBackups } returns 3
-        updateDatabaseFileContent("initial")
+        every { treeBackupSettings.enabled } returns true
+        every { treeBackupSettings.numberOfBackups } returns 3
+        updatePasswordTreeFileContent("initial")
         backupManager.run()
 
         // when
@@ -131,21 +131,21 @@ class BackupManagerTest {
         // given
         val expectedContent = "latest"
 
-        every { databaseBackupSettings.enabled } returns true
-        every { databaseBackupSettings.numberOfBackups } returns 3
+        every { treeBackupSettings.enabled } returns true
+        every { treeBackupSettings.numberOfBackups } returns 3
 
-        updateDatabaseFileContent("first")
+        updatePasswordTreeFileContent("first")
         backupManager.run()
         wait1Sec()
-        updateDatabaseFileContent("second")
+        updatePasswordTreeFileContent("second")
         backupManager.run()
         wait1Sec()
-        updateDatabaseFileContent("third")
+        updatePasswordTreeFileContent("third")
         backupManager.run()
         expectThat(files()) hasSize 3
         wait1Sec()
-        updateDatabaseFileContent(expectedContent)
-        every { databaseBackupSettings.numberOfBackups } returns 1
+        updatePasswordTreeFileContent(expectedContent)
+        every { treeBackupSettings.numberOfBackups } returns 1
 
         // when
         backupManager.run()
@@ -156,10 +156,10 @@ class BackupManagerTest {
         expectThat(Files.readString(backupFile)) isEqualTo expectedContent
     }
 
-    private fun updateDatabaseFileContent(content: String) =
-        Files.writeString(Paths.get("$tempWorkingDirectory/$DATABASE_FILENAME"), content)
+    private fun updatePasswordTreeFileContent(content: String) =
+        Files.writeString(Paths.get("$tempWorkingDirectory/$PASSWORD_TREE_FILENAME"), content)
     private fun wait1Sec() = Thread.sleep(1000)
     private fun files() = systemOperation.getFileNames(tempWorkingDirectory.toDirectory()).map { it.value }
         .filterNot { it == tempWorkingDirectory }
-        .filterNot { it == DATABASE_FILENAME }
+        .filterNot { it == PASSWORD_TREE_FILENAME }
 }

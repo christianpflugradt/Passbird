@@ -37,7 +37,7 @@ class FilePasswordExchangeTest {
 
         // then
         expectThat(actual.success).isTrue()
-        expectThat(captureSystemErr.capture) contains "Password database could not be exported"
+        expectThat(captureSystemErr.capture) contains "Password Tree could not be exported"
     }
 
     @Test
@@ -55,6 +55,6 @@ class FilePasswordExchangeTest {
         expectThat(actual.success).isTrue()
         expectThat(actual.getOrNull()).isNotNull()
         expectThat(actual.getOrNull()!!.toList()).isEmpty()
-        expectThat(captureSystemErr.capture) contains "Password database could not be imported"
+        expectThat(captureSystemErr.capture) contains "Password Tree could not be imported"
     }
 }

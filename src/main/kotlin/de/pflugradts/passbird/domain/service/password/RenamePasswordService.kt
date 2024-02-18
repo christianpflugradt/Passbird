@@ -6,7 +6,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
-import de.pflugradts.passbird.domain.service.password.storage.EggRepository
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 
 class RenamePasswordService @Inject constructor(
     @Inject private val cryptoProvider: CryptoProvider,

@@ -50,16 +50,16 @@ application:
       location:
       # overrides default number of backups for this file
       numberOfBackups:
-    # manages backups for passbird.pw database file
-    database:
+    # manages backups for passbird.ks keystore file
+    keyStore:
       # enables backups for this file
       enabled: true
       # overrides default location for this file
       location:
       # overrides default number of backups for this file
       numberOfBackups:
-    # manages backups for passbird.ks keystore file
-    keyStore:
+    # manages backups for passbird.tree (database file)
+    passwordTree:
       # enables backups for this file
       enabled: true
       # overrides default location for this file
@@ -93,12 +93,12 @@ adapter:
   keyStore:
     # path to directory where keystore is located
     location:
-  passwordStore:
-    # path to directory where password database is located
+  passwordTree:
+    # path to directory where Password Tree is located
     location:
-    # terminates Passbird if database checksum doesn't meet expectations
+    # terminates Passbird if Password Tree checksum doesn't meet expectations
     verifyChecksum: true
-    # terminates Passbird if database signature doesn't meet expectations
+    # terminates Passbird if Password Tree signature doesn't meet expectations
     verifySignature: true
   # some of these settings are not supported by all terminals
   userInterface:
@@ -170,10 +170,10 @@ The general usage info will be given below and is also available in Passbird by 
         c[EggId] (custom set) like set but prompts the user to input a new Password
         v[EggId] (view) prints the Password contained in that Egg to the console
         r[EggId] (rename) renames an Egg by prompting the user for a new one
-        d[EggId] (discard) removes the Egg entirely from the database
-        e (export) exports the Password database in a human readable json format
-        i (import) imports Passwords into the database from a json file
-        l (list) non parameterized, lists all Eggs in the database
+        d[EggId] (discard) removes the Egg entirely from the Tree
+        e (export) exports the Password Tree in a human readable json format
+        i (import) imports Passwords into the Tree from a json file
+        l (list) non parameterized, lists all Eggs in the current Nest
         n (Nests) view available Nests and print Nest specific help
         s? (Password configurations) view available configurations and print set specific help
         h (help) prints this help
@@ -223,7 +223,7 @@ Custom passwords are another advanced feature briefly covered in the configurati
 
 ### General Usage
 
-Passbird updates the physical database file immediately after every action. As of now there is no backup function and each action is irrevocable, so think carefully before you delete or overwrite a stored Password. You might want to back up the Password database file and keystore file from time to time.
+Passbird updates the physical Password Tree (file) immediately after every action.
 
 Some example inputs and what they do:
 
@@ -241,15 +241,15 @@ Some example inputs and what they do:
 
 `e` exports all Eggs to a file `passbird-export.json` in the directory passed on program start
 
-`i` imports all Eggs from a file `passbird-export.json` expected in the directory passed on program start - please note that this will potentially overwrite all Passwords in your database if there are any matching Eggs!
+`i` imports all Eggs from a file `passbird-export.json` expected in the directory passed on program start.
 
 ## Migrating from Passbird 3.x.x to Passbird 4.x.x
 
-The database structure has changed to support Proteins in the future. For that reason using Passbird 3.x.x all passwords must be exported using the `export` command (letter `e`). Nest names will get lost because they're not included in the export file. They should be printed using the `Nest` command (letter `n`) and written down.
+The Tree structure has changed to support Proteins in the future. For that reason using Passbird 3.x.x all Passwords must be exported using the `export` command (letter `e`). Nest names will get lost because they're not included in the export file. They should be printed using the `Nest` command (letter `n`) and written down.
 
-After that the password file should be renamed (as a backup) and Passbird updated to 4.x.x. Passbird can then be started as usual. The database will be empty but Passbird still start due to the existing KeyStore. The import command may then be used to reimport all passwords and create Nests with default names. Using the `create` command Nests can be renamed to their previous names. E.g. `n+1` will prompt for a new name for the Nest at slot 1. All other Nests can be renamed to their original names the same way, e.g. `n+9` will prompt for a new name for the Nest at slot 9.
+After that the Tree file should be renamed (as a backup) and Passbird updated to 4.x.x. Passbird can then be started as usual. The Tree will be empty but Passbird still starts due to the existing KeyStore. The import command may then be used to reimport all passwords and create Nests with default names. Using the `create` command Nests can be renamed to their previous names. E.g. `n+1` will prompt for a new name for the Nest at slot 1. All other Nests can be renamed to their original names the same way, e.g. `n+9` will prompt for a new name for the Nest at slot 9.
 
-As of Passbird 4.x.x the database will not be updated upon renaming a Nest. This will be fixed in the future. To trigger an update a new Egg can be created. It can be deleted right afterward and the new Nest names will be persisted. Assuming you don't have an Egg named `tmp4xx` you can input `stmp4xx` and `dtmp4xx` to trigger an update without leaving traces.
+As of Passbird 4.x.x the physical Tree file will not be updated upon renaming a Nest. This will be fixed in the future. To trigger an update a new Egg can be created. It can be deleted right afterward and the new Nest names will be persisted. Assuming you don't have an Egg named `tmp4xx` you can input `stmp4xx` and `dtmp4xx` to trigger an update without leaving traces.
 
 ## <a name="faq"></a>Frequently Asked Questions
 
@@ -259,7 +259,7 @@ If you prefer the terminal to a graphical user interface, and you don't need to 
 ### Is Passbird secure?
 Short answer: No.
 
-Long answer: I am not a security expert and Passbird has not been reviewed by such. Passbird uses a Keystore and a Cipher to symmetrically encrypt all data using a master Password chosen by the user. All data is generally handled in byte arrays by the application. All user input is read and program output is written as single bytes. Only for copying a Password to clipboard I store it in a string because I know no other way to write to the clipboard using Java. Once sensitive decrypted data has been used, like written to the clipboard, the byte array will be overwritten with random bytes. The Password database is encoded twice (first at the individual Egg level, then again for the whole file), so from analyzing it in a hex editor you should not even be able to tell how many Passwords are currently stored in the database. Passbird is also completely offline. If I were to take a wild guess I would say it is probably reasonably safe.
+Long answer: I am not a security expert and Passbird has not been reviewed by such. Passbird uses a Keystore and a Cipher to symmetrically encrypt all data using a master Password chosen by the user. All data is generally handled in byte arrays by the application. All user input is read and program output is written as single bytes. Only for copying a Password to clipboard I store it in a string because I know no other way to write to the clipboard using Java. Once sensitive decrypted data has been used, like written to the clipboard, the byte array will be overwritten with random bytes. The Password database is encoded at the individual Egg level and then again for the whole file, so from analyzing it in a hex editor you should not even be able to tell how many Passwords are currently stored in it. Passbird is also completely offline. If I were to take a wild guess I would say it is probably reasonably safe.
 
 ### Does Passbird support Unicode?
 

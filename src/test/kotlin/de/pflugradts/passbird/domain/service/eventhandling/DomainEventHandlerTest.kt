@@ -5,7 +5,7 @@ import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
-import de.pflugradts.passbird.domain.service.password.storage.EggRepository
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag

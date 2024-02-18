@@ -52,7 +52,7 @@ class PassbirdSetupTest {
         fakeConfiguration(
             instance = configuration,
             withConfigurationTemplate = true,
-            withPasswordStoreLocation = configurationDirectory,
+            withPasswordTreeLocation = configurationDirectory,
             withKeyStoreLocation = configurationDirectory,
         )
         fakeUserInterfaceAdapterPort(

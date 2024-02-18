@@ -9,7 +9,7 @@ import com.google.inject.multibindings.Multibinder
 import de.pflugradts.passbird.adapter.clipboard.ClipboardService
 import de.pflugradts.passbird.adapter.exchange.FilePasswordExchange
 import de.pflugradts.passbird.adapter.keystore.KeyStoreService
-import de.pflugradts.passbird.adapter.passwordstore.PasswordStoreFacade
+import de.pflugradts.passbird.adapter.passwordtree.PasswordTreeFacade
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.ExchangeAdapterPort
@@ -57,9 +57,9 @@ import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
 import de.pflugradts.passbird.domain.service.password.provider.RandomPasswordProvider
-import de.pflugradts.passbird.domain.service.password.storage.EggRepository
-import de.pflugradts.passbird.domain.service.password.storage.NestingGround
-import de.pflugradts.passbird.domain.service.password.storage.PasswordStoreAdapterPort
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
+import de.pflugradts.passbird.domain.service.password.tree.NestingGround
+import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 
 class ApplicationModule : AbstractModule() {
     override fun configure() {
@@ -78,7 +78,7 @@ class ApplicationModule : AbstractModule() {
         bind(NestService::class.java).to(NestingGroundService::class.java)
         bind(PasswordProvider::class.java).to(RandomPasswordProvider::class.java)
         bind(PasswordService::class.java).to(PasswordFacade::class.java)
-        bind(PasswordStoreAdapterPort::class.java).to(PasswordStoreFacade::class.java)
+        bind(PasswordTreeAdapterPort::class.java).to(PasswordTreeFacade::class.java)
         bind(UserInterfaceAdapterPort::class.java).to(CommandLineInterfaceService::class.java)
     }
 

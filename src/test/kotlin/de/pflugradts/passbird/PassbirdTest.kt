@@ -33,7 +33,7 @@ private const val DOMAIN_SERVICES = "$DOMAIN_ROOT.service"
 private const val CLIPBOARD_ADAPTER = "clipboard"
 private const val EXCHANGE_ADAPTER = "exchange"
 private const val KEYSTORE_ADAPTER = "keystore"
-private const val PASSWORDSTORE_ADAPTER = "passwordstore"
+private const val PASSWORDTREE_ADAPTER = "passwordtree"
 private const val USERINTERFACE_ADAPTER = "userinterface"
 
 @Tag(ARCHITECTURE)
@@ -50,7 +50,7 @@ class PassbirdTest {
             .adapter(CLIPBOARD_ADAPTER, path(ADAPTER_ROOT, CLIPBOARD_ADAPTER))
             .adapter(EXCHANGE_ADAPTER, path(ADAPTER_ROOT, EXCHANGE_ADAPTER))
             .adapter(KEYSTORE_ADAPTER, path(ADAPTER_ROOT, KEYSTORE_ADAPTER))
-            .adapter(PASSWORDSTORE_ADAPTER, path(ADAPTER_ROOT, PASSWORDSTORE_ADAPTER))
+            .adapter(PASSWORDTREE_ADAPTER, path(ADAPTER_ROOT, PASSWORDTREE_ADAPTER))
             .adapter(USERINTERFACE_ADAPTER, path(ADAPTER_ROOT, USERINTERFACE_ADAPTER))
             .ignoreDependency(assignableTo(AbstractModule::class.java), alwaysTrue()) // exclude guice modules
             .check(classes)

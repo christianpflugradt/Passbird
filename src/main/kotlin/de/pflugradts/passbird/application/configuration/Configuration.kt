@@ -21,7 +21,7 @@ data class Configuration(
     override fun updateDirectory(directory: Directory) {
         application.backup.location = "${directory.value}/$DEFAULT_BACKUP_DIRECTORY"
         adapter.keyStore.location = directory.value
-        adapter.passwordStore.location = directory.value
+        adapter.passwordTree.location = directory.value
     }
 
     data class Application(
@@ -34,7 +34,7 @@ data class Configuration(
         override var location: String = DEFAULT_BACKUP_DIRECTORY,
         override var numberOfBackups: Int = 10,
         override val configuration: BackupSettings = BackupSettings(),
-        override val database: BackupSettings = BackupSettings(),
+        override val passwordTree: BackupSettings = BackupSettings(),
         override val keyStore: BackupSettings = BackupSettings(),
     ) : ReadableConfiguration.Backup
     data class BackupSettings(
@@ -67,7 +67,7 @@ data class Configuration(
     data class Adapter(
         override val clipboard: Clipboard = Clipboard(),
         override val keyStore: KeyStore = KeyStore(),
-        override val passwordStore: PasswordStore = PasswordStore(),
+        override val passwordTree: PasswordTree = PasswordTree(),
         override val userInterface: UserInterface = UserInterface(),
     ) : ReadableConfiguration.Adapter
     data class Clipboard(override val reset: ClipboardReset = ClipboardReset()) : ReadableConfiguration.Clipboard
@@ -75,11 +75,11 @@ data class Configuration(
         override val enabled: Boolean = true,
         override val delaySeconds: Int = DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS,
     ) : ReadableConfiguration.ClipboardReset
-    data class PasswordStore(
+    data class PasswordTree(
         override var location: String = "",
         override val verifySignature: Boolean = true,
         override val verifyChecksum: Boolean = true,
-    ) : ReadableConfiguration.PasswordStore
+    ) : ReadableConfiguration.PasswordTree
     data class KeyStore(override var location: String = "") : ReadableConfiguration.KeyStore
     data class UserInterface(
         override val ansiEscapeCodes: AnsiEscapeCodes = AnsiEscapeCodes(),

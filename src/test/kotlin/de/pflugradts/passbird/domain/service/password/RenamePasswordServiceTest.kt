@@ -8,8 +8,8 @@ import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
-import de.pflugradts.passbird.domain.service.password.storage.EggRepository
-import de.pflugradts.passbird.domain.service.password.storage.fakeEggRepository
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
+import de.pflugradts.passbird.domain.service.password.tree.fakeEggRepository
 import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.verify

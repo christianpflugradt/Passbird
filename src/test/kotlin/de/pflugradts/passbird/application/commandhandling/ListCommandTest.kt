@@ -51,7 +51,7 @@ internal class ListCommandTest {
     }
 
     @Test
-    fun `should handle list command with empty database `() {
+    fun `should handle list command with empty nest `() {
         // given
         val input = inputOf(shellOf("l"))
         fakePasswordService(instance = passwordService, withEggs = emptyList())
@@ -62,6 +62,6 @@ internal class ListCommandTest {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell.asString()) isEqualTo "database is empty"
+        expectThat(outputSlot.captured.shell.asString()) isEqualTo "Nest is empty"
     }
 }

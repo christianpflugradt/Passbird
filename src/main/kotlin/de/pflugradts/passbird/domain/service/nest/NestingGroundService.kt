@@ -12,7 +12,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
-import de.pflugradts.passbird.domain.service.password.storage.EggRepository
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import java.util.function.Supplier
 
 @Singleton

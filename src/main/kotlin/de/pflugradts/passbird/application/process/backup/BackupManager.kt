@@ -5,8 +5,8 @@ import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.application.Global
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.DATABASE_FILENAME
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
 import de.pflugradts.passbird.application.process.Finalizer
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
@@ -22,7 +22,7 @@ class BackupManager @Inject constructor(
     override fun run() {
         listOf(
             Triple(backupConfiguration.configuration, Global.homeDirectory, CONFIGURATION_FILENAME),
-            Triple(backupConfiguration.database, configuration.adapter.passwordStore.location.toDirectory(), DATABASE_FILENAME),
+            Triple(backupConfiguration.passwordTree, configuration.adapter.passwordTree.location.toDirectory(), PASSWORD_TREE_FILENAME),
             Triple(backupConfiguration.keyStore, configuration.adapter.keyStore.location.toDirectory(), KEYSTORE_FILENAME),
         ).forEach { (settings, directory, fileName) ->
             if (settings.enabled && numberOfBackups(settings) > 0) {

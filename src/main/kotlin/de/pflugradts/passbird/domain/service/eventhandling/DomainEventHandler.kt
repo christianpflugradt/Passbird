@@ -7,7 +7,7 @@ import com.google.inject.Singleton
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.NestCreated
 import de.pflugradts.passbird.domain.model.event.NestDiscarded
-import de.pflugradts.passbird.domain.service.password.storage.EggRepository
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 
 @Singleton
 class DomainEventHandler @Inject constructor(

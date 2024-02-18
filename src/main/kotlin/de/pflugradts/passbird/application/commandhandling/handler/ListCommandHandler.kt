@@ -21,7 +21,7 @@ class ListCommandHandler @Inject constructor(
     }
 
     private fun join(eggIdShellList: List<Shell>) = if (eggIdShellList.isEmpty()) {
-        shellOf("database is empty")
+        shellOf("Nest is empty")
     } else {
         val count = eggIdShellList.stream().map(Shell::size)
             .reduce((eggIdShellList.size - 1) * 2) { a: Int, b: Int -> Integer.sum(a, b) }

@@ -1,11 +1,11 @@
-package de.pflugradts.passbird.adapter.passwordstore
+package de.pflugradts.passbird.adapter.passwordtree
 
 import com.google.inject.Inject
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.DATABASE_FILENAME
-import de.pflugradts.passbird.application.failure.WritePasswordDatabaseFailure
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
+import de.pflugradts.passbird.application.failure.WritePasswordTreeFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
@@ -23,10 +23,10 @@ import de.pflugradts.passbird.domain.model.slot.Slot.Companion.LAST_SLOT
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
-import de.pflugradts.passbird.domain.service.password.storage.EggStreamSupplier
+import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import java.util.Arrays
 
-class PasswordStoreWriter @Inject constructor(
+class PasswordTreeWriter @Inject constructor(
     @Inject private val systemOperation: SystemOperation,
     @Inject private val configuration: ReadableConfiguration,
     @Inject private val nestService: NestService,
@@ -47,7 +47,7 @@ class PasswordStoreWriter @Inject constructor(
     }
 
     private fun writeToDisk(shell: Shell) = tryCatching { systemOperation.writeBytesToFile(filePath, cryptoProvider.encrypt(shell)) }
-        .onFailure { reportFailure(WritePasswordDatabaseFailure(filePath, it)) }
+        .onFailure { reportFailure(WritePasswordTreeFailure(filePath, it)) }
 
     private fun calcRequiredContentSize(eggs: EggStreamSupplier): Int {
         val eggDataSize = eggs.get()
@@ -66,7 +66,7 @@ class PasswordStoreWriter @Inject constructor(
     }
 
     private val filePath get() =
-        systemOperation.resolvePath(configuration.adapter.passwordStore.location.toDirectory(), DATABASE_FILENAME.toFileName())
+        systemOperation.resolvePath(configuration.adapter.passwordTree.location.toDirectory(), PASSWORD_TREE_FILENAME.toFileName())
     private fun calcActualTotalSize(contentSize: Int) = signatureSize() + contentSize + checksumBytes()
 
     private fun Option<Nest>.asByteArray(): ByteArray {

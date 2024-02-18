@@ -14,7 +14,7 @@ import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
-import de.pflugradts.passbird.domain.service.password.storage.PasswordStoreAdapterPort
+import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 
 class PassbirdTestMain @Inject constructor(
     @Inject val bootable: Bootable,
@@ -24,7 +24,7 @@ class PassbirdTestMain @Inject constructor(
     @Inject val keyStoreAdapterPort: KeyStoreAdapterPort,
     @Inject val passwordProvider: PasswordProvider,
     @Inject val passwordService: PasswordService,
-    @Inject val passwordStoreAdapterPort: PasswordStoreAdapterPort,
+    @Inject val passwordTreeAdapterPort: PasswordTreeAdapterPort,
     @Inject val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     @Inject val configuration: ReadableConfiguration,
     @Inject val commandHandlers: Set<CommandHandler>,

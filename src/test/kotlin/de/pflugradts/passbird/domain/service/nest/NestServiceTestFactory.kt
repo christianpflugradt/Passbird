@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.domain.service.nest
 
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
-import de.pflugradts.passbird.domain.service.password.storage.EggRepository
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import io.mockk.mockk
 import io.mockk.spyk
 

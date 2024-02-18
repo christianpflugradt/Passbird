@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.adapter.passwordstore
+package de.pflugradts.passbird.adapter.passwordtree
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.INTEGRATION
@@ -46,20 +46,20 @@ import java.util.Collections
 import java.util.UUID
 
 @Tag(INTEGRATION)
-class PasswordStoreFacadeTest {
+class PasswordTreeFacadeTest {
 
     private val configuration = mockk<Configuration>()
     private val cryptoProvider = mockk<CryptoProvider>()
     private val nestService = createNestServiceForTesting()
     private val systemOperation = spyk(SystemOperation())
-    private var passwordStoreFacade: PasswordStoreFacade = PasswordStoreFacade(
-        passwordStoreReader = PasswordStoreReader(
+    private var passwordTreeFacade: PasswordTreeFacade = PasswordTreeFacade(
+        passwordTreeReader = PasswordTreeReader(
             configuration = configuration,
             cryptoProvider = cryptoProvider,
             nestService = nestService,
             systemOperation = systemOperation,
         ),
-        passwordStoreWriter = PasswordStoreWriter(
+        passwordTreeWriter = PasswordTreeWriter(
             configuration = configuration,
             cryptoProvider = cryptoProvider,
             nestService = nestService,
@@ -67,39 +67,39 @@ class PasswordStoreFacadeTest {
         ),
     )
 
-    private var tempPasswordStoreDirectory = UUID.randomUUID().toString()
-    private var databaseFilename = tempPasswordStoreDirectory + File.separator + ReadableConfiguration.DATABASE_FILENAME
+    private var tempPasswordTreeDirectory = UUID.randomUUID().toString()
+    private var passwordTreeFilename = tempPasswordTreeDirectory + File.separator + ReadableConfiguration.PASSWORD_TREE_FILENAME
 
     @BeforeEach
     fun setup() {
-        expectThat(File(tempPasswordStoreDirectory).mkdir()).isTrue()
-        fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory)
+        expectThat(File(tempPasswordTreeDirectory).mkdir()).isTrue()
+        fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory)
         every { cryptoProvider.encrypt(any(Shell::class)) } answers { firstArg() }
         every { cryptoProvider.decrypt(any(Shell::class)) } answers { firstArg() }
     }
 
     @AfterEach
     fun cleanup() {
-        expectThat(File(databaseFilename).delete()).isTrue()
-        expectThat(File(tempPasswordStoreDirectory).delete()).isTrue()
+        expectThat(File(passwordTreeFilename).delete()).isTrue()
+        expectThat(File(tempPasswordTreeDirectory).delete()).isTrue()
     }
 
     @Test
-    fun `should write to and then read from database`() {
+    fun `should write to and then read from tree`() {
         // given
         val eggs = someEggs()
 
         // when
-        passwordStoreFacade.sync { eggs.stream() }
-        expectThat(File(databaseFilename)).exists()
-        val actual = passwordStoreFacade.restore()
+        passwordTreeFacade.sync { eggs.stream() }
+        expectThat(File(passwordTreeFilename)).exists()
+        val actual = passwordTreeFacade.restore()
 
         // then
         expectThat(actual.get().toList()) containsExactly eggs
     }
 
     @Test
-    fun `should write to and them read from database using nests`() {
+    fun `should write to and them read from tree using nests`() {
         // given
         val nest1 = shellOf("nest1")
         val nest3 = shellOf("Nest3")
@@ -130,10 +130,10 @@ class PasswordStoreFacadeTest {
         val eggs = listOf(egg1, egg2, egg3, egg3b)
 
         // when
-        passwordStoreFacade.sync { eggs.stream() }
+        passwordTreeFacade.sync { eggs.stream() }
         nestService.populate(Collections.nCopies(CAPACITY, emptyShell()))
-        expectThat(File(databaseFilename)).exists()
-        val actual = passwordStoreFacade.restore()
+        expectThat(File(passwordTreeFilename)).exists()
+        val actual = passwordTreeFacade.restore()
 
         // then
         expectThat(actual.get().toList()) containsExactly eggs
@@ -149,36 +149,36 @@ class PasswordStoreFacadeTest {
     }
 
     @Test
-    fun `should write to and them read from empty database`() {
+    fun `should write to and them read from empty tree`() {
         // given
-        expectThat(File(databaseFilename).createNewFile()).isTrue()
+        expectThat(File(passwordTreeFilename).createNewFile()).isTrue()
 
         // when
-        val actual = passwordStoreFacade.restore()
+        val actual = passwordTreeFacade.restore()
 
         // then
         expectThat(actual.get().count()) isEqualTo 0
     }
 
     @Test
-    fun `should create empty password database if file not exists`() {
+    fun `should create empty tree if file not exists`() {
         // given
-        expectThat(File(databaseFilename).createNewFile()).isTrue()
+        expectThat(File(passwordTreeFilename).createNewFile()).isTrue()
 
         // when
-        val actual = passwordStoreFacade.restore()
+        val actual = passwordTreeFacade.restore()
 
         // then
         expectThat(actual.get().count()) isEqualTo 0
     }
 
     @Test
-    fun `should create empty password database if file is empty`() {
+    fun `should create empty tree if file is empty`() {
         // given
-        expectThat(File(databaseFilename).createNewFile()).isTrue()
+        expectThat(File(passwordTreeFilename).createNewFile()).isTrue()
 
         // when
-        val actual = passwordStoreFacade.restore()
+        val actual = passwordTreeFacade.restore()
 
         // then
         expectThat(actual.get().count()) isEqualTo 0
@@ -193,24 +193,24 @@ class PasswordStoreFacadeTest {
             val eggs = someEggs()
             val manipulatedSignature = signature().reversedArray()
             every { systemOperation.exit() } returns Unit
-            fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifySignature = true)
+            fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifySignature = true)
 
             mockkStatic(::signature)
             every { signature() } returns manipulatedSignature
-            passwordStoreFacade.sync { eggs.stream() }
-            expectThat(File(databaseFilename)).exists()
+            passwordTreeFacade.sync { eggs.stream() }
+            expectThat(File(passwordTreeFilename)).exists()
             unmockkAll()
 
             val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
 
             // when
             captureSystemErr.during {
-                passwordStoreFacade.restore()
+                passwordTreeFacade.restore()
             }
             val actual = captureSystemErr.capture
 
             // then
-            expectThat(actual) contains "Signature of password database could not be verified."
+            expectThat(actual) contains "Signature of Password Tree could not be verified."
             expectThat(actual) contains "Shutting down due to signature failure."
             verify(exactly = 1) { systemOperation.exit() }
         }
@@ -221,12 +221,12 @@ class PasswordStoreFacadeTest {
             val eggs = someEggs()
             val manipulatedSignature = signature().reversedArray()
             every { systemOperation.exit() } returns Unit
-            fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifySignature = false)
+            fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifySignature = false)
 
             mockkStatic(::signature)
             every { signature() } returns manipulatedSignature
-            passwordStoreFacade.sync { eggs.stream() }
-            expectThat(File(databaseFilename)).exists()
+            passwordTreeFacade.sync { eggs.stream() }
+            expectThat(File(passwordTreeFilename)).exists()
             unmockkAll()
 
             val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
@@ -234,13 +234,13 @@ class PasswordStoreFacadeTest {
             // when
             var restored = 0
             captureSystemErr.during {
-                restored = passwordStoreFacade.restore().get().count().toInt()
+                restored = passwordTreeFacade.restore().get().count().toInt()
             }
             val actual = captureSystemErr.capture
 
             // then
             expectThat(restored) isEqualTo eggs.size
-            expectThat(actual) contains "Signature of password database could not be verified."
+            expectThat(actual) contains "Signature of Password Tree could not be verified."
             expectThat(actual.contains("Shutting down due to signature failure.")).isFalse()
             verify(exactly = 0) { systemOperation.exit() }
         }
@@ -250,24 +250,24 @@ class PasswordStoreFacadeTest {
             // given
             val eggs = someEggs()
             every { systemOperation.exit() } returns Unit
-            fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifyChecksum = true)
+            fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifyChecksum = true)
 
             mockkStatic(::checksum)
             every { checksum(any()) } returns 0
-            passwordStoreFacade.sync { eggs.stream() }
-            expectThat(File(databaseFilename)).exists()
+            passwordTreeFacade.sync { eggs.stream() }
+            expectThat(File(passwordTreeFilename)).exists()
             unmockkAll()
 
             val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
 
             // when
             captureSystemErr.during {
-                passwordStoreFacade.restore()
+                passwordTreeFacade.restore()
             }
             val actual = captureSystemErr.capture
 
             // then
-            expectThat(actual) contains "Checksum of password database could not be verified."
+            expectThat(actual) contains "Checksum of Password Tree could not be verified."
             expectThat(actual) contains "Shutting down due to checksum failure."
             verify(exactly = 1) { systemOperation.exit() }
         }
@@ -277,12 +277,12 @@ class PasswordStoreFacadeTest {
             // given
             val eggs = someEggs()
             every { systemOperation.exit() } returns Unit
-            fakeConfiguration(instance = configuration, withPasswordStoreLocation = tempPasswordStoreDirectory, withVerifyChecksum = false)
+            fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifyChecksum = false)
 
             mockkStatic(::checksum)
             every { checksum(any()) } returns 0
-            passwordStoreFacade.sync { eggs.stream() }
-            expectThat(File(databaseFilename)).exists()
+            passwordTreeFacade.sync { eggs.stream() }
+            expectThat(File(passwordTreeFilename)).exists()
             unmockkAll()
 
             val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
@@ -290,13 +290,13 @@ class PasswordStoreFacadeTest {
             // when
             var restored = 0
             captureSystemErr.during {
-                restored = passwordStoreFacade.restore().get().count().toInt()
+                restored = passwordTreeFacade.restore().get().count().toInt()
             }
             val actual = captureSystemErr.capture
 
             // then
             expectThat(restored) isEqualTo eggs.size
-            expectThat(actual) contains "Checksum of password database could not be verified."
+            expectThat(actual) contains "Checksum of Password Tree could not be verified."
             expectThat(actual.contains("Shutting down due to checksum failure.")).isFalse()
             verify(exactly = 0) { systemOperation.exit() }
         }

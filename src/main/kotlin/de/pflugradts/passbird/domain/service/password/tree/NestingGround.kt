@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.domain.service.password.storage
+package de.pflugradts.passbird.domain.service.password.tree
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
@@ -11,23 +11,23 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestService
-import de.pflugradts.passbird.domain.service.password.storage.EggFilter.CURRENT_NEST
-import de.pflugradts.passbird.domain.service.password.storage.EggFilter.Companion.all
-import de.pflugradts.passbird.domain.service.password.storage.EggFilter.Companion.inNest
+import de.pflugradts.passbird.domain.service.password.tree.EggFilter.CURRENT_NEST
+import de.pflugradts.passbird.domain.service.password.tree.EggFilter.Companion.all
+import de.pflugradts.passbird.domain.service.password.tree.EggFilter.Companion.inNest
 import java.util.function.Predicate
 import java.util.function.Supplier
 import java.util.stream.Stream
 
 @Singleton
 class NestingGround @Inject constructor(
-    @Inject private val passwordStoreAdapterPort: PasswordStoreAdapterPort,
+    @Inject private val passwordTreeAdapterPort: PasswordTreeAdapterPort,
     @Inject private val nestService: NestService,
     @Inject private val eventRegistry: EventRegistry,
 ) : EggRepository {
     private val lazyEggs: MutableOption<MutableList<Egg>> = mutableOptionOf()
     private val eggs: MutableList<Egg> get() {
         if (lazyEggs.isEmpty) {
-            lazyEggs.set(passwordStoreAdapterPort.restore().get().toList().toMutableList())
+            lazyEggs.set(passwordTreeAdapterPort.restore().get().toList().toMutableList())
             lazyEggs.get().forEach {
                 it.clearDomainEvents()
                 eventRegistry.register(it)
@@ -46,7 +46,7 @@ class NestingGround @Inject constructor(
         eventRegistry.deregister(egg)
     }
 
-    override fun sync() = passwordStoreAdapterPort.sync(createEggStreamSupplier(EggFilter.ALL_NESTS))
+    override fun sync() = passwordTreeAdapterPort.sync(createEggStreamSupplier(EggFilter.ALL_NESTS))
     override fun find(eggIdShell: Shell, slot: Slot): Option<Egg> = find(createEggStreamSupplier(slot), eggIdShell)
     override fun find(eggIdShell: Shell): Option<Egg> = find(createEggStreamSupplier(CURRENT_NEST), eggIdShell)
     private fun find(supplier: EggStreamSupplier, eggIdShell: Shell): Option<Egg> =

@@ -8,10 +8,10 @@ import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import kotlin.io.path.name
 
 fun reportFailure(checksumFailure: ChecksumFailure) {
-    err("Checksum of password database could not be verified.")
+    err("Checksum of Password Tree could not be verified.")
     if (checksumFailure.critical) {
         err(
-            "Shutting down due to checksum failure. If you still think this is a valid Passbird password database file, " +
+            "Shutting down due to checksum failure. If you still think this is a valid Passbird Tree, " +
                 "you can set the verifyChecksum option in your configuration to false.",
         )
     }
@@ -27,9 +27,9 @@ fun reportFailure(configurationFailure: ConfigurationFailure) = if (configuratio
 } else {
     err("Configuration could not be loaded: ${configurationFailure.ex.message}")
 }
-fun reportFailure(passwordDatabaseFailure: DecryptPasswordDatabaseFailure) =
-    err("Password database at '${passwordDatabaseFailure.path.name}' could not be decrypted: ${passwordDatabaseFailure.ex.message}")
-fun reportFailure(exportFailure: ExportFailure) = err("Password database could not be exported: ${exportFailure.ex.message}")
+fun reportFailure(passwordTreeFailure: DecryptPasswordTreeFailure) =
+    err("Password Tree at '${passwordTreeFailure.path.name}' could not be decrypted: ${passwordTreeFailure.ex.message}")
+fun reportFailure(exportFailure: ExportFailure) = err("Password Tree could not be exported: ${exportFailure.ex.message}")
 fun reportFailure(homeDirectoryFailure: HomeDirectoryFailure) = err(
     "Shutting down: " + when (homeDirectoryFailure.case) {
         IS_NULL -> "No home directory was given upon starting Passbird."
@@ -39,23 +39,23 @@ fun reportFailure(homeDirectoryFailure: HomeDirectoryFailure) = err(
 )
 fun reportFailure(importFailure: ImportFailure) = if (importFailure.ex is InvalidEggIdException) {
     err(
-        "Password database could not be imported because at least one eggId contains digits or special characters. " +
+        "Password Tree could not be imported because at least one eggId contains digits or special characters. " +
             "Please correct invalid eggIds and try again. Erroneous eggId: ${importFailure.ex.eggIdShell.asString()}",
     )
 } else {
-    err("Password database could not be imported.")
+    err("Password Tree could not be imported.")
 }
 fun reportFailure(loginFailure: LoginFailure) = err("Login failed. Shutting down after ${loginFailure.attempts} unsuccessful attempts.")
 fun reportFailure(signatureCheckFailure: SignatureCheckFailure) {
-    err("Signature of password database could not be verified.")
+    err("Signature of Password Tree could not be verified.")
     if (signatureCheckFailure.critical) {
         err(
-            "Shutting down due to signature failure. If you still think this is a valid Passbird password " +
-                "database file, you can set the verifySignature option in your configuration to false.",
+            "Shutting down due to signature failure. If you still think this is a valid Passbird Tree," +
+                "you can set the verifySignature option in your configuration to false.",
         )
     }
 }
-fun reportFailure(writePasswordDatabaseFailure: WritePasswordDatabaseFailure) =
-    err("Password database could not be synced: ${writePasswordDatabaseFailure.ex.message}")
+fun reportFailure(writePasswordTreeFailure: WritePasswordTreeFailure) =
+    err("Password Tree could not be synced: ${writePasswordTreeFailure.ex.message}")
 
 private fun err(message: String) = System.err.println(message)

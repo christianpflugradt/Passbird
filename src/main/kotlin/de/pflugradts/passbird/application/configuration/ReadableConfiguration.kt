@@ -18,8 +18,8 @@ interface ReadableConfiguration {
         val location: String
         val numberOfBackups: Int
         val configuration: BackupSettings
-        val database: BackupSettings
         val keyStore: BackupSettings
+        val passwordTree: BackupSettings
     }
     interface BackupSettings {
         val enabled: Boolean
@@ -51,7 +51,7 @@ interface ReadableConfiguration {
     interface Adapter {
         val clipboard: Clipboard
         val keyStore: KeyStore
-        val passwordStore: PasswordStore
+        val passwordTree: PasswordTree
         val userInterface: UserInterface
     }
     interface Clipboard {
@@ -61,7 +61,7 @@ interface ReadableConfiguration {
         val enabled: Boolean
         val delaySeconds: Int
     }
-    interface PasswordStore {
+    interface PasswordTree {
         val location: String
         val verifySignature: Boolean
         val verifyChecksum: Boolean
@@ -81,7 +81,7 @@ interface ReadableConfiguration {
     companion object {
         const val CONFIGURATION_FILENAME = "passbird.yml"
         const val KEYSTORE_FILENAME = "passbird.ks"
-        const val DATABASE_FILENAME = "passbird.pw"
+        const val PASSWORD_TREE_FILENAME = "passbird.tree"
         const val EXCHANGE_FILENAME = "passbird-export.json"
     }
 }
