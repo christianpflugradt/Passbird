@@ -16,7 +16,7 @@ import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 
 class MoveToNestCommandHandler @Inject constructor(
-    @Inject private val n: CanListAvailableNests,
+    @Inject private val canListAvailableNests: CanListAvailableNests,
     @Inject private val nestService: NestService,
     @Inject private val passwordService: PasswordService,
     @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -25,7 +25,7 @@ class MoveToNestCommandHandler @Inject constructor(
     private fun handleMoveToNestCommand(moveToNestCommand: MoveToNestCommand) {
         if (passwordService.eggExists(moveToNestCommand.argument, EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             userInterfaceAdapterPort.send(outputOf(shellOf("\nAvailable Nests: \n"), HIGHLIGHT))
-            userInterfaceAdapterPort.send(outputOf(shellOf(n.getAvailableNests(includeCurrent = false))))
+            userInterfaceAdapterPort.send(outputOf(shellOf(canListAvailableNests.getAvailableNests(includeCurrent = false))))
             val input = userInterfaceAdapterPort.receive(outputOf(shellOf("\nEnter Nest you want to move Egg to: ")))
             val nestSlot = input.extractNestSlot()
             if (nestSlot === INVALID) {
