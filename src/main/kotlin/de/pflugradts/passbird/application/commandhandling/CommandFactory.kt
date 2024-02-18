@@ -23,6 +23,7 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 @Singleton
 class CommandFactory @Inject constructor(
     @Inject private val nestCommandFactory: NestCommandFactory,
+    @Inject private val proteinCommandFactory: ProteinCommandFactory,
     @Inject private val setCommandFactory: SetCommandFactory,
 ) {
     fun construct(commandType: CommandType, input: Input): Command {
@@ -35,6 +36,7 @@ class CommandFactory @Inject constructor(
             CommandType.IMPORT -> ImportCommand()
             CommandType.LIST -> ListCommand()
             CommandType.NEST -> constructSafely(nestCommandFactory, input)
+            CommandType.PROTEIN -> constructSafely(proteinCommandFactory, input)
             CommandType.QUIT -> QuitCommand(quitReason = USER)
             CommandType.RENAME -> RenameCommand(input)
             CommandType.SET -> constructSafely(setCommandFactory, input)

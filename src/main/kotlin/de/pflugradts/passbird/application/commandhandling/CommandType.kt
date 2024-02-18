@@ -11,6 +11,7 @@ enum class CommandType(val type: Char) {
     IMPORT('i'),
     LIST('l'),
     NEST('n'),
+    PROTEIN('p'),
     QUIT('q'),
     RENAME('r'),
     SET('s'),

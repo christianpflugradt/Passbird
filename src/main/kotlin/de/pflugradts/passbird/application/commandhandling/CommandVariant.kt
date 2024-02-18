@@ -4,4 +4,5 @@ enum class CommandVariant(val value: Char) {
     ADD('+'),
     DISCARD('-'),
     INFO('?'),
+    SHOW_ALL('*'),
 }

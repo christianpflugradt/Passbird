@@ -46,5 +46,8 @@ abstract class SpecialCommandFactory {
 
         @JvmStatic
         protected fun Shell.isInfoVariant() = getChar(1) == CommandVariant.INFO.value
+
+        @JvmStatic
+        protected fun Shell.isShowAllVariant() = getChar(1) == CommandVariant.SHOW_ALL.value
     }
 }
