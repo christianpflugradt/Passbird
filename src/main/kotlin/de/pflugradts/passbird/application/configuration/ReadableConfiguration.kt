@@ -80,7 +80,7 @@ interface ReadableConfiguration {
 
     companion object {
         const val CONFIGURATION_FILENAME = "passbird.yml"
-        const val KEYSTORE_FILENAME = "passbird.ks"
+        const val KEYSTORE_FILENAME = "passbird.sec"
         const val PASSWORD_TREE_FILENAME = "passbird.tree"
         const val EXCHANGE_FILENAME = "passbird-export.json"
     }

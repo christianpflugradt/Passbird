@@ -28,7 +28,7 @@ class SetupGuide @Inject constructor(
     fun sendConfigKeyStoreRouteInformation(location: String) {
         send("You have landed here because the keystore specified in your configuration does not exist.")
         send("Your configuration specifies the keystore to be in the following directory: $location")
-        send("However in that directory there is no file 'passbird.ks'")
+        send("However in that directory there is no file 'passbird.sec'")
     }
 
     fun sendInputPath(fileDescription: String) {

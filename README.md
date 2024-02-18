@@ -50,7 +50,7 @@ application:
       location:
       # overrides default number of backups for this file
       numberOfBackups:
-    # manages backups for passbird.ks keystore file
+    # manages backups for passbird.sec keystore file
     keyStore:
       # enables backups for this file
       enabled: true
@@ -251,6 +251,10 @@ After that the Tree file should be renamed (as a backup) and Passbird updated to
 
 As of Passbird 4.x.x the physical Tree file will not be updated upon renaming a Nest. This will be fixed in the future. To trigger an update a new Egg can be created. It can be deleted right afterward and the new Nest names will be persisted. Assuming you don't have an Egg named `tmp4xx` you can input `stmp4xx` and `dtmp4xx` to trigger an update without leaving traces.
 
+The Passbird database file has been renamed to Passbird (Password) Tree and as a result the physical filename changes from `passbird.pw` to `passbird.tree` which happens automatically through the update procedure described above.
+
+The expected keystore file has also been changed from `passbird.ks` to `passbird.sec`. Before launching Passbird 4.x.x the file has to be renamed manually. You may either rename the file directly or create a copy and name it accordingly keeping the previous file in the process if you wish to do so.
+
 ## <a name="faq"></a>Frequently Asked Questions
 
 ### Is Passbird the right tool for me?
@@ -261,7 +265,7 @@ Short answer: No.
 
 Long answer: I am not a security expert and Passbird has not been reviewed by such. Passbird uses a Keystore and a Cipher to symmetrically encrypt all data using a master Password chosen by the user. All data is generally handled in byte arrays by the application. All user input is read and program output is written as single bytes. Only for copying a Password to clipboard I store it in a string because I know no other way to write to the clipboard using Java. Once sensitive decrypted data has been used, like written to the clipboard, the byte array will be overwritten with random bytes. The Password database is encoded at the individual Egg level and then again for the whole file, so from analyzing it in a hex editor you should not even be able to tell how many Passwords are currently stored in it. Passbird is also completely offline. If I were to take a wild guess I would say it is probably reasonably safe.
 
-### Does Passbird support Unicode?
+### Does Passbird support unicode?
 
 No. Many programs don't support unicode characters in Passwords. In fact some don't even allow common special characters like backslashes or spaces. Supporting advanced character sets didn't seem worth it to me, thus Passbird translates every byte into an ascii character. You may input a unicode character which is represented in several bytes and Passbird will interpret it as multiple ascii characters. I advise against doing that. You might have trouble reproducing the correct input and end up with some broken Eggs that you can't delete.
 
