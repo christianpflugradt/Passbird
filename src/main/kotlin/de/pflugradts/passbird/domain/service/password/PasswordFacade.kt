@@ -18,6 +18,8 @@ class PasswordFacade @Inject constructor(
     override fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction) =
         viewPasswordService.eggExists(eggIdShell, eggNotExistsAction)
     override fun viewPassword(eggIdShell: Shell) = viewPasswordService.viewPassword(eggIdShell)
+    override fun viewProteinTypes(eggIdShell: Shell) = viewPasswordService.viewProteinTypes(eggIdShell)
+    override fun viewProteinStructures(eggIdShell: Shell) = viewPasswordService.viewProteinStructures(eggIdShell)
     override fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell) = renamePasswordService.renameEgg(eggIdShell, newEggIdShell)
     override fun findAllEggIds() = viewPasswordService.findAllEggIds()
     override fun challengeEggId(shell: Shell) = putPasswordService.challengeEggId(shell)

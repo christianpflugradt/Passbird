@@ -17,6 +17,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.RenameCommandH
 import de.pflugradts.passbird.application.commandhandling.handler.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.SetInfoCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ViewCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.ViewProteinTypesCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.MoveToNestCommandHandler
@@ -64,6 +65,7 @@ class PassbirdMainModuleTest {
             SwitchNestCommandHandler::class.java,
             ViewCommandHandler::class.java,
             ViewNestCommandHandler::class.java,
+            ViewProteinTypesCommandHandler::class.java,
         )
         actual.commandHandlers.forEachIndexed { index, commandHandler ->
             expectThat(commandHandler::class.java) isSameInstanceAs expectedCommandHandlers[index]
