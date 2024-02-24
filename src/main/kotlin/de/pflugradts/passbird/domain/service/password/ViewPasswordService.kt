@@ -6,7 +6,6 @@ import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.Shell
-import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellComparator
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -31,7 +30,7 @@ class ViewPasswordService @Inject constructor(
     fun viewProteinTypes(eggIdShell: Shell) = encrypted(eggIdShell).let { encryptedEggIdShell ->
         find(encryptedEggIdShell).map { eggOption ->
             eggOption.proteins.map { protein ->
-                protein.map { optionOf(decrypted(it.viewType())) }.orElse(optionOf(shellOf("user name")))
+                protein.map { optionOf(decrypted(it.viewType())) }.orElse(emptyOption())
             }
         }.or {
             eventRegistry.register(EggNotFound(encryptedEggIdShell))

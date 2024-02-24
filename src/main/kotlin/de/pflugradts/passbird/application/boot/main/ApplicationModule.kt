@@ -30,6 +30,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.RenameCommandH
 import de.pflugradts.passbird.application.commandhandling.handler.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.SetInfoCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ViewCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.ViewProteinStructuresCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ViewProteinTypesCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
@@ -105,6 +106,7 @@ class ApplicationModule : AbstractModule() {
                 SwitchNestCommandHandler::class.java,
                 ViewCommandHandler::class.java,
                 ViewNestCommandHandler::class.java,
+                ViewProteinStructuresCommandHandler::class.java,
                 ViewProteinTypesCommandHandler::class.java,
             ).forEach { this.addBinding().to(it) }
         }
