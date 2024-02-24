@@ -41,9 +41,9 @@ class SlotTest {
     }
 
     @Test
-    fun `should return index 10 for default nest slot`() {
+    fun `should return index 0 for default nest slot`() {
         // given // when // then
-        expectThat(DEFAULT.index()) isEqualTo 10
+        expectThat(DEFAULT.index()) isEqualTo 0
     }
 
     companion object {

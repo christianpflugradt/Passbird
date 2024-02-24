@@ -21,6 +21,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.CustomSetComma
 import de.pflugradts.passbird.application.commandhandling.handler.DiscardCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ExportCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.GetCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.GetProteinCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ImportCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ListCommandHandler
@@ -95,6 +96,7 @@ class ApplicationModule : AbstractModule() {
                 DiscardNestCommandHandler::class.java,
                 ExportCommandHandler::class.java,
                 GetCommandHandler::class.java,
+                GetProteinCommandHandler::class.java,
                 HelpCommandHandler::class.java,
                 ImportCommandHandler::class.java,
                 ListCommandHandler::class.java,

@@ -22,7 +22,7 @@ enum class Slot {
         const val CAPACITY = 9
         const val FIRST_SLOT = 1
         const val LAST_SLOT = 9
-        private const val DEFAULT_INDEX = 10
+        private const val DEFAULT_INDEX = 0
         fun slotAt(index: String) = slotAt(if (index.length == 1) index[0] else 0.toChar())
         fun slotAt(index: Char) = tryCatching { slotAt(index.toString().toInt()) } getOrElse DEFAULT
         fun slotAt(index: Int) = if (index in FIRST_SLOT..LAST_SLOT) entries[index] else DEFAULT

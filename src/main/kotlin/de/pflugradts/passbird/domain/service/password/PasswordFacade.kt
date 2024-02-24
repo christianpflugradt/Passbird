@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
 import com.google.inject.Inject
+import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
@@ -18,6 +19,8 @@ class PasswordFacade @Inject constructor(
     override fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction) =
         viewPasswordService.eggExists(eggIdShell, eggNotExistsAction)
     override fun viewPassword(eggIdShell: Shell) = viewPasswordService.viewPassword(eggIdShell)
+    override fun viewProteinStructure(eggIdShell: Shell, slot: Slot): Option<Shell> =
+        viewPasswordService.viewProteinStructure(eggIdShell, slot)
     override fun viewProteinTypes(eggIdShell: Shell) = viewPasswordService.viewProteinTypes(eggIdShell)
     override fun viewProteinStructures(eggIdShell: Shell) = viewPasswordService.viewProteinStructures(eggIdShell)
     override fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell) = renamePasswordService.renameEgg(eggIdShell, newEggIdShell)

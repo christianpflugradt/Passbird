@@ -15,6 +15,7 @@ interface PasswordService {
     fun eggExists(eggIdShell: Shell, slot: Slot): Boolean
     fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction): Boolean
     fun viewPassword(eggIdShell: Shell): Option<Shell>
+    fun viewProteinStructure(eggIdShell: Shell, slot: Slot): Option<Shell>
     fun viewProteinTypes(eggIdShell: Shell): Option<List<Option<Shell>>>
     fun viewProteinStructures(eggIdShell: Shell): Option<List<Option<Shell>>>
     fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell)
