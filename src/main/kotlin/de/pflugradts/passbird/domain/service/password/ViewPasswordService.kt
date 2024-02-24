@@ -4,6 +4,7 @@ import com.google.inject.Inject
 import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.kotlinextensions.Option
+import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellComparator
@@ -18,35 +19,20 @@ class ViewPasswordService @Inject constructor(
     @Inject private val eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun findAllEggIds(): Stream<Shell> = eggRepository.findAll().map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
-    fun viewPassword(eggIdShell: Shell): Option<Shell> = encrypted(eggIdShell).let { encryptedEggIdShell ->
-        find(encryptedEggIdShell)
-            .map { decrypted(it.viewPassword()) }
-            .or {
+    fun viewPassword(eggIdShell: Shell): Option<Shell> = extractFromEgg(eggIdShell) { decrypted(it.viewPassword()) }
+    fun viewProteinStructures(eggIdShell: Shell) = extractFromEgg(eggIdShell) { egg ->
+        egg.proteins.map { protein -> protein.map { optionOf(decrypted(it.viewStructure())) }.orElse(emptyOption()) }
+    }
+    fun viewProteinTypes(eggIdShell: Shell) = extractFromEgg(eggIdShell) { egg ->
+        egg.proteins.map { protein -> protein.map { optionOf(decrypted(it.viewType())) }.orElse(emptyOption()) }
+    }
+
+    private fun <T> extractFromEgg(eggIdShell: Shell, extraction: (egg: Egg) -> T): Option<T> =
+        encrypted(eggIdShell).let { encryptedEggIdShell ->
+            find(encryptedEggIdShell).map { extraction(it) }.or {
                 eventRegistry.register(EggNotFound(encryptedEggIdShell))
                 eventRegistry.processEvents()
                 emptyOption()
             }
-    }
-    fun viewProteinTypes(eggIdShell: Shell) = encrypted(eggIdShell).let { encryptedEggIdShell ->
-        find(encryptedEggIdShell).map { eggOption ->
-            eggOption.proteins.map { protein ->
-                protein.map { optionOf(decrypted(it.viewType())) }.orElse(emptyOption())
-            }
-        }.or {
-            eventRegistry.register(EggNotFound(encryptedEggIdShell))
-            eventRegistry.processEvents()
-            emptyOption()
         }
-    }
-    fun viewProteinStructures(eggIdShell: Shell) = encrypted(eggIdShell).let { encryptedEggIdShell ->
-        find(encryptedEggIdShell).map { eggOption ->
-            eggOption.proteins.map { protein ->
-                protein.map { optionOf(decrypted(it.viewStructure())) }.orElse(emptyOption())
-            }
-        }.or {
-            eventRegistry.register(EggNotFound(encryptedEggIdShell))
-            eventRegistry.processEvents()
-            emptyOption()
-        }
-    }
 }
