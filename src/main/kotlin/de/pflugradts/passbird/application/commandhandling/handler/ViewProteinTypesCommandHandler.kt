@@ -31,9 +31,9 @@ class ViewProteinTypesCommandHandler @Inject constructor(
     private fun outputsOf(index: Int, proteinType: Option<Shell>): Array<Output> = with(canPrintInfo) {
         arrayOf(
             out(padded(index)),
-            out(proteinType.map { it.asString() }.orElse("(empty)").padded()),
+            out(proteinType.map { it.asString() }.orElse("---").padded()),
             out(SEP),
-            out(proteinType.map { "******" }.orElse("(empty)").padded()),
+            out(proteinType.map { "******" }.orElse("---").padded()),
         )
     }
 }

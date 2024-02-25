@@ -58,7 +58,7 @@ class ViewProteinStructuresCommandTest {
         }
 
         // then
-        expectThat(captureSystemOut.capture) contains "1:   (empty)              | (empty)             "
+        expectThat(captureSystemOut.capture) contains "1:   ---                  | ---                 "
         expectThat(command) isNotEqualTo reference
     }
 }

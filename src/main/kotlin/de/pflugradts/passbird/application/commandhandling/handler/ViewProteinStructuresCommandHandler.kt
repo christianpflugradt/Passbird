@@ -38,9 +38,9 @@ class ViewProteinStructuresCommandHandler @Inject constructor(
     private fun outputsOf(index: Int, shellPairOption: Option<ShellPair>): Array<Output> = with(canPrintInfo) {
         arrayOf(
             out(padded(index)),
-            out(shellPairOption.map { it.first.asString() }.orElse("(empty)").padded()),
+            out(shellPairOption.map { it.first.asString() }.orElse("---").padded()),
             out(SEP),
-            out(shellPairOption.map { it.second.asString() }.orElse("(empty)").padded()),
+            out(shellPairOption.map { it.second.asString() }.orElse("---").padded()),
         )
     }
 }
