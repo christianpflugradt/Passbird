@@ -22,11 +22,15 @@ class ViewPasswordService @Inject constructor(
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun findAllEggIds(): Stream<Shell> = eggRepository.findAll().map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
     fun viewPassword(eggIdShell: Shell): Option<Shell> = extractFromEgg(eggIdShell) { decrypted(it.viewPassword()) }
+    fun proteinExists(eggIdShell: Shell, slot: Slot) = viewProteinStructure(eggIdShell, slot).map { it.isNotEmpty }.orElse(false)
     fun viewProteinStructure(eggIdShell: Shell, slot: Slot): Option<Shell> = extractFromEgg(eggIdShell) { egg ->
         egg.proteins[slot.index()].map { decrypted(it.viewStructure()) }.orElse(emptyShell())
     }
     fun viewProteinStructures(eggIdShell: Shell) = extractFromEgg(eggIdShell) { egg ->
         egg.proteins.map { protein -> protein.map { optionOf(decrypted(it.viewStructure())) }.orElse(emptyOption()) }
+    }
+    fun viewProteinType(eggIdShell: Shell, slot: Slot): Option<Shell> = extractFromEgg(eggIdShell) { egg ->
+        egg.proteins[slot.index()].map { decrypted(it.viewType()) }.orElse(emptyShell())
     }
     fun viewProteinTypes(eggIdShell: Shell) = extractFromEgg(eggIdShell) { egg ->
         egg.proteins.map { protein -> protein.map { optionOf(decrypted(it.viewType())) }.orElse(emptyOption()) }

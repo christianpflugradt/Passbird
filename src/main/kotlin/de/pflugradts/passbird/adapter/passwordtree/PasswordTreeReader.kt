@@ -1,8 +1,7 @@
 package de.pflugradts.passbird.adapter.passwordtree
 
 import com.google.inject.Inject
-import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
-import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
+import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
@@ -137,7 +136,11 @@ class PasswordTreeReader @Inject constructor(
             incrementedOffset += Integer.BYTES
             val structureBytes = if (structureSize > 0) readBytes(this, incrementedOffset, structureSize) else byteArrayOf()
             incrementedOffset += structureSize
-            if (typeSize > 0 && structureSize > 0) optionOf(createProtein(shellOf(typeBytes), shellOf(structureBytes))) else emptyOption()
+            if (typeSize > 0 && structureSize > 0) {
+                mutableOptionOf(createProtein(shellOf(typeBytes), shellOf(structureBytes)))
+            } else {
+                mutableOptionOf()
+            }
         }.toList()
         return Pair(createEgg(slotAt(nestSlot), shellOf(eggIdBytes), shellOf(passwordBytes), proteins), incrementedOffset)
     }

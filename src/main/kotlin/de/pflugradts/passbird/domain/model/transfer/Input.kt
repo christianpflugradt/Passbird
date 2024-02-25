@@ -26,6 +26,7 @@ class Input private constructor(val shell: Shell) : ValueObject {
 
     val data get() = if (shell.size > 1) shell.slice(command.size, shell.size) else emptyShell()
     val isEmpty get() = shell.isEmpty
+    val isNotEmpty get() = shell.isNotEmpty
     fun invalidate() = shell.scramble()
     fun extractNestSlot(): Slot = shell.asString().toIntOrNull()?.let {
         if (it in FIRST_SLOT - 1..LAST_SLOT) slotAt(it) else INVALID
