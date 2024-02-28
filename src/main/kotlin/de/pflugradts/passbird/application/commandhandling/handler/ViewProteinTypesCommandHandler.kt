@@ -33,7 +33,7 @@ class ViewProteinTypesCommandHandler @Inject constructor(
             out(padded(index)),
             out(proteinType.map { it.asString() }.orElse("---").padded()),
             out(SEP),
-            out(proteinType.map { "******" }.orElse("---").padded()),
+            out(proteinType.map { "*****" }.orElse("---").padded()),
         )
     }
 }

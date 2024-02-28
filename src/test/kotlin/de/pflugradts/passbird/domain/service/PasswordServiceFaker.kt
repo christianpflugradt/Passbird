@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.domain.service
 
-import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
@@ -8,7 +7,6 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
-import java.util.Collections
 
 fun fakePasswordService(
     instance: PasswordService,
@@ -38,8 +36,12 @@ fun fakePasswordService(
         println(res)
         res
     }
-    every { instance.viewProteinTypes(any()) } returns optionOf(Collections.nCopies(10, emptyOption()))
-    every { instance.viewProteinStructures(any()) } returns optionOf(Collections.nCopies(10, emptyOption()))
+    every { instance.viewProteinTypes(any()) } answers {
+        optionOf(withEggs.find { it.viewEggId() == firstArg() }?.proteins?.map { it.map { p -> p.viewType() } })
+    }
+    every { instance.viewProteinStructures(any()) } answers {
+        optionOf(withEggs.find { it.viewEggId() == firstArg() }?.proteins?.map { it.map { p -> p.viewStructure() } })
+    }
     if (withInvalidEggId) {
         every { instance.challengeEggId(any()) } answers { throw InvalidEggIdException(firstArg()) }
     } else {
