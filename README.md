@@ -171,13 +171,16 @@ The general usage info will be given below and is also available in Passbird by 
         v[EggId] (view) prints the Password contained in that Egg to the console
         r[EggId] (rename) renames an Egg by prompting the user for a new one
         d[EggId] (discard) removes the Egg entirely from the Tree
+
         e (export) exports the Password Tree in a human readable json format
         i (import) imports Passwords into the Tree from a json file
         l (list) non parameterized, lists all Eggs in the current Nest
-        n (Nests) view available Nests and print Nest specific help
-        s? (Password configurations) view available configurations and print set specific help
         h (help) prints this help
         q (quit) terminates Passbird application 
+
+        n (Nests) view available Nests and print Nest specific help
+        p? (Proteins) prints protein usage information
+        s? (Password configurations) view available configurations and print set specific help
 
 ### Nests
 
@@ -189,6 +192,28 @@ Nests are an advanced feature of Passbird. Think of it as categories for your Pa
     n[1-9][EggId] (assign) assigns the Password for that EggId to the specified Nest
     n+[1-9] (create) creates a new Nest at the specified Nest Slot
     [NOT YET IMPLEMENTED] n-[1-9] (discard) discards the Nest at the specified Nest Slot
+
+### Proteins
+
+Proteins can store additional information for your Passwords. An Egg contains a Password and a descriptive EggId. Proteins offer you to store up to ten additional pieces of information in that Egg. Each Protein has a Type and a Structure. The Type describes the kind of information, be it a user, a URL or a recovery code. The Structure contains the actual information. So a Protein could have a Type "user" and a Structure "john.doe".
+
+Proteins introduce a few new commands which can be listed by inputting `p?` and then enter:
+
+    p? (help) prints this help
+    p[EggId] (info) prints Protein Types for specified Egg
+    p*[EggId] (complete info) prints Protein Types and Structures for specified Egg
+    p[0-9][EggId] (copy) copies the Protein Structure to clipboard
+    p+[1-9][EggId] (update) updates the Protein Structure and optionally Type as well
+
+Let's say we have an Egg identified by EggId `gitlab`. You can input `pgitlab` to safely view its Proteins only revealing the Types which are deemed non-sensitive. That way you could see that alongside the Password you've also stored the user, the URL to that service and a recovery code. For each Protein you'll also see the Slot you assigned which you need to copy the Structure into the clipboard.
+
+If you want to print the actual user, URL and so on, you can input `p*gitlab`. This will print potentially sensitive information on the command line. This command behaves exactly the same as `pgitlab` except it won´t mask the sensitive Structures but print their actual content.
+
+If you want to copy the user for a corresponding Password into clipboard, and you know it's stored in Slot 2 because you've printed the Protein information with `pgitlab`, you can input `p2gitlab` to have it copied to your clipboard.
+
+Each Egg has always ten, initially empty Protein Slots. To create a Protein and insert it into a Slot, you can use the update command. This command will first prompt you to enter a Protein Type. If the Protein already exists, and you just press enter, the existing Type will be kept. Then you'll be asked to input the Protein Structure. You can just press enter to abort Protein creation.
+
+A command to delete existing Proteins will be implemented in the near future.
 
 ### Custom Passwords
 
