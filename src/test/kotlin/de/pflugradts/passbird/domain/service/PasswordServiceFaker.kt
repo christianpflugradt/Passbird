@@ -39,8 +39,14 @@ fun fakePasswordService(
     every { instance.viewProteinTypes(any()) } answers {
         optionOf(withEggs.find { it.viewEggId() == firstArg() }?.proteins?.map { it.map { p -> p.viewType() } })
     }
+    every { instance.viewProteinType(any(), any()) } answers {
+        optionOf(withEggs.find { it.viewEggId() == firstArg() }?.proteins?.get(secondArg<Slot>().index())?.orNull()?.viewType())
+    }
     every { instance.viewProteinStructures(any()) } answers {
         optionOf(withEggs.find { it.viewEggId() == firstArg() }?.proteins?.map { it.map { p -> p.viewStructure() } })
+    }
+    every { instance.viewProteinStructure(any(), any()) } answers {
+        optionOf(withEggs.find { it.viewEggId() == firstArg() }?.proteins?.get(secondArg<Slot>().index())?.orNull()?.viewStructure())
     }
     if (withInvalidEggId) {
         every { instance.challengeEggId(any()) } answers { throw InvalidEggIdException(firstArg()) }
