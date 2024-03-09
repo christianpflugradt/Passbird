@@ -13,6 +13,10 @@
             "matchFileNames": [ "build.gradle.kts" ],
             "matchUpdateTypes": [ "patch", "minor" ],
             "groupName": "non-major"
+        },
+        {
+            "matchPackageNames": ["io.mockk:mockk"],
+            "allowedVersions": "!/1\\.13\\.10/"
         }
     ]
 }
