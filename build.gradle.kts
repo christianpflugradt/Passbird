@@ -11,7 +11,7 @@ plugins {
     jacoco
     java
     kotlin("jvm") version "1.9.23"
-    id("org.owasp.dependencycheck") version "9.0.9"
+    id("org.owasp.dependencycheck") version "9.0.10"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
 }
@@ -35,7 +35,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:5.10.2")
-    testImplementation("org.awaitility:awaitility:4.2.0")
+    testImplementation("org.awaitility:awaitility:4.2.1")
     testImplementation("com.tngtech.archunit:archunit:1.2.1")
 }
 
