@@ -21,11 +21,11 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.1")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.1")
     implementation("com.google.inject:guice:7.0.0")
     implementation("com.google.inject.extensions:guice-assistedinject:7.0.0")
-    implementation("com.google.guava:guava:33.1.0-jre")
+    implementation("com.google.guava:guava:33.2.0-jre")
 
     testImplementation("io.strikt:strikt-core:0.34.1")
     testImplementation("io.strikt:strikt-jvm:0.34.1")
