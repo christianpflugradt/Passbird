@@ -11,8 +11,8 @@ plugins {
     jacoco
     java
     kotlin("jvm") version "2.0.0"
-    id("org.owasp.dependencycheck") version "9.1.0"
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    id("org.owasp.dependencycheck") version "9.2.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
 }
 
@@ -25,11 +25,11 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.1")
     implementation("com.google.inject:guice:7.0.0")
     implementation("com.google.inject.extensions:guice-assistedinject:7.0.0")
-    implementation("com.google.guava:guava:33.2.0-jre")
+    implementation("com.google.guava:guava:33.2.1-jre")
 
     testImplementation("io.strikt:strikt-core:0.34.1")
     testImplementation("io.strikt:strikt-jvm:0.34.1")
-    testImplementation("io.mockk:mockk:1.13.9")
+    testImplementation("io.mockk:mockk:1.13.11")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
