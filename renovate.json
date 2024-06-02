@@ -15,8 +15,8 @@
             "groupName": "non-major"
         },
         {
-            "matchPackageNames": ["io.mockk:mockk"],
-            "allowedVersions": "!/1\\.13\\.10/"
+            "matchPackageNames": ["eclipse-temurin"],
+            "allowedVersions": "/^(21|25)-jdk/"
         }
     ]
 }
