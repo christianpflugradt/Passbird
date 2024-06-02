@@ -5,6 +5,7 @@ import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.DiscardNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
@@ -50,8 +51,7 @@ class DiscardNestCommandHandler @Inject constructor(
                             nestService.discardNestAt(discardNestCommand.slot)
                         } else {
                             val overlapsMessage = "The following EggIds exist in both Nests. " +
-                                "Please move them manually before discarding the Nest: ${System.lineSeparator()}- " +
-                                overlaps.joinToString(separator = "${System.lineSeparator()}- ") { id -> id.asString() }
+                                "Please move them manually before discarding the Nest: ${System.lineSeparator()}- " + joinToString(overlaps)
                             userInterfaceAdapterPort.send(outputOf(shellOf(overlapsMessage)))
                             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
                         }
@@ -68,4 +68,6 @@ class DiscardNestCommandHandler @Inject constructor(
         }
         userInterfaceAdapterPort.sendLineBreak()
     }
+
+    private fun joinToString(shells: List<Shell>) = shells.joinToString(separator = "${System.lineSeparator()}- ") { id -> id.asString() }
 }
