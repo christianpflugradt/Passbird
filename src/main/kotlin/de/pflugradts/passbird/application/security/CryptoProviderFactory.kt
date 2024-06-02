@@ -23,14 +23,12 @@ class CryptoProviderFactory @Inject constructor(
     fun createCryptoProvider() = authenticate()
         .retry { authenticate() }
         .retry { authenticate() }
-        .fold(
-            onSuccess = { Cipherizer(it.secret, it.iv) },
-            onFailure = {
-                reportFailure(LoginFailure(3))
-                systemOperation.exit()
-                null
-            },
-        )
+        .map { Cipherizer(it.secret, it.iv) }
+        .onFailure {
+            reportFailure(LoginFailure(3))
+            systemOperation.exit()
+        }
+        .getOrNull()!!
 
     private fun authenticate() = keyStoreAdapterPort.loadKey(
         receiveLogin(),
