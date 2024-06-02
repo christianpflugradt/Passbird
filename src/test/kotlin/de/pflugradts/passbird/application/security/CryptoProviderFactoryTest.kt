@@ -2,9 +2,9 @@ package de.pflugradts.passbird.application.security
 
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
-import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
@@ -28,7 +28,6 @@ import java.nio.file.Path
 
 class CryptoProviderFactoryTest {
 
-    private val application = mockk<Bootable>()
     private val configuration = mockk<Configuration>()
     private val keyStoreAdapterPort = mockk<KeyStoreAdapterPort>()
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>()
@@ -119,7 +118,7 @@ class CryptoProviderFactoryTest {
         givenLoginFails(incorrectPassword, keyStoreFilePath)
 
         // when
-        cryptoProviderFactory.createCryptoProvider()
+        val test = tryCatching { cryptoProviderFactory.createCryptoProvider() }
 
         // then
         verify(exactly = 1) { systemOperation.exit() }

@@ -8,8 +8,7 @@ inline fun <R> tryCatching(block: () -> R): TryResult<R> {
     }
 }
 
-@JvmInline
-private value class Failure(val ex: Exception)
+private class Failure(val ex: Exception)
 
 @JvmInline
 value class TryResult<R> private constructor(
@@ -45,8 +44,8 @@ value class TryResult<R> private constructor(
         return this
     }
 
-    fun <T> fold(onSuccess: (value: R) -> T, onFailure: (value: Exception) -> T): T {
-        return if (success) onSuccess(getOrNull()!!) else onFailure(exceptionOrNull()!!)
+    fun <T> map(fn: (R) -> T): TryResult<T> {
+        return if (success) success(fn(getOrNull()!!)) else failure(exceptionOrNull()!!)
     }
 
     fun retry(block: (TryResult<R>) -> TryResult<R>) = if (failure) block(this) else this
