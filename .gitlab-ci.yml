@@ -1,10 +1,10 @@
 image: eclipse-temurin:21-jdk
 
 stages:
-  - 📦 release
   - 🔎 check
   - ✅ test
   - 📘 report
+  - 📦 release
 
 sast:
     stage: 🔎 check
@@ -89,4 +89,5 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
   script:
     - npm install semantic-release@24.0.0 @semantic-release/gitlab@13.1.0 conventional-changelog-conventionalcommits@8.0.0
     - npx semantic-release -t \${version}
+  when: manual
   only: [ main ]
