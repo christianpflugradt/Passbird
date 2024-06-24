@@ -27,8 +27,8 @@ dependencies {
     implementation("com.google.inject.extensions:guice-assistedinject:7.0.0")
     implementation("com.google.guava:guava:33.2.1-jre")
 
-    testImplementation("io.strikt:strikt-core:0.34.1")
-    testImplementation("io.strikt:strikt-jvm:0.34.1")
+    testImplementation("io.strikt:strikt-core:0.35.1")
+    testImplementation("io.strikt:strikt-jvm:0.35.1")
     testImplementation("io.mockk:mockk:1.13.11")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
