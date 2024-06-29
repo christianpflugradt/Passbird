@@ -1,4 +1,5 @@
 plugins:
+  - "@semantic-release/gitlab"
   - - "@semantic-release/commit-analyzer"
     - preset: angular
       releaseRules:
@@ -51,7 +52,5 @@ plugins:
           - type: test
             section: ":unicorn: Quality Assurance"
             hidden: false
-  - "@semantic-release/release-notes-generator"
-  - "@semantic-release/gitlab"
 branches:
   - "main"
