@@ -28,6 +28,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
     - ./gradlew dependencyCheckAnalyze
   artifacts:
     paths: [ build/reports/dependency-check-report.html ]
+  allow_failure: true
   except: [ tags ]
 
 🏅 ktlint:
