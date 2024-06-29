@@ -11,9 +11,10 @@ import de.pflugradts.passbird.application.failure.ImportFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
-import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import java.io.IOException
 import java.nio.file.Files
 
@@ -38,20 +39,28 @@ class FilePasswordExchange @Inject constructor(
             mapper.readValue(
                 Files.readString(systemOperation.resolvePath(Global.homeDirectory, EXCHANGE_FILENAME.toFileName())),
                 ExchangeWrapper::class.java,
-            ).value.toShellPairMap()
+            ).exportedContent.toShellPairMap()
         } catch (e: IOException) {
             reportFailure(ImportFailure(e))
             emptyMap()
         }
     }
+
+    private fun ShellPairMap.toSerializable() = entries.map { nest ->
+        EggsPerNest(
+            exportedNest = ExportedNest(nest.key.viewNestId().asString(), nest.key.slot.index()),
+            exportedEggs = nest.value.map { ExportedEgg(it.first.asString(), it.second.asString()) },
+        )
+    }
+
+    private fun List<EggsPerNest>.toShellPairMap() = associate { entry ->
+        createNest(shellOf(entry.exportedNest.nestId), slotAt(entry.exportedNest.slot)) to (
+            entry.exportedEggs.map { ShellPair(shellOf(it.eggId), shellOf(it.password)) }
+            )
+    }
 }
 
-private class PlainEgg(var eggId: String = "", var password: String = "")
-private typealias PlainEggMap = Map<Slot, List<PlainEgg>>
-private class ExchangeWrapper(val value: PlainEggMap = emptyMap())
-private fun ShellPairMap.toSerializable() = entries.associate { nest ->
-    nest.key to nest.value.map { PlainEgg(it.first.asString(), it.second.asString()) }
-}
-private fun PlainEggMap.toShellPairMap() = entries.associate { nest ->
-    nest.key to nest.value.map { ShellPair(shellOf(it.eggId), shellOf(it.password)) }
-}
+private class ExportedEgg(var eggId: String = "", var password: String = "")
+private class ExportedNest(var nestId: String = "", var slot: Int = 0)
+private class EggsPerNest(var exportedNest: ExportedNest = ExportedNest(), var exportedEggs: List<ExportedEgg> = emptyList())
+private class ExchangeWrapper(val exportedContent: List<EggsPerNest> = emptyList())

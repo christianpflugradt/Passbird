@@ -9,6 +9,7 @@ import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.slot.Slot.S2
 import de.pflugradts.passbird.domain.model.slot.Slot.S9
@@ -77,7 +78,7 @@ class PasswordImportExportServiceTest {
         // then
         verify { passwordService.putEggs(capture(importSlot)) }
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
-        verify(exactly = 1) { nestService.place(shellOf("Nest-9"), S9) }
+        verify(exactly = 1) { nestService.place(shellOf(S9.name), S9) }
         expectThat(importSlot) hasSize 3
         expectThatActualBytePairsMatchExpected(importSlot[0], eggs.subList(0, 2))
         expectThatActualBytePairsMatchExpected(importSlot[1], eggs.subList(2, 3))
@@ -97,7 +98,7 @@ class PasswordImportExportServiceTest {
         val exchangeAdapterPort = fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory)
         fakePasswordService(instance = passwordService, withEggs = eggs, withNestService = nestService)
         nestService.place(shellOf("n2"), S2)
-        nestService.place(shellOf("n2"), S9)
+        nestService.place(shellOf("n9"), S9)
         nestService.moveToNestAt(givenCurrentNestSlot)
         val exportNestSlot = slot<ShellPairMap>()
         val eggCountSlot = slot<EggsExported>()
@@ -110,13 +111,15 @@ class PasswordImportExportServiceTest {
         verify { exchangeAdapterPort.send(capture(exportNestSlot)) }
         val actual = exportNestSlot.captured
         expectThatActualBytePairsMatchExpected(actual, eggs)
-        expectThat(actual) hasSize 3 containsKey DEFAULT containsKey S2 containsKey S9
+        expectThat(actual) hasSize 3 containsKey DEFAULT.toNest() containsKey S2.toNest() containsKey S9.toNest()
         expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
         verify { eventRegistry.register(capture(eggCountSlot)) }
         verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(eggCountSlot.isCaptured)
         expectThat(eggCountSlot.captured.count) isEqualTo testData().size
     }
+
+    private fun Slot.toNest() = nestService.atNestSlot(this).get()
 }
 
 private fun expectThatActualEggIdsMatchExpected(actual: ShellMap, expected: List<Egg>) {

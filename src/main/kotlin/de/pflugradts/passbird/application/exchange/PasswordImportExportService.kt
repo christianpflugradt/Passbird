@@ -3,9 +3,8 @@ package de.pflugradts.passbird.application.exchange
 import com.google.inject.Inject
 import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
-import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.shell.ShellPair
-import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -17,19 +16,19 @@ class PasswordImportExportService @Inject constructor(
     @Inject private val eventRegistry: EventRegistry,
 ) : ImportExportService {
     override fun peekImportEggIdShells() = exchangeFactory.createPasswordExchange().receive().entries.associate {
-        it.key to it.value.map { bytePair -> bytePair.first }
+        it.key.slot to it.value.map { bytePair -> bytePair.first }
     }
 
     override fun importEggs() {
         val currentNest = nestService.currentNest()
         val eggsByNest = exchangeFactory.createPasswordExchange().receive()
-        eggsByNest.keys.forEach { nestSlot ->
-            val deployedNest = nestService.atNestSlot(nestSlot)
+        eggsByNest.keys.forEach { nest ->
+            val deployedNest = nestService.atNestSlot(nest.slot)
             if (deployedNest.isEmpty) {
-                nestService.place(shellOf("Nest-${nestSlot.index()}"), nestSlot)
+                nestService.place(nest.viewNestId(), nest.slot)
             }
-            nestService.moveToNestAt(nestSlot)
-            passwordService.putEggs(eggsByNest[nestSlot]!!.stream())
+            nestService.moveToNestAt(nest.slot)
+            passwordService.putEggs(eggsByNest[nest]!!.stream())
         }
         nestService.moveToNestAt(currentNest.slot)
         eventRegistry.register(EggsImported(eggsByNest.values.sumOf { it.size }))
@@ -38,10 +37,10 @@ class PasswordImportExportService @Inject constructor(
 
     override fun exportEggs() {
         val currentNest = nestService.currentNest()
-        val eggsByNest = mutableMapOf<Slot, List<ShellPair>>()
+        val eggsByNest = mutableMapOf<Nest, List<ShellPair>>()
         nestService.all(includeDefault = true).filter { it.isPresent }.map { it.get() }.forEach { nest ->
             nestService.moveToNestAt(nest.slot)
-            eggsByNest[nest.slot] = passwordService.findAllEggIds()
+            eggsByNest[nest] = passwordService.findAllEggIds()
                 .map { eggId -> ShellPair(eggId, passwordService.viewPassword(eggId).get()) }.toList()
         }
         exchangeFactory.createPasswordExchange().send(eggsByNest)

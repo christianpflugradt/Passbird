@@ -4,6 +4,7 @@ import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
@@ -50,17 +51,19 @@ class FilePasswordExchangeIntegrationTest {
         // whe
         filePasswordExchange.send(
             mapOf(
-                Slot.DEFAULT to listOf(givenEgg1, givenEgg2),
-                Slot.S2 to listOf(givenEgg3),
-                Slot.S9 to listOf(givenEgg4, givenEgg5),
+                Slot.DEFAULT.toNest() to listOf(givenEgg1, givenEgg2),
+                Slot.S2.toNest() to listOf(givenEgg3),
+                Slot.S9.toNest() to listOf(givenEgg4, givenEgg5),
             ),
         )
         val actual = filePasswordExchange.receive()
 
         // then
-        expectThat(actual) hasSize 3 containsKey Slot.DEFAULT containsKey Slot.S2 containsKey Slot.S9
-        expectThat(actual[Slot.DEFAULT]!!).containsExactlyInAnyOrder(givenEgg1, givenEgg2)
-        expectThat(actual[Slot.S2]!!).containsExactlyInAnyOrder(givenEgg3)
-        expectThat(actual[Slot.S9]!!).containsExactlyInAnyOrder(givenEgg4, givenEgg5)
+        expectThat(actual) hasSize 3 containsKey Slot.DEFAULT.toNest() containsKey Slot.S2.toNest() containsKey Slot.S9.toNest()
+        expectThat(actual[Slot.DEFAULT.toNest()]!!).containsExactlyInAnyOrder(givenEgg1, givenEgg2)
+        expectThat(actual[Slot.S2.toNest()]!!).containsExactlyInAnyOrder(givenEgg3)
+        expectThat(actual[Slot.S9.toNest()]!!).containsExactlyInAnyOrder(givenEgg4, givenEgg5)
     }
 }
+
+private fun Slot.toNest() = createNest(shellOf(this.name), this)
