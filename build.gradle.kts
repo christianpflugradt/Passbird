@@ -12,7 +12,7 @@ plugins {
     jacoco
     java
     kotlin("jvm") version "2.0.0"
-    id("org.owasp.dependencycheck") version "9.2.0"
+    id("org.owasp.dependencycheck") version "10.0.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
 }
