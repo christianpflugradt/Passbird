@@ -30,7 +30,7 @@ dependencies {
 
     testImplementation("io.strikt:strikt-core:0.35.1")
     testImplementation("io.strikt:strikt-jvm:0.35.1")
-    testImplementation("io.mockk:mockk:1.13.11")
+    testImplementation("io.mockk:mockk:1.13.12")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.3")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.3")
