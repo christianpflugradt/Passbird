@@ -11,7 +11,7 @@ plugins {
     application
     jacoco
     java
-    kotlin("jvm") version "2.0.10"
+    kotlin("jvm") version "2.0.20"
     id("org.owasp.dependencycheck") version "10.0.3"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
@@ -26,7 +26,7 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.2")
     implementation("com.google.inject:guice:7.0.0")
     implementation("com.google.inject.extensions:guice-assistedinject:7.0.0")
-    implementation("com.google.guava:guava:33.2.1-jre")
+    implementation("com.google.guava:guava:33.3.0-jre")
 
     testImplementation("io.strikt:strikt-core:0.35.1")
     testImplementation("io.strikt:strikt-jvm:0.35.1")
