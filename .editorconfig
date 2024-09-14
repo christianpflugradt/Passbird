@@ -1,17 +1,17 @@
 root = true
 
 [*]
+charset = utf-8
 indent_style = space
 indent_size = 4
-max_line_length = 140
 insert_final_newline = true
+max_line_length = 140
 
 [*.yml]
 indent_size = 2
 
 [*.{kt,kts}]
+ij_continuation_indent_size = 4
 ij_kotlin_packages_to_use_import_on_demand = 10
 ij_kotlin_allow_trailing_comma = true
 ij_kotlin_allow_trailing_comma_on_call_site = true
-ktlint_code_style = intellij_idea
-ktlint_standard_curly-spacing = disabled

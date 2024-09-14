@@ -65,6 +65,12 @@ tasks.withType<KotlinJvmCompile>().configureEach {
 ktlint.version = "1.2.1"
 
 ktlint {
+    additionalEditorconfig.set(
+        mapOf(
+            "ktlint_code_style" to "intellij_idea",
+            "ktlint_standard_curly-spacing" to "disabled",
+        ),
+    )
     reporters {
         reporter(HTML)
     }
