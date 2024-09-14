@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.json.JsonMapper
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.Global
-import de.pflugradts.passbird.application.ShellPairMap
+import de.pflugradts.passbird.application.PasswordInfo
+import de.pflugradts.passbird.application.PasswordInfoMap
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.EXCHANGE_FILENAME
 import de.pflugradts.passbird.application.failure.ExportFailure
 import de.pflugradts.passbird.application.failure.ImportFailure
@@ -23,7 +24,7 @@ class FilePasswordExchange @Inject constructor(
 ) : ExchangeAdapterPort {
     private val mapper = JsonMapper()
 
-    override fun send(data: ShellPairMap) {
+    override fun send(data: PasswordInfoMap) {
         try {
             Files.writeString(
                 systemOperation.resolvePath(Global.homeDirectory, EXCHANGE_FILENAME.toFileName()),
@@ -34,33 +35,51 @@ class FilePasswordExchange @Inject constructor(
         }
     }
 
-    override fun receive(): ShellPairMap {
+    override fun receive(): PasswordInfoMap {
         return try {
             mapper.readValue(
                 Files.readString(systemOperation.resolvePath(Global.homeDirectory, EXCHANGE_FILENAME.toFileName())),
                 ExchangeWrapper::class.java,
-            ).exportedContent.toShellPairMap()
+            ).exportedContent.toPasswordInfoMap()
         } catch (e: IOException) {
             reportFailure(ImportFailure(e))
             emptyMap()
         }
     }
 
-    private fun ShellPairMap.toSerializable() = entries.map { nest ->
+    private fun PasswordInfoMap.toSerializable() = entries.map { nest ->
         EggsPerNest(
             exportedNest = ExportedNest(nest.key.viewNestId().asString(), nest.key.slot.index()),
-            exportedEggs = nest.value.map { ExportedEgg(it.first.asString(), it.second.asString()) },
+            exportedEggs = nest.value.map {
+                ExportedEgg(
+                    eggId = it.first.first.asString(),
+                    password = it.first.second.asString(),
+                    proteins = it.second.mapIndexed { index, protein ->
+                        ExportedProtein(
+                            proteinType = protein.first.asString(),
+                            proteinStructure = protein.second.asString(),
+                            slot = index,
+                        )
+                    },
+                )
+            },
         )
     }
 
-    private fun List<EggsPerNest>.toShellPairMap() = associate { entry ->
+    private fun List<EggsPerNest>.toPasswordInfoMap() = associate { entry ->
         createNest(shellOf(entry.exportedNest.nestId), slotAt(entry.exportedNest.slot)) to (
-            entry.exportedEggs.map { ShellPair(shellOf(it.eggId), shellOf(it.password)) }
+            entry.exportedEggs.map {
+                PasswordInfo(
+                    first = ShellPair(shellOf(it.eggId), shellOf(it.password)),
+                    second = it.proteins.map { protein -> ShellPair(shellOf(protein.proteinType), shellOf(protein.proteinStructure)) },
+                )
+            }
             )
     }
 }
 
-private class ExportedEgg(var eggId: String = "", var password: String = "")
+private class ExportedProtein(var proteinType: String = "", var proteinStructure: String = "", var slot: Int = 0)
+private class ExportedEgg(var eggId: String = "", var password: String = "", var proteins: List<ExportedProtein> = emptyList())
 private class ExportedNest(var nestId: String = "", var slot: Int = 0)
 private class EggsPerNest(var exportedNest: ExportedNest = ExportedNest(), var exportedEggs: List<ExportedEgg> = emptyList())
 private class ExchangeWrapper(val exportedContent: List<EggsPerNest> = emptyList())

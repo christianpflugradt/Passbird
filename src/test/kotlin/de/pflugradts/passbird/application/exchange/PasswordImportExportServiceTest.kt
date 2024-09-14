@@ -1,14 +1,14 @@
 package de.pflugradts.passbird.application.exchange
 
-import de.pflugradts.passbird.application.ShellPairMap
+import de.pflugradts.passbird.application.PasswordInfoMap
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
 import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
-import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.slot.Slot.S2
@@ -28,7 +28,6 @@ import strikt.assertions.containsKey
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import java.util.function.Supplier
-import java.util.stream.Stream
 
 class PasswordImportExportServiceTest {
 
@@ -69,20 +68,23 @@ class PasswordImportExportServiceTest {
         fakePasswordService(instance = passwordService)
         nestService.place(shellOf("n2"), S2)
         nestService.moveToNestAt(givenCurrentNestSlot)
-        val importSlot = mutableListOf<Stream<ShellPair>>()
+        val eggIdSlot = mutableListOf<Shell>()
+        val passwordSlot = mutableListOf<Shell>()
         val eggCountSlot = slot<EggsImported>()
 
         // when
         importExportServiceSupplier.get().importEggs()
 
         // then
-        verify { passwordService.putEggs(capture(importSlot)) }
+        verify { passwordService.putEgg(capture(eggIdSlot), capture(passwordSlot)) }
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
         verify(exactly = 1) { nestService.place(shellOf(S9.name), S9) }
-        expectThat(importSlot) hasSize 3
-        expectThatActualBytePairsMatchExpected(importSlot[0], eggs.subList(0, 2))
-        expectThatActualBytePairsMatchExpected(importSlot[1], eggs.subList(2, 3))
-        expectThatActualBytePairsMatchExpected(importSlot[2], eggs.subList(3, 5))
+        expectThat(eggIdSlot) hasSize eggs.size
+        expectThat(passwordSlot) hasSize eggs.size
+        eggs.indices.forEach { i ->
+            expectThat(eggIdSlot[i]) isEqualTo eggs[i].viewEggId()
+            expectThat(passwordSlot[i]) isEqualTo eggs[i].viewPassword()
+        }
         expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
         verify { eventRegistry.register(capture(eggCountSlot)) }
         verify(exactly = 1) { eventRegistry.processEvents() }
@@ -100,7 +102,7 @@ class PasswordImportExportServiceTest {
         nestService.place(shellOf("n2"), S2)
         nestService.place(shellOf("n9"), S9)
         nestService.moveToNestAt(givenCurrentNestSlot)
-        val exportNestSlot = slot<ShellPairMap>()
+        val exportNestSlot = slot<PasswordInfoMap>()
         val eggCountSlot = slot<EggsExported>()
 
         // when
@@ -130,21 +132,13 @@ private fun expectThatActualEggIdsMatchExpected(actual: ShellMap, expected: List
         }
     }
 }
-private fun expectThatActualBytePairsMatchExpected(actual: Stream<ShellPair>, expected: List<Egg>) {
-    val actualList = actual.toList()
-    expectThat(actualList.size) isEqualTo expected.size
-    actualList.forEachIndexed { index, _ ->
-        expectThat(actualList[index].first) isEqualTo expected[index].viewEggId()
-        expectThat(actualList[index].second) isEqualTo expected[index].viewPassword()
-    }
-}
 
-private fun expectThatActualBytePairsMatchExpected(actual: ShellPairMap, expected: List<Egg>) {
+private fun expectThatActualBytePairsMatchExpected(actual: PasswordInfoMap, expected: List<Egg>) {
     var index = 0
     actual.keys.forEach { nestSlot ->
         actual[nestSlot]!!.forEach {
-            expectThat(it.first) isEqualTo expected[index].viewEggId()
-            expectThat(it.second) isEqualTo expected[index++].viewPassword()
+            expectThat(it.first.first) isEqualTo expected[index].viewEggId()
+            expectThat(it.first.second) isEqualTo expected[index++].viewPassword()
         }
     }
 }

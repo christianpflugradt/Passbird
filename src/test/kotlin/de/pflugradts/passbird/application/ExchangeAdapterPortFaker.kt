@@ -13,12 +13,17 @@ fun fakeExchangeAdapterPort(forExchangeFactory: ExchangeFactory, withEggs: List<
     val instance = mockk<ExchangeAdapterPort>()
     every { instance.send(any()) } returns Unit
     every { instance.receive() } answers {
-        val result = mutableMapOf<Nest, MutableList<ShellPair>>()
+        val result = mutableMapOf<Nest, MutableList<PasswordInfo>>()
         withEggs.forEach {
             it.associatedNest().run {
                 createNest(shellOf(this.name), this).run {
                     if (!result.containsKey(this)) result[this] = mutableListOf()
-                    result[this]!!.add(ShellPair(it.viewEggId(), it.viewPassword()))
+                    result[this]!!.add(
+                        PasswordInfo(
+                            first = ShellPair(it.viewEggId(), it.viewPassword()),
+                            second = emptyList(),
+                        ),
+                    )
                 }
             }
         }

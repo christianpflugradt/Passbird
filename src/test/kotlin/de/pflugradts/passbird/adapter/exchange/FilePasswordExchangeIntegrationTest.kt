@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.adapter.exchange
 
 import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -42,11 +43,11 @@ class FilePasswordExchangeIntegrationTest {
     @Test
     fun `should export and re-import passwords across multiple nests`() {
         // given
-        val givenEgg1 = ShellPair(shellOf("EggId1"), shellOf("Password1"))
-        val givenEgg2 = ShellPair(shellOf("EggId2"), shellOf("Password2"))
-        val givenEgg3 = ShellPair(shellOf("EggId3"), shellOf("Password3"))
-        val givenEgg4 = ShellPair(shellOf("EggId4"), shellOf("Password4"))
-        val givenEgg5 = ShellPair(shellOf("EggId5"), shellOf("Password5"))
+        val givenEgg1 = PasswordInfo(ShellPair(shellOf("EggId1"), shellOf("Password1")), emptyList())
+        val givenEgg2 = PasswordInfo(ShellPair(shellOf("EggId2"), shellOf("Password2")), emptyList())
+        val givenEgg3 = PasswordInfo(ShellPair(shellOf("EggId3"), shellOf("Password3")), emptyList())
+        val givenEgg4 = PasswordInfo(ShellPair(shellOf("EggId4"), shellOf("Password4")), emptyList())
+        val givenEgg5 = PasswordInfo(ShellPair(shellOf("EggId5"), shellOf("Password5")), emptyList())
 
         // whe
         filePasswordExchange.send(
