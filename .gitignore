@@ -1,7 +1,14 @@
+# IntelliJ IDEA
 .idea/*
 *.iml
-.git/*
+
+# Gradle
 .gradle/*
 gradlew.bat
+
+# Build
 build/*
 out/*
+
+# macOS
+.DS_Store
