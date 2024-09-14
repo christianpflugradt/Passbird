@@ -88,7 +88,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
   variables:
       GIT_STRATEGY: clone
   script:
-    - npm install semantic-release@24.0.0 @semantic-release/gitlab@13.1.0 conventional-changelog-conventionalcommits@8.0.0
+    - npm install semantic-release@24.1.1 @semantic-release/gitlab@13.2.1 conventional-changelog-conventionalcommits@8.0.0
     - npx semantic-release -t \${version}
   when: manual
   only: [ main ]
