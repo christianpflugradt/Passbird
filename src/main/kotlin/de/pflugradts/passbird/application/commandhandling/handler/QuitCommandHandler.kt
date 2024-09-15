@@ -14,9 +14,9 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
 
 class QuitCommandHandler @Inject constructor(
-    @Inject private val finalizers: Set<Finalizer>,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-    @Inject private val systemOperation: SystemOperation,
+    private val finalizers: Set<Finalizer>,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val systemOperation: SystemOperation,
 ) : CommandHandler {
     @Subscribe
     private fun handleQuitCommand(quitCommand: QuitCommand) {

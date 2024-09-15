@@ -11,9 +11,9 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 
 class ExportFileChecker @Inject constructor(
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val systemOperation: SystemOperation,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val configuration: ReadableConfiguration,
+    private val systemOperation: SystemOperation,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : Initializer {
     override fun run() {
         val exchangeFile = systemOperation.resolvePath(Global.homeDirectory, ReadableConfiguration.EXCHANGE_FILENAME.toFileName())

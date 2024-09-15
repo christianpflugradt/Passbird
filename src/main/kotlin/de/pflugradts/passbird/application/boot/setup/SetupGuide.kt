@@ -5,9 +5,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 
-class SetupGuide @Inject constructor(
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-) {
+class SetupGuide @Inject constructor(private val userInterfaceAdapterPort: UserInterfaceAdapterPort) {
     fun sendWelcome() {
         send("Welcome to Passbird Setup!")
         userInterfaceAdapterPort.sendLineBreak()

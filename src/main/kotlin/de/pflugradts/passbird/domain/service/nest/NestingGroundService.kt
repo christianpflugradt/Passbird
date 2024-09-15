@@ -17,8 +17,8 @@ import java.util.function.Supplier
 
 @Singleton
 class NestingGroundService @Inject constructor(
-    @Inject private val eggRepository: EggRepository,
-    @Inject private val eventRegistry: EventRegistry,
+    private val eggRepository: EggRepository,
+    private val eventRegistry: EventRegistry,
 ) : NestService {
 
     private val lazyNests = mutableListOf<MutableOption<Nest>>()

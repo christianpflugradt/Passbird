@@ -15,12 +15,12 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import java.nio.file.Paths
 
 class PassbirdSetup @Inject constructor(
-    @Inject private val setupGuide: SetupGuide,
-    @Inject private val configurationSync: ConfigurationSync,
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val keyStoreAdapterPort: KeyStoreAdapterPort,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-    @Inject private val systemOperation: SystemOperation,
+    private val setupGuide: SetupGuide,
+    private val configurationSync: ConfigurationSync,
+    private val configuration: ReadableConfiguration,
+    private val keyStoreAdapterPort: KeyStoreAdapterPort,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val systemOperation: SystemOperation,
 ) : Bootable {
     override fun boot() {
         setupGuide.sendWelcome()

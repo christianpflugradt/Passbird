@@ -20,9 +20,7 @@ private const val IV_ALIAS = "PwMan3IV"
 private const val AES_ENCRYPTION = "AES"
 const val KEYSTORE_KEY_BITS = 128
 
-class KeyStoreService @Inject constructor(
-    @Inject private val systemOperation: SystemOperation,
-) : KeyStoreAdapterPort {
+class KeyStoreService @Inject constructor(private val systemOperation: SystemOperation) : KeyStoreAdapterPort {
 
     override fun loadKey(password: PlainShell, path: Path) = tryCatching { load(password, systemOperation.newInputStream(path)) }
 

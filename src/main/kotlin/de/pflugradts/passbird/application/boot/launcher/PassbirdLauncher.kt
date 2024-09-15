@@ -22,9 +22,9 @@ ${'\t'}You may obtain a copy of the License at http://www.apache.org/licenses/LI
 private const val SLOGAN = "\tguarding your digital nest with secure feathers"
 
 class PassbirdLauncher @Inject constructor(
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-    @Inject private val systemOperation: SystemOperation,
+    private val configuration: ReadableConfiguration,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val systemOperation: SystemOperation,
 ) : Bootable {
 
     private val keyStoreLocation get() = configuration.adapter.keyStore.location

@@ -15,9 +15,9 @@ import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class DiscardNestCommandHandler @Inject constructor(
-    @Inject private val nestService: NestService,
-    @Inject private val passwordService: PasswordService,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val nestService: NestService,
+    private val passwordService: PasswordService,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
 
     @Subscribe

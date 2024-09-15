@@ -9,7 +9,7 @@ import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 
-class ConfigurationFactory @Inject constructor(@Inject private val systemOperation: SystemOperation) {
+class ConfigurationFactory @Inject constructor(private val systemOperation: SystemOperation) {
     fun loadConfiguration() = configurationFromFile() ?: Configuration(template = true)
     private fun configurationFromFile() = try {
         YAMLMapper().readValue(

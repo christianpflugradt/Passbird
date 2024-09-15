@@ -15,9 +15,9 @@ import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
 
 class SetProteinCommandHandler @Inject constructor(
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val passwordService: PasswordService,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val configuration: ReadableConfiguration,
+    private val passwordService: PasswordService,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleSetProteinCommand(setProteinCommand: SetProteinCommand) {

@@ -7,8 +7,8 @@ import de.pflugradts.passbird.application.commandhandling.command.ExportCommand
 import de.pflugradts.passbird.application.exchange.ImportExportService
 
 class ExportCommandHandler @Inject constructor(
-    @Inject private val importExportService: ImportExportService,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val importExportService: ImportExportService,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleExportCommand(@Suppress("UNUSED_PARAMETER") exportCommand: ExportCommand) {

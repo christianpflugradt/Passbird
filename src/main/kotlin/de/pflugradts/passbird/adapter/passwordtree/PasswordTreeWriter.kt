@@ -27,10 +27,10 @@ import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import java.util.Arrays
 
 class PasswordTreeWriter @Inject constructor(
-    @Inject private val systemOperation: SystemOperation,
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val nestService: NestService,
-    @Inject private val cryptoProvider: CryptoProvider,
+    private val systemOperation: SystemOperation,
+    private val configuration: ReadableConfiguration,
+    private val nestService: NestService,
+    private val cryptoProvider: CryptoProvider,
 ) {
 
     fun sync(eggSupplier: EggStreamSupplier) {

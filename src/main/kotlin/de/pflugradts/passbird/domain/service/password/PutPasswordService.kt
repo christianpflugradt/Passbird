@@ -13,10 +13,10 @@ import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import java.util.stream.Stream
 
 class PutPasswordService @Inject constructor(
-    @Inject private val cryptoProvider: CryptoProvider,
-    @Inject private val eggRepository: EggRepository,
-    @Inject private val eventRegistry: EventRegistry,
-    @Inject private val nestService: NestService,
+    cryptoProvider: CryptoProvider,
+    private val eggRepository: EggRepository,
+    eventRegistry: EventRegistry,
+    private val nestService: NestService,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun putEggs(shellPairs: Stream<ShellPair>) {
         shellPairs.forEach { putEgg(it.first, it.second, false) }

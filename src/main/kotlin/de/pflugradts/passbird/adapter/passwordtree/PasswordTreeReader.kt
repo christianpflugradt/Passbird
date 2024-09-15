@@ -32,10 +32,10 @@ import java.util.function.Supplier
 import java.util.stream.Stream
 
 class PasswordTreeReader @Inject constructor(
-    @Inject private val systemOperation: SystemOperation,
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val nestService: NestService,
-    @Inject private val cryptoProvider: CryptoProvider,
+    private val systemOperation: SystemOperation,
+    private val configuration: ReadableConfiguration,
+    private val nestService: NestService,
+    private val cryptoProvider: CryptoProvider,
 ) {
     fun restore(): EggStreamSupplier {
         val eggs = ArrayDeque<Egg>()

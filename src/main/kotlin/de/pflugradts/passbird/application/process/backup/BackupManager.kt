@@ -15,8 +15,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class BackupManager @Inject constructor(
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val systemOperation: SystemOperation,
+    private val configuration: ReadableConfiguration,
+    private val systemOperation: SystemOperation,
 ) : Finalizer {
     private val backupConfiguration get() = configuration.application.backup
     override fun run() {

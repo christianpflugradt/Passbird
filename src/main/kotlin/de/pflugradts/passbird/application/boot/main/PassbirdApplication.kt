@@ -19,11 +19,11 @@ const val INTERRUPT = 0x03.toChar()
 
 @Singleton
 class PassbirdApplication @Inject constructor(
-    @Inject private val inactivityHandler: InactivityHandler,
-    @Inject private val initializers: Set<Initializer>,
-    @Inject private val inputHandler: InputHandler,
-    @Inject private val nestService: NestingGroundService,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val inactivityHandler: InactivityHandler,
+    private val initializers: Set<Initializer>,
+    private val inputHandler: InputHandler,
+    private val nestService: NestingGroundService,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : Bootable {
 
     override fun boot() {

@@ -6,8 +6,8 @@ import de.pflugradts.passbird.application.process.Initializer
 import kotlin.concurrent.fixedRateTimer
 
 class InactivityHandlerScheduler @Inject constructor(
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val inactivityHandler: InactivityHandler,
+    private val configuration: ReadableConfiguration,
+    private val inactivityHandler: InactivityHandler,
 ) : Initializer {
     override fun run() {
         if (configuration.application.inactivityLimit.enabled) {

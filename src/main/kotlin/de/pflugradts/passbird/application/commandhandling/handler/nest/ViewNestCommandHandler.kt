@@ -10,10 +10,10 @@ import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.service.nest.NestService
 
 class ViewNestCommandHandler @Inject constructor(
-    @Inject private val canPrintInfo: CanPrintInfo,
-    @Inject private val canListAvailableNests: CanListAvailableNests,
-    @Inject private val nestService: NestService,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val canPrintInfo: CanPrintInfo,
+    private val canListAvailableNests: CanListAvailableNests,
+    private val nestService: NestService,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleViewNestCommand(@Suppress("UNUSED_PARAMETER") viewNestCommand: ViewNestCommand) {

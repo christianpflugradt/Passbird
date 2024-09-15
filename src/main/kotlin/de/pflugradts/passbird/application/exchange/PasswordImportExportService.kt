@@ -15,10 +15,10 @@ import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class PasswordImportExportService @Inject constructor(
-    @Inject private val exchangeFactory: ExchangeFactory,
-    @Inject private val passwordService: PasswordService,
-    @Inject private val nestService: NestService,
-    @Inject private val eventRegistry: EventRegistry,
+    private val exchangeFactory: ExchangeFactory,
+    private val passwordService: PasswordService,
+    private val nestService: NestService,
+    private val eventRegistry: EventRegistry,
 ) : ImportExportService {
     override fun peekImportEggIdShells() = exchangeFactory.createPasswordExchange().receive().entries.associate {
         it.key.slot to it.value.map { passwordInfo -> passwordInfo.first.first }

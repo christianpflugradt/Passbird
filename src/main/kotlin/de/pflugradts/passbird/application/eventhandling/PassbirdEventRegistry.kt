@@ -12,7 +12,7 @@ import java.util.Queue
 
 @Singleton
 class PassbirdEventRegistry @Inject constructor(
-    @Inject private val eventHandlers: Set<EventHandler>,
+    eventHandlers: Set<EventHandler>,
     private val eventBus: EventBus = EventBus(),
 ) : EventRegistry {
     private val aggregateRoots = mutableSetOf<AggregateRoot>()

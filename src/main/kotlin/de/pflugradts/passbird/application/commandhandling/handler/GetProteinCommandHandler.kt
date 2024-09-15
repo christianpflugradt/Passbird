@@ -11,9 +11,9 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class GetProteinCommandHandler @Inject constructor(
-    @Inject private val passwordService: PasswordService,
-    @Inject private val clipboardAdapterPort: ClipboardAdapterPort,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val passwordService: PasswordService,
+    private val clipboardAdapterPort: ClipboardAdapterPort,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleGetProteinCommand(getProteinCommand: GetProteinCommand) {

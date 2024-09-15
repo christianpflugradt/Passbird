@@ -8,9 +8,9 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 
 class InactivityHandler @Inject constructor(
-    @Inject private val commandBus: CommandBus,
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val systemOperation: SystemOperation,
+    private val commandBus: CommandBus,
+    private val configuration: ReadableConfiguration,
+    private val systemOperation: SystemOperation,
 ) {
     private val inactivityLimitInMinutes get() = configuration.application.inactivityLimit.limitInMinutes
     private var lastInteraction = now()

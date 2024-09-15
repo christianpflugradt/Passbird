@@ -8,11 +8,11 @@ import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExis
 import java.util.stream.Stream
 
 class PasswordFacade @Inject constructor(
-    @Inject private val putPasswordService: PutPasswordService,
-    @Inject private val viewPasswordService: ViewPasswordService,
-    @Inject private val discardPasswordService: DiscardPasswordService,
-    @Inject private val renamePasswordService: RenamePasswordService,
-    @Inject private val movePasswordService: MovePasswordService,
+    private val putPasswordService: PutPasswordService,
+    private val viewPasswordService: ViewPasswordService,
+    private val discardPasswordService: DiscardPasswordService,
+    private val renamePasswordService: RenamePasswordService,
+    private val movePasswordService: MovePasswordService,
 ) : PasswordService {
     override fun eggExists(eggIdShell: Shell, slot: Slot) = viewPasswordService.eggExists(eggIdShell, slot)
     override fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction) =

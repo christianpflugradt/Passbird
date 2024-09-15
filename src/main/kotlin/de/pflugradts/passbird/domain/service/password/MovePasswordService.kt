@@ -10,9 +10,9 @@ import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 
 class MovePasswordService @Inject constructor(
-    @Inject private val cryptoProvider: CryptoProvider,
-    @Inject private val eggRepository: EggRepository,
-    @Inject private val eventRegistry: EventRegistry,
+    cryptoProvider: CryptoProvider,
+    eggRepository: EggRepository,
+    private val eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun movePassword(eggIdShell: Shell, targetSlot: Slot) {
         if (eggExists(eggIdShell, targetSlot)) {

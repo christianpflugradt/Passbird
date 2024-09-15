@@ -8,8 +8,8 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class ViewCommandHandler @Inject constructor(
-    @Inject private val passwordService: PasswordService,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val passwordService: PasswordService,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleViewCommand(viewCommand: ViewCommand) {

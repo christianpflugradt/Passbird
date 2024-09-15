@@ -7,7 +7,7 @@ import de.pflugradts.passbird.application.commandhandling.command.base.Command
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 
 @Singleton
-class CommandBus @Inject constructor(@Inject private val commandHandlers: Set<CommandHandler>) {
+class CommandBus @Inject constructor(commandHandlers: Set<CommandHandler>) {
     private val eventBus = EventBus()
     init {
         commandHandlers.forEach { eventBus.register(it) }

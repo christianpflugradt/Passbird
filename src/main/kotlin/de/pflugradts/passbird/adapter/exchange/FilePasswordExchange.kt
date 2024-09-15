@@ -20,7 +20,7 @@ import java.io.IOException
 import java.nio.file.Files
 
 class FilePasswordExchange @Inject constructor(
-    @Inject private val systemOperation: SystemOperation,
+    private val systemOperation: SystemOperation,
 ) : ExchangeAdapterPort {
     private val mapper = JsonMapper()
 

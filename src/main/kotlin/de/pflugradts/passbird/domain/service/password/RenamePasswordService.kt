@@ -9,9 +9,9 @@ import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 
 class RenamePasswordService @Inject constructor(
-    @Inject private val cryptoProvider: CryptoProvider,
-    @Inject private val eggRepository: EggRepository,
-    @Inject private val eventRegistry: EventRegistry,
+    cryptoProvider: CryptoProvider,
+    eggRepository: EggRepository,
+    eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell) {
         challengeEggId(newEggIdShell)

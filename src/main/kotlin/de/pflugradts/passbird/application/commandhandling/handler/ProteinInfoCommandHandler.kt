@@ -7,8 +7,8 @@ import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintI
 import de.pflugradts.passbird.application.commandhandling.command.ProteinInfoCommand
 
 class ProteinInfoCommandHandler @Inject constructor(
-    @Inject private val canPrintInfo: CanPrintInfo,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val canPrintInfo: CanPrintInfo,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleProteinInfoCommand(@Suppress("UNUSED_PARAMETER") proteinInfoCommand: ProteinInfoCommand) {

@@ -12,8 +12,8 @@ import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
 
 class RenameCommandHandler @Inject constructor(
-    @Inject private val passwordService: PasswordService,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val passwordService: PasswordService,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleRenameCommand(renameCommand: RenameCommand) {

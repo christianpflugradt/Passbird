@@ -8,9 +8,9 @@ import de.pflugradts.passbird.application.commandhandling.command.SetInfoCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 
 class SetInfoCommandHandler @Inject constructor(
-    @Inject private val canPrintInfo: CanPrintInfo,
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val canPrintInfo: CanPrintInfo,
+    private val configuration: ReadableConfiguration,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleSetInfoCommand(@Suppress("UNUSED_PARAMETER") setInfoCommand: SetInfoCommand) {

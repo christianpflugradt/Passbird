@@ -11,9 +11,9 @@ import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class ViewProteinTypesCommandHandler @Inject constructor(
-    @Inject private val canPrintInfo: CanPrintInfo,
-    @Inject private val passwordService: PasswordService,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val canPrintInfo: CanPrintInfo,
+    private val passwordService: PasswordService,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleViewProteinTypesCommand(viewProteinTypesCommand: ViewProteinTypesCommand) {

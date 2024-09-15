@@ -14,8 +14,8 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 
 @Singleton
 class CommandLineInterfaceService @Inject constructor(
-    @Inject private val systemOperation: SystemOperation,
-    @Inject private val configuration: ReadableConfiguration,
+    private val systemOperation: SystemOperation,
+    private val configuration: ReadableConfiguration,
 ) : UserInterfaceAdapterPort {
 
     override fun receive(vararg output: Output) = output.forEach { sendWithoutLineBreak(it) }.run { receivePlain() }

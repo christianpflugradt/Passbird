@@ -16,10 +16,10 @@ import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExis
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
 
 class SetCommandHandler @Inject constructor(
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val passwordService: PasswordService,
-    @Inject private val passwordProvider: PasswordProvider,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val configuration: ReadableConfiguration,
+    private val passwordService: PasswordService,
+    private val passwordProvider: PasswordProvider,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
 
     private val customPasswordConfigurations: List<ReadableConfiguration.CustomPasswordConfiguration>

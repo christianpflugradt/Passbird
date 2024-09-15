@@ -7,8 +7,8 @@ import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintI
 import de.pflugradts.passbird.application.commandhandling.command.HelpCommand
 
 class HelpCommandHandler @Inject constructor(
-    @Inject private val canPrintInfo: CanPrintInfo,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val canPrintInfo: CanPrintInfo,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleHelpCommand(@Suppress("UNUSED_PARAMETER") helpCommand: HelpCommand) {

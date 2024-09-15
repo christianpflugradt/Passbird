@@ -22,9 +22,9 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 
 @Singleton
 class CommandFactory @Inject constructor(
-    @Inject private val nestCommandFactory: NestCommandFactory,
-    @Inject private val proteinCommandFactory: ProteinCommandFactory,
-    @Inject private val setCommandFactory: SetCommandFactory,
+    private val nestCommandFactory: NestCommandFactory,
+    private val proteinCommandFactory: ProteinCommandFactory,
+    private val setCommandFactory: SetCommandFactory,
 ) {
     fun construct(commandType: CommandType, input: Input): Command {
         return when (commandType) {

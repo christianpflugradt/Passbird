@@ -10,8 +10,8 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 
 @Singleton
 class InputHandler @Inject constructor(
-    @Inject private val commandBus: CommandBus,
-    @Inject private val commandFactory: CommandFactory,
+    private val commandBus: CommandBus,
+    private val commandFactory: CommandFactory,
 ) {
     fun handleInput(input: Input) {
         tryCatching {

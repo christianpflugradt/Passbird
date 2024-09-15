@@ -16,10 +16,10 @@ import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 
 class MoveToNestCommandHandler @Inject constructor(
-    @Inject private val canListAvailableNests: CanListAvailableNests,
-    @Inject private val nestService: NestService,
-    @Inject private val passwordService: PasswordService,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val canListAvailableNests: CanListAvailableNests,
+    private val nestService: NestService,
+    private val passwordService: PasswordService,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleMoveToNestCommand(moveToNestCommand: MoveToNestCommand) {

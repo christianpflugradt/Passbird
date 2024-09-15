@@ -11,8 +11,8 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_A
 import de.pflugradts.passbird.domain.service.nest.NestService
 
 class SwitchNestCommandHandler @Inject constructor(
-    @Inject private val nestService: NestService,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val nestService: NestService,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleSwitchNestCommand(switchNestCommand: SwitchNestCommand) {

@@ -21,8 +21,8 @@ import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 
 class ApplicationEventHandler @Inject constructor(
-    @Inject private val cryptoProvider: CryptoProvider,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val cryptoProvider: CryptoProvider,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : EventHandler {
     @Subscribe
     private fun handleEggCreated(eggCreated: EggCreated) {

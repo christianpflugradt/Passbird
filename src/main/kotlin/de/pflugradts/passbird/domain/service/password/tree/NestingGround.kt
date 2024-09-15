@@ -20,9 +20,9 @@ import java.util.stream.Stream
 
 @Singleton
 class NestingGround @Inject constructor(
-    @Inject private val passwordTreeAdapterPort: PasswordTreeAdapterPort,
-    @Inject private val nestService: NestService,
-    @Inject private val eventRegistry: EventRegistry,
+    private val passwordTreeAdapterPort: PasswordTreeAdapterPort,
+    private val nestService: NestService,
+    private val eventRegistry: EventRegistry,
 ) : EggRepository {
     private val lazyEggs: MutableOption<MutableList<Egg>> = mutableOptionOf()
     private val eggs: MutableList<Egg> get() {

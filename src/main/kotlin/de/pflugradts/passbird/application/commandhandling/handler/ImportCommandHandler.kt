@@ -12,10 +12,10 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_A
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class ImportCommandHandler@Inject constructor(
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val importExportService: ImportExportService,
-    @Inject private val passwordService: PasswordService,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val configuration: ReadableConfiguration,
+    private val importExportService: ImportExportService,
+    private val passwordService: PasswordService,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {
     @Subscribe
     private fun handleImportCommand(@Suppress("UNUSED_PARAMETER") importCommand: ImportCommand) {

@@ -15,10 +15,10 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 
 @Singleton
 class CryptoProviderFactory @Inject constructor(
-    @Inject private val configuration: ReadableConfiguration,
-    @Inject private val keyStoreAdapterPort: KeyStoreAdapterPort,
-    @Inject private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-    @Inject private val systemOperation: SystemOperation,
+    private val configuration: ReadableConfiguration,
+    private val keyStoreAdapterPort: KeyStoreAdapterPort,
+    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val systemOperation: SystemOperation,
 ) {
     fun createCryptoProvider() = authenticate()
         .retry { authenticate() }

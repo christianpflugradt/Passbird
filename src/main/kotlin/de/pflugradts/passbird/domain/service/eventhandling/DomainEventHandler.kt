@@ -10,9 +10,7 @@ import de.pflugradts.passbird.domain.model.event.NestDiscarded
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 
 @Singleton
-class DomainEventHandler @Inject constructor(
-    @Inject private val eggRepositoryProvider: Provider<EggRepository>,
-) : EventHandler {
+class DomainEventHandler @Inject constructor(private val eggRepositoryProvider: Provider<EggRepository>) : EventHandler {
     private val eggRepository: EggRepository get() = eggRepositoryProvider.get()
 
     @Subscribe

@@ -16,9 +16,9 @@ import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import java.util.stream.Stream
 
 class ViewPasswordService @Inject constructor(
-    @Inject private val cryptoProvider: CryptoProvider,
-    @Inject private val eggRepository: EggRepository,
-    @Inject private val eventRegistry: EventRegistry,
+    cryptoProvider: CryptoProvider,
+    private val eggRepository: EggRepository,
+    private val eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun findAllEggIds(): Stream<Shell> = eggRepository.findAll().map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
     fun viewPassword(eggIdShell: Shell): Option<Shell> = extractFromEgg(eggIdShell) { decrypted(it.viewPassword()) }

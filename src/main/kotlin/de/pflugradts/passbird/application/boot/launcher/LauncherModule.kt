@@ -18,7 +18,7 @@ class LauncherModule : AbstractModule() {
     }
 
     class ConfigurationDependencyProvider @Inject constructor(
-        @Inject private val configurationFactory: ConfigurationFactory,
+        private val configurationFactory: ConfigurationFactory,
     ) : Provider<ReadableConfiguration> {
         override fun get(): ReadableConfiguration = configurationFactory.loadConfiguration()
     }

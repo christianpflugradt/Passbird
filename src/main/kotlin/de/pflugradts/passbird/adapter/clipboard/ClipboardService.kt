@@ -14,8 +14,8 @@ private const val MILLI_SECONDS = 1000L
 
 @Singleton
 class ClipboardService @Inject constructor(
-    @Inject private val systemOperation: SystemOperation,
-    @Inject private val configuration: ReadableConfiguration,
+    private val systemOperation: SystemOperation,
+    private val configuration: ReadableConfiguration,
 ) : ClipboardAdapterPort {
 
     private var cleanerThread: Thread? = null

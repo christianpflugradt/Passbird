@@ -12,8 +12,8 @@ import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 
 class ConfigurationSyncService @Inject constructor(
-    @Inject private val updatableConfiguration: UpdatableConfiguration,
-    @Inject private val systemOperation: SystemOperation,
+    private val updatableConfiguration: UpdatableConfiguration,
+    private val systemOperation: SystemOperation,
 ) : ConfigurationSync {
     override fun sync(directory: Directory) {
         updatableConfiguration.updateDirectory(directory)
