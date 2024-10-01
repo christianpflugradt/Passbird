@@ -6,6 +6,7 @@ import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
@@ -41,7 +42,7 @@ class RenamePasswordServiceTest {
         passwordService.renameEgg(oldEggId, newEggId)
 
         // then
-        expectThat(givenEgg.viewEggId()) isEqualTo newEggId isNotEqualTo oldEggId
+        expectThat(givenEgg.viewEggId().fakeDec()) isEqualTo newEggId isNotEqualTo oldEggId
     }
 
     @Test
@@ -61,7 +62,7 @@ class RenamePasswordServiceTest {
         val actual = tryCatching { passwordService.renameEgg(oldEggId, newEggId) }
 
         // then
-        expectThat(givenEgg.viewEggId()) isEqualTo oldEggId isNotEqualTo newEggId
+        expectThat(givenEgg.viewEggId().fakeDec()) isEqualTo oldEggId isNotEqualTo newEggId
         expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isA<EggIdAlreadyExistsException>()
     }
@@ -80,7 +81,7 @@ class RenamePasswordServiceTest {
         passwordService.renameEgg(oldEggId, newEggId)
 
         // then
-        expectThat(givenEgg.viewEggId()) isEqualTo oldEggId isNotEqualTo newEggId
+        expectThat(givenEgg.viewEggId().fakeDec()) isEqualTo oldEggId isNotEqualTo newEggId
     }
 
     @Test

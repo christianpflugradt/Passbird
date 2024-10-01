@@ -37,6 +37,9 @@ class PasswordTreeWriter @Inject constructor(
         val contentSize = calcRequiredContentSize(eggSupplier)
         val bytes = ByteArray(calcActualTotalSize(contentSize))
         var offset = copyBytes(signature(), bytes, 0, signatureSize())
+        for (i in 0 until Slot.CAPACITY) {
+            offset += copyBytes(placeHolder().toByteArray(), bytes, offset, placeHolder().size)
+        }
         for (index in FIRST_SLOT..LAST_SLOT) {
             nestService.atNestSlot(slotAt(index)).asByteArray().let { offset += copyBytes(it, bytes, offset, it.size) }
         }
@@ -46,8 +49,9 @@ class PasswordTreeWriter @Inject constructor(
         writeToDisk(shellOf(bytes))
     }
 
-    private fun writeToDisk(shell: Shell) = tryCatching { systemOperation.writeBytesToFile(filePath, cryptoProvider.encrypt(shell)) }
-        .onFailure { reportFailure(WritePasswordTreeFailure(filePath, it)) }
+    private fun writeToDisk(shell: Shell) = tryCatching {
+        systemOperation.writeBytesToFile(filePath, cryptoProvider.encrypt(shell).toByteArray())
+    }.onFailure { reportFailure(WritePasswordTreeFailure(filePath, it)) }
 
     private fun calcRequiredContentSize(eggs: EggStreamSupplier): Int {
         val eggDataSize = eggs.get()
@@ -62,7 +66,8 @@ class PasswordTreeWriter @Inject constructor(
             .filter { it.isPresent }
             .map { it.get().viewNestId().size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
-        return eggDataSize + eggMetaSize + nestSize
+        val placeholderSize = Slot.CAPACITY * placeHolder().size
+        return eggDataSize + eggMetaSize + nestSize + placeholderSize
     }
 
     private val filePath get() =

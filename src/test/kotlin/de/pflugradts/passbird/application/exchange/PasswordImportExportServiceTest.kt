@@ -9,6 +9,7 @@ import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.slot.Slot.S2
@@ -82,8 +83,8 @@ class PasswordImportExportServiceTest {
         expectThat(eggIdSlot) hasSize eggs.size
         expectThat(passwordSlot) hasSize eggs.size
         eggs.indices.forEach { i ->
-            expectThat(eggIdSlot[i]) isEqualTo eggs[i].viewEggId()
-            expectThat(passwordSlot[i]) isEqualTo eggs[i].viewPassword()
+            expectThat(eggIdSlot[i]) isEqualTo eggs[i].viewEggId().fakeDec()
+            expectThat(passwordSlot[i]) isEqualTo eggs[i].viewPassword().fakeDec()
         }
         expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
         verify { eventRegistry.register(capture(eggCountSlot)) }
@@ -128,7 +129,7 @@ private fun expectThatActualEggIdsMatchExpected(actual: ShellMap, expected: List
     var index = 0
     actual.keys.forEach { nestSlot ->
         actual[nestSlot]!!.forEach {
-            expectThat(it) isEqualTo expected[index++].viewEggId()
+            expectThat(it) isEqualTo expected[index++].viewEggId().fakeDec()
         }
     }
 }
@@ -137,8 +138,8 @@ private fun expectThatActualBytePairsMatchExpected(actual: PasswordInfoMap, expe
     var index = 0
     actual.keys.forEach { nestSlot ->
         actual[nestSlot]!!.forEach {
-            expectThat(it.first.first) isEqualTo expected[index].viewEggId()
-            expectThat(it.first.second) isEqualTo expected[index++].viewPassword()
+            expectThat(it.first.first) isEqualTo expected[index].viewEggId().fakeDec()
+            expectThat(it.first.second) isEqualTo expected[index++].viewPassword().fakeDec()
         }
     }
 }

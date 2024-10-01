@@ -3,6 +3,8 @@ package de.pflugradts.passbird.domain.model.egg
 import de.pflugradts.passbird.domain.model.egg.Password.Companion.createPassword
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.fakeDec
+import de.pflugradts.passbird.domain.model.shell.fakeEnc
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -21,25 +23,25 @@ class PasswordTest {
         val passwordShell = shellOf("Password")
 
         // when
-        val actual = createPassword(passwordShell)
+        val actual = createPassword(passwordShell.fakeEnc())
 
         // then
-        expectThat(actual.view()) isEqualTo passwordShell
+        expectThat(actual.view().fakeDec()) isEqualTo passwordShell
     }
 
     @Test
     fun `should update password`() {
         // given
         val originalPasswordShell = shellOf("Password")
-        val password = createPassword(originalPasswordShell)
+        val password = createPassword(originalPasswordShell.fakeEnc())
         val updatedPasswordShell = shellOf("p4s5w0rD")
 
         // when
-        password.update(updatedPasswordShell)
+        password.update(updatedPasswordShell.fakeEnc())
         val actual = password.view()
 
         // then
-        expectThat(actual) isEqualTo updatedPasswordShell isNotEqualTo originalPasswordShell
+        expectThat(actual.fakeDec()) isEqualTo updatedPasswordShell isNotEqualTo originalPasswordShell
     }
 
     @Test
@@ -47,7 +49,7 @@ class PasswordTest {
         // given
         val givenShell = mockk<Shell>(relaxed = true)
         every { givenShell.copy() } returns givenShell
-        val password = createPassword(givenShell)
+        val password = createPassword(givenShell.fakeEnc())
 
         // when
         password.discard()
@@ -60,30 +62,30 @@ class PasswordTest {
     fun `should clone passwordShell on creation`() {
         // given
         val passwordShell = shellOf("Password")
-        val password = createPassword(passwordShell)
+        val password = createPassword(passwordShell.fakeEnc())
 
         // when
         passwordShell.scramble()
         val actual = password.view()
 
         // then
-        expectThat(actual) isNotEqualTo passwordShell
+        expectThat(actual) isNotEqualTo passwordShell.fakeEnc()
     }
 
     @Test
     fun `should clone passwordShell on update`() {
         // given
         val originalPasswordShell = shellOf("Password")
-        val password = createPassword(originalPasswordShell)
+        val password = createPassword(originalPasswordShell.fakeEnc())
         val updatedPasswordShell = shellOf("p4s5w0rD")
 
         // when
-        password.update(updatedPasswordShell)
+        password.update(updatedPasswordShell.fakeEnc())
         updatedPasswordShell.scramble()
         val actual = password.view()
 
         // then
-        expectThat(actual) isNotEqualTo updatedPasswordShell
+        expectThat(actual) isNotEqualTo updatedPasswordShell.fakeEnc()
     }
 
     @Nested
@@ -92,7 +94,7 @@ class PasswordTest {
         @Test
         fun `should be equal to itself`() {
             // given
-            val password1 = createPassword(shellOf("abc"))
+            val password1 = createPassword(shellOf("abc").fakeEnc())
             val password2 = password1
 
             // when
@@ -107,8 +109,8 @@ class PasswordTest {
             // given
             val passwordShell = shellOf("abc")
             val samePasswordShell = shellOf("abc")
-            val password1 = createPassword(passwordShell)
-            val password2 = createPassword(samePasswordShell)
+            val password1 = createPassword(passwordShell.fakeEnc())
+            val password2 = createPassword(samePasswordShell.fakeEnc())
 
             // when
             val actual = password1.equals(password2)
@@ -122,8 +124,8 @@ class PasswordTest {
             // given
             val passwordShell = shellOf("abc")
             val otherPasswordShell = shellOf("abd")
-            val password1 = createPassword(passwordShell)
-            val password2 = createPassword(otherPasswordShell)
+            val password1 = createPassword(passwordShell.fakeEnc())
+            val password2 = createPassword(otherPasswordShell.fakeEnc())
 
             // when
             val actual = password1.equals(password2)
@@ -136,7 +138,7 @@ class PasswordTest {
         fun `should not be equal to other class`() {
             // given
             val passwordShell = shellOf("abc")
-            val password = createPassword(passwordShell)
+            val password = createPassword(passwordShell.fakeEnc())
 
             // when
             val actual = password.equals(passwordShell)
@@ -148,7 +150,7 @@ class PasswordTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val password = createPassword(shellOf("abc"))
+            val password = createPassword(shellOf("abc").fakeEnc())
 
             // when
             val actual = password.equals(null)

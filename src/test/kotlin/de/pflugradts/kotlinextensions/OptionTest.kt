@@ -6,6 +6,7 @@ import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.fakeDec
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -180,7 +181,7 @@ class OptionTest {
             val option = optionOf(givenEgg)
 
             // when
-            val actual = option.map { it.viewEggId().asString() }
+            val actual = option.map { it.viewEggId().fakeDec().asString() }
 
             // then
             expectThat(actual.isPresent).isTrue()
@@ -193,7 +194,7 @@ class OptionTest {
             val option = optionOf<Egg>(null)
 
             // when
-            val actual = option.map { it.viewEggId().asString() }
+            val actual = option.map { it.viewEggId().fakeDec().asString() }
 
             // then
             expectThat(actual.isPresent).isFalse()

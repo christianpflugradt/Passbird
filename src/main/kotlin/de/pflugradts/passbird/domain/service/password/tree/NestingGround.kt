@@ -50,7 +50,7 @@ class NestingGround @Inject constructor(
     override fun find(eggIdShell: Shell, slot: Slot): Option<Egg> = find(createEggStreamSupplier(slot), eggIdShell)
     override fun find(eggIdShell: Shell): Option<Egg> = find(createEggStreamSupplier(CURRENT_NEST), eggIdShell)
     private fun find(supplier: EggStreamSupplier, eggIdShell: Shell): Option<Egg> =
-        supplier.get().filter { it.viewEggId() == eggIdShell }.findAny().toOption()
+        supplier.get().filter { it.viewEggId().payload == eggIdShell }.findAny().toOption()
     override fun findAll() = createEggStreamSupplier(CURRENT_NEST).get()
     private fun createEggStreamSupplier(eggFilter: EggFilter): EggStreamSupplier =
         createEggStreamSupplier(if (eggFilter == CURRENT_NEST) inNest(nestService.currentNest().slot) else all())

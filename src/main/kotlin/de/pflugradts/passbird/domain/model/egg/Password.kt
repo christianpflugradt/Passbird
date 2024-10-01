@@ -1,17 +1,17 @@
 package de.pflugradts.passbird.domain.model.egg
 
 import de.pflugradts.passbird.domain.model.ddd.DomainEntity
-import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 
-class Password private constructor(private var shell: Shell) : DomainEntity {
-    fun update(newShell: Shell) {
-        shell = newShell.copy()
+class Password private constructor(private var encryptedShell: EncryptedShell) : DomainEntity {
+    fun update(newEncryptedShell: EncryptedShell) {
+        encryptedShell = newEncryptedShell.copy()
     }
-    fun discard() = shell.scramble()
-    fun view() = shell.copy()
-    override fun equals(other: Any?) = (other as? Password)?.view() == shell
-    override fun hashCode() = shell.hashCode()
+    fun discard() = encryptedShell.scramble()
+    fun view() = encryptedShell.copy()
+    override fun equals(other: Any?) = (other as? Password)?.view() == encryptedShell
+    override fun hashCode() = encryptedShell.hashCode()
     companion object {
-        fun createPassword(shell: Shell) = Password(shell.copy())
+        fun createPassword(encryptedShell: EncryptedShell) = Password(encryptedShell.copy())
     }
 }

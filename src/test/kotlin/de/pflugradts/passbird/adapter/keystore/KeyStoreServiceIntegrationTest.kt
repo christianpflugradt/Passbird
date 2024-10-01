@@ -58,8 +58,7 @@ class KeyStoreServiceIntegrationTest {
         expectThat(File(keyStoreFile!!)).exists()
         expectThat(actualStoreResult.success).isTrue()
         expectThat(actualLoadResult.success).isTrue()
-        expectThat(actualLoadResult.getOrNull()?.secret?.size) isEqualTo expectedByteArraySize
-        expectThat(actualLoadResult.getOrNull()?.iv?.size) isEqualTo expectedByteArraySize
+        expectThat(actualLoadResult.getOrNull()?.size) isEqualTo expectedByteArraySize
         expectThat(oneTimePasswordPlainShell1.toCharArray()) isNotEqualTo password.toCharArray()
         expectThat(oneTimePasswordPlainShell2.toCharArray()) isNotEqualTo password.toCharArray()
     }

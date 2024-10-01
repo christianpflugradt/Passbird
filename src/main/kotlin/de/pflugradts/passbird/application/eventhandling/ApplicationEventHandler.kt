@@ -13,7 +13,7 @@ import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.event.NestCreated
 import de.pflugradts.passbird.domain.model.event.NestDiscarded
-import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.EVENT_HANDLED
@@ -76,7 +76,7 @@ class ApplicationEventHandler @Inject constructor(
     }
 
     private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), EVENT_HANDLED))
-    private fun decrypt(shell: Shell) = cryptoProvider.decrypt(shell).asString()
+    private fun decrypt(encryptedShell: EncryptedShell) = cryptoProvider.decrypt(encryptedShell).asString()
 }
 
 private fun nestSlotText(nestSlotIndex: Int) = if (nestSlotIndex in 1..9) "Nest at Slot $nestSlotIndex" else "Default Nest"

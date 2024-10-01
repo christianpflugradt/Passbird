@@ -2,6 +2,8 @@ package de.pflugradts.passbird.domain.model.egg
 
 import de.pflugradts.passbird.domain.model.egg.EggId.Companion.createEggId
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.fakeDec
+import de.pflugradts.passbird.domain.model.shell.fakeEnc
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -18,39 +20,39 @@ class EggIdTest {
         val eggIdShell = shellOf("EggId")
 
         // when
-        val eggId = createEggId(eggIdShell)
+        val eggId = createEggId(eggIdShell.fakeEnc())
 
         // then
-        expectThat(eggId.view()) isEqualTo eggIdShell
+        expectThat(eggId.view().fakeDec()) isEqualTo eggIdShell
     }
 
     @Test
     fun `should rename eggId`() {
         // given
         val originalEggIdShell = shellOf("EggId123")
-        val eggId = createEggId(originalEggIdShell)
+        val eggId = createEggId(originalEggIdShell.fakeEnc())
         val updatedEggIdShell = shellOf("EggIdABC")
 
         // when
-        eggId.rename(updatedEggIdShell)
+        eggId.rename(updatedEggIdShell.fakeEnc())
         val actual = eggId.view()
 
         // then
-        expectThat(actual) isEqualTo updatedEggIdShell isNotEqualTo originalEggIdShell
+        expectThat(actual.fakeDec()) isEqualTo updatedEggIdShell isNotEqualTo originalEggIdShell
     }
 
     @Test
     fun `should clone eggIdShell`() {
         // given
         val eggIdShell = shellOf("EggId")
-        val eggId = createEggId(eggIdShell)
+        val eggId = createEggId(eggIdShell.fakeEnc())
 
         // when
         eggIdShell.scramble()
         val actual = eggId.view()
 
         // then
-        expectThat(actual) isNotEqualTo eggIdShell
+        expectThat(actual) isNotEqualTo eggIdShell.fakeEnc()
     }
 
     @Nested
@@ -59,7 +61,7 @@ class EggIdTest {
         @Test
         fun `should be equal to itself`() {
             // given
-            val eggId1 = createEggId(shellOf("abc"))
+            val eggId1 = createEggId(shellOf("abc").fakeEnc())
             val eggId2 = eggId1
 
             // when
@@ -74,8 +76,8 @@ class EggIdTest {
             // given
             val eggIdShell = shellOf("abc")
             val sameEggIdShell = shellOf("abc")
-            val eggId1 = createEggId(eggIdShell)
-            val eggId2 = createEggId(sameEggIdShell)
+            val eggId1 = createEggId(eggIdShell.fakeEnc())
+            val eggId2 = createEggId(sameEggIdShell.fakeEnc())
 
             // when
             val actual = eggId1.equals(eggId2)
@@ -89,8 +91,8 @@ class EggIdTest {
             // given
             val eggIdShell = shellOf("abc")
             val otherEggIdShell = shellOf("abd")
-            val eggId1 = createEggId(eggIdShell)
-            val eggId2 = createEggId(otherEggIdShell)
+            val eggId1 = createEggId(eggIdShell.fakeEnc())
+            val eggId2 = createEggId(otherEggIdShell.fakeEnc())
 
             // when
             val actual = eggId1.equals(eggId2)
@@ -103,7 +105,7 @@ class EggIdTest {
         fun `should not be equal to other class`() {
             // given
             val eggIdShell = shellOf("abc")
-            val eggId = createEggId(eggIdShell)
+            val eggId = createEggId(eggIdShell.fakeEnc())
 
             // when
             val actual = eggId.equals(eggIdShell)
@@ -115,7 +117,7 @@ class EggIdTest {
         @Test
         fun `should not be equal to null`() {
             // given
-            val eggId = createEggId(shellOf("abc"))
+            val eggId = createEggId(shellOf("abc").fakeEnc())
 
             // when
             val actual = eggId.equals(null)

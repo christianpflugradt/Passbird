@@ -38,7 +38,7 @@ class ViewPasswordService @Inject constructor(
 
     private fun <T> extractFromEgg(eggIdShell: Shell, extraction: (egg: Egg) -> T): Option<T> =
         encrypted(eggIdShell).let { encryptedEggIdShell ->
-            find(encryptedEggIdShell).map { extraction(it) }.or {
+            find(encryptedEggIdShell.payload).map { extraction(it) }.or {
                 eventRegistry.register(EggNotFound(encryptedEggIdShell))
                 eventRegistry.processEvents()
                 emptyOption()

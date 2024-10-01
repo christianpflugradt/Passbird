@@ -6,12 +6,14 @@ import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.password.MovePasswordService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import de.pflugradts.passbird.domain.service.password.tree.fakeEggRepository
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -19,6 +21,7 @@ import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
 import strikt.assertions.isNotNull
+import strikt.assertions.isTrue
 
 internal class MovePasswordServiceTest {
 
@@ -50,12 +53,15 @@ internal class MovePasswordServiceTest {
         val givenEggId = shellOf("EggId123")
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository)
+        val eggNotFoundSlot = slot<EggNotFound>()
 
         // when
         passwordService.movePassword(givenEggId, Slot.S1)
 
         // then
-        verify(exactly = 1) { passbirdEventRegistry.register(eq(EggNotFound(givenEggId))) }
+        verify { passbirdEventRegistry.register(capture(eggNotFoundSlot)) }
+        expectThat(eggNotFoundSlot.isCaptured).isTrue()
+        expectThat(eggNotFoundSlot.captured.eggIdShell.fakeDec()) isEqualTo givenEggId
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 

@@ -6,6 +6,7 @@ import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
+import de.pflugradts.passbird.domain.model.shell.fakeDec
 import io.mockk.every
 import io.mockk.mockk
 
@@ -20,7 +21,7 @@ fun fakeExchangeAdapterPort(forExchangeFactory: ExchangeFactory, withEggs: List<
                     if (!result.containsKey(this)) result[this] = mutableListOf()
                     result[this]!!.add(
                         PasswordInfo(
-                            first = ShellPair(it.viewEggId(), it.viewPassword()),
+                            first = ShellPair(it.viewEggId().fakeDec(), it.viewPassword().fakeDec()),
                             second = emptyList(),
                         ),
                     )

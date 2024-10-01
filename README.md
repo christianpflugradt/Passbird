@@ -268,17 +268,11 @@ Some example inputs and what they do:
 
 `i` imports all Eggs from a file `passbird-export.json` expected in the directory passed on program start.
 
-## Migrating from Passbird 3.x.x to Passbird 4.x.x
+## Migrating Passbird 4.x.x to Passbird 5.x.x
 
-The Tree structure has changed to support Proteins in the future. For that reason using Passbird 3.x.x all Passwords must be exported using the `export` command (letter `e`). Nest names will get lost because they're not included in the export file. They should be printed using the `Nest` command (letter `n`) and written down.
+The Tree structure has changed as Passbird 5.x.x is now encrypted using AES-GCM, an encryption algorithm recommended by NIST. Furthermore, the structure of the file has slightly changed in preparation of an upcoming feature related to shortcuts.For that reason, using Passbird 4.x.x, all Passwords must be exported using the `export` command (letter `e`). The export will preserve Nests and Proteins, so no data should get lost in the process. Nevertheless, it is recommended to manually back up the folder where Passbird resides in case something goes wrong.
 
-After that the Tree file should be renamed (as a backup) and Passbird updated to 4.x.x. Passbird can then be started as usual. The Tree will be empty but Passbird still starts due to the existing KeyStore. The import command may then be used to reimport all passwords and create Nests with default names. Using the `create` command Nests can be renamed to their previous names. E.g. `n+1` will prompt for a new name for the Nest at slot 1. All other Nests can be renamed to their original names the same way, e.g. `n+9` will prompt for a new name for the Nest at slot 9.
-
-As of Passbird 4.x.x the physical Tree file will not be updated upon renaming a Nest. This will be fixed in the future. To trigger an update a new Egg can be created. It can be deleted right afterward and the new Nest names will be persisted. Assuming you don't have an Egg named `tmp4xx` you can input `stmp4xx` and `dtmp4xx` to trigger an update without leaving traces.
-
-The Passbird database file has been renamed to Passbird (Password) Tree and as a result the physical filename changes from `passbird.pw` to `passbird.tree` which happens automatically through the update procedure described above.
-
-The expected keystore file has also been changed from `passbird.ks` to `passbird.sec`. Before launching Passbird 4.x.x the file has to be renamed manually. You may either rename the file directly or create a copy and name it accordingly keeping the previous file in the process if you wish to do so.
+After creating an export file, terminate Passbird and delete the password database file named `passbird.tree`. Now update Passbird to 5.x.x which will, due to the deleted password database file, trigger the setup routine and prompt you to confirm the directory Passbird uses. Enter the directory you have previously used and Passbird will initialise with an empty database. Now run the `import` command (letter `i`) and all Nests, Passwords and Proteins should be restored.
 
 ## <a name="faq"></a>Frequently Asked Questions
 

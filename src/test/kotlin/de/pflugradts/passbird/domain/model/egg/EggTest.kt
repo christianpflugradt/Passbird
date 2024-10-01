@@ -9,6 +9,8 @@ import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.fakeDec
+import de.pflugradts.passbird.domain.model.shell.fakeEnc
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.S1
 import io.mockk.every
@@ -35,7 +37,7 @@ class EggTest {
         val actual = egg.viewEggId()
 
         // then
-        expectThat(actual) isEqualTo givenEggIdShell
+        expectThat(actual.fakeDec()) isEqualTo givenEggIdShell
     }
 
     @Test
@@ -46,11 +48,11 @@ class EggTest {
         val egg = createEggForTesting(withEggIdShell = givenEggIdShell)
 
         // when
-        egg.rename(updatedEggIdShell)
+        egg.rename(updatedEggIdShell.fakeEnc())
         val actual = egg.viewEggId()
 
         // then
-        expectThat(actual) isEqualTo updatedEggIdShell isNotEqualTo givenEggIdShell
+        expectThat(actual.fakeDec()) isEqualTo updatedEggIdShell isNotEqualTo givenEggIdShell
     }
 
     @Test
@@ -63,7 +65,7 @@ class EggTest {
         val actual = egg.viewPassword()
 
         // then
-        expectThat(actual) isEqualTo givenEggIdShell
+        expectThat(actual.fakeDec()) isEqualTo givenEggIdShell
     }
 
     @Test
@@ -74,11 +76,11 @@ class EggTest {
         val egg = createEggForTesting(withPasswordShell = givenEggIdShell)
 
         // when
-        egg.updatePassword(updatedEggIdShell)
+        egg.updatePassword(updatedEggIdShell.fakeEnc())
         val actual = egg.viewPassword()
 
         // then
-        expectThat(actual) isEqualTo updatedEggIdShell isNotEqualTo givenEggIdShell
+        expectThat(actual.fakeDec()) isEqualTo updatedEggIdShell isNotEqualTo givenEggIdShell
     }
 
     @Test
@@ -167,7 +169,7 @@ class EggTest {
             val egg = createEggForTesting(withEggIdShell = givenEggIdShell)
 
             // when
-            val actual = egg.equals(createEggId(givenEggIdShell))
+            val actual = egg.equals(createEggId(givenEggIdShell.fakeEnc()))
 
             // then
             expectThat(actual).isFalse()
@@ -191,7 +193,7 @@ class EggTest {
         @Test
         fun `should have created event when egg is created`() {
             // given / when
-            val egg = createEgg(Slot.DEFAULT, shellOf("EggId"), shellOf("Password"))
+            val egg = createEgg(Slot.DEFAULT, shellOf("EggId").fakeEnc(), shellOf("Password").fakeEnc())
 
             // then
             expectThat(egg.getDomainEvents()) hasSize 1
@@ -207,7 +209,7 @@ class EggTest {
 
             // when
             egg.clearDomainEvents()
-            egg.updatePassword(shellOf("new password"))
+            egg.updatePassword(shellOf("new password").fakeEnc())
 
             // then
             expectThat(egg.getDomainEvents()) hasSize 1
@@ -239,7 +241,7 @@ class EggTest {
 
             // when
             egg.clearDomainEvents()
-            egg.rename(shellOf("newEggId"))
+            egg.rename(shellOf("newEggId").fakeEnc())
 
             // then
             expectThat(egg.getDomainEvents()) hasSize 1

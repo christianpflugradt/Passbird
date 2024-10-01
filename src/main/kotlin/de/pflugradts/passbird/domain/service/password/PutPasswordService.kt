@@ -28,7 +28,7 @@ class PutPasswordService @Inject constructor(
         val encryptedEggIdShell = encrypted(eggIdShell)
         val encryptedPasswordShell = encrypted(passwordShell)
         val nestSlot = nestService.currentNest().slot
-        find(encryptedEggIdShell).ifPresentOrElse(
+        find(encryptedEggIdShell.payload).ifPresentOrElse(
             { it.updatePassword(encryptedPasswordShell) },
             { eggRepository.add(createEgg(nestSlot, encryptedEggIdShell, encryptedPasswordShell)) },
         )
@@ -37,7 +37,7 @@ class PutPasswordService @Inject constructor(
 
     fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell) {
         if (eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
-            find(encrypted(eggIdShell)).get().updateProtein(slot, encrypted(typeShell), encrypted(structureShell))
+            find(encrypted(eggIdShell).payload).get().updateProtein(slot, encrypted(typeShell), encrypted(structureShell))
         }
         processEventsAndSync()
     }

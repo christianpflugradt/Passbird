@@ -3,7 +3,9 @@ package de.pflugradts.passbird.domain.service.password
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -11,6 +13,7 @@ import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import de.pflugradts.passbird.domain.service.password.tree.fakeEggRepository
 import io.mockk.Called
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -67,13 +70,16 @@ class ViewPasswordServiceTest {
         val matchingEgg = createEggForTesting(withEggIdShell = givenEggId, withPasswordShell = expectedPassword)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
+        val encryptedShellSlot = slot<EncryptedShell>()
 
         // when
         val actual = passwordService.viewPassword(givenEggId)
 
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(givenEggId) }
-        verify(exactly = 1) { cryptoProvider.decrypt(expectedPassword) }
+        verify { cryptoProvider.decrypt(capture(encryptedShellSlot)) }
+        expectThat(encryptedShellSlot.isCaptured).isTrue()
+        expectThat(encryptedShellSlot.captured.fakeDec()) isEqualTo expectedPassword
         verify { eventRegistry wasNot Called }
         expectThat(actual.isPresent).isTrue()
         expectThat(actual.get()) isEqualTo expectedPassword
@@ -87,13 +93,16 @@ class ViewPasswordServiceTest {
         val matchingEgg = createEggForTesting(withEggIdShell = givenEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
+        val eggNotFoundSlot = slot<EggNotFound>()
 
         // when
         val actual = passwordService.viewPassword(otherEggId)
 
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(otherEggId) }
-        verify(exactly = 1) { eventRegistry.register(eq(EggNotFound(otherEggId))) }
+        verify { eventRegistry.register(capture(eggNotFoundSlot)) }
+        expectThat(eggNotFoundSlot.isCaptured).isTrue()
+        expectThat(eggNotFoundSlot.captured.eggIdShell.fakeDec()) isEqualTo otherEggId
         verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(actual.isEmpty).isTrue()
     }

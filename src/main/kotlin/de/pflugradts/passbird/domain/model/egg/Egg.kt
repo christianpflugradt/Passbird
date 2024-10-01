@@ -11,7 +11,7 @@ import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggMoved
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
-import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.slot.Slot
 
 class Egg private constructor(
@@ -28,16 +28,16 @@ class Egg private constructor(
     fun viewEggId() = eggId.view()
     fun viewPassword() = password.view()
 
-    fun rename(eggIdShell: Shell) {
+    fun rename(eggIdShell: EncryptedShell) {
         eggId.rename(eggIdShell)
         registerDomainEvent(EggRenamed(this))
     }
 
-    fun updatePassword(shell: Shell) {
-        password.update(shell)
+    fun updatePassword(encryptedShell: EncryptedShell) {
+        password.update(encryptedShell)
         registerDomainEvent(EggUpdated(this))
     }
-    fun updateProtein(slot: Slot, typeShell: Shell, structureShell: Shell) {
+    fun updateProtein(slot: Slot, typeShell: EncryptedShell, structureShell: EncryptedShell) {
         proteins[slot.index()].set(createProtein(typeShell, structureShell))
     }
     fun moveToNestAt(slot: Slot) {
@@ -56,8 +56,12 @@ class Egg private constructor(
     override fun hashCode() = slot.hashCode() + 31 * eggId.hashCode()
 
     companion object {
-        fun createEgg(slot: Slot, eggIdShell: Shell, passwordShell: Shell, proteins: List<MutableOption<Protein>> = emptyProteins()) =
-            Egg(slot, createEggId(eggIdShell), createPassword(passwordShell), proteins)
+        fun createEgg(
+            slot: Slot,
+            eggIdShell: EncryptedShell,
+            passwordShell: EncryptedShell,
+            proteins: List<MutableOption<Protein>> = emptyProteins(),
+        ) = Egg(slot = slot, eggId = createEggId(eggIdShell), password = createPassword(passwordShell), proteins = proteins)
     }
 }
 

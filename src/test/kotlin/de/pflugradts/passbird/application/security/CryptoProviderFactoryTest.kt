@@ -61,7 +61,7 @@ class CryptoProviderFactoryTest {
         val actual = cryptoProviderFactory.createCryptoProvider()
 
         // then
-        expectThat(actual).isA<Cipherizer>()
+        expectThat(actual).isA<AesGcmCipher>()
     }
 
     @Test
@@ -93,7 +93,7 @@ class CryptoProviderFactoryTest {
         val actual = cryptoProviderFactory.createCryptoProvider()
 
         // then
-        expectThat(actual).isA<Cipherizer>()
+        expectThat(actual).isA<AesGcmCipher>()
     }
 
     @Test
@@ -118,7 +118,7 @@ class CryptoProviderFactoryTest {
         givenLoginFails(incorrectPassword, keyStoreFilePath)
 
         // when
-        val test = tryCatching { cryptoProviderFactory.createCryptoProvider() }
+        tryCatching { cryptoProviderFactory.createCryptoProvider() }
 
         // then
         verify(exactly = 1) { systemOperation.exit() }
@@ -126,7 +126,7 @@ class CryptoProviderFactoryTest {
 
     private fun givenLoginSucceeds(password: Input, keyStoreFilePath: Path) = every {
         keyStoreAdapterPort.loadKey(eq(password.shell.toPlainShell()), eq(keyStoreFilePath))
-    } returns success(value = Key(emptyShell(), emptyShell()))
+    } returns success(value = emptyShell())
 
     private fun givenLoginFails(password: Input, keyStoreFilePath: Path) = every {
         keyStoreAdapterPort.loadKey(eq(password.shell.toPlainShell()), eq(keyStoreFilePath))

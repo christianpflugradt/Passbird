@@ -23,7 +23,7 @@ class CryptoProviderFactory @Inject constructor(
     fun createCryptoProvider() = authenticate()
         .retry { authenticate() }
         .retry { authenticate() }
-        .map { Cipherizer(it.secret, it.iv) }
+        .map { AesGcmCipher(it) }
         .onFailure {
             reportFailure(LoginFailure(3))
             systemOperation.exit()

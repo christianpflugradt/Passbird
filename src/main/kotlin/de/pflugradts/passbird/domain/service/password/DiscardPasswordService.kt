@@ -14,7 +14,7 @@ class DiscardPasswordService @Inject constructor(
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun discardEgg(eggIdShell: Shell) {
         encrypted(eggIdShell).let { encryptedEggIdShell ->
-            find(encryptedEggIdShell).ifPresentOrElse(
+            find(encryptedEggIdShell.payload).ifPresentOrElse(
                 { it.discard() },
                 { eventRegistry.register(EggNotFound(encryptedEggIdShell)) },
             )

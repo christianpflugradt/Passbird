@@ -5,11 +5,12 @@ import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.egg.createEggForTesting
-import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.slot.Slot.S1
@@ -22,7 +23,6 @@ import de.pflugradts.passbird.domain.model.slot.Slot.S7
 import de.pflugradts.passbird.domain.model.slot.Slot.S8
 import de.pflugradts.passbird.domain.model.slot.Slot.S9
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
-import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -49,7 +49,7 @@ import java.util.UUID
 class PasswordTreeFacadeTest {
 
     private val configuration = mockk<Configuration>()
-    private val cryptoProvider = mockk<CryptoProvider>()
+    private val cryptoProvider = createAesGcmCipherForTesting()
     private val nestService = createNestServiceForTesting()
     private val systemOperation = spyk(SystemOperation())
     private var passwordTreeFacade: PasswordTreeFacade = PasswordTreeFacade(
@@ -74,8 +74,6 @@ class PasswordTreeFacadeTest {
     fun setup() {
         expectThat(File(tempPasswordTreeDirectory).mkdir()).isTrue()
         fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory)
-        every { cryptoProvider.encrypt(any(Shell::class)) } answers { firstArg() }
-        every { cryptoProvider.decrypt(any(Shell::class)) } answers { firstArg() }
     }
 
     @AfterEach
@@ -107,27 +105,11 @@ class PasswordTreeFacadeTest {
         nestService.place(nest1, S1)
         nestService.place(nest3, S3)
         nestService.place(nest9, S9)
-        val egg1 = createEggForTesting(
-            withEggIdShell = shellOf("EggId1"),
-            withPasswordShell = shellOf("Password1"),
-            withSlot = DEFAULT,
-        )
-        val egg2 = createEggForTesting(
-            withEggIdShell = shellOf("EggId2"),
-            withPasswordShell = shellOf("Password2"),
-            withSlot = S1,
-        )
-        val egg3 = createEggForTesting(
-            withEggIdShell = shellOf("EggId3"),
-            withPasswordShell = shellOf("Password3"),
-            withSlot = S3,
-        )
-        val egg3b = createEggForTesting(
-            withEggIdShell = shellOf("EggId3"),
-            withPasswordShell = shellOf("Password3b"),
-            withSlot = S9,
-        )
-        val eggs = listOf(egg1, egg2, egg3, egg3b)
+        val egg1 = createEggFromStrings(slot = DEFAULT, eggId = "EggId1", password = "Password1")
+        val egg2 = createEggFromStrings(slot = S1, eggId = "EggId2", password = "Password2")
+        val egg3a = createEggFromStrings(slot = S3, eggId = "EggId3", password = "Password3")
+        val egg3b = createEggFromStrings(slot = S9, eggId = "EggId3", password = "Password3")
+        val eggs = listOf(egg1, egg2, egg3a, egg3b)
 
         // when
         passwordTreeFacade.sync { eggs.stream() }
@@ -303,8 +285,14 @@ class PasswordTreeFacadeTest {
     }
 
     private fun someEggs() = listOf(
-        createEggForTesting(withEggIdShell = shellOf("EggId1"), withPasswordShell = shellOf("Password1")),
-        createEggForTesting(withEggIdShell = shellOf("EggId2"), withPasswordShell = shellOf("Password2")),
-        createEggForTesting(withEggIdShell = shellOf("EggId3"), withPasswordShell = shellOf("Password3")),
+        createEggFromStrings(eggId = "EggId1", password = "Password1"),
+        createEggFromStrings(eggId = "EggId2", password = "Password2"),
+        createEggFromStrings(eggId = "EggId3", password = "Password3"),
+    )
+
+    private fun createEggFromStrings(slot: Slot = DEFAULT, eggId: String, password: String) = createEgg(
+        slot = slot,
+        eggIdShell = cryptoProvider.encrypt(shellOf(eggId)),
+        passwordShell = cryptoProvider.encrypt(shellOf(password)),
     )
 }

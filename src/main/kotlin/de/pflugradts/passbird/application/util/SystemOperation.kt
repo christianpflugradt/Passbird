@@ -1,12 +1,8 @@
 package de.pflugradts.passbird.application.util
 
-import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.application.FileName
 import de.pflugradts.passbird.application.toFileName
-import de.pflugradts.passbird.domain.model.shell.Shell
-import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
-import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.io.InputStream
@@ -43,8 +39,8 @@ class SystemOperation {
     fun isDirectory(directory: Directory): Boolean = Files.isDirectory(getPath(directory))
     fun newInputStream(path: Path): InputStream = Files.newInputStream(path)
     fun newOutputStream(path: Path): OutputStream = Files.newOutputStream(path)
-    fun writeBytesToFile(path: Path, shell: Shell): Path = Files.write(path, shell.toByteArray())
-    fun readBytesFromFile(path: Path) = tryCatching { shellOf(Files.readAllBytes(path)) } getOrElse emptyShell()
+    fun writeBytesToFile(path: Path, byteArray: ByteArray): Path = Files.write(path, byteArray)
+    fun readBytesFromFile(path: Path): ByteArray = Files.readAllBytes(path)
     fun copyToClipboard(text: String) = StringSelection(text).let { Toolkit.getDefaultToolkit().systemClipboard.setContents(it, it) }
     fun exit(): Unit = exitProcess(0)
 }

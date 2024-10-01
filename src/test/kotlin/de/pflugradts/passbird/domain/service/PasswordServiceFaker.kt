@@ -3,6 +3,7 @@ package de.pflugradts.passbird.domain.service
 import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
+import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -20,33 +21,39 @@ fun fakePasswordService(
         if (withNestService != null) {
             withEggs
                 .filter { it.associatedNest() == withNestService.currentNest().slot }
-                .map { it.viewEggId() }.stream()
+                .map { it.viewEggId().fakeDec() }.stream()
         } else {
-            withEggs.map { it.viewEggId() }.stream()
+            withEggs.map { it.viewEggId().fakeDec() }.stream()
         }
     }
     every { instance.viewPassword(any()) } answers {
-        optionOf(withEggs.find { it.viewEggId() == firstArg() }?.viewPassword())
+        optionOf(withEggs.find { it.viewEggId().fakeDec() == firstArg() }?.viewPassword()?.fakeDec())
     }
     every { instance.eggExists(any(), any<PasswordService.EggNotExistsAction>()) } answers {
-        withEggs.find { it.viewEggId() == firstArg() } != null
+        withEggs.find { it.viewEggId().fakeDec() == firstArg() } != null
     }
     every { instance.eggExists(any(), any<Slot>()) } answers {
-        val res = withEggs.find { it.viewEggId() == firstArg() && it.associatedNest() == secondArg() } != null
-        println(res)
-        res
+        withEggs.find { it.viewEggId().fakeDec() == firstArg() && it.associatedNest() == secondArg() } != null
     }
     every { instance.viewProteinTypes(any()) } answers {
-        optionOf(withEggs.find { it.viewEggId() == firstArg() }?.proteins?.map { it.map { p -> p.viewType() } })
+        optionOf(withEggs.find { it.viewEggId().fakeDec() == firstArg() }?.proteins?.map { it.map { p -> p.viewType().fakeDec() } })
     }
     every { instance.viewProteinType(any(), any()) } answers {
-        optionOf(withEggs.find { it.viewEggId() == firstArg() }?.proteins?.get(secondArg<Slot>().index())?.orNull()?.viewType())
+        optionOf(
+            withEggs.find {
+                it.viewEggId().fakeDec() == firstArg()
+            }?.proteins?.get(secondArg<Slot>().index())?.orNull()?.viewType()?.fakeDec(),
+        )
     }
     every { instance.viewProteinStructures(any()) } answers {
-        optionOf(withEggs.find { it.viewEggId() == firstArg() }?.proteins?.map { it.map { p -> p.viewStructure() } })
+        optionOf(withEggs.find { it.viewEggId().fakeDec() == firstArg() }?.proteins?.map { it.map { p -> p.viewStructure().fakeDec() } })
     }
     every { instance.viewProteinStructure(any(), any()) } answers {
-        optionOf(withEggs.find { it.viewEggId() == firstArg() }?.proteins?.get(secondArg<Slot>().index())?.orNull()?.viewStructure())
+        optionOf(
+            withEggs.find {
+                it.viewEggId().fakeDec() == firstArg()
+            }?.proteins?.get(secondArg<Slot>().index())?.orNull()?.viewStructure()?.fakeDec(),
+        )
     }
     if (withInvalidEggId) {
         every { instance.challengeEggId(any()) } answers { throw InvalidEggIdException(firstArg()) }

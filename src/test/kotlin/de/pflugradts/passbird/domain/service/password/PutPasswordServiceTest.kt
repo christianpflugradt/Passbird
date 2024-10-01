@@ -2,12 +2,12 @@ package de.pflugradts.passbird.domain.service.password
 
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
-import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
+import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
-import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -15,6 +15,7 @@ import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import de.pflugradts.passbird.domain.service.password.tree.fakeEggRepository
 import io.mockk.Called
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -95,6 +96,7 @@ class PutPasswordServiceTest {
         val matchingEgg = createEggForTesting(withEggIdShell = existingEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
+        val eggSlot = slot<Egg>()
 
         // when
         passwordService.putEgg(newEggId, newPassword)
@@ -103,7 +105,10 @@ class PutPasswordServiceTest {
         verify(exactly = 1) { cryptoProvider.encrypt(newEggId) }
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
         verify(exactly = 1) { eggRepository.sync() }
-        verify(exactly = 1) { eggRepository.add(eq(createEgg(Slot.DEFAULT, newEggId, newPassword))) }
+        verify { eggRepository.add(capture(eggSlot)) }
+        expectThat(eggSlot.isCaptured).isTrue()
+        expectThat(eggSlot.captured.viewEggId().fakeDec()) isEqualTo newEggId
+        expectThat(eggSlot.captured.viewPassword().fakeDec()) isEqualTo newPassword
         verify(exactly = 1) { eventRegistry.processEvents() }
     }
 
@@ -124,7 +129,7 @@ class PutPasswordServiceTest {
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
         verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { eventRegistry.processEvents() }
-        expectThat(eggRepository.find(eggIdShell = existingEggId).orNull()?.viewPassword()) isEqualTo newPassword
+        expectThat(eggRepository.find(eggIdShell = existingEggId).orNull()?.viewPassword()?.fakeDec()) isEqualTo newPassword
     }
 
     @Test
@@ -152,6 +157,7 @@ class PutPasswordServiceTest {
         val matchingEgg = createEggForTesting(withEggIdShell = existingEggId)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
+        val eggSlot = slot<Egg>()
 
         // when
         passwordService.putEggs(
@@ -161,10 +167,13 @@ class PutPasswordServiceTest {
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(newEggId) }
         verify(exactly = 1) { cryptoProvider.encrypt(existingEggId) }
-        verify(exactly = 1) { eggRepository.add(eq(createEgg(Slot.DEFAULT, newEggId, newPassword))) }
+        verify(exactly = 1) { eggRepository.add(capture(eggSlot)) }
+        expectThat(eggSlot.isCaptured).isTrue()
+        expectThat(eggSlot.captured.viewEggId().fakeDec()) isEqualTo newEggId
+        expectThat(eggSlot.captured.viewPassword().fakeDec()) isEqualTo newPassword
         verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { eventRegistry.processEvents() }
-        expectThat(eggRepository.find(eggIdShell = existingEggId).orNull()?.viewPassword()) isEqualTo newPasswordForExistingEggId
+        expectThat(eggRepository.find(eggIdShell = existingEggId).orNull()?.viewPassword()?.fakeDec()) isEqualTo newPasswordForExistingEggId
     }
 
     @Test

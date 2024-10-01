@@ -18,6 +18,7 @@ import de.pflugradts.passbird.application.util.readInt
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.egg.Protein.Companion.createProtein
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -45,6 +46,9 @@ class PasswordTreeReader @Inject constructor(
             verifySignature(byteArray)
             verifyChecksum(byteArray)
             var offset = signatureSize()
+            for (i in 0 until Slot.CAPACITY) {
+                offset += placeHolder().size
+            }
             offset = populateNests(byteArray, offset)
             while (offset < byteArray.size - 2) {
                 val res = byteArray.asEgg(offset)
@@ -57,7 +61,7 @@ class PasswordTreeReader @Inject constructor(
     }
 
     private fun readFromDisk() =
-        tryCatching { systemOperation.readBytesFromFile(filePath).let { if (it.isEmpty) it else cryptoProvider.decrypt(it) } }
+        tryCatching { systemOperation.readBytesFromFile(filePath).let { cryptoProvider.decrypt(encryptedShellOf(it)) } }
             .onFailure { reportFailure(DecryptPasswordTreeFailure(filePath, it)) }
             .getOrNull()
 
@@ -137,11 +141,11 @@ class PasswordTreeReader @Inject constructor(
             val structureBytes = if (structureSize > 0) readBytes(this, incrementedOffset, structureSize) else byteArrayOf()
             incrementedOffset += structureSize
             if (typeSize > 0 && structureSize > 0) {
-                mutableOptionOf(createProtein(shellOf(typeBytes), shellOf(structureBytes)))
+                mutableOptionOf(createProtein(encryptedShellOf(typeBytes), encryptedShellOf(structureBytes)))
             } else {
                 mutableOptionOf()
             }
         }.toList()
-        return Pair(createEgg(slotAt(nestSlot), shellOf(eggIdBytes), shellOf(passwordBytes), proteins), incrementedOffset)
+        return Pair(createEgg(slotAt(nestSlot), encryptedShellOf(eggIdBytes), encryptedShellOf(passwordBytes), proteins), incrementedOffset)
     }
 }

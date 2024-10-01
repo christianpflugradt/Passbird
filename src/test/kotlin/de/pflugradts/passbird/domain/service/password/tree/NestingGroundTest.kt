@@ -3,6 +3,7 @@ package de.pflugradts.passbird.domain.service.password.tree
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.createNestServiceSpyForTesting
@@ -52,7 +53,7 @@ class NestingGroundTest {
     @Test
     fun `should find egg`() {
         // given / when
-        val actual = nestingGround.find(givenEgg1.viewEggId())
+        val actual = nestingGround.find(givenEgg1.viewEggId().fakeDec())
 
         // then
         expectThat(actual.isPresent).isTrue()
@@ -65,7 +66,7 @@ class NestingGroundTest {
         val nonExistingEgg = createEggForTesting(withEggIdShell = shellOf("unknown"))
 
         // when
-        val actual = nestingGround.find(nonExistingEgg.viewEggId())
+        val actual = nestingGround.find(nonExistingEgg.viewEggId().fakeDec())
 
         // then
         expectThat(actual.isEmpty).isTrue()
@@ -81,7 +82,7 @@ class NestingGroundTest {
 
         // then
         verify(exactly = 1) { eventRegistry.register(newEgg) }
-        nestingGround.find(newEgg.viewEggId()).let {
+        nestingGround.find(newEgg.viewEggId().fakeDec()).let {
             expectThat(it.isPresent).isTrue()
             expectThat(it.get()) isEqualTo newEgg
         }
@@ -93,7 +94,7 @@ class NestingGroundTest {
         nestingGround.delete(givenEgg1)
 
         // then
-        expectThat(nestingGround.find(givenEgg1.viewEggId()).isEmpty).isTrue()
+        expectThat(nestingGround.find(givenEgg1.viewEggId().fakeDec()).isEmpty).isTrue()
     }
 
     @Test

@@ -7,6 +7,8 @@ import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.fakeDec
+import de.pflugradts.passbird.domain.model.shell.fakeEnc
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
@@ -45,7 +47,7 @@ internal class RenameCommandTest {
         // then
         verify(exactly = 1) { passwordService.renameEgg(eq(shellOf(args)), newEggId) }
         verify(exactly = 1) { newEggId.scramble() }
-        expectThat(givenEgg.viewEggId()) isEqualTo reference.slice(1)
+        expectThat(givenEgg.viewEggId()) isEqualTo reference.slice(1).fakeEnc()
         expectThat(shell) isNotEqualTo reference
     }
 
@@ -103,7 +105,7 @@ internal class RenameCommandTest {
         inputHandler.handleInput(inputOf(shell))
 
         // then
-        expectThat(givenEgg.viewEggId()) isEqualTo reference.slice(1)
+        expectThat(givenEgg.viewEggId().fakeDec()) isEqualTo reference.slice(1)
         expectThat(shell) isNotEqualTo reference
     }
 }
