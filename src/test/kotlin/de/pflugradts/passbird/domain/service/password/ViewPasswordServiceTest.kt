@@ -70,7 +70,7 @@ class ViewPasswordServiceTest {
         val matchingEgg = createEggForTesting(withEggIdShell = givenEggId, withPasswordShell = expectedPassword)
         fakeCryptoProvider(instance = cryptoProvider)
         fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
-        val encryptedShellSlot = slot<EncryptedShell>()
+        val encryptedShellSlot = mutableListOf<EncryptedShell>()
 
         // when
         val actual = passwordService.viewPassword(givenEggId)
@@ -78,8 +78,9 @@ class ViewPasswordServiceTest {
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(givenEggId) }
         verify { cryptoProvider.decrypt(capture(encryptedShellSlot)) }
-        expectThat(encryptedShellSlot.isCaptured).isTrue()
-        expectThat(encryptedShellSlot.captured.fakeDec()) isEqualTo expectedPassword
+        expectThat(encryptedShellSlot.size) isEqualTo 2
+        expectThat(encryptedShellSlot[0].fakeDec()) isEqualTo givenEggId
+        expectThat(encryptedShellSlot[1].fakeDec()) isEqualTo expectedPassword
         verify { eventRegistry wasNot Called }
         expectThat(actual.isPresent).isTrue()
         expectThat(actual.get()) isEqualTo expectedPassword

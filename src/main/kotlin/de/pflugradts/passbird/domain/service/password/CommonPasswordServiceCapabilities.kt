@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
 import de.pflugradts.kotlinextensions.Option
+import de.pflugradts.kotlinextensions.toOption
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.event.EggNotFound
@@ -13,14 +14,17 @@ import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExis
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import java.util.function.Predicate
+import java.util.stream.Stream
 
 abstract class CommonPasswordServiceCapabilities(
     private val cryptoProvider: CryptoProvider,
     private val eggRepository: EggRepository,
     private val eventRegistry: EventRegistry,
 ) {
-    fun find(eggIdShell: Shell, slot: Slot): Option<Egg> = eggRepository.find(eggIdShell, slot)
-    fun find(eggIdShell: Shell): Option<Egg> = eggRepository.find(eggIdShell)
+    fun find(eggIdShell: Shell, slot: Slot): Option<Egg> = eggRepository.findAll(slot).findDecrypted(eggIdShell)
+    fun find(eggIdShell: Shell): Option<Egg> = eggRepository.findAll().findDecrypted(eggIdShell)
+    private fun Stream<Egg>.findDecrypted(eggIdShell: Shell) = filter { decrypted(it.viewEggId()) == eggIdShell }.findAny().toOption()
+
     fun encrypted(shell: Shell) = cryptoProvider.encrypt(shell)
     fun decrypted(encryptedShell: EncryptedShell) = cryptoProvider.decrypt(encryptedShell)
 

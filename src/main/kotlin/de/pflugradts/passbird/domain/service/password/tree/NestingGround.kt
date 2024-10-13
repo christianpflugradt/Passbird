@@ -4,10 +4,7 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import de.pflugradts.kotlinextensions.MutableOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
-import de.pflugradts.kotlinextensions.Option
-import de.pflugradts.kotlinextensions.toOption
 import de.pflugradts.passbird.domain.model.egg.Egg
-import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestService
@@ -47,10 +44,7 @@ class NestingGround @Inject constructor(
     }
 
     override fun sync() = passwordTreeAdapterPort.sync(createEggStreamSupplier(EggFilter.ALL_NESTS))
-    override fun find(eggIdShell: Shell, slot: Slot): Option<Egg> = find(createEggStreamSupplier(slot), eggIdShell)
-    override fun find(eggIdShell: Shell): Option<Egg> = find(createEggStreamSupplier(CURRENT_NEST), eggIdShell)
-    private fun find(supplier: EggStreamSupplier, eggIdShell: Shell): Option<Egg> =
-        supplier.get().filter { it.viewEggId().payload == eggIdShell }.findAny().toOption()
+    override fun findAll(slot: Slot) = createEggStreamSupplier(slot).get()
     override fun findAll() = createEggStreamSupplier(CURRENT_NEST).get()
     private fun createEggStreamSupplier(eggFilter: EggFilter): EggStreamSupplier =
         createEggStreamSupplier(if (eggFilter == CURRENT_NEST) inNest(nestService.currentNest().slot) else all())

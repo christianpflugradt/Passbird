@@ -7,6 +7,7 @@ import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.createNestServiceSpyForTesting
+import de.pflugradts.passbird.domain.service.nest.findForTesting
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -30,9 +31,9 @@ class NestingGroundTest {
     private val nestingGround = NestingGround(passwordTreeAdapterPort, nestService, eventRegistry)
 
     @Test
-    fun `should initialize`() {
+    fun `should initialize upon first invocation`() {
         // given / when / then
-        nestingGround.find(emptyShell())
+        nestingGround.findForTesting(emptyShell())
         verify(exactly = 1) { eventRegistry.register(givenEgg1) }
         verify(exactly = 1) { eventRegistry.register(givenEgg2) }
     }
@@ -53,7 +54,7 @@ class NestingGroundTest {
     @Test
     fun `should find egg`() {
         // given / when
-        val actual = nestingGround.find(givenEgg1.viewEggId().fakeDec())
+        val actual = nestingGround.findForTesting(givenEgg1.viewEggId().fakeDec())
 
         // then
         expectThat(actual.isPresent).isTrue()
@@ -66,7 +67,7 @@ class NestingGroundTest {
         val nonExistingEgg = createEggForTesting(withEggIdShell = shellOf("unknown"))
 
         // when
-        val actual = nestingGround.find(nonExistingEgg.viewEggId().fakeDec())
+        val actual = nestingGround.findForTesting(nonExistingEgg.viewEggId().fakeDec())
 
         // then
         expectThat(actual.isEmpty).isTrue()
@@ -82,7 +83,7 @@ class NestingGroundTest {
 
         // then
         verify(exactly = 1) { eventRegistry.register(newEgg) }
-        nestingGround.find(newEgg.viewEggId().fakeDec()).let {
+        nestingGround.findForTesting(newEgg.viewEggId().fakeDec()).let {
             expectThat(it.isPresent).isTrue()
             expectThat(it.get()) isEqualTo newEgg
         }
@@ -94,7 +95,7 @@ class NestingGroundTest {
         nestingGround.delete(givenEgg1)
 
         // then
-        expectThat(nestingGround.find(givenEgg1.viewEggId().fakeDec()).isEmpty).isTrue()
+        expectThat(nestingGround.findForTesting(givenEgg1.viewEggId().fakeDec()).isEmpty).isTrue()
     }
 
     @Test
@@ -145,9 +146,9 @@ class NestingGroundTest {
 
             // when
             nestService.moveToNestAt(firstSlot)
-            val actualFirstEgg = nestingGround.find(eggIdShells)
+            val actualFirstEgg = nestingGround.findForTesting(eggIdShells)
             nestService.moveToNestAt(secondSlot)
-            val actualSecondEgg = nestingGround.find(eggIdShells)
+            val actualSecondEgg = nestingGround.findForTesting(eggIdShells)
 
             // then
             expectThat(actualFirstEgg.isPresent).isTrue()
