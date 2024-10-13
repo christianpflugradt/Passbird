@@ -272,7 +272,7 @@ Some example inputs and what they do:
 
 The Tree structure has changed as Passbird 5.x.x is now encrypted using AES-GCM, an encryption algorithm recommended by NIST. Furthermore, the structure of the file has slightly changed in preparation of an upcoming feature related to shortcuts.For that reason, using Passbird 4.x.x, all Passwords must be exported using the `export` command (letter `e`). The export will preserve Nests and Proteins, so no data should get lost in the process. Nevertheless, it is recommended to manually back up the folder where Passbird resides in case something goes wrong.
 
-After creating an export file, terminate Passbird and delete the password database file named `passbird.tree`. Now update Passbird to 5.x.x which will, due to the deleted password database file, trigger the setup routine and prompt you to confirm the directory Passbird uses. Enter the directory you have previously used and Passbird will initialise with an empty database. Now run the `import` command (letter `i`) and all Nests, Passwords and Proteins should be restored.
+After creating an export file, terminate Passbird and delete the password database file named `passbird.tree`. Now update Passbird to 5.x.x and start the program. Passbird will output an error because the password database cannot be read. Ignore this error and run the `import` command (letter `i`), which will restore the database and all Nests, Passwords and Proteins.
 
 ## <a name="faq"></a>Frequently Asked Questions
 
