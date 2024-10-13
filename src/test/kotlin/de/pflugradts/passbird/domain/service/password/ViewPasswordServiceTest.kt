@@ -76,7 +76,6 @@ class ViewPasswordServiceTest {
         val actual = passwordService.viewPassword(givenEggId)
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(givenEggId) }
         verify { cryptoProvider.decrypt(capture(encryptedShellSlot)) }
         expectThat(encryptedShellSlot.size) isEqualTo 2
         expectThat(encryptedShellSlot[0].fakeDec()) isEqualTo givenEggId
@@ -100,10 +99,9 @@ class ViewPasswordServiceTest {
         val actual = passwordService.viewPassword(otherEggId)
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(otherEggId) }
         verify { eventRegistry.register(capture(eggNotFoundSlot)) }
         expectThat(eggNotFoundSlot.isCaptured).isTrue()
-        expectThat(eggNotFoundSlot.captured.eggIdShell.fakeDec()) isEqualTo otherEggId
+        expectThat(eggNotFoundSlot.captured.eggIdShell) isEqualTo otherEggId
         verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(actual.isEmpty).isTrue()
     }

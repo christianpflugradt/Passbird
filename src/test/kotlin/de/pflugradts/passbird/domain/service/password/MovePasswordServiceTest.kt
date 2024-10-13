@@ -6,7 +6,6 @@ import de.pflugradts.passbird.domain.model.egg.EggIdAlreadyExistsException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
-import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.password.MovePasswordService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -61,7 +60,7 @@ internal class MovePasswordServiceTest {
         // then
         verify { passbirdEventRegistry.register(capture(eggNotFoundSlot)) }
         expectThat(eggNotFoundSlot.isCaptured).isTrue()
-        expectThat(eggNotFoundSlot.captured.eggIdShell.fakeDec()) isEqualTo givenEggId
+        expectThat(eggNotFoundSlot.captured.eggIdShell) isEqualTo givenEggId
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 

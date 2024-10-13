@@ -36,12 +36,10 @@ class ViewPasswordService @Inject constructor(
         egg.proteins.map { protein -> protein.map { optionOf(decrypted(it.viewType())) }.orElse(emptyOption()) }
     }
 
-    private fun <T> extractFromEgg(eggIdShell: Shell, extraction: (egg: Egg) -> T): Option<T> =
-        encrypted(eggIdShell).let { encryptedEggIdShell ->
-            find(encryptedEggIdShell.payload).map { extraction(it) }.or {
-                eventRegistry.register(EggNotFound(encryptedEggIdShell))
-                eventRegistry.processEvents()
-                emptyOption()
-            }
+    private fun <T> extractFromEgg(eggIdShell: Shell, extraction: (egg: Egg) -> T): Option<T> = find(eggIdShell)
+        .map { extraction(it) }.or {
+            eventRegistry.register(EggNotFound(eggIdShell))
+            eventRegistry.processEvents()
+            emptyOption()
         }
 }

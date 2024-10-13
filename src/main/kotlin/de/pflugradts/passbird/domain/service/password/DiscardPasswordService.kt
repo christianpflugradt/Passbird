@@ -12,13 +12,7 @@ class DiscardPasswordService @Inject constructor(
     eggRepository: EggRepository,
     private val eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
-    fun discardEgg(eggIdShell: Shell) {
-        encrypted(eggIdShell).let { encryptedEggIdShell ->
-            find(encryptedEggIdShell.payload).ifPresentOrElse(
-                { it.discard() },
-                { eventRegistry.register(EggNotFound(encryptedEggIdShell)) },
-            )
-        }
-        processEventsAndSync()
-    }
+    fun discardEgg(eggIdShell: Shell) = find(eggIdShell)
+        .ifPresentOrElse({ it.discard() }, { eventRegistry.register(EggNotFound(eggIdShell)) })
+        .also { processEventsAndSync() }
 }

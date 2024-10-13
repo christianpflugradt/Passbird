@@ -11,9 +11,7 @@ import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
-import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
-import de.pflugradts.passbird.domain.model.shell.fakeEnc
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -39,7 +37,7 @@ class ApplicationEventHandlerTest {
 
     @ParameterizedTest
     @MethodSource("providePasswordEvents")
-    fun `should process egg created`(domainEvent: DomainEvent) {
+    fun `should process egg events`(domainEvent: DomainEvent) {
         // given
         val expectedEggIdShell = shellOf("expected eggId")
         every { cryptoProvider.decrypt(any(EncryptedShell::class)) } answers { expectedEggIdShell }
@@ -62,7 +60,7 @@ class ApplicationEventHandlerTest {
             Arguments.of(EggUpdated(createEggForTesting())),
             Arguments.of(EggRenamed(createEggForTesting())),
             Arguments.of(EggMoved(createEggForTesting())),
-            Arguments.of(EggNotFound(emptyShell().fakeEnc())),
+            Arguments.of(EggNotFound(shellOf("expected eggId"))),
         )
     }
 }

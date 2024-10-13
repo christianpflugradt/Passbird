@@ -16,13 +16,11 @@ class RenamePasswordService @Inject constructor(
     fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell) {
         challengeEggId(newEggIdShell)
         if (eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
-            encrypted(newEggIdShell).let { encryptedNewEggIdShell ->
-                if (find(encryptedNewEggIdShell.payload).isEmpty) {
-                    encrypted(eggIdShell).payload.let { find(it).get().rename(encryptedNewEggIdShell) }
-                    processEventsAndSync()
-                } else {
-                    throw EggIdAlreadyExistsException(newEggIdShell)
-                }
+            if (find(newEggIdShell).isEmpty) {
+                encrypted(newEggIdShell).let { find(eggIdShell).get().rename(it) }
+                processEventsAndSync()
+            } else {
+                throw EggIdAlreadyExistsException(newEggIdShell)
             }
         }
     }

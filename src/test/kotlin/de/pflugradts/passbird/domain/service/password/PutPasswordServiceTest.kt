@@ -125,7 +125,6 @@ class PutPasswordServiceTest {
         passwordService.putEgg(existingEggId, newPassword)
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(existingEggId) }
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
         verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { eventRegistry.processEvents() }
@@ -166,7 +165,6 @@ class PutPasswordServiceTest {
 
         // then
         verify(exactly = 1) { cryptoProvider.encrypt(newEggId) }
-        verify(exactly = 1) { cryptoProvider.encrypt(existingEggId) }
         verify(exactly = 1) { eggRepository.add(capture(eggSlot)) }
         expectThat(eggSlot.isCaptured).isTrue()
         expectThat(eggSlot.captured.viewEggId().fakeDec()) isEqualTo newEggId

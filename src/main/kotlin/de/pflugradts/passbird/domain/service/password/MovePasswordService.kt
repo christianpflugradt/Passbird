@@ -18,12 +18,7 @@ class MovePasswordService @Inject constructor(
         if (eggExists(eggIdShell, targetSlot)) {
             throw EggIdAlreadyExistsException(eggIdShell)
         } else {
-            encrypted(eggIdShell).let { encryptedEggIdShell ->
-                find(encryptedEggIdShell.payload).ifPresentOrElse(
-                    { it.moveToNestAt(targetSlot) },
-                    { eventRegistry.register(EggNotFound(encryptedEggIdShell)) },
-                )
-            }
+            find(eggIdShell).ifPresentOrElse({ it.moveToNestAt(targetSlot) }, { eventRegistry.register(EggNotFound(eggIdShell)) })
             processEventsAndSync()
         }
     }

@@ -40,7 +40,6 @@ class DiscardPasswordServiceTest {
         passwordService.discardEgg(givenEggId)
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(givenEggId) }
         verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(givenEgg.viewPassword()) isNotEqualTo givenPassword.fakeEnc()
     }
@@ -59,10 +58,9 @@ class DiscardPasswordServiceTest {
         passwordService.discardEgg(otherEggId)
 
         // then
-        verify(exactly = 1) { cryptoProvider.encrypt(otherEggId) }
         verify { eventRegistry.register(capture(eggNotFoundSlot)) }
         expectThat(eggNotFoundSlot.isCaptured).isTrue()
-        expectThat(eggNotFoundSlot.captured.eggIdShell.fakeDec()) isEqualTo otherEggId
+        expectThat(eggNotFoundSlot.captured.eggIdShell) isEqualTo otherEggId
         verify(exactly = 1) { eventRegistry.processEvents() }
     }
 }
