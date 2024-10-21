@@ -32,10 +32,10 @@ dependencies {
     testImplementation("io.strikt:strikt-jvm:0.35.1")
     testImplementation("io.mockk:mockk:1.13.13")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:5.11.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.3")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:5.11.3")
     testImplementation("org.awaitility:awaitility:4.2.2")
     testImplementation("com.tngtech.archunit:archunit:1.3.0")
 }
