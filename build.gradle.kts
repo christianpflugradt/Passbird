@@ -131,7 +131,6 @@ tasks.jacocoTestCoverageVerification {
         }
     }
     mustRunAfter(tasks.withType<Test>())
-    mustRunAfter(tasks.jacocoTestReport)
 }
 
 dependencyCheck {
