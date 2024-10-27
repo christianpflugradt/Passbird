@@ -79,4 +79,19 @@ class ByteArrayUtilsTest {
         expectThat(actual) isEqualTo size
         expectThat(givenTargetByteArray) isEqualTo expectedTargetByteArray
     }
+
+    @Test
+    fun `should copy bytes with size unspecified`() {
+        // given
+        val givenSourceByteArray = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8)
+        val givenTargetByteArray = ByteArray(18)
+        val offset = 7
+        val expectedTargetByteArray = byteArrayOf(0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 0, 0)
+
+        // when
+        copyBytes(givenSourceByteArray, givenTargetByteArray, offset)
+
+        // then
+        expectThat(givenTargetByteArray) isEqualTo expectedTargetByteArray
+    }
 }
