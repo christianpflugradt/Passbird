@@ -1,3 +1,4 @@
+
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
@@ -134,15 +135,22 @@ tasks.jacocoTestCoverageVerification {
 }
 
 dependencyCheck {
+    scanSet = listOf(
+
+    )
     failBuildOnCVSS = 0.0f
     nvd.apiKey = System.getenv("NVD_API_KEY")
     nvd.delay = 16000
     suppressionFile = "owasp-suppressions.xml"
     analyzers.apply {
-        assemblyEnabled = false
-        centralEnabled = false
-        nexusEnabled = false
-        ossIndexEnabled = false
-        retirejs.enabled = false
+        ossIndex.apply {
+            username = System.getenv("OSS_INDEX_USERNAME")
+            password = System.getenv("OSS_INDEX_PASSWORD")
+        }
+        centralEnabled = true // Maven Central
+        ossIndexEnabled = true // Sonatype OSS Index
+        assemblyEnabled = false // .NET
+        nexusEnabled = false // Sonatype Nexus Repository
+        retirejs.enabled = false // JavaScript
     }
 }

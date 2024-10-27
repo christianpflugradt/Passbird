@@ -18,6 +18,8 @@ jobs:
       - name: check dependencies for vulnerabilities
         env:
             NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+            OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
+            OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
         run: |
           export JAVA_OPTS="-Xms1g -Xmx4g"
           ./gradlew dependencyCheckAnalyze
