@@ -22,4 +22,5 @@ fun fakeUserInterfaceAdapterPort(
     every { instance.receiveYes(any<Output>()) } returns withReceiveYes
     every { instance.send(any()) } returns Unit
     every { instance.sendLineBreak() } returns Unit
+    every { instance.warningSound() } returns Unit
 }
