@@ -11,6 +11,7 @@ import de.pflugradts.passbird.domain.service.password.MovePasswordService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import de.pflugradts.passbird.domain.service.password.tree.fakeEggRepository
+import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -44,6 +45,7 @@ internal class MovePasswordServiceTest {
 
         // then
         expectThat(givenEgg.associatedNest()) isEqualTo newSlot isNotEqualTo givenSlot
+        verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 
     @Test
@@ -73,10 +75,7 @@ internal class MovePasswordServiceTest {
         val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withSlot = givenSlot)
         val conflictingEgg = createEggForTesting(withEggIdShell = givenEggId, withSlot = newSlot)
         fakeCryptoProvider(instance = cryptoProvider)
-        fakeEggRepository(
-            instance = eggRepository,
-            withEggs = listOf(givenEgg, conflictingEgg),
-        )
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg, conflictingEgg))
 
         // when
         val actual = tryCatching { passwordService.movePassword(givenEggId, newSlot) }
@@ -84,5 +83,6 @@ internal class MovePasswordServiceTest {
         // then
         expectThat(actual.exceptionOrNull()).isNotNull().isA<EggIdAlreadyExistsException>()
         expectThat(givenEgg.associatedNest()) isEqualTo givenSlot isNotEqualTo newSlot
+        verify { passbirdEventRegistry wasNot Called }
     }
 }
