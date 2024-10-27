@@ -21,14 +21,6 @@ import java.util.Collections
 class ShellTest {
 
     @Test
-    fun test() {
-        val givenShell = byteArrayOf(1, 2, 3)
-        val shell = shellOf(givenShell)
-        println(shell.toByteArray().toList())
-        println(shell.toMutableList().also { it.remove(1.toByte()) })
-    }
-
-    @Test
     fun `should have correct size`() {
         // given
         val givenShell = byteArrayOf(1, 2, 3)
