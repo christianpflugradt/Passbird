@@ -10,6 +10,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.S4
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.Called
@@ -108,7 +109,9 @@ class GetProteinCommandTest {
 
         // then
         verify { clipboardAdapterPort wasNot Called }
-        verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
+        verify(exactly = 1) {
+            userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted - Specified Protein Structure is empty."))))
+        }
         expectThat(command) isNotEqualTo reference
     }
 }
