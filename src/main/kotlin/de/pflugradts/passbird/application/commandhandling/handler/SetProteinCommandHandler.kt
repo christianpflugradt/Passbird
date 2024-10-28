@@ -23,28 +23,31 @@ class SetProteinCommandHandler @Inject constructor(
     private fun handleSetProteinCommand(setProteinCommand: SetProteinCommand) {
         val eggIdShell = setProteinCommand.argument
         val slot = setProteinCommand.slot
-        if (passwordService.eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
-            if (!passwordService.proteinExists(eggIdShell, slot) || commandConfirmed(setProteinCommand)) {
-                val type = passwordService.viewProteinType(setProteinCommand.argument, setProteinCommand.slot).get()
-                val typeMsg = if (type.isEmpty) {
-                    "Enter Protein Type: "
-                } else {
-                    "Enter new Protein Type to replace '${type.asString()}' or just press enter to keep it: "
+        run {
+            if (passwordService.eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
+                if (!passwordService.proteinExists(eggIdShell, slot) || commandConfirmed(setProteinCommand)) {
+                    val type = passwordService.viewProteinType(setProteinCommand.argument, setProteinCommand.slot).get()
+                    val typeMsg = if (type.isEmpty) {
+                        "Enter Protein Type or just press enter to abort: "
+                    } else {
+                        "Enter new Protein Type to replace '${type.asString()}' or just press enter to keep it: "
+                    }
+                    val typeInput =
+                        userInterfaceAdapterPort.receive(outputOf(shellOf(typeMsg))).let { if (it.isEmpty) inputOf(type) else it }
+                    if (typeInput.isNotEmpty) {
+                        val structureMsg = "Enter Protein Structure or just press enter to abort: "
+                        val structureInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(structureMsg)))
+                        if (structureInput.isNotEmpty) {
+                            passwordService.putProtein(
+                                eggIdShell = eggIdShell,
+                                slot = slot,
+                                typeShell = typeInput.shell,
+                                structureShell = structureInput.shell,
+                            )
+                            return@run
+                        }
+                    }
                 }
-                val typeInput = userInterfaceAdapterPort.receive(outputOf(shellOf(typeMsg))).let { if (it.isEmpty) inputOf(type) else it }
-                val structureMsg = "Enter Protein Structure or just press enter to abort: "
-                val structureInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(structureMsg)))
-                if (structureInput.isNotEmpty) {
-                    passwordService.putProtein(
-                        eggIdShell = eggIdShell,
-                        slot = slot,
-                        typeShell = typeInput.shell,
-                        structureShell = structureInput.shell,
-                    )
-                } else {
-                    userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
-                }
-            } else {
                 userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             }
         }

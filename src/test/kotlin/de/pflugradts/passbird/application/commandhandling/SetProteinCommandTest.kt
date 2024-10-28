@@ -170,4 +170,155 @@ class SetProteinCommandTest {
         verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
         expectThat(shell) isNotEqualTo reference
     }
+
+    @Test
+    fun `should handle set protein command with new protein and no type provided`() {
+        // given
+        val args = "EggId"
+        val slot = DEFAULT
+        val shell = shellOf("p+${slot.index()}$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
+        val givenType = ""
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf(givenType))),
+        )
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+        verify(exactly = 0) { passwordService.putProtein(eq(shellOf(args)), slot, any(), any()) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should handle set protein command with new protein and no structure provided`() {
+        // given
+        val args = "EggId"
+        val slot = DEFAULT
+        val shell = shellOf("p+${slot.index()}$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
+        val givenType = "url"
+        val givenStructure = ""
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf(givenType))),
+            withTheseSecureInputs = listOf(inputOf(shellOf(givenStructure))),
+        )
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+        verify(exactly = 0) { passwordService.putProtein(eq(shellOf(args)), slot, any(), any()) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should handle set protein command with existing protein and no type provided`() {
+        // given
+        val args = "EggId"
+        val slot = DEFAULT
+        val shell = shellOf("p+${slot.index()}$args")
+        val reference = shell.copy()
+        val givenPreviousType = "url"
+        val givenEgg = createEggForTesting(
+            withEggIdShell = shellOf(args),
+            withProteins = mapOf(slot to ShellPair(shellOf(givenPreviousType), shellOf("example.com"))),
+        )
+        val givenType = ""
+        val givenStructure = "example.org"
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf(givenType))),
+            withTheseSecureInputs = listOf(inputOf(shellOf(givenStructure))),
+        )
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) {
+            passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenPreviousType)), eq(shellOf(givenStructure)))
+        }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should handle set protein command with existing protein and no structure provided`() {
+        // given
+        val args = "EggId"
+        val slot = DEFAULT
+        val shell = shellOf("p+${slot.index()}$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(
+            withEggIdShell = shellOf(args),
+            withProteins = mapOf(slot to ShellPair(shellOf("url"), shellOf("example.com"))),
+        )
+        val givenType = "url"
+        val givenStructure = ""
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf(givenType))),
+            withTheseSecureInputs = listOf(inputOf(shellOf(givenStructure))),
+        )
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+        verify(exactly = 0) { passwordService.putProtein(eq(shellOf(args)), slot, any(), any()) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should handle set protein command with existing protein and new type provided`() {
+        // given
+        val args = "EggId"
+        val slot = DEFAULT
+        val shell = shellOf("p+${slot.index()}$args")
+        val reference = shell.copy()
+        val givenPreviousType = "url"
+        val givenEgg = createEggForTesting(
+            withEggIdShell = shellOf(args),
+            withProteins = mapOf(slot to ShellPair(shellOf(givenPreviousType), shellOf("example.com"))),
+        )
+        val givenType = "link"
+        val givenStructure = "example.org"
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf(givenType))),
+            withTheseSecureInputs = listOf(inputOf(shellOf(givenStructure))),
+        )
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) {
+            passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+        }
+        expectThat(shell) isNotEqualTo reference
+    }
 }
