@@ -44,6 +44,8 @@ class SetProteinCommandHandler @Inject constructor(
                 } else {
                     userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
                 }
+            } else {
+                userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             }
         }
         setProteinCommand.invalidateInput()
