@@ -24,7 +24,7 @@ repositories {
 
 val guiceVersion = "7.0.0"
 val jacksonVersion = "2.18.0"
-val striktVersion = "0.35.1"
+val striktVersion = "0.35.0"
 dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
@@ -40,7 +40,7 @@ dependencies {
 
     testImplementation("io.mockk:mockk:1.13.13")
 
-    testImplementation(platform("org.junit:junit-bom:5.11.3"))
+    testImplementation(platform("org.junit:junit-bom:5.11.2"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
