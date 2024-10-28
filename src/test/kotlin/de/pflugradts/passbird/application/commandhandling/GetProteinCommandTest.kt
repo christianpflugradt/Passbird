@@ -110,7 +110,7 @@ class GetProteinCommandTest {
         // then
         verify { clipboardAdapterPort wasNot Called }
         verify(exactly = 1) {
-            userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted - Specified Protein Structure is empty."))))
+            userInterfaceAdapterPort.send(eq(outputOf(shellOf("Specified Protein Structure is empty - Operation aborted."))))
         }
         expectThat(command) isNotEqualTo reference
     }

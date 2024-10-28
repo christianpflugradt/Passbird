@@ -22,7 +22,7 @@ class GetProteinCommandHandler @Inject constructor(
                 clipboardAdapterPort.post(outputOf(it))
                 userInterfaceAdapterPort.send(outputOf(shellOf("Protein copied to clipboard.")))
             } else {
-                val msg = "Operation aborted - Specified Protein Structure is empty."
+                val msg = "Specified Protein Structure is empty - Operation aborted."
                 userInterfaceAdapterPort.send(outputOf(shellOf(msg), OutputFormatting.OPERATION_ABORTED))
             }
         }
