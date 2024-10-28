@@ -22,21 +22,30 @@ repositories {
     mavenCentral()
 }
 
+val guiceVersion = "7.0.0"
+val jacksonVersion = "2.18.0"
+val striktVersion = "0.35.1"
 dependencies {
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.0")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.0")
-    implementation("com.google.inject:guice:7.0.0")
-    implementation("com.google.inject.extensions:guice-assistedinject:7.0.0")
+
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
+
+    implementation("com.google.inject:guice:$guiceVersion")
+    implementation("com.google.inject.extensions:guice-assistedinject:$guiceVersion")
+
     implementation("com.google.guava:guava:33.3.1-jre")
 
-    testImplementation("io.strikt:strikt-core:0.35.1")
-    testImplementation("io.strikt:strikt-jvm:0.35.1")
+    testImplementation("io.strikt:strikt-core:$striktVersion")
+    testImplementation("io.strikt:strikt-jvm:$striktVersion")
+
     testImplementation("io.mockk:mockk:1.13.13")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.3")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params:5.11.3")
+    testImplementation(platform("org.junit:junit-bom:5.11.3"))
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params")
+
     testImplementation("org.awaitility:awaitility:4.2.2")
     testImplementation("com.tngtech.archunit:archunit:1.3.0")
 }
