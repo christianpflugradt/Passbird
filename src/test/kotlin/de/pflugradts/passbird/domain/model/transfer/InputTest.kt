@@ -4,7 +4,6 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
-import de.pflugradts.passbird.domain.model.slot.Slot.INVALID
 import de.pflugradts.passbird.domain.model.slot.Slot.S1
 import de.pflugradts.passbird.domain.model.slot.Slot.S2
 import de.pflugradts.passbird.domain.model.slot.Slot.S3
@@ -146,7 +145,7 @@ class InputTest {
         }
 
         @Test
-        fun `should parse invalid nest with lower number`() {
+        fun `should fall back to default on number below minimum`() {
             // given
             val givenIndex = -1
             val input = inputOf(givenIndex)
@@ -155,11 +154,11 @@ class InputTest {
             val actual = input.extractNestSlot()
 
             // then
-            expectThat(actual) isEqualTo INVALID
+            expectThat(actual) isEqualTo DEFAULT
         }
 
         @Test
-        fun `should parse invalid nest with higher number`() {
+        fun `should fall back to default on number above maximum`() {
             // given
             val givenIndex = 10
             val input = inputOf(givenIndex)
@@ -168,11 +167,11 @@ class InputTest {
             val actual = input.extractNestSlot()
 
             // then
-            expectThat(actual) isEqualTo INVALID
+            expectThat(actual) isEqualTo DEFAULT
         }
 
         @Test
-        fun `should parse invalid nest with string`() {
+        fun `should fall back to default on string`() {
             // given
             val givenIndex = "-A"
             val input = inputOf(shellOf(givenIndex))
@@ -181,7 +180,7 @@ class InputTest {
             val actual = input.extractNestSlot()
 
             // then
-            expectThat(actual) isEqualTo INVALID
+            expectThat(actual) isEqualTo DEFAULT
         }
 
         private fun inputOf(index: Int) = inputOf(shellOf(index.toString()))

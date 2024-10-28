@@ -15,7 +15,8 @@ import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
@@ -29,12 +30,12 @@ class SetProteinCommandTest {
     private val setProteinCommandHandler = SetProteinCommandHandler(configuration, passwordService, userInterfaceAdapterPort)
     private val inputHandler = createInputHandlerFor(setProteinCommandHandler)
 
-    @Test
-    fun `should handle set protein command`() {
+    @ParameterizedTest
+    @EnumSource(value = Slot::class)
+    fun `should handle set protein command`(slot: Slot) {
         // given
         val args = "EggId"
-        val givenSlot = Slot.S1
-        val shell = shellOf("p+${givenSlot.index()}$args")
+        val shell = shellOf("p+${slot.index()}$args")
         val reference = shell.copy()
         val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
         val givenType = "url"
@@ -53,7 +54,7 @@ class SetProteinCommandTest {
 
         // then
         verify(exactly = 1) {
-            passwordService.putProtein(eq(shellOf(args)), givenSlot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+            passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
         }
         expectThat(shell) isNotEqualTo reference
     }

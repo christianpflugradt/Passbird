@@ -13,7 +13,6 @@ enum class Slot {
     S7,
     S8,
     S9,
-    INVALID,
     ;
 
     fun index() = (FIRST_SLOT..LAST_SLOT).find { slotAt(it) === this } ?: DEFAULT_INDEX

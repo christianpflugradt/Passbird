@@ -134,30 +134,6 @@ class MoveToNestCommandTest {
     }
 
     @Test
-    fun `should handle invalid nest entered`() {
-        // given
-        val givenEggId = "a"
-        val givenInput = shellOf("n$givenEggId")
-        val referenceInput = givenInput.copy()
-        val givenEgg = createEggForTesting(withEggIdShell = shellOf(givenEggId))
-        val invalidNestSlot = -1
-        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
-        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(invalidNestSlot)))
-        val outputSlot = mutableListOf<Output>()
-
-        // when
-        expectThat(givenInput) isEqualTo referenceInput
-        inputHandler.handleInput(inputOf(givenInput))
-
-        // then
-        verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot) hasSize 3
-        expectThat(outputSlot[2].shell.asString()) contains "Invalid Nest"
-        verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
-        expectThat(givenInput) isNotEqualTo referenceInput
-    }
-
-    @Test
     fun `should handle current nest entered`() {
         // given
         val givenEggId = "a"

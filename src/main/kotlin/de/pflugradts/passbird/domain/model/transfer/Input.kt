@@ -8,7 +8,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.FIRST_SLOT
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.LAST_SLOT
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
-import de.pflugradts.passbird.domain.model.slot.Slot.INVALID
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 
 class Input private constructor(val shell: Shell) : ValueObject {
 
@@ -29,8 +29,8 @@ class Input private constructor(val shell: Shell) : ValueObject {
     val isNotEmpty get() = shell.isNotEmpty
     fun invalidate() = shell.scramble()
     fun extractNestSlot(): Slot = shell.asString().toIntOrNull()?.let {
-        if (it in FIRST_SLOT - 1..LAST_SLOT) slotAt(it) else INVALID
-    } ?: INVALID
+        if (it in FIRST_SLOT - 1..LAST_SLOT) slotAt(it) else DEFAULT
+    } ?: DEFAULT
 
     override fun equals(other: Any?): Boolean = when {
         (this === other) -> true
