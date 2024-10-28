@@ -22,9 +22,16 @@ repositories {
     mavenCentral()
 }
 
+val guavaVersion = "33.3.1-jre"
 val guiceVersion = "7.0.0"
 val jacksonVersion = "2.18.0"
+
+val archunitVersion = "1.3.0"
+val awaitilityVersion = "4.2.2"
+val junitPlatformVersion = "5.11.2"
+val mockkVersion = "1.13.13"
 val striktVersion = "0.35.0"
+
 dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
@@ -32,22 +39,20 @@ dependencies {
 
     implementation("com.google.inject:guice:$guiceVersion")
     implementation("com.google.inject.extensions:guice-assistedinject:$guiceVersion")
-
-    implementation("com.google.guava:guava:33.3.1-jre")
+    implementation("com.google.guava:guava:$guavaVersion")
 
     testImplementation("io.strikt:strikt-core:$striktVersion")
     testImplementation("io.strikt:strikt-jvm:$striktVersion")
+    testImplementation("io.mockk:mockk:$mockkVersion")
 
-    testImplementation("io.mockk:mockk:1.13.13")
-
-    testImplementation(platform("org.junit:junit-bom:5.11.2"))
+    testImplementation(platform("org.junit:junit-bom:$junitPlatformVersion"))
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-params")
 
-    testImplementation("org.awaitility:awaitility:4.2.2")
-    testImplementation("com.tngtech.archunit:archunit:1.3.0")
+    testImplementation("org.awaitility:awaitility:$awaitilityVersion")
+    testImplementation("com.tngtech.archunit:archunit:$archunitVersion")
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
