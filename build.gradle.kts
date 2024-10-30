@@ -13,7 +13,7 @@ plugins {
     jacoco
     java
     kotlin("jvm") version "2.0.21"
-    id("org.owasp.dependencycheck") version "11.0.0"
+    id("org.owasp.dependencycheck") version "11.1.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
 }
@@ -24,7 +24,7 @@ repositories {
 
 val guavaVersion = "33.3.1-jre"
 val guiceVersion = "7.0.0"
-val jacksonVersion = "2.18.0"
+val jacksonVersion = "2.18.1"
 
 val archunitVersion = "1.3.0"
 val awaitilityVersion = "4.2.2"
