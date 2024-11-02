@@ -6,6 +6,8 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType.HTML
+import java.text.SimpleDateFormat
+import java.util.Date
 
 plugins {
     idea
@@ -61,8 +63,16 @@ group = "de.pflugradts"
 tasks.withType<Jar> {
     archiveBaseName.set("passbird")
     manifest {
+        attributes["Manifest-Version"] = "1.0"
+        attributes["Build-Date"] = SimpleDateFormat("yyyy-MM-dd").format(Date())
+        attributes["Created-By"] = project.findProperty("createdBy") ?: "unspecified"
         attributes["Main-Class"] = "de.pflugradts.passbird.application.MainKt"
+        attributes["Implementation-Title"] = "Passbird"
         attributes["Implementation-Version"] = version
+        attributes["Implementation-Vendor"] = "Christian Pflugradt"
+        attributes["Specification-Title"] = "Secure Offline Password Management CLI"
+        attributes["Specification-Version"] = version.toString().substringBefore('.')
+        attributes["Specification-Vendor"] = "Independent | Christian Pflugradt"
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(sourceSets.main.get().output)
