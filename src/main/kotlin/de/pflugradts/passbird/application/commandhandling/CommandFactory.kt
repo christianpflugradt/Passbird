@@ -15,7 +15,6 @@ import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitReason.USER
 import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewCommand
-import de.pflugradts.passbird.application.commandhandling.command.base.Command
 import de.pflugradts.passbird.application.failure.CommandFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.domain.model.transfer.Input
@@ -26,23 +25,21 @@ class CommandFactory @Inject constructor(
     private val proteinCommandFactory: ProteinCommandFactory,
     private val setCommandFactory: SetCommandFactory,
 ) {
-    fun construct(commandType: CommandType, input: Input): Command {
-        return when (commandType) {
-            CommandType.CUSTOM_SET -> CustomSetCommand(input)
-            CommandType.DISCARD -> DiscardCommand(input)
-            CommandType.EXPORT -> ExportCommand()
-            CommandType.GET -> GetCommand(input)
-            CommandType.HELP -> HelpCommand()
-            CommandType.IMPORT -> ImportCommand()
-            CommandType.LIST -> ListCommand()
-            CommandType.NEST -> constructSafely(nestCommandFactory, input)
-            CommandType.PROTEIN -> constructSafely(proteinCommandFactory, input)
-            CommandType.QUIT -> QuitCommand(quitReason = USER)
-            CommandType.RENAME -> RenameCommand(input)
-            CommandType.SET -> constructSafely(setCommandFactory, input)
-            CommandType.VIEW -> ViewCommand(input)
-            else -> NullCommand()
-        }
+    fun construct(commandType: CommandType, input: Input) = when (commandType) {
+        CommandType.CUSTOM_SET -> CustomSetCommand(input)
+        CommandType.DISCARD -> DiscardCommand(input)
+        CommandType.EXPORT -> ExportCommand()
+        CommandType.GET -> GetCommand(input)
+        CommandType.HELP -> HelpCommand()
+        CommandType.IMPORT -> ImportCommand()
+        CommandType.LIST -> ListCommand()
+        CommandType.NEST -> constructSafely(nestCommandFactory, input)
+        CommandType.PROTEIN -> constructSafely(proteinCommandFactory, input)
+        CommandType.QUIT -> QuitCommand(quitReason = USER)
+        CommandType.RENAME -> RenameCommand(input)
+        CommandType.SET -> constructSafely(setCommandFactory, input)
+        CommandType.VIEW -> ViewCommand(input)
+        else -> NullCommand()
     }
 
     private fun constructSafely(factory: SpecialCommandFactory, input: Input) = tryCatching { factory.constructFromInput(input) }

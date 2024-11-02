@@ -35,16 +35,14 @@ class FilePasswordExchange @Inject constructor(
         }
     }
 
-    override fun receive(): PasswordInfoMap {
-        return try {
-            mapper.readValue(
-                Files.readString(systemOperation.resolvePath(Global.homeDirectory, EXCHANGE_FILENAME.toFileName())),
-                ExchangeWrapper::class.java,
-            ).exportedContent.toPasswordInfoMap()
-        } catch (e: IOException) {
-            reportFailure(ImportFailure(e))
-            emptyMap()
-        }
+    override fun receive() = try {
+        mapper.readValue(
+            Files.readString(systemOperation.resolvePath(Global.homeDirectory, EXCHANGE_FILENAME.toFileName())),
+            ExchangeWrapper::class.java,
+        ).exportedContent.toPasswordInfoMap()
+    } catch (e: IOException) {
+        reportFailure(ImportFailure(e))
+        emptyMap()
     }
 
     private fun PasswordInfoMap.toSerializable() = entries.map { nest ->

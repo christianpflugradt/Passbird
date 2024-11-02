@@ -87,13 +87,14 @@ tasks.withType<KotlinJvmCompile>().configureEach {
     }
 }
 
-ktlint.version = "1.2.1"
+ktlint.version = "1.4.0"
 
 ktlint {
     additionalEditorconfig.set(
         mapOf(
             "ktlint_code_style" to "intellij_idea",
             "ktlint_standard_curly-spacing" to "disabled",
+            "ktlint_standard_class-signature" to "disabled",
         ),
     )
     reporters {

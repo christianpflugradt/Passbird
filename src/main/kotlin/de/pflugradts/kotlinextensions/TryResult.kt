@@ -1,11 +1,12 @@
 package de.pflugradts.kotlinextensions
 
-inline fun <R> tryCatching(block: () -> R): TryResult<R> {
-    return try {
-        TryResult.success(block())
-    } catch (ex: Exception) {
-        TryResult.failure(ex)
-    }
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
+
+inline fun <R> tryCatching(block: () -> R) = try {
+    success(block())
+} catch (ex: Exception) {
+    failure(ex)
 }
 
 private class Failure(val ex: Exception)
@@ -28,25 +29,12 @@ value class TryResult<R> private constructor(
         else -> value as R
     }
 
-    @Suppress("UNCHECKED_CAST")
-    infix fun getOrElse(other: R) = when (value) {
-        is Failure -> other
-        else -> value as R
-    }
+    infix fun getOrElse(other: R) = getOrNull() ?: other
 
-    fun onFailure(action: (ex: Exception) -> Unit): TryResult<R> {
-        exceptionOrNull()?.let { action(it) }
-        return this
-    }
+    fun onFailure(action: (ex: Exception) -> Unit) = apply { exceptionOrNull()?.let(action) }
+    fun onSuccess(action: (value: R) -> Unit) = apply { getOrNull()?.let(action) }
 
-    fun onSuccess(action: (value: R) -> Unit): TryResult<R> {
-        getOrNull()?.let { action(it) }
-        return this
-    }
-
-    fun <T> map(fn: (R) -> T): TryResult<T> {
-        return if (success) success(fn(getOrNull()!!)) else failure(exceptionOrNull()!!)
-    }
+    fun <T> map(fn: (R) -> T): TryResult<T> = if (success) success(fn(getOrNull()!!)) else failure(exceptionOrNull()!!)
 
     fun retry(block: (TryResult<R>) -> TryResult<R>) = if (failure) block(this) else this
 
