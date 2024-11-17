@@ -11,7 +11,9 @@ import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggMoved
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
+import de.pflugradts.passbird.domain.model.event.ProteinCreated
 import de.pflugradts.passbird.domain.model.event.ProteinDiscarded
+import de.pflugradts.passbird.domain.model.event.ProteinUpdated
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.slot.Slot
 
@@ -39,7 +41,15 @@ class Egg private constructor(
         registerDomainEvent(EggUpdated(this))
     }
     fun updateProtein(slot: Slot, typeShell: EncryptedShell, structureShell: EncryptedShell) {
-        proteins[slot.index()].set(createProtein(typeShell, structureShell))
+        val proteinOption = proteins[slot.index()]
+        val previousProtein = proteinOption.orNull()
+        val newProtein = createProtein(typeShell, structureShell)
+        proteinOption.set(newProtein)
+        if (previousProtein != null) {
+            registerDomainEvent(ProteinUpdated(this, slot, previousProtein, newProtein))
+        } else {
+            registerDomainEvent(ProteinCreated(this, newProtein))
+        }
     }
 
     fun moveToNestAt(slot: Slot) {

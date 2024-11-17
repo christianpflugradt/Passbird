@@ -13,7 +13,9 @@ import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.event.NestCreated
 import de.pflugradts.passbird.domain.model.event.NestDiscarded
+import de.pflugradts.passbird.domain.model.event.ProteinCreated
 import de.pflugradts.passbird.domain.model.event.ProteinDiscarded
+import de.pflugradts.passbird.domain.model.event.ProteinUpdated
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -64,6 +66,25 @@ class ApplicationEventHandler @Inject constructor(
     @Subscribe
     private fun handleEggsImported(eggsImported: EggsImported) {
         send("${eggsImported.count} eggs successfully imported.")
+    }
+
+    @Subscribe
+    private fun handleProteinCreated(proteinCreated: ProteinCreated) {
+        val msg = "Protein '${decrypt(proteinCreated.protein.viewType())}' for " +
+            "egg '${decrypt(proteinCreated.egg.viewEggId())}' successfully created."
+        send(msg)
+    }
+
+    @Subscribe
+    private fun handleProteinUpdated(proteinUpdated: ProteinUpdated) {
+        val msg = if (decrypt(proteinUpdated.oldProtein.viewType()) == decrypt(proteinUpdated.newProtein.viewType())) {
+            "Protein '${decrypt(proteinUpdated.oldProtein.viewType())}' at slot ${proteinUpdated.slot.index()} for " +
+                "egg '${decrypt(proteinUpdated.egg.viewEggId())}' successfully updated."
+        } else {
+            "Protein for egg '${decrypt(proteinUpdated.egg.viewEggId())}' at slot ${proteinUpdated.slot.index()} successfully updated " +
+                "from '${decrypt(proteinUpdated.oldProtein.viewType())}' to '${decrypt(proteinUpdated.newProtein.viewType())}'."
+        }
+        send(msg)
     }
 
     @Subscribe
