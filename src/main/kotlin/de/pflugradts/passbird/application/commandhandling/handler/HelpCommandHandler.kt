@@ -30,9 +30,9 @@ class HelpCommandHandler @Inject constructor(
                 outBold("\th"), out(" (help) prints this help\n"),
                 outBold("\tq"), out(" (quit) terminates Passbird application \n"),
                 out("\n"),
-                outBold("\tn"), out(" (Nests) view available Nests and print Nest specific help\n"),
+                outBold("\tn"), out(" (Nests) prints available Nests and Nest specific help\n"),
                 outBold("\tp?"), out(" (Proteins) prints protein usage information\n"),
-                outBold("\ts?"), out(" (Password configurations) view available configurations and print set specific help\n"),
+                outBold("\ts?"), out(" (Password configurations) prints available configurations and set specific help\n"),
             )
         }
     }

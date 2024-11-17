@@ -178,9 +178,9 @@ The general usage info will be given below and is also available in Passbird by 
         h (help) prints this help
         q (quit) terminates Passbird application 
 
-        n (Nests) view available Nests and print Nest specific help
+        n (Nests) prints available Nests and Nest specific help
         p? (Proteins) prints protein usage information
-        s? (Password configurations) view available configurations and print set specific help
+        s? (Password configurations) prints available configurations and set specific help
 
 ### General Usage
 
@@ -208,7 +208,7 @@ Some example inputs and what they do:
 
 Nests are an advanced feature of Passbird. Think of it as categories for your Passwords. You may have a Nest for online shopping and another for social networks, or one for personal and another for work related stuff. Nest related help is available by pressing `n` and then enter:
 
-    n (view) displays current Nest, available Nests and Nest commands
+    n (view) prints current Nest, available Nests and Nest commands
     n0 (switch to default) switches to the default Nest
     n[1-9] (switch) switches to the Nest at the given Nest Slot (between 1 and 9 inclusively)
     n[1-9][EggId] (assign) assigns the Password for that EggId to the specified Nest
