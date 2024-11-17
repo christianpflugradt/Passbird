@@ -68,6 +68,7 @@ fun fakePasswordService(
         every { instance.challengeEggId(any()) } returns Unit
     }
     every { instance.discardEgg(any()) } returns Unit
+    every { instance.discardProtein(any(), any()) } returns Unit
     every { instance.renameEgg(any(), any()) } returns Unit
     every { instance.moveEgg(any(), any()) } returns Unit
 }
