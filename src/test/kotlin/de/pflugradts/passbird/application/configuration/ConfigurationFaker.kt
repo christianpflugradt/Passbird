@@ -36,7 +36,6 @@ fun fakeConfiguration(
     every { ansiEscapeCodes.enabled } returns withAnsiEscapeCodesEnabled
     val userInterface = mockk<UserInterface>()
     every { userInterface.secureInput } returns withSecureInputEnabled
-    every { userInterface.secureProteinInput } returns withSecureProteinInputEnabled
     every { userInterface.ansiEscapeCodes } returns ansiEscapeCodes
     every { userInterface.audibleBell } returns withAudibleBellEnabled
     val keyStore = mockk<Configuration.KeyStore>()
@@ -66,6 +65,11 @@ fun fakeConfiguration(
     every { application.inactivityLimit } returns inactivityLimit
     every { application.password } returns password
     every { instance.application } returns application
+    val protein = mockk<Configuration.Protein>()
+    every { protein.secureProteinStructureInput } returns withSecureProteinInputEnabled
+    val domain = mockk<Configuration.Domain>()
+    every { domain.protein } returns protein
+    every { instance.domain } returns domain
     every { instance.template } returns withConfigurationTemplate
     every { instance.parsePasswordRequirements() } answers { callOriginal() }
 }

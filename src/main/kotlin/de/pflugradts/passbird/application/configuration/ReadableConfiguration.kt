@@ -1,12 +1,14 @@
 package de.pflugradts.passbird.application.configuration
 
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
+import de.pflugradts.passbird.domain.model.egg.Protein
 
 interface ReadableConfiguration {
     fun parsePasswordRequirements(): PasswordRequirements
     val template: Boolean
     val application: Application
     val adapter: Adapter
+    val domain: Domain
 
     interface Application {
         val backup: Backup
@@ -73,10 +75,17 @@ interface ReadableConfiguration {
         val ansiEscapeCodes: AnsiEscapeCodes
         val audibleBell: Boolean
         val secureInput: Boolean
-        val secureProteinInput: Boolean
     }
     interface AnsiEscapeCodes {
         val enabled: Boolean
+    }
+
+    interface Domain {
+        val protein: Protein
+    }
+
+    interface Protein {
+        val secureProteinStructureInput: Boolean
     }
 
     companion object {

@@ -37,7 +37,7 @@ class SetProteinCommandHandler @Inject constructor(
                         userInterfaceAdapterPort.receive(outputOf(shellOf(typeMsg))).let { if (it.isEmpty) inputOf(type) else it }
                     if (typeInput.isNotEmpty) {
                         val structureOutput = outputOf(shellOf("Enter Protein Structure or just press enter to abort: "))
-                        val structureInput = if (configuration.adapter.userInterface.secureProteinInput) {
+                        val structureInput = if (configuration.domain.protein.secureProteinStructureInput) {
                             userInterfaceAdapterPort.receiveSecurely(structureOutput)
                         } else {
                             userInterfaceAdapterPort.receive(structureOutput)

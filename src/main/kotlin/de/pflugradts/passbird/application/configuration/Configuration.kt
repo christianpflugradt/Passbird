@@ -11,6 +11,7 @@ data class Configuration(
     @Transient override var template: Boolean = false,
     override val application: Application = Application(),
     override val adapter: Adapter = Adapter(),
+    override val domain: Domain = Domain(),
 ) : UpdatableConfiguration {
 
     override fun parsePasswordRequirements() = PasswordRequirements(
@@ -85,7 +86,8 @@ data class Configuration(
         override val ansiEscapeCodes: AnsiEscapeCodes = AnsiEscapeCodes(),
         override val audibleBell: Boolean = false,
         override val secureInput: Boolean = true,
-        override val secureProteinInput: Boolean = true,
     ) : ReadableConfiguration.UserInterface
     data class AnsiEscapeCodes(override val enabled: Boolean = false) : ReadableConfiguration.AnsiEscapeCodes
+    data class Domain(override val protein: Protein = Protein()) : ReadableConfiguration.Domain
+    data class Protein(override val secureProteinStructureInput: Boolean = true) : ReadableConfiguration.Protein
 }
