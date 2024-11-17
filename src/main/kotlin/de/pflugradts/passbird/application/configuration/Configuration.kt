@@ -89,5 +89,8 @@ data class Configuration(
     ) : ReadableConfiguration.UserInterface
     data class AnsiEscapeCodes(override val enabled: Boolean = false) : ReadableConfiguration.AnsiEscapeCodes
     data class Domain(override val protein: Protein = Protein()) : ReadableConfiguration.Domain
-    data class Protein(override val secureProteinStructureInput: Boolean = true) : ReadableConfiguration.Protein
+    data class Protein(
+        override val secureProteinStructureInput: Boolean = true,
+        override val promptForProteinStructureInputToggle: Boolean = false,
+    ) : ReadableConfiguration.Protein
 }

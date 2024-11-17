@@ -23,6 +23,7 @@ fun fakeConfiguration(
     withCustomPasswordConfigurations: List<Configuration.CustomPasswordConfiguration> = emptyList(),
     withSecureInputEnabled: Boolean = true,
     withSecureProteinInputEnabled: Boolean = true,
+    withPromptForProteinStructureInputToggle: Boolean = false,
     withInactivityTimeLimit: Int = 0,
     withVerifyChecksum: Boolean = true,
     withVerifySignature: Boolean = true,
@@ -67,6 +68,7 @@ fun fakeConfiguration(
     every { instance.application } returns application
     val protein = mockk<Configuration.Protein>()
     every { protein.secureProteinStructureInput } returns withSecureProteinInputEnabled
+    every { protein.promptForProteinStructureInputToggle } returns withPromptForProteinStructureInputToggle
     val domain = mockk<Configuration.Domain>()
     every { domain.protein } returns protein
     every { instance.domain } returns domain

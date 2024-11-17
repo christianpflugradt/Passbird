@@ -86,6 +86,7 @@ interface ReadableConfiguration {
 
     interface Protein {
         val secureProteinStructureInput: Boolean
+        val promptForProteinStructureInputToggle: Boolean
     }
 
     companion object {
