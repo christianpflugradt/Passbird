@@ -11,6 +11,7 @@ import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggMoved
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
+import de.pflugradts.passbird.domain.model.event.ProteinDiscarded
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.slot.Slot
 
@@ -51,7 +52,12 @@ class Egg private constructor(
         registerDomainEvent(EggDiscarded(this))
     }
     fun discardProtein(slot: Slot) {
-        proteins[slot.index()].set(null)
+        val proteinOption = proteins[slot.index()]
+        if (proteinOption.isPresent) {
+            val discardedProtein = proteinOption.get()
+            proteinOption.set(null)
+            registerDomainEvent(ProteinDiscarded(this, discardedProtein))
+        }
     }
 
     override fun equals(other: Any?) = (other as? Egg)?.let {

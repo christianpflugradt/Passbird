@@ -16,4 +16,4 @@ data class EggsExported(val count: Int) : DomainEvent
 data class EggsImported(val count: Int) : DomainEvent
 data class NestCreated(val nest: Nest) : DomainEvent
 data class NestDiscarded(val nest: Nest) : DomainEvent
-data class ProteinDiscarded(val eggIdShell: Shell, val protein: Protein) : DomainEvent
+data class ProteinDiscarded(val egg: Egg, val protein: Protein) : DomainEvent

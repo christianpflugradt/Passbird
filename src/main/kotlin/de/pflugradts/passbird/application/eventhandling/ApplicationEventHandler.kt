@@ -13,6 +13,7 @@ import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.event.NestCreated
 import de.pflugradts.passbird.domain.model.event.NestDiscarded
+import de.pflugradts.passbird.domain.model.event.ProteinDiscarded
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -63,6 +64,13 @@ class ApplicationEventHandler @Inject constructor(
     @Subscribe
     private fun handleEggsImported(eggsImported: EggsImported) {
         send("${eggsImported.count} eggs successfully imported.")
+    }
+
+    @Subscribe
+    private fun handleProteinDiscarded(proteinDiscarded: ProteinDiscarded) {
+        val msg = "Protein '${decrypt(proteinDiscarded.protein.viewType())}' of " +
+            "egg '${decrypt(proteinDiscarded.egg.viewEggId())}' successfully discarded."
+        send(msg)
     }
 
     @Subscribe
