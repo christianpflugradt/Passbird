@@ -204,6 +204,7 @@ Proteins introduce a few new commands which can be listed by inputting `p?` and 
     p*[EggId] (complete info) prints Protein Types and Structures for specified Egg
     p[0-9][EggId] (copy) copies the Protein Structure to clipboard
     p+[1-9][EggId] (update) updates the Protein Structure and optionally Type as well
+    p-[1-9][EggId] (discard) discards the Protein Structure and Type
 
 Let's say we have an Egg identified by EggId `gitlab`. You can input `pgitlab` to safely view its Proteins only revealing the Types which are deemed non-sensitive. That way you could see that alongside the Password you've also stored the user, the URL to that service and a recovery code. For each Protein you'll also see the Slot you assigned which you need to copy the Structure into the clipboard.
 

@@ -26,6 +26,7 @@ interface PasswordService {
     fun putEgg(eggIdShell: Shell, passwordShell: Shell)
     fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell)
     fun discardEgg(eggIdShell: Shell)
+    fun discardProtein(eggIdShell: Shell, slot: Slot)
     fun moveEgg(eggIdShell: Shell, targetSlot: Slot)
     fun findAllEggIds(): Stream<Shell>
 }

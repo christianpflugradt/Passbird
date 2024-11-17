@@ -40,6 +40,7 @@ class Egg private constructor(
     fun updateProtein(slot: Slot, typeShell: EncryptedShell, structureShell: EncryptedShell) {
         proteins[slot.index()].set(createProtein(typeShell, structureShell))
     }
+
     fun moveToNestAt(slot: Slot) {
         this.slot = slot
         registerDomainEvent(EggMoved(this))
@@ -48,6 +49,9 @@ class Egg private constructor(
     fun discard() {
         password.discard()
         registerDomainEvent(EggDiscarded(this))
+    }
+    fun discardProtein(slot: Slot) {
+        proteins[slot.index()].set(null)
     }
 
     override fun equals(other: Any?) = (other as? Egg)?.let {

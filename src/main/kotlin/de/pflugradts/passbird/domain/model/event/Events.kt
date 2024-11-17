@@ -2,6 +2,7 @@ package de.pflugradts.passbird.domain.model.event
 
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
 import de.pflugradts.passbird.domain.model.egg.Egg
+import de.pflugradts.passbird.domain.model.egg.Protein
 import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.shell.Shell
 
@@ -15,3 +16,4 @@ data class EggsExported(val count: Int) : DomainEvent
 data class EggsImported(val count: Int) : DomainEvent
 data class NestCreated(val nest: Nest) : DomainEvent
 data class NestDiscarded(val nest: Nest) : DomainEvent
+data class ProteinDiscarded(val eggIdShell: Shell, val protein: Protein) : DomainEvent

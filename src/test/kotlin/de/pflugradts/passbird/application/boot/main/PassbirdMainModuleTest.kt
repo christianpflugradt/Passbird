@@ -6,6 +6,7 @@ import com.google.inject.util.Modules
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.commandhandling.handler.CustomSetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.DiscardCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.DiscardProteinCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ExportCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.GetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.GetProteinCommandHandler
@@ -55,6 +56,7 @@ class PassbirdMainModuleTest {
             CustomSetCommandHandler::class.java,
             DiscardCommandHandler::class.java,
             DiscardNestCommandHandler::class.java,
+            DiscardProteinCommandHandler::class.java,
             ExportCommandHandler::class.java,
             GetCommandHandler::class.java,
             GetProteinCommandHandler::class.java,

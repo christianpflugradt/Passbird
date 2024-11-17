@@ -20,7 +20,7 @@ class ProteinInfoCommandHandler @Inject constructor(
                 outBold("\n\tp*[EggId]"), out(" (complete info) prints Protein Types and Structures for specified Egg"),
                 outBold("\n\tp[0-9][EggId]"), out(" (copy) copies the Protein Structure to clipboard"),
                 outBold("\n\tp+[1-9][EggId]"), out(" (update) updates the Protein Structure and optionally Type as well"),
-                // TBD: outBold("\n\tp-[1-9][EggId]"), out(" (clear) clears the Protein Structure and optionally Type as well"),
+                outBold("\n\tp-[1-9][EggId]"), out(" (discard) discards the Protein Structure and Type"),
                 out("\n"),
             )
         }
