@@ -66,7 +66,7 @@ class GetProteinCommandTest {
     }
 
     @Test
-    fun `should handle get protein command with invalid egg`() {
+    fun `should handle get protein command with non existing egg`() {
         // given
         val args = "EggId"
         val command = shellOf("p0$args")
