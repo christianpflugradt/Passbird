@@ -85,6 +85,7 @@ data class Configuration(
         override val ansiEscapeCodes: AnsiEscapeCodes = AnsiEscapeCodes(),
         override val audibleBell: Boolean = false,
         override val secureInput: Boolean = true,
+        override val secureProteinInput: Boolean = true,
     ) : ReadableConfiguration.UserInterface
     data class AnsiEscapeCodes(override val enabled: Boolean = false) : ReadableConfiguration.AnsiEscapeCodes
 }

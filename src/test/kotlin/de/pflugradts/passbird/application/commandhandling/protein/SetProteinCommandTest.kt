@@ -173,6 +173,34 @@ class SetProteinCommandTest {
     }
 
     @Test
+    fun `should handle set protein command with secure protein input not enabled`() {
+        // given
+        val args = "EggId"
+        val slot = DEFAULT
+        val shell = shellOf("p+${slot.index()}$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
+        val givenType = "url"
+        val givenStructure = "example.com"
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration, withSecureProteinInputEnabled = false)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf(givenType)), inputOf(shellOf(givenStructure))),
+        )
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) {
+            passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+        }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
     fun `should handle set protein command with new protein and no type provided`() {
         // given
         val args = "EggId"

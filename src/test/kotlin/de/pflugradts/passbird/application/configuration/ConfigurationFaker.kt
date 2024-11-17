@@ -22,6 +22,7 @@ fun fakeConfiguration(
     withPasswordLength: Int = 20,
     withCustomPasswordConfigurations: List<Configuration.CustomPasswordConfiguration> = emptyList(),
     withSecureInputEnabled: Boolean = true,
+    withSecureProteinInputEnabled: Boolean = true,
     withInactivityTimeLimit: Int = 0,
     withVerifyChecksum: Boolean = true,
     withVerifySignature: Boolean = true,
@@ -35,6 +36,7 @@ fun fakeConfiguration(
     every { ansiEscapeCodes.enabled } returns withAnsiEscapeCodesEnabled
     val userInterface = mockk<UserInterface>()
     every { userInterface.secureInput } returns withSecureInputEnabled
+    every { userInterface.secureProteinInput } returns withSecureProteinInputEnabled
     every { userInterface.ansiEscapeCodes } returns ansiEscapeCodes
     every { userInterface.audibleBell } returns withAudibleBellEnabled
     val keyStore = mockk<Configuration.KeyStore>()

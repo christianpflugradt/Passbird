@@ -109,6 +109,8 @@ adapter:
     audibleBell: false
     # hides sensitive user input such as passwords
     secureInput: true
+    # considers protein structures as secure input
+    secureProteinInput: true
 ```
 You may adjust the configuration parameters to your needs by editing the yaml file with a text editor. The configuration file must retain a valid yaml format and may only contain parameters known to Passbird. While not advised it is possible to omit most parameters in which case the defaults will be used.
 

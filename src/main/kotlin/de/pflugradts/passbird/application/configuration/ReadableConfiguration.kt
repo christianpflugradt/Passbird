@@ -73,6 +73,7 @@ interface ReadableConfiguration {
         val ansiEscapeCodes: AnsiEscapeCodes
         val audibleBell: Boolean
         val secureInput: Boolean
+        val secureProteinInput: Boolean
     }
     interface AnsiEscapeCodes {
         val enabled: Boolean
