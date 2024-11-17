@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.application.commandhandling.handler
+package de.pflugradts.passbird.application.commandhandling.handler.protein
 
 import com.google.common.eventbus.Subscribe
 import com.google.inject.Inject
@@ -8,6 +8,7 @@ import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.ViewProteinStructuresCommand
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.transfer.Output

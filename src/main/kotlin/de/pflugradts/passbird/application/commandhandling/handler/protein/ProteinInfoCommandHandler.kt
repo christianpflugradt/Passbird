@@ -1,10 +1,11 @@
-package de.pflugradts.passbird.application.commandhandling.handler
+package de.pflugradts.passbird.application.commandhandling.handler.protein
 
 import com.google.common.eventbus.Subscribe
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.ProteinInfoCommand
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 
 class ProteinInfoCommandHandler @Inject constructor(
     private val canPrintInfo: CanPrintInfo,

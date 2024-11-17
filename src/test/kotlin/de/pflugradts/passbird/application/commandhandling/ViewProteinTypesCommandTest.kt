@@ -4,7 +4,7 @@ import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
-import de.pflugradts.passbird.application.commandhandling.handler.ViewProteinTypesCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.protein.ViewProteinTypesCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
