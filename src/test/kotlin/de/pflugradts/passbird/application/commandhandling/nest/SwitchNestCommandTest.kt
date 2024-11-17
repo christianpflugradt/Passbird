@@ -1,7 +1,8 @@
-package de.pflugradts.passbird.application.commandhandling
+package de.pflugradts.passbird.application.commandhandling.nest
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNestCommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot

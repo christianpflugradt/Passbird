@@ -1,16 +1,15 @@
-package de.pflugradts.passbird.application.commandhandling
+package de.pflugradts.passbird.application.commandhandling.egg
 
 import de.pflugradts.passbird.INTEGRATION
-import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
-import de.pflugradts.passbird.application.commandhandling.handler.egg.GetCommandHandler
+import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
+import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -21,24 +20,23 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
 
 @Tag(INTEGRATION)
-class GetCommandTest {
+class ViewCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
-    private val clipboardAdapterPort = mockk<ClipboardAdapterPort>(relaxed = true)
     private val passwordService = mockk<PasswordService>()
-    private val getCommandHandler = GetCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(getCommandHandler)
+    private val viewCommandHandler = ViewCommandHandler(passwordService, userInterfaceAdapterPort)
+    private val inputHandler = createInputHandlerFor(viewCommandHandler)
 
     @Test
-    fun `should handle get command`() {
+    fun `should handle view command`() {
         // given
-        val args = "EggId"
-        val command = shellOf("g$args")
+        val eggId = "EggId"
+        val password = "Password"
+        val command = shellOf("v$eggId")
         val reference = command.copy()
-        val expectedPassword = shellOf("value")
         fakePasswordService(
             instance = passwordService,
-            withEggs = listOf(createEggForTesting(withEggIdShell = shellOf(args), withPasswordShell = expectedPassword)),
+            withEggs = listOf(createEggForTesting(withEggIdShell = shellOf(eggId), withPasswordShell = shellOf(password))),
         )
         val outputSlot = slot<Output>()
 
@@ -47,21 +45,20 @@ class GetCommandTest {
         inputHandler.handleInput(inputOf(command))
 
         // then
-        verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell) isEqualTo expectedPassword
-        verify(exactly = 1) { userInterfaceAdapterPort.send(any()) }
+        verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell.asString()) isEqualTo password
         expectThat(command) isNotEqualTo reference
     }
 
     @Test
-    fun `should handle get command with invalid egg`() {
+    fun `should handle view command for non existing password`() {
         // given
-        val args = "EggId"
-        val command = shellOf("g$args")
+        val eggId = "EggId"
+        val command = shellOf("v$eggId")
         val reference = command.copy()
         fakePasswordService(
             instance = passwordService,
-            withEggs = listOf(createEggForTesting(withEggIdShell = shellOf("other"))),
+            withEggs = emptyList(),
         )
 
         // when
@@ -69,7 +66,6 @@ class GetCommandTest {
         inputHandler.handleInput(inputOf(command))
 
         // then
-        verify { clipboardAdapterPort wasNot Called }
         verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
         expectThat(command) isNotEqualTo reference
     }

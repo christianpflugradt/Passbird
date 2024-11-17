@@ -1,10 +1,11 @@
-package de.pflugradts.passbird.application.commandhandling
+package de.pflugradts.passbird.application.commandhandling.nest
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
+import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration

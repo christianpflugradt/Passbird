@@ -1,8 +1,9 @@
-package de.pflugradts.passbird.application.commandhandling
+package de.pflugradts.passbird.application.commandhandling.protein
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.protein.GetProteinCommandHandler
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf

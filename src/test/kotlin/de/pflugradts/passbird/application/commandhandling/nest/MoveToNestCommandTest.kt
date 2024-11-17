@@ -1,8 +1,9 @@
-package de.pflugradts.passbird.application.commandhandling
+package de.pflugradts.passbird.application.commandhandling.nest
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
+import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.nest.MoveToNestCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting

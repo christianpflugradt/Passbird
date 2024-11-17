@@ -1,7 +1,8 @@
-package de.pflugradts.passbird.application.commandhandling
+package de.pflugradts.passbird.application.commandhandling.egg
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.egg.DiscardCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
