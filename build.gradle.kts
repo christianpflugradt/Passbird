@@ -26,7 +26,7 @@ repositories {
 
 val guavaVersion = "33.3.1-jre"
 val guiceVersion = "7.0.0"
-val jacksonVersion = "2.18.1"
+val jacksonVersion = "2.18.2"
 
 val archunitVersion = "1.3.0"
 val awaitilityVersion = "4.2.2"
