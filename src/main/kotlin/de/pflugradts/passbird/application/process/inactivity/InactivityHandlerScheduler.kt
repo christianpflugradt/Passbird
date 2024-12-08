@@ -15,7 +15,7 @@ class InactivityHandlerScheduler @Inject constructor(
                 name = "inactivity-handler",
                 daemon = true,
                 initialDelay = 0,
-                period = 1000 * 60,
+                period = 1000 * 10,
                 action = { inactivityHandler.checkInactivity() },
             )
         }
