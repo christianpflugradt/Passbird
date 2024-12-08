@@ -18,5 +18,13 @@
             "matchPackageNames": ["eclipse-temurin"],
             "allowedVersions": "/^(21|25)-jdk/"
         }
+    ],
+    "regexManagers": [
+        {
+            "fileMatch": ["^build.gradle.kts$"],
+            "matchStrings": ["ktlint\\.version\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
+            "depNameTemplate": "pinterest/ktlint",
+            "datasourceTemplate": "github-releases"
+        }
     ]
 }
