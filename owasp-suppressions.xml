@@ -2,17 +2,17 @@
 
     <suppress>
         <notes><![CDATA[
-   file name: ktlint-cli-reporter-checkstyle-1.4.0.jar
+   file name: ktlint-cli-reporter-checkstyle-1.5.0.jar
    ]]></notes>
-        <sha1>ad7195e2f77fa6e832fe3ff9e491666023b4610c</sha1>
+        <sha1>a85c1d2b73ea6f56aa8d74f3f482b3c483017bfc</sha1>
         <cve>CVE-2019-10782</cve>
     </suppress>
 
     <suppress>
         <notes><![CDATA[
-   file name: ktlint-cli-reporter-checkstyle-1.4.0.jar
+   file name: ktlint-cli-reporter-checkstyle-1.5.0.jar
    ]]></notes>
-        <sha1>ad7195e2f77fa6e832fe3ff9e491666023b4610c</sha1>
+        <sha1>a85c1d2b73ea6f56aa8d74f3f482b3c483017bfc</sha1>
         <cve>CVE-2019-9658</cve>
     </suppress>
 
