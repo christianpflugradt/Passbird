@@ -22,11 +22,11 @@ variables:
 
 before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 
-⚙ compile:
+🛠 compile:
   stage: 🔎 check
   script: ./gradlew compileKotlin compileTestKotlin compileJava compileTestJava
 
-🔑 owasp:
+🛡️ owasp:
   stage: 🔎 check
   script: JAVA_OPTS="-Xms1g -Xmx2g" ./gradlew dependencyCheckAnalyze
   artifacts:
@@ -34,16 +34,20 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
   allow_failure: true
   except: [ tags ]
 
-🏅 ktlint:
+✏️ ktlint:
   stage: 🔎 check
   script: ./gradlew ktlintCheck
   artifacts:
     paths: [ build/reports/ktlint/* ]
 
+📜 license-check:
+  stage: 🔎 check
+  script: ./gradlew validateLicenses
+
 🗃 unit-tests:
   stage: ✅ test
   script: ./gradlew test
-  needs: [ ⚙ compile]
+  needs: [ 🛠 compile]
   artifacts:
     paths:
       - build/reports/tests/test/*
@@ -52,7 +56,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 🛠 integration-tests:
   stage: ✅ test
   script: ./gradlew integration
-  needs: [ ⚙ compile]
+  needs: [ 🛠 compile]
   artifacts:
     paths:
       - build/reports/tests/integration/*
@@ -61,7 +65,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 🧱 architecture-tests:
   stage: ✅ test
   script: ./gradlew architecture
-  needs: [ ⚙ compile]
+  needs: [ 🛠 compile]
   artifacts:
     paths:
       - build/reports/tests/architecture/*
