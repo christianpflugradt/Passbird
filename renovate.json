@@ -5,24 +5,38 @@
     "prCreation": "status-success",
     "packageRules": [
         {
-            "matchFileNames": [ ".github/**" ],
+            "matchFileNames": [
+                ".github/**"
+            ],
             "groupName": "github-actions",
             "separateMajorMinor": false
         },
         {
-            "matchFileNames": [ "build.gradle.kts" ],
-            "matchUpdateTypes": [ "patch", "minor" ],
+            "matchFileNames": [
+                "build.gradle.kts"
+            ],
+            "matchUpdateTypes": [
+                "patch",
+                "minor"
+            ],
             "groupName": "non-major"
         },
         {
-            "matchPackageNames": ["eclipse-temurin"],
+            "matchPackageNames": [
+                "eclipse-temurin"
+            ],
             "allowedVersions": "/^(21|25)-jdk/"
         }
     ],
-    "regexManagers": [
+    "customManagers": [
         {
-            "fileMatch": ["^build.gradle.kts$"],
-            "matchStrings": ["ktlint\\.version\\s*=\\s*\"(?<currentValue>[^\"]+)\""],
+            "customType": "regex",
+            "fileMatch": [
+                "^build.gradle.kts$"
+            ],
+            "matchStrings": [
+                "ktlint\\.version\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+            ],
             "depNameTemplate": "pinterest/ktlint",
             "datasourceTemplate": "github-releases"
         }
