@@ -53,7 +53,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
       - build/reports/tests/test/*
       - build/jacoco/test.exec
 
-🛠 integration-tests:
+🔗 integration-tests:
   stage: ✅ test
   script: ./gradlew integration
   needs: [ 🛠 compile]
@@ -75,7 +75,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
   script: ./gradlew jacocoTestCoverageVerification
   needs:
     - 🗃 unit-tests
-    - 🛠 integration-tests
+    - 🔗 integration-tests
     - 🧱 architecture-tests
 
 📊 test-coverage-report:
@@ -84,7 +84,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
   script: ./gradlew jacocoTestReport
   needs:
     - 🗃 unit-tests
-    - 🛠 integration-tests
+    - 🔗 integration-tests
     - 🧱 architecture-tests
   artifacts:
     paths: [ build/reports/jacoco/test/html/* ]
