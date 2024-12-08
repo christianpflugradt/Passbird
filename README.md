@@ -316,4 +316,4 @@ Of course! For example, I use separate Password databases for personal and work 
 No. The core characteristic of Passbird is its gui-less nature. If you want a gui, use one of the popular gui-based Password managers such as Keepass.
 
 ### Can you implement feature xyz?
-It depends. If I think that feature is useful, and it fits with Passbird I might implement it. Why don't you open a [Gitlab Issue](https://gitlab.com/christianpflugradt/passbird/-/issues) for it? :-)
+It depends. If I think that feature is useful, and it fits with Passbird I might implement it. Why don't you open a [GitHub Issue](https://gitlhub.com/christianpflugradt/passbird/issues) for it? :-)
