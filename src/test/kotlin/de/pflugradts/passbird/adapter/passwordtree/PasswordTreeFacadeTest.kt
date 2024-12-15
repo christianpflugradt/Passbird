@@ -23,6 +23,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot.S7
 import de.pflugradts.passbird.domain.model.slot.Slot.S8
 import de.pflugradts.passbird.domain.model.slot.Slot.S9
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
+import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -88,7 +89,7 @@ class PasswordTreeFacadeTest {
         val eggs = someEggs()
 
         // when
-        passwordTreeFacade.sync { eggs.stream() }
+        passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream()}))
         expectThat(File(passwordTreeFilename)).exists()
         val actual = passwordTreeFacade.restore()
 
@@ -112,7 +113,7 @@ class PasswordTreeFacadeTest {
         val eggs = listOf(egg1, egg2, egg3a, egg3b)
 
         // when
-        passwordTreeFacade.sync { eggs.stream() }
+        passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream()}))
         nestService.populate(Collections.nCopies(CAPACITY, emptyShell()))
         expectThat(File(passwordTreeFilename)).exists()
         val actual = passwordTreeFacade.restore()
@@ -179,7 +180,7 @@ class PasswordTreeFacadeTest {
 
             mockkStatic(::signature)
             every { signature() } returns manipulatedSignature
-            passwordTreeFacade.sync { eggs.stream() }
+            passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream()}))
             expectThat(File(passwordTreeFilename)).exists()
             unmockkAll()
 
@@ -207,7 +208,7 @@ class PasswordTreeFacadeTest {
 
             mockkStatic(::signature)
             every { signature() } returns manipulatedSignature
-            passwordTreeFacade.sync { eggs.stream() }
+            passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream()}))
             expectThat(File(passwordTreeFilename)).exists()
             unmockkAll()
 
@@ -236,7 +237,7 @@ class PasswordTreeFacadeTest {
 
             mockkStatic(::checksum)
             every { checksum(any()) } returns 0
-            passwordTreeFacade.sync { eggs.stream() }
+            passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream()}))
             expectThat(File(passwordTreeFilename)).exists()
             unmockkAll()
 
@@ -263,7 +264,7 @@ class PasswordTreeFacadeTest {
 
             mockkStatic(::checksum)
             every { checksum(any()) } returns 0
-            passwordTreeFacade.sync { eggs.stream() }
+            passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream()}))
             expectThat(File(passwordTreeFilename)).exists()
             unmockkAll()
 

@@ -14,6 +14,7 @@ import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.copyInt
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.nest.Nest
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -37,13 +38,15 @@ class PasswordTreeWriter @Inject constructor(
         val contentSize = calcRequiredContentSize(eggSupplier)
         val bytes = ByteArray(calcActualTotalSize(contentSize))
         var offset = copyBytes(signature(), bytes, 0, signatureSize())
-        for (i in 0 until Slot.CAPACITY) {
-            offset += copyBytes(placeHolder().toByteArray(), bytes, offset, placeHolder().size)
+        eggSupplier.memory().forEach { (_, value) ->
+            value.forEach { memoryEntry ->
+                memoryEntry.encryptedShellAsByteArray().let { offset += copyBytes(it, bytes, offset, it.size) }
+            }
         }
         for (index in FIRST_SLOT..LAST_SLOT) {
-            nestService.atNestSlot(slotAt(index)).asByteArray().let { offset += copyBytes(it, bytes, offset, it.size) }
+            nestService.atNestSlot(slotAt(index)).nestAsByteArray().let { offset += copyBytes(it, bytes, offset, it.size) }
         }
-        eggSupplier.get().forEach { egg -> egg.asByteArray().let { offset += copyBytes(it, bytes, offset, it.size) } }
+        eggSupplier.get().forEach { egg -> egg.eggAsByteArray().let { offset += copyBytes(it, bytes, offset, it.size) } }
         val checksumBytes = byteArrayOf(if (contentSize > 0) checksum(Arrays.copyOfRange(bytes, signatureSize(), contentSize)) else 0x0)
         copyBytes(checksumBytes, bytes, offset, checksumBytes())
         writeToDisk(shellOf(bytes))
@@ -54,6 +57,9 @@ class PasswordTreeWriter @Inject constructor(
     }.onFailure { reportFailure(WritePasswordTreeFailure(filePath, it)) }
 
     private fun calcRequiredContentSize(eggs: EggStreamSupplier): Int {
+        val memorySize = 100 * Integer.BYTES + eggs.memory().entries.fold(0) { acc, (_, options) ->
+            acc + options.sumOf { it.orNull()?.size ?: 0 }
+        }
         val eggDataSize = eggs.get()
             .map { egg: Egg ->
                 intBytes() + egg.viewEggId().size + egg.viewPassword().size + egg.proteins.filter { it.isPresent }.sumOf {
@@ -66,15 +72,26 @@ class PasswordTreeWriter @Inject constructor(
             .filter { it.isPresent }
             .map { it.get().viewNestId().size }
             .reduce(0) { a: Int, b: Int -> Integer.sum(a, b) }
-        val placeholderSize = Slot.CAPACITY * placeHolder().size
-        return eggDataSize + eggMetaSize + nestSize + placeholderSize
+        return memorySize + eggDataSize + eggMetaSize + nestSize
     }
 
     private val filePath get() =
         systemOperation.resolvePath(configuration.adapter.passwordTree.location.toDirectory(), PASSWORD_TREE_FILENAME.toFileName())
     private fun calcActualTotalSize(contentSize: Int) = signatureSize() + contentSize + checksumBytes()
 
-    private fun Option<Nest>.asByteArray(): ByteArray {
+    private fun Option<EncryptedShell>.encryptedShellAsByteArray() = if (isPresent) {
+        val shellBytesSize = get().size
+        val bytes = ByteArray(Integer.BYTES + shellBytesSize)
+        copyInt(shellBytesSize, bytes, 0)
+        copyBytes(get().toByteArray(), bytes, Integer.BYTES, shellBytesSize)
+        bytes
+    } else {
+        val bytes = ByteArray(Integer.BYTES)
+        copyInt(0, bytes, 0)
+        bytes
+    }
+
+    private fun Option<Nest>.nestAsByteArray(): ByteArray {
         val nestShell = map { it.viewNestId() }.orElse(emptyShell())
         val nestBytesSize = nestShell.size
         val bytes = ByteArray(Integer.BYTES + nestBytesSize)
@@ -83,7 +100,7 @@ class PasswordTreeWriter @Inject constructor(
         return bytes
     }
 
-    private fun Egg.asByteArray(): ByteArray {
+    private fun Egg.eggAsByteArray(): ByteArray {
         val eggIdSize = viewEggId().size
         val passwordSize = viewPassword().size
         val metaSize = 22 * Integer.BYTES

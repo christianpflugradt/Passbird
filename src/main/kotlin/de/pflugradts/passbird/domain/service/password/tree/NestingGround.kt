@@ -12,8 +12,6 @@ import de.pflugradts.passbird.domain.service.password.tree.EggFilter.CURRENT_NES
 import de.pflugradts.passbird.domain.service.password.tree.EggFilter.Companion.all
 import de.pflugradts.passbird.domain.service.password.tree.EggFilter.Companion.inNest
 import java.util.function.Predicate
-import java.util.function.Supplier
-import java.util.stream.Stream
 
 @Singleton
 class NestingGround @Inject constructor(
@@ -49,7 +47,7 @@ class NestingGround @Inject constructor(
     private fun createEggStreamSupplier(eggFilter: EggFilter): EggStreamSupplier =
         createEggStreamSupplier(if (eggFilter == CURRENT_NEST) inNest(nestService.currentNest().slot) else all())
     private fun createEggStreamSupplier(slot: Slot) = createEggStreamSupplier(inNest(slot))
-    private fun createEggStreamSupplier(predicate: Predicate<Egg>) = Supplier { eggs.stream().filter(predicate) }
-}
+    private fun createEggStreamSupplier(predicate: Predicate<Egg>) = EggStreamSupplier({ eggs.stream().filter(predicate) })
 
-typealias EggStreamSupplier = Supplier<Stream<Egg>>
+    override fun memory() = emptyMemory()
+}

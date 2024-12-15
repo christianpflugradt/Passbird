@@ -1,7 +1,10 @@
 package de.pflugradts.passbird.adapter.passwordtree
 
 import com.google.inject.Inject
+import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
+import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
+import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
@@ -18,6 +21,7 @@ import de.pflugradts.passbird.application.util.readInt
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.egg.Protein.Companion.createProtein
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
@@ -27,10 +31,9 @@ import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
+import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
 import java.util.ArrayDeque
 import java.util.Arrays
-import java.util.function.Supplier
-import java.util.stream.Stream
 
 class PasswordTreeReader @Inject constructor(
     private val systemOperation: SystemOperation,
@@ -46,8 +49,15 @@ class PasswordTreeReader @Inject constructor(
             verifySignature(byteArray)
             verifyChecksum(byteArray)
             var offset = signatureSize()
-            for (i in 0 until Slot.CAPACITY) {
-                offset += placeHolder().size
+            val memory = if (isPlaceholder(readBytes(byteArray, offset, placeHolder().size))) {
+                for (i in 0 until Slot.CAPACITY) {
+                    offset += placeHolder().size
+                }
+                emptyMemory()
+            } else {
+                val (incrementedOffset, memory) = retrieveMemory(byteArray, offset)
+                offset = incrementedOffset
+                memory
             }
             offset = populateNests(byteArray, offset)
             while (offset < byteArray.size - 2) {
@@ -55,9 +65,9 @@ class PasswordTreeReader @Inject constructor(
                 eggs.add(res.first)
                 offset = res.second
             }
-            return Supplier { eggs.stream() }
+            return EggStreamSupplier({ eggs.stream() }, memory)
         }
-        return Supplier { Stream.empty() }
+        return EggStreamSupplier({ eggs.stream() })
     }
 
     private fun readFromDisk() =
@@ -102,6 +112,7 @@ class PasswordTreeReader @Inject constructor(
 
     private val filePath get() =
         systemOperation.resolvePath(configuration.adapter.passwordTree.location.toDirectory(), PASSWORD_TREE_FILENAME.toFileName())
+
     private fun calcActualContentSize(totalSize: Int) = totalSize - signatureSize() - checksumBytes()
 
     private fun ByteArray.asNestShell(offset: Int): Pair<Shell, Int> {
@@ -147,5 +158,35 @@ class PasswordTreeReader @Inject constructor(
             }
         }.toList()
         return Pair(createEgg(slotAt(nestSlot), encryptedShellOf(eggIdBytes), encryptedShellOf(passwordBytes), proteins), incrementedOffset)
+    }
+
+    private fun isPlaceholder(byteArray: ByteArray): Boolean = encryptedShellOf(byteArray) == placeHolder()
+
+    private fun ByteArray.asMemoryEntry(offset: Int): Pair<Option<EncryptedShell>, Int> {
+        var incrementedOffset = offset
+        val shellSize = readInt(this, incrementedOffset)
+        incrementedOffset += Integer.BYTES
+        val encryptedShellOption = if (shellSize > 0) {
+            val shellBytes = readBytes(this, incrementedOffset, shellSize)
+            incrementedOffset += shellSize
+            optionOf(encryptedShellOf(shellBytes))
+        } else {
+            emptyOption()
+        }
+        return Pair(encryptedShellOption, incrementedOffset)
+    }
+
+    private fun retrieveMemory(byteArray: ByteArray, offset: Int): Pair<Int, Map<Slot, List<Option<EncryptedShell>>>> {
+        var incrementedOffset = offset
+        return (0..Slot.CAPACITY).associate { nestSlot ->
+            val slot = slotAt(nestSlot)
+            val (list, newOffset) = (0..Slot.CAPACITY).fold(Pair(emptyList<Option<EncryptedShell>>(), incrementedOffset)) { acc, _ ->
+                val (currentList, currentOffset) = acc
+                val res = byteArray.asMemoryEntry(currentOffset)
+                currentList + res.first to res.second
+            }
+            incrementedOffset = newOffset
+            slot to list
+        }.let { Pair(incrementedOffset, it) }
     }
 }
