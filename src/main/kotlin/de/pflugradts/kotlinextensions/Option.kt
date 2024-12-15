@@ -29,6 +29,7 @@ class MutableOption<T> private constructor(private var value: T?) : Option<T> {
         value ?: other()
     }
     override fun <U> map(block: (T) -> U) = value?.let { optionOf(block(it)) } ?: emptyOption()
+    fun <U> mapMutable(block: (T) -> U) = value?.let { mutableOptionOf(block(it)) } ?: mutableOptionOf()
     override fun or(block: () -> Option<T>) = if (isPresent) this else block()
     fun set(value: T?) {
         this.value = value

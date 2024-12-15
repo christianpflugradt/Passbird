@@ -1,10 +1,8 @@
 package de.pflugradts.passbird.adapter.passwordtree
 
 import com.google.inject.Inject
-import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
+import de.pflugradts.kotlinextensions.MutableOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
-import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
-import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
@@ -31,6 +29,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
+import de.pflugradts.passbird.domain.service.password.tree.MemoryMap
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
 import java.util.ArrayDeque
 import java.util.Arrays
@@ -162,25 +161,25 @@ class PasswordTreeReader @Inject constructor(
 
     private fun isPlaceholder(byteArray: ByteArray): Boolean = encryptedShellOf(byteArray) == placeHolder()
 
-    private fun ByteArray.asMemoryEntry(offset: Int): Pair<Option<EncryptedShell>, Int> {
+    private fun ByteArray.asMemoryEntry(offset: Int): Pair<MutableOption<EncryptedShell>, Int> {
         var incrementedOffset = offset
         val shellSize = readInt(this, incrementedOffset)
         incrementedOffset += Integer.BYTES
         val encryptedShellOption = if (shellSize > 0) {
             val shellBytes = readBytes(this, incrementedOffset, shellSize)
             incrementedOffset += shellSize
-            optionOf(encryptedShellOf(shellBytes))
+            mutableOptionOf(encryptedShellOf(shellBytes))
         } else {
-            emptyOption()
+            mutableOptionOf()
         }
         return Pair(encryptedShellOption, incrementedOffset)
     }
 
-    private fun retrieveMemory(byteArray: ByteArray, offset: Int): Pair<Int, Map<Slot, List<Option<EncryptedShell>>>> {
+    private fun retrieveMemory(byteArray: ByteArray, offset: Int): Pair<Int, MemoryMap> {
         var incrementedOffset = offset
         return (0..Slot.CAPACITY).associate { nestSlot ->
             val slot = slotAt(nestSlot)
-            val (list, newOffset) = (0..Slot.CAPACITY).fold(Pair(emptyList<Option<EncryptedShell>>(), incrementedOffset)) { acc, _ ->
+            val (list, newOffset) = (0..Slot.CAPACITY).fold(Pair(emptyList<MutableOption<EncryptedShell>>(), incrementedOffset)) { acc, _ ->
                 val (currentList, currentOffset) = acc
                 val res = byteArray.asMemoryEntry(currentOffset)
                 currentList + res.first to res.second

@@ -5,12 +5,10 @@ import com.google.inject.Singleton
 import de.pflugradts.kotlinextensions.MutableOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
 import de.pflugradts.passbird.domain.model.egg.Egg
+import de.pflugradts.passbird.domain.model.egg.EggId
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestService
-import de.pflugradts.passbird.domain.service.password.tree.EggFilter.CURRENT_NEST
-import de.pflugradts.passbird.domain.service.password.tree.EggFilter.Companion.all
-import de.pflugradts.passbird.domain.service.password.tree.EggFilter.Companion.inNest
 import java.util.function.Predicate
 
 @Singleton
@@ -19,16 +17,22 @@ class NestingGround @Inject constructor(
     private val nestService: NestService,
     private val eventRegistry: EventRegistry,
 ) : EggRepository {
+    private val lazyMemory: MutableOption<MemoryMap> = mutableOptionOf()
     private val lazyEggs: MutableOption<MutableList<Egg>> = mutableOptionOf()
-    private val eggs: MutableList<Egg> get() {
+    private val memory: MemoryMap get() = initializeIfEmpty().run { lazyMemory.get() }
+    private val eggs: MutableList<Egg> get() = initializeIfEmpty().run { lazyEggs.get() }
+    private val currentNestSlot get() = nestService.currentNest().slot
+
+    private fun initializeIfEmpty() {
         if (lazyEggs.isEmpty) {
-            lazyEggs.set(passwordTreeAdapterPort.restore().get().toList().toMutableList())
+            val initialState = passwordTreeAdapterPort.restore()
+            lazyEggs.set(initialState.get().toList().toMutableList())
+            lazyMemory.set(initialState.memory())
             lazyEggs.get().forEach {
                 it.clearDomainEvents()
                 eventRegistry.register(it)
             }
         }
-        return lazyEggs.get()
     }
 
     override fun add(egg: Egg) {
@@ -41,13 +45,17 @@ class NestingGround @Inject constructor(
         eventRegistry.deregister(egg)
     }
 
-    override fun sync() = passwordTreeAdapterPort.sync(createEggStreamSupplier(EggFilter.ALL_NESTS))
+    override fun sync() = passwordTreeAdapterPort.sync(EggStreamSupplier({ eggs.stream() }, memory))
     override fun findAll(slot: Slot) = createEggStreamSupplier(slot).get()
-    override fun findAll() = createEggStreamSupplier(CURRENT_NEST).get()
-    private fun createEggStreamSupplier(eggFilter: EggFilter): EggStreamSupplier =
-        createEggStreamSupplier(if (eggFilter == CURRENT_NEST) inNest(nestService.currentNest().slot) else all())
+    override fun findAll() = createEggStreamSupplier(inNest(currentNestSlot)).get()
     private fun createEggStreamSupplier(slot: Slot) = createEggStreamSupplier(inNest(slot))
     private fun createEggStreamSupplier(predicate: Predicate<Egg>) = EggStreamSupplier({ eggs.stream().filter(predicate) })
 
-    override fun memory() = emptyMemory()
+    override fun memory() = memory[currentNestSlot]!!.copy()
+    override fun updateMemory(mostRecentEggId: EggId) = with(memory[currentNestSlot]!!) {
+        (size - 1 downTo 1).forEach { this[it].set(this[it - 1].get()) }
+        this[0].set(mostRecentEggId.view())
+    }
 }
+
+private fun inNest(slot: Slot) = Predicate<Egg> { it.associatedNest() == slot }
