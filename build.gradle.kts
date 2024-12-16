@@ -27,7 +27,7 @@ repositories {
     mavenCentral()
 }
 
-val guavaVersion = "33.3.1-jre"
+val guavaVersion = "33.4.0-jre"
 val guiceVersion = "7.0.0"
 val jacksonVersion = "2.18.2"
 
