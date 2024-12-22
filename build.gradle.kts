@@ -27,6 +27,14 @@ repositories {
     mavenCentral()
 }
 
+// force ktlint to use logback 1.5.x due to vulnerability in earlier versions
+// gradle plugin / ktlint version addressed: 12.1.2 / 1.5.0
+configurations.all {
+    resolutionStrategy {
+        force("ch.qos.logback:logback-core:1.5.13")
+    }
+}
+
 val guavaVersion = "33.4.0-jre"
 val guiceVersion = "7.0.0"
 val jacksonVersion = "2.18.2"
