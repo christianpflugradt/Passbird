@@ -18,6 +18,8 @@ import de.pflugradts.passbird.application.util.readBytes
 import de.pflugradts.passbird.application.util.readInt
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
+import de.pflugradts.passbird.domain.model.egg.EggIdMemory
+import de.pflugradts.passbird.domain.model.egg.MemoryMap
 import de.pflugradts.passbird.domain.model.egg.Protein.Companion.createProtein
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
@@ -26,10 +28,11 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
+import de.pflugradts.passbird.domain.model.slot.Slots
+import de.pflugradts.passbird.domain.model.slot.Slots.Companion.slotIterator
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
-import de.pflugradts.passbird.domain.service.password.tree.MemoryMap
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
 import java.util.ArrayDeque
 import java.util.Arrays
@@ -177,15 +180,18 @@ class PasswordTreeReader @Inject constructor(
 
     private fun retrieveMemory(byteArray: ByteArray, offset: Int): Pair<Int, MemoryMap> {
         var incrementedOffset = offset
-        return (0..Slot.CAPACITY).associate { nestSlot ->
-            val slot = slotAt(nestSlot)
-            val (list, newOffset) = (0..Slot.CAPACITY).fold(Pair(emptyList<MutableOption<EncryptedShell>>(), incrementedOffset)) { acc, _ ->
-                val (currentList, currentOffset) = acc
-                val res = byteArray.asMemoryEntry(currentOffset)
-                currentList + res.first to res.second
+        return Slots<EggIdMemory>().apply {
+            slotIterator().forEach { nestSlot ->
+                this[nestSlot].set(
+                    EggIdMemory().apply {
+                        slotIterator().forEach { slot ->
+                            val (entry, newOffset) = byteArray.asMemoryEntry(incrementedOffset)
+                            entry.ifPresent { this[slot].set(it) }
+                            incrementedOffset = newOffset
+                        }
+                    },
+                )
             }
-            incrementedOffset = newOffset
-            slot to list
         }.let { Pair(incrementedOffset, it) }
     }
 }

@@ -38,9 +38,11 @@ class PasswordTreeWriter @Inject constructor(
         val contentSize = calcRequiredContentSize(eggSupplier)
         val bytes = ByteArray(calcActualTotalSize(contentSize))
         var offset = copyBytes(signature(), bytes, 0, signatureSize())
-        eggSupplier.memory().forEach { (_, value) ->
-            value.forEach { memoryEntry ->
-                memoryEntry.encryptedShellAsByteArray().let { offset += copyBytes(it, bytes, offset, it.size) }
+        eggSupplier.memory().forEach { memoryListOption ->
+            memoryListOption.ifPresent { memoryList ->
+                memoryList.forEach { memoryEntry ->
+                    memoryEntry.encryptedShellAsByteArray().let { offset += copyBytes(it, bytes, offset, it.size) }
+                }
             }
         }
         for (index in FIRST_SLOT..LAST_SLOT) {
@@ -57,8 +59,8 @@ class PasswordTreeWriter @Inject constructor(
     }.onFailure { reportFailure(WritePasswordTreeFailure(filePath, it)) }
 
     private fun calcRequiredContentSize(eggs: EggStreamSupplier): Int {
-        val memorySize = 100 * Integer.BYTES + eggs.memory().entries.fold(0) { acc, (_, options) ->
-            acc + options.sumOf { it.orNull()?.size ?: 0 }
+        val memorySize = 100 * Integer.BYTES + eggs.memory().fold(0) { acc, inner ->
+            acc + inner.map { slots -> slots.sumOf { it.map(EncryptedShell::size).orElse(0) } }.orElse(0)
         }
         val eggDataSize = eggs.get()
             .map { egg: Egg ->

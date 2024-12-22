@@ -3,6 +3,7 @@ package de.pflugradts.passbird.domain.service.password
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.kotlinextensions.toOption
 import de.pflugradts.passbird.domain.model.egg.Egg
+import de.pflugradts.passbird.domain.model.egg.EggIdMemory
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
@@ -22,16 +23,19 @@ abstract class CommonPasswordServiceCapabilities(
     private val eventRegistry: EventRegistry,
 ) {
     fun find(eggIdShell: Shell, slot: Slot): Option<Egg> = eggRepository.findAll(slot).findDecrypted(eggIdShell)
-    fun find(eggIdShell: Shell): Option<Egg> = eggRepository.findAll().findDecrypted(eggIdShell)
+    fun find(eggIdShell: Shell): Option<Egg> = eggRepository.findAll().findDecrypted(eggIdShell).apply { ifPresent { updateMemory(it) } }
+
     private fun Stream<Egg>.findDecrypted(eggIdShell: Shell) = filter { decrypted(it.viewEggId()) == eggIdShell }.findAny().toOption()
+    private fun EggIdMemory.findDuplicate(egg: Egg) = find { entry ->
+        entry.map { decrypted(it) == decrypted(egg.viewEggId()) }.orElse(false)
+    }?.get()
+
+    private fun updateMemory(egg: Egg) = eggRepository.updateMemory(egg, eggRepository.memory().findDuplicate(egg))
 
     fun encrypted(shell: Shell) = cryptoProvider.encrypt(shell)
     fun decrypted(encryptedShell: EncryptedShell) = cryptoProvider.decrypt(encryptedShell)
 
-    fun processEventsAndSync() {
-        eventRegistry.processEvents()
-        eggRepository.sync()
-    }
+    fun processEventsAndSync() = eventRegistry.processEvents().apply { eggRepository.sync() }
 
     fun challengeEggId(shell: Shell) {
         if (plainValueOf(shell.getByte(0)).isDigit || anyMatch(shell.copy()) { plainValueOf(it).isSymbol }) {

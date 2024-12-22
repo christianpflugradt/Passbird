@@ -5,7 +5,8 @@ import com.google.inject.Singleton
 import de.pflugradts.kotlinextensions.MutableOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
 import de.pflugradts.passbird.domain.model.egg.Egg
-import de.pflugradts.passbird.domain.model.egg.EggId
+import de.pflugradts.passbird.domain.model.egg.MemoryMap
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestService
@@ -38,6 +39,7 @@ class NestingGround @Inject constructor(
     override fun add(egg: Egg) {
         eventRegistry.register(egg)
         eggs.add(egg)
+        updateMemory(egg)
     }
 
     override fun delete(egg: Egg) {
@@ -51,11 +53,10 @@ class NestingGround @Inject constructor(
     private fun createEggStreamSupplier(slot: Slot) = createEggStreamSupplier(inNest(slot))
     private fun createEggStreamSupplier(predicate: Predicate<Egg>) = EggStreamSupplier({ eggs.stream().filter(predicate) })
 
-    override fun memory() = memory[currentNestSlot]!!.copy()
-    override fun updateMemory(mostRecentEggId: EggId) = with(memory[currentNestSlot]!!) {
-        (size - 1 downTo 1).forEach { this[it].set(this[it - 1].get()) }
-        this[0].set(mostRecentEggId.view())
-    }
+    override fun memory() = memory[currentNestSlot].get().copy()
+    override fun updateMemory(mostRecentEgg: Egg, duplicate: EncryptedShell?) = memory[currentNestSlot].get()
+        .memorize(mostRecentEgg.viewEggId(), duplicate)
+        .also { sync() }
 }
 
 private fun inNest(slot: Slot) = Predicate<Egg> { it.associatedNest() == slot }
