@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.application.configuration
 
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
-import de.pflugradts.passbird.domain.model.egg.Protein
 
 interface ReadableConfiguration {
     fun parsePasswordRequirements(): PasswordRequirements
@@ -81,7 +80,13 @@ interface ReadableConfiguration {
     }
 
     interface Domain {
+        val eggIdMemory: EggIdMemory
         val protein: Protein
+    }
+
+    interface EggIdMemory {
+        val enabled: Boolean
+        val persisted: Boolean
     }
 
     interface Protein {

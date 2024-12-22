@@ -59,7 +59,7 @@ class PasswordTreeReader @Inject constructor(
             } else {
                 val (incrementedOffset, memory) = retrieveMemory(byteArray, offset)
                 offset = incrementedOffset
-                memory
+                if (eggIdMemoryEnabled) memory else emptyMemory()
             }
             offset = populateNests(byteArray, offset)
             while (offset < byteArray.size - 2) {
@@ -114,6 +114,8 @@ class PasswordTreeReader @Inject constructor(
 
     private val filePath get() =
         systemOperation.resolvePath(configuration.adapter.passwordTree.location.toDirectory(), PASSWORD_TREE_FILENAME.toFileName())
+
+    private val eggIdMemoryEnabled get() = with(configuration.domain.eggIdMemory) { enabled && persisted}
 
     private fun calcActualContentSize(totalSize: Int) = totalSize - signatureSize() - checksumBytes()
 

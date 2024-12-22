@@ -6,6 +6,7 @@ import com.google.inject.Provider
 import com.google.inject.Singleton
 import com.google.inject.assistedinject.FactoryModuleBuilder
 import com.google.inject.multibindings.Multibinder
+import com.google.inject.name.Names
 import de.pflugradts.passbird.adapter.clipboard.ClipboardService
 import de.pflugradts.passbird.adapter.exchange.FilePasswordExchange
 import de.pflugradts.passbird.adapter.keystore.KeyStoreService
@@ -75,6 +76,9 @@ class ApplicationModule : AbstractModule() {
     }
 
     private fun configureApplication() {
+        bind(Boolean::class.java)
+            .annotatedWith(Names.named("EggIdMemoryEnabled"))
+            .toProvider(EggIdMemoryEnabledProvider::class.java)
         bind(Bootable::class.java).to(PassbirdApplication::class.java)
         bind(ClipboardAdapterPort::class.java).to(ClipboardService::class.java)
         bind(EventRegistry::class.java).to(PassbirdEventRegistry::class.java)
@@ -154,5 +158,11 @@ class ApplicationModule : AbstractModule() {
         private val cryptoProviderFactory: CryptoProviderFactory,
     ) : Provider<CryptoProvider> {
         override fun get() = cryptoProviderFactory.createCryptoProvider()
+    }
+
+    private class EggIdMemoryEnabledProvider @Inject constructor(
+        private val configuration: ReadableConfiguration,
+    ) : Provider<Boolean> {
+        override fun get() = configuration.domain.eggIdMemory.enabled
     }
 }

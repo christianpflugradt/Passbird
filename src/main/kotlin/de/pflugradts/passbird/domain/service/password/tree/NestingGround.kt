@@ -2,6 +2,7 @@ package de.pflugradts.passbird.domain.service.password.tree
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
+import com.google.inject.name.Named
 import de.pflugradts.kotlinextensions.MutableOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
 import de.pflugradts.passbird.domain.model.egg.Egg
@@ -14,6 +15,8 @@ import java.util.function.Predicate
 
 @Singleton
 class NestingGround @Inject constructor(
+    @Named("EggIdMemoryEnabled")
+    private val eggIdMemoryEnabled: Boolean,
     private val passwordTreeAdapterPort: PasswordTreeAdapterPort,
     private val nestService: NestService,
     private val eventRegistry: EventRegistry,
@@ -54,9 +57,11 @@ class NestingGround @Inject constructor(
     private fun createEggStreamSupplier(predicate: Predicate<Egg>) = EggStreamSupplier({ eggs.stream().filter(predicate) })
 
     override fun memory() = memory[currentNestSlot].get().copy()
-    override fun updateMemory(mostRecentEgg: Egg, duplicate: EncryptedShell?) = memory[currentNestSlot].get()
-        .memorize(mostRecentEgg.viewEggId(), duplicate)
-        .also { sync() }
+    override fun updateMemory(mostRecentEgg: Egg, duplicate: EncryptedShell?) {
+        if (eggIdMemoryEnabled) {
+            memory[currentNestSlot].get().memorize(mostRecentEgg.viewEggId(), duplicate).also { sync() }
+        }
+    }
 }
 
 private fun inNest(slot: Slot) = Predicate<Egg> { it.associatedNest() == slot }

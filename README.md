@@ -110,6 +110,11 @@ adapter:
     # hides sensitive user input such as passwords
     secureInput: true
 domain:
+    eggIdMemory:
+        # memorizes the up to ten most recently used egg ids per nest for memory related usage
+        enabled: true
+        # persists the memorized egg ids across Passbird restarts
+        persisted: true
     protein:
         # treats protein structures as secure input
         secureProteinStructureInput: true

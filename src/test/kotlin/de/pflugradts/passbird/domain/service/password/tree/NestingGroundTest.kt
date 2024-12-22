@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.domain.service.password.tree
 
+import de.pflugradts.passbird.application.configuration.Configuration
+import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -11,6 +13,7 @@ import de.pflugradts.passbird.domain.service.nest.findForTesting
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -25,10 +28,16 @@ class NestingGroundTest {
     private val givenEgg2 = createEggForTesting(withEggIdShell = shellOf("EggId2"))
     private val givenEggs = listOf(givenEgg1, givenEgg2)
 
+    private val configuration = mockk<Configuration>()
     private val passwordTreeAdapterPort = fakePasswordTreeAdapterPort(givenEggs)
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
     private val nestService = createNestServiceSpyForTesting()
-    private val nestingGround = NestingGround(passwordTreeAdapterPort, nestService, eventRegistry)
+    private val nestingGround = NestingGround(eggIdMemoryEnabled = false, passwordTreeAdapterPort, nestService, eventRegistry)
+
+    @BeforeEach
+    fun setUp() {
+        fakeConfiguration(instance = configuration)
+    }
 
     @Test
     fun `should initialize upon first invocation`() {

@@ -88,7 +88,14 @@ data class Configuration(
         override val secureInput: Boolean = true,
     ) : ReadableConfiguration.UserInterface
     data class AnsiEscapeCodes(override val enabled: Boolean = false) : ReadableConfiguration.AnsiEscapeCodes
-    data class Domain(override val protein: Protein = Protein()) : ReadableConfiguration.Domain
+    data class Domain(
+        override val eggIdMemory: EggIdMemory = EggIdMemory(),
+        override val protein: Protein = Protein(),
+    ) : ReadableConfiguration.Domain
+    data class EggIdMemory(
+        override val enabled: Boolean = true,
+        override val persisted: Boolean = false,
+    ) : ReadableConfiguration.EggIdMemory
     data class Protein(
         override val secureProteinStructureInput: Boolean = true,
         override val promptForProteinStructureInputToggle: Boolean = false,

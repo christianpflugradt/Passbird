@@ -69,8 +69,12 @@ fun fakeConfiguration(
     val protein = mockk<Configuration.Protein>()
     every { protein.secureProteinStructureInput } returns withSecureProteinInputEnabled
     every { protein.promptForProteinStructureInputToggle } returns withPromptForProteinStructureInputToggle
+    val eggIdMemory = mockk<Configuration.EggIdMemory>()
+    every { eggIdMemory.enabled } returns false
+    every { eggIdMemory.persisted } returns false
     val domain = mockk<Configuration.Domain>()
     every { domain.protein } returns protein
+    every { domain.eggIdMemory } returns eggIdMemory
     every { instance.domain } returns domain
     every { instance.template } returns withConfigurationTemplate
     every { instance.parsePasswordRequirements() } answers { callOriginal() }
