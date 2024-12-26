@@ -18,6 +18,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.egg.RenameComm
 import de.pflugradts.passbird.application.commandhandling.handler.egg.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.GetMemoryCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.memory.UseMemoryCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.ViewMemoryCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
@@ -74,6 +75,7 @@ class PassbirdMainModuleTest {
             SetInfoCommandHandler::class.java,
             SetProteinCommandHandler::class.java,
             SwitchNestCommandHandler::class.java,
+            UseMemoryCommandHandler::class.java,
             ViewCommandHandler::class.java,
             ViewMemoryCommandHandler::class.java,
             ViewNestCommandHandler::class.java,

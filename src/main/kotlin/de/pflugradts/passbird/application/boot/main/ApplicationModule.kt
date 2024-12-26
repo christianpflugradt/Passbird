@@ -17,6 +17,10 @@ import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
+import de.pflugradts.passbird.application.commandhandling.CommandBus
+import de.pflugradts.passbird.application.commandhandling.CommandHandlerBus
+import de.pflugradts.passbird.application.commandhandling.CommandInputHandler
+import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ExportCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHandler
@@ -31,6 +35,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.egg.RenameComm
 import de.pflugradts.passbird.application.commandhandling.handler.egg.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.GetMemoryCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.memory.UseMemoryCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.ViewMemoryCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
@@ -83,8 +88,10 @@ class ApplicationModule : AbstractModule() {
             .toProvider(EggIdMemoryEnabledProvider::class.java)
         bind(Bootable::class.java).to(PassbirdApplication::class.java)
         bind(ClipboardAdapterPort::class.java).to(ClipboardService::class.java)
+        bind(CommandBus::class.java).to(CommandHandlerBus::class.java)
         bind(EventRegistry::class.java).to(PassbirdEventRegistry::class.java)
         bind(ImportExportService::class.java).to(PasswordImportExportService::class.java)
+        bind(InputHandler::class.java).to(CommandInputHandler::class.java)
         bind(KeyStoreAdapterPort::class.java).to(KeyStoreService::class.java)
         bind(EggRepository::class.java).to(NestingGround::class.java)
         bind(NestService::class.java).to(NestingGroundService::class.java)
@@ -117,6 +124,7 @@ class ApplicationModule : AbstractModule() {
                 SetInfoCommandHandler::class.java,
                 SetProteinCommandHandler::class.java,
                 SwitchNestCommandHandler::class.java,
+                UseMemoryCommandHandler::class.java,
                 ViewCommandHandler::class.java,
                 ViewMemoryCommandHandler::class.java,
                 ViewNestCommandHandler::class.java,

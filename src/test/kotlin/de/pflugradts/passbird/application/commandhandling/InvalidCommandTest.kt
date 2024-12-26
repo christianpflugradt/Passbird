@@ -28,7 +28,7 @@ class InvalidCommandTest {
 
     @Nested
     inner class InputHandlerTest {
-        private val commandBus = spyk(CommandBus(emptySet()))
+        private val commandBus = spyk(CommandHandlerBus(emptySet()))
         private val inputHandler = createInputHandlerFor(commandBus)
 
         @Test

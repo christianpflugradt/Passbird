@@ -59,7 +59,7 @@ class QuitCommandTest {
 
     @Nested
     inner class InactivityTest {
-        private val commandBus = CommandBus(setOf(quitCommandHandler))
+        private val commandBus = CommandHandlerBus(setOf(quitCommandHandler))
 
         @Test
         fun `should output inactivity hint if quit reason is inactivity`() {

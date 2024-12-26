@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.application.process.inactivity
 
-import de.pflugradts.passbird.application.commandhandling.CommandBus
+import de.pflugradts.passbird.application.commandhandling.CommandHandlerBus
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitReason.INACTIVITY
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -25,7 +25,7 @@ private const val FIVE_MINUTES = 5 * 60
 class InactivityHandlerTest {
 
     private val instant = mockk<Instant>()
-    private val commandBus = mockk<CommandBus>(relaxed = true)
+    private val commandBus = mockk<CommandHandlerBus>(relaxed = true)
     private val configuration = mockk<Configuration>()
     private val systemOperation = mockk<SystemOperation>()
 

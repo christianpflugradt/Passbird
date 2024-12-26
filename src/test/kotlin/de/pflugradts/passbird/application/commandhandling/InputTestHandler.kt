@@ -14,5 +14,6 @@ private val commandFactory = CommandFactory(
     setCommandFactory = SetCommandFactory(),
 )
 
-fun createInputHandlerFor(commandBus: CommandBus) = InputHandler(commandBus, commandFactory)
-fun createInputHandlerFor(commandHandler: CommandHandler) = InputHandler(CommandBus(setOf(commandHandler)), commandFactory)
+fun createInputHandlerFor(commandBus: CommandBus): InputHandler = CommandInputHandler(commandBus, commandFactory)
+fun createInputHandlerFor(commandHandler: CommandHandler): InputHandler =
+    CommandInputHandler(CommandHandlerBus(setOf(commandHandler)), commandFactory)

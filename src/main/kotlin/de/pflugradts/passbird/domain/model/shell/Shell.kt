@@ -22,6 +22,8 @@ class Shell private constructor(
     fun stream(): Stream<Byte> = StreamSupport.stream(spliterator(), false)
     fun toByteArray() = content.clone()
 
+    operator fun plus(other: Shell) = shellOf(content + other.toByteArray())
+
     fun toPlainShell(): PlainShell {
         val c = CharArray(size)
         for (i in 0 until size) c[i] = Char(content[i].toUShort())
