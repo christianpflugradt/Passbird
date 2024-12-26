@@ -17,9 +17,7 @@ class GetCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleGetCommand(getCommand: GetCommand) {
-        // below line results in an arch unit violation due to https://github.com/TNG/ArchUnit/issues/981
-        // passwordService.viewPassword(getCommand.argument).ifPresent {
-        passwordService.viewPassword(getCommand.argument).orNull()?.also {
+        passwordService.viewPassword(getCommand.argument).ifPresent {
             clipboardAdapterPort.post(outputOf(it))
             userInterfaceAdapterPort.send(outputOf(shellOf("Password copied to clipboard.")))
         }
