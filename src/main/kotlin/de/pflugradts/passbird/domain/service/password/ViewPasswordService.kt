@@ -37,6 +37,7 @@ class ViewPasswordService @Inject constructor(
         egg.proteins.map { protein -> protein.map { optionOf(decrypted(it.viewType())) }.orElse(emptyOption()) }
     }
     fun viewMemory() = eggRepository.memory().map { it.map { encryptedShell -> decrypted(encryptedShell) } }.toSlots()
+    fun viewMemoryEntry(slot: Slot) = eggRepository.memory()[slot].map { decrypted(it) }
 
     private fun <T> extractFromEgg(eggIdShell: Shell, extraction: (egg: Egg) -> T): Option<T> = find(eggIdShell)
         .map { extraction(it) }.or {

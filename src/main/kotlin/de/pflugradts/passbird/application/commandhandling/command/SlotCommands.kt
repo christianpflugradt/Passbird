@@ -5,4 +5,5 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 
 class AddNestCommand(slot: Slot) : AbstractSlotCommand(slot)
 class DiscardNestCommand(slot: Slot) : AbstractSlotCommand(slot)
+class GetMemoryCommand(slot: Slot) : AbstractSlotCommand(slot)
 class SwitchNestCommand(slot: Slot) : AbstractSlotCommand(slot)

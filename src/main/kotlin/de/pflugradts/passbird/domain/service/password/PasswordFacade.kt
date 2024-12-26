@@ -19,6 +19,7 @@ class PasswordFacade @Inject constructor(
         viewPasswordService.eggExists(eggIdShell, eggNotExistsAction)
     override fun proteinExists(eggIdShell: Shell, slot: Slot) = viewPasswordService.proteinExists(eggIdShell, slot)
     override fun viewMemory() = viewPasswordService.viewMemory()
+    override fun viewMemoryEntry(slot: Slot) = viewPasswordService.viewMemoryEntry(slot)
     override fun viewPassword(eggIdShell: Shell) = viewPasswordService.viewPassword(eggIdShell)
     override fun viewProteinStructure(eggIdShell: Shell, slot: Slot) = viewPasswordService.viewProteinStructure(eggIdShell, slot)
     override fun viewProteinStructures(eggIdShell: Shell) = viewPasswordService.viewProteinStructures(eggIdShell)

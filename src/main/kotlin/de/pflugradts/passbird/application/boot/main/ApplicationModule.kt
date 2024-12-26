@@ -30,6 +30,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.egg.GetCommand
 import de.pflugradts.passbird.application.commandhandling.handler.egg.RenameCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.memory.GetMemoryCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.ViewMemoryCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
@@ -104,6 +105,7 @@ class ApplicationModule : AbstractModule() {
                 DiscardProteinCommandHandler::class.java,
                 ExportCommandHandler::class.java,
                 GetCommandHandler::class.java,
+                GetMemoryCommandHandler::class.java,
                 GetProteinCommandHandler::class.java,
                 HelpCommandHandler::class.java,
                 ImportCommandHandler::class.java,
