@@ -2,10 +2,12 @@ package de.pflugradts.passbird
 
 import com.google.common.eventbus.Subscribe
 import com.google.inject.AbstractModule
+import com.tngtech.archunit.base.DescribedPredicate
 import com.tngtech.archunit.base.DescribedPredicate.alwaysTrue
 import com.tngtech.archunit.core.domain.JavaClass
 import com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo
 import com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEndingWith
+import com.tngtech.archunit.core.domain.JavaMethod
 import com.tngtech.archunit.core.domain.JavaModifier
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.core.importer.ImportOption.DoNotIncludeTests
@@ -163,7 +165,8 @@ class PassbirdTest {
         @Test
         fun `event handlers handle methods must be annotated with subscribe`() {
             methods().that().areDeclaredInClassesThat().areAssignableTo(EventHandler::class.java)
-                .and().haveNameMatching("handle.*")
+                .and().haveNameMatching("^handle.*")
+                .and(areNotKotlinLambdas())
                 .should().beAnnotatedWith(Subscribe::class.java)
                 .check(classes)
         }
@@ -171,7 +174,7 @@ class PassbirdTest {
         @Test
         fun `no methods that are not event handlers may be annotated with subscribe`() {
             noMethods().that().areDeclaredInClassesThat().areNotAssignableTo(EventHandler::class.java)
-                .or().haveNameNotMatching("handle.*")
+                .or().haveNameNotMatching("^handle.*")
                 .should().beAnnotatedWith(Subscribe::class.java)
                 .check(classes)
         }
@@ -189,4 +192,8 @@ class PassbirdTest {
             noClasses().should().haveSimpleNameEndingWith("Helper").check(classes)
         }
     }
+}
+
+private fun areNotKotlinLambdas() = object : DescribedPredicate<JavaMethod>("not a Kotlin lambda") {
+    override fun test(method: JavaMethod) = !method.name.contains("$")
 }
