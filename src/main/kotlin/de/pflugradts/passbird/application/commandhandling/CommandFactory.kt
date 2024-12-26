@@ -21,6 +21,7 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 
 @Singleton
 class CommandFactory @Inject constructor(
+    private val memoryCommandFactory: MemoryCommandFactory,
     private val nestCommandFactory: NestCommandFactory,
     private val proteinCommandFactory: ProteinCommandFactory,
     private val setCommandFactory: SetCommandFactory,
@@ -33,6 +34,7 @@ class CommandFactory @Inject constructor(
         CommandType.HELP -> HelpCommand()
         CommandType.IMPORT -> ImportCommand()
         CommandType.LIST -> ListCommand()
+        CommandType.MEMORY -> constructSafely(memoryCommandFactory, input)
         CommandType.NEST -> constructSafely(nestCommandFactory, input)
         CommandType.PROTEIN -> constructSafely(proteinCommandFactory, input)
         CommandType.QUIT -> QuitCommand(quitReason = USER)

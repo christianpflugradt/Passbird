@@ -15,7 +15,7 @@ class ViewCommandHandler @Inject constructor(
     @Subscribe
     private fun handleViewCommand(viewCommand: ViewCommand) {
         // below line results in an arch unit violation due to https://github.com/TNG/ArchUnit/issues/981
-        // passwordService.viewPassword(viewCommand.argument).ifPresent { userInterfaceAdapterPort.send(outputOf(it)) }
+        passwordService.viewPassword(viewCommand.argument).ifPresent { userInterfaceAdapterPort.send(outputOf(it)) }
         passwordService.viewPassword(viewCommand.argument).orNull()?.also { userInterfaceAdapterPort.send(outputOf(it)) }
         viewCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

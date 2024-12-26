@@ -40,3 +40,5 @@ open class Slots<T> : Iterable<MutableOption<T>> {
 private fun requireValidIndex(index: Int) = require(index in 0 until 10) { "Index must be between 0 and 9" }
 
 private val slots: Iterable<Slot> = listOf(DEFAULT, S1, S2, S3, S4, S5, S6, S7, S8, S9)
+
+fun <E> List<Option<E>>.toSlots(): Slots<E> = Slots<E>().also { forEachIndexed { index, element -> it[index] = element } }

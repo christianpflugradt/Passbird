@@ -4,6 +4,7 @@ import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slots
 import java.util.stream.Stream
 
 interface PasswordService {
@@ -15,6 +16,7 @@ interface PasswordService {
     fun eggExists(eggIdShell: Shell, slot: Slot): Boolean
     fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction): Boolean
     fun proteinExists(eggIdShell: Shell, slot: Slot): Boolean
+    fun viewMemory(): Slots<Shell>
     fun viewPassword(eggIdShell: Shell): Option<Shell>
     fun viewProteinStructure(eggIdShell: Shell, slot: Slot): Option<Shell>
     fun viewProteinStructures(eggIdShell: Shell): Option<List<Option<Shell>>>

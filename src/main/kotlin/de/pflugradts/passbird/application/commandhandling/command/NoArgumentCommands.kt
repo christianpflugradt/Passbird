@@ -10,6 +10,7 @@ class ProteinInfoCommand : NoArgumentCommand
 class QuitCommand(val quitReason: QuitReason) : NoArgumentCommand
 class SetInfoCommand : NoArgumentCommand
 class ViewNestCommand : NoArgumentCommand
+class ViewMemoryCommand : NoArgumentCommand
 
 class NullCommand : NoArgumentCommand
 

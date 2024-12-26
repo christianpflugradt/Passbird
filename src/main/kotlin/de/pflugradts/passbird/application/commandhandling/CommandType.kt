@@ -10,6 +10,7 @@ enum class CommandType(val type: Char) {
     HELP('h'),
     IMPORT('i'),
     LIST('l'),
+    MEMORY('m'),
     NEST('n'),
     PROTEIN('p'),
     QUIT('q'),

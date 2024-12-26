@@ -71,7 +71,12 @@ class InvalidCommandTest {
 
     @Nested
     inner class CommandFactoryTest {
-        private val commandFactory = CommandFactory(NestCommandFactory(), ProteinCommandFactory(), SetCommandFactory())
+        private val commandFactory = CommandFactory(
+            memoryCommandFactory = MemoryCommandFactory(),
+            nestCommandFactory = NestCommandFactory(),
+            proteinCommandFactory = ProteinCommandFactory(),
+            setCommandFactory = SetCommandFactory(),
+        )
 
         @ParameterizedTest
         @ValueSource(

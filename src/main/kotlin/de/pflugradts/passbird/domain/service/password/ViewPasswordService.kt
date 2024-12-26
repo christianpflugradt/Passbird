@@ -10,6 +10,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.ShellComparator
 import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.toSlots
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
@@ -35,6 +36,7 @@ class ViewPasswordService @Inject constructor(
     fun viewProteinTypes(eggIdShell: Shell) = extractFromEgg(eggIdShell) { egg ->
         egg.proteins.map { protein -> protein.map { optionOf(decrypted(it.viewType())) }.orElse(emptyOption()) }
     }
+    fun viewMemory() = eggRepository.memory().map { it.map { encryptedShell -> decrypted(encryptedShell) } }.toSlots()
 
     private fun <T> extractFromEgg(eggIdShell: Shell, extraction: (egg: Egg) -> T): Option<T> = find(eggIdShell)
         .map { extraction(it) }.or {
