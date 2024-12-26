@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.application.commandhandling
+package de.pflugradts.passbird.application.commandhandling.factory
 
 import com.google.inject.Singleton
 import de.pflugradts.passbird.application.commandhandling.command.ViewMemoryCommand

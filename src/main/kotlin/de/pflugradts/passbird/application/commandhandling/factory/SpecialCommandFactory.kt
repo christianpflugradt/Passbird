@@ -1,5 +1,6 @@
-package de.pflugradts.passbird.application.commandhandling
+package de.pflugradts.passbird.application.commandhandling.factory
 
+import de.pflugradts.passbird.application.commandhandling.CommandVariant
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.command.base.Command
 import de.pflugradts.passbird.domain.model.shell.Shell

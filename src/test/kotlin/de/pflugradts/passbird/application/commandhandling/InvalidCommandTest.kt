@@ -3,6 +3,11 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
+import de.pflugradts.passbird.application.commandhandling.factory.CommandFactory
+import de.pflugradts.passbird.application.commandhandling.factory.MemoryCommandFactory
+import de.pflugradts.passbird.application.commandhandling.factory.NestCommandFactory
+import de.pflugradts.passbird.application.commandhandling.factory.ProteinCommandFactory
+import de.pflugradts.passbird.application.commandhandling.factory.SetCommandFactory
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf

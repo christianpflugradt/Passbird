@@ -1,8 +1,9 @@
-package de.pflugradts.passbird.application.commandhandling
+package de.pflugradts.passbird.application.commandhandling.factory
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
 import de.pflugradts.kotlinextensions.tryCatching
+import de.pflugradts.passbird.application.commandhandling.CommandType
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
 import de.pflugradts.passbird.application.commandhandling.command.DiscardCommand
 import de.pflugradts.passbird.application.commandhandling.command.ExportCommand
