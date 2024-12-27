@@ -1,23 +1,22 @@
-- [Passbird](#passbird)
-    * [Getting started](#getting-started)
-        + [Downloading Passbird](#downloading-passbird)
-        + [Running Passbird](#running-passbird)
-        + [Setup](#setup)
-        + [Tutorial: Your first Password](#tutorial-your-first-password)
-    * [Configuration](#configuration)
-        + [Custom Password Configuration](#custom-password-configuration)
-    * [Usage](#usage)
-        + [General Usage](#general-usage)
-        + [Nests](#nests)
-        + [Proteins](#proteins)
-        + [Memory](#memory)
-        + [Custom Passwords](#custom-passwords)
-    * [Migrating Passbird 4.x.x to Passbird 5.x.x](#migrating-passbird-4xx-to-passbird-5xx)
-    * [Frequently Asked Questions](#frequently-asked-questions)
-
 # Passbird
 
 [![version](https://gitlab.com/christianpflugradt/passbird/-/badges/release.svg)](https://gitlab.com/christianpflugradt/passbird/-/releases) [![pipeline status](https://gitlab.com/christianpflugradt/passbird/badges/main/pipeline.svg)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![coverage report](https://gitlab.com/christianpflugradt/passbird/badges/main/coverage.svg?job=📊%20test-coverage-report)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+* [Getting started](#getting-started)
+    + [Downloading Passbird](#downloading-passbird)
+    + [Running Passbird](#running-passbird)
+    + [Setup](#setup)
+    + [Tutorial: Your first Password](#tutorial-your-first-password)
+* [Configuration](#configuration)
+    + [Custom Password Configuration](#custom-password-configuration)
+* [Usage](#usage)
+    + [General Usage](#general-usage)
+    + [Nests](#nests)
+    + [Proteins](#proteins)
+    + [Memory](#memory)
+    + [Custom Passwords](#custom-passwords)
+* [Migrating Passbird 4.x.x to Passbird 5.x.x](#migrating-passbird-4xx-to-passbird-5xx)
+* [Frequently Asked Questions](#frequently-asked-questions)
 
 Passbird is a lightweight, terminal-based password manager built in Kotlin. It operates entirely offline, securing your passwords with AES-GCM encryption and storing the encryption key in a Java KeyStore (JCEKS).
 
