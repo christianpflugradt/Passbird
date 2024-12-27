@@ -31,7 +31,7 @@ repositories {
 // gradle plugin / ktlint version addressed: 12.1.2 / 1.5.0
 configurations.all {
     resolutionStrategy {
-        force("ch.qos.logback:logback-core:1.5.13")
+        force("ch.qos.logback:logback-core:1.5.15")
     }
 }
 
