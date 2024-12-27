@@ -1,176 +1,216 @@
+- [Passbird](#passbird)
+    * [Getting started](#getting-started)
+        + [Downloading Passbird](#downloading-passbird)
+        + [Running Passbird](#running-passbird)
+        + [Setup](#setup)
+        + [Tutorial: Your first Password](#tutorial-your-first-password)
+    * [Configuration](#configuration)
+        + [Custom Password Configuration](#custom-password-configuration)
+    * [Usage](#usage)
+        + [General Usage](#general-usage)
+        + [Nests](#nests)
+        + [Proteins](#proteins)
+        + [Memory](#memory)
+        + [Custom Passwords](#custom-passwords)
+    * [Migrating Passbird 4.x.x to Passbird 5.x.x](#migrating-passbird-4xx-to-passbird-5xx)
+    * [Frequently Asked Questions](#frequently-asked-questions)
+
 # Passbird
 
 [![version](https://gitlab.com/christianpflugradt/passbird/-/badges/release.svg)](https://gitlab.com/christianpflugradt/passbird/-/releases) [![pipeline status](https://gitlab.com/christianpflugradt/passbird/badges/main/pipeline.svg)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![coverage report](https://gitlab.com/christianpflugradt/passbird/badges/main/coverage.svg?job=📊%20test-coverage-report)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Passbird is a terminal based password manager written in Kotlin. It works completely offline and encrypts all passwords using an AES/GCM Cipher and an encryption key stored in Java KeyStore (JCEKS).
+Passbird is a lightweight, terminal-based password manager built in Kotlin. It operates entirely offline, securing your passwords with AES-GCM encryption and storing the encryption key in a Java KeyStore (JCEKS).
 
-Check the FAQ at the bottom if you are wondering whether Passbird is the right tool for you.
+Unsure if Passbird suits your needs? Consult the [FAQ](#frequently-asked-questions) for guidance.
 
-## Downloading Passbird
-The latest version of Passbird can be downloaded [at my website](https://pflugradts.de/password-manager/).
+## Getting started
 
-You may also build Passbird yourself by cloning this project and running the Gradle jar task.
+### Downloading Passbird
 
-## Running Passbird
-Passbird runs on all major operating systems and requires only Java version 17 or higher to be installed.
+Download the latest version of Passbird [from the official website](https://pflugradts.de/password-manager/).
 
-Use the following syntax to run Passbird:
+Alternatively, you can build Passbird yourself by cloning the project repository and running the Gradle jar task.
+
+### Running Passbird
+
+Passbird runs on all major operating systems and requires Java 17 or higher.
+
+To start Passbird, use the following command:
 
 `java -jar passbird.jar home-directory`
 
-`home-directory` must point to an existing directory where your configuration file is stored and the import and export commands read from respectively write to. An example configuration directory for Linux may be `/etc/passbird` and for Windows `"c:\\program files\\passbird"`. You must use quotes if your configuration path contains spaces.
+Replace home-directory with the path to an existing directory where your configuration file is stored. This directory is also used for import/export operations. Examples:
+- **Linux**: /etc/passbird
+- **Windows**: "C:\Program Files\Passbird"
 
-You may specify the initial Nest as a second optional argument. Nests are an advanced feature explained further below. Nests are specified by their Nest Slot ranging from 1 to 9. Any other value results in the default Nest being initially selected.
+Note: Use quotes if the path contains spaces.
 
-The following example starts Passbird with Nest at Nest Slot 1 as the initial Nest: `java -jar pasbird.jar home-directory 1`
+You may optionally specify an initial Nest (explained in detail later) by adding its Nest Slot number (1–9). For example:
 
-## Setup
-The first time you run Passbird its setup routine will execute. You will then be asked to specify a home directory and choose a master Password for the Keystore.
+`java -jar passbird.jar home-directory 1`
 
-The master Password you have chosen must be input everytime you start Passbird in non setup mode. Passbird will terminate if you input the wrong Password three times in a row.
+This starts Passbird with the Nest at Slot 1 selected.
 
-Don't worry if you start setup by accident, just press any key other than `c` and setup will exit without touching anything.
+### Setup
+
+On first launch, Passbird will guide you through its setup process. You will be prompted to:
+1. Specify a home-directory.
+2. Create a master password for securing the Java Keystore.
+
+The master password must be entered each time you run Passbird. Entering the incorrect password three times will terminate the program.
+
+Tip: If setup is triggered accidentally, press any key other than c to exit without making changes.
+
+### Tutorial: Your first Password
+
+#### 1. Create a Password
+
+After setup, start Passbird and type: `semail`
+
+This creates a secure password for the identifier email. In Passbird, such identifiers are called EggIds, as passwords are metaphorically stored in Eggs.
+
+#### 2. Copy the Password to Clipboard
+
+Type: `gemail`
+
+The password is now copied to your clipboard. By default, the clipboard is cleared after 10 seconds. You can adjust this timeout or disable clipboard clearing in the configuration file (discussed later).
+
+#### 3. View the Password
+
+To display the password in the terminal, type: `vemail`
+
+#### 4. Delete the Password
+
+Since this is just a tutorial, delete the password by typing: `demail`
+
+#### Summary of Commands Used
+
+In this tutorial, you’ve used these basic commands, all of which operate on an EggId:
+1. set: Creates or updates a password for the specified EggId.
+2. get: Copies the password for the EggId to the clipboard.
+3. view: Displays the password in the terminal.
+4. delete: Removes the password and its associated Egg.
+
+Finally, type: `q`
+
+to quit Passbird.
 
 ## Configuration
-Once set up Passbird will create a `passbird.yml` with various configuration parameters. The following structure represents the default in the latest release of Passbird, enriched by explanatory comments:
+
+After completing setup, Passbird generates a configuration file named `passbird.yml`. This file contains customizable parameters, structured as shown below:
 
 ```yaml
 application:
-  # manages backups of important Passbird files
   backup:
-    # default location for all backups, can be relative or absolute path
     location: backups
-    # default number of backups to keep per file
     numberOfBackups: 10
-    # manages backups for passbird.yml configuration file
     configuration:
-      # enables backups for this file
       enabled: true
-      # overrides default location for this file
-      location:
-      # overrides default number of backups for this file
-      numberOfBackups:
-    # manages backups for passbird.sec keystore file
     keyStore:
-      # enables backups for this file
       enabled: true
-      # overrides default location for this file
-      location:
-      # overrides default number of backups for this file
-      numberOfBackups:
-    # manages backups for passbird.tree (database file)
     passwordTree:
-      # enables backups for this file
       enabled: true
-      # overrides default location for this file
-      location:
-      # overrides default number of backups for this file
-      numberOfBackups:
   exchange:
-    # prompts for deletion if password export file is detected on program start
     promptOnExportFile: true
   inactivityLimit:
-    # terminates Passbird after a period of inactivity if enabled
     enabled: false
-    # required minutes of continuous inactivity to pass before termination
     limitInMinutes: 10
   password:
-    # length of passwords generated through Passbird
     length: 20
-    # enables non-alphanumeric characters in passwords such as !@#$^&.)"\
     specialCharacters: true
-    # requires confirmation before actions that delete or update passwords
     promptOnRemoval: true
-    # custom password configurations are empty by default and explained separately
     customPasswordConfigurations:
 adapter:
   clipboard:
     reset:
-      # empties clipboard after a password is copied to it
-      enabled: true
-      # number of seconds to pass before clipboard is emptied
+      enabled: false
       delaySeconds: 10
   keyStore:
-    # path to directory where keystore is located
     location:
   passwordTree:
-    # path to directory where Password Tree is located
     location:
-    # terminates Passbird if Password Tree checksum doesn't meet expectations
     verifyChecksum: true
-    # terminates Passbird if Password Tree signature doesn't meet expectations
     verifySignature: true
-  # some of these settings are not supported by all terminals
   userInterface:
     ansiEscapeCodes:
-      # enables colorful mode
-      enabled: true 
-    # gives acoustic feedback on invalid input
+      enabled: false
     audibleBell: false
-    # hides sensitive user input such as passwords
     secureInput: true
 domain:
-    eggIdMemory:
-        # memorizes the up to ten most recently used egg ids per nest for memory related usage
-        enabled: true
-        # persists the memorized egg ids across Passbird restarts
-        persisted: false
-    protein:
-        # treats protein structures as secure input
-        secureProteinStructureInput: true
-        # if enabled prompts to toggle secureProteinStructureInput setting for next input
-        promptForProteinStructureInputToggle: false
+  eggIdMemory:
+    enabled: true
+    persisted: false
+  protein:
+    secureProteinStructureInput: true
+    promptForProteinStructureInputToggle: false
 ```
-You may adjust the configuration parameters to your needs by editing the yaml file with a text editor. The configuration file must retain a valid yaml format and may only contain parameters known to Passbird. While not advised it is possible to omit most parameters in which case the defaults will be used.
 
-Defaults are subject to change in major updates of Passbird. When new parameters are introduced in minor updates they're usually inactive by default to change the experience as little as possible.
+You may modify the parameters to suit your needs by editing the YAML file in a text editor. Ensure the file adheres to valid YAML syntax and only includes supported parameters. If you omit parameters, Passbird will revert to defaults.
+
+Note: Default values may change with major updates. New parameters introduced in minor updates are usually inactive by default to preserve the existing user experience.
+
+For a complete list of configuration settings and their descriptions, consult the [CONFIGURATION.md](CONFIGURATION.md) file. It provides an exhaustive reference to all available parameters, their purposes, and how to customize them.
 
 ### Custom Password Configuration
 
-You may define up to nine custom password configurations for specific use cases such as PINs for smartphones and cash cards which are often limited to 4-6 digits. A custom configuration has six properties. As they have default values, it's only necessary to specify them, when they deviate from their defaults. The following configuration section defines six custom password configurations of which the first is equivalent to the default:
+Passbird supports up to nine custom password configurations for specific use cases (e.g., PINs or highly secure passwords). Each configuration has six customizable properties:
+1. name: A descriptive name for the configuration.
+2. length: The length of the generated password.
+3. hasNumbers: Include numeric characters.
+4. hasLowercaseLetters: Include lowercase letters.
+5. hasUppercaseLetters: Include uppercase letters.
+6. hasSpecialCharacters: Include non-alphanumeric characters (e.g., !@#$%^&*).
+7. unusedSpecialCharacters: Specify any special characters to exclude.
 
 ```yaml
-    customPasswordConfigurations:
-       # each hyphen starts a new custom password configuration
-       - name: example with default settings
-         length: 20
-         # if all "has" properties are false the password will consistent
-         # of only numbers as a fallback
-         hasNumbers: true
-         hasLowercaseLetters: true
-         hasUppercaseLetters: true
-         hasSpecialCharacters: true
-         # all special characters are used by default
-         unusedSpecialCharacters: ""
-       - name: alphanumeric
-         length: 32
-         hasSpecialCharacters: false
-       - name: only common special characters
-         length: 28
-         # unused characters should be specified in quotes
-         # the quote character itself must be preceded by a backslash
-         unusedSpecialCharacters: " \":'`&!"
-       - name: very secure
-         length: 48
-       - name: PIN-4
-         length: 4
-         hasLowercaseLetters: false
-         hasUppercaseLetters: false
-         hasSpecialCharacters: false
-       - name: PIN-5
-         length: 5
-         hasLowercaseLetters: false
-         hasUppercaseLetters: false
-         hasSpecialCharacters: false  
+customPasswordConfigurations:
+    - name: example with default settings
+      length: 20
+      hasNumbers: true
+      hasLowercaseLetters: true
+      hasUppercaseLetters: true
+      hasSpecialCharacters: true
+      unusedSpecialCharacters: ""
+    - name: alphanumeric
+      length: 32
+      hasSpecialCharacters: false
+    - name: only common special characters
+      length: 28
+      unusedSpecialCharacters: " \":'`&!"
+    - name: very secure
+      length: 48
+    - name: PIN-4
+      length: 4
+      hasLowercaseLetters: false
+      hasUppercaseLetters: false
+      hasSpecialCharacters: false
+    - name: PIN-5
+      length: 5
+      hasLowercaseLetters: false
+      hasUppercaseLetters: false
+      hasSpecialCharacters: false
 ```
+
+Defining Custom Configurations
+- Modify the customPasswordConfigurations section in passbird.yml to define your custom settings.
+- If a property is omitted, Passbird uses the default value for that property.
+
+Tip: Custom configurations are especially useful for generating passwords tailored to systems with specific requirements, such as numeric-only PINs.
 
 ## Usage
 
-Passbird has a very simple command based usage syntax. Each Password is stored in an Egg, and you must set and memorize an identifier for each, which is known as its `EggId`.
+Passbird uses a simple, command-based syntax to manage passwords. Each password is stored in an Egg, identified by a unique EggId.
 
-Let's say you want to store your GitLab Password and choose `gitlab` as its EggId. To create and save a Password for EggId `gitlab` you will input `sgitlab` and press enter. `s` stands for the `set` command which sets a Password for an Egg. If the EggId already exists, it will set a new Password for that Egg. To copy the Password to clipboard you must input `ggitlab`. This is the `get` command represented by the character `g`.
+For example, if you want to store your email account password and choose email as its EggId:
+- To create and save a password for email, enter: `semail`
 
-The general usage info will be given below and is also available in Passbird by pressing `h` and then enter:
+The s command stands for “set” and generates a random password for the specified EggId. If the EggId already exists, the password will be replaced.
+
+- To copy the password to the clipboard, enter: `gemail`
+
+The g command stands for “get” and copies the password to your clipboard.
+
+You can access Passbird’s in-app help at any time by pressing h and then Enter.
 
     Usage: [command][parameter]
     A command takes at most one parameter which is usually an EggId.
@@ -195,29 +235,27 @@ The general usage info will be given below and is also available in Passbird by 
 
 ### General Usage
 
-Passbird updates the physical Password Tree (file) immediately after every action.
+Passbird immediately updates the password database (Password Tree file) after every action. Below are some example commands using the email EggId:
 
-Some example inputs and what they do:
+`gemail` copies the password for the Egg identified by email to the clipboard.
 
-`ggitlab` copies the Password for Egg with EggId gitlab to clipboard
+`semail` sets a random password for the Egg identified by email. By default, the password is 20 characters long and includes digits, lowercase and uppercase letters, and special characters. If the EggId already exists, the existing password will be replaced.
 
-`sgitlab` sets a random Password for Egg with EggId gitlab - by default a string of length 20 with digits, lowercase and uppercase letters and special characters; if the EggId is already in use, the existing Password will be overwritten
+`vemail` displays the password for the Egg identified by email in the terminal (standard output).
 
-`vgitlab` prints the Password for Egg with EggId gitlab to the terminal (standard out stream)
+`demail` deletes the Egg identified by email, including its associated password.
 
-`dgitlab` deletes Egg with EggId gitlab including its associated Password
+`cemail` prompts you to input a custom password for the Egg identified by email. The input is hidden by default. Use this command if the system you’re storing the password for does not support Passbird’s standard password format. Be sure to verify your input immediately, as it is not confirmed.
 
-`cgitlab` prompts for a custom Password to be input by the user; the input will be hidden by default. Choose this command if you need a Password for a system that does not support standard Passwords generated by Passbird. You don't need to confirm your input, so I advise you to confirm right away that you've input the Password you intended to.
+`remail` prompts you to rename the Egg identified by email. The new EggId must be unique (not already in use).
 
-`rgitlab` prompts for a new EggId that replaces the previous EggId gitlab - the new EggId must not yet exist
+`e` exports all Eggs to a file named `passbird-export.json` in the directory specified during program start.
 
-`e` exports all Eggs to a file `passbird-export.json` in the directory passed on program start
-
-`i` imports all Eggs from a file `passbird-export.json` expected in the directory passed on program start.
+`i` imports all Eggs from a `passbird-export.json` file located in the directory specified during program start.
 
 ### Nests
 
-Nests are an advanced feature of Passbird. Think of it as categories for your Passwords. You may have a Nest for online shopping and another for social networks, or one for personal and another for work related stuff. Nest related help is available by pressing `n` and then enter:
+Nests are an advanced feature in Passbird, allowing you to organize passwords into categories. For example, you might create one Nest for online shopping, another for social networks, or separate Nests for personal and work-related accounts. To access Nest-specific help, press n followed by Enter.
 
     n (view) prints current Nest, available Nests and Nest commands
     n0 (switch to default) switches to the default Nest
@@ -228,9 +266,9 @@ Nests are an advanced feature of Passbird. Think of it as categories for your Pa
 
 ### Proteins
 
-Proteins can store additional information for your Passwords. An Egg contains a Password and a descriptive EggId. Proteins offer you to store up to ten additional pieces of information in that Egg. Each Protein has a Type and a Structure. The Type describes the kind of information, be it a user, a URL or a recovery code. The Structure contains the actual information. So a Protein could have a Type "user" and a Structure "john.doe".
+Proteins allow you to store additional information alongside your passwords. While an Egg contains a password and its descriptive EggId, Proteins let you add up to ten extra data entries to the same Egg. Each Protein has a Type, which describes the kind of information (e.g., “user,” “URL,” or “recovery code”), and a Structure, which holds the actual data (e.g., “john.doe”).
 
-Proteins introduce a few new commands which can be listed by inputting `p?` and then enter:
+To view commands related to Proteins, input `p?` and press Enter.
 
     p? (help) prints this help
     p[EggId] (info) prints Protein Types for specified Egg
@@ -239,32 +277,44 @@ Proteins introduce a few new commands which can be listed by inputting `p?` and 
     p+[1-9][EggId] (update) updates the Protein Structure and optionally Type as well
     p-[1-9][EggId] (discard) discards the Protein Structure and Type
 
-Let's say we have an Egg identified by EggId `gitlab`. You can input `pgitlab` to safely view its Proteins only revealing the Types which are deemed non-sensitive. That way you could see that alongside the Password you've also stored the user, the URL to that service and a recovery code. For each Protein you'll also see the Slot you assigned which you need to copy the Structure into the clipboard.
+Consider an Egg identified by the EggId email. To view the Proteins associated with this Egg, input `pemail`. This command displays the Protein Types (e.g., “user,” “URL,” “recovery code”) without revealing the sensitive Structures. For instance, it might indicate that the Egg contains a user, a URL, and a recovery code.
 
-If you want to print the actual user, URL and so on, you can input `p*gitlab`. This will print potentially sensitive information on the command line. This command behaves exactly the same as `pgitlab` except it won´t mask the sensitive Structures but print their actual content.
+To display the actual Protein Structures (sensitive data) alongside their Types, use `p*email`. This command functions similarly to `pemail`, but it additionally reveals the full content of the Structures.
 
-If you want to copy the user for a corresponding Password into clipboard, and you know it's stored in Slot 2 because you've printed the Protein information with `pgitlab`, you can input `p2gitlab` to have it copied to your clipboard.
+If the Structure of a specific Protein is required in the clipboard, determine its Slot number (e.g., Slot 2 as shown in the `pemail` output) and use `p2email`. This will copy the content of Slot 2 directly to the clipboard.
 
-Each Egg has always ten, initially empty Protein Slots. To create a Protein and insert it into a Slot, you can use the update command. This command will first prompt you to enter a Protein Type. If the Protein already exists, and you just press enter, the existing Type will be kept. Then you'll be asked to input the Protein Structure. You can just press enter to abort Protein creation.
+Each Egg contains ten Protein Slots, which are initially empty. To create or update a Protein in a specific Slot, e.g. Slot 1, use `p+1email`. You will first be prompted to enter the Protein Type (e.g., “user”). If a Protein already exists in the specified Slot and no new Type is provided, the existing Type will remain unchanged. Next, you will be asked to input the Protein Structure. Pressing Enter without input will abort the creation or update process.
 
-A command to delete existing Proteins will be implemented in the near future.
+To delete a Protein from a specific Slot, e.g. Slot 1, input `p-1email`. This command removes both the Type and Structure from the specified Slot.
 
 ### Memory
 
-The EggIdMemory contains the up to ten most recent EggIds accessed per Nest. By utilizing it you can avoid typing in the same EggId multiple times, for instance if you want to set multiple Proteins for it.
+The EggIdMemory stores up to ten of the most recently accessed EggIds for each Nest. This feature allows you to avoid retyping the same EggId repeatedly, which is particularly useful when performing multiple operations on the same Egg, such as setting multiple Proteins.
 
-You can input `m?` and then enter to list the EggIdMemory related commands:
+To view commands related to the EggIdMemory, input `m?`. This displays the following options:
 
     m? (help) prints this help
     m (info) prints the EggIdMemory
     m[0-9] (copy) copies the memorized EggId to clipboard
     m[0-9]Command (use) invokes the specified command with the memorized EggId
 
-The `use memory` command is especially powerful. Let's say you want to copy the password for gitlab to clipboard. You'll then enter `ggitlab`. Say you want to store the website, login and recovery code for your GitLab account as proteins next. You could input `p+1gitlab` to store a Protein at Slot 1. But you could also enter `m0p+1` instead to invoke the `p+1` command with the most recently memorized EggId which is `gitlab`. To rename the second most recently used EggId you could enter `m1r` and to view the password for the third most recently used EggId you could enter `m2v`. Simply enter `m` to display the most recently used, memorized EggIds.
+The `use memory` command is especially versatile. Consider an Egg identified by email. To copy its password to the clipboard, you would first input `gemail`. This action stores the EggId email in the most recent memory slot (Slot 0).
+
+Subsequently, if you wish to set a Protein for this Egg, you could input `p+1email` directly. However, by using the memory feature, you may instead input `m0p+1`. This command invokes the `p+1` operation using the EggId stored in Slot 0, eliminating the need to retype "email".
+
+The memory feature extends to other operations as well. For example:
+- To rename the second most recently accessed EggId (stored in Slot 1), input `m1r`.
+- To view the password for the third most recently accessed EggId (stored in Slot 2), input `m2v`.
+
+At any time, you can input `m` to display the contents of the EggIdMemory. This command lists the EggIds currently stored in memory, ordered from most recently used (Slot 0) to least recently used (Slot 9).
 
 ### Custom Passwords
 
-Custom passwords are another advanced feature briefly covered in the configuration section. You may define up to nine of these and can apply them by using the set command while referring to their specific index. While `seggid` is interchangeable with `s0eggId` the commands `s1eggid` up to `s9eggid` will use the respective configuration if defined. You may view all available configurations and their indices by inputting `s?`. Using the example configuration above the output will look like this:
+Custom passwords are an advanced feature briefly introduced in the configuration section. Passbird allows you to define up to nine custom password configurations for specific use cases. These configurations can be applied using the set command by specifying the corresponding configuration index.
+
+The command `semail` is interchangeable with `s0email`, which uses the default configuration. For custom configurations, use commands `s1email` through `s9email` to apply the respective custom settings, provided they have been defined in the configuration file.
+
+To view all available configurations and their indices, input `s?`. Using the example configuration provided earlier, the output might appear as follows:
 
     0: Default
         20 characters
@@ -295,43 +345,46 @@ Custom passwords are another advanced feature briefly covered in the configurati
 
 ## Migrating Passbird 4.x.x to Passbird 5.x.x
 
-The Tree structure has changed as Passbird 5.x.x is now encrypted using AES-GCM, an encryption algorithm recommended by NIST. Furthermore, the structure of the file has slightly changed in preparation of an upcoming feature related to shortcuts.For that reason, using Passbird 4.x.x, all Passwords must be exported using the `export` command (letter `e`). The export will preserve Nests and Proteins, so no data should get lost in the process. Nevertheless, it is recommended to manually back up the folder where Passbird resides in case something goes wrong.
+With the release of Passbird 5.x.x, the Tree structure has been updated to use AES-GCM encryption, a method recommended by NIST for enhanced security. Additionally, the file structure has been modified to prepare for upcoming features related to shortcuts. Due to these changes, migrating from Passbird 4.x.x requires exporting and reimporting your passwords.
 
-After creating an export file, terminate Passbird and delete the password database file named `passbird.tree`. Now update Passbird to 5.x.x and start the program. Passbird will output an error because the password database cannot be read. Ignore this error and run the `import` command (letter `i`), which will restore the database and all Nests, Passwords and Proteins.
+Migration Steps:
+1.	Export Your Passwords:
+Using Passbird 4.x.x, export all stored passwords by executing the export command `e`. The export will preserve Nests, Proteins, and other data, ensuring no loss of information. However, it is strongly recommended to manually back up the entire Passbird folder as an additional safeguard.
+2.	Prepare for Update:
+After exporting, terminate Passbird and delete the password database file named passbird.tree. This file is no longer compatible with the updated format.
+3.	Update Passbird:
+Replace your Passbird installation with version 5.x.x and start the program. An error will appear indicating that the password database cannot be read. This is expected and can be safely ignored.
+4.	Import Your Passwords:
+Execute the import command `i` to restore your data. This process will reimport all Nests, Passwords, and Proteins into the updated format.
 
-## <a name="faq"></a>Frequently Asked Questions
+## Frequently Asked Questions
 
 ### Is Passbird the right tool for me?
-If you prefer the terminal to a graphical user interface, and you don't need to manage hundreds of Passwords, you might want to give Passbird a chance. Keep in mind that Passbird does not use a hierarchy for managing its Eggs, so you might have a hard time memorizing all those EggId or thinking of good and consistent names if you want to store hundreds of Passwords or also want to store related information such as urls and usernames. Passbird will be able to store such meta information in a future version.
+If you prefer the terminal to a graphical user interface and do not need to manage hundreds of passwords, Passbird might be a good choice for you. Note that Passbird does not use a hierarchical system for managing Eggs. As such, if you need to store hundreds of passwords, or if you require a detailed structure for related information like URLs or usernames, you may find it challenging to organize your data. 
 
 ### Is Passbird secure?
-Short answer: No.
+Passbird has not been reviewed by security experts. It uses a Keystore and a Cipher to encrypt all data symmetrically with a master password chosen by the user. Sensitive data is generally handled as byte arrays, and decrypted data is immediately overwritten after use. The password database is doubly encoded, both at the individual Egg level and for the entire file, making it difficult to determine even the number of stored passwords from a hex editor. Passbird operates entirely offline. While these measures likely offer reasonable security, they are not guaranteed.
 
-Long answer: I am not a security expert and Passbird has not been reviewed by such. Passbird uses a Keystore and a Cipher to symmetrically encrypt all data using a master Password chosen by the user. All data is generally handled in byte arrays by the application. All user input is read and program output is written as single bytes. Only for copying a Password to clipboard I store it in a string because I know no other way to write to the clipboard using Java. Once sensitive decrypted data has been used, like written to the clipboard, the byte array will be overwritten with random bytes. The Password database is encoded at the individual Egg level and then again for the whole file, so from analyzing it in a hex editor you should not even be able to tell how many Passwords are currently stored in it. Passbird is also completely offline. If I were to take a wild guess I would say it is probably reasonably safe.
-
-### Does Passbird support unicode?
-
-No. Many programs don't support unicode characters in Passwords. In fact some don't even allow common special characters like backslashes or spaces. Supporting advanced character sets didn't seem worth it to me, thus Passbird translates every byte into an ascii character. You may input a unicode character which is represented in several bytes and Passbird will interpret it as multiple ascii characters. I advise against doing that. You might have trouble reproducing the correct input and end up with some broken Eggs that you can't delete.
+### Does Passbird support Unicode?
+No. Many programs do not support Unicode characters in passwords, and some even restrict special characters like backslashes or spaces. Passbird translates every byte into an ASCII character. Inputting Unicode characters will result in multiple ASCII characters, which may cause inconsistencies and make certain Eggs undeletable. It is advised to avoid Unicode inputs.
 
 ### How do I update Passbird?
+Passbird follows semantic versioning (*x.y.z*, where `x` is the major version, `y` the minor version, and `z` the patch level). To update to a minor or patch version, download the latest JAR file and use it as usual. For major updates, consult the migration notes provided in this README.
 
-Passbird uses semantic versioning in the style of *x.y.z* where x is the major version, y the minor version and z the patch level version. Updating to a minor or patch level version is very simple: Just download the jar file and use it. Consult the migration notes in this Readme when upgrading to the next major version. 
+You can find the ten most recent versions of Passbird [on the official website](https://pflugradts.de/password-manager/), along with checksums for verifying file integrity using tools like `md5sum`. For an automated but less secure update process, consider [Passbird-Updater](https://github.com/christianpflugradt/passbird-updater), though manual updates are recommended.
 
-You will always find the ten most recent versions of Passbird [at my website](https://pflugradts.de/password-manager/). There you will also find the checksum for each jar file. You can use the program `md5sum`, pre-installed on many operating systems, to verify file integrity: `md5sum filename`
+### What happens if I lose my master password or keystore file?
+Losing your master password or keystore file results in permanent data loss. The master password is required to decrypt the database, and the keystore file stores the encryption key. Even recreating the keystore with the same master password will not regenerate the same encryption key.
 
-A more automated but less secure alternative to manually updating Passbird is [Passbird-Updater](https://gitlab.com/christianpflugradt/passbird-updater). Please consult its [README](https://gitlab.com/christianpflugradt/passbird-updater#passbird-updater) before using it. Passbird Updater is not part of Passbird and the recommended way is to manually update Passbird.
+If you forget your master password, your only recourse is brute force guessing.
 
-### What can I do if I forget my master Password?
-Without the correct master Password you cannot decrypt your Password database. There is no way to bypass this protection. The only thing you can do is to try and find out your Password via brute force. Passbird terminates after 3 wrong attempts so if the program is still running after 3 guesses, you have guessed correctly. I am not aware of any way to protect against brute force attacks by the way, since an attacker could simply brute force the keystore itself instead of using Passbird to find out the correct Password. The best protection is a secure Password that would take a long time to guess, and to keep your keystore file safe.
+### How do I back up my passwords?
+Passbird supports file-based backups for the password database (`passbird.tree`), configuration file (`passbird.yml`), and keystore file (`passbird.sec`). These can be automatically managed through the backup settings in `passbird.yml`. Refer to the [configuration section](./CONFIGURATION.md) for details on enabling and customizing backups.
 
-### What can I do if I lose the keystore file?
-Your master Password will allow Passbird to retrieve the encryption key from the keystore. Without the encryption key your Password database cannot be decrypted. If you recreate the keystore with the same master Password, the encryption key will NOT be the same. Losing your keystore file means permanently losing access to your Password database.
+While Passbird does not offer built-in online backup features, you can securely store these backup files using external tools like Nextcloud, Dropbox, or similar cloud services. Ensure that the storage location of your backups is well-protected, as these files contain sensitive data necessary for password recovery.
+
+### Can Passbird integrate with browsers or other tools?
+No. Passbird is designed with a 100% offline philosophy, ensuring maximum privacy and security. It does not integrate with browsers, plugins, or other tools. For users requiring browser integration, a different password manager may be more suitable.
 
 ### Can I run multiple instances of Passbird?
-Of course! For example, I use separate Password databases for personal and work related Passwords. You can run them in different terminal windows at the same time and the instances won't be aware of each other.
-
-### Can you add a graphical interface?
-No. The core characteristic of Passbird is its gui-less nature. If you want a gui, use one of the popular gui-based Password managers such as Keepass.
-
-### Can you implement feature xyz?
-It depends. If I think that feature is useful, and it fits with Passbird I might implement it. Why don't you open a [GitHub Issue](https://gitlhub.com/christianpflugradt/passbird/issues) for it? :-)
+Yes. For example, you might use separate databases for personal and work-related passwords. These can be run simultaneously in different terminal windows, as the instances operate independently.
