@@ -16,10 +16,10 @@ class MemoryInfoCommandHandler @Inject constructor(
         with(canPrintInfo) {
             userInterfaceAdapterPort.send(
                 outBold("\n\nAvailable Memory commands:\n"),
-                outBold("\n\tm?"), out(" (help) prints this help"),
-                outBold("\n\tm"), out(" (info) prints the EggIdMemory"),
-                outBold("\n\tm[0-9]"), out(" (copy) copies the memorized EggId to clipboard"),
-                outBold("\n\tm[0-9]Command"), out(" (use) invokes the specified command with the memorized EggId"),
+                outBold("\n\tm?"), out(" (help)           Displays this help menu for Memory commands."),
+                outBold("\n\tm"), out(" (info)            Lists the EggIds currently stored in the EggIdMemory."),
+                outBold("\n\tm[0-9]"), out(" (copy)       Copies the EggId from the specified Memory Slot to the clipboard."),
+                outBold("\n\tm[0-9]Command"), out(" (use) Executes the specified command using the EggId from the given Memory Slot."),
                 out("\n"),
             )
         }

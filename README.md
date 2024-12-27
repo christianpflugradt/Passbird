@@ -216,22 +216,22 @@ You can access Passbird’s in-app help at any time by pressing h and then Enter
     A command takes at most one parameter which is usually an EggId.
 
     commands:
-        g[EggId] (get) copies the Password contained in that Egg to clipboard
-        s[EggId] (set) sets a random Password for this Egg overwriting any that existed
-        c[EggId] (custom set) like set but prompts the user to input a new Password
-        v[EggId] (view) prints the Password contained in that Egg to the console
-        r[EggId] (rename) renames an Egg by prompting the user for a new one
-        d[EggId] (discard) removes the Egg entirely from the Tree
+        g[EggId] (get)        Copies the password for the specified Egg to the clipboard.
+        s[EggId] (set)        Sets a random password for the specified Egg, overwriting any existing one.
+        c[EggId] (custom set) Prompts the user to input a custom password for the specified Egg.
+        v[EggId] (view)       Displays the password for the specified Egg in the console.
+        r[EggId] (rename)     Renames the specified Egg by prompting the user for a new EggId.
+        d[EggId] (discard)    Deletes the specified Egg and its associated password.
 
-        e (export) exports the Password Tree in a human readable json format
-        i (import) imports Passwords into the Tree from a json file
-        l (list) non parameterized, lists all Eggs in the current Nest
-        h (help) prints this help
-        q (quit) terminates Passbird application 
+        e (export)            Exports the Password Tree to a human-readable JSON file.
+        i (import)            Imports passwords from a JSON file into the Password Tree.
+        l (list)              Lists all Eggs in the current Nest.
+        h (help)              Displays this help menu.
+        q (quit)              Exits the Passbird application.
 
-        n (Nests) prints available Nests and Nest specific help
-        p? (Proteins) prints protein usage information
-        s? (Password configurations) prints available configurations and set specific help
+        n (Nests)             Displays available Nests and related commands.
+        p? (Proteins)         Displays Protein-related usage information.
+        s? (Password configs) Displays available password configurations and related help.
 
 ### General Usage
 
@@ -257,12 +257,12 @@ Passbird immediately updates the password database (Password Tree file) after ev
 
 Nests are an advanced feature in Passbird, allowing you to organize passwords into categories. For example, you might create one Nest for online shopping, another for social networks, or separate Nests for personal and work-related accounts. To access Nest-specific help, press n followed by Enter.
 
-    n (view) prints current Nest, available Nests and Nest commands
-    n0 (switch to default) switches to the default Nest
-    n[1-9] (switch) switches to the Nest at the given Nest Slot (between 1 and 9 inclusively)
-    n[1-9][EggId] (assign) assigns the Password for that EggId to the specified Nest
-    n+[1-9] (create) creates a new Nest at the specified Nest Slot
-    n-[1-9] (discard) discards the Nest at the specified Nest Slot
+    n (view)               Displays the current Nest, available Nests, and related commands.
+    n0 (switch)            Switches to the default Nest.
+    n[1-9] (switch)        Switches to the Nest in the specified Nest Slot (1–9).
+    n[0-9][EggId] (assign) Assigns the specified EggId to the Nest in the given Nest Slot.
+    n+[1-9] (create)       Creates a new Nest in the specified Nest Slot.
+    n-[1-9] (discard)      Deletes the Nest in the specified Nest Slot.
 
 ### Proteins
 
@@ -270,12 +270,12 @@ Proteins allow you to store additional information alongside your passwords. Whi
 
 To view commands related to Proteins, input `p?` and press Enter.
 
-    p? (help) prints this help
-    p[EggId] (info) prints Protein Types for specified Egg
-    p*[EggId] (complete info) prints Protein Types and Structures for specified Egg
-    p[0-9][EggId] (copy) copies the Protein Structure to clipboard
-    p+[1-9][EggId] (update) updates the Protein Structure and optionally Type as well
-    p-[1-9][EggId] (discard) discards the Protein Structure and Type
+    p? (help)                Displays this help menu for Protein commands.
+    p[EggId] (info)          Displays the Protein Types associated with the specified Egg.
+    p*[EggId] (details)      Displays both the Protein Types and their Structures for the specified Egg.
+    p[0-9][EggId] (copy)     Copies the Protein Structure in the specified Slot (0–9) to the clipboard.
+    p+[0-9][EggId] (update)  Updates the Protein Structure and optionally the Type in the specified Slot.
+    p-[0-9][EggId] (discard) Deletes the Protein Structure and Type from the specified Slot.
 
 Consider an Egg identified by the EggId email. To view the Proteins associated with this Egg, input `pemail`. This command displays the Protein Types (e.g., “user,” “URL,” “recovery code”) without revealing the sensitive Structures. For instance, it might indicate that the Egg contains a user, a URL, and a recovery code.
 
@@ -293,10 +293,10 @@ The EggIdMemory stores up to ten of the most recently accessed EggIds for each N
 
 To view commands related to the EggIdMemory, input `m?`. This displays the following options:
 
-    m? (help) prints this help
-    m (info) prints the EggIdMemory
-    m[0-9] (copy) copies the memorized EggId to clipboard
-    m[0-9]Command (use) invokes the specified command with the memorized EggId
+    m? (help)           Displays this help menu for Memory commands.
+    m (info)            Lists the EggIds currently stored in the EggIdMemory.
+    m[0-9] (copy)       Copies the EggId from the specified Memory Slot to the clipboard.
+    m[0-9]Command (use) Executes the specified command using the EggId from the given Memory Slot.
 
 The `use memory` command is especially versatile. Consider an Egg identified by email. To copy its password to the clipboard, you would first input `gemail`. This action stores the EggId email in the most recent memory slot (Slot 0).
 
@@ -339,9 +339,9 @@ To view all available configurations and their indices, input `s?`. Using the ex
     
     Available Set Commands:
 
-	    s[EggId] sets a random Password with default configuration
-        s[1-9][EggId] sets a random Password with specified configuration
-        s? prints this overview
+        s? (help)                  Displays an overview of available password configurations.
+	    s[EggId] (set)             Sets a random password for the specified EggId using the default configuration.
+        s[1-9][EggId] (set custom) Sets a random password for the specified EggId using a custom configuration.
 
 ## Migrating Passbird 4.x.x to Passbird 5.x.x
 

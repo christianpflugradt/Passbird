@@ -41,12 +41,12 @@ class SetInfoCommandHandler @Inject constructor(
             }
             userInterfaceAdapterPort.send(
                 outBold("\nAvailable Set commands:\n"),
-                outBold("\n\ts[EggId] "),
-                out("sets a random Password with default configuration"),
-                outBold("\n\ts[1-9][EggId] "),
-                out("sets a random Password with specified configuration"),
-                outBold("\n\ts? "),
-                out("prints this overview\n"),
+                outBold("\n\ts?"),
+                out(" (help)                  Displays an overview of available password configurations.\n"),
+                outBold("\n\ts[EggId]"),
+                out(" (set)             Sets a random password for the specified EggId using the default configuration."),
+                outBold("\n\ts[1-9][EggId]"),
+                out(" (set custom) Sets a random password for the specified EggId using a custom configuration."),
             )
         }
     }

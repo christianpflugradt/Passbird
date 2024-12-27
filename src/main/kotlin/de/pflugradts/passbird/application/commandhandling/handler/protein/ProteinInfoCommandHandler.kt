@@ -16,12 +16,18 @@ class ProteinInfoCommandHandler @Inject constructor(
         with(canPrintInfo) {
             userInterfaceAdapterPort.send(
                 outBold("\n\nAvailable Protein commands:\n"),
-                outBold("\n\tp?"), out(" (help) prints this help"),
-                outBold("\n\tp[EggId]"), out(" (info) prints Protein Types for specified Egg"),
-                outBold("\n\tp*[EggId]"), out(" (complete info) prints Protein Types and Structures for specified Egg"),
-                outBold("\n\tp[0-9][EggId]"), out(" (copy) copies the Protein Structure to clipboard"),
-                outBold("\n\tp+[1-9][EggId]"), out(" (update) updates the Protein Structure and optionally Type as well"),
-                outBold("\n\tp-[1-9][EggId]"), out(" (discard) discards the Protein Structure and Type"),
+                outBold("\n\tp?"),
+                out(" (help)                Displays this help menu for Protein commands."),
+                outBold("\n\tp[EggId]"),
+                out(" (info)          Displays the Protein Types associated with the specified Egg."),
+                outBold("\n\tp*[EggId]"),
+                out(" (details)      Displays both the Protein Types and their Structures for the specified Egg."),
+                outBold("\n\tp[0-9][EggId]"),
+                out(" (copy)     Copies the Protein Structure in the specified Slot (0–9) to the clipboard."),
+                outBold("\n\tp+[0-9][EggId]"),
+                out(" (update)  Updates the Protein Structure and optionally the Type in the specified Slot."),
+                outBold("\n\tp-[0-9][EggId]"),
+                out(" (discard) Deletes the Protein Structure and Type from the specified Slot."),
                 out("\n"),
             )
         }
