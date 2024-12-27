@@ -35,6 +35,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.egg.RenameComm
 import de.pflugradts.passbird.application.commandhandling.handler.egg.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.GetMemoryCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.memory.MemoryInfoCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.UseMemoryCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.ViewMemoryCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
@@ -117,6 +118,7 @@ class ApplicationModule : AbstractModule() {
                 HelpCommandHandler::class.java,
                 ImportCommandHandler::class.java,
                 ListCommandHandler::class.java,
+                MemoryInfoCommandHandler::class.java,
                 ProteinInfoCommandHandler::class.java,
                 QuitCommandHandler::class.java,
                 RenameCommandHandler::class.java,

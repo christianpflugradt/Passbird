@@ -114,7 +114,7 @@ domain:
         # memorizes the up to ten most recently used egg ids per nest for memory related usage
         enabled: true
         # persists the memorized egg ids across Passbird restarts
-        persisted: true
+        persisted: false
     protein:
         # treats protein structures as secure input
         secureProteinStructureInput: true
@@ -248,6 +248,19 @@ If you want to copy the user for a corresponding Password into clipboard, and yo
 Each Egg has always ten, initially empty Protein Slots. To create a Protein and insert it into a Slot, you can use the update command. This command will first prompt you to enter a Protein Type. If the Protein already exists, and you just press enter, the existing Type will be kept. Then you'll be asked to input the Protein Structure. You can just press enter to abort Protein creation.
 
 A command to delete existing Proteins will be implemented in the near future.
+
+### Memory
+
+The EggIdMemory contains the up to ten most recent EggIds accessed per Nest. By utilizing it you can avoid typing in the same EggId multiple times, for instance if you want to set multiple Proteins for it.
+
+You can input `m?` and then enter to list the EggIdMemory related commands:
+
+    m? (help) prints this help
+    m (info) prints the EggIdMemory
+    m[0-9] (copy) copies the memorized EggId to clipboard
+    m[0-9]Command (use) invokes the specified command with the memorized EggId
+
+The `use memory` command is especially powerful. Let's say you want to copy the password for gitlab to clipboard. You'll then enter `ggitlab`. Say you want to store the website, login and recovery code for your GitLab account as proteins next. You could input `p+1gitlab` to store a Protein at Slot 1. But you could also enter `m0p+1` instead to invoke the `p+1` command with the most recently memorized EggId which is `gitlab`. To rename the second most recently used EggId you could enter `m1r` and to view the password for the third most recently used EggId you could enter `m2v`. Simply enter `m` to display the most recently used, memorized EggIds.
 
 ### Custom Passwords
 
