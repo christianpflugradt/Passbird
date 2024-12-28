@@ -82,15 +82,15 @@ class GetMemoryCommandTest {
     }
 }
 
-fun testMemoryData() = mapOf(
-    DEFAULT to "a",
-    S1 to "b",
-    S2 to "c",
-    S3 to "d",
-    S4 to "e",
-    S5 to "f",
-    S6 to "g",
-    S7 to "h",
-    S8 to "i",
-    S9 to "j",
+private fun testMemoryData() = mapOf(
+    DEFAULT to "eggid0",
+    S1 to "eggid1",
+    S2 to "eggid2",
+    S3 to "eggid3",
+    S4 to "eggid4",
+    S5 to "eggid5",
+    S6 to "eggid6",
+    S7 to "eggid7",
+    S8 to "eggid8",
+    S9 to "eggid9",
 )
