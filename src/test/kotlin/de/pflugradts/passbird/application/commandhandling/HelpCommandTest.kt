@@ -20,8 +20,8 @@ class HelpCommandTest {
 
     private val configuration = mockk<Configuration>()
     private val commandLineInterfaceService = CommandLineInterfaceService(mockk(), configuration)
-    private val quitCommandHandler = HelpCommandHandler(CanPrintInfo(), commandLineInterfaceService)
-    private val inputHandler = createInputHandlerFor(quitCommandHandler)
+    private val helpCommandHandler = HelpCommandHandler(CanPrintInfo(), commandLineInterfaceService)
+    private val inputHandler = createInputHandlerFor(helpCommandHandler)
 
     @Test
     fun `should handle help command`() {

@@ -229,6 +229,7 @@ You can access Passbird’s in-app help at any time by pressing h and then Enter
         q (quit)              Exits the Passbird application.
 
         n (Nests)             Displays available Nests and related commands.
+        m? (Memory)           Displays Memory-related usage information.
         p? (Proteins)         Displays Protein-related usage information.
         s? (Password configs) Displays available password configurations and related help.
 
