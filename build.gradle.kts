@@ -1,4 +1,5 @@
 
+import groovy.lang.Closure
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
@@ -140,6 +141,11 @@ tasks.withType<Test>().configureEach {
         events(FAILED, PASSED, SKIPPED)
     }
     group = VERIFICATION_GROUP
+    var testCount = 0
+    afterTest(object : Closure<Unit>(this) {
+        fun doCall() = testCount++
+    })
+    doLast { println("\nTotal Tests: $testCount") }
 }
 
 val testExecutionData: PatternFilterable = fileTree(project.rootDir.path).include("build/jacoco/*.exec")
