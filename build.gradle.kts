@@ -60,6 +60,7 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockkVersion")
 
     testImplementation(platform("org.junit:junit-bom:$junitPlatformVersion"))
+    testImplementation("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
@@ -109,27 +110,19 @@ ktlint {
             "ktlint_standard_class-signature" to "disabled",
         ),
     )
-    reporters {
-        reporter(HTML)
-    }
+    reporters { reporter(HTML) }
 }
 
 tasks.test {
-    useJUnitPlatform {
-        excludeTags("architecture", "integration", "non-headless")
-    }
+    useJUnitPlatform { excludeTags("architecture", "integration", "non-headless") }
 }
 
 tasks.register<Test>("integration") {
-    useJUnitPlatform {
-        includeTags("integration")
-    }
+    useJUnitPlatform { includeTags("integration") }
 }
 
 tasks.register<Test>("architecture") {
-    useJUnitPlatform {
-        includeTags("architecture")
-    }
+    useJUnitPlatform { includeTags("architecture") }
 }
 
 tasks.register<Test>("all") {
@@ -137,14 +130,16 @@ tasks.register<Test>("all") {
 }
 
 tasks.withType<Test>().configureEach {
-    testLogging {
-        events(FAILED, PASSED, SKIPPED)
-    }
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    testLogging { events(FAILED, PASSED, SKIPPED) }
     group = VERIFICATION_GROUP
     var testCount = 0
-    afterTest(object : Closure<Unit>(this) {
-        fun doCall() = testCount++
-    })
+    afterTest(
+        object : Closure<Unit>(this) {
+            fun doCall() = testCount++
+        },
+    )
     doLast { println("\nTotal Tests: $testCount") }
 }
 
