@@ -49,10 +49,7 @@ class GetMemoryCommandTest {
     fun `should handle get memory command`(slot: Slot, eggId: String) {
         // given
         val command = shellOf("m${slot.index()}")
-        fakePasswordService(
-            instance = passwordService,
-            withMemory = testMemoryData(),
-        )
+        fakePasswordService(instance = passwordService, withMemory = testMemoryData())
         val outputSlot = slot<Output>()
 
         // when
@@ -69,10 +66,7 @@ class GetMemoryCommandTest {
     fun `should handle get memory command on empty memory slot`(slot: Slot) {
         // given
         val command = shellOf("m${slot.index()}")
-        fakePasswordService(
-            instance = passwordService,
-            withMemory = emptyMap(),
-        )
+        fakePasswordService(instance = passwordService, withMemory = emptyMap())
 
         // when
         inputHandler.handleInput(inputOf(command))
