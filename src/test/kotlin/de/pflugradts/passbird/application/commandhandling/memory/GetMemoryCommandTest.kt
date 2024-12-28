@@ -1,14 +1,22 @@
-package de.pflugradts.passbird.application.commandhandling.protein
+package de.pflugradts.passbird.application.commandhandling.memory
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
-import de.pflugradts.passbird.application.commandhandling.handler.protein.GetProteinCommandHandler
-import de.pflugradts.passbird.domain.model.egg.createEggForTesting
+import de.pflugradts.passbird.application.commandhandling.handler.memory.GetMemoryCommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.slot.Slot.S1
+import de.pflugradts.passbird.domain.model.slot.Slot.S2
+import de.pflugradts.passbird.domain.model.slot.Slot.S3
 import de.pflugradts.passbird.domain.model.slot.Slot.S4
+import de.pflugradts.passbird.domain.model.slot.Slot.S5
+import de.pflugradts.passbird.domain.model.slot.Slot.S6
+import de.pflugradts.passbird.domain.model.slot.Slot.S7
+import de.pflugradts.passbird.domain.model.slot.Slot.S8
+import de.pflugradts.passbird.domain.model.slot.Slot.S9
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -19,100 +27,76 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
+import org.junit.jupiter.params.provider.MethodSource
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import strikt.assertions.isNotEqualTo
+import java.util.stream.Stream
 
 @Tag(INTEGRATION)
-class GetProteinCommandTest {
+class GetMemoryCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val clipboardAdapterPort = mockk<ClipboardAdapterPort>(relaxed = true)
     private val passwordService = mockk<PasswordService>()
-    private val getProteinCommandHandler = GetProteinCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(getProteinCommandHandler)
+    private val getMemoryCommandHandler = GetMemoryCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort)
+    private val inputHandler = createInputHandlerFor(getMemoryCommandHandler)
 
     @ParameterizedTest
-    @EnumSource(value = Slot::class)
-    fun `should handle get protein command`(slot: Slot) {
+    @MethodSource("providedMemory")
+    fun `should handle get memory command`(slot: Slot, eggId: String) {
         // given
-        val args = "EggId"
-        val command = shellOf("p${slot.index()}$args")
-        val reference = command.copy()
-        val expectedStructure = shellOf("username")
+        val command = shellOf("m${slot.index()}")
         fakePasswordService(
             instance = passwordService,
-            withEggs = listOf(
-                createEggForTesting(
-                    withEggIdShell = shellOf(args),
-                    withProteins = mapOf(slot to Pair(shellOf("type"), expectedStructure)),
-                ),
-            ),
+            withMemory = testMemoryData(),
         )
         val outputSlot = slot<Output>()
 
         // when
-        expectThat(command) isEqualTo reference
         inputHandler.handleInput(inputOf(command))
 
         // then
         verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell) isEqualTo expectedStructure
-        verify(exactly = 1) { userInterfaceAdapterPort.send(any()) }
-        expectThat(command) isNotEqualTo reference
+        expectThat(outputSlot.captured.shell) isEqualTo shellOf(testMemoryData()[slot].orEmpty())
+        verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(shellOf("EggId copied to clipboard."))) }
     }
 
-    @Test
-    fun `should handle get protein command with non existing egg`() {
+    @ParameterizedTest
+    @EnumSource(Slot::class)
+    fun `should handle get memory command on empty memory slot`(slot: Slot) {
         // given
-        val args = "EggId"
-        val command = shellOf("p0$args")
-        val reference = command.copy()
+        val command = shellOf("m${slot.index()}")
         fakePasswordService(
             instance = passwordService,
-            withEggs = listOf(createEggForTesting(withEggIdShell = shellOf("other"))),
+            withMemory = emptyMap(),
         )
 
         // when
-        expectThat(command) isEqualTo reference
         inputHandler.handleInput(inputOf(command))
 
         // then
         verify { clipboardAdapterPort wasNot Called }
-        verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
-        expectThat(command) isNotEqualTo reference
+        verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(shellOf("Memory entry at slot ${slot.index()} does not exist."))) }
     }
 
-    @Test
-    fun `should handle get protein command with non-existing protein`() {
-        // given
-        val args = "EggId"
-        val command = shellOf("p3$args")
-        val otherSlot = S4
-        val reference = command.copy()
-        val expectedStructure = shellOf("username")
-        fakePasswordService(
-            instance = passwordService,
-            withEggs = listOf(
-                createEggForTesting(
-                    withEggIdShell = shellOf(args),
-                    withProteins = mapOf(otherSlot to Pair(shellOf("type"), expectedStructure)),
-                ),
-            ),
-        )
-
-        // when
-        expectThat(command) isEqualTo reference
-        inputHandler.handleInput(inputOf(command))
-
-        // then
-        verify { clipboardAdapterPort wasNot Called }
-        verify(exactly = 1) {
-            userInterfaceAdapterPort.send(eq(outputOf(shellOf("Specified Protein Structure is empty - Operation aborted."))))
-        }
-        expectThat(command) isNotEqualTo reference
+    companion object {
+        @JvmStatic
+        private fun providedMemory(): Stream<Arguments> = testMemoryData().map { Arguments.of(it.key, it.value) }.stream()
     }
 }
+
+fun testMemoryData() = mapOf(
+    DEFAULT to "a",
+    S1 to "b",
+    S2 to "c",
+    S3 to "d",
+    S4 to "e",
+    S5 to "f",
+    S6 to "g",
+    S7 to "h",
+    S8 to "i",
+    S9 to "j",
+)

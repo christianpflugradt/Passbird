@@ -5,9 +5,12 @@ import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.Protein
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slots
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
@@ -17,6 +20,7 @@ fun fakePasswordService(
     withInvalidEggId: Boolean = false,
     withEggs: List<Egg> = emptyList(),
     withNestService: NestService? = null,
+    withMemory: Map<Slot, String> = emptyMap(),
 ) {
     every { instance.putEgg(any(), any()) } returns Unit
     every { instance.putEggs(any()) } returns Unit
@@ -71,6 +75,8 @@ fun fakePasswordService(
     every { instance.discardProtein(any(), any()) } returns Unit
     every { instance.renameEgg(any(), any()) } returns Unit
     every { instance.moveEgg(any(), any()) } returns Unit
+    every { instance.viewMemory() } answers { Slots<Shell>().apply { withMemory.forEach { this[it.key] = shellOf(it.value) } } }
+    every { instance.viewMemoryEntry(any<Slot>()) } answers { instance.viewMemory()[firstArg<Slot>()] }
 }
 
 private fun MutableOption<Protein>.extractType() = orNull()?.viewType()?.fakeDec() ?: emptyShell()
