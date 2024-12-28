@@ -62,9 +62,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:$junitPlatformVersion"))
     testImplementation("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-params")
 
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("com.tngtech.archunit:archunit:$archunitVersion")
