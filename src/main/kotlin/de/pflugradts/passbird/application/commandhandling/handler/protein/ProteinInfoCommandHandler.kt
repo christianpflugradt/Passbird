@@ -15,7 +15,7 @@ class ProteinInfoCommandHandler @Inject constructor(
     private fun handleProteinInfoCommand(@Suppress("UNUSED_PARAMETER") proteinInfoCommand: ProteinInfoCommand) {
         with(canPrintInfo) {
             userInterfaceAdapterPort.send(
-                outBold("\n\nAvailable Protein commands:\n"),
+                outBold("\nAvailable Protein commands:\n"),
                 outBold("\n\tp?"),
                 out(" (help)                Displays this help menu for Protein commands."),
                 outBold("\n\tp[EggId]"),
