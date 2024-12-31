@@ -15,9 +15,9 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
 
-private const val COPYRIGHT = "\tCopyright 2020 - 2024 Christian Pflugradt"
+private const val COPYRIGHT = "\tCopyright 2020 - 2025 Christian Pflugradt"
 private const val LICENSE = """${'\t'}This software is licensed under the Apache License, Version 2.0 (APLv2)
-${'\t'}You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+${'\t'}You may obtain a copy of the License at https://www.apache.org/licenses/LICENSE-2.0
 """
 private const val SLOGAN = "\tguarding your digital nest with secure feathers"
 
