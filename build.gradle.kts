@@ -17,9 +17,9 @@ plugins {
     application
     jacoco
     java
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.1.10"
     id("com.github.hierynomus.license-report") version "0.16.1"
-    id("org.owasp.dependencycheck") version "12.0.1"
+    id("org.owasp.dependencycheck") version "12.0.2"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
 }
