@@ -38,7 +38,7 @@ configurations.all {
 
 val guavaVersion = "33.4.0-jre"
 val guiceVersion = "7.0.0"
-val jacksonVersion = "2.18.2"
+val jacksonVersion = "2.18.3"
 
 val archunitVersion = "1.4.0"
 val awaitilityVersion = "4.3.0"
