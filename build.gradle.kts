@@ -32,11 +32,11 @@ repositories {
 // gradle plugin / ktlint version addressed: 12.1.2 / 1.5.0
 configurations.all {
     resolutionStrategy {
-        force("ch.qos.logback:logback-core:1.5.17")
+        force("ch.qos.logback:logback-core:1.5.18")
     }
 }
 
-val guavaVersion = "33.4.0-jre"
+val guavaVersion = "33.4.5-jre"
 val guiceVersion = "7.0.0"
 val jacksonVersion = "2.18.3"
 
