@@ -36,7 +36,7 @@ configurations.all {
     }
 }
 
-val guavaVersion = "33.4.7-jre"
+val guavaVersion = "33.4.8-jre"
 val guiceVersion = "7.0.0"
 val jacksonVersion = "2.18.3"
 
