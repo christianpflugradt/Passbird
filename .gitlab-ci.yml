@@ -91,7 +91,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 
 🚀 semver:
   stage: 📦 release
-  image: node:23
+  image: node:24
   variables:
       GIT_STRATEGY: clone
   script:
