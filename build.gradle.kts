@@ -40,7 +40,7 @@ val guavaVersion = "33.4.8-jre"
 val guiceVersion = "7.0.0"
 val jacksonVersion = "2.19.0"
 
-val archunitVersion = "1.4.0"
+val archunitVersion = "1.4.1"
 val awaitilityVersion = "4.3.0"
 val junitPlatformVersion = "5.12.2"
 val mockkVersion = "1.14.2"
