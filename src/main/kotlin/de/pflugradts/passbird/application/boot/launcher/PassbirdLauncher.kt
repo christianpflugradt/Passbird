@@ -11,9 +11,18 @@ import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.DEFAULT
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ERROR_MESSAGE
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.util.jar.JarInputStream
 
 private const val COPYRIGHT = "\tCopyright 2020 - 2025 Christian Pflugradt"
 private const val LICENSE = """${'\t'}This software is licensed under the Apache License, Version 2.0 (APLv2)
@@ -42,10 +51,27 @@ class PassbirdLauncher @Inject constructor(
     private fun sendBanner() {
         userInterfaceAdapterPort.sendLineBreak()
         userInterfaceAdapterPort.send(outputOf(shellOf(if (ansiEscapeCodesEnabled) coloredBanner() else plainBanner())))
-        userInterfaceAdapterPort.send(outputOf(shellOf("\t${javaClass.getPackage().implementationVersion}"), NEST))
+        userInterfaceAdapterPort.send(outputOf(shellOf("\t${javaClass.getPackage().implementationVersion}"), NEST), ageHint())
         userInterfaceAdapterPort.sendLineBreak()
         userInterfaceAdapterPort.send(outputOf(shellOf(SLOGAN), SPECIAL))
         userInterfaceAdapterPort.sendLineBreak()
+    }
+
+    private fun ageHint(): Output {
+        manifestAttributes()?.getValue("Build-Date")?.also { buildDate ->
+            ChronoUnit.DAYS.between(
+                LocalDate.parse(buildDate, DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                LocalDate.now(),
+            ).let { age ->
+                when {
+                    age <= 7 -> "This version is up to date." to DEFAULT
+                    age <= 29 -> "This version is $age days old. Perhaps there's a newer version?" to DEFAULT
+                    age <= 89 -> "This version is $age days old. Perhaps there's a newer version?" to OPERATION_ABORTED
+                    else -> "This version is outdated." to ERROR_MESSAGE
+                }
+            }.let { (message, formatting) -> return@ageHint outputOf(shellOf(" | $message"), formatting) }
+        }
+        return emptyOutput()
     }
 
     private fun sendLicenseNotice() {
@@ -88,3 +114,6 @@ class PassbirdLauncher @Inject constructor(
         0x20, 0x5c, 0x5f, 0x5f, 0x2c, 0x5f, 0x7c, 0x1b, 0x5b, 0x30, 0x6d, 0x0a,
     )
 }
+
+private fun manifestAttributes() = {}.javaClass.protectionDomain.codeSource.location
+    ?.let { it.openStream().use { stream -> JarInputStream(stream).manifest } }?.mainAttributes
