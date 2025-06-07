@@ -19,7 +19,7 @@ plugins {
     java
     kotlin("jvm") version "2.1.21"
     id("com.github.hierynomus.license-report") version "0.16.1"
-    id("org.owasp.dependencycheck") version "12.1.1"
+    id("org.owasp.dependencycheck") version "12.1.2"
     id("org.jlleitschuh.gradle.ktlint") version "12.3.0"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
 }
@@ -42,7 +42,7 @@ val jacksonVersion = "2.19.0"
 
 val archunitVersion = "1.4.1"
 val awaitilityVersion = "4.3.0"
-val junitPlatformVersion = "5.13.0"
+val junitPlatformVersion = "5.13.1"
 val mockkVersion = "1.14.2"
 val striktVersion = "0.35.1"
 
