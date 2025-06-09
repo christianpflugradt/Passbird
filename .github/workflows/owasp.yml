@@ -17,6 +17,7 @@ jobs:
           distribution: 'temurin'
       - name: check dependencies for vulnerabilities
         env:
+            DEPENDENCY_CHECK_DATA_LOCATION: .dependency-check
             NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
             OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
             OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}

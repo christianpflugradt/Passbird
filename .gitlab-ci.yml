@@ -17,10 +17,10 @@ secret_detection:
   stage: 🔎 check
 
 variables:
-  DOCKER_DRIVER: overlay2
+  DEPENDENCY_CHECK_DATA_LOCATION: /cache/owasp
+  GRADLE_USER_HOME: /cache
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.logging.level=warn"
   SAST_JAVA_VERSION: 17
-
-before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 
 🛠 compile:
   stage: 🔎 check
@@ -81,7 +81,7 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
 📊 test-coverage-report:
   stage: 📘 report
   coverage: '/Branch Coverage: \d+\.?\d*/'
-  script: ./gradlew jacocoTestReport
+  script: ./gradlew -Dorg.gradle.caching=false -Dorg.gradle.logging.level=info jacocoTestReport
   needs:
     - 🗃 unit-tests
     - 🔗 integration-tests
@@ -94,6 +94,11 @@ before_script: [ export GRADLE_USER_HOME=`pwd`/.gradle ]
   image: node:24
   variables:
       GIT_STRATEGY: clone
-  script: npm install semantic-release@24.2.5 @semantic-release/gitlab@13.2.5 && npx semantic-release
+  script: |
+    npm install \
+      semantic-release@24.2.5 \
+      @semantic-release/gitlab@13.2.5 \
+      conventional-changelog-conventionalcommits@9.0.0 \
+    && npx semantic-release
   when: manual
   only: [ main ]
