@@ -186,7 +186,7 @@ dependencyCheck {
         retirejs.enabled = false // JavaScript
     }
     data {
-        directory = System.getenv("DEPENDENCY_CHECK_DATA_LOCATION") ?: "~/.dependency-check"
+        directory = System.getenv("DEPENDENCY_CHECK_DATA_LOCATION") ?: ".dependency-check"
     }
 }
 
