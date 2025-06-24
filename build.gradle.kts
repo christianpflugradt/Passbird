@@ -17,7 +17,7 @@ plugins {
     application
     jacoco
     java
-    kotlin("jvm") version "2.1.21"
+    kotlin("jvm") version "2.2.0"
     id("com.github.hierynomus.license-report") version "0.16.1"
     id("org.owasp.dependencycheck") version "12.1.3"
     id("org.jlleitschuh.gradle.ktlint") version "12.3.0"
@@ -42,8 +42,8 @@ val jacksonVersion = "2.19.1"
 
 val archunitVersion = "1.4.1"
 val awaitilityVersion = "4.3.0"
-val junitPlatformVersion = "5.13.1"
-val mockkVersion = "1.14.2"
+val junitPlatformVersion = "5.13.2"
+val mockkVersion = "1.14.4"
 val striktVersion = "0.35.1"
 
 dependencies {
