@@ -11,10 +11,21 @@ include:
   - template: Security/Secret-Detection.gitlab-ci.yml
 
 sast:
-    stage: 🔎 check
+  stage: 🔎 check
+
+semgrep-sast:
+  stage: 🔎 check
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - when: on_success
 
 secret_detection:
   stage: 🔎 check
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - when: on_success
 
 variables:
   DEPENDENCY_CHECK_DATA_LOCATION: /cache/owasp
@@ -37,7 +48,7 @@ variables:
     - tags
     - schedules
 
-.owasp-db-purge:
+🧹 owasp db purge:
   stage: 🔎 check
   script:
     - ./gradlew dependencyCheckPurge
@@ -45,7 +56,7 @@ variables:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $OWASP_PURGE == "true"'
 
-.owasp-db-update:
+🔄 owasp db update:
   stage: 🔎 check
   script: ./gradlew dependencyCheckUpdate
   rules:
@@ -58,12 +69,12 @@ variables:
     paths: [ build/reports/ktlint/* ]
   except: [ schedules ]
 
-📜 license-check:
+📜 license check:
   stage: 🔎 check
   script: ./gradlew validateLicenses
   except: [ schedules ]
 
-🗃 unit-tests:
+🗃 unit tests:
   stage: ✅ test
   script: ./gradlew test
   needs: [ 🛠 compile]
@@ -73,7 +84,7 @@ variables:
       - build/jacoco/test.exec
   except: [ schedules ]
 
-🔗 integration-tests:
+🔗 integration tests:
   stage: ✅ test
   script: ./gradlew integration
   needs: [ 🛠 compile]
@@ -83,7 +94,7 @@ variables:
       - build/jacoco/integration.exec
   except: [ schedules ]
 
-🧱 architecture-tests:
+🧱 architecture tests:
   stage: ✅ test
   script: ./gradlew architecture
   needs: [ 🛠 compile]
@@ -92,23 +103,23 @@ variables:
       - build/reports/tests/architecture/*
   except: [ schedules ]
 
-🏆 test-coverage-verification:
+🏆 test coverage verification:
   stage: 📘 report
   script: ./gradlew jacocoTestCoverageVerification
   needs:
-    - 🗃 unit-tests
-    - 🔗 integration-tests
-    - 🧱 architecture-tests
+    - 🗃 unit tests
+    - 🔗 integration tests
+    - 🧱 architecture tests
   except: [ schedules ]
 
-📊 test-coverage-report:
+📊 test coverage report:
   stage: 📘 report
   coverage: '/Branch Coverage: \d+\.?\d*/'
   script: ./gradlew -Dorg.gradle.caching=false -Dorg.gradle.logging.level=info jacocoTestReport
   needs:
-    - 🗃 unit-tests
-    - 🔗 integration-tests
-    - 🧱 architecture-tests
+    - 🗃 unit tests
+    - 🔗 integration tests
+    - 🧱 architecture tests
   artifacts:
     paths: [ build/reports/jacoco/test/html/* ]
   except: [ schedules ]
@@ -126,3 +137,4 @@ variables:
     && npx semantic-release
   when: manual
   only: [ main ]
+  except: [ schedules ]
