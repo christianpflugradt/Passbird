@@ -30,12 +30,12 @@ repositories {
 
 val guavaVersion = "33.4.8-jre"
 val guiceVersion = "7.0.0"
-val jacksonVersion = "2.19.1"
+val jacksonVersion = "2.19.2"
 
 val archunitVersion = "1.4.1"
 val awaitilityVersion = "4.3.0"
 val junitPlatformVersion = "5.13.3"
-val mockkVersion = "1.14.4"
+val mockkVersion = "1.14.5"
 val striktVersion = "0.35.1"
 
 dependencies {
