@@ -17,16 +17,17 @@ jobs:
           distribution: 'temurin'
       - name: check dependencies for vulnerabilities
         env:
-            DEPENDENCY_CHECK_DATA_LOCATION: .dependency-check
-            GRADLE_OPTS: "-Dorg.gradle.logging.level=debug"
+            DEPENDENCY_CHECK_DATA_LOCATION: "${{ github.workspace }}/.dependency-check"
+            GRADLE_OPTS: "-Dorg.gradle.logging.level=info"
             JAVA_OPTS: "-Xms1g -Xmx4g"
             NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
             OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
             OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
         run: |
           ./gradlew dependencyCheckPurge
+          rm -rf "$DEPENDENCY_CHECK_DATA_LOCATION"
           ./gradlew dependencyCheckUpdate
-          ./gradlew dependencyCheckAnalyze
+          ./gradlew dependencyCheckAnalyze --stacktrace
       - uses: actions/upload-artifact@v4
         if: always()
         with:
