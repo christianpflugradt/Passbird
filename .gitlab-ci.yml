@@ -25,6 +25,7 @@ variables:
 🛠 compile:
   stage: 🔎 check
   script: ./gradlew compileKotlin compileTestKotlin compileJava compileTestJava
+  except: [ schedules ]
 
 🛡️ owasp:
   stage: 🔎 check
@@ -32,17 +33,35 @@ variables:
   artifacts:
     paths: [ build/reports/dependency-check-report.html ]
   allow_failure: true
-  except: [ tags ]
+  except:
+    - tags
+    - schedules
+
+.owasp-db-purge:
+  stage: 🔎 check
+  script:
+    - ./gradlew dependencyCheckPurge
+    - rm -rf "$DEPENDENCY_CHECK_DATA_LOCATION"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $OWASP_PURGE == "true"'
+
+.owasp-db-update:
+  stage: 🔎 check
+  script: ./gradlew dependencyCheckUpdate
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $OWASP_UPDATE == "true"'
 
 ✏️ ktlint:
   stage: 🔎 check
   script: ./gradlew ktlintCheck
   artifacts:
     paths: [ build/reports/ktlint/* ]
+  except: [ schedules ]
 
 📜 license-check:
   stage: 🔎 check
   script: ./gradlew validateLicenses
+  except: [ schedules ]
 
 🗃 unit-tests:
   stage: ✅ test
@@ -52,6 +71,7 @@ variables:
     paths:
       - build/reports/tests/test/*
       - build/jacoco/test.exec
+  except: [ schedules ]
 
 🔗 integration-tests:
   stage: ✅ test
@@ -61,6 +81,7 @@ variables:
     paths:
       - build/reports/tests/integration/*
       - build/jacoco/integration.exec
+  except: [ schedules ]
 
 🧱 architecture-tests:
   stage: ✅ test
@@ -69,6 +90,7 @@ variables:
   artifacts:
     paths:
       - build/reports/tests/architecture/*
+  except: [ schedules ]
 
 🏆 test-coverage-verification:
   stage: 📘 report
@@ -77,6 +99,7 @@ variables:
     - 🗃 unit-tests
     - 🔗 integration-tests
     - 🧱 architecture-tests
+  except: [ schedules ]
 
 📊 test-coverage-report:
   stage: 📘 report
@@ -88,6 +111,7 @@ variables:
     - 🧱 architecture-tests
   artifacts:
     paths: [ build/reports/jacoco/test/html/* ]
+  except: [ schedules ]
 
 🚀 semver:
   stage: 📦 release
