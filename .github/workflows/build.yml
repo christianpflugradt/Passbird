@@ -5,6 +5,9 @@ on:
     push:
     workflow_dispatch:
 
+env:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
 jobs:
 
   compile:

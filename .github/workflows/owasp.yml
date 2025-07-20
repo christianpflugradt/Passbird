@@ -18,10 +18,15 @@ jobs:
       - name: check dependencies for vulnerabilities
         env:
             DEPENDENCY_CHECK_DATA_LOCATION: .dependency-check
+            GRADLE_OPTS: "-Dorg.gradle.logging.level=debug"
+            JAVA_OPTS: "-Xms1g -Xmx4g"
             NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
             OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
             OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
-        run: JAVA_OPTS="-Xms1g -Xmx4g" ./gradlew dependencyCheckAnalyze
+        run: |
+          ./gradlew dependencyCheckPurge
+          ./gradlew dependencyCheckUpdate
+          ./gradlew dependencyCheckAnalyze
       - uses: actions/upload-artifact@v4
         if: always()
         with:
