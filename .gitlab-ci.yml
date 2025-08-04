@@ -71,7 +71,7 @@ variables:
 
 📜 license check:
   stage: 🔎 check
-  script: ./gradlew validateLicenses
+  script: ./gradlew checkLicense --no-build-cache
   except: [ schedules ]
 
 🗃 unit tests:

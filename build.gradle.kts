@@ -7,10 +7,8 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType.HTML
-import org.w3c.dom.Element
 import java.text.SimpleDateFormat
 import java.util.Date
-import javax.xml.parsers.DocumentBuilderFactory
 
 plugins {
     idea
@@ -18,7 +16,7 @@ plugins {
     jacoco
     java
     kotlin("jvm") version "2.2.0"
-    id("com.github.hierynomus.license-report") version "0.16.1"
+    id("com.github.jk1.dependency-license-report") version "2.9"
     id("org.owasp.dependencycheck") version "12.1.3"
     id("org.jlleitschuh.gradle.ktlint") version "13.0.0"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
@@ -182,53 +180,6 @@ dependencyCheck {
     }
 }
 
-downloadLicenses {
-    dependencyConfiguration = "runtimeClasspath"
-}
-
-val allowedLicenses = listOf(
-    "Apache License, Version 2.0",
-    "The Apache License, Version 2.0",
-    "The Apache Software License, Version 2.0",
-    "Apache 2.0",
-    "The MIT License",
-    "Public Domain",
-)
-
-tasks.register("validateLicenses") {
-    group = "verification"
-    description = "Fails the build if any incompatible licenses are detected."
-
-    dependsOn("downloadLicenses")
-
-    doLast {
-        val licenseReportFile = layout.buildDirectory.file("reports/license/license-dependency.xml").get().asFile
-        if (!licenseReportFile.exists()) {
-            throw GradleException("License report not found: ${licenseReportFile.absolutePath}")
-        }
-        val invalidDependencies = mutableListOf<String>()
-        val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(licenseReportFile)
-        val licenseNodes = document.getElementsByTagName("license")
-        if (licenseNodes.length == 0) {
-            throw GradleException("No licenses found in the report. Check your downloadLicenses configuration.")
-        }
-        for (i in 0 until licenseNodes.length) {
-            val licenseNode = licenseNodes.item(i) as Element
-            val licenseName = licenseNode.getAttribute("name")
-            if (licenseName !in allowedLicenses) {
-                val dependencyNodes = licenseNode.getElementsByTagName("dependency")
-                for (j in 0 until dependencyNodes.length) {
-                    val dependency = dependencyNodes.item(j).textContent
-                    invalidDependencies.add("$dependency (License: $licenseName)")
-                }
-            }
-        }
-        if (invalidDependencies.isNotEmpty()) {
-            println("Disallowed licenses detected:")
-            invalidDependencies.forEach { println("- $it") }
-            throw GradleException("Build failed due to disallowed licenses.")
-        } else {
-            println("All licenses are compatible.")
-        }
-    }
+licenseReport {
+    allowedLicensesFile = file("$projectDir/allowed-licenses.json")
 }

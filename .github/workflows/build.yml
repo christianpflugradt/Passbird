@@ -49,8 +49,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: validate licenses
-        run: ./gradlew validateLicenses
+      - name: check licenses
+        run: ./gradlew checkLicense
 
   unit-tests:
     runs-on: ubuntu-latest
