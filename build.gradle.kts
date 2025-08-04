@@ -113,7 +113,7 @@ tasks.register<Test>("architecture") {
     useJUnitPlatform { includeTags("architecture") }
 }
 
-tasks.register<Test>("all") {
+tasks.register<Test>("allTests") {
     useJUnitPlatform()
 }
 
@@ -182,4 +182,16 @@ dependencyCheck {
 
 licenseReport {
     allowedLicensesFile = file("$projectDir/allowed-licenses.json")
+}
+
+tasks.register("preCommitCheck") {
+    group = VERIFICATION_GROUP
+    description = "Runs all verification tasks used in the pre-commit hook."
+
+    dependsOn(
+        "ktlintCheck",
+        "checkLicense",
+        "jacocoTestCoverageVerification",
+        "allTests",
+    )
 }
