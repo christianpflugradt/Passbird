@@ -62,7 +62,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: compile
           path: build
@@ -87,7 +87,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: compile
           path: build
@@ -113,7 +113,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: compile
           path: build
@@ -138,15 +138,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: compile
           path: build
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: unit-test-execution-data
           path: build/jacoco/test.exec
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: integration-test-execution-data
           path: build/jacoco/integration.exec
@@ -168,15 +168,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: compile
           path: build
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: unit-test-execution-data
           path: build/jacoco/test.exec
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: integration-test-execution-data
           path: build/jacoco/integration.exec
