@@ -15,9 +15,9 @@ plugins {
     application
     jacoco
     java
-    kotlin("jvm") version "2.2.10"
+    kotlin("jvm") version "2.2.20"
     id("com.github.jk1.dependency-license-report") version "2.9"
-    id("org.owasp.dependencycheck") version "12.1.3"
+    id("org.owasp.dependencycheck") version "12.1.5"
     id("org.jlleitschuh.gradle.ktlint") version "13.1.0"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
 }
@@ -26,9 +26,9 @@ repositories {
     mavenCentral()
 }
 
-val guavaVersion = "33.4.8-jre"
+val guavaVersion = "33.5.0-jre"
 val guiceVersion = "7.0.0"
-val jacksonVersion = "2.19.2"
+val jacksonVersion = "2.20.0"
 
 val archunitVersion = "1.4.1"
 val awaitilityVersion = "4.3.0"
