@@ -12,16 +12,6 @@
             "separateMajorMinor": false
         },
         {
-            "matchFileNames": [
-                "build.gradle.kts"
-            ],
-            "matchUpdateTypes": [
-                "patch",
-                "minor"
-            ],
-            "groupName": "non-major"
-        },
-        {
             "matchPackageNames": [
                 "eclipse-temurin"
             ],
