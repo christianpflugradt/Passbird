@@ -51,6 +51,12 @@ jobs:
           distribution: 'temurin'
       - name: check licenses
         run: ./gradlew checkLicense
+      - name: upload failed license check report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependencies-without-allowed-license
+          path: build/reports/dependency-license/dependencies-without-allowed-license.json
 
   unit-tests:
     runs-on: ubuntu-latest

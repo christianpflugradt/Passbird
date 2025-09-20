@@ -72,6 +72,10 @@ variables:
 📜 license check:
   stage: 🔎 check
   script: ./gradlew checkLicense --no-build-cache
+  artifacts:
+    paths:
+      - build/reports/dependency-license/dependencies-without-allowed-license.json
+    when: always
   except: [ schedules ]
 
 🗃 unit tests:
