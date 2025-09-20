@@ -1,19 +1,22 @@
 {
     "allowedLicenses": [
         {
+            "moduleLicense": "Apache 2.0"
+        },
+        {
             "moduleLicense": "Apache License, Version 2.0"
+        },
+        {
+            "moduleLicense": "Apache-2.0"
+        },
+        {
+            "moduleLicense": "Public Domain"
         },
         {
             "moduleLicense": "The Apache License, Version 2.0"
         },
         {
             "moduleLicense": "The Apache Software License, Version 2.0"
-        },
-        {
-            "moduleLicense": "Apache 2.0"
-        },
-        {
-            "moduleLicense": "Public Domain"
         }
     ]
 }
