@@ -15,7 +15,7 @@ import java.util.function.Predicate
 
 @Singleton
 class NestingGround @Inject constructor(
-    @Named("EggIdMemoryEnabled")
+    @param:Named("EggIdMemoryEnabled")
     private val eggIdMemoryEnabled: Boolean,
     private val passwordTreeAdapterPort: PasswordTreeAdapterPort,
     private val nestService: NestService,
