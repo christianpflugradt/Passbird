@@ -1,4 +1,4 @@
-image: eclipse-temurin:25-jdk
+image: eclipse-temurin:21-jdk
 
 stages:
   - 🔎 check
