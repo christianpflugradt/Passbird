@@ -18,7 +18,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       - name: compile code
         run: ./gradlew compileKotlin compileTestKotlin compileJava compileTestJava
       - uses: actions/upload-artifact@v4
@@ -67,7 +67,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       - uses: actions/download-artifact@v5
         with:
           name: compile
@@ -92,7 +92,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       - uses: actions/download-artifact@v5
         with:
           name: compile
@@ -118,7 +118,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       - uses: actions/download-artifact@v5
         with:
           name: compile
@@ -143,7 +143,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       - uses: actions/download-artifact@v5
         with:
           name: compile
@@ -173,7 +173,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v5
       - uses: actions/download-artifact@v5
         with:
           name: compile
