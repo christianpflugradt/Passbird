@@ -116,7 +116,7 @@ variables:
     - 🧱 architecture tests
   except: [ schedules ]
 
-test coverage report:
+📊 test coverage report:
   stage: 📘 report
   coverage: '/Branch Coverage:\s+(\d+(?:\.\d+)?)%/'
   script: ./gradlew -Dorg.gradle.caching=false -Dorg.gradle.logging.level=info jacocoTestReport
