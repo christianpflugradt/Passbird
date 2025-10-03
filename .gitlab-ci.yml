@@ -118,7 +118,7 @@ variables:
 
 📊 test coverage report:
   stage: 📘 report
-  coverage: '/-\s*Branch Coverage:\s+(\d+(?:\.\d+)?)%/'
+  coverage: '/Branch Coverage:\s+(\d+(?:\.\d+)?)%/'
   script: ./gradlew -Dorg.gradle.caching=false -Dorg.gradle.logging.level=info jacocoTestReport
   needs:
     - 🗃 unit tests
