@@ -1,6 +1,6 @@
 # Passbird
 
-[![version](https://gitlab.com/christianpflugradt/passbird/-/badges/release.svg)](https://gitlab.com/christianpflugradt/passbird/-/releases) [![pipeline status](https://gitlab.com/christianpflugradt/passbird/badges/main/pipeline.svg)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![coverage report](https://gitlab.com/christianpflugradt/passbird/badges/main/coverage.svg?job=📊%20test-coverage-report)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![version](https://gitlab.com/christianpflugradt/passbird/-/badges/release.svg)](https://gitlab.com/christianpflugradt/passbird/-/releases) [![pipeline status](https://gitlab.com/christianpflugradt/passbird/badges/main/pipeline.svg)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![coverage report](https://gitlab.com/christianpflugradt/passbird/badges/main/coverage.svg?job=%F0%9F%93%8A%20test-coverage-report)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 * [Getting started](#getting-started)
     + [Downloading Passbird](#downloading-passbird)
