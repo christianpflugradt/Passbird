@@ -129,7 +129,7 @@ variables:
 
 🚀 semver:
   stage: 📦 release
-  image: node:24
+  image: node:25
   variables:
       GIT_STRATEGY: clone
   script: |
