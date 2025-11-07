@@ -21,8 +21,8 @@
     "customManagers": [
         {
             "customType": "regex",
-            "fileMatch": [
-                "^build.gradle.kts$"
+            "managerFilePatterns": [
+                "/^build.gradle.kts$/"
             ],
             "matchStrings": [
                 "ktlint\\.version\\s*=\\s*\"(?<currentValue>[^\"]+)\""
