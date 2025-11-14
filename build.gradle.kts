@@ -88,7 +88,7 @@ tasks.withType<KotlinJvmCompile>().configureEach {
     }
 }
 
-ktlint.version = "1.7.1"
+ktlint.version = "1.8.0"
 
 ktlint {
     additionalEditorconfig.set(
