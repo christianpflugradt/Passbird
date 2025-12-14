@@ -21,7 +21,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v5
       - name: compile code
         run: ./gradlew compileKotlin compileTestKotlin compileJava compileTestJava
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: compile
           path: build
@@ -36,7 +36,7 @@ jobs:
           distribution: 'temurin'
       - name: lint code
         run: ./gradlew ktlintCheck
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: ktlint-reports
           path: build/reports/ktlint/*
@@ -53,7 +53,7 @@ jobs:
         run: ./gradlew checkLicense
       - name: upload failed license check report
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: dependencies-without-allowed-license
           path: build/reports/dependency-license/dependencies-without-allowed-license.json
@@ -68,17 +68,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v5
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: compile
           path: build
       - name: run unit tests
         run: ./gradlew test
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: unit-test-report
           path: build/reports/tests/test/*
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: unit-test-execution-data
           path: build/jacoco/test.exec
@@ -93,17 +93,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v5
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: compile
           path: build
       - name: run integration tests
         run: ./gradlew integration
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: integration-test-report
           path: build/reports/tests/integration/*
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: integration-test-execution-data
           path: build/jacoco/integration.exec
@@ -119,13 +119,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v5
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: compile
           path: build
       - name: run architecture tests
         run: ./gradlew architecture
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: architecture-test-report
           path: build/reports/tests/architecture/*
@@ -144,15 +144,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v5
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: compile
           path: build
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: unit-test-execution-data
           path: build/jacoco/test.exec
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: integration-test-execution-data
           path: build/jacoco/integration.exec
@@ -174,22 +174,22 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v5
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: compile
           path: build
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: unit-test-execution-data
           path: build/jacoco/test.exec
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: integration-test-execution-data
           path: build/jacoco/integration.exec
       - name: create code coverage report
         # for some reason downloaded test execution data is not used, so we'll run all tests again for jacoco to work
         run: ./gradlew test integration jacocoTestReport
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: test-coverage-report
           path: build/reports/jacoco/test/html/*
