@@ -17,7 +17,7 @@ plugins {
     java
     kotlin("jvm") version "2.3.0"
     id("com.github.jk1.dependency-license-report") version "3.0.1"
-    id("org.owasp.dependencycheck") version "12.1.9"
+    id("org.owasp.dependencycheck") version "12.2.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
     id("org.barfuin.gradle.jacocolog") version "3.1.0"
 }
