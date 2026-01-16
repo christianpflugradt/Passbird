@@ -170,7 +170,6 @@ dependencyCheck {
             password = System.getenv("OSS_INDEX_PASSWORD")
         }
         centralEnabled = true // Maven Central
-        ossIndexEnabled = true // Sonatype OSS Index
         assemblyEnabled = false // .NET
         nexusEnabled = false // Sonatype Nexus Repository
         retirejs.enabled = false // JavaScript
