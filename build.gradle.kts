@@ -19,7 +19,7 @@ plugins {
     id("com.github.jk1.dependency-license-report") version "3.0.1"
     id("org.owasp.dependencycheck") version "12.2.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
-    id("org.barfuin.gradle.jacocolog") version "4.0.0"
+    id("org.barfuin.gradle.jacocolog") version "4.0.1"
 }
 
 repositories {
