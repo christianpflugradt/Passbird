@@ -59,6 +59,7 @@ variables:
   <<: *check_base
   script: JAVA_OPTS="-Xms1g -Xmx2g" ./gradlew dependencyCheckAnalyze
   artifacts:
+    when: always
     paths: [ build/reports/dependency-check-report.html ]
   allow_failure: true
   except:
