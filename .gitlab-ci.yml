@@ -70,6 +70,7 @@ variables:
   <<: *check_base
   script: ./gradlew ktlintCheck
   artifacts:
+    when: always
     paths: [ build/reports/ktlint/* ]
 
 📜 license check:
@@ -89,6 +90,7 @@ variables:
   <<: *test_base
   script: ./gradlew test
   artifacts:
+    when: always
     paths:
       - build/reports/tests/test/*
       - build/jacoco/test.exec
@@ -97,6 +99,7 @@ variables:
   <<: *test_base
   script: ./gradlew integration
   artifacts:
+    when: always
     paths:
       - build/reports/tests/integration/*
       - build/jacoco/integration.exec
@@ -105,6 +108,7 @@ variables:
   <<: *test_base
   script: ./gradlew architecture
   artifacts:
+    when: always
     paths:
       - build/reports/tests/architecture/*
 
@@ -126,6 +130,7 @@ variables:
   coverage: '/Branch Coverage:\s+(\d+(?:\.\d+)?)%/'
   script: ./gradlew -Dorg.gradle.caching=false -Dorg.gradle.logging.level=info jacocoTestReport
   artifacts:
+    when: always
     paths: [ build/reports/jacoco/test/html/* ]
 
 🚀 semver:
