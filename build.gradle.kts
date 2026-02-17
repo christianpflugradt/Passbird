@@ -33,7 +33,7 @@ val jacksonVersion = "2.21.0"
 val archunitVersion = "1.4.1"
 val awaitilityVersion = "4.3.0"
 val junitPlatformVersion = "6.0.3"
-val mockkVersion = "1.14.6"
+val mockkVersion = "1.14.9"
 val striktVersion = "0.35.1"
 
 dependencies {
