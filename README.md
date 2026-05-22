@@ -1,6 +1,6 @@
 # Passbird
 
-[![version](https://gitlab.com/christianpflugradt/passbird/-/badges/release.svg)](https://gitlab.com/christianpflugradt/passbird/-/releases) [![pipeline status](https://gitlab.com/christianpflugradt/passbird/badges/main/pipeline.svg)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![coverage report](https://gitlab.com/christianpflugradt/passbird/badges/main/coverage.svg)](https://gitlab.com/christianpflugradt/passbird/-/commits/main) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![release](https://img.shields.io/github/v/release/christianpflugradt/Passbird?display_name=tag&sort=semver)](https://github.com/christianpflugradt/Passbird/releases) [![build](https://github.com/christianpflugradt/Passbird/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/christianpflugradt/Passbird/actions/workflows/build.yml) [![publish](https://github.com/christianpflugradt/Passbird/actions/workflows/publish.yml/badge.svg)](https://github.com/christianpflugradt/Passbird/actions/workflows/publish.yml) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 * [Getting started](#getting-started)
     + [Downloading Passbird](#downloading-passbird)
@@ -28,9 +28,9 @@ Unsure if Passbird suits your needs? Consult the [FAQ](#frequently-asked-questio
 
 ### Downloading Passbird
 
-Download the latest version of Passbird [from the official website](https://pflugradts.de/password-manager/).
+Download the latest version of Passbird [from GitHub Releases](https://github.com/christianpflugradt/Passbird/releases/latest).
 
-Alternatively, you can build Passbird yourself by cloning the project repository and running the Gradle jar task.
+Each GitHub release publishes a `passbird.jar` asset. Alternatively, you can build Passbird yourself by cloning the project repository and running the Gradle jar task.
 
 ### Running Passbird
 
@@ -426,7 +426,7 @@ No. Many programs do not support Unicode characters in passwords, and some even 
 ### How do I update Passbird?
 Passbird follows semantic versioning (*x.y.z*, where `x` is the major version, `y` the minor version, and `z` the patch level). To update to a minor or patch version, download the latest JAR file and use it as usual. For major updates, consult the migration notes provided in this README.
 
-You can find the ten most recent versions of Passbird [on the official website](https://pflugradts.de/password-manager/), along with checksums for verifying file integrity using tools like `md5sum`. For an automated but less secure update process, consider [Passbird-Updater](https://github.com/christianpflugradt/passbird-updater), though manual updates are recommended.
+You can find current and historical Passbird versions [on GitHub Releases](https://github.com/christianpflugradt/Passbird/releases). Each release publishes the `passbird.jar` asset used by [Passbird-Updater](https://github.com/christianpflugradt/Passbird-Updater), though manual updates are still the more conservative option.
 
 ### What happens if I lose my master password or keystore file?
 Losing your master password or keystore file results in permanent data loss. The master password is required to decrypt the database, and the keystore file stores the encryption key. Even recreating the keystore with the same master password will not regenerate the same encryption key.

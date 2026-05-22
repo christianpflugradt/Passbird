@@ -1,6 +1,6 @@
 schema_version: 1
 entrypoint: AGENTS.md
-last_reviewed: 2026-05-17
+last_reviewed: 2026-05-22
 repository:
   name: Passbird
   type: secure offline terminal password manager
@@ -50,10 +50,10 @@ sources_reviewed:
     - CONFIGURATION.md
   build_and_ci:
     - build.gradle.kts
-    - .gitlab-ci.yml
     - .github/workflows/build.yml
     - .github/workflows/codeql.yml
     - .github/workflows/owasp.yml
+    - .github/workflows/publish.yml
   code:
     - src/main/kotlin/de/pflugradts/passbird/application/Main.kt
     - src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationModule.kt

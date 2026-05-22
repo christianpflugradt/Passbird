@@ -18,7 +18,8 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 - Preserve the onion architecture enforced by `src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt`.
 - Preserve the offline-first product posture. Do not add network or browser integration unless explicitly requested by the maintainer.
 - Prefer additive, backward-conscious changes. Escalate before changing persistence formats, cryptographic parameters, or user-visible security defaults.
-- If the local `rtk` wrapper exists, prefer it for shell commands; otherwise use direct commands.
+- Before running shell commands, source `~/.zprofile` and `~/.zshrc` so repo-local tooling such as `rtk`, `gh`, and SDKMAN-managed runtimes are available.
+- After sourcing the shell environment, prefer the local `rtk` wrapper for shell commands; otherwise use direct commands.
 
 ## Commit Messages
 

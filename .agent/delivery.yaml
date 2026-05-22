@@ -24,13 +24,11 @@ ci_landscape:
       - .github/workflows/build.yml
       - .github/workflows/codeql.yml
       - .github/workflows/owasp.yml
+      - .github/workflows/publish.yml
     notes:
       - architecture tests and coverage jobs run only on main in the observed GitHub workflow
-  gitlab:
-    file: .gitlab-ci.yml
-    notes:
-      - compile, lint, license, unit, integration, architecture, coverage, and OWASP jobs are defined
-      - semantic-release is a manual main-branch release job
+      - publish workflow runs semantic-release manually and on a Monday 03:00 Europe/Berlin schedule
+      - scheduled and manual publish runs are expected to succeed even when no release is due
 change_rules:
   - keep changes small and intention-revealing in this security-sensitive codebase
   - add or update tests with behavior changes; do not rely on docs alone
@@ -98,6 +96,11 @@ recommended_validation_by_change_type:
       - ./gradlew test
       - ./gradlew integration
       - ./gradlew ktlintCheck
+  ci_or_release_workflow:
+    run:
+      - ./gradlew jar
+      - review workflow and release config for consistency
+      - run semantic-release in dry-run mode when credentials and tags are available
   security_or_persistence:
     run:
       - ./gradlew allTests
@@ -109,6 +112,9 @@ release_and_history_notes:
   commit_patterns_observed:
     - conventional commit style for automation and release tooling
     - dependency updates are frequent and usually automated
+  automation:
+    - semantic-release now publishes on GitHub rather than GitLab
+    - release assets are expected to include passbird.jar for updater compatibility
   release_guardrail:
     - if a change impacts persistence format or migration behavior, document it before release
 escalation_rules:

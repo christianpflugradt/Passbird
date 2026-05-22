@@ -1,6 +1,6 @@
 {
   "branches": ["main"],
-  "repositoryUrl": "https://oauth2:${GL_TOKEN}@gitlab.com/christianpflugradt/Passbird.git",
+  "repositoryUrl": "https://github.com/christianpflugradt/Passbird.git",
   "tagFormat": "${version}",
   "plugins": [
     [
@@ -39,6 +39,21 @@
         }
       }
     ],
-    "@semantic-release/gitlab"
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "build/libs/passbird.jar",
+            "name": "passbird.jar",
+            "label": "Passbird executable JAR"
+          }
+        ],
+        "successComment": false,
+        "failComment": false,
+        "releasedLabels": false,
+        "addReleases": false
+      }
+    ]
   ]
 }
