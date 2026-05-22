@@ -135,6 +135,10 @@ val testExecutionData: PatternFilterable = fileTree(project.rootDir.path).includ
 
 tasks.jacocoTestReport {
     executionData(testExecutionData)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
     mustRunAfter(tasks.withType<Test>())
     mustRunAfter(tasks.ktlintKotlinScriptCheck)
     mustRunAfter(tasks.ktlintMainSourceSetCheck)

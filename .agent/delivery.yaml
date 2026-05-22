@@ -27,6 +27,7 @@ ci_landscape:
       - .github/workflows/publish.yml
     notes:
       - architecture tests and coverage jobs run only on main in the observed GitHub workflow
+      - the build workflow publishes the GitHub Pages site and a branch-coverage badge from the JaCoCo report on main
       - publish workflow runs semantic-release manually and on a Monday 03:00 Europe/Berlin schedule
       - scheduled and manual publish runs are expected to succeed even when no release is due
 change_rules:
