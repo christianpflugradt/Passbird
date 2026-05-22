@@ -17,7 +17,6 @@
     + [Custom Passwords](#custom-passwords)
 * [Development](#development)
     + [Commit Messages](#commit-messages)
-* [Migrating Passbird 4.x.x to Passbird 5.x.x](#migrating-passbird-4xx-to-passbird-5xx)
 * [Frequently Asked Questions](#frequently-asked-questions)
 
 Passbird is a lightweight, terminal-based password manager built in Kotlin. It operates entirely offline, securing your passwords with AES-GCM encryption and storing the encryption key in a Java KeyStore (JCEKS).
@@ -397,20 +396,6 @@ Examples:
 - `docs(configuration): explain verifySignature behavior`
 - `chore(deps): update dependency gradle to v9.5.1`
 - `ci: upload owasp report on failure`
-
-## Migrating Passbird 4.x.x to Passbird 5.x.x
-
-With the release of Passbird 5.x.x, the Tree structure has been updated to use AES-GCM encryption, a method recommended by NIST for enhanced security. Additionally, the file structure has been modified to prepare for upcoming features related to shortcuts. Due to these changes, migrating from Passbird 4.x.x requires exporting and reimporting your passwords.
-
-Migration Steps:
-1.	Export Your Passwords:
-Using Passbird 4.x.x, export all stored passwords by executing the export command `e`. The export will preserve Nests, Proteins, and other data, ensuring no loss of information. However, it is strongly recommended to manually back up the entire Passbird folder as an additional safeguard.
-2.	Prepare for Update:
-After exporting, terminate Passbird and delete the password database file named passbird.tree. This file is no longer compatible with the updated format.
-3.	Update Passbird:
-Replace your Passbird installation with version 5.x.x and start the program. An error will appear indicating that the password database cannot be read. This is expected and can be safely ignored.
-4.	Import Your Passwords:
-Execute the import command `i` to restore your data. This process will reimport all Nests, Passwords, and Proteins into the updated format.
 
 ## Frequently Asked Questions
 
