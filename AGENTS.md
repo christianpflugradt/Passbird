@@ -20,6 +20,8 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 - Prefer additive, backward-conscious changes. Escalate before changing persistence formats, cryptographic parameters, or user-visible security defaults.
 - Before running shell commands, source `~/.zprofile` and `~/.zshrc` so repo-local tooling such as `rtk`, `gh`, and SDKMAN-managed runtimes are available.
 - After sourcing the shell environment, prefer the local `rtk` wrapper for shell commands; otherwise use direct commands.
+- Once a requested task is complete and suitable for release, commit and push it immediately.
+- Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.
 
 ## Commit Messages
 

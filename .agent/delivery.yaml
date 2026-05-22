@@ -36,6 +36,8 @@ change_rules:
   - update CONFIGURATION.md for any configuration-schema or default-value change
   - update .agent docs whenever agent-facing guidance would otherwise become stale
   - preserve backward compatibility unless the maintainer explicitly chooses a breaking change
+  - commit and push immediately after a task is complete and releasable
+  - delay commit and push only when maintainer input is still required or the current state is incomplete or not ready to release
 commit_messages:
   standard: conventional_commits
   enforced_by:
@@ -117,6 +119,7 @@ release_and_history_notes:
     - release assets are expected to include passbird.jar for updater compatibility
   release_guardrail:
     - if a change impacts persistence format or migration behavior, document it before release
+    - agents should not push partial or unreleasable states simply to satisfy the default commit-and-push rule
 escalation_rules:
   - escalate when a change has hidden compatibility risk for stored data
   - escalate when a request conflicts with offline-only posture
