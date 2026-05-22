@@ -46,9 +46,9 @@ ci_landscape:
     notes:
       - architecture tests and coverage jobs run only on main in the observed GitHub workflow
       - the build workflow runs dependency-check analysis on push and restores its local database from the default-branch GitHub Actions cache when available
-      - a daily OWASP workflow refreshes the mirrored NVD, KEV, and hosted suppressions assets on GitHub Pages and warms the dependency-check cache
-      - a weekly OWASP workflow purges and rebuilds the dependency-check cache from the GitHub Pages mirror during the Sunday-to-Monday overnight window
-      - the build workflow publishes the GitHub Pages site, preserves the mirrored dependency-check assets, and refreshes the branch-coverage badge and report on main
+      - a daily OWASP workflow refreshes the dependency-check cache from the Gradle plugin update task
+      - a weekly OWASP workflow purges and rebuilds the dependency-check cache during the Sunday-to-Monday overnight window
+      - the build workflow publishes the GitHub Pages site for coverage assets and refreshes the branch-coverage badge and report on main
       - publish workflow runs semantic-release manually and on a Monday 03:00 Europe/Berlin schedule
       - scheduled and manual publish runs are expected to succeed even when no release is due
 change_rules:

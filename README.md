@@ -404,7 +404,7 @@ Examples:
 - `test(keystore): cover failed key loading`
 - `docs(configuration): explain verifySignature behavior`
 - `chore(deps): update dependency gradle to v9.5.1`
-- `ci: refresh dependency-check mirror on github pages`
+- `ci: refresh dependency-check cache`
 
 ## Frequently Asked Questions
 
