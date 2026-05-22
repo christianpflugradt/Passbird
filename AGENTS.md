@@ -18,6 +18,9 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 - Preserve the onion architecture enforced by `src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt`.
 - Preserve the offline-first product posture. Do not add network or browser integration unless explicitly requested by the maintainer.
 - Prefer additive, backward-conscious changes. Escalate before changing persistence formats, cryptographic parameters, or user-visible security defaults.
+- Do not add fallbacks the maintainer did not ask for. If a fallback might be needed, pause and get clarification before introducing it.
+- Do not add code comments unless the maintainer explicitly asks for them or an existing project convention clearly requires them. Never leave design commentary, temporary notes, "version 1" phrasing, or other agent-style annotations.
+- Before changing any user-visible text shown by the password manager, get maintainer approval for the exact wording. Do not introduce wording changes without approval.
 - Before running shell commands, source `~/.zprofile` and `~/.zshrc` so repo-local tooling such as `rtk`, `gh`, and SDKMAN-managed runtimes are available.
 - After sourcing the shell environment, prefer the local `rtk` wrapper for shell commands; otherwise use direct commands.
 - Once a requested task is complete and suitable for release, commit and push it immediately.

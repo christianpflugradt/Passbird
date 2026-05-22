@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-17
+last_reviewed: 2026-05-22
 domain_language:
   - term: Egg
     meaning: aggregate root representing one password entry and its associated proteins in a specific nest
@@ -88,4 +88,5 @@ task_hints_for_agents:
   - when a user describes an account entry, map it to Egg plus optional Proteins
   - when a user describes categories or workspaces, check whether a Nest concept already covers it
   - when adding user-facing commands, keep command grammar terse and single-character-first unless the maintainer asks for a different direction
+  - do not change prompts, messages, labels, confirmations, errors, or any other user-visible password-manager text without approval for the exact wording
   - if a new feature stretches the Egg, Nest, Protein, or Memory model, document the terminology change here

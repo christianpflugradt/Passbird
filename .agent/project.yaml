@@ -99,3 +99,6 @@ agent_notes:
   - this repo values long-term maintenance, not only passing tests
   - security claims in docs should remain modest; README explicitly says the project is not externally audited
   - any design doc that overstates guarantees is a defect
+  - do not add fallback behavior or fallback implementations unless the maintainer explicitly asks for them; if fallback handling is uncertain, stop and ask
+  - do not add code comments unless the maintainer explicitly asks for them or an existing project convention clearly requires them; never leave design commentary, temporary notes, versioned implementation notes, or other agent-style annotations
+  - treat all password-manager wording as maintainer-owned copy; do not change user-visible text without approval for the exact wording
