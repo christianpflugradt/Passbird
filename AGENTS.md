@@ -23,6 +23,15 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 - Once a requested task is complete and suitable for release, commit and push it immediately.
 - Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.
 
+## Review Commands
+
+- Use `review <area>` for standing workspace reviews.
+- Supported review areas are `security`, `architecture`, `integrity`, `behavior`, and `delivery`.
+- Read `.agent/review.yaml` before performing one of these reviews.
+- Reviews use the current task, diff, or concern as the trigger, but they must assess the full workspace rather than only the touched files.
+- Review findings must be reported as `P0` to `P3`, ordered by severity, and every finding must include a proposed fix.
+- If no actionable findings are discovered for the selected area, say so explicitly.
+
 ## Commit Messages
 
 - Commits use Conventional Commits and are validated by the local `commit-msg` hook.

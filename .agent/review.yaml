@@ -1,0 +1,109 @@
+schema_version: 1
+last_reviewed: 2026-05-22
+review_commands:
+  syntax: review <area>
+  supported_areas:
+    - security
+    - architecture
+    - integrity
+    - behavior
+    - delivery
+  interpretation:
+    - use the current request, diff, or concern as the review trigger
+    - inspect the full workspace for supporting or conflicting evidence
+    - do not limit the review to touched files, recent commits, or release notes
+review_process:
+  - identify the highest-risk files and workflows for the selected area before forming conclusions
+  - trace cross-file and cross-layer consequences, especially when a local change could weaken a broader guarantee
+  - prefer a small number of well-supported findings over a long list of shallow observations
+  - report only actionable findings; praise and summaries are secondary
+output_contract:
+  findings_first: true
+  findings_order:
+    - P0
+    - P1
+    - P2
+    - P3
+  each_finding_must_include:
+    - priority
+    - concise title
+    - evidence with file references
+    - impact
+    - proposed fix
+  no_findings_requirement: state explicitly when no actionable findings are present for the selected area
+severity_scale:
+  P0: release-blocking issue with catastrophic impact such as secret disclosure, irreversible data loss, or a broken release/update path
+  P1: serious issue likely to affect users or weaken guarantees materially, including major security, integrity, or architectural regressions
+  P2: meaningful correctness, maintainability, or verification gap that should be fixed soon but is not immediately release-blocking
+  P3: minor hardening, clarity, or consistency issue that is worth addressing but has limited immediate impact
+areas:
+  - term: security
+    review_question: Could this change expose secrets, weaken crypto or verification guarantees, or widen Passbird's attack surface?
+    hotspots:
+      - src/main/kotlin/de/pflugradts/passbird/application/security
+      - src/main/kotlin/de/pflugradts/passbird/adapter/keystore
+      - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree
+      - src/main/kotlin/de/pflugradts/passbird/adapter/exchange
+      - src/main/kotlin/de/pflugradts/passbird/adapter/userinterface
+      - CONFIGURATION.md
+      - README.md
+    focus:
+      - secret lifetime, plaintext exposure, and secure input handling
+      - cryptographic parameters, keystore semantics, and password tree verification behavior
+      - export, backup, clipboard, and startup flows that could leak or over-retain sensitive data
+      - documentation wording that could overstate security guarantees
+  - term: architecture
+    review_question: Does the code still respect the onion architecture, dependency direction, and adapter boundaries that keep the project maintainable?
+    hotspots:
+      - src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt
+      - src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationModule.kt
+      - src/main/kotlin/de/pflugradts/passbird/application/commandhandling
+      - src/main/kotlin/de/pflugradts/passbird/domain
+      - src/main/kotlin/de/pflugradts/passbird/adapter
+    focus:
+      - layer boundaries, package placement, and prohibited dependency directions
+      - command and event wiring that could bypass intended ports or registries
+      - new abstractions that increase complexity without preserving extension paths
+      - drift between structural tests and real package or wiring behavior
+  - term: integrity
+    review_question: Could this change corrupt user data, break compatibility, or create unsafe restore or migration behavior?
+    hotspots:
+      - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree
+      - src/main/kotlin/de/pflugradts/passbird/adapter/exchange
+      - src/main/kotlin/de/pflugradts/passbird/application/configuration
+      - src/main/kotlin/de/pflugradts/passbird/application/process/backup
+      - CONFIGURATION.md
+      - README.md
+    focus:
+      - password tree layout, checksum, signature, and read-write symmetry
+      - import, export, and backup behavior, including overwrite and restore safety
+      - backward compatibility for stored files and configuration defaults
+      - edge cases that could silently drop eggs, nests, proteins, or memory state
+  - term: behavior
+    review_question: Will users still get correct, understandable, and safely guided CLI behavior across normal and edge-case workflows?
+    hotspots:
+      - src/main/kotlin/de/pflugradts/passbird/application/commandhandling
+      - src/main/kotlin/de/pflugradts/passbird/application/boot
+      - src/main/kotlin/de/pflugradts/passbird/application/process
+      - src/main/kotlin/de/pflugradts/passbird/adapter/userinterface
+      - README.md
+      - CONFIGURATION.md
+    focus:
+      - command parsing, dispatch, prompts, confirmations, and failure handling
+      - setup, startup, inactivity, and quit flows that could surprise or mislead users
+      - consistency between documented commands and real terminal behavior
+      - user-facing changes that need tests or docs to stay safe and understandable
+  - term: delivery
+    review_question: Is the project still verifiable and releasable, with trustworthy automation, coverage, dependency checks, and updater-compatible assets?
+    hotspots:
+      - .github/workflows
+      - .releaserc.json
+      - build.gradle.kts
+      - settings.gradle.kts
+      - scripts
+      - README.md
+    focus:
+      - CI workflow correctness, artifact flow, and scheduled or manual release behavior
+      - semantic-release rules, tag creation, and GitHub release asset expectations
+      - coverage, tests, CodeQL, OWASP, and license checks that may look green while missing real regressions
+      - changes that could break the Passbird-Updater contract around release discovery or passbird.jar delivery

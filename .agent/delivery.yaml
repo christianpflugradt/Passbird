@@ -23,11 +23,15 @@ ci_landscape:
     workflows:
       - .github/workflows/build.yml
       - .github/workflows/codeql.yml
-      - .github/workflows/owasp.yml
+      - .github/workflows/owasp-update.yml
+      - .github/workflows/owasp-purge.yml
       - .github/workflows/publish.yml
     notes:
       - architecture tests and coverage jobs run only on main in the observed GitHub workflow
-      - the build workflow publishes the GitHub Pages site and a branch-coverage badge from the JaCoCo report on main
+      - the build workflow runs dependency-check analysis on push and restores its local database from the default-branch GitHub Actions cache when available
+      - a daily OWASP workflow refreshes the mirrored NVD, KEV, and hosted suppressions assets on GitHub Pages and warms the dependency-check cache
+      - a weekly OWASP workflow purges and rebuilds the dependency-check cache from the GitHub Pages mirror
+      - the build workflow publishes the GitHub Pages site, preserves the mirrored dependency-check assets, and refreshes the branch-coverage badge and report on main
       - publish workflow runs semantic-release manually and on a Monday 03:00 Europe/Berlin schedule
       - scheduled and manual publish runs are expected to succeed even when no release is due
 change_rules:
@@ -125,3 +129,16 @@ escalation_rules:
   - escalate when a change has hidden compatibility risk for stored data
   - escalate when a request conflicts with offline-only posture
   - escalate when a test-only green state would still leave the security model ambiguous
+review_protocol:
+  trigger: review <area>
+  supported_areas:
+    - security
+    - architecture
+    - integrity
+    - behavior
+    - delivery
+  requirements:
+    - workspace reviews must use the current concern as a trigger but evaluate the full workspace
+    - findings must be reported as P0 to P3 and ordered by severity
+    - every finding must include a proposed fix
+    - explicitly state when a selected review area has no actionable findings
