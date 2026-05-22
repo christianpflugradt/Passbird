@@ -2,6 +2,7 @@
 
 [![release](https://img.shields.io/github/v/release/christianpflugradt/Passbird?display_name=tag&sort=semver)](https://github.com/christianpflugradt/Passbird/releases) [![build](https://github.com/christianpflugradt/Passbird/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/christianpflugradt/Passbird/actions/workflows/build.yml) [![publish](https://github.com/christianpflugradt/Passbird/actions/workflows/publish.yml/badge.svg)](https://github.com/christianpflugradt/Passbird/actions/workflows/publish.yml) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+* [Agentic AI Disclaimer](#agentic-ai-disclaimer)
 * [Getting started](#getting-started)
     + [Downloading Passbird](#downloading-passbird)
     + [Running Passbird](#running-passbird)
@@ -22,6 +23,14 @@
 Passbird is a lightweight, terminal-based password manager built in Kotlin. It operates entirely offline, securing your passwords with AES-GCM encryption and storing the encryption key in a Java KeyStore (JCEKS).
 
 Unsure if Passbird suits your needs? Consult the [FAQ](#frequently-asked-questions) for guidance.
+
+## Agentic AI Disclaimer
+
+Starting with Passbird 6.0.0, Passbird is developed with the help of agentic AI.
+
+Passbird remains dedicated to offline-first, security-conscious development, and AI-assisted changes are reviewed closely before every release. The same care is taken as before, but some users may reasonably prefer to stay on Passbird 5.x.x because AI is now part of the development process.
+
+If that is your preference, continuing to use 5.x.x is a valid choice.
 
 ## Getting started
 
