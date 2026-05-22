@@ -150,15 +150,11 @@ jobs:
           path: build
       - uses: actions/download-artifact@v8
         with:
-          name: unit-test-execution-data
-          path: build/jacoco/test.exec
-      - uses: actions/download-artifact@v8
-        with:
-          name: integration-test-execution-data
-          path: build/jacoco/integration.exec
+          pattern: "*-test-execution-data"
+          path: build/jacoco
+          merge-multiple: true
       - name: verify code coverage
-        # for some reason downloaded test execution data is not used, so we'll run all tests again for jacoco to work
-        run: ./gradlew test integration jacocoTestCoverageVerification
+        run: ./gradlew jacocoTestCoverageVerification
 
   test-coverage-report:
     runs-on: ubuntu-latest
@@ -180,15 +176,11 @@ jobs:
           path: build
       - uses: actions/download-artifact@v8
         with:
-          name: unit-test-execution-data
-          path: build/jacoco/test.exec
-      - uses: actions/download-artifact@v8
-        with:
-          name: integration-test-execution-data
-          path: build/jacoco/integration.exec
+          pattern: "*-test-execution-data"
+          path: build/jacoco
+          merge-multiple: true
       - name: create code coverage report
-        # for some reason downloaded test execution data is not used, so we'll run all tests again for jacoco to work
-        run: ./gradlew test integration jacocoTestReport
+        run: ./gradlew jacocoTestReport
       - uses: actions/upload-artifact@v7
         with:
           name: test-coverage-report
