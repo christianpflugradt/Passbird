@@ -2,7 +2,7 @@ schema_version: 1
 last_reviewed: 2026-05-22
 quality_gates:
   formatting_and_style:
-    - ./gradlew ktlintCheck
+    - pre-commit hook runs ./gradlew ktlintCheck
   test_suites:
     - ./gradlew test
     - ./gradlew integration
@@ -14,10 +14,27 @@ quality_gates:
       instruction: ">= 0.90"
       branch: ">= 0.85"
   dependency_and_license:
-    - ./gradlew checkLicense
-    - ./gradlew dependencyCheckAnalyze
+    - pre-commit hook runs ./gradlew checkLicense
+    - GitHub Actions OWASP dependency check workflows
   convenience_task:
     - ./gradlew preCommitCheck
+local_verification_policy:
+  pre_commit_hook:
+    covers:
+      - ./gradlew ktlintCheck
+      - ./gradlew checkLicense
+      - ./gradlew jacocoTestCoverageVerification
+      - ./gradlew allTests
+    note: do not rerun these manually unless the maintainer explicitly asks for it
+  focused_tests:
+    default: run only tests that exercise the code you changed or the tests you added
+    expand_scope_when:
+      - a structural or wiring change needs ./gradlew architecture
+      - the maintainer explicitly asks for broader local verification
+  owasp_dependency_check:
+    local_runs: discouraged
+    default: rely_on_ci
+    note: only run locally when the maintainer explicitly asks for it
 ci_landscape:
   github:
     workflows:
@@ -91,18 +108,14 @@ recommended_validation_by_change_type:
       - review changed files for consistency
   kotlin_code_non_structural:
     run:
-      - ./gradlew test
-      - ./gradlew ktlintCheck
+      - run only the focused tests for the changed code or newly added tests
   architecture_or_wiring:
     run:
-      - ./gradlew test
+      - run only the focused tests for the changed code or newly added tests
       - ./gradlew architecture
-      - ./gradlew ktlintCheck
   config_or_user_workflow:
     run:
-      - ./gradlew test
-      - ./gradlew integration
-      - ./gradlew ktlintCheck
+      - run only the focused unit and integration tests that cover the changed workflow
   ci_or_release_workflow:
     run:
       - ./gradlew jar
@@ -110,10 +123,9 @@ recommended_validation_by_change_type:
       - run semantic-release in dry-run mode when credentials and tags are available
   security_or_persistence:
     run:
-      - ./gradlew allTests
+      - run the focused persistence or workflow tests you changed or added
       - ./gradlew architecture
-      - ./gradlew jacocoTestCoverageVerification
-      - ./gradlew dependencyCheckAnalyze
+      - review CI OWASP coverage instead of running dependency-check locally
 release_and_history_notes:
   versioning: semantic versioning
   commit_patterns_observed:

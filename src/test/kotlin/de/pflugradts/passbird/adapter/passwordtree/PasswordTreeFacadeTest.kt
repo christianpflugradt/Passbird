@@ -79,7 +79,7 @@ class PasswordTreeFacadeTest {
 
     @AfterEach
     fun cleanup() {
-        expectThat(File(passwordTreeFilename).delete()).isTrue()
+        expectThat(!File(passwordTreeFilename).exists() || File(passwordTreeFilename).delete()).isTrue()
         expectThat(File(tempPasswordTreeDirectory).delete()).isTrue()
     }
 
@@ -132,39 +132,30 @@ class PasswordTreeFacadeTest {
     }
 
     @Test
-    fun `should write to and them read from empty tree`() {
+    fun `should create empty tree if file does not exist without reporting a failure`() {
         // given
-        expectThat(File(passwordTreeFilename).createNewFile()).isTrue()
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
 
         // when
-        val actual = passwordTreeFacade.restore()
+        val actual = captureSystemErr.during { passwordTreeFacade.restore() }
 
         // then
         expectThat(actual.get().count()) isEqualTo 0
+        expectThat(captureSystemErr.capture).isEqualTo("")
     }
 
     @Test
-    fun `should create empty tree if file not exists`() {
+    fun `should create empty tree if file is empty without reporting a failure`() {
         // given
         expectThat(File(passwordTreeFilename).createNewFile()).isTrue()
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
 
         // when
-        val actual = passwordTreeFacade.restore()
+        val actual = captureSystemErr.during { passwordTreeFacade.restore() }
 
         // then
         expectThat(actual.get().count()) isEqualTo 0
-    }
-
-    @Test
-    fun `should create empty tree if file is empty`() {
-        // given
-        expectThat(File(passwordTreeFilename).createNewFile()).isTrue()
-
-        // when
-        val actual = passwordTreeFacade.restore()
-
-        // then
-        expectThat(actual.get().count()) isEqualTo 0
+        expectThat(captureSystemErr.capture).isEqualTo("")
     }
 
     @Nested

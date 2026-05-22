@@ -68,20 +68,19 @@ security_sensitive_files:
 validation_matrix:
   crypto_or_persistence_change:
     required:
-      - ./gradlew allTests
+      - run the focused tests that cover the changed persistence or secret-handling behavior
       - ./gradlew architecture
-      - ./gradlew jacocoTestCoverageVerification
     recommended:
-      - ./gradlew dependencyCheckAnalyze
+      - review the latest CI OWASP dependency-check result if dependency risk is part of the change
   dependency_or_build_change:
     required:
-      - ./gradlew checkLicense
-      - ./gradlew dependencyCheckAnalyze
-      - ./gradlew allTests
+      - run only the focused tests relevant to the dependency or build change
+    recommended:
+      - rely on the pre-commit hook for license, coverage, and full-test enforcement
+      - rely on GitHub Actions OWASP dependency-check workflows instead of local runs unless the maintainer explicitly asks otherwise
   ui_or_command_change_touching_secrets:
     required:
-      - ./gradlew test
-      - ./gradlew integration
+      - run the focused unit and integration tests that cover the changed command or secret-handling path
       - ./gradlew architecture
 documentation_expectations:
   - if a security-relevant behavior changes, update README or CONFIGURATION.md when user-visible

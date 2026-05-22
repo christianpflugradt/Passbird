@@ -25,6 +25,8 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 - After sourcing the shell environment, prefer the local `rtk` wrapper for shell commands; otherwise use direct commands.
 - Once a requested task is complete and suitable for release, commit and push it immediately.
 - Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.
+- Do not run `./gradlew dependencyCheckAnalyze` locally for verification. Treat OWASP dependency scanning as CI-only unless the maintainer explicitly asks for a local run.
+- Do not manually run verification tasks that are already covered by the local `pre-commit` hook. Before committing, run only focused tests for the behavior you changed or the tests you added, plus any extra checks that are not part of the hook but are truly needed for the change.
 
 ## Review Commands
 
@@ -47,8 +49,7 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 
 Use `.agent/delivery.yaml` to choose the right checks. At minimum:
 
-- run `./gradlew test` for behavior changes
-- run `./gradlew architecture` for structural changes
-- run `./gradlew ktlintCheck` for Kotlin edits
-- run `./gradlew checkLicense` when dependencies change
-- run `./gradlew dependencyCheckAnalyze` when security-sensitive dependency work is involved
+- run only the focused tests that cover the code you changed or the tests you added
+- run `./gradlew architecture` only for structural or wiring changes that are not already otherwise covered
+- rely on the local `pre-commit` hook for `ktlintCheck`, `checkLicense`, `jacocoTestCoverageVerification`, and the full test suite
+- rely on GitHub Actions for OWASP dependency scanning unless the maintainer explicitly requests a local run

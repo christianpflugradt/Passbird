@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.configuration
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.mainMocked
@@ -19,7 +20,6 @@ import java.util.UUID
 
 @Tag(INTEGRATION)
 class ReadableConfigurationTest {
-
     private val systemOperation = spyk(SystemOperation())
     private val configurationFactory = ConfigurationFactory(systemOperation)
     private var tempConfigurationDirectory = UUID.randomUUID().toString()
@@ -33,15 +33,17 @@ class ReadableConfigurationTest {
 
     @AfterEach
     fun cleanup() {
-        expectThat(File(configurationFile).delete()).isTrue()
+        expectThat(!File(configurationFile).exists() || File(configurationFile).delete()).isTrue()
         expectThat(File(tempConfigurationDirectory).delete()).isTrue()
     }
 
     @Test
     fun `should read, write, and read configuration again`() {
         // first load template if physical files does not exist
-        val configuration = configurationFactory.loadConfiguration()
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+        val configuration = captureSystemErr.during { configurationFactory.loadConfiguration() }
         expectThat(configuration.template).isTrue()
+        expectThat(captureSystemErr.capture).isEqualTo("")
 
         // now persist configuration to file system
         ConfigurationSyncService(configuration, systemOperation).sync(tempConfigurationDirectory.toDirectory())

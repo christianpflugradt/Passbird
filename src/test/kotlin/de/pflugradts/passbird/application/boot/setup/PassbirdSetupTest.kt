@@ -75,6 +75,7 @@ class PassbirdSetupTest {
         verify(exactly = 1) { setupGuide.sendConfigTemplateRouteInformation() }
         verify(exactly = 1) { setupGuide.sendInputPath("configuration") }
         verify(exactly = 1) { setupGuide.sendCreateKeyStoreInformation() }
+        verify(exactly = 0) { setupGuide.sendNonMatchingInputs() }
         expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
         expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
         verify(exactly = 1) { setupGuide.sendRestart() }
@@ -127,6 +128,7 @@ class PassbirdSetupTest {
         verify(exactly = 1) { setupGuide.sendConfigKeyStoreRouteInformation(configurationDirectory) }
         verify(exactly = 1) { setupGuide.sendInputPath("keystore") }
         verify(exactly = 1) { setupGuide.sendCreateKeyStoreInformation() }
+        verify(exactly = 0) { setupGuide.sendNonMatchingInputs() }
         expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
         expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
         verify(exactly = 1) { setupGuide.sendRestart() }
@@ -227,6 +229,7 @@ class PassbirdSetupTest {
         verify(exactly = 1) { setupGuide.sendConfigKeyStoreRouteInformation(configurationDirectory) }
         verify(exactly = 1) { setupGuide.sendInputPath("keystore") }
         verify(exactly = 1) { setupGuide.sendCreateKeyStoreInformation() }
+        verify(exactly = 2) { setupGuide.sendNonMatchingInputs() }
         expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
         expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
         verify(exactly = 1) { setupGuide.sendRestart() }
