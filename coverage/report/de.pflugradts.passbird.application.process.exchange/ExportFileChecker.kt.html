@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExportFileChecker.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.process.exchange</a> &gt; <span class="el_source">ExportFileChecker.kt</span></div><h1>ExportFileChecker.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.process.exchange
+
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.Global
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.process.Initializer
+import de.pflugradts.passbird.application.toFileName
+import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+
+<span class="fc" id="L13">class ExportFileChecker @Inject constructor(</span>
+<span class="fc" id="L14">    private val configuration: ReadableConfiguration,</span>
+<span class="fc" id="L15">    private val systemOperation: SystemOperation,</span>
+<span class="fc" id="L16">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : Initializer {
+    override fun run() {
+<span class="fc" id="L19">        val exchangeFile = systemOperation.resolvePath(Global.homeDirectory, ReadableConfiguration.EXCHANGE_FILENAME.toFileName())</span>
+<span class="fc bfc" id="L20" title="All 4 branches covered.">        if (configuration.application.exchange.promptOnExportFile &amp;&amp; exchangeFile.toFile().exists()) {</span>
+<span class="fc" id="L21">            val prompt = &quot;An password export file has been detected. Should this file be deleted? Y/n &quot;</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">            if (userInterfaceAdapterPort.receiveYes(outputOf(shellOf(prompt)))) {</span>
+<span class="fc" id="L23">                systemOperation.delete(exchangeFile)</span>
+<span class="fc" id="L24">                userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Export file has been successfully deleted.&quot;)))</span>
+            } else {
+<span class="fc" id="L26">                val msg = &quot;Export file has not been deleted but prompt for deletion will be repeated upon next program start.&quot;</span>
+<span class="fc" id="L27">                userInterfaceAdapterPort.send(outputOf(shellOf(msg)))</span>
+            }
+<span class="fc" id="L29">            userInterfaceAdapterPort.sendLineBreak()</span>
+        }
+<span class="fc" id="L31">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

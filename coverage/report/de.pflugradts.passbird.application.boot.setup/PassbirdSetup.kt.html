@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PassbirdSetup.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.boot.setup</a> &gt; <span class="el_source">PassbirdSetup.kt</span></div><h1>PassbirdSetup.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.boot.setup
+
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.Directory
+import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.boot.Bootable
+import de.pflugradts.passbird.application.configuration.ConfigurationSync
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Input
+import de.pflugradts.passbird.domain.model.transfer.Input.Companion.emptyInput
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import java.nio.file.Paths
+
+<span class="fc" id="L17">class PassbirdSetup @Inject constructor(</span>
+<span class="fc" id="L18">    private val setupGuide: SetupGuide,</span>
+<span class="fc" id="L19">    private val configurationSync: ConfigurationSync,</span>
+<span class="fc" id="L20">    private val configuration: ReadableConfiguration,</span>
+<span class="fc" id="L21">    private val keyStoreAdapterPort: KeyStoreAdapterPort,</span>
+<span class="fc" id="L22">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+<span class="fc" id="L23">    private val systemOperation: SystemOperation,</span>
+) : Bootable {
+    override fun boot() {
+<span class="fc" id="L26">        setupGuide.sendWelcome()</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (configuration.template) {</span>
+<span class="fc" id="L28">            setupGuide.sendConfigTemplateRouteInformation()</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">            if (continueRoute()) {</span>
+<span class="fc" id="L30">                configTemplateRoute()</span>
+            }
+        } else {
+<span class="fc" id="L33">            setupGuide.sendConfigKeyStoreRouteInformation(configuration.adapter.keyStore.location)</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">            if (continueRoute()) {</span>
+<span class="fc" id="L35">                configKeyStoreRoute()</span>
+            }
+        }
+<span class="fc" id="L38">        setupGuide.sendGoodbye()</span>
+<span class="fc" id="L39">        systemOperation.exit()</span>
+<span class="fc" id="L40">    }</span>
+
+<span class="fc" id="L42">    private fun continueRoute() = userInterfaceAdapterPort.receiveConfirmation(outputOf(shellOf(&quot;Your input: &quot;)))</span>
+
+    private fun configTemplateRoute() {
+<span class="fc" id="L45">        setupGuide.sendInputPath(&quot;configuration&quot;)</span>
+<span class="fc" id="L46">        createConfiguration(verifyValidDirectory(Directory(configuration.adapter.passwordTree.location)))</span>
+<span class="fc" id="L47">        setupGuide.sendCreateKeyStoreInformation()</span>
+<span class="fc" id="L48">        createKeyStore(Directory(configuration.adapter.keyStore.location), receiveMasterPassword())</span>
+<span class="fc" id="L49">        setupGuide.sendRestart()</span>
+<span class="fc" id="L50">    }</span>
+
+    private fun configKeyStoreRoute() {
+<span class="fc" id="L53">        setupGuide.sendInputPath(&quot;keystore&quot;)</span>
+<span class="fc" id="L54">        setupGuide.sendCreateKeyStoreInformation()</span>
+<span class="fc" id="L55">        createKeyStore(verifyValidDirectory(Directory(configuration.adapter.keyStore.location)), receiveMasterPassword())</span>
+<span class="fc" id="L56">        setupGuide.sendRestart()</span>
+<span class="fc" id="L57">    }</span>
+
+<span class="fc" id="L59">    private fun createConfiguration(directory: Directory) = configurationSync.sync(directory)</span>
+
+    private fun receiveMasterPassword(): Input {
+<span class="fc" id="L62">        var input = emptyInput()</span>
+<span class="fc" id="L63">        var inputRepeated = emptyInput()</span>
+<span class="fc bfc" id="L64" title="All 4 branches covered.">        while (input.isEmpty || input != inputRepeated) {</span>
+<span class="fc" id="L65">            setupGuide.sendNonMatchingInputs()</span>
+<span class="fc" id="L66">            input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(&quot;first input: &quot;)))</span>
+<span class="fc" id="L67">            inputRepeated = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(&quot;second input: &quot;)))</span>
+        }
+<span class="fc" id="L69">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L70">        return input</span>
+    }
+
+    private fun createKeyStore(directory: Directory, password: Input) {
+<span class="fc" id="L74">        keyStoreAdapterPort.storeKey(</span>
+<span class="fc" id="L75">            password.shell.toPlainShell(),</span>
+<span class="fc" id="L76">            Paths.get(directory.value).resolve(ReadableConfiguration.KEYSTORE_FILENAME),</span>
+        )
+<span class="fc" id="L78">        setupGuide.sendCreateKeyStoreSucceeded()</span>
+<span class="fc" id="L79">    }</span>
+
+    private fun verifyValidDirectory(givenDirectory: Directory): Directory {
+<span class="fc" id="L82">        var directory = givenDirectory</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        while (!isValidDirectory(directory)) {</span>
+<span class="fc" id="L84">            directory = Directory(userInterfaceAdapterPort.receive(outputOf(shellOf(&quot;your input: &quot;))).shell.asString())</span>
+        }
+<span class="fc" id="L86">        return directory</span>
+    }
+
+<span class="fc bfc" id="L89" title="All 4 branches covered.">    private fun isValidDirectory(directory: Directory) = systemOperation.getPath(directory).toFile().let { it.isDirectory &amp;&amp; it.exists() }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

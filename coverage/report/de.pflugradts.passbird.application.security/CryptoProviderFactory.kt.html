@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CryptoProviderFactory.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.security</a> &gt; <span class="el_source">CryptoProviderFactory.kt</span></div><h1>CryptoProviderFactory.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.security
+
+import com.google.inject.Inject
+import com.google.inject.Singleton
+import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.failure.LoginFailure
+import de.pflugradts.passbird.application.failure.reportFailure
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.toFileName
+import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+
+<span class="fc" id="L16">@Singleton</span>
+<span class="fc" id="L17">class CryptoProviderFactory @Inject constructor(</span>
+<span class="fc" id="L18">    private val configuration: ReadableConfiguration,</span>
+<span class="fc" id="L19">    private val keyStoreAdapterPort: KeyStoreAdapterPort,</span>
+<span class="fc" id="L20">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+<span class="fc" id="L21">    private val systemOperation: SystemOperation,</span>
+) {
+<span class="fc" id="L23">    fun createCryptoProvider() = authenticate()</span>
+<span class="fc" id="L24">        .retry { authenticate() }</span>
+<span class="fc" id="L25">        .retry { authenticate() }</span>
+<span class="fc" id="L26">        .map { AesGcmCipher(it) }</span>
+<span class="fc" id="L27">        .onFailure {</span>
+<span class="fc" id="L28">            reportFailure(LoginFailure(3))</span>
+<span class="fc" id="L29">            systemOperation.exit()</span>
+<span class="fc" id="L30">        }</span>
+<span class="fc" id="L31">        .getOrNull()!!</span>
+
+<span class="fc" id="L33">    private fun authenticate() = keyStoreAdapterPort.loadKey(</span>
+<span class="fc" id="L34">        receiveLogin(),</span>
+<span class="fc" id="L35">        systemOperation.resolvePath(</span>
+<span class="fc" id="L36">            configuration.adapter.keyStore.location.toDirectory(),</span>
+<span class="fc" id="L37">            ReadableConfiguration.KEYSTORE_FILENAME.toFileName(),</span>
+        ),
+<span class="fc" id="L39">    )</span>
+
+<span class="fc" id="L41">    private fun receiveLogin() = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(&quot;Enter key: &quot;))).shell.toPlainShell()</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

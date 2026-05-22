@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApplicationModule.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.boot.main</a> &gt; <span class="el_source">ApplicationModule.kt</span></div><h1>ApplicationModule.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.boot.main
+
+import com.google.inject.AbstractModule
+import com.google.inject.Inject
+import com.google.inject.Provider
+import com.google.inject.Singleton
+import com.google.inject.assistedinject.FactoryModuleBuilder
+import com.google.inject.multibindings.Multibinder
+import com.google.inject.name.Names
+import de.pflugradts.passbird.adapter.clipboard.ClipboardService
+import de.pflugradts.passbird.adapter.exchange.FilePasswordExchange
+import de.pflugradts.passbird.adapter.keystore.KeyStoreService
+import de.pflugradts.passbird.adapter.passwordtree.PasswordTreeFacade
+import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
+import de.pflugradts.passbird.application.ClipboardAdapterPort
+import de.pflugradts.passbird.application.ExchangeAdapterPort
+import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.boot.Bootable
+import de.pflugradts.passbird.application.commandhandling.CommandBus
+import de.pflugradts.passbird.application.commandhandling.CommandHandlerBus
+import de.pflugradts.passbird.application.commandhandling.CommandInputHandler
+import de.pflugradts.passbird.application.commandhandling.InputHandler
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.ExportCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.ImportCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.ListCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.QuitCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.SetInfoCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.egg.CustomSetCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.egg.DiscardCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.egg.GetCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.egg.RenameCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.egg.SetCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.memory.GetMemoryCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.memory.MemoryInfoCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.memory.UseMemoryCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.memory.ViewMemoryCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.MoveToNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.protein.DiscardProteinCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.protein.GetProteinCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.protein.ProteinInfoCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.protein.SetProteinCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.protein.ViewProteinStructuresCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.protein.ViewProteinTypesCommandHandler
+import de.pflugradts.passbird.application.configuration.ConfigurationFactory
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.eventhandling.ApplicationEventHandler
+import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
+import de.pflugradts.passbird.application.exchange.ExchangeFactory
+import de.pflugradts.passbird.application.exchange.ImportExportService
+import de.pflugradts.passbird.application.exchange.PasswordImportExportService
+import de.pflugradts.passbird.application.process.Finalizer
+import de.pflugradts.passbird.application.process.Initializer
+import de.pflugradts.passbird.application.process.backup.BackupManager
+import de.pflugradts.passbird.application.process.exchange.ExportFileChecker
+import de.pflugradts.passbird.application.process.inactivity.InactivityHandlerScheduler
+import de.pflugradts.passbird.application.security.CryptoProviderFactory
+import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
+import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
+import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
+import de.pflugradts.passbird.domain.service.nest.NestService
+import de.pflugradts.passbird.domain.service.nest.NestingGroundService
+import de.pflugradts.passbird.domain.service.password.PasswordFacade
+import de.pflugradts.passbird.domain.service.password.PasswordService
+import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
+import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
+import de.pflugradts.passbird.domain.service.password.provider.RandomPasswordProvider
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
+import de.pflugradts.passbird.domain.service.password.tree.NestingGround
+import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
+
+<span class="fc" id="L79">class ApplicationModule : AbstractModule() {</span>
+    override fun configure() {
+<span class="fc" id="L81">        configureApplication()</span>
+<span class="fc" id="L82">        configureMultibinders()</span>
+<span class="fc" id="L83">        configureProviders()</span>
+<span class="fc" id="L84">    }</span>
+
+    private fun configureApplication() {
+<span class="fc" id="L87">        bind(Boolean::class.java)</span>
+<span class="fc" id="L88">            .annotatedWith(Names.named(&quot;EggIdMemoryEnabled&quot;))</span>
+<span class="fc" id="L89">            .toProvider(EggIdMemoryEnabledProvider::class.java)</span>
+<span class="fc" id="L90">        bind(Bootable::class.java).to(PassbirdApplication::class.java)</span>
+<span class="fc" id="L91">        bind(ClipboardAdapterPort::class.java).to(ClipboardService::class.java)</span>
+<span class="fc" id="L92">        bind(CommandBus::class.java).to(CommandHandlerBus::class.java)</span>
+<span class="fc" id="L93">        bind(EventRegistry::class.java).to(PassbirdEventRegistry::class.java)</span>
+<span class="fc" id="L94">        bind(ImportExportService::class.java).to(PasswordImportExportService::class.java)</span>
+<span class="fc" id="L95">        bind(InputHandler::class.java).to(CommandInputHandler::class.java)</span>
+<span class="fc" id="L96">        bind(KeyStoreAdapterPort::class.java).to(KeyStoreService::class.java)</span>
+<span class="fc" id="L97">        bind(EggRepository::class.java).to(NestingGround::class.java)</span>
+<span class="fc" id="L98">        bind(NestService::class.java).to(NestingGroundService::class.java)</span>
+<span class="fc" id="L99">        bind(PasswordProvider::class.java).to(RandomPasswordProvider::class.java)</span>
+<span class="fc" id="L100">        bind(PasswordService::class.java).to(PasswordFacade::class.java)</span>
+<span class="fc" id="L101">        bind(PasswordTreeAdapterPort::class.java).to(PasswordTreeFacade::class.java)</span>
+<span class="fc" id="L102">        bind(UserInterfaceAdapterPort::class.java).to(CommandLineInterfaceService::class.java)</span>
+<span class="fc" id="L103">    }</span>
+
+    private fun configureMultibinders() {
+<span class="fc" id="L106">        Multibinder.newSetBinder(binder(), CommandHandler::class.java).apply {</span>
+<span class="fc" id="L107">            listOf(</span>
+<span class="fc" id="L108">                AddNestCommandHandler::class.java,</span>
+<span class="fc" id="L109">                MoveToNestCommandHandler::class.java,</span>
+<span class="fc" id="L110">                CustomSetCommandHandler::class.java,</span>
+<span class="fc" id="L111">                DiscardCommandHandler::class.java,</span>
+<span class="fc" id="L112">                DiscardNestCommandHandler::class.java,</span>
+<span class="fc" id="L113">                DiscardProteinCommandHandler::class.java,</span>
+<span class="fc" id="L114">                ExportCommandHandler::class.java,</span>
+<span class="fc" id="L115">                GetCommandHandler::class.java,</span>
+<span class="fc" id="L116">                GetMemoryCommandHandler::class.java,</span>
+<span class="fc" id="L117">                GetProteinCommandHandler::class.java,</span>
+<span class="fc" id="L118">                HelpCommandHandler::class.java,</span>
+<span class="fc" id="L119">                ImportCommandHandler::class.java,</span>
+<span class="fc" id="L120">                ListCommandHandler::class.java,</span>
+<span class="fc" id="L121">                MemoryInfoCommandHandler::class.java,</span>
+<span class="fc" id="L122">                ProteinInfoCommandHandler::class.java,</span>
+<span class="fc" id="L123">                QuitCommandHandler::class.java,</span>
+<span class="fc" id="L124">                RenameCommandHandler::class.java,</span>
+<span class="fc" id="L125">                SetCommandHandler::class.java,</span>
+<span class="fc" id="L126">                SetInfoCommandHandler::class.java,</span>
+<span class="fc" id="L127">                SetProteinCommandHandler::class.java,</span>
+<span class="fc" id="L128">                SwitchNestCommandHandler::class.java,</span>
+<span class="fc" id="L129">                UseMemoryCommandHandler::class.java,</span>
+<span class="fc" id="L130">                ViewCommandHandler::class.java,</span>
+<span class="fc" id="L131">                ViewMemoryCommandHandler::class.java,</span>
+<span class="fc" id="L132">                ViewNestCommandHandler::class.java,</span>
+<span class="fc" id="L133">                ViewProteinStructuresCommandHandler::class.java,</span>
+<span class="fc" id="L134">                ViewProteinTypesCommandHandler::class.java,</span>
+<span class="fc" id="L135">            ).forEach { this.addBinding().to(it) }</span>
+<span class="fc" id="L136">        }</span>
+<span class="fc" id="L137">        Multibinder.newSetBinder(binder(), EventHandler::class.java).apply {</span>
+<span class="fc" id="L138">            listOf(</span>
+<span class="fc" id="L139">                ApplicationEventHandler::class.java,</span>
+<span class="fc" id="L140">                DomainEventHandler::class.java,</span>
+<span class="fc" id="L141">            ).forEach { this.addBinding().to(it) }</span>
+<span class="fc" id="L142">        }</span>
+<span class="fc" id="L143">        Multibinder.newSetBinder(binder(), Initializer::class.java).apply {</span>
+<span class="fc" id="L144">            listOf(</span>
+<span class="fc" id="L145">                ExportFileChecker::class.java,</span>
+<span class="fc" id="L146">                InactivityHandlerScheduler::class.java,</span>
+<span class="fc" id="L147">            ).forEach { this.addBinding().to(it) }</span>
+<span class="fc" id="L148">        }</span>
+<span class="fc" id="L149">        Multibinder.newSetBinder(binder(), Finalizer::class.java).apply {</span>
+<span class="fc" id="L150">            listOf(</span>
+<span class="fc" id="L151">                BackupManager::class.java,</span>
+<span class="fc" id="L152">            ).forEach { this.addBinding().to(it) }</span>
+<span class="fc" id="L153">        }</span>
+<span class="fc" id="L154">    }</span>
+
+    private fun configureProviders() {
+<span class="fc" id="L157">        bind(ReadableConfiguration::class.java).toProvider(ConfigurationDependencyProvider::class.java).`in`(Singleton::class.java)</span>
+<span class="fc" id="L158">        bind(CryptoProvider::class.java).toProvider(CryptoProviderDependencyProvider::class.java).`in`(Singleton::class.java)</span>
+<span class="fc" id="L159">        install(</span>
+<span class="fc" id="L160">            FactoryModuleBuilder().implement(ExchangeAdapterPort::class.java, FilePasswordExchange::class.java)</span>
+<span class="fc" id="L161">                .build(ExchangeFactory::class.java),</span>
+        )
+<span class="fc" id="L163">    }</span>
+
+<span class="fc" id="L165">    private class ConfigurationDependencyProvider @Inject constructor(</span>
+<span class="fc" id="L166">        private val configurationFactory: ConfigurationFactory,</span>
+    ) : Provider&lt;ReadableConfiguration&gt; {
+<span class="fc" id="L168">        override fun get(): ReadableConfiguration = configurationFactory.loadConfiguration()</span>
+    }
+
+<span class="nc" id="L171">    private class CryptoProviderDependencyProvider @Inject constructor(</span>
+<span class="nc" id="L172">        private val cryptoProviderFactory: CryptoProviderFactory,</span>
+    ) : Provider&lt;CryptoProvider&gt; {
+<span class="nc" id="L174">        override fun get() = cryptoProviderFactory.createCryptoProvider()</span>
+    }
+
+<span class="fc" id="L177">    private class EggIdMemoryEnabledProvider @Inject constructor(</span>
+<span class="fc" id="L178">        private val configuration: ReadableConfiguration,</span>
+    ) : Provider&lt;Boolean&gt; {
+<span class="fc" id="L180">        override fun get() = configuration.domain.eggIdMemory.enabled</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpecialCommandFactory.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.factory</a> &gt; <span class="el_source">SpecialCommandFactory.kt</span></div><h1>SpecialCommandFactory.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.factory
+
+import de.pflugradts.passbird.application.commandhandling.CommandVariant
+import de.pflugradts.passbird.application.commandhandling.command.NullCommand
+import de.pflugradts.passbird.application.commandhandling.command.base.Command
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
+import de.pflugradts.passbird.domain.model.transfer.Input
+
+<span class="fc" id="L10">abstract class SpecialCommandFactory {</span>
+<span class="fc bfc" id="L11" title="All 2 branches covered.">    fun constructFromInput(input: Input) = if (input.command.size &gt; MAX_COMMAND_SIZE) {</span>
+<span class="fc" id="L12">        throw IllegalArgumentException(&quot;Command parameter not supported: ${input.command.slice(2).asString()}&quot;)</span>
+    } else {
+<span class="fc bfc" id="L14" title="All 2 branches covered.">        internalConstruct(input) ?: NullCommand()</span>
+<span class="fc" id="L15">    }</span>
+    protected abstract fun internalConstruct(input: Input): Command?
+    companion object {
+        @JvmStatic
+<span class="pc" id="L19">        protected val MAX_COMMAND_SIZE = 3</span>
+
+        @JvmStatic
+<span class="fc" id="L22">        protected fun Input.hasNoData() = data.isEmpty</span>
+
+        @JvmStatic
+<span class="fc" id="L25">        protected fun Input.hasData() = data.isNotEmpty</span>
+
+        @JvmStatic
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        protected fun Shell.size1() = size == 1</span>
+
+        @JvmStatic
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        protected fun Shell.size2() = size == 2</span>
+
+        @JvmStatic
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">        protected fun Shell.size3() = size == 3</span>
+
+        @JvmStatic
+<span class="fc bfc" id="L37" title="All 4 branches covered.">        protected fun Shell.isSlotted() = getChar(1).isDigit() || getChar(2).isDigit()</span>
+
+        @JvmStatic
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        protected fun Shell.getSlot() = if (getChar(1).isDigit()) slotAt(getChar(1)) else slotAt(getChar(2))</span>
+
+        @JvmStatic
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        protected fun Shell.isAddVariant() = getChar(1) == CommandVariant.ADD.value</span>
+
+        @JvmStatic
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        protected fun Shell.isDiscardVariant() = getChar(1) == CommandVariant.DISCARD.value</span>
+
+        @JvmStatic
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        protected fun Shell.isInfoVariant() = getChar(1) == CommandVariant.INFO.value</span>
+
+        @JvmStatic
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        protected fun Shell.isShowAllVariant() = getChar(1) == CommandVariant.SHOW_ALL.value</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

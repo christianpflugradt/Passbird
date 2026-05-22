@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DiscardNestCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler.nest</a> &gt; <span class="el_source">DiscardNestCommandHandler.kt</span></div><h1>DiscardNestCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler.nest
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.command.DiscardNestCommand
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
+import de.pflugradts.passbird.domain.service.nest.NestService
+import de.pflugradts.passbird.domain.service.password.PasswordService
+
+<span class="fc" id="L17">class DiscardNestCommandHandler @Inject constructor(</span>
+<span class="fc" id="L18">    private val nestService: NestService,</span>
+<span class="fc" id="L19">    private val passwordService: PasswordService,</span>
+<span class="fc" id="L20">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : CommandHandler {
+
+    @Subscribe
+    private fun handleDiscardNestCommand(discardNestCommand: DiscardNestCommand) {
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        if (discardNestCommand.slot == DEFAULT) {</span>
+<span class="fc" id="L26">            userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Default Nest cannot be discarded - Operation aborted.&quot;), OPERATION_ABORTED))</span>
+<span class="fc" id="L27">            return</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        } else if (nestService.atNestSlot(discardNestCommand.slot).isEmpty) {</span>
+<span class="fc" id="L29">            userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Specified Nest does not exist - Operation aborted.&quot;), OPERATION_ABORTED))</span>
+<span class="fc" id="L30">            return</span>
+        } else {
+<span class="fc" id="L32">            val currentNest = nestService.currentNest()</span>
+<span class="fc" id="L33">            nestService.moveToNestAt(discardNestCommand.slot)</span>
+<span class="fc" id="L34">            val eggIds = passwordService.findAllEggIds().toList()</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">            if (eggIds.isEmpty()) {</span>
+<span class="fc" id="L36">                nestService.discardNestAt(discardNestCommand.slot)</span>
+            } else {
+<span class="fc" id="L38">                val prompt = &quot;Nest '${nestService.currentNest().viewNestId().asString()}' contains ${eggIds.size} Eggs. &quot; +</span>
+                    &quot;Specify a Nest Slot 0-9 to move them to or anything else to abort: &quot;
+<span class="fc" id="L40">                val input = userInterfaceAdapterPort.receive(outputOf(shellOf(prompt)))</span>
+<span class="fc" id="L41">                val nestSlot = input.shell.asString()</span>
+<span class="pc bpc" id="L42" title="2 of 4 branches missed.">                if (nestSlot.length == 1 &amp;&amp; nestSlot[0].isDigit()) {</span>
+<span class="fc" id="L43">                    val targetNestOption = nestService.atNestSlot(slotAt(nestSlot))</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">                    if (targetNestOption.isPresent) {</span>
+<span class="fc" id="L45">                        nestService.moveToNestAt(targetNestOption.get().slot)</span>
+<span class="fc" id="L46">                        val otherEggIds = passwordService.findAllEggIds().toList()</span>
+<span class="fc" id="L47">                        val overlaps = eggIds.filter { eggId -&gt; otherEggIds.contains(eggId) }</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">                        if (overlaps.isEmpty()) {</span>
+<span class="fc" id="L49">                            nestService.moveToNestAt(discardNestCommand.slot)</span>
+<span class="fc" id="L50">                            eggIds.forEach { eggId -&gt; passwordService.moveEgg(eggId, targetNestOption.get().slot) }</span>
+<span class="fc" id="L51">                            nestService.discardNestAt(discardNestCommand.slot)</span>
+                        } else {
+<span class="fc" id="L53">                            val overlapsMessage = &quot;The following EggIds exist in both Nests. &quot; +</span>
+<span class="fc" id="L54">                                &quot;Please move them manually before discarding the Nest: ${System.lineSeparator()}- &quot; + joinToString(overlaps)</span>
+<span class="fc" id="L55">                            userInterfaceAdapterPort.send(outputOf(shellOf(overlapsMessage)))</span>
+<span class="fc" id="L56">                            userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Operation aborted.&quot;)))</span>
+                        }
+                    } else {
+<span class="fc" id="L59">                        userInterfaceAdapterPort.send(</span>
+<span class="fc" id="L60">                            outputOf(shellOf(&quot;Nest Slot $nestSlot is empty - Operation aborted.&quot;), OPERATION_ABORTED),</span>
+                        )
+                    }
+                } else {
+<span class="nc" id="L64">                    userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Operation aborted.&quot;), OPERATION_ABORTED))</span>
+                }
+            }
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            nestService.moveToNestAt(if (discardNestCommand.slot == currentNest.slot) DEFAULT else currentNest.slot)</span>
+        }
+<span class="fc" id="L69">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L70">    }</span>
+
+<span class="fc" id="L72">    private fun joinToString(shells: List&lt;Shell&gt;) = shells.joinToString(separator = &quot;${System.lineSeparator()}- &quot;) { id -&gt; id.asString() }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

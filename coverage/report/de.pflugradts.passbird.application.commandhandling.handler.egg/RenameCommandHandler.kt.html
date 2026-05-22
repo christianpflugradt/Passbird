@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RenameCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler.egg</a> &gt; <span class="el_source">RenameCommandHandler.kt</span></div><h1>RenameCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler.egg
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.domain.model.egg.EggIdException
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
+import de.pflugradts.passbird.domain.service.password.PasswordService
+import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
+
+<span class="fc" id="L15">class RenameCommandHandler @Inject constructor(</span>
+<span class="fc" id="L16">    private val passwordService: PasswordService,</span>
+<span class="fc" id="L17">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : CommandHandler {
+    @Subscribe
+    private fun handleRenameCommand(renameCommand: RenameCommand) {
+<span class="fc bfc" id="L21" title="All 2 branches covered.">        if (passwordService.eggExists(renameCommand.argument, CREATE_ENTRY_NOT_EXISTS_EVENT)) {</span>
+<span class="fc" id="L22">            val secureInput = userInterfaceAdapterPort.receive(outputOf(shellOf(&quot;Enter new EggId or nothing to abort: &quot;)))</span>
+<span class="fc bfc" id="L23" title="All 2 branches covered.">            if (secureInput.isEmpty) {</span>
+<span class="fc" id="L24">                userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Empty input - Operation aborted.&quot;), OPERATION_ABORTED))</span>
+            } else {
+<span class="fc" id="L26">                try {</span>
+<span class="fc" id="L27">                    passwordService.renameEgg(renameCommand.argument, secureInput.shell)</span>
+<span class="nc" id="L28">                } catch (ex: EggIdException) {</span>
+<span class="nc" id="L29">                    userInterfaceAdapterPort.send(outputOf(shellOf(&quot;${ex.message} - Operation aborted.&quot;), OPERATION_ABORTED))</span>
+                }
+            }
+<span class="fc" id="L32">            secureInput.invalidate()</span>
+        }
+<span class="fc" id="L34">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L35">        renameCommand.invalidateInput()</span>
+<span class="fc" id="L36">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

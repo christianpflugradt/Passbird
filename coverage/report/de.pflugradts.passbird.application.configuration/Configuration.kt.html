@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Configuration.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.configuration</a> &gt; <span class="el_source">Configuration.kt</span></div><h1>Configuration.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.configuration
+
+import de.pflugradts.passbird.application.Directory
+import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
+
+private const val DEFAULT_BACKUP_DIRECTORY = &quot;backups&quot;
+private const val DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS = 10
+private const val DEFAULT_PASSWORD_LENGTH = 20
+
+<span class="fc" id="L10">data class Configuration(</span>
+<span class="pc" id="L11">    @Transient override var template: Boolean = false,</span>
+<span class="fc" id="L12">    override val application: Application = Application(),</span>
+<span class="fc" id="L13">    override val adapter: Adapter = Adapter(),</span>
+<span class="fc" id="L14">    override val domain: Domain = Domain(),</span>
+<span class="fc" id="L15">) : UpdatableConfiguration {</span>
+
+<span class="fc" id="L17">    override fun parsePasswordRequirements() = PasswordRequirements(</span>
+<span class="fc" id="L18">        length = application.password.length,</span>
+<span class="fc" id="L19">        hasSpecialCharacters = application.password.specialCharacters,</span>
+<span class="fc" id="L20">    )</span>
+
+    override fun updateDirectory(directory: Directory) {
+<span class="fc" id="L23">        application.backup.location = &quot;${directory.value}/$DEFAULT_BACKUP_DIRECTORY&quot;</span>
+<span class="fc" id="L24">        adapter.keyStore.location = directory.value</span>
+<span class="fc" id="L25">        adapter.passwordTree.location = directory.value</span>
+<span class="fc" id="L26">    }</span>
+
+<span class="fc" id="L28">    data class Application(</span>
+<span class="fc" id="L29">        override val backup: Backup = Backup(),</span>
+<span class="fc" id="L30">        override val exchange: Exchange = Exchange(),</span>
+<span class="fc" id="L31">        override val inactivityLimit: InactivityLimit = InactivityLimit(),</span>
+<span class="fc" id="L32">        override val password: Password = Password(),</span>
+<span class="fc" id="L33">    ) : ReadableConfiguration.Application</span>
+<span class="fc" id="L34">    data class Backup(</span>
+<span class="fc" id="L35">        override var location: String = DEFAULT_BACKUP_DIRECTORY,</span>
+<span class="fc" id="L36">        override var numberOfBackups: Int = 10,</span>
+<span class="fc" id="L37">        override val configuration: BackupSettings = BackupSettings(),</span>
+<span class="fc" id="L38">        override val passwordTree: BackupSettings = BackupSettings(),</span>
+<span class="fc" id="L39">        override val keyStore: BackupSettings = BackupSettings(),</span>
+<span class="fc" id="L40">    ) : ReadableConfiguration.Backup</span>
+<span class="fc" id="L41">    data class BackupSettings(</span>
+<span class="fc" id="L42">        override val enabled: Boolean = true,</span>
+<span class="fc" id="L43">        override val location: String? = null,</span>
+<span class="fc" id="L44">        override val numberOfBackups: Int? = null,</span>
+<span class="fc" id="L45">    ) : ReadableConfiguration.BackupSettings</span>
+<span class="fc" id="L46">    data class Exchange(</span>
+<span class="fc" id="L47">        override val promptOnExportFile: Boolean = true,</span>
+<span class="fc" id="L48">    ) : ReadableConfiguration.Exchange</span>
+<span class="fc" id="L49">    data class InactivityLimit(</span>
+<span class="fc" id="L50">        override val enabled: Boolean = false,</span>
+<span class="fc" id="L51">        override val limitInMinutes: Int = 10,</span>
+<span class="fc" id="L52">    ) : ReadableConfiguration.InactivityLimit</span>
+<span class="fc" id="L53">    data class Password(</span>
+<span class="fc" id="L54">        override val length: Int = DEFAULT_PASSWORD_LENGTH,</span>
+<span class="fc" id="L55">        override val specialCharacters: Boolean = true,</span>
+<span class="fc" id="L56">        override val promptOnRemoval: Boolean = true,</span>
+<span class="fc" id="L57">        override val customPasswordConfigurations: List&lt;CustomPasswordConfiguration&gt; = emptyList(),</span>
+<span class="fc" id="L58">    ) : ReadableConfiguration.Password</span>
+<span class="fc" id="L59">    data class CustomPasswordConfiguration(</span>
+<span class="fc" id="L60">        override val name: String = &quot;&quot;,</span>
+<span class="fc" id="L61">        override val length: Int = DEFAULT_PASSWORD_LENGTH,</span>
+<span class="fc" id="L62">        override val hasNumbers: Boolean = true,</span>
+<span class="fc" id="L63">        override val hasLowercaseLetters: Boolean = true,</span>
+<span class="fc" id="L64">        override val hasUppercaseLetters: Boolean = true,</span>
+<span class="fc" id="L65">        override val hasSpecialCharacters: Boolean = true,</span>
+<span class="fc" id="L66">        override val unusedSpecialCharacters: String = &quot;&quot;,</span>
+<span class="fc" id="L67">    ) : ReadableConfiguration.CustomPasswordConfiguration</span>
+<span class="fc" id="L68">    data class Adapter(</span>
+<span class="fc" id="L69">        override val clipboard: Clipboard = Clipboard(),</span>
+<span class="fc" id="L70">        override val keyStore: KeyStore = KeyStore(),</span>
+<span class="fc" id="L71">        override val passwordTree: PasswordTree = PasswordTree(),</span>
+<span class="fc" id="L72">        override val userInterface: UserInterface = UserInterface(),</span>
+<span class="fc" id="L73">    ) : ReadableConfiguration.Adapter</span>
+<span class="fc" id="L74">    data class Clipboard(override val reset: ClipboardReset = ClipboardReset()) : ReadableConfiguration.Clipboard</span>
+<span class="fc" id="L75">    data class ClipboardReset(</span>
+<span class="fc" id="L76">        override val enabled: Boolean = true,</span>
+<span class="fc" id="L77">        override val delaySeconds: Int = DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS,</span>
+<span class="fc" id="L78">    ) : ReadableConfiguration.ClipboardReset</span>
+<span class="fc" id="L79">    data class PasswordTree(</span>
+<span class="fc" id="L80">        override var location: String = &quot;&quot;,</span>
+<span class="fc" id="L81">        override val verifySignature: Boolean = true,</span>
+<span class="fc" id="L82">        override val verifyChecksum: Boolean = true,</span>
+<span class="fc" id="L83">    ) : ReadableConfiguration.PasswordTree</span>
+<span class="fc" id="L84">    data class KeyStore(override var location: String = &quot;&quot;) : ReadableConfiguration.KeyStore</span>
+<span class="fc" id="L85">    data class UserInterface(</span>
+<span class="fc" id="L86">        override val ansiEscapeCodes: AnsiEscapeCodes = AnsiEscapeCodes(),</span>
+<span class="fc" id="L87">        override val audibleBell: Boolean = false,</span>
+<span class="fc" id="L88">        override val secureInput: Boolean = true,</span>
+<span class="fc" id="L89">    ) : ReadableConfiguration.UserInterface</span>
+<span class="fc" id="L90">    data class AnsiEscapeCodes(override val enabled: Boolean = false) : ReadableConfiguration.AnsiEscapeCodes</span>
+<span class="fc" id="L91">    data class Domain(</span>
+<span class="fc" id="L92">        override val eggIdMemory: EggIdMemory = EggIdMemory(),</span>
+<span class="fc" id="L93">        override val protein: Protein = Protein(),</span>
+<span class="fc" id="L94">    ) : ReadableConfiguration.Domain</span>
+<span class="fc" id="L95">    data class EggIdMemory(</span>
+<span class="fc" id="L96">        override val enabled: Boolean = true,</span>
+<span class="fc" id="L97">        override val persisted: Boolean = false,</span>
+<span class="fc" id="L98">    ) : ReadableConfiguration.EggIdMemory</span>
+<span class="fc" id="L99">    data class Protein(</span>
+<span class="fc" id="L100">        override val secureProteinStructureInput: Boolean = true,</span>
+<span class="fc" id="L101">        override val promptForProteinStructureInputToggle: Boolean = false,</span>
+<span class="fc" id="L102">    ) : ReadableConfiguration.Protein</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

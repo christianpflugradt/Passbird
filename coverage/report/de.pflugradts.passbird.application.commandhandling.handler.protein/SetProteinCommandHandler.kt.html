@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SetProteinCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler.protein</a> &gt; <span class="el_source">SetProteinCommandHandler.kt</span></div><h1>SetProteinCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler.protein
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.command.SetProteinCommand
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
+import de.pflugradts.passbird.domain.model.transfer.Output
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
+import de.pflugradts.passbird.domain.service.password.PasswordService
+import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
+
+<span class="fc" id="L18">class SetProteinCommandHandler @Inject constructor(</span>
+<span class="fc" id="L19">    private val configuration: ReadableConfiguration,</span>
+<span class="fc" id="L20">    private val passwordService: PasswordService,</span>
+<span class="fc" id="L21">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : CommandHandler {
+    @Subscribe
+    private fun handleSetProteinCommand(setProteinCommand: SetProteinCommand) {
+<span class="fc" id="L25">        val eggIdShell = setProteinCommand.argument</span>
+<span class="fc" id="L26">        val slot = setProteinCommand.slot</span>
+<span class="fc" id="L27">        run {</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">            if (passwordService.eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {</span>
+<span class="fc bfc" id="L29" title="All 4 branches covered.">                if (!passwordService.proteinExists(eggIdShell, slot) || commandConfirmed(setProteinCommand)) {</span>
+<span class="fc" id="L30">                    val type = passwordService.viewProteinType(setProteinCommand.argument, setProteinCommand.slot).get()</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">                    val typeMsg = if (type.isEmpty) {</span>
+<span class="fc" id="L32">                        &quot;Enter Protein Type or just press enter to abort: &quot;</span>
+                    } else {
+<span class="fc" id="L34">                        &quot;Enter new Protein Type to replace '${type.asString()}' or just press enter to keep it: &quot;</span>
+                    }
+<span class="fc" id="L36">                    val typeInput =</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">                        userInterfaceAdapterPort.receive(outputOf(shellOf(typeMsg))).let { if (it.isEmpty) inputOf(type) else it }</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">                    if (typeInput.isNotEmpty) {</span>
+<span class="fc" id="L39">                        val structureInput = structureInputReceived(secureInputDetermined())</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">                        if (structureInput.isNotEmpty) {</span>
+<span class="fc" id="L41">                            passwordService.putProtein(</span>
+<span class="fc" id="L42">                                eggIdShell = eggIdShell,</span>
+<span class="fc" id="L43">                                slot = slot,</span>
+<span class="fc" id="L44">                                typeShell = typeInput.shell,</span>
+<span class="fc" id="L45">                                structureShell = structureInput.shell,</span>
+                            )
+<span class="fc" id="L47">                            return@run</span>
+                        }
+                    }
+                }
+<span class="fc" id="L51">                userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Operation aborted.&quot;), OPERATION_ABORTED))</span>
+            }
+<span class="fc" id="L53">        }</span>
+<span class="fc" id="L54">        setProteinCommand.invalidateInput()</span>
+<span class="fc" id="L55">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L56">    }</span>
+
+<span class="fc bfc" id="L58" title="All 2 branches covered.">    private fun commandConfirmed(setProteinCommand: SetProteinCommand) = if (configuration.application.password.promptOnRemoval &amp;&amp;</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        passwordService.eggExists(setProteinCommand.argument, PasswordService.EggNotExistsAction.DO_NOTHING)</span>
+    ) {
+<span class="fc" id="L61">        val msg = &quot;Existing Protein at Slot '${setProteinCommand.slot.index()}' of Egg '${setProteinCommand.argument.asString()}' &quot; +</span>
+            &quot;will be irrevocably overwritten.\nInput 'c' to confirm or anything else to abort.\nYour input: &quot;
+<span class="fc" id="L63">        userInterfaceAdapterPort.receiveConfirmation(Output.outputOf(Shell.shellOf(msg)))</span>
+    } else {
+<span class="fc" id="L65">        true</span>
+<span class="fc" id="L66">    }</span>
+
+    private fun secureInputDetermined(): Boolean {
+<span class="fc" id="L69">        val secureInput = configuration.domain.protein.secureProteinStructureInput</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (configuration.domain.protein.promptForProteinStructureInputToggle) {</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">            val verb = if (secureInput) &quot;Disable&quot; else &quot;Enable&quot;</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">            if (userInterfaceAdapterPort.receiveYes(outputOf(shellOf(&quot;$verb secure input for next input? Y/n &quot;)))) {</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">                return !secureInput</span>
+            }
+        }
+<span class="fc" id="L76">        return secureInput</span>
+    }
+
+    private fun structureInputReceived(secureInput: Boolean) =
+<span class="fc" id="L80">        with(outputOf(shellOf(&quot;Enter Protein Structure or just press enter to abort: &quot;))) {</span>
+<span class="pc" id="L81">            when (secureInput) {</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">                true -&gt; userInterfaceAdapterPort.receiveSecurely(this)</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">                false -&gt; userInterfaceAdapterPort.receive(this)</span>
+<span class="fc" id="L84">            }</span>
+<span class="fc" id="L85">        }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

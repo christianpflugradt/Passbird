@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PassbirdEventRegistry.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.eventhandling</a> &gt; <span class="el_source">PassbirdEventRegistry.kt</span></div><h1>PassbirdEventRegistry.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.eventhandling
+
+import com.google.common.eventbus.EventBus
+import com.google.inject.Inject
+import com.google.inject.Singleton
+import de.pflugradts.passbird.domain.model.ddd.AggregateRoot
+import de.pflugradts.passbird.domain.model.ddd.DomainEvent
+import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
+import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
+import java.util.ArrayDeque
+import java.util.Queue
+
+<span class="fc" id="L13">@Singleton</span>
+<span class="fc" id="L14">class PassbirdEventRegistry @Inject constructor(</span>
+    eventHandlers: Set&lt;EventHandler&gt;,
+<span class="fc" id="L16">    private val eventBus: EventBus = EventBus(),</span>
+<span class="fc" id="L17">) : EventRegistry {</span>
+<span class="fc" id="L18">    private val aggregateRoots = mutableSetOf&lt;AggregateRoot&gt;()</span>
+<span class="fc" id="L19">    private val domainEvents: Queue&lt;DomainEvent&gt; = ArrayDeque()</span>
+<span class="fc" id="L20">    private val abandonedAggregateRoots: Queue&lt;AggregateRoot&gt; = ArrayDeque()</span>
+
+<span class="fc" id="L22">    init {</span>
+<span class="fc" id="L23">        eventHandlers.forEach { eventBus.register(it) }</span>
+<span class="fc" id="L24">    }</span>
+    override fun register(aggregateRoot: AggregateRoot) {
+<span class="fc" id="L26">        aggregateRoots.add(aggregateRoot)</span>
+<span class="fc" id="L27">    }</span>
+    override fun register(domainEvent: DomainEvent) {
+<span class="fc" id="L29">        domainEvents.add(domainEvent)</span>
+<span class="fc" id="L30">    }</span>
+    override fun deregister(aggregateRoot: AggregateRoot) {
+<span class="fc" id="L32">        abandonedAggregateRoots.add(aggregateRoot)</span>
+<span class="fc" id="L33">    }</span>
+
+    override fun processEvents() {
+<span class="fc" id="L36">        processAbandonedAggregateRoots()</span>
+<span class="fc" id="L37">        processAggregateRoots()</span>
+<span class="fc" id="L38">        processDomainEvents()</span>
+<span class="fc" id="L39">        processAbandonedAggregateRoots()</span>
+<span class="fc" id="L40">    }</span>
+
+    private fun processAggregateRoots() {
+<span class="fc" id="L43">        aggregateRoots.forEach { aggregateRoot -&gt;</span>
+<span class="fc" id="L44">            aggregateRoot.getDomainEvents().forEach { eventBus.post(it) }</span>
+<span class="fc" id="L45">            aggregateRoot.clearDomainEvents()</span>
+<span class="fc" id="L46">        }</span>
+<span class="fc" id="L47">    }</span>
+
+    private fun processDomainEvents() {
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        while (!domainEvents.isEmpty()) {</span>
+<span class="fc" id="L51">            eventBus.post(domainEvents.poll())</span>
+        }
+<span class="fc" id="L53">    }</span>
+
+    private fun processAbandonedAggregateRoots() {
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        while (!abandonedAggregateRoots.isEmpty()) aggregateRoots.remove(abandonedAggregateRoots.poll())</span>
+<span class="fc" id="L57">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

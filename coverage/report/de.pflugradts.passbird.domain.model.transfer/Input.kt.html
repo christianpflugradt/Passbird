@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Input.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.domain.model.transfer</a> &gt; <span class="el_source">Input.kt</span></div><h1>Input.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.domain.model.transfer
+
+import de.pflugradts.passbird.domain.model.ddd.ValueObject
+import de.pflugradts.passbird.domain.model.shell.PlainValue.Companion.plainValueOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.FIRST_SLOT
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.LAST_SLOT
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+
+<span class="fc" id="L13">class Input private constructor(val shell: Shell) : ValueObject {</span>
+
+    val command get(): Shell {
+<span class="fc bfc" id="L16" title="All 2 branches covered.">        if (shell.size &gt; 0) {</span>
+<span class="fc bfc" id="L17" title="All 2 branches covered.">            for (i in 1 until shell.size) {</span>
+<span class="fc bfc" id="L18" title="All 2 branches covered.">                if (plainValueOf(shell.getByte(i)).isAlphabeticCharacter) {</span>
+<span class="fc" id="L19">                    return shell.slice(0, i)</span>
+                }
+            }
+<span class="fc" id="L22">            return shell</span>
+        }
+<span class="fc" id="L24">        return emptyShell()</span>
+    }
+
+<span class="fc bfc" id="L27" title="All 2 branches covered.">    val data get() = if (shell.size &gt; 1) shell.slice(command.size, shell.size) else emptyShell()</span>
+<span class="fc" id="L28">    val isEmpty get() = shell.isEmpty</span>
+<span class="fc" id="L29">    val isNotEmpty get() = shell.isNotEmpty</span>
+<span class="fc" id="L30">    fun invalidate() = shell.scramble()</span>
+<span class="fc bfc" id="L31" title="All 4 branches covered.">    fun extractNestSlot(): Slot = shell.asString().toIntOrNull()?.let {</span>
+<span class="fc bfc" id="L32" title="All 6 branches covered.">        if (it in FIRST_SLOT - 1..LAST_SLOT) slotAt(it) else DEFAULT</span>
+<span class="fc" id="L33">    } ?: DEFAULT</span>
+
+<span class="fc" id="L35">    override fun equals(other: Any?): Boolean = when {</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        (this === other) -&gt; true</span>
+<span class="fc bfc" id="L37" title="All 4 branches covered.">        (javaClass != other?.javaClass) -&gt; false</span>
+<span class="fc" id="L38">        else -&gt; shell == (other as Input).shell</span>
+<span class="fc" id="L39">    }</span>
+
+<span class="fc" id="L41">    override fun hashCode() = shell.hashCode()</span>
+
+    companion object {
+<span class="fc" id="L44">        fun inputOf(shell: Shell) = Input(shell)</span>
+<span class="fc" id="L45">        fun emptyInput() = inputOf(emptyShell())</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

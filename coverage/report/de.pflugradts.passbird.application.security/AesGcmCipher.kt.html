@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AesGcmCipher.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.security</a> &gt; <span class="el_source">AesGcmCipher.kt</span></div><h1>AesGcmCipher.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.security
+
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
+import java.security.SecureRandom
+import javax.crypto.Cipher
+import javax.crypto.Cipher.DECRYPT_MODE
+import javax.crypto.Cipher.ENCRYPT_MODE
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.PBEKeySpec
+import javax.crypto.spec.SecretKeySpec
+
+private const val ENCRYPTION_ALGORITHM = &quot;AES&quot;
+private const val TRANSFORMATION = &quot;$ENCRYPTION_ALGORITHM/GCM/NoPadding&quot;
+private const val SECRET_KEY_ALGORITHM = &quot;PBKDF2WithHmacSHA256&quot;
+private const val TAG_LENGTH_BIT = 128
+private const val AES_KEY_LENGTH_BIT = 128
+<span class="fc" id="L21">private val SALT = &quot;PassbirdSalt2024&quot;.toByteArray()</span>
+
+<span class="fc" id="L23">class AesGcmCipher(keyShell: Shell) : CryptoProvider {</span>
+<span class="fc" id="L24">    private val secureRandom = SecureRandom()</span>
+<span class="fc" id="L25">    private val secretKeySpec = createSecretKeySpec(keyShell)</span>
+
+<span class="fc" id="L27">    override fun encrypt(shell: Shell) = requestSecureIv().let {</span>
+<span class="fc" id="L28">        EncryptedShell(payload = cipherize(ENCRYPT_MODE, shell, it.toByteArray()), iv = it)</span>
+<span class="fc" id="L29">    }</span>
+
+<span class="fc" id="L31">    override fun decrypt(encryptedShell: EncryptedShell) = cipherize(DECRYPT_MODE, encryptedShell.payload, encryptedShell.iv.toByteArray())</span>
+
+<span class="fc" id="L33">    private fun requestSecureIv(): Shell = ByteArray(IV_SIZE).apply { secureRandom.nextBytes(this) }.toShell()</span>
+
+<span class="fc" id="L35">    private fun cipherize(mode: Int, shell: Shell, iv: ByteArray) = Cipher.getInstance(TRANSFORMATION)</span>
+<span class="fc" id="L36">        .apply { init(mode, secretKeySpec, GCMParameterSpec(TAG_LENGTH_BIT, iv)) }</span>
+<span class="fc" id="L37">        .doFinal(shell.toByteArray()).toShell()</span>
+
+<span class="fc" id="L39">    private fun createSecretKeySpec(keyShell: Shell) = SecretKeySpec(</span>
+<span class="fc" id="L40">        SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM)</span>
+<span class="fc" id="L41">            .generateSecret(PBEKeySpec(keyShell.toPlainShell().toCharArray(), SALT, 100, AES_KEY_LENGTH_BIT)).encoded,</span>
+<span class="fc" id="L42">        ENCRYPTION_ALGORITHM,</span>
+<span class="fc" id="L43">    )</span>
+
+<span class="fc" id="L45">    private fun ByteArray.toShell() = shellOf(this)</span>
+
+    companion object {
+        const val IV_SIZE = 12
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

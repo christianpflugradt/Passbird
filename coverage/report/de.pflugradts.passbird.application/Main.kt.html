@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Main.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application</a> &gt; <span class="el_source">Main.kt</span></div><h1>Main.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application
+
+import de.pflugradts.passbird.application.boot.bootModule
+import de.pflugradts.passbird.application.boot.launcher.LauncherModule
+import de.pflugradts.passbird.application.failure.HomeDirectoryFailure
+import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.DOES_NOT_EXIST
+import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.IS_NOT_A_DIRECTORY
+import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.IS_NULL
+import de.pflugradts.passbird.application.failure.reportFailure
+import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
+
+interface RunContext {
+    val homeDirectory: Directory
+    val initialSlot: Slot
+}
+
+private lateinit var global: RunContext
+<span class="fc" id="L20">val Global get() = global</span>
+
+<span class="nc" id="L22">fun mainGetSystemOperation() = SystemOperation()</span>
+
+fun mainHasValidHomeDirectory(dir: String?): Boolean {
+<span class="fc" id="L25">    var valid = false</span>
+<span class="fc" id="L26">    when {</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        dir == null -&gt; reportFailure(HomeDirectoryFailure(case = IS_NULL))</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        !mainGetSystemOperation().exists(dir.toDirectory()) -&gt; reportFailure(HomeDirectoryFailure(dir, DOES_NOT_EXIST))</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        !mainGetSystemOperation().isDirectory(dir.toDirectory()) -&gt; reportFailure(HomeDirectoryFailure(dir, IS_NOT_A_DIRECTORY))</span>
+<span class="fc" id="L30">        else -&gt; valid = true</span>
+    }
+<span class="fc" id="L32">    return valid</span>
+}
+
+fun main(args: Array&lt;String&gt;) {
+<span class="fc bfc" id="L36" title="All 2 branches covered.">    if (mainHasValidHomeDirectory(args.getOrNull(0))) {</span>
+<span class="fc" id="L37">        global = object : RunContext {</span>
+<span class="fc" id="L38">            override val homeDirectory = args[0].toDirectory()</span>
+<span class="fc bfc" id="L39" title="All 4 branches covered.">            override val initialSlot = slotAt(args.getOrElse(1) { 0.toString() })</span>
+        }
+<span class="fc" id="L41">        bootModule(LauncherModule())</span>
+    } else {
+<span class="fc" id="L43">        mainGetSystemOperation().exit()</span>
+    }
+<span class="fc" id="L45">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

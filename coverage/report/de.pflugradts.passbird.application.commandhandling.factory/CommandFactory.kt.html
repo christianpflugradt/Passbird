@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommandFactory.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.factory</a> &gt; <span class="el_source">CommandFactory.kt</span></div><h1>CommandFactory.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.factory
+
+import com.google.inject.Inject
+import com.google.inject.Singleton
+import de.pflugradts.kotlinextensions.tryCatching
+import de.pflugradts.passbird.application.commandhandling.CommandType
+import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
+import de.pflugradts.passbird.application.commandhandling.command.DiscardCommand
+import de.pflugradts.passbird.application.commandhandling.command.ExportCommand
+import de.pflugradts.passbird.application.commandhandling.command.GetCommand
+import de.pflugradts.passbird.application.commandhandling.command.HelpCommand
+import de.pflugradts.passbird.application.commandhandling.command.ImportCommand
+import de.pflugradts.passbird.application.commandhandling.command.ListCommand
+import de.pflugradts.passbird.application.commandhandling.command.NullCommand
+import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
+import de.pflugradts.passbird.application.commandhandling.command.QuitReason.USER
+import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
+import de.pflugradts.passbird.application.commandhandling.command.ViewCommand
+import de.pflugradts.passbird.application.failure.CommandFailure
+import de.pflugradts.passbird.application.failure.reportFailure
+import de.pflugradts.passbird.domain.model.transfer.Input
+
+<span class="fc" id="L23">@Singleton</span>
+<span class="fc" id="L24">class CommandFactory @Inject constructor(</span>
+<span class="fc" id="L25">    private val memoryCommandFactory: MemoryCommandFactory,</span>
+<span class="fc" id="L26">    private val nestCommandFactory: NestCommandFactory,</span>
+<span class="fc" id="L27">    private val proteinCommandFactory: ProteinCommandFactory,</span>
+<span class="fc" id="L28">    private val setCommandFactory: SetCommandFactory,</span>
+) {
+<span class="fc bfc" id="L30" title="All 15 branches covered.">    fun construct(commandType: CommandType, input: Input) = when (commandType) {</span>
+<span class="fc" id="L31">        CommandType.CUSTOM_SET -&gt; CustomSetCommand(input)</span>
+<span class="fc" id="L32">        CommandType.DISCARD -&gt; DiscardCommand(input)</span>
+<span class="fc" id="L33">        CommandType.EXPORT -&gt; ExportCommand()</span>
+<span class="fc" id="L34">        CommandType.GET -&gt; GetCommand(input)</span>
+<span class="fc" id="L35">        CommandType.HELP -&gt; HelpCommand()</span>
+<span class="fc" id="L36">        CommandType.IMPORT -&gt; ImportCommand()</span>
+<span class="fc" id="L37">        CommandType.LIST -&gt; ListCommand()</span>
+<span class="fc" id="L38">        CommandType.MEMORY -&gt; constructSafely(memoryCommandFactory, input)</span>
+<span class="fc" id="L39">        CommandType.NEST -&gt; constructSafely(nestCommandFactory, input)</span>
+<span class="fc" id="L40">        CommandType.PROTEIN -&gt; constructSafely(proteinCommandFactory, input)</span>
+<span class="fc" id="L41">        CommandType.QUIT -&gt; QuitCommand(quitReason = USER)</span>
+<span class="fc" id="L42">        CommandType.RENAME -&gt; RenameCommand(input)</span>
+<span class="fc" id="L43">        CommandType.SET -&gt; constructSafely(setCommandFactory, input)</span>
+<span class="fc" id="L44">        CommandType.VIEW -&gt; ViewCommand(input)</span>
+<span class="fc" id="L45">        else -&gt; NullCommand()</span>
+<span class="fc" id="L46">    }</span>
+
+<span class="fc" id="L48">    private fun constructSafely(factory: SpecialCommandFactory, input: Input) = tryCatching { factory.constructFromInput(input) }</span>
+<span class="fc" id="L49">        .onFailure { reportFailure(CommandFailure(it)) }</span>
+<span class="fc" id="L50">        .getOrElse(NullCommand())</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

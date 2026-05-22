@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuitCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler</a> &gt; <span class="el_source">QuitCommandHandler.kt</span></div><h1>QuitCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
+import de.pflugradts.passbird.application.commandhandling.command.QuitReason.INACTIVITY
+import de.pflugradts.passbird.application.process.Finalizer
+import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ERROR_MESSAGE
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
+
+<span class="fc" id="L16">class QuitCommandHandler @Inject constructor(</span>
+<span class="fc" id="L17">    private val finalizers: Set&lt;Finalizer&gt;,</span>
+<span class="fc" id="L18">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+<span class="fc" id="L19">    private val systemOperation: SystemOperation,</span>
+) : CommandHandler {
+    @Subscribe
+    private fun handleQuitCommand(quitCommand: QuitCommand) {
+<span class="fc" id="L23">        finalizers.forEach { it.run() }</span>
+<span class="fc" id="L24">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        if (quitCommand.quitReason == INACTIVITY) {</span>
+<span class="fc" id="L26">            userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L27">            userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Terminating Passbird due to inactivity.&quot;)))</span>
+<span class="fc" id="L28">            userInterfaceAdapterPort.sendLineBreak()</span>
+        }
+<span class="fc" id="L30">        val goodbye = randomGoodBye()</span>
+<span class="fc" id="L31">        userInterfaceAdapterPort.send(outputOf(shellOf(&quot;  -,     &quot;), NEST), outputOf(shellOf(goodbye.first), SPECIAL))</span>
+<span class="fc" id="L32">        userInterfaceAdapterPort.send(outputOf(shellOf(&quot; ( '&lt;    &quot;), SPECIAL), outputOf(shellOf(goodbye.second), SPECIAL))</span>
+<span class="fc" id="L33">        userInterfaceAdapterPort.send(outputOf(shellOf(&quot;/ ) )    &quot;), ERROR_MESSAGE), outputOf(shellOf(goodbye.third), SPECIAL))</span>
+<span class="fc" id="L34">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L35">        systemOperation.exit()</span>
+<span class="fc" id="L36">    }</span>
+
+<span class="fc" id="L38">    private fun randomGoodBye() = listOf(</span>
+<span class="fc" id="L39">        Triple(</span>
+<span class="fc" id="L40">            &quot;Fly safe, my feathered friends,&quot;,</span>
+<span class="fc" id="L41">            &quot;and guard those passwords with&quot;,</span>
+<span class="fc" id="L42">            &quot;the strength of a soaring eagle.&quot;,</span>
+        ),
+<span class="fc" id="L44">        Triple(</span>
+<span class="fc" id="L45">            &quot;May the winds of security carry&quot;,</span>
+<span class="fc" id="L46">            &quot;you far, and may your nests&quot;,</span>
+<span class="fc" id="L47">            &quot;remain impervious to prying eyes.&quot;,</span>
+        ),
+<span class="fc" id="L49">        Triple(</span>
+<span class="fc" id="L50">            &quot;Tweet farewell to the passwords,&quot;,</span>
+<span class="fc" id="L51">            &quot;my little hatchlings, and may they stay&quot;,</span>
+<span class="fc" id="L52">            &quot;encrypted in the skies of cyberspace.&quot;,</span>
+        ),
+<span class="fc" id="L54">        Triple(</span>
+<span class="fc" id="L55">            &quot;Feathered guardians, it's time to spread&quot;,</span>
+<span class="fc" id="L56">            &quot;your wings and protect the digital secrets&quot;,</span>
+<span class="fc" id="L57">            &quot;entrusted to your nests. Farewell!&quot;,</span>
+        ),
+<span class="fc" id="L59">        Triple(</span>
+<span class="fc" id="L60">            &quot;Fly high, passwords snug in your eggshells,&quot;,</span>
+<span class="fc" id="L61">            &quot;and may your cryptographic codes remain&quot;,</span>
+<span class="fc" id="L62">            &quot;uncrackable in the vast password skies.&quot;,</span>
+        ),
+<span class="fc" id="L64">        Triple(</span>
+<span class="fc" id="L65">            &quot;Flutter away, my password-protected eggs,&quot;,</span>
+<span class="fc" id="L66">            &quot;and may your encryption be as unyielding&quot;,</span>
+<span class="fc" id="L67">            &quot;as the oak branches that cradle you.&quot;,</span>
+        ),
+<span class="fc" id="L69">        Triple(</span>
+<span class="fc" id="L70">            &quot;Take flight, my avian keepers of security,&quot;,</span>
+<span class="fc" id="L71">            &quot;and may the passwords you guard be&quot;,</span>
+<span class="fc" id="L72">            &quot;as elusive as the clouds you soar through.&quot;,</span>
+        ),
+<span class="fc" id="L74">        Triple(</span>
+<span class="fc" id="L75">            &quot;Soar into the sunset, my egg-bound sentinels,&quot;,</span>
+<span class="fc" id="L76">            &quot;and let the passwords within your shells&quot;,</span>
+<span class="fc" id="L77">            &quot;remain as mysterious as the night sky.&quot;,</span>
+        ),
+<span class="fc" id="L79">        Triple(</span>
+<span class="fc" id="L80">            &quot;Wing your way into the horizon, passwords nestled&quot;,</span>
+<span class="fc" id="L81">            &quot;in your egg-shaped sanctuaries, and may your security&quot;,</span>
+<span class="fc" id="L82">            &quot;be as steadfast as a vigilant owl.&quot;,</span>
+        ),
+<span class="fc" id="L84">        Triple(</span>
+<span class="fc" id="L85">            &quot;As you take to the skies, remember to keep&quot;,</span>
+<span class="fc" id="L86">            &quot;those passwords safe and sound, for the&quot;,</span>
+<span class="fc" id="L87">            &quot;digital realm relies on your watchful wings.&quot;,</span>
+        ),
+<span class="fc" id="L89">        Triple(</span>
+<span class="fc" id="L90">            &quot;Fly on, password protectors, and may&quot;,</span>
+<span class="fc" id="L91">            &quot;the clouds of encryption surround&quot;,</span>
+<span class="fc" id="L92">            &quot;you in a cloak of digital secrecy.&quot;,</span>
+        ),
+<span class="fc" id="L94">        Triple(</span>
+<span class="fc" id="L95">            &quot;Wishing you tailwinds and uncrackable codes as you&quot;,</span>
+<span class="fc" id="L96">            &quot;carry the passwords to their secure destinations.&quot;,</span>
+<span class="fc" id="L97">            &quot;Farewell, my avian custodians.&quot;,</span>
+        ),
+<span class="fc" id="L99">        Triple(</span>
+<span class="fc" id="L100">            &quot;Spread your wings, guardians of access, and let&quot;,</span>
+<span class="fc" id="L101">            &quot;the passwords you shelter remain as elusive&quot;,</span>
+<span class="fc" id="L102">            &quot;as the dance of sunlight on rippling waters.&quot;,</span>
+        ),
+<span class="fc" id="L104">        Triple(</span>
+<span class="fc" id="L105">            &quot;May your nests be resilient, and your passwords&quot;,</span>
+<span class="fc" id="L106">            &quot;resilient still. Farewell, feathered keepers&quot;,</span>
+<span class="fc" id="L107">            &quot;of the keys to the digital realm.&quot;,</span>
+        ),
+<span class="fc" id="L109">        Triple(</span>
+<span class="fc" id="L110">            &quot;As you take flight, may the passwords&quot;,</span>
+<span class="fc" id="L111">            &quot;in your care be as well-protected&quot;,</span>
+<span class="fc" id="L112">            &quot;as the jewels in the crown of the sky.&quot;,</span>
+        ),
+<span class="fc" id="L114">        Triple(</span>
+<span class="fc" id="L115">            &quot;Sail into the azure expanse, my egg-borne&quot;,</span>
+<span class="fc" id="L116">            &quot;custodians, and let the passwords within your&quot;,</span>
+<span class="fc" id="L117">            &quot;shells be as secure as a fortress in the clouds.&quot;,</span>
+        ),
+<span class="fc" id="L119">        Triple(</span>
+<span class="fc" id="L120">            &quot;Fly gracefully, my aerial stewards of security,&quot;,</span>
+<span class="fc" id="L121">            &quot;and may the passwords under your vigilant wings&quot;,</span>
+<span class="fc" id="L122">            &quot;remain impervious to the storms of cyber threats.&quot;,</span>
+        ),
+<span class="fc" id="L124">        Triple(</span>
+<span class="fc" id="L125">            &quot;Wishing you clear skies and encrypted horizons,&quot;,</span>
+<span class="fc" id="L126">            &quot;my password-keeping companions. Until we meet again,&quot;,</span>
+<span class="fc" id="L127">            &quot;soar high and keep the digital keys safe.&quot;,</span>
+        ),
+<span class="fc" id="L129">        Triple(</span>
+<span class="fc" id="L130">            &quot;May the currents of the digital winds guide&quot;,</span>
+<span class="fc" id="L131">            &quot;you to safeguard the passwords, and may your&quot;,</span>
+<span class="fc" id="L132">            &quot;nests be a haven of unbreakable defenses. Farewell!&quot;,</span>
+        ),
+<span class="fc" id="L134">        Triple(</span>
+<span class="fc" id="L135">            &quot;Take flight, my encrypted messengers, and may&quot;,</span>
+<span class="fc" id="L136">            &quot;the passwords within your eggs be as well-protected&quot;,</span>
+<span class="fc" id="L137">            &quot;as the ancient secrets whispered by the wind.&quot;,</span>
+        ),
+<span class="fc" id="L139">    ).random()</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

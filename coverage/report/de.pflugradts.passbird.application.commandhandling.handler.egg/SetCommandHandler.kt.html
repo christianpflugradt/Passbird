@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SetCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler.egg</a> &gt; <span class="el_source">SetCommandHandler.kt</span></div><h1>SetCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler.egg
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.command.SetCommand
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
+import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
+import de.pflugradts.passbird.domain.service.password.PasswordService
+import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
+import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
+
+<span class="fc" id="L19">class SetCommandHandler @Inject constructor(</span>
+<span class="fc" id="L20">    private val configuration: ReadableConfiguration,</span>
+<span class="fc" id="L21">    private val passwordService: PasswordService,</span>
+<span class="fc" id="L22">    private val passwordProvider: PasswordProvider,</span>
+<span class="fc" id="L23">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : CommandHandler {
+
+    private val customPasswordConfigurations: List&lt;ReadableConfiguration.CustomPasswordConfiguration&gt;
+<span class="fc" id="L27">        get() = configuration.application.password.customPasswordConfigurations</span>
+
+    @Subscribe
+    private fun handleSetCommand(setCommand: SetCommand) {
+<span class="fc bfc" id="L31" title="All 4 branches covered.">        if (setCommand.slot != DEFAULT &amp;&amp; customPasswordConfigurations.size &lt; setCommand.slot.index()) {</span>
+<span class="fc" id="L32">            val msg = &quot;Specified configuration does not exist - Operation aborted.&quot;</span>
+<span class="fc" id="L33">            userInterfaceAdapterPort.send(outputOf(shellOf(msg), OPERATION_ABORTED))</span>
+        } else {
+<span class="fc bfc" id="L35" title="All 2 branches covered.">            val passwordRequirements = if (setCommand.slot == DEFAULT) {</span>
+<span class="fc" id="L36">                configuration.parsePasswordRequirements()</span>
+            } else {
+<span class="fc" id="L38">                customPasswordConfigurations[setCommand.slot.index() - 1].toPasswordRequirements()</span>
+            }
+<span class="fc bfc" id="L40" title="All 2 branches covered.">            if (!passwordRequirements.isValid()) {</span>
+<span class="fc" id="L41">                val msg = &quot;Specified configuration is invalid - Operation aborted.&quot;</span>
+<span class="fc" id="L42">                userInterfaceAdapterPort.send(outputOf(shellOf(msg), OPERATION_ABORTED))</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">            } else if (commandConfirmed(setCommand)) {</span>
+<span class="fc" id="L44">                try {</span>
+<span class="fc" id="L45">                    passwordService.challengeEggId(setCommand.argument)</span>
+<span class="fc" id="L46">                    passwordService.putEgg(setCommand.argument, passwordProvider.createNewPassword(passwordRequirements))</span>
+<span class="fc" id="L47">                } catch (ex: InvalidEggIdException) {</span>
+<span class="fc" id="L48">                    userInterfaceAdapterPort.send(outputOf(shellOf(&quot;${ex.message} - Operation aborted.&quot;), OPERATION_ABORTED))</span>
+                }
+            } else {
+<span class="fc" id="L51">                userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Operation aborted.&quot;), OPERATION_ABORTED))</span>
+            }
+        }
+<span class="fc" id="L54">        setCommand.invalidateInput()</span>
+<span class="fc" id="L55">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L56">    }</span>
+
+<span class="fc bfc" id="L58" title="All 2 branches covered.">    private fun commandConfirmed(setCommand: SetCommand) = if (configuration.application.password.promptOnRemoval &amp;&amp;</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        passwordService.eggExists(setCommand.argument, EggNotExistsAction.DO_NOTHING)</span>
+    ) {
+<span class="fc" id="L61">        val msg = &quot;Existing Egg '${setCommand.argument.asString()}' will be irrevocably overwritten.\n&quot; +</span>
+            &quot;Input 'c' to confirm or anything else to abort.\nYour input: &quot;
+<span class="fc" id="L63">        userInterfaceAdapterPort.receiveConfirmation(outputOf(shellOf(msg)))</span>
+    } else {
+<span class="fc" id="L65">        true</span>
+<span class="fc" id="L66">    }</span>
+}
+
+<span class="fc" id="L69">private fun ReadableConfiguration.CustomPasswordConfiguration.toPasswordRequirements() = PasswordRequirements(</span>
+<span class="fc" id="L70">    length = length,</span>
+<span class="fc" id="L71">    hasNumbers = hasNumbers,</span>
+<span class="fc" id="L72">    hasLowercaseLetters = hasLowercaseLetters,</span>
+<span class="fc" id="L73">    hasUppercaseLetters = hasUppercaseLetters,</span>
+<span class="fc" id="L74">    hasSpecialCharacters = hasSpecialCharacters,</span>
+<span class="fc" id="L75">    unusedSpecialCharacters = unusedSpecialCharacters,</span>
+<span class="fc" id="L76">)</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

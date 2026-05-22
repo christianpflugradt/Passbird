@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Egg.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.domain.model.egg</a> &gt; <span class="el_source">Egg.kt</span></div><h1>Egg.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.domain.model.egg
+
+import de.pflugradts.kotlinextensions.MutableOption
+import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
+import de.pflugradts.passbird.domain.model.ddd.AggregateRoot
+import de.pflugradts.passbird.domain.model.egg.EggId.Companion.createEggId
+import de.pflugradts.passbird.domain.model.egg.Password.Companion.createPassword
+import de.pflugradts.passbird.domain.model.egg.Protein.Companion.createProtein
+import de.pflugradts.passbird.domain.model.event.EggCreated
+import de.pflugradts.passbird.domain.model.event.EggDiscarded
+import de.pflugradts.passbird.domain.model.event.EggMoved
+import de.pflugradts.passbird.domain.model.event.EggRenamed
+import de.pflugradts.passbird.domain.model.event.EggUpdated
+import de.pflugradts.passbird.domain.model.event.ProteinCreated
+import de.pflugradts.passbird.domain.model.event.ProteinDiscarded
+import de.pflugradts.passbird.domain.model.event.ProteinUpdated
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell
+import de.pflugradts.passbird.domain.model.slot.Slot
+
+<span class="fc" id="L20">class Egg private constructor(</span>
+<span class="fc" id="L21">    private var slot: Slot,</span>
+<span class="fc" id="L22">    private val eggId: EggId,</span>
+<span class="fc" id="L23">    private val password: Password,</span>
+<span class="fc" id="L24">    val proteins: List&lt;MutableOption&lt;Protein&gt;&gt;,</span>
+) : AggregateRoot() {
+
+<span class="fc" id="L27">    init {</span>
+<span class="fc" id="L28">        registerDomainEvent(EggCreated(this))</span>
+<span class="fc" id="L29">    }</span>
+<span class="fc" id="L30">    fun associatedNest() = slot</span>
+<span class="fc" id="L31">    fun viewEggId() = eggId.view()</span>
+<span class="fc" id="L32">    fun viewPassword() = password.view()</span>
+
+    fun rename(eggIdShell: EncryptedShell) {
+<span class="fc" id="L35">        eggId.rename(eggIdShell)</span>
+<span class="fc" id="L36">        registerDomainEvent(EggRenamed(this))</span>
+<span class="fc" id="L37">    }</span>
+
+    fun updatePassword(encryptedShell: EncryptedShell) {
+<span class="fc" id="L40">        password.update(encryptedShell)</span>
+<span class="fc" id="L41">        registerDomainEvent(EggUpdated(this))</span>
+<span class="fc" id="L42">    }</span>
+    fun updateProtein(slot: Slot, typeShell: EncryptedShell, structureShell: EncryptedShell) {
+<span class="fc" id="L44">        val proteinOption = proteins[slot.index()]</span>
+<span class="fc" id="L45">        val previousProtein = proteinOption.orNull()</span>
+<span class="fc" id="L46">        val newProtein = createProtein(typeShell, structureShell)</span>
+<span class="fc" id="L47">        proteinOption.set(newProtein)</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (previousProtein != null) {</span>
+<span class="nc" id="L49">            registerDomainEvent(ProteinUpdated(this, slot, previousProtein, newProtein))</span>
+        } else {
+<span class="fc" id="L51">            registerDomainEvent(ProteinCreated(this, newProtein))</span>
+        }
+<span class="fc" id="L53">    }</span>
+
+    fun moveToNestAt(slot: Slot) {
+<span class="fc" id="L56">        this.slot = slot</span>
+<span class="fc" id="L57">        registerDomainEvent(EggMoved(this))</span>
+<span class="fc" id="L58">    }</span>
+
+    fun discard() {
+<span class="fc" id="L61">        password.discard()</span>
+<span class="fc" id="L62">        registerDomainEvent(EggDiscarded(this))</span>
+<span class="fc" id="L63">    }</span>
+    fun discardProtein(slot: Slot) {
+<span class="fc" id="L65">        val proteinOption = proteins[slot.index()]</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (proteinOption.isPresent) {</span>
+<span class="fc" id="L67">            val discardedProtein = proteinOption.get()</span>
+<span class="fc" id="L68">            proteinOption.set(null)</span>
+<span class="fc" id="L69">            registerDomainEvent(ProteinDiscarded(this, discardedProtein))</span>
+        }
+<span class="fc" id="L71">    }</span>
+
+<span class="fc bfc" id="L73" title="All 4 branches covered.">    override fun equals(other: Any?) = (other as? Egg)?.let {</span>
+<span class="fc bfc" id="L74" title="All 4 branches covered.">        it.viewEggId() == viewEggId() &amp;&amp; it.associatedNest() == slot</span>
+<span class="fc" id="L75">    } ?: false</span>
+<span class="fc" id="L76">    override fun hashCode() = slot.hashCode() + 31 * eggId.hashCode()</span>
+
+    companion object {
+<span class="fc" id="L79">        fun createEgg(</span>
+            slot: Slot,
+            eggIdShell: EncryptedShell,
+            passwordShell: EncryptedShell,
+<span class="fc" id="L83">            proteins: List&lt;MutableOption&lt;Protein&gt;&gt; = emptyProteins(),</span>
+<span class="fc" id="L84">        ) = Egg(slot = slot, eggId = createEggId(eggIdShell), password = createPassword(passwordShell), proteins = proteins)</span>
+    }
+}
+
+<span class="fc" id="L88">private val emptyProteins = {</span>
+<span class="fc" id="L89">    listOf&lt;MutableOption&lt;Protein&gt;&gt;(</span>
+<span class="fc" id="L90">        mutableOptionOf(),</span>
+<span class="fc" id="L91">        mutableOptionOf(),</span>
+<span class="fc" id="L92">        mutableOptionOf(),</span>
+<span class="fc" id="L93">        mutableOptionOf(),</span>
+<span class="fc" id="L94">        mutableOptionOf(),</span>
+<span class="fc" id="L95">        mutableOptionOf(),</span>
+<span class="fc" id="L96">        mutableOptionOf(),</span>
+<span class="fc" id="L97">        mutableOptionOf(),</span>
+<span class="fc" id="L98">        mutableOptionOf(),</span>
+<span class="fc" id="L99">        mutableOptionOf(),</span>
+<span class="fc" id="L100">    )</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

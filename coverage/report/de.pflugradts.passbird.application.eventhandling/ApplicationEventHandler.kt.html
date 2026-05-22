@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ApplicationEventHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.eventhandling</a> &gt; <span class="el_source">ApplicationEventHandler.kt</span></div><h1>ApplicationEventHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.eventhandling
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.domain.model.event.EggCreated
+import de.pflugradts.passbird.domain.model.event.EggDiscarded
+import de.pflugradts.passbird.domain.model.event.EggMoved
+import de.pflugradts.passbird.domain.model.event.EggNotFound
+import de.pflugradts.passbird.domain.model.event.EggRenamed
+import de.pflugradts.passbird.domain.model.event.EggUpdated
+import de.pflugradts.passbird.domain.model.event.EggsExported
+import de.pflugradts.passbird.domain.model.event.EggsImported
+import de.pflugradts.passbird.domain.model.event.NestCreated
+import de.pflugradts.passbird.domain.model.event.NestDiscarded
+import de.pflugradts.passbird.domain.model.event.ProteinCreated
+import de.pflugradts.passbird.domain.model.event.ProteinDiscarded
+import de.pflugradts.passbird.domain.model.event.ProteinUpdated
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.EVENT_HANDLED
+import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
+import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
+
+<span class="fc" id="L26">class ApplicationEventHandler @Inject constructor(</span>
+<span class="fc" id="L27">    private val cryptoProvider: CryptoProvider,</span>
+<span class="fc" id="L28">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : EventHandler {
+    @Subscribe
+    private fun handleEggCreated(eggCreated: EggCreated) {
+<span class="fc" id="L32">        send(&quot;Egg '${decrypt(eggCreated.egg.viewEggId())}' successfully created.&quot;)</span>
+<span class="fc" id="L33">    }</span>
+
+    @Subscribe
+    private fun handleEggUpdated(eggUpdated: EggUpdated) {
+<span class="fc" id="L37">        send(&quot;Egg '${decrypt(eggUpdated.egg.viewEggId())}' successfully updated.&quot;)</span>
+<span class="fc" id="L38">    }</span>
+
+    @Subscribe
+    private fun handleEggRenamed(eggRenamed: EggRenamed) {
+<span class="fc" id="L42">        send(&quot;Egg '${decrypt(eggRenamed.egg.viewEggId())}' successfully renamed.&quot;)</span>
+<span class="fc" id="L43">    }</span>
+
+    @Subscribe
+    private fun handleEggDiscarded(eggDiscarded: EggDiscarded) {
+<span class="fc" id="L47">        send(&quot;Egg '${decrypt(eggDiscarded.egg.viewEggId())}' successfully discarded.&quot;)</span>
+<span class="fc" id="L48">    }</span>
+
+    @Subscribe
+    private fun handleEggMoved(eggMoved: EggMoved) {
+<span class="fc" id="L52">        send(&quot;Egg '${decrypt(eggMoved.egg.viewEggId())}' successfully moved to ${nestSlotText(eggMoved.egg.associatedNest().index())}.&quot;)</span>
+<span class="fc" id="L53">    }</span>
+
+    @Subscribe
+    private fun handleEggNotFound(eggNotFound: EggNotFound) {
+<span class="fc" id="L57">        send(&quot;Egg '${eggNotFound.eggIdShell.asString()}' not found.&quot;)</span>
+<span class="fc" id="L58">        userInterfaceAdapterPort.warningSound()</span>
+<span class="fc" id="L59">    }</span>
+
+    @Subscribe
+    private fun handleEggsExported(eggsExported: EggsExported) {
+<span class="fc" id="L63">        send(&quot;${eggsExported.count} eggs successfully exported.&quot;)</span>
+<span class="fc" id="L64">    }</span>
+
+    @Subscribe
+    private fun handleEggsImported(eggsImported: EggsImported) {
+<span class="fc" id="L68">        send(&quot;${eggsImported.count} eggs successfully imported.&quot;)</span>
+<span class="fc" id="L69">    }</span>
+
+    @Subscribe
+    private fun handleProteinCreated(proteinCreated: ProteinCreated) {
+<span class="nc" id="L73">        val msg = &quot;Protein '${decrypt(proteinCreated.protein.viewType())}' for &quot; +</span>
+<span class="nc" id="L74">            &quot;egg '${decrypt(proteinCreated.egg.viewEggId())}' successfully created.&quot;</span>
+<span class="nc" id="L75">        send(msg)</span>
+<span class="nc" id="L76">    }</span>
+
+    @Subscribe
+    private fun handleProteinUpdated(proteinUpdated: ProteinUpdated) {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        val msg = if (decrypt(proteinUpdated.oldProtein.viewType()) == decrypt(proteinUpdated.newProtein.viewType())) {</span>
+<span class="nc" id="L81">            &quot;Protein '${decrypt(proteinUpdated.oldProtein.viewType())}' at slot ${proteinUpdated.slot.index()} for &quot; +</span>
+<span class="nc" id="L82">                &quot;egg '${decrypt(proteinUpdated.egg.viewEggId())}' successfully updated.&quot;</span>
+        } else {
+<span class="nc" id="L84">            &quot;Protein for egg '${decrypt(proteinUpdated.egg.viewEggId())}' at slot ${proteinUpdated.slot.index()} successfully updated &quot; +</span>
+<span class="nc" id="L85">                &quot;from '${decrypt(proteinUpdated.oldProtein.viewType())}' to '${decrypt(proteinUpdated.newProtein.viewType())}'.&quot;</span>
+        }
+<span class="nc" id="L87">        send(msg)</span>
+<span class="nc" id="L88">    }</span>
+
+    @Subscribe
+    private fun handleProteinDiscarded(proteinDiscarded: ProteinDiscarded) {
+<span class="nc" id="L92">        val msg = &quot;Protein '${decrypt(proteinDiscarded.protein.viewType())}' of &quot; +</span>
+<span class="nc" id="L93">            &quot;egg '${decrypt(proteinDiscarded.egg.viewEggId())}' successfully discarded.&quot;</span>
+<span class="nc" id="L94">        send(msg)</span>
+<span class="nc" id="L95">    }</span>
+
+    @Subscribe
+    private fun handleNestCreated(nestCreated: NestCreated) {
+<span class="fc" id="L99">        send(&quot;Nest '${nestCreated.nest.viewNestId().asString()}' successfully created.&quot;)</span>
+<span class="fc" id="L100">    }</span>
+
+    @Subscribe
+    private fun handleNestDiscarded(nestDiscarded: NestDiscarded) {
+<span class="fc" id="L104">        send(&quot;Nest '${nestDiscarded.nest.viewNestId().asString()}' successfully discarded.&quot;)</span>
+<span class="fc" id="L105">    }</span>
+
+<span class="fc" id="L107">    private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), EVENT_HANDLED))</span>
+<span class="fc" id="L108">    private fun decrypt(encryptedShell: EncryptedShell) = cryptoProvider.decrypt(encryptedShell).asString()</span>
+}
+
+<span class="pc bpc" id="L111" title="1 of 6 branches missed.">private fun nestSlotText(nestSlotIndex: Int) = if (nestSlotIndex in 1..9) &quot;Nest at Slot $nestSlotIndex&quot; else &quot;Default Nest&quot;</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

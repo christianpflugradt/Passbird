@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PassbirdApplication.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.boot.main</a> &gt; <span class="el_source">PassbirdApplication.kt</span></div><h1>PassbirdApplication.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.boot.main
+
+import com.google.inject.Inject
+import com.google.inject.Singleton
+import de.pflugradts.passbird.application.Global
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.boot.Bootable
+import de.pflugradts.passbird.application.commandhandling.InputHandler
+import de.pflugradts.passbird.application.process.Initializer
+import de.pflugradts.passbird.application.process.inactivity.InactivityHandler
+import de.pflugradts.passbird.domain.model.nest.Nest
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Input
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
+import de.pflugradts.passbird.domain.service.nest.NestingGroundService
+
+const val INTERRUPT = 0x03.toChar()
+
+<span class="fc" id="L20">@Singleton</span>
+<span class="fc" id="L21">class PassbirdApplication @Inject constructor(</span>
+<span class="fc" id="L22">    private val inactivityHandler: InactivityHandler,</span>
+<span class="fc" id="L23">    private val initializers: Set&lt;Initializer&gt;,</span>
+<span class="fc" id="L24">    private val inputHandler: InputHandler,</span>
+<span class="fc" id="L25">    private val nestService: NestingGroundService,</span>
+<span class="fc" id="L26">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : Bootable {
+
+    override fun boot() {
+<span class="fc" id="L30">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L31">        nestService.moveToNestAt(Global.initialSlot)</span>
+<span class="fc" id="L32">        initializers.forEach { it.run() }</span>
+<span class="fc" id="L33">        var input: Input</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        while (!isSigTerm(receiveInput().also { input = it })) {</span>
+<span class="fc" id="L35">            inactivityHandler.registerInteraction()</span>
+<span class="fc" id="L36">            inputHandler.handleInput(input)</span>
+        }
+<span class="fc" id="L38">    }</span>
+
+<span class="fc" id="L40">    private fun receiveInput() = userInterfaceAdapterPort.receive(</span>
+<span class="fc" id="L41">        outputOf(shellOf(nestPrefix()), NEST),</span>
+<span class="fc" id="L42">        outputOf(shellOf(&quot;Enter command: &quot;)),</span>
+<span class="fc" id="L43">    )</span>
+
+<span class="fc" id="L45">    private fun nestPrefix() = nestService.currentNest().let {</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (it == Nest.DEFAULT) &quot;&quot; else &quot;[${it.viewNestId().asString()}] &quot;</span>
+<span class="fc" id="L47">    }</span>
+
+<span class="fc bfc" id="L49" title="All 6 branches covered.">    private fun isSigTerm(input: Input) = input.data.isEmpty &amp;&amp; !input.command.isEmpty &amp;&amp; input.command.firstByte == INTERRUPT.code.toByte()</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

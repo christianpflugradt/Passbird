@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TryResult.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.kotlinextensions</a> &gt; <span class="el_source">TryResult.kt</span></div><h1>TryResult.kt</h1><pre class="source lang-java linenums">package de.pflugradts.kotlinextensions
+
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
+
+<span class="fc" id="L6">inline fun &lt;R&gt; tryCatching(block: () -&gt; R) = try {</span>
+<span class="fc" id="L7">    success(block())</span>
+<span class="fc" id="L8">} catch (ex: Exception) {</span>
+<span class="fc" id="L9">    failure(ex)</span>
+<span class="fc" id="L10">}</span>
+
+<span class="fc" id="L12">private class Failure(val ex: Exception)</span>
+
+@JvmInline
+value class TryResult&lt;R&gt; private constructor(
+    val value: Any?,
+) {
+<span class="fc" id="L18">    val failure: Boolean get() = value is Failure</span>
+<span class="fc bfc" id="L19" title="All 2 branches covered.">    val success: Boolean get() = value !is Failure</span>
+
+<span class="fc" id="L21">    fun exceptionOrNull() = when (value) {</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        is Failure -&gt; value.ex</span>
+<span class="fc" id="L23">        else -&gt; null</span>
+<span class="fc" id="L24">    }</span>
+
+    @Suppress(&quot;UNCHECKED_CAST&quot;)
+<span class="fc" id="L27">    fun getOrNull() = when (value) {</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        is Failure -&gt; null</span>
+<span class="fc" id="L29">        else -&gt; value as R</span>
+<span class="fc" id="L30">    }</span>
+
+<span class="fc bfc" id="L32" title="All 2 branches covered.">    infix fun getOrElse(other: R) = getOrNull() ?: other</span>
+
+<span class="fc bfc" id="L34" title="All 2 branches covered.">    fun onFailure(action: (ex: Exception) -&gt; Unit) = apply { exceptionOrNull()?.let(action) }</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">    fun onSuccess(action: (value: R) -&gt; Unit) = apply { getOrNull()?.let(action) }</span>
+
+<span class="fc bfc" id="L37" title="All 2 branches covered.">    fun &lt;T&gt; map(fn: (R) -&gt; T): TryResult&lt;T&gt; = if (success) success(fn(getOrNull()!!)) else failure(exceptionOrNull()!!)</span>
+
+<span class="fc bfc" id="L39" title="All 2 branches covered.">    fun retry(block: (TryResult&lt;R&gt;) -&gt; TryResult&lt;R&gt;) = if (failure) block(this) else this</span>
+
+    companion object {
+<span class="fc" id="L42">        fun &lt;R&gt; success(value: R) = TryResult&lt;R&gt;(value)</span>
+<span class="fc" id="L43">        fun &lt;R&gt; failure(ex: Exception) = TryResult&lt;R&gt;(Failure(ex))</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

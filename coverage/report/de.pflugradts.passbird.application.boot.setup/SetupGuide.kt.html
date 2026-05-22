@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SetupGuide.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.boot.setup</a> &gt; <span class="el_source">SetupGuide.kt</span></div><h1>SetupGuide.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.boot.setup
+
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+
+<span class="fc" id="L8">class SetupGuide @Inject constructor(private val userInterfaceAdapterPort: UserInterfaceAdapterPort) {</span>
+    fun sendWelcome() {
+<span class="fc" id="L10">        send(&quot;Welcome to Passbird Setup!&quot;)</span>
+<span class="fc" id="L11">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L12">    }</span>
+
+    fun sendConfigTemplateRouteInformation() {
+<span class="fc" id="L15">        send(&quot;You have landed here because you did not provide a configuration.&quot;)</span>
+<span class="fc" id="L16">        send(&quot;If you have a configuration file, then please start Passbird as follows:&quot;)</span>
+<span class="fc" id="L17">        send(&quot;java -jar passbird.jar \&quot;absolute-path-to-directory-with-configuration-file\&quot;&quot;)</span>
+<span class="fc" id="L18">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L19">        send(&quot;Example for a Linux path: /etc/passbird&quot;)</span>
+<span class="fc" id="L20">        send(&quot;Example for a Windows path: c:\\programs\\passbird&quot;)</span>
+<span class="fc" id="L21">        send(&quot;The configuration file must be in the specified directory and it must be named 'passbird.yml.'&quot;)</span>
+<span class="fc" id="L22">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L23">        send(&quot;To (c)ontinue setup, press 'c'. To quit setup, press any other key&quot;)</span>
+<span class="fc" id="L24">    }</span>
+
+    fun sendConfigKeyStoreRouteInformation(location: String) {
+<span class="fc" id="L27">        send(&quot;You have landed here because the keystore specified in your configuration does not exist.&quot;)</span>
+<span class="fc" id="L28">        send(&quot;Your configuration specifies the keystore to be in the following directory: $location&quot;)</span>
+<span class="fc" id="L29">        send(&quot;However in that directory there is no file 'passbird.sec'&quot;)</span>
+<span class="fc" id="L30">    }</span>
+
+    fun sendInputPath(fileDescription: String) {
+<span class="fc" id="L33">        send(&quot;Please input an absolute path to a directory in which to create the '$fileDescription' file.&quot;)</span>
+<span class="fc" id="L34">    }</span>
+
+    fun sendCreateKeyStoreInformation() {
+<span class="fc" id="L37">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L38">        send(&quot;Your Passbird Keystore will be secured by a master password.&quot;)</span>
+<span class="fc" id="L39">        send(&quot;This master password gives access to all passwords stored in Passbird.&quot;)</span>
+<span class="fc" id="L40">        send(&quot;If you lose this password, you will not be able to access any passwords stored in Passbird.&quot;)</span>
+<span class="fc" id="L41">        send(&quot;Choose your master password wisely.&quot;)</span>
+<span class="fc" id="L42">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L43">        send(&quot;You have to input your master password twice.&quot;)</span>
+<span class="fc" id="L44">        send(&quot;Your input will be hidden unless secure input is disabled in your configuration.&quot;)</span>
+<span class="fc" id="L45">        send(&quot;If your inputs do not match, you will have to repeat the procedure.&quot;)</span>
+<span class="fc" id="L46">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L47">    }</span>
+
+    fun sendCreateKeyStoreSucceeded() {
+<span class="fc" id="L50">        send(&quot;Keystore has been created successfully!&quot;)</span>
+<span class="fc" id="L51">    }</span>
+    fun sendNonMatchingInputs() {
+<span class="fc" id="L53">        send(&quot;Your inputs do not match, please repeat.&quot;)</span>
+<span class="fc" id="L54">    }</span>
+    fun sendRestart() {
+<span class="fc" id="L56">        send(&quot;Now restart Passbird to use it.&quot;)</span>
+<span class="fc" id="L57">    }</span>
+    fun sendGoodbye() {
+<span class="fc" id="L59">        send(&quot;Goodbye!&quot;)</span>
+<span class="fc" id="L60">    }</span>
+<span class="fc" id="L61">    private fun send(message: String) = userInterfaceAdapterPort.send(outputOf(shellOf(message)))</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

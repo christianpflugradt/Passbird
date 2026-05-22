@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MoveToNestCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler.nest</a> &gt; <span class="el_source">MoveToNestCommandHandler.kt</span></div><h1>MoveToNestCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler.nest
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
+import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.HIGHLIGHT
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
+import de.pflugradts.passbird.domain.service.nest.NestService
+import de.pflugradts.passbird.domain.service.password.PasswordService
+import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
+
+<span class="fc" id="L17">class MoveToNestCommandHandler @Inject constructor(</span>
+<span class="fc" id="L18">    private val canListAvailableNests: CanListAvailableNests,</span>
+<span class="fc" id="L19">    private val nestService: NestService,</span>
+<span class="fc" id="L20">    private val passwordService: PasswordService,</span>
+<span class="fc" id="L21">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : CommandHandler {
+    @Subscribe
+    private fun handleMoveToNestCommand(moveToNestCommand: MoveToNestCommand) {
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        if (passwordService.eggExists(moveToNestCommand.argument, EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT)) {</span>
+<span class="fc" id="L26">            userInterfaceAdapterPort.send(outputOf(shellOf(&quot;\nAvailable Nests: \n&quot;), HIGHLIGHT))</span>
+<span class="fc" id="L27">            userInterfaceAdapterPort.send(outputOf(shellOf(canListAvailableNests.getAvailableNests(includeCurrent = false))))</span>
+<span class="fc" id="L28">            val input = userInterfaceAdapterPort.receive(outputOf(shellOf(&quot;\nEnter Nest you want to move Egg to: &quot;)))</span>
+<span class="fc" id="L29">            val nestSlot = input.extractNestSlot()</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">            if (nestSlot === nestService.currentNest().slot) {</span>
+<span class="fc" id="L31">                userInterfaceAdapterPort.send(</span>
+<span class="fc" id="L32">                    outputOf(shellOf(&quot;Egg is already in the specified Nest - Operation aborted.&quot;), OPERATION_ABORTED),</span>
+                )
+<span class="fc bfc" id="L34" title="All 2 branches covered.">            } else if (nestService.atNestSlot(nestSlot).isEmpty) {</span>
+<span class="fc" id="L35">                userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Specified Nest does not exist - Operation aborted.&quot;), OPERATION_ABORTED))</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">            } else if (passwordService.eggExists(moveToNestCommand.argument, nestSlot)) {</span>
+<span class="fc" id="L37">                userInterfaceAdapterPort.send(</span>
+<span class="fc" id="L38">                    outputOf(shellOf(&quot;Egg with same EggId already exists in target Nest - Operation aborted.&quot;), OPERATION_ABORTED),</span>
+                )
+            } else {
+<span class="fc" id="L41">                passwordService.moveEgg(moveToNestCommand.argument, nestSlot)</span>
+            }
+<span class="fc" id="L43">            input.invalidate()</span>
+        }
+<span class="fc" id="L45">        moveToNestCommand.invalidateInput()</span>
+<span class="fc" id="L46">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L47">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

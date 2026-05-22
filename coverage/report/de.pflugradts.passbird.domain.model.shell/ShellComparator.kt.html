@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShellComparator.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.domain.model.shell</a> &gt; <span class="el_source">ShellComparator.kt</span></div><h1>ShellComparator.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.domain.model.shell
+
+import java.util.concurrent.atomic.AtomicInteger
+
+<span class="fc" id="L5">private val sortReference = buildSortReference()</span>
+
+private fun buildSortReference(): Map&lt;Int, Int&gt; {
+<span class="fc" id="L8">    val sortReferenceMap = mutableMapOf&lt;Int, Int&gt;()</span>
+<span class="fc" id="L9">    val index = AtomicInteger(0)</span>
+<span class="fc" id="L10">    val assignSlot: (Int) -&gt; Unit = { sortReferenceMap[it] = index.getAndIncrement() }</span>
+<span class="fc" id="L11">    (MIN_ASCII_VALUE..MAX_ASCII_VALUE).filter { PlainValue.plainValueOf(it).isSymbol }.forEach(assignSlot)</span>
+<span class="fc" id="L12">    (FIRST_DIGIT_INDEX..LAST_DIGIT_INDEX).forEach(assignSlot)</span>
+<span class="fc" id="L13">    val lowercaseRange = (FIRST_LOWERCASE_INDEX..LAST_LOWERCASE_INDEX)</span>
+<span class="fc" id="L14">    val uppercaseRange = (FIRST_UPPERCASE_INDEX..LAST_UPPERCASE_INDEX)</span>
+<span class="fc" id="L15">    lowercaseRange.forEachIndexed { i, _ -&gt;</span>
+<span class="fc" id="L16">        sortReferenceMap[uppercaseRange.elementAt(i)] = index.get()</span>
+<span class="fc" id="L17">        sortReferenceMap[lowercaseRange.elementAt(i)] = index.getAndIncrement()</span>
+<span class="fc" id="L18">    }</span>
+<span class="fc" id="L19">    return sortReferenceMap.toMap()</span>
+}
+
+<span class="fc" id="L22">class ShellComparator : Comparator&lt;Shell&gt; {</span>
+    override fun compare(shell1: Shell, shell2: Shell): Int {
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (shell1 == shell2) return 0</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        val reverse = shell1.size &gt; shell2.size</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        val b1 = if (reverse) shell2.toByteArray() else shell1.toByteArray()</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        val b2 = if (reverse) shell1.toByteArray() else shell2.toByteArray()</span>
+<span class="fc" id="L28">        var index = -1</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        var result = if (b1.size == b2.size) 0 else -1</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        while (++index &lt; b1.size) {</span>
+<span class="fc" id="L31">            val b1SortIndex = sortReference[b1[index].toInt()]</span>
+<span class="fc" id="L32">            val b2SortIndex = sortReference[b2[index].toInt()]</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">            if (b1SortIndex!!.compareTo(b2SortIndex!!) != 0) {</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">                result = if (b1SortIndex &lt; b2SortIndex) -1 else 1</span>
+<span class="fc" id="L35">                break</span>
+            }
+        }
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        return if (reverse) result * -1 else result</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

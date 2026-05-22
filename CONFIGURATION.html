@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Passbird Configuration | Passbird</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Passbird Configuration" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="https://christianpflugradt.github.io/Passbird/CONFIGURATION.html" />
+<meta property="og:url" content="https://christianpflugradt.github.io/Passbird/CONFIGURATION.html" />
+<meta property="og:site_name" content="Passbird" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Passbird Configuration" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","headline":"Passbird Configuration","url":"https://christianpflugradt.github.io/Passbird/CONFIGURATION.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/Passbird/assets/css/style.css?v=e60a45df6079fb91e3368f7b4f1c9d257d574022">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/Passbird/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <div class="container-lg px-3 my-5 markdown-body">
+      
+      <h1><a href="https://christianpflugradt.github.io/Passbird/">Passbird</a></h1>
+      
+
+      <h1 id="passbird-configuration">Passbird Configuration</h1>
+
+<p>Passbird’s behavior can be customized using the passbird.yml configuration file. Below is a detailed explanation of all configuration parameters.</p>
+
+<h2 id="parameter-descriptions">Parameter Descriptions</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th><strong>Parameter</strong></th>
+      <th><strong>Description</strong></th>
+      <th><strong>Default Value</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.backup.location</code></td>
+      <td>Specifies the directory where backup files are stored. Can be an absolute or relative path.</td>
+      <td>backups</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.backup.numberOfBackups</code></td>
+      <td>Sets the maximum number of backup files to retain per file.</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.backup.configuration.enabled</code></td>
+      <td>Enables or disables backups for the <code class="language-plaintext highlighter-rouge">passbird.yml</code> configuration file.</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.backup.configuration.location</code></td>
+      <td>Overrides the default backup location for the <code class="language-plaintext highlighter-rouge">passbird.yml</code> file.</td>
+      <td><em>(unset)</em></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.backup.configuration.numberOfBackups</code></td>
+      <td>Overrides the default number of backups to keep for the <code class="language-plaintext highlighter-rouge">passbird.yml</code> file.</td>
+      <td><em>(unset)</em></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.backup.keyStore.enabled</code></td>
+      <td>Enables or disables backups for the keystore file (<code class="language-plaintext highlighter-rouge">passbird.sec</code>).</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.backup.keyStore.location</code></td>
+      <td>Overrides the default backup location for the keystore file.</td>
+      <td><em>(unset)</em></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.backup.keyStore.numberOfBackups</code></td>
+      <td>Overrides the default number of backups to keep for the keystore file.</td>
+      <td><em>(unset)</em></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.backup.passwordTree.enabled</code></td>
+      <td>Enables or disables backups for the password tree file (<code class="language-plaintext highlighter-rouge">passbird.tree</code>).</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.backup.passwordTree.location</code></td>
+      <td>Overrides the default backup location for the password tree file.</td>
+      <td><em>(unset)</em></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.backup.passwordTree.numberOfBackups</code></td>
+      <td>Overrides the default number of backups to keep for the password tree file.</td>
+      <td><em>(unset)</em></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.exchange.promptOnExportFile</code></td>
+      <td>Prompts the user to confirm deletion if an export file is detected on program startup.</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.inactivityLimit.enabled</code></td>
+      <td>Enables or disables automatic termination of Passbird after a period of inactivity.</td>
+      <td>false</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.inactivityLimit.limitInMinutes</code></td>
+      <td>Specifies the number of minutes of inactivity before Passbird terminates, if enabled.</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.password.length</code></td>
+      <td>Defines the default length of passwords generated by Passbird.</td>
+      <td>20</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.password.specialCharacters</code></td>
+      <td>Enables or disables the inclusion of non-alphanumeric characters in generated passwords.</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.password.promptOnRemoval</code></td>
+      <td>Requires confirmation before deleting or updating passwords.</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">application.password.customPasswordConfigurations</code></td>
+      <td>Allows defining custom password configurations for specific use cases (see <a href="/Passbird/">README</a>).</td>
+      <td><em>(unset)</em></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">adapter.clipboard.reset.enabled</code></td>
+      <td>Enables or disables automatic clearing of the clipboard after copying a password.</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">adapter.clipboard.reset.delaySeconds</code></td>
+      <td>Specifies the seconds to wait before clearing the clipboard after copying a password.</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">adapter.keyStore.location</code></td>
+      <td>Specifies the directory where the keystore file is located.</td>
+      <td><em>(set during setup)</em></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">adapter.passwordTree.location</code></td>
+      <td>Specifies the directory where the password tree file is located.</td>
+      <td><em>(set during setup)</em></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">adapter.passwordTree.verifyChecksum</code></td>
+      <td>Verifies the checksum of the password tree file to ensure its integrity.</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">adapter.passwordTree.verifySignature</code></td>
+      <td>Verifies the digital signature of the password tree file to ensure its authenticity.</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">adapter.userInterface.ansiEscapeCodes.enabled</code></td>
+      <td>Enables or disables colorful mode in terminals that support ANSI escape codes.</td>
+      <td>false</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">adapter.userInterface.audibleBell</code></td>
+      <td>Enables or disables an audible bell as feedback for invalid input.</td>
+      <td>false</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">adapter.userInterface.secureInput</code></td>
+      <td>Hides sensitive user input (e.g., passwords) in the terminal.</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">domain.eggIdMemory.enabled</code></td>
+      <td>Enables or disables EggIdMemory, tracking the most recently used EggIds for quick access.</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">domain.eggIdMemory.persisted</code></td>
+      <td>Retains the EggId memory across Passbird restarts, if enabled.</td>
+      <td>false</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">domain.protein.secureProteinStructureInput</code></td>
+      <td>Treats protein structures as sensitive input, hiding them by default.</td>
+      <td>true</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">domain.protein.promptForProteinStructureInputToggle</code></td>
+      <td>Prompts the user to toggle secure input for the next protein structure input.</td>
+      <td>false</td>
+    </tr>
+  </tbody>
+</table>
+
+
+      
+      <div class="footer border-top border-gray-light mt-5 pt-3 text-right text-gray">
+        This site is open source. <a href="https://github.com/christianpflugradt/Passbird/edit/main/CONFIGURATION.md">Improve this page</a>.
+      </div>
+      
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+  </body>
+</html>

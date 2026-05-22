@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Slot.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.domain.model.slot</a> &gt; <span class="el_source">Slot.kt</span></div><h1>Slot.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.domain.model.slot
+
+import de.pflugradts.kotlinextensions.tryCatching
+
+enum class Slot {
+<span class="fc" id="L6">    DEFAULT,</span>
+<span class="fc" id="L7">    S1,</span>
+<span class="fc" id="L8">    S2,</span>
+<span class="fc" id="L9">    S3,</span>
+<span class="fc" id="L10">    S4,</span>
+<span class="fc" id="L11">    S5,</span>
+<span class="fc" id="L12">    S6,</span>
+<span class="fc" id="L13">    S7,</span>
+<span class="fc" id="L14">    S8,</span>
+<span class="fc" id="L15">    S9,</span>
+    ;
+
+<span class="fc bfc" id="L18" title="All 8 branches covered.">    fun index() = (FIRST_SLOT..LAST_SLOT).find { slotAt(it) === this } ?: DEFAULT_INDEX</span>
+
+    companion object {
+        const val CAPACITY = 9
+        const val FIRST_SLOT = 1
+        const val LAST_SLOT = 9
+        private const val DEFAULT_INDEX = 0
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        fun slotAt(index: String) = slotAt(if (index.length == 1) index[0] else 0.toChar())</span>
+<span class="fc" id="L26">        fun slotAt(index: Char) = tryCatching { slotAt(index.toString().toInt()) } getOrElse DEFAULT</span>
+<span class="fc bfc" id="L27" title="All 6 branches covered.">        fun slotAt(index: Int) = if (index in FIRST_SLOT..LAST_SLOT) entries[index] else DEFAULT</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

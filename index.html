@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Passbird</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Passbird" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="https://christianpflugradt.github.io/Passbird/" />
+<meta property="og:url" content="https://christianpflugradt.github.io/Passbird/" />
+<meta property="og:site_name" content="Passbird" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Passbird" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","headline":"Passbird","name":"Passbird","url":"https://christianpflugradt.github.io/Passbird/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/Passbird/assets/css/style.css?v=e60a45df6079fb91e3368f7b4f1c9d257d574022">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/Passbird/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <div class="container-lg px-3 my-5 markdown-body">
+      
+
+      <h1 id="passbird">Passbird</h1>
+
+<p><a href="https://github.com/christianpflugradt/Passbird/releases"><img src="https://img.shields.io/github/v/release/christianpflugradt/Passbird?display_name=tag&amp;sort=semver" alt="release" /></a> <a href="https://github.com/christianpflugradt/Passbird/actions/workflows/build.yml"><img src="https://github.com/christianpflugradt/Passbird/actions/workflows/build.yml/badge.svg?branch=main" alt="build" /></a> <a href="https://christianpflugradt.github.io/Passbird/coverage/report/"><img src="https://img.shields.io/endpoint?url=https://christianpflugradt.github.io/Passbird/coverage/branch-coverage.json" alt="branch coverage" /></a> <a href="https://github.com/christianpflugradt/Passbird/actions/workflows/publish.yml"><img src="https://github.com/christianpflugradt/Passbird/actions/workflows/publish.yml/badge.svg" alt="publish" /></a> <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="license" /></a></p>
+
+<ul>
+  <li><a href="#agentic-ai-disclaimer">Agentic AI Disclaimer</a></li>
+  <li><a href="#getting-started">Getting started</a>
+    <ul>
+      <li><a href="#downloading-passbird">Downloading Passbird</a></li>
+      <li><a href="#running-passbird">Running Passbird</a></li>
+      <li><a href="#setup">Setup</a></li>
+      <li><a href="#tutorial-your-first-password">Tutorial: Your first Password</a></li>
+    </ul>
+  </li>
+  <li><a href="#configuration">Configuration</a>
+    <ul>
+      <li><a href="#custom-password-configuration">Custom Password Configuration</a></li>
+    </ul>
+  </li>
+  <li><a href="#usage">Usage</a>
+    <ul>
+      <li><a href="#general-usage">General Usage</a></li>
+      <li><a href="#nests">Nests</a></li>
+      <li><a href="#proteins">Proteins</a></li>
+      <li><a href="#memory">Memory</a></li>
+      <li><a href="#custom-passwords">Custom Passwords</a></li>
+    </ul>
+  </li>
+  <li><a href="#development">Development</a>
+    <ul>
+      <li><a href="#commit-messages">Commit Messages</a></li>
+    </ul>
+  </li>
+  <li><a href="#frequently-asked-questions">Frequently Asked Questions</a></li>
+</ul>
+
+<p>Passbird is a lightweight, terminal-based password manager built in Kotlin. It operates entirely offline, securing your passwords with AES-GCM encryption and storing the encryption key in a Java KeyStore (JCEKS).</p>
+
+<p>Unsure if Passbird suits your needs? Consult the <a href="#frequently-asked-questions">FAQ</a> for guidance.</p>
+
+<h2 id="agentic-ai-disclaimer">Agentic AI Disclaimer</h2>
+
+<p>Starting with Passbird 6.0.0, Passbird is developed with the help of agentic AI.</p>
+
+<p>Passbird remains dedicated to offline-first, security-conscious development, and AI-assisted changes are reviewed closely before every release. The same care is taken as before, but some users may reasonably prefer to stay on Passbird 5.x.x because AI is now part of the development process.</p>
+
+<p>If that is your preference, continuing to use 5.x.x is a valid choice.</p>
+
+<h2 id="getting-started">Getting started</h2>
+
+<h3 id="downloading-passbird">Downloading Passbird</h3>
+
+<p>Download the latest version of Passbird <a href="https://github.com/christianpflugradt/Passbird/releases/latest">from GitHub Releases</a>.</p>
+
+<p>Each GitHub release publishes a <code class="language-plaintext highlighter-rouge">passbird.jar</code> asset. Alternatively, you can build Passbird yourself by cloning the project repository and running the Gradle jar task.</p>
+
+<h3 id="running-passbird">Running Passbird</h3>
+
+<p>Passbird runs on all major operating systems and requires Java 17 or higher.</p>
+
+<p>To start Passbird, use the following command:</p>
+
+<p><code class="language-plaintext highlighter-rouge">java -jar passbird.jar home-directory</code></p>
+
+<p>Replace home-directory with the path to an existing directory where your configuration file is stored. This directory is also used for import/export operations. Examples:</p>
+<ul>
+  <li><strong>Linux</strong>: /etc/passbird</li>
+  <li><strong>Windows</strong>: “C:\Program Files\Passbird”</li>
+</ul>
+
+<p>Note: Use quotes if the path contains spaces.</p>
+
+<p>You may optionally specify an initial Nest (explained in detail later) by adding its Nest Slot number (1–9). For example:</p>
+
+<p><code class="language-plaintext highlighter-rouge">java -jar passbird.jar home-directory 1</code></p>
+
+<p>This starts Passbird with the Nest at Slot 1 selected.</p>
+
+<h3 id="setup">Setup</h3>
+
+<p>On first launch, Passbird will guide you through its setup process. You will be prompted to:</p>
+<ol>
+  <li>Specify a home-directory.</li>
+  <li>Create a master password for securing the Java Keystore.</li>
+</ol>
+
+<p>The master password must be entered each time you run Passbird. Entering the incorrect password three times will terminate the program.</p>
+
+<p>Tip: If setup is triggered accidentally, press any key other than c to exit without making changes.</p>
+
+<h3 id="tutorial-your-first-password">Tutorial: Your first Password</h3>
+
+<h4 id="1-create-a-password">1. Create a Password</h4>
+
+<p>After setup, start Passbird and type: <code class="language-plaintext highlighter-rouge">semail</code></p>
+
+<p>This creates a secure password for the identifier email. In Passbird, such identifiers are called EggIds, as passwords are metaphorically stored in Eggs.</p>
+
+<h4 id="2-copy-the-password-to-clipboard">2. Copy the Password to Clipboard</h4>
+
+<p>Type: <code class="language-plaintext highlighter-rouge">gemail</code></p>
+
+<p>The password is now copied to your clipboard. By default, the clipboard is cleared after 10 seconds. You can adjust this timeout or disable clipboard clearing in the configuration file (discussed later).</p>
+
+<h4 id="3-view-the-password">3. View the Password</h4>
+
+<p>To display the password in the terminal, type: <code class="language-plaintext highlighter-rouge">vemail</code></p>
+
+<h4 id="4-delete-the-password">4. Delete the Password</h4>
+
+<p>Since this is just a tutorial, delete the password by typing: <code class="language-plaintext highlighter-rouge">demail</code></p>
+
+<h4 id="summary-of-commands-used">Summary of Commands Used</h4>
+
+<p>In this tutorial, you’ve used these basic commands, all of which operate on an EggId:</p>
+<ol>
+  <li>set: Creates or updates a password for the specified EggId.</li>
+  <li>get: Copies the password for the EggId to the clipboard.</li>
+  <li>view: Displays the password in the terminal.</li>
+  <li>delete: Removes the password and its associated Egg.</li>
+</ol>
+
+<p>Finally, type: <code class="language-plaintext highlighter-rouge">q</code></p>
+
+<p>to quit Passbird.</p>
+
+<h2 id="configuration">Configuration</h2>
+
+<p>After completing setup, Passbird generates a configuration file named <code class="language-plaintext highlighter-rouge">passbird.yml</code>. This file contains customizable parameters, structured as shown below:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">application</span><span class="pi">:</span>
+  <span class="na">backup</span><span class="pi">:</span>
+    <span class="na">location</span><span class="pi">:</span> <span class="s">backups</span>
+    <span class="na">numberOfBackups</span><span class="pi">:</span> <span class="m">10</span>
+    <span class="na">configuration</span><span class="pi">:</span>
+      <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">keyStore</span><span class="pi">:</span>
+      <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">passwordTree</span><span class="pi">:</span>
+      <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">exchange</span><span class="pi">:</span>
+    <span class="na">promptOnExportFile</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">inactivityLimit</span><span class="pi">:</span>
+    <span class="na">enabled</span><span class="pi">:</span> <span class="no">false</span>
+    <span class="na">limitInMinutes</span><span class="pi">:</span> <span class="m">10</span>
+  <span class="na">password</span><span class="pi">:</span>
+    <span class="na">length</span><span class="pi">:</span> <span class="m">20</span>
+    <span class="na">specialCharacters</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">promptOnRemoval</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">customPasswordConfigurations</span><span class="pi">:</span>
+<span class="na">adapter</span><span class="pi">:</span>
+  <span class="na">clipboard</span><span class="pi">:</span>
+    <span class="na">reset</span><span class="pi">:</span>
+      <span class="na">enabled</span><span class="pi">:</span> <span class="no">false</span>
+      <span class="na">delaySeconds</span><span class="pi">:</span> <span class="m">10</span>
+  <span class="na">keyStore</span><span class="pi">:</span>
+    <span class="na">location</span><span class="pi">:</span>
+  <span class="na">passwordTree</span><span class="pi">:</span>
+    <span class="na">location</span><span class="pi">:</span>
+    <span class="na">verifyChecksum</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">verifySignature</span><span class="pi">:</span> <span class="no">true</span>
+  <span class="na">userInterface</span><span class="pi">:</span>
+    <span class="na">ansiEscapeCodes</span><span class="pi">:</span>
+      <span class="na">enabled</span><span class="pi">:</span> <span class="no">false</span>
+    <span class="na">audibleBell</span><span class="pi">:</span> <span class="no">false</span>
+    <span class="na">secureInput</span><span class="pi">:</span> <span class="no">true</span>
+<span class="na">domain</span><span class="pi">:</span>
+  <span class="na">eggIdMemory</span><span class="pi">:</span>
+    <span class="na">enabled</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">persisted</span><span class="pi">:</span> <span class="no">false</span>
+  <span class="na">protein</span><span class="pi">:</span>
+    <span class="na">secureProteinStructureInput</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">promptForProteinStructureInputToggle</span><span class="pi">:</span> <span class="no">false</span>
+</code></pre></div></div>
+
+<p>You may modify the parameters to suit your needs by editing the YAML file in a text editor. Ensure the file adheres to valid YAML syntax and only includes supported parameters. If you omit parameters, Passbird will revert to defaults.</p>
+
+<p>Note: Default values may change with major updates. New parameters introduced in minor updates are usually inactive by default to preserve the existing user experience.</p>
+
+<p>For a complete list of configuration settings and their descriptions, consult the <a href="/Passbird/CONFIGURATION.html">CONFIGURATION.md</a> file. It provides an exhaustive reference to all available parameters, their purposes, and how to customize them.</p>
+
+<h3 id="custom-password-configuration">Custom Password Configuration</h3>
+
+<p>Passbird supports up to nine custom password configurations for specific use cases (e.g., PINs or highly secure passwords). Each configuration has six customizable properties:</p>
+<ol>
+  <li>name: A descriptive name for the configuration.</li>
+  <li>length: The length of the generated password.</li>
+  <li>hasNumbers: Include numeric characters.</li>
+  <li>hasLowercaseLetters: Include lowercase letters.</li>
+  <li>hasUppercaseLetters: Include uppercase letters.</li>
+  <li>hasSpecialCharacters: Include non-alphanumeric characters (e.g., !@#$%^&amp;*).</li>
+  <li>unusedSpecialCharacters: Specify any special characters to exclude.</li>
+</ol>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">customPasswordConfigurations</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">example with default settings</span>
+      <span class="na">length</span><span class="pi">:</span> <span class="m">20</span>
+      <span class="na">hasNumbers</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">hasLowercaseLetters</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">hasUppercaseLetters</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">hasSpecialCharacters</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">unusedSpecialCharacters</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">alphanumeric</span>
+      <span class="na">length</span><span class="pi">:</span> <span class="m">32</span>
+      <span class="na">hasSpecialCharacters</span><span class="pi">:</span> <span class="no">false</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">only common special characters</span>
+      <span class="na">length</span><span class="pi">:</span> <span class="m">28</span>
+      <span class="na">unusedSpecialCharacters</span><span class="pi">:</span> <span class="s2">"</span><span class="nv"> </span><span class="se">\"</span><span class="s">:'`&amp;!"</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">very secure</span>
+      <span class="na">length</span><span class="pi">:</span> <span class="m">48</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">PIN-4</span>
+      <span class="na">length</span><span class="pi">:</span> <span class="m">4</span>
+      <span class="na">hasLowercaseLetters</span><span class="pi">:</span> <span class="no">false</span>
+      <span class="na">hasUppercaseLetters</span><span class="pi">:</span> <span class="no">false</span>
+      <span class="na">hasSpecialCharacters</span><span class="pi">:</span> <span class="no">false</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">PIN-5</span>
+      <span class="na">length</span><span class="pi">:</span> <span class="m">5</span>
+      <span class="na">hasLowercaseLetters</span><span class="pi">:</span> <span class="no">false</span>
+      <span class="na">hasUppercaseLetters</span><span class="pi">:</span> <span class="no">false</span>
+      <span class="na">hasSpecialCharacters</span><span class="pi">:</span> <span class="no">false</span>
+</code></pre></div></div>
+
+<p>Defining Custom Configurations</p>
+<ul>
+  <li>Modify the customPasswordConfigurations section in passbird.yml to define your custom settings.</li>
+  <li>If a property is omitted, Passbird uses the default value for that property.</li>
+</ul>
+
+<p>Tip: Custom configurations are especially useful for generating passwords tailored to systems with specific requirements, such as numeric-only PINs.</p>
+
+<h2 id="usage">Usage</h2>
+
+<p>Passbird uses a simple, command-based syntax to manage passwords. Each password is stored in an Egg, identified by a unique EggId.</p>
+
+<p>For example, if you want to store your email account password and choose email as its EggId:</p>
+<ul>
+  <li>To create and save a password for email, enter: <code class="language-plaintext highlighter-rouge">semail</code></li>
+</ul>
+
+<p>The s command stands for “set” and generates a random password for the specified EggId. If the EggId already exists, the password will be replaced.</p>
+
+<ul>
+  <li>To copy the password to the clipboard, enter: <code class="language-plaintext highlighter-rouge">gemail</code></li>
+</ul>
+
+<p>The g command stands for “get” and copies the password to your clipboard.</p>
+
+<p>You can access Passbird’s in-app help at any time by pressing h and then Enter.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Usage: [command][parameter]
+A command takes at most one parameter which is usually an EggId.
+
+commands:
+    g[EggId] (get)        Copies the password for the specified Egg to the clipboard.
+    s[EggId] (set)        Sets a random password for the specified Egg, overwriting any existing one.
+    c[EggId] (custom set) Prompts the user to input a custom password for the specified Egg.
+    v[EggId] (view)       Displays the password for the specified Egg in the console.
+    r[EggId] (rename)     Renames the specified Egg by prompting the user for a new EggId.
+    d[EggId] (discard)    Deletes the specified Egg and its associated password.
+
+    e (export)            Exports the Password Tree to a human-readable JSON file.
+    i (import)            Imports passwords from a JSON file into the Password Tree.
+    l (list)              Lists all Eggs in the current Nest.
+    h (help)              Displays this help menu.
+    q (quit)              Exits the Passbird application.
+
+    n (Nests)             Displays available Nests and related commands.
+    m? (Memory)           Displays Memory-related usage information.
+    p? (Proteins)         Displays Protein-related usage information.
+    s? (Password configs) Displays available password configurations and related help.
+</code></pre></div></div>
+
+<h3 id="general-usage">General Usage</h3>
+
+<p>Passbird immediately updates the password database (Password Tree file) after every action. Below are some example commands using the email EggId:</p>
+
+<p><code class="language-plaintext highlighter-rouge">gemail</code> copies the password for the Egg identified by email to the clipboard.</p>
+
+<p><code class="language-plaintext highlighter-rouge">semail</code> sets a random password for the Egg identified by email. By default, the password is 20 characters long and includes digits, lowercase and uppercase letters, and special characters. If the EggId already exists, the existing password will be replaced.</p>
+
+<p><code class="language-plaintext highlighter-rouge">vemail</code> displays the password for the Egg identified by email in the terminal (standard output).</p>
+
+<p><code class="language-plaintext highlighter-rouge">demail</code> deletes the Egg identified by email, including its associated password.</p>
+
+<p><code class="language-plaintext highlighter-rouge">cemail</code> prompts you to input a custom password for the Egg identified by email. The input is hidden by default. Use this command if the system you’re storing the password for does not support Passbird’s standard password format. Be sure to verify your input immediately, as it is not confirmed.</p>
+
+<p><code class="language-plaintext highlighter-rouge">remail</code> prompts you to rename the Egg identified by email. The new EggId must be unique (not already in use).</p>
+
+<p><code class="language-plaintext highlighter-rouge">e</code> exports all Eggs to a file named <code class="language-plaintext highlighter-rouge">passbird-export.json</code> in the directory specified during program start.</p>
+
+<p><code class="language-plaintext highlighter-rouge">i</code> imports all Eggs from a <code class="language-plaintext highlighter-rouge">passbird-export.json</code> file located in the directory specified during program start.</p>
+
+<h3 id="nests">Nests</h3>
+
+<p>Nests are an advanced feature in Passbird, allowing you to organize passwords into categories. For example, you might create one Nest for online shopping, another for social networks, or separate Nests for personal and work-related accounts. To access Nest-specific help, press n followed by Enter.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>n (view)               Displays the current Nest, available Nests, and related commands.
+n0 (switch)            Switches to the default Nest.
+n[1-9] (switch)        Switches to the Nest in the specified Nest Slot (1–9).
+n[0-9][EggId] (assign) Assigns the specified EggId to the Nest in the given Nest Slot.
+n+[1-9] (create)       Creates a new Nest in the specified Nest Slot.
+n-[1-9] (discard)      Deletes the Nest in the specified Nest Slot.
+</code></pre></div></div>
+
+<h3 id="proteins">Proteins</h3>
+
+<p>Proteins allow you to store additional information alongside your passwords. While an Egg contains a password and its descriptive EggId, Proteins let you add up to ten extra data entries to the same Egg. Each Protein has a Type, which describes the kind of information (e.g., “user,” “URL,” or “recovery code”), and a Structure, which holds the actual data (e.g., “john.doe”).</p>
+
+<p>To view commands related to Proteins, input <code class="language-plaintext highlighter-rouge">p?</code> and press Enter.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>p? (help)                Displays this help menu for Protein commands.
+p[EggId] (info)          Displays the Protein Types associated with the specified Egg.
+p*[EggId] (details)      Displays both the Protein Types and their Structures for the specified Egg.
+p[0-9][EggId] (copy)     Copies the Protein Structure in the specified Slot (0–9) to the clipboard.
+p+[0-9][EggId] (update)  Updates the Protein Structure and optionally the Type in the specified Slot.
+p-[0-9][EggId] (discard) Deletes the Protein Structure and Type from the specified Slot.
+</code></pre></div></div>
+
+<p>Consider an Egg identified by the EggId email. To view the Proteins associated with this Egg, input <code class="language-plaintext highlighter-rouge">pemail</code>. This command displays the Protein Types (e.g., “user,” “URL,” “recovery code”) without revealing the sensitive Structures. For instance, it might indicate that the Egg contains a user, a URL, and a recovery code.</p>
+
+<p>To display the actual Protein Structures (sensitive data) alongside their Types, use <code class="language-plaintext highlighter-rouge">p*email</code>. This command functions similarly to <code class="language-plaintext highlighter-rouge">pemail</code>, but it additionally reveals the full content of the Structures.</p>
+
+<p>If the Structure of a specific Protein is required in the clipboard, determine its Slot number (e.g., Slot 2 as shown in the <code class="language-plaintext highlighter-rouge">pemail</code> output) and use <code class="language-plaintext highlighter-rouge">p2email</code>. This will copy the content of Slot 2 directly to the clipboard.</p>
+
+<p>Each Egg contains ten Protein Slots, which are initially empty. To create or update a Protein in a specific Slot, e.g. Slot 1, use <code class="language-plaintext highlighter-rouge">p+1email</code>. You will first be prompted to enter the Protein Type (e.g., “user”). If a Protein already exists in the specified Slot and no new Type is provided, the existing Type will remain unchanged. Next, you will be asked to input the Protein Structure. Pressing Enter without input will abort the creation or update process.</p>
+
+<p>To delete a Protein from a specific Slot, e.g. Slot 1, input <code class="language-plaintext highlighter-rouge">p-1email</code>. This command removes both the Type and Structure from the specified Slot.</p>
+
+<h3 id="memory">Memory</h3>
+
+<p>The EggIdMemory stores up to ten of the most recently accessed EggIds for each Nest. This feature allows you to avoid retyping the same EggId repeatedly, which is particularly useful when performing multiple operations on the same Egg, such as setting multiple Proteins.</p>
+
+<p>To view commands related to the EggIdMemory, input <code class="language-plaintext highlighter-rouge">m?</code>. This displays the following options:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>m? (help)           Displays this help menu for Memory commands.
+m (info)            Lists the EggIds currently stored in the EggIdMemory.
+m[0-9] (copy)       Copies the EggId from the specified Memory Slot to the clipboard.
+m[0-9]Command (use) Executes the specified command using the EggId from the given Memory Slot.
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">use memory</code> command is especially versatile. Consider an Egg identified by email. To copy its password to the clipboard, you would first input <code class="language-plaintext highlighter-rouge">gemail</code>. This action stores the EggId email in the most recent memory slot (Slot 0).</p>
+
+<p>Subsequently, if you wish to set a Protein for this Egg, you could input <code class="language-plaintext highlighter-rouge">p+1email</code> directly. However, by using the memory feature, you may instead input <code class="language-plaintext highlighter-rouge">m0p+1</code>. This command invokes the <code class="language-plaintext highlighter-rouge">p+1</code> operation using the EggId stored in Slot 0, eliminating the need to retype “email”.</p>
+
+<p>The memory feature extends to other operations as well. For example:</p>
+<ul>
+  <li>To rename the second most recently accessed EggId (stored in Slot 1), input <code class="language-plaintext highlighter-rouge">m1r</code>.</li>
+  <li>To view the password for the third most recently accessed EggId (stored in Slot 2), input <code class="language-plaintext highlighter-rouge">m2v</code>.</li>
+</ul>
+
+<p>At any time, you can input <code class="language-plaintext highlighter-rouge">m</code> to display the contents of the EggIdMemory. This command lists the EggIds currently stored in memory, ordered from most recently used (Slot 0) to least recently used (Slot 9).</p>
+
+<h3 id="custom-passwords">Custom Passwords</h3>
+
+<p>Custom passwords are an advanced feature briefly introduced in the configuration section. Passbird allows you to define up to nine custom password configurations for specific use cases. These configurations can be applied using the set command by specifying the corresponding configuration index.</p>
+
+<p>The command <code class="language-plaintext highlighter-rouge">semail</code> is interchangeable with <code class="language-plaintext highlighter-rouge">s0email</code>, which uses the default configuration. For custom configurations, use commands <code class="language-plaintext highlighter-rouge">s1email</code> through <code class="language-plaintext highlighter-rouge">s9email</code> to apply the respective custom settings, provided they have been defined in the configuration file.</p>
+
+<p>To view all available configurations and their indices, input <code class="language-plaintext highlighter-rouge">s?</code>. Using the example configuration provided earlier, the output might appear as follows:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0: Default
+    20 characters
+1: example with default settings
+    20 characters
+2: alphanumeric
+    32 characters
+    no special characters
+3: only common special characters
+    28 characters
+    unused special characters:  ":'`&amp;!
+4: very secure
+    48 characters
+5: PIN-4
+    4 characters
+    no letters
+    no special characters
+6: PIN-5
+    5 characters
+    no letters
+    no special characters
+
+Available Set Commands:
+
+    s? (help)                  Displays an overview of available password configurations.
+    s[EggId] (set)             Sets a random password for the specified EggId using the default configuration.
+    s[1-9][EggId] (set custom) Sets a random password for the specified EggId using a custom configuration.
+</code></pre></div></div>
+
+<h2 id="development">Development</h2>
+
+<h3 id="commit-messages">Commit Messages</h3>
+
+<p>Passbird uses Conventional Commits and validates them in the local <code class="language-plaintext highlighter-rouge">commit-msg</code> hook before a commit is accepted.</p>
+
+<p>Supported commit types are:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">fix</code></li>
+  <li><code class="language-plaintext highlighter-rouge">feat</code></li>
+  <li><code class="language-plaintext highlighter-rouge">build</code></li>
+  <li><code class="language-plaintext highlighter-rouge">chore</code></li>
+  <li><code class="language-plaintext highlighter-rouge">ci</code></li>
+  <li><code class="language-plaintext highlighter-rouge">docs</code></li>
+  <li><code class="language-plaintext highlighter-rouge">perf</code></li>
+  <li><code class="language-plaintext highlighter-rouge">refactor</code></li>
+  <li><code class="language-plaintext highlighter-rouge">revert</code></li>
+  <li><code class="language-plaintext highlighter-rouge">style</code></li>
+  <li><code class="language-plaintext highlighter-rouge">test</code></li>
+  <li><code class="language-plaintext highlighter-rouge">major</code></li>
+</ul>
+
+<p>Scopes are optional. When a scope is used, it must be one of:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">backup</code></li>
+  <li><code class="language-plaintext highlighter-rouge">boot</code></li>
+  <li><code class="language-plaintext highlighter-rouge">clipboard</code></li>
+  <li><code class="language-plaintext highlighter-rouge">commands</code></li>
+  <li><code class="language-plaintext highlighter-rouge">configuration</code></li>
+  <li><code class="language-plaintext highlighter-rouge">deps</code></li>
+  <li><code class="language-plaintext highlighter-rouge">egg</code></li>
+  <li><code class="language-plaintext highlighter-rouge">events</code></li>
+  <li><code class="language-plaintext highlighter-rouge">exchange</code></li>
+  <li><code class="language-plaintext highlighter-rouge">gradle</code></li>
+  <li><code class="language-plaintext highlighter-rouge">inactivity</code></li>
+  <li><code class="language-plaintext highlighter-rouge">keystore</code></li>
+  <li><code class="language-plaintext highlighter-rouge">memory</code></li>
+  <li><code class="language-plaintext highlighter-rouge">nest</code></li>
+  <li><code class="language-plaintext highlighter-rouge">password</code></li>
+  <li><code class="language-plaintext highlighter-rouge">passwordtree</code></li>
+  <li><code class="language-plaintext highlighter-rouge">protein</code></li>
+  <li><code class="language-plaintext highlighter-rouge">release</code></li>
+  <li><code class="language-plaintext highlighter-rouge">security</code></li>
+  <li><code class="language-plaintext highlighter-rouge">userinterface</code></li>
+</ul>
+
+<p>Use scopes primarily for software areas, especially when a change is focused on one adapter or one part of the application or domain model. If a change is broad or cross-cutting, omit the scope. The <code class="language-plaintext highlighter-rouge">ci</code> type is usually scope-less.</p>
+
+<p>Examples:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">fix(passwordtree): preserve checksum verification on restore</code></li>
+  <li><code class="language-plaintext highlighter-rouge">feat(protein): add update confirmation message</code></li>
+  <li><code class="language-plaintext highlighter-rouge">refactor(commands): simplify memory command dispatch</code></li>
+  <li><code class="language-plaintext highlighter-rouge">test(keystore): cover failed key loading</code></li>
+  <li><code class="language-plaintext highlighter-rouge">docs(configuration): explain verifySignature behavior</code></li>
+  <li><code class="language-plaintext highlighter-rouge">chore(deps): update dependency gradle to v9.5.1</code></li>
+  <li><code class="language-plaintext highlighter-rouge">ci: refresh dependency-check mirror on github pages</code></li>
+</ul>
+
+<h2 id="frequently-asked-questions">Frequently Asked Questions</h2>
+
+<h3 id="is-passbird-the-right-tool-for-me">Is Passbird the right tool for me?</h3>
+<p>If you prefer the terminal to a graphical user interface and do not need to manage hundreds of passwords, Passbird might be a good choice for you. Note that Passbird does not use a hierarchical system for managing Eggs. As such, if you need to store hundreds of passwords, or if you require a detailed structure for related information like URLs or usernames, you may find it challenging to organize your data.</p>
+
+<h3 id="is-passbird-secure">Is Passbird secure?</h3>
+<p>Passbird has not been reviewed by security experts. It uses a Keystore and a Cipher to encrypt all data symmetrically with a master password chosen by the user. Sensitive data is generally handled as byte arrays, and decrypted data is immediately overwritten after use. The password database is doubly encoded, both at the individual Egg level and for the entire file, making it difficult to determine even the number of stored passwords from a hex editor. Passbird operates entirely offline. While these measures likely offer reasonable security, they are not guaranteed.</p>
+
+<h3 id="does-passbird-support-unicode">Does Passbird support Unicode?</h3>
+<p>No. Many programs do not support Unicode characters in passwords, and some even restrict special characters like backslashes or spaces. Passbird translates every byte into an ASCII character. Inputting Unicode characters will result in multiple ASCII characters, which may cause inconsistencies and make certain Eggs undeletable. It is advised to avoid Unicode inputs.</p>
+
+<h3 id="how-do-i-update-passbird">How do I update Passbird?</h3>
+<p>Passbird follows semantic versioning (<em>x.y.z</em>, where <code class="language-plaintext highlighter-rouge">x</code> is the major version, <code class="language-plaintext highlighter-rouge">y</code> the minor version, and <code class="language-plaintext highlighter-rouge">z</code> the patch level). To update to a minor or patch version, download the latest JAR file and use it as usual. For major updates, consult the migration notes provided in this README.</p>
+
+<p>You can find current and historical Passbird versions <a href="https://github.com/christianpflugradt/Passbird/releases">on GitHub Releases</a>. Each release publishes the <code class="language-plaintext highlighter-rouge">passbird.jar</code> asset used by <a href="https://github.com/christianpflugradt/Passbird-Updater">Passbird-Updater</a>, though manual updates are still the more conservative option.</p>
+
+<h3 id="what-happens-if-i-lose-my-master-password-or-keystore-file">What happens if I lose my master password or keystore file?</h3>
+<p>Losing your master password or keystore file results in permanent data loss. The master password is required to decrypt the database, and the keystore file stores the encryption key. Even recreating the keystore with the same master password will not regenerate the same encryption key.</p>
+
+<p>If you forget your master password, your only recourse is brute force guessing.</p>
+
+<h3 id="how-do-i-back-up-my-passwords">How do I back up my passwords?</h3>
+<p>Passbird supports file-based backups for the password database (<code class="language-plaintext highlighter-rouge">passbird.tree</code>), configuration file (<code class="language-plaintext highlighter-rouge">passbird.yml</code>), and keystore file (<code class="language-plaintext highlighter-rouge">passbird.sec</code>). These can be automatically managed through the backup settings in <code class="language-plaintext highlighter-rouge">passbird.yml</code>. Refer to the <a href="/Passbird/CONFIGURATION.html">configuration section</a> for details on enabling and customizing backups.</p>
+
+<p>While Passbird does not offer built-in online backup features, you can securely store these backup files using external tools like Nextcloud, Dropbox, or similar cloud services. Ensure that the storage location of your backups is well-protected, as these files contain sensitive data necessary for password recovery.</p>
+
+<h3 id="can-passbird-integrate-with-browsers-or-other-tools">Can Passbird integrate with browsers or other tools?</h3>
+<p>No. Passbird is designed with a 100% offline philosophy, ensuring maximum privacy and security. It does not integrate with browsers, plugins, or other tools. For users requiring browser integration, a different password manager may be more suitable.</p>
+
+<h3 id="can-i-run-multiple-instances-of-passbird">Can I run multiple instances of Passbird?</h3>
+<p>Yes. For example, you might use separate databases for personal and work-related passwords. These can be run simultaneously in different terminal windows, as the instances operate independently.</p>
+
+
+      
+      <div class="footer border-top border-gray-light mt-5 pt-3 text-right text-gray">
+        This site is open source. <a href="https://github.com/christianpflugradt/Passbird/edit/main/README.md">Improve this page</a>.
+      </div>
+      
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+  </body>
+</html>

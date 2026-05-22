@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SetupModule.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.boot.setup</a> &gt; <span class="el_source">SetupModule.kt</span></div><h1>SetupModule.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.boot.setup
+
+import com.google.inject.AbstractModule
+import com.google.inject.Inject
+import com.google.inject.Provider
+import com.google.inject.Singleton
+import de.pflugradts.passbird.adapter.keystore.KeyStoreService
+import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
+import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.boot.Bootable
+import de.pflugradts.passbird.application.configuration.ConfigurationFactory
+import de.pflugradts.passbird.application.configuration.ConfigurationSync
+import de.pflugradts.passbird.application.configuration.ConfigurationSyncService
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.configuration.UpdatableConfiguration
+
+<span class="fc" id="L18">class SetupModule : AbstractModule() {</span>
+    override fun configure() {
+<span class="fc" id="L20">        bind(Bootable::class.java).to(PassbirdSetup::class.java)</span>
+<span class="fc" id="L21">        bind(KeyStoreAdapterPort::class.java).to(KeyStoreService::class.java)</span>
+<span class="fc" id="L22">        bind(UserInterfaceAdapterPort::class.java).to(CommandLineInterfaceService::class.java)</span>
+<span class="fc" id="L23">        bind(ConfigurationSync::class.java).to(ConfigurationSyncService::class.java)</span>
+<span class="fc" id="L24">        bind(UpdatableConfiguration::class.java).toProvider(ConfigurationDependencyProvider::class.java).`in`(Singleton::class.java)</span>
+<span class="fc" id="L25">        bind(ReadableConfiguration::class.java).to(UpdatableConfiguration::class.java)</span>
+<span class="fc" id="L26">    }</span>
+
+<span class="fc" id="L28">    private class ConfigurationDependencyProvider @Inject constructor(</span>
+<span class="pc" id="L29">        @Inject val configurationFactory: ConfigurationFactory,</span>
+    ) : Provider&lt;UpdatableConfiguration&gt; {
+<span class="fc" id="L31">        override fun get(): UpdatableConfiguration = configurationFactory.loadConfiguration()</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

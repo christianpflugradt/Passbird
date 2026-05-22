@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Shell.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.domain.model.shell</a> &gt; <span class="el_source">Shell.kt</span></div><h1>Shell.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.domain.model.shell
+
+import de.pflugradts.passbird.domain.model.ddd.ValueObject
+import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
+import java.security.SecureRandom
+import java.util.stream.Stream
+import java.util.stream.StreamSupport
+
+<span class="fc" id="L9">class Shell private constructor(</span>
+<span class="fc" id="L10">    private val content: ByteArray,</span>
+) : ValueObject,
+    Iterable&lt;Byte&gt; {
+
+<span class="fc" id="L14">    val size get() = content.size</span>
+<span class="fc bfc" id="L15" title="All 2 branches covered.">    val isEmpty get() = size == 0</span>
+<span class="fc bfc" id="L16" title="All 2 branches covered.">    val isNotEmpty get() = !isEmpty</span>
+<span class="fc" id="L17">    val firstByte get() = content[0]</span>
+<span class="fc" id="L18">    fun getByte(index: Int) = content[index]</span>
+<span class="fc" id="L19">    fun getChar(index: Int) = Char(getByte(index).toUShort())</span>
+<span class="fc" id="L20">    override fun iterator() = ShellIterator(content.clone())</span>
+<span class="fc" id="L21">    fun copy() = shellOf(content.clone())</span>
+<span class="fc" id="L22">    fun stream(): Stream&lt;Byte&gt; = StreamSupport.stream(spliterator(), false)</span>
+<span class="fc" id="L23">    fun toByteArray() = content.clone()</span>
+
+<span class="fc" id="L25">    operator fun plus(other: Shell) = shellOf(content + other.toByteArray())</span>
+
+    fun toPlainShell(): PlainShell {
+<span class="fc" id="L28">        val c = CharArray(size)</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        for (i in 0 until size) c[i] = Char(content[i].toUShort())</span>
+<span class="fc" id="L30">        return plainShellOf(c)</span>
+    }
+
+    fun asString(): String {
+<span class="fc" id="L34">        val builder = StringBuilder()</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        for (i in 0 until size) {</span>
+<span class="fc" id="L36">            builder.append(Char(content[i].toUShort()))</span>
+        }
+<span class="fc" id="L38">        return builder.toString()</span>
+    }
+
+    @JvmOverloads
+<span class="fc bfc" id="L42" title="All 2 branches covered.">    fun slice(fromInclusive: Int, toExclusive: Int = content.size): Shell = if (toExclusive - fromInclusive &gt; 0) {</span>
+<span class="fc" id="L43">        val sub = ByteArray(toExclusive - fromInclusive)</span>
+<span class="fc" id="L44">        System.arraycopy(content, fromInclusive, sub, 0, sub.size)</span>
+<span class="fc" id="L45">        shellOf(sub)</span>
+    } else {
+<span class="fc" id="L47">        emptyShell()</span>
+<span class="fc" id="L48">    }</span>
+
+<span class="fc" id="L50">    fun scramble() = content.indices.forEach {</span>
+<span class="fc" id="L51">        content[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toByte()</span>
+<span class="fc" id="L52">    }</span>
+
+<span class="fc" id="L54">    class ShellIterator(private val byteArray: ByteArray) : Iterator&lt;Byte&gt; {</span>
+        private var index = 0
+<span class="fc bfc" id="L56" title="All 2 branches covered.">        override fun hasNext() = index &lt; byteArray.size</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        override fun next() = if (hasNext()) byteArray[index++] else throw NoSuchElementException()</span>
+    }
+
+<span class="fc" id="L60">    override fun equals(other: Any?): Boolean = when {</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        (this === other) -&gt; true</span>
+<span class="fc bfc" id="L62" title="All 4 branches covered.">        (javaClass != other?.javaClass) -&gt; false</span>
+<span class="fc" id="L63">        else -&gt; content contentEquals (other as Shell).content</span>
+<span class="fc" id="L64">    }</span>
+
+<span class="fc" id="L66">    override fun hashCode() = content.contentHashCode()</span>
+
+    companion object {
+<span class="fc" id="L69">        private val SECURE_RANDOM = SecureRandom()</span>
+
+        @JvmStatic
+<span class="pc" id="L72">        fun shellOf(bytes: ByteArray) = Shell(bytes.clone())</span>
+
+        @JvmStatic
+        fun shellOf(b: List&lt;Byte&gt;): Shell {
+<span class="fc" id="L76">            val bytes = ByteArray(b.size)</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">            for (i in b.indices) {</span>
+<span class="fc" id="L78">                bytes[i] = b[i]</span>
+            }
+<span class="fc" id="L80">            return shellOf(bytes)</span>
+<span class="nc" id="L81">        }</span>
+
+        @JvmStatic
+<span class="pc" id="L84">        fun shellOf(s: String): Shell = plainShellOf(s.toCharArray()).toShell()</span>
+
+        @JvmStatic
+<span class="pc" id="L87">        fun emptyShell(): Shell = shellOf(ByteArray(0))</span>
+    }
+}
+
+typealias ShellPair = Pair&lt;Shell, Shell&gt;
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

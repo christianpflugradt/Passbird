@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SwitchNestCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler.nest</a> &gt; <span class="el_source">SwitchNestCommandHandler.kt</span></div><h1>SwitchNestCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler.nest
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.command.SwitchNestCommand
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
+import de.pflugradts.passbird.domain.service.nest.NestService
+
+<span class="fc" id="L13">class SwitchNestCommandHandler @Inject constructor(</span>
+<span class="fc" id="L14">    private val nestService: NestService,</span>
+<span class="fc" id="L15">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : CommandHandler {
+    @Subscribe
+    private fun handleSwitchNestCommand(switchNestCommand: SwitchNestCommand) {
+<span class="fc bfc" id="L19" title="All 2 branches covered.">        if (nestService.currentNest().slot == switchNestCommand.slot) {</span>
+<span class="fc" id="L20">            userInterfaceAdapterPort.send(</span>
+<span class="fc" id="L21">                outputOf(shellOf(&quot;'${nestService.currentNest().viewNestId().asString()}' is already the current Nest.&quot;)),</span>
+            )
+<span class="fc bfc" id="L23" title="All 2 branches covered.">        } else if (nestService.atNestSlot(switchNestCommand.slot).isPresent) {</span>
+<span class="fc" id="L24">            nestService.moveToNestAt(switchNestCommand.slot)</span>
+        } else {
+<span class="fc" id="L26">            userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Specified Nest does not exist - Operation aborted.&quot;), OPERATION_ABORTED))</span>
+        }
+<span class="fc" id="L28">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L29">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

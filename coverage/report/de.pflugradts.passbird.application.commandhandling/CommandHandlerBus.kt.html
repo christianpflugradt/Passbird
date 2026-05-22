@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommandHandlerBus.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling</a> &gt; <span class="el_source">CommandHandlerBus.kt</span></div><h1>CommandHandlerBus.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling
+
+import com.google.common.eventbus.EventBus
+import com.google.inject.Inject
+import com.google.inject.Singleton
+import de.pflugradts.passbird.application.commandhandling.command.base.Command
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+
+<span class="fc" id="L9">@Singleton</span>
+<span class="fc" id="L10">class CommandHandlerBus @Inject constructor(commandHandlers: Set&lt;CommandHandler&gt;) : CommandBus {</span>
+<span class="fc" id="L11">    private val eventBus = EventBus()</span>
+<span class="fc" id="L12">    init {</span>
+<span class="fc" id="L13">        commandHandlers.forEach { eventBus.register(it) }</span>
+<span class="fc" id="L14">    }</span>
+<span class="fc" id="L15">    override fun post(command: Command) = eventBus.post(command)</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

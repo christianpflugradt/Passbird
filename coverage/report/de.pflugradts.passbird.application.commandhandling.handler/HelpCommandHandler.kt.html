@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HelpCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler</a> &gt; <span class="el_source">HelpCommandHandler.kt</span></div><h1>HelpCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
+import de.pflugradts.passbird.application.commandhandling.command.HelpCommand
+
+<span class="fc" id="L9">class HelpCommandHandler @Inject constructor(</span>
+<span class="fc" id="L10">    private val canPrintInfo: CanPrintInfo,</span>
+<span class="fc" id="L11">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : CommandHandler {
+    @Subscribe
+    private fun handleHelpCommand(@Suppress(&quot;UNUSED_PARAMETER&quot;) helpCommand: HelpCommand) {
+<span class="fc" id="L15">        with(canPrintInfo) {</span>
+<span class="fc" id="L16">            userInterfaceAdapterPort.send(</span>
+<span class="fc" id="L17">                outBold(&quot;\nUsage: [command][parameter]\n&quot;),</span>
+<span class="fc" id="L18">                out(&quot;A command takes at most one parameter which is usually an EggId.\n\n&quot;),</span>
+<span class="fc" id="L19">                outBold(&quot;Commands:\n\n&quot;),</span>
+<span class="fc" id="L20">                outBold(&quot;\tg[EggId]&quot;), out(&quot; (get)        Copies the password for the specified Egg to the clipboard.\n&quot;),</span>
+<span class="fc" id="L21">                outBold(&quot;\ts[EggId]&quot;), out(&quot; (set)        Sets a random password for the specified Egg, overwriting any existing one.\n&quot;),</span>
+<span class="fc" id="L22">                outBold(&quot;\tc[EggId]&quot;), out(&quot; (custom set) Prompts the user to input a custom password for the specified Egg.\n&quot;),</span>
+<span class="fc" id="L23">                outBold(&quot;\tv[EggId]&quot;), out(&quot; (view)       Displays the password for the specified Egg in the console.\n&quot;),</span>
+<span class="fc" id="L24">                outBold(&quot;\tr[EggId]&quot;), out(&quot; (rename)     Renames the specified Egg by prompting the user for a new EggId.\n&quot;),</span>
+<span class="fc" id="L25">                outBold(&quot;\td[EggId]&quot;), out(&quot; (discard)    Deletes the specified Egg and its associated password.\n&quot;),</span>
+<span class="fc" id="L26">                out(&quot;\n&quot;),</span>
+<span class="fc" id="L27">                outBold(&quot;\te&quot;), out(&quot; (export)            Exports the Password Tree to a human-readable JSON file.\n&quot;),</span>
+<span class="fc" id="L28">                outBold(&quot;\ti&quot;), out(&quot; (import)            Imports passwords from a JSON file into the Password Tree.\n&quot;),</span>
+<span class="fc" id="L29">                outBold(&quot;\tl&quot;), out(&quot; (list)              Lists all Eggs in the current Nest.\n&quot;),</span>
+<span class="fc" id="L30">                outBold(&quot;\th&quot;), out(&quot; (help)              Displays this help menu.\n&quot;),</span>
+<span class="fc" id="L31">                outBold(&quot;\tq&quot;), out(&quot; (quit)              Exits the Passbird application.\n&quot;),</span>
+<span class="fc" id="L32">                out(&quot;\n&quot;),</span>
+<span class="fc" id="L33">                outBold(&quot;\tn&quot;), out(&quot; (Nests)             Displays available Nests and related commands.\n&quot;),</span>
+<span class="fc" id="L34">                outBold(&quot;\tm?&quot;), out(&quot; (Memory)           Displays Memory-related usage information.\n&quot;),</span>
+<span class="fc" id="L35">                outBold(&quot;\tp?&quot;), out(&quot; (Proteins)         Displays Protein-related usage information.\n&quot;),</span>
+<span class="fc" id="L36">                outBold(&quot;\ts?&quot;), out(&quot; (Password configs) Displays available password configurations and related help.\n&quot;),</span>
+            )
+<span class="fc" id="L38">        }</span>
+<span class="fc" id="L39">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

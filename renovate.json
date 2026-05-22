@@ -1,0 +1,34 @@
+{
+    "dependencyDashboard": true,
+    "dependencyDashboardOSVVulnerabilitySummary": "all",
+    "separateMultipleMajor": true,
+    "prCreation": "status-success",
+    "packageRules": [
+        {
+            "matchFileNames": [
+                ".github/**"
+            ],
+            "groupName": "github-actions",
+            "separateMajorMinor": false
+        },
+        {
+            "matchPackageNames": [
+                "eclipse-temurin"
+            ],
+            "allowedVersions": "/^(21|25)-jdk/"
+        }
+    ],
+    "customManagers": [
+        {
+            "customType": "regex",
+            "managerFilePatterns": [
+                "/^build.gradle.kts$/"
+            ],
+            "matchStrings": [
+                "ktlint\\.version\\s*=\\s*\"(?<currentValue>[^\"]+)\""
+            ],
+            "depNameTemplate": "pinterest/ktlint",
+            "datasourceTemplate": "github-releases"
+        }
+    ]
+}

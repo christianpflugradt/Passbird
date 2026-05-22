@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EggIdMemory.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.domain.model.egg</a> &gt; <span class="el_source">EggIdMemory.kt</span></div><h1>EggIdMemory.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.domain.model.egg
+
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slots
+
+typealias MemoryMap = Slots&lt;EggIdMemory&gt;
+
+<span class="fc" id="L9">class EggIdMemory : Slots&lt;EncryptedShell&gt;() {</span>
+    fun memorize(encryptedShell: EncryptedShell, duplicate: EncryptedShell?) {
+<span class="pc bpc" id="L11" title="2 of 4 branches missed.">        val startIndex = this.indexOfFirst { it.map { item -&gt; item == duplicate }.orElse(false) }</span>
+<span class="pc bpc" id="L12" title="4 of 8 branches missed.">            .takeIf { it != -1 } ?: this.indexOfFirst { it.isEmpty }.takeIf { it != -1 } ?: Slot.S9.index()</span>
+<span class="pc" id="L13">        (startIndex downTo 1).forEach { this[it].set(this[it - 1].get()) }</span>
+<span class="fc" id="L14">        this[0].set(encryptedShell)</span>
+<span class="fc" id="L15">    }</span>
+
+<span class="fc" id="L17">    fun copy() = EggIdMemory().apply { this@EggIdMemory.forEachIndexed { index, item -&gt; this[index] = item.map(EncryptedShell::copy) } }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

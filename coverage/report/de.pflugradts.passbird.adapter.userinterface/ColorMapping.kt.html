@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColorMapping.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.adapter.userinterface</a> &gt; <span class="el_source">ColorMapping.kt</span></div><h1>ColorMapping.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.adapter.userinterface
+
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.DEFAULT
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ERROR_MESSAGE
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.EVENT_HANDLED
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.HIGHLIGHT
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
+
+<span class="fc bfc" id="L12" title="All 7 branches covered.">private fun mapColorCode(outputFormatting: OutputFormatting) = when (outputFormatting) {</span>
+<span class="fc" id="L13">    DEFAULT -&gt; 231</span>
+<span class="fc" id="L14">    SPECIAL -&gt; 220</span>
+<span class="fc" id="L15">    OPERATION_ABORTED -&gt; 208</span>
+<span class="fc" id="L16">    ERROR_MESSAGE -&gt; 196</span>
+<span class="fc" id="L17">    HIGHLIGHT -&gt; 207</span>
+<span class="fc" id="L18">    NEST -&gt; 39</span>
+<span class="fc" id="L19">    EVENT_HANDLED -&gt; 118</span>
+<span class="fc" id="L20">}</span>
+<span class="fc" id="L21">fun beginEscape(outputFormatting: OutputFormatting) = print(&quot;\u001B[38;5;${mapColorCode(outputFormatting)}m&quot;)</span>
+<span class="fc" id="L22">fun endEscape() = print(&quot;\u001B[0m&quot;)</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

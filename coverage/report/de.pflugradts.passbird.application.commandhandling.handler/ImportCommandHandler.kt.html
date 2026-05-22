@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImportCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler</a> &gt; <span class="el_source">ImportCommandHandler.kt</span></div><h1>ImportCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.command.ImportCommand
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.exchange.ImportExportService
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
+import de.pflugradts.passbird.domain.service.password.PasswordService
+
+<span class="fc" id="L14">class ImportCommandHandler@Inject constructor(</span>
+<span class="fc" id="L15">    private val configuration: ReadableConfiguration,</span>
+<span class="fc" id="L16">    private val importExportService: ImportExportService,</span>
+<span class="fc" id="L17">    private val passwordService: PasswordService,</span>
+<span class="fc" id="L18">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : CommandHandler {
+    @Subscribe
+    private fun handleImportCommand(@Suppress(&quot;UNUSED_PARAMETER&quot;) importCommand: ImportCommand) {
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (commandConfirmed()) {</span>
+<span class="fc" id="L23">            importExportService.importEggs()</span>
+        } else {
+<span class="fc" id="L25">            userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Operation aborted.&quot;), OPERATION_ABORTED))</span>
+        }
+<span class="fc" id="L27">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L28">    }</span>
+
+    private fun commandConfirmed(): Boolean {
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (configuration.application.password.promptOnRemoval) {</span>
+<span class="fc" id="L32">            val overlaps = importExportService.peekImportEggIdShells()</span>
+<span class="fc" id="L33">                .map { (nestSlot, eggIdShell) -&gt; eggIdShell.map { Triple(nestSlot, it, passwordService.eggExists(it, nestSlot)) } }</span>
+<span class="fc" id="L34">                .flatten()</span>
+<span class="fc" id="L35">                .filter { it.third }</span>
+<span class="fc" id="L36">                .map { Pair(it.first, it.second) }</span>
+<span class="fc bfc" id="L37" title="All 4 branches covered.">            if (overlaps.isNotEmpty()) {</span>
+<span class="fc" id="L38">                return userInterfaceAdapterPort.receiveConfirmation(</span>
+<span class="fc" id="L39">                    outputOf(</span>
+<span class="fc" id="L40">                        shellOf(</span>
+<span class="fc" id="L41">                            &quot;By importing this file ${overlaps.size} existing Passwords &quot; +</span>
+                                &quot;will be irrevocably overwritten.\n&quot; +
+                                &quot;The following Eggs will be affected: &quot; +
+<span class="fc" id="L44">                                &quot;${overlaps.joinToString { &quot;${it.second.asString()} (${it.first})&quot; }}\n&quot; +</span>
+                                &quot;Input 'c' to confirm or anything else to abort.\nYour input: &quot;,
+                        ),
+                    ),
+                )
+            }
+        }
+<span class="fc" id="L51">        return true</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

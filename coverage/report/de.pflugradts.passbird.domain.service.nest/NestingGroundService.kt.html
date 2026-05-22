@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NestingGroundService.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.domain.service.nest</a> &gt; <span class="el_source">NestingGroundService.kt</span></div><h1>NestingGroundService.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.domain.service.nest
+
+import com.google.inject.Inject
+import com.google.inject.Singleton
+import de.pflugradts.kotlinextensions.MutableOption
+import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
+import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
+import de.pflugradts.kotlinextensions.Option
+import de.pflugradts.passbird.domain.model.nest.Nest
+import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.CAPACITY
+import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
+import java.util.function.Supplier
+
+<span class="fc" id="L18">@Singleton</span>
+<span class="fc" id="L19">class NestingGroundService @Inject constructor(</span>
+<span class="fc" id="L20">    private val eggRepository: EggRepository,</span>
+<span class="fc" id="L21">    private val eventRegistry: EventRegistry,</span>
+) : NestService {
+
+<span class="fc" id="L24">    private val lazyNests = mutableListOf&lt;MutableOption&lt;Nest&gt;&gt;()</span>
+    private val nests: MutableList&lt;MutableOption&lt;Nest&gt;&gt; get() {
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (lazyNests.isEmpty()) {</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">            repeat(CAPACITY) { lazyNests.add(EMPTY_NEST_SUPPLIER.get()) }</span>
+<span class="fc" id="L28">            eggRepository.sync()</span>
+        }
+<span class="fc" id="L30">        return lazyNests</span>
+    }
+<span class="fc" id="L32">    private var currentNest = Slot.DEFAULT</span>
+
+    override fun populate(nestShells: List&lt;Shell&gt;) {
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (nestShells.size == Slot.CAPACITY) {</span>
+<span class="fc" id="L36">            nestShells.forEachIndexed { index, shell -&gt;</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">                if (shell.isNotEmpty) {</span>
+<span class="fc" id="L38">                    place(shell, Slot.slotAt(index + 1), publish = false)</span>
+                }
+<span class="fc" id="L40">            }</span>
+        }
+<span class="fc" id="L42">    }</span>
+
+<span class="fc" id="L44">    override fun place(nestShell: Shell, slot: Slot) = place(nestShell, slot, true)</span>
+    fun place(nestShell: Shell, slot: Slot, publish: Boolean) {
+<span class="fc" id="L46">        createNest(nestShell, slot).let {</span>
+<span class="fc" id="L47">            nests[slot.nestIndex()].set(it)</span>
+<span class="fc" id="L48">            eventRegistry.register(it)</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">            if (publish) eventRegistry.processEvents() else it.clearDomainEvents()</span>
+<span class="fc" id="L50">        }</span>
+<span class="fc" id="L51">    }</span>
+    override fun discardNestAt(slot: Slot) {
+<span class="fc" id="L53">        atNestSlot(slot).ifPresent { it.discard() }</span>
+<span class="fc" id="L54">        nests[slot.nestIndex()] = EMPTY_NEST_SUPPLIER.get()</span>
+<span class="fc" id="L55">        eventRegistry.processEvents()</span>
+<span class="fc" id="L56">    }</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">    override fun atNestSlot(slot: Slot): Option&lt;Nest&gt; = if (slot === Slot.DEFAULT) Nest.DEFAULT.option() else nests[slot.nestIndex()]</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">    override fun all(includeDefault: Boolean) = nests.let { if (includeDefault) Nest.DEFAULT.asOptionInList() + it else it }.stream()</span>
+<span class="fc" id="L59">    override fun currentNest(): Nest = atNestSlot(currentNest).orElse(Nest.DEFAULT)</span>
+    override fun moveToNestAt(slot: Slot) {
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if (atNestSlot(slot).isPresent) currentNest = slot</span>
+<span class="fc" id="L62">    }</span>
+
+    companion object {
+<span class="fc" id="L65">        private val EMPTY_NEST_SUPPLIER = Supplier { mutableOptionOf&lt;Nest&gt;() }</span>
+    }
+}
+
+<span class="fc" id="L69">private fun Nest.asOptionInList() = listOf(optionOf(this))</span>
+<span class="fc" id="L70">private fun Nest.option() = optionOf(this)</span>
+<span class="fc" id="L71">private fun Slot.nestIndex() = index() - 1</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

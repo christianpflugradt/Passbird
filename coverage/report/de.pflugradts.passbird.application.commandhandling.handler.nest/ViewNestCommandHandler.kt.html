@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ViewNestCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler.nest</a> &gt; <span class="el_source">ViewNestCommandHandler.kt</span></div><h1>ViewNestCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler.nest
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
+import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
+import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.domain.service.nest.NestService
+
+<span class="fc" id="L12">class ViewNestCommandHandler @Inject constructor(</span>
+<span class="fc" id="L13">    private val canPrintInfo: CanPrintInfo,</span>
+<span class="fc" id="L14">    private val canListAvailableNests: CanListAvailableNests,</span>
+<span class="fc" id="L15">    private val nestService: NestService,</span>
+<span class="fc" id="L16">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : CommandHandler {
+    @Subscribe
+    private fun handleViewNestCommand(@Suppress(&quot;UNUSED_PARAMETER&quot;) viewNestCommand: ViewNestCommand) {
+<span class="fc" id="L20">        with(canPrintInfo) {</span>
+<span class="fc" id="L21">            userInterfaceAdapterPort.send(</span>
+<span class="fc" id="L22">                outBold(&quot;\nCurrent Nest: &quot;), out(currentNest),</span>
+<span class="fc" id="L23">                outBold(&quot;\n\nAvailable Nests:\n&quot;),</span>
+<span class="fc" id="L24">                out(availableNests),</span>
+<span class="fc" id="L25">                outBold(&quot;\n\nAvailable Nest commands:\n&quot;),</span>
+<span class="fc" id="L26">                outBold(&quot;\n\tn&quot;), out(&quot; (view)               Displays the current Nest, available Nests, and related commands.&quot;),</span>
+<span class="fc" id="L27">                outBold(&quot;\n\tn0&quot;), out(&quot; (switch)            Switches to the default Nest.&quot;),</span>
+<span class="fc" id="L28">                outBold(&quot;\n\tn[1-9]&quot;), out(&quot; (switch)        Switches to the Nest in the specified Nest Slot (1–9).&quot;),</span>
+<span class="fc" id="L29">                outBold(&quot;\n\tn[0-9][EggId]&quot;), out(&quot; (assign) Assigns the specified EggId to the Nest in the given Nest Slot.&quot;),</span>
+<span class="fc" id="L30">                outBold(&quot;\n\tn+[1-9]&quot;), out(&quot; (create)       Creates a new Nest in the specified Nest Slot.&quot;),</span>
+<span class="fc" id="L31">                outBold(&quot;\n\tn-[1-9]&quot;), out(&quot; (discard)      Deletes the Nest in the specified Nest Slot.&quot;),</span>
+<span class="fc" id="L32">                out(&quot;\n&quot;),</span>
+            )
+<span class="fc" id="L34">        }</span>
+<span class="fc" id="L35">    }</span>
+
+<span class="fc" id="L37">    private val currentNest get() = nestService.currentNest().viewNestId().asString()</span>
+<span class="fc" id="L38">    private val availableNests get() = canListAvailableNests.getAvailableNests(includeCurrent = true).let {</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        if (canListAvailableNests.hasCustomNests()) it else &quot;$it\t(use the n+ command to create custom Nests)\n&quot;</span>
+<span class="fc" id="L40">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

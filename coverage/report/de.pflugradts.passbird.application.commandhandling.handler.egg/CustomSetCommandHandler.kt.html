@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomSetCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler.egg</a> &gt; <span class="el_source">CustomSetCommandHandler.kt</span></div><h1>CustomSetCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler.egg
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
+import de.pflugradts.passbird.domain.service.password.PasswordService
+import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.DO_NOTHING
+
+<span class="fc" id="L16">class CustomSetCommandHandler @Inject constructor(</span>
+<span class="fc" id="L17">    private val configuration: ReadableConfiguration,</span>
+<span class="fc" id="L18">    private val passwordService: PasswordService,</span>
+<span class="fc" id="L19">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : CommandHandler {
+    @Subscribe
+    private fun handleCustomSetCommand(customSetCommand: CustomSetCommand) {
+<span class="fc bfc" id="L23" title="All 2 branches covered.">        if (commandConfirmed(customSetCommand)) {</span>
+<span class="fc" id="L24">            try {</span>
+<span class="fc" id="L25">                passwordService.challengeEggId(customSetCommand.argument)</span>
+<span class="fc" id="L26">                val secureInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(&quot;Enter custom Password: &quot;)))</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">                if (secureInput.isEmpty) {</span>
+<span class="fc" id="L28">                    userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Empty input - Operation aborted.&quot;), OPERATION_ABORTED))</span>
+                } else {
+<span class="fc" id="L30">                    passwordService.putEgg(customSetCommand.argument, secureInput.shell)</span>
+                }
+<span class="fc" id="L32">                secureInput.invalidate()</span>
+<span class="fc" id="L33">            } catch (ex: InvalidEggIdException) {</span>
+<span class="fc" id="L34">                userInterfaceAdapterPort.send(outputOf(shellOf(&quot;${ex.message} - Operation aborted.&quot;), OPERATION_ABORTED))</span>
+            }
+        } else {
+<span class="fc" id="L37">            userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Operation aborted.&quot;), OPERATION_ABORTED))</span>
+        }
+<span class="fc" id="L39">        customSetCommand.invalidateInput()</span>
+<span class="fc" id="L40">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L41">    }</span>
+
+    private fun commandConfirmed(customSetCommand: CustomSetCommand) =
+<span class="fc bfc" id="L44" title="All 4 branches covered.">        if (configuration.application.password.promptOnRemoval &amp;&amp; passwordService.eggExists(customSetCommand.argument, DO_NOTHING)) {</span>
+<span class="fc" id="L45">            userInterfaceAdapterPort</span>
+<span class="fc" id="L46">                .receiveConfirmation(</span>
+<span class="fc" id="L47">                    outputOf(</span>
+<span class="fc" id="L48">                        shellOf(</span>
+<span class="fc" id="L49">                            &quot;Existing Egg '${customSetCommand.argument.asString()}' will be irrevocably overwritten.\n&quot; +</span>
+                                &quot;Input 'c' to confirm or anything else to abort.\nYour input: &quot;,
+                        ),
+                    ),
+                )
+        } else {
+<span class="fc" id="L55">            true</span>
+<span class="fc" id="L56">        }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

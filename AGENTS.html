@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>AGENTS.md | Passbird</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="AGENTS.md" />
+<meta property="og:locale" content="en_US" />
+<link rel="canonical" href="https://christianpflugradt.github.io/Passbird/AGENTS.html" />
+<meta property="og:url" content="https://christianpflugradt.github.io/Passbird/AGENTS.html" />
+<meta property="og:site_name" content="Passbird" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="AGENTS.md" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","headline":"AGENTS.md","url":"https://christianpflugradt.github.io/Passbird/AGENTS.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/Passbird/assets/css/style.css?v=e60a45df6079fb91e3368f7b4f1c9d257d574022">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/Passbird/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <div class="container-lg px-3 my-5 markdown-body">
+      
+      <h1><a href="https://christianpflugradt.github.io/Passbird/">Passbird</a></h1>
+      
+
+      <h1 id="agentsmd">AGENTS.md</h1>
+
+<p>Use <code class="language-plaintext highlighter-rouge">AGENTS.md</code> as the repository entrypoint. The plural form is the established convention and is the filename toolchains are most likely to discover automatically.</p>
+
+<p>This repository keeps its agent-facing design and guardrail material in <code class="language-plaintext highlighter-rouge">.agent/</code> as structured YAML. Start with <code class="language-plaintext highlighter-rouge">.agent/manifest.yaml</code>, then read only the files relevant to the task.</p>
+
+<h2 id="read-order">Read Order</h2>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">.agent/manifest.yaml</code></li>
+  <li><code class="language-plaintext highlighter-rouge">.agent/project.yaml</code></li>
+  <li>Task-specific files named in <code class="language-plaintext highlighter-rouge">.agent/manifest.yaml</code></li>
+</ol>
+
+<h2 id="working-agreement">Working Agreement</h2>
+
+<ul>
+  <li>Code, tests, and build configuration are the source of truth if a document ever drifts.</li>
+  <li>When changing behavior, architecture, security posture, persistence, configuration, or verification rules, update the matching <code class="language-plaintext highlighter-rouge">.agent/*.yaml</code> files in the same change.</li>
+  <li>Read <code class="language-plaintext highlighter-rouge">.agent/security.yaml</code> before touching crypto, keystore handling, password tree persistence, backup behavior, import/export, secure input, or configuration defaults.</li>
+  <li>Preserve the onion architecture enforced by <code class="language-plaintext highlighter-rouge">src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt</code>.</li>
+  <li>Preserve the offline-first product posture. Do not add network or browser integration unless explicitly requested by the maintainer.</li>
+  <li>Prefer additive, backward-conscious changes. Escalate before changing persistence formats, cryptographic parameters, or user-visible security defaults.</li>
+  <li>Before running shell commands, source <code class="language-plaintext highlighter-rouge">~/.zprofile</code> and <code class="language-plaintext highlighter-rouge">~/.zshrc</code> so repo-local tooling such as <code class="language-plaintext highlighter-rouge">rtk</code>, <code class="language-plaintext highlighter-rouge">gh</code>, and SDKMAN-managed runtimes are available.</li>
+  <li>After sourcing the shell environment, prefer the local <code class="language-plaintext highlighter-rouge">rtk</code> wrapper for shell commands; otherwise use direct commands.</li>
+  <li>Once a requested task is complete and suitable for release, commit and push it immediately.</li>
+  <li>Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.</li>
+</ul>
+
+<h2 id="review-commands">Review Commands</h2>
+
+<ul>
+  <li>Use <code class="language-plaintext highlighter-rouge">review &lt;area&gt;</code> for standing workspace reviews.</li>
+  <li>Supported review areas are <code class="language-plaintext highlighter-rouge">security</code>, <code class="language-plaintext highlighter-rouge">architecture</code>, <code class="language-plaintext highlighter-rouge">integrity</code>, <code class="language-plaintext highlighter-rouge">behavior</code>, and <code class="language-plaintext highlighter-rouge">delivery</code>.</li>
+  <li>Read <code class="language-plaintext highlighter-rouge">.agent/review.yaml</code> before performing one of these reviews.</li>
+  <li>Reviews use the current task, diff, or concern as the trigger, but they must assess the full workspace rather than only the touched files.</li>
+  <li>Review findings must be reported as <code class="language-plaintext highlighter-rouge">P0</code> to <code class="language-plaintext highlighter-rouge">P3</code>, ordered by severity, and every finding must include a proposed fix.</li>
+  <li>If no actionable findings are discovered for the selected area, say so explicitly.</li>
+</ul>
+
+<h2 id="commit-messages">Commit Messages</h2>
+
+<ul>
+  <li>Commits use Conventional Commits and are validated by the local <code class="language-plaintext highlighter-rouge">commit-msg</code> hook.</li>
+  <li>Supported types are <code class="language-plaintext highlighter-rouge">fix</code>, <code class="language-plaintext highlighter-rouge">feat</code>, <code class="language-plaintext highlighter-rouge">build</code>, <code class="language-plaintext highlighter-rouge">chore</code>, <code class="language-plaintext highlighter-rouge">ci</code>, <code class="language-plaintext highlighter-rouge">docs</code>, <code class="language-plaintext highlighter-rouge">perf</code>, <code class="language-plaintext highlighter-rouge">refactor</code>, <code class="language-plaintext highlighter-rouge">revert</code>, <code class="language-plaintext highlighter-rouge">style</code>, <code class="language-plaintext highlighter-rouge">test</code>, and <code class="language-plaintext highlighter-rouge">major</code>.</li>
+  <li>Scopes are optional. When used, they must be one of <code class="language-plaintext highlighter-rouge">backup</code>, <code class="language-plaintext highlighter-rouge">boot</code>, <code class="language-plaintext highlighter-rouge">clipboard</code>, <code class="language-plaintext highlighter-rouge">commands</code>, <code class="language-plaintext highlighter-rouge">configuration</code>, <code class="language-plaintext highlighter-rouge">deps</code>, <code class="language-plaintext highlighter-rouge">egg</code>, <code class="language-plaintext highlighter-rouge">events</code>, <code class="language-plaintext highlighter-rouge">exchange</code>, <code class="language-plaintext highlighter-rouge">gradle</code>, <code class="language-plaintext highlighter-rouge">inactivity</code>, <code class="language-plaintext highlighter-rouge">keystore</code>, <code class="language-plaintext highlighter-rouge">memory</code>, <code class="language-plaintext highlighter-rouge">nest</code>, <code class="language-plaintext highlighter-rouge">password</code>, <code class="language-plaintext highlighter-rouge">passwordtree</code>, <code class="language-plaintext highlighter-rouge">protein</code>, <code class="language-plaintext highlighter-rouge">release</code>, <code class="language-plaintext highlighter-rouge">security</code>, or <code class="language-plaintext highlighter-rouge">userinterface</code>.</li>
+  <li>Prefer no scope for broad changes. Prefer a scope for localized software changes, especially adapter-specific work.</li>
+  <li>The <code class="language-plaintext highlighter-rouge">ci</code> type is usually scope-less.</li>
+</ul>
+
+<h2 id="minimum-validation">Minimum Validation</h2>
+
+<p>Use <code class="language-plaintext highlighter-rouge">.agent/delivery.yaml</code> to choose the right checks. At minimum:</p>
+
+<ul>
+  <li>run <code class="language-plaintext highlighter-rouge">./gradlew test</code> for behavior changes</li>
+  <li>run <code class="language-plaintext highlighter-rouge">./gradlew architecture</code> for structural changes</li>
+  <li>run <code class="language-plaintext highlighter-rouge">./gradlew ktlintCheck</code> for Kotlin edits</li>
+  <li>run <code class="language-plaintext highlighter-rouge">./gradlew checkLicense</code> when dependencies change</li>
+  <li>run <code class="language-plaintext highlighter-rouge">./gradlew dependencyCheckAnalyze</code> when security-sensitive dependency work is involved</li>
+</ul>
+
+
+      
+      <div class="footer border-top border-gray-light mt-5 pt-3 text-right text-gray">
+        This site is open source. <a href="https://github.com/christianpflugradt/Passbird/edit/main/AGENTS.md">Improve this page</a>.
+      </div>
+      
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+    <script>anchors.add();</script>
+  </body>
+</html>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SystemOperation.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.util</a> &gt; <span class="el_source">SystemOperation.kt</span></div><h1>SystemOperation.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.util
+
+import de.pflugradts.passbird.application.Directory
+import de.pflugradts.passbird.application.FileName
+import de.pflugradts.passbird.application.toFileName
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
+import java.io.InputStream
+import java.io.OutputStream
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.security.KeyStore
+import java.time.Clock
+import kotlin.io.path.name
+import kotlin.system.exitProcess
+
+private const val JCEKS_KEYSTORE = &quot;JCEKS&quot;
+
+<span class="fc" id="L20">class SystemOperation {</span>
+<span class="fc" id="L21">    val clock = Clock.systemUTC()</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">    val isConsoleAvailable: Boolean get() = System.console() != null</span>
+<span class="fc" id="L23">    val jceksInstance: KeyStore get() = KeyStore.getInstance(JCEKS_KEYSTORE)</span>
+
+<span class="nc" id="L25">    fun readPasswordFromConsole(): CharArray = System.console().readPassword()</span>
+<span class="fc" id="L26">    fun getFileNames(directory: Directory): List&lt;FileName&gt; = Files.list(getPath(directory)).map { it.name.toFileName() }.toList()</span>
+<span class="fc" id="L27">    fun getPath(directory: Directory): Path = Paths.get(directory.value)</span>
+<span class="fc" id="L28">    fun resolvePath(directory: Directory, fileName: FileName): Path = getPath(directory).resolve(fileName.value)</span>
+<span class="nc" id="L29">    fun resolvePath(directory: Directory, other: Directory): Path = getPath(directory).resolve(other.value)</span>
+    fun copyTo(source: Path, target: Path) {
+<span class="fc" id="L31">        Files.copy(source, target)</span>
+<span class="fc" id="L32">    }</span>
+    fun createDirectory(directory: Directory) {
+<span class="nc" id="L34">        Files.createDirectories(getPath(directory))</span>
+<span class="nc" id="L35">    }</span>
+<span class="fc" id="L36">    fun delete(path: Path) = Files.delete(path)</span>
+<span class="fc" id="L37">    fun exists(directory: Directory): Boolean = exists(getPath(directory))</span>
+<span class="fc" id="L38">    fun exists(path: Path): Boolean = Files.exists(path)</span>
+<span class="nc" id="L39">    fun isDirectory(directory: Directory): Boolean = Files.isDirectory(getPath(directory))</span>
+<span class="fc" id="L40">    fun newInputStream(path: Path): InputStream = Files.newInputStream(path)</span>
+<span class="fc" id="L41">    fun newOutputStream(path: Path): OutputStream = Files.newOutputStream(path)</span>
+<span class="fc" id="L42">    fun writeBytesToFile(path: Path, byteArray: ByteArray): Path = Files.write(path, byteArray)</span>
+<span class="fc" id="L43">    fun readBytesFromFile(path: Path): ByteArray = Files.readAllBytes(path)</span>
+<span class="nc" id="L44">    fun copyToClipboard(text: String) = StringSelection(text).let { Toolkit.getDefaultToolkit().systemClipboard.setContents(it, it) }</span>
+<span class="nc" id="L45">    fun exit(): Unit = exitProcess(0)</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

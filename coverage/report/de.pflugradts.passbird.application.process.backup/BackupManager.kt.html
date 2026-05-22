@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BackupManager.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.process.backup</a> &gt; <span class="el_source">BackupManager.kt</span></div><h1>BackupManager.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.process.backup
+
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.Directory
+import de.pflugradts.passbird.application.Global
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
+import de.pflugradts.passbird.application.process.Finalizer
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.toFileName
+import de.pflugradts.passbird.application.util.SystemOperation
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+<span class="fc" id="L17">class BackupManager @Inject constructor(</span>
+<span class="fc" id="L18">    private val configuration: ReadableConfiguration,</span>
+<span class="fc" id="L19">    private val systemOperation: SystemOperation,</span>
+) : Finalizer {
+<span class="fc" id="L21">    private val backupConfiguration get() = configuration.application.backup</span>
+    override fun run() {
+<span class="fc" id="L23">        listOf(</span>
+<span class="fc" id="L24">            Triple(backupConfiguration.configuration, Global.homeDirectory, CONFIGURATION_FILENAME),</span>
+<span class="fc" id="L25">            Triple(backupConfiguration.passwordTree, configuration.adapter.passwordTree.location.toDirectory(), PASSWORD_TREE_FILENAME),</span>
+<span class="fc" id="L26">            Triple(backupConfiguration.keyStore, configuration.adapter.keyStore.location.toDirectory(), KEYSTORE_FILENAME),</span>
+<span class="fc" id="L27">        ).forEach { (settings, directory, fileName) -&gt;</span>
+<span class="fc bfc" id="L28" title="All 4 branches covered.">            if (settings.enabled &amp;&amp; numberOfBackups(settings) &gt; 0) {</span>
+<span class="fc" id="L29">                val backupDirectory = systemOperation.getPath(Global.homeDirectory)</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">                    .resolve(settings.location ?: backupConfiguration.location)</span>
+<span class="fc" id="L31">                    .toString().toDirectory()</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">                if (!systemOperation.exists(backupDirectory)) systemOperation.createDirectory(backupDirectory)</span>
+<span class="fc" id="L33">                val backupPattern = &quot;\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}&quot;</span>
+<span class="fc" id="L34">                val backups = systemOperation.getFileNames(backupDirectory).filter {</span>
+<span class="fc" id="L35">                    it.value.matches(&quot;${fileName.stem()}_$backupPattern\\.${fileName.extension()}&quot;.toRegex())</span>
+<span class="fc" id="L36">                }.sortedBy { it.value }</span>
+<span class="fc bfc" id="L37" title="All 4 branches covered.">                if (backups.isNotEmpty()) {</span>
+<span class="fc" id="L38">                    val current = systemOperation.resolvePath(directory, fileName.toFileName())</span>
+<span class="fc" id="L39">                    val lastBackup = systemOperation.resolvePath(backupDirectory, backups.last())</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">                    if (systemOperation.readBytesFromFile(current) != systemOperation.readBytesFromFile(lastBackup)) {</span>
+<span class="fc" id="L41">                        backup(directory, fileName, backupDirectory)</span>
+                    }
+<span class="fc" id="L43">                    backups.take(0.coerceAtLeast((backups.size + 1) - numberOfBackups(settings))).forEach {</span>
+<span class="fc" id="L44">                        systemOperation.delete(systemOperation.resolvePath(backupDirectory, it))</span>
+<span class="fc" id="L45">                    }</span>
+                } else {
+<span class="fc" id="L47">                    backup(directory, fileName, backupDirectory)</span>
+                }
+            }
+<span class="fc" id="L50">        }</span>
+<span class="fc" id="L51">    }</span>
+
+    private fun numberOfBackups(settings: ReadableConfiguration.BackupSettings) =
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        settings.numberOfBackups ?: configuration.application.backup.numberOfBackups</span>
+
+    private fun backup(directory: Directory, fileName: String, backupDirectory: Directory) {
+<span class="fc" id="L57">        val format = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd_HH-mm-ss&quot;)</span>
+<span class="fc" id="L58">        val backupName = &quot;${fileName.stem()}_${LocalDateTime.now().format(format)}.${fileName.extension()}&quot;</span>
+<span class="fc" id="L59">        systemOperation.copyTo(</span>
+<span class="fc" id="L60">            systemOperation.resolvePath(directory, fileName.toFileName()),</span>
+<span class="fc" id="L61">            systemOperation.resolvePath(backupDirectory, backupName.toFileName()),</span>
+        )
+<span class="fc" id="L63">    }</span>
+}
+
+<span class="fc" id="L66">private fun String.stem() = substring(0, indexOf(&quot;.&quot;))</span>
+<span class="fc" id="L67">private fun String.extension() = substring(indexOf(&quot;.&quot;) + 1)</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

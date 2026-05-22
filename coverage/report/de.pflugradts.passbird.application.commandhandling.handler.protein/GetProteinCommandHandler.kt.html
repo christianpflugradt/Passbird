@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GetProteinCommandHandler.kt</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Passbird</a> &gt; <a href="index.source.html" class="el_package">de.pflugradts.passbird.application.commandhandling.handler.protein</a> &gt; <span class="el_source">GetProteinCommandHandler.kt</span></div><h1>GetProteinCommandHandler.kt</h1><pre class="source lang-java linenums">package de.pflugradts.passbird.application.commandhandling.handler.protein
+
+import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
+import de.pflugradts.passbird.application.ClipboardAdapterPort
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.command.GetProteinCommand
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
+import de.pflugradts.passbird.domain.service.password.PasswordService
+
+<span class="fc" id="L14">class GetProteinCommandHandler @Inject constructor(</span>
+<span class="fc" id="L15">    private val passwordService: PasswordService,</span>
+<span class="fc" id="L16">    private val clipboardAdapterPort: ClipboardAdapterPort,</span>
+<span class="fc" id="L17">    private val userInterfaceAdapterPort: UserInterfaceAdapterPort,</span>
+) : CommandHandler {
+    @Subscribe
+    private fun handleGetProteinCommand(getProteinCommand: GetProteinCommand) {
+<span class="fc bfc" id="L21" title="All 2 branches covered.">        passwordService.viewProteinStructure(getProteinCommand.argument, getProteinCommand.slot).orNull()?.also {</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">            if (it.isNotEmpty) {</span>
+<span class="fc" id="L23">                clipboardAdapterPort.post(outputOf(it))</span>
+<span class="fc" id="L24">                userInterfaceAdapterPort.send(outputOf(shellOf(&quot;Protein copied to clipboard.&quot;)))</span>
+            } else {
+<span class="fc" id="L26">                val msg = &quot;Specified Protein Structure is empty - Operation aborted.&quot;</span>
+<span class="fc" id="L27">                userInterfaceAdapterPort.send(outputOf(shellOf(msg), OutputFormatting.OPERATION_ABORTED))</span>
+            }
+<span class="fc" id="L29">        }</span>
+<span class="fc" id="L30">        getProteinCommand.invalidateInput()</span>
+<span class="fc" id="L31">        userInterfaceAdapterPort.sendLineBreak()</span>
+<span class="fc" id="L32">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
