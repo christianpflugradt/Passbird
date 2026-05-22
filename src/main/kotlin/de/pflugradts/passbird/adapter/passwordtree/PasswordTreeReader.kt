@@ -72,10 +72,16 @@ class PasswordTreeReader @Inject constructor(
         return EggStreamSupplier({ eggs.stream() })
     }
 
-    private fun readFromDisk() =
-        tryCatching { systemOperation.readBytesFromFile(filePath).let { cryptoProvider.decrypt(encryptedShellOf(it)) } }
-            .onFailure { reportFailure(DecryptPasswordTreeFailure(filePath, it)) }
-            .getOrNull()
+    private fun readFromDisk() = tryCatching {
+        if (!systemOperation.exists(filePath)) {
+            return@tryCatching emptyShell()
+        }
+        systemOperation.readBytesFromFile(filePath).let {
+            if (it.isEmpty()) emptyShell() else cryptoProvider.decrypt(encryptedShellOf(it))
+        }
+    }
+        .onFailure { reportFailure(DecryptPasswordTreeFailure(filePath, it)) }
+        .getOrNull()
 
     private fun verifySignature(bytes: ByteArray) {
         val expectedSignature = signature()

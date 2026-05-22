@@ -19,16 +19,16 @@ fun reportFailure(checksumFailure: ChecksumFailure) {
 fun reportFailure(clipboardFailure: ClipboardFailure) =
 <span class="fc" id="L20">    err(&quot;Clipboard could not be updated. Please check your Java version. Exception: ${clipboardFailure.ex.message}&quot;)</span>
 <span class="fc" id="L21">fun reportFailure(commandFailure: CommandFailure) = err(&quot;Command execution failed: ${commandFailure.ex.message}&quot;)</span>
-<span class="pc bpc" id="L22" title="1 of 2 branches missed.">fun reportFailure(configurationFailure: ConfigurationFailure) = if (configurationFailure.ex is UnrecognizedPropertyException) {</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">fun reportFailure(configurationFailure: ConfigurationFailure) = if (configurationFailure.ex is UnrecognizedPropertyException) {</span>
 <span class="nc" id="L23">    err(</span>
         &quot;Configuration contains unrecognized property and will not be used. Please remove the unrecognized field &quot; +
 <span class="nc bnc" id="L25" title="All 4 branches missed.">            &quot;before restarting Passbird: ${configurationFailure.ex.message?.split(&quot;(&quot;)?.get(0)}&quot;,</span>
     )
 } else {
-<span class="fc" id="L28">    err(&quot;Configuration could not be loaded: ${configurationFailure.ex.message}&quot;)</span>
-<span class="fc" id="L29">}</span>
+<span class="nc" id="L28">    err(&quot;Configuration could not be loaded: ${configurationFailure.ex.message}&quot;)</span>
+<span class="nc" id="L29">}</span>
 fun reportFailure(passwordTreeFailure: DecryptPasswordTreeFailure) =
-<span class="fc" id="L31">    err(&quot;Password Tree at '${passwordTreeFailure.path.name}' could not be decrypted: ${passwordTreeFailure.ex.message}&quot;)</span>
+<span class="nc" id="L31">    err(&quot;Password Tree at '${passwordTreeFailure.path.name}' could not be decrypted: ${passwordTreeFailure.ex.message}&quot;)</span>
 <span class="fc" id="L32">fun reportFailure(exportFailure: ExportFailure) = err(&quot;Password Tree could not be exported: ${exportFailure.ex.message}&quot;)</span>
 <span class="fc" id="L33">fun reportFailure(homeDirectoryFailure: HomeDirectoryFailure) = err(</span>
 <span class="fc bfc" id="L34" title="All 3 branches covered.">    &quot;Shutting down: &quot; + when (homeDirectoryFailure.case) {</span>

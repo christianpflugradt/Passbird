@@ -8,8 +8,8 @@ interface Failure
 <span class="pc" id="L8">data class ChecksumFailure(val actualChecksum: Byte, val expectedChecksum: Byte, val critical: Boolean) : Failure</span>
 <span class="fc" id="L9">data class ClipboardFailure(val ex: Exception) : Failure</span>
 <span class="fc" id="L10">data class CommandFailure(val ex: Exception) : Failure</span>
-<span class="fc" id="L11">data class ConfigurationFailure(val ex: Exception) : Failure</span>
-<span class="fc" id="L12">data class DecryptPasswordTreeFailure(val path: Path, val ex: Exception) : Failure</span>
+<span class="nc" id="L11">data class ConfigurationFailure(val ex: Exception) : Failure</span>
+<span class="nc" id="L12">data class DecryptPasswordTreeFailure(val path: Path, val ex: Exception) : Failure</span>
 <span class="fc" id="L13">data class ExportFailure(val ex: Exception) : Failure</span>
 <span class="fc" id="L14">data class HomeDirectoryFailure(val homeDirectory: String? = null, val case: HomeDirectoryFailureCase) : Failure</span>
 <span class="fc" id="L15">data class ImportFailure(val ex: Exception) : Failure</span>

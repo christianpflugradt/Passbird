@@ -10,6 +10,8 @@
 <meta name="generator" content="Jekyll v3.10.0" />
 <meta property="og:title" content="AGENTS.md" />
 <meta property="og:locale" content="en_US" />
+<meta name="description" content="Offline-first terminal password manager with local encrypted storage" />
+<meta property="og:description" content="Offline-first terminal password manager with local encrypted storage" />
 <link rel="canonical" href="https://christianpflugradt.github.io/Passbird/AGENTS.html" />
 <meta property="og:url" content="https://christianpflugradt.github.io/Passbird/AGENTS.html" />
 <meta property="og:site_name" content="Passbird" />
@@ -17,10 +19,10 @@
 <meta name="twitter:card" content="summary" />
 <meta property="twitter:title" content="AGENTS.md" />
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","headline":"AGENTS.md","url":"https://christianpflugradt.github.io/Passbird/AGENTS.html"}</script>
+{"@context":"https://schema.org","@type":"WebPage","description":"Offline-first terminal password manager with local encrypted storage","headline":"AGENTS.md","url":"https://christianpflugradt.github.io/Passbird/AGENTS.html"}</script>
 <!-- End Jekyll SEO tag -->
 
-    <link rel="stylesheet" href="/Passbird/assets/css/style.css?v=e60a45df6079fb91e3368f7b4f1c9d257d574022">
+    <link rel="stylesheet" href="/Passbird/assets/css/style.css?v=362c33790c151da5597451d9673ae5f5480bf30f">
     <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
 
 <!-- Setup Google Analytics -->
@@ -62,10 +64,15 @@
   <li>Preserve the onion architecture enforced by <code class="language-plaintext highlighter-rouge">src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt</code>.</li>
   <li>Preserve the offline-first product posture. Do not add network or browser integration unless explicitly requested by the maintainer.</li>
   <li>Prefer additive, backward-conscious changes. Escalate before changing persistence formats, cryptographic parameters, or user-visible security defaults.</li>
+  <li>Do not add fallbacks the maintainer did not ask for. If a fallback might be needed, pause and get clarification before introducing it.</li>
+  <li>Do not add code comments unless the maintainer explicitly asks for them or an existing project convention clearly requires them. Never leave design commentary, temporary notes, “version 1” phrasing, or other agent-style annotations.</li>
+  <li>Before changing any user-visible text shown by the password manager, get maintainer approval for the exact wording. Do not introduce wording changes without approval.</li>
   <li>Before running shell commands, source <code class="language-plaintext highlighter-rouge">~/.zprofile</code> and <code class="language-plaintext highlighter-rouge">~/.zshrc</code> so repo-local tooling such as <code class="language-plaintext highlighter-rouge">rtk</code>, <code class="language-plaintext highlighter-rouge">gh</code>, and SDKMAN-managed runtimes are available.</li>
   <li>After sourcing the shell environment, prefer the local <code class="language-plaintext highlighter-rouge">rtk</code> wrapper for shell commands; otherwise use direct commands.</li>
   <li>Once a requested task is complete and suitable for release, commit and push it immediately.</li>
   <li>Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.</li>
+  <li>Do not run <code class="language-plaintext highlighter-rouge">./gradlew dependencyCheckAnalyze</code> locally for verification. Treat OWASP dependency scanning as CI-only unless the maintainer explicitly asks for a local run.</li>
+  <li>Do not manually run verification tasks that are already covered by the local <code class="language-plaintext highlighter-rouge">pre-commit</code> hook. Before committing, run only focused tests for the behavior you changed or the tests you added, plus any extra checks that are not part of the hook but are truly needed for the change.</li>
 </ul>
 
 <h2 id="review-commands">Review Commands</h2>
@@ -94,11 +101,10 @@
 <p>Use <code class="language-plaintext highlighter-rouge">.agent/delivery.yaml</code> to choose the right checks. At minimum:</p>
 
 <ul>
-  <li>run <code class="language-plaintext highlighter-rouge">./gradlew test</code> for behavior changes</li>
-  <li>run <code class="language-plaintext highlighter-rouge">./gradlew architecture</code> for structural changes</li>
-  <li>run <code class="language-plaintext highlighter-rouge">./gradlew ktlintCheck</code> for Kotlin edits</li>
-  <li>run <code class="language-plaintext highlighter-rouge">./gradlew checkLicense</code> when dependencies change</li>
-  <li>run <code class="language-plaintext highlighter-rouge">./gradlew dependencyCheckAnalyze</code> when security-sensitive dependency work is involved</li>
+  <li>run only the focused tests that cover the code you changed or the tests you added</li>
+  <li>run <code class="language-plaintext highlighter-rouge">./gradlew architecture</code> only for structural or wiring changes that are not already otherwise covered</li>
+  <li>rely on the local <code class="language-plaintext highlighter-rouge">pre-commit</code> hook for <code class="language-plaintext highlighter-rouge">ktlintCheck</code>, <code class="language-plaintext highlighter-rouge">checkLicense</code>, <code class="language-plaintext highlighter-rouge">jacocoTestCoverageVerification</code>, and the full test suite</li>
+  <li>rely on GitHub Actions for OWASP dependency scanning unless the maintainer explicitly requests a local run</li>
 </ul>
 
 

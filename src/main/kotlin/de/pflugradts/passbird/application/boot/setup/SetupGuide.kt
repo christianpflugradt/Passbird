@@ -27,6 +27,8 @@ class SetupGuide @Inject constructor(private val userInterfaceAdapterPort: UserI
         send("You have landed here because the keystore specified in your configuration does not exist.")
         send("Your configuration specifies the keystore to be in the following directory: $location")
         send("However in that directory there is no file 'passbird.sec'")
+        userInterfaceAdapterPort.sendLineBreak()
+        send("To (c)ontinue setup, press 'c'. To quit setup, press any other key")
     }
 
     fun sendInputPath(fileDescription: String) {
@@ -49,14 +51,18 @@ class SetupGuide @Inject constructor(private val userInterfaceAdapterPort: UserI
     fun sendCreateKeyStoreSucceeded() {
         send("Keystore has been created successfully!")
     }
+
     fun sendNonMatchingInputs() {
         send("Your inputs do not match, please repeat.")
     }
+
     fun sendRestart() {
         send("Now restart Passbird to use it.")
     }
+
     fun sendGoodbye() {
         send("Goodbye!")
     }
+
     private fun send(message: String) = userInterfaceAdapterPort.send(outputOf(shellOf(message)))
 }

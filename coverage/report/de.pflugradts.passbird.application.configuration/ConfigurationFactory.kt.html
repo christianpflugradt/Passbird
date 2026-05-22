@@ -11,17 +11,20 @@ import de.pflugradts.passbird.application.util.SystemOperation
 
 <span class="fc" id="L12">class ConfigurationFactory @Inject constructor(private val systemOperation: SystemOperation) {</span>
 <span class="fc bfc" id="L13" title="All 2 branches covered.">    fun loadConfiguration() = configurationFromFile() ?: Configuration(template = true)</span>
-<span class="fc" id="L14">    private fun configurationFromFile() = try {</span>
-<span class="fc" id="L15">        YAMLMapper().readValue(</span>
-<span class="fc" id="L16">            systemOperation.resolvePath(</span>
-<span class="fc" id="L17">                Global.homeDirectory,</span>
-<span class="fc" id="L18">                CONFIGURATION_FILENAME.toFileName(),</span>
-<span class="fc" id="L19">            ).toFile(),</span>
-<span class="fc" id="L20">            Configuration::class.java,</span>
-        )
-<span class="fc" id="L22">    } catch (ex: Exception) {</span>
-<span class="fc" id="L23">        reportFailure(ConfigurationFailure(ex))</span>
-<span class="fc" id="L24">        null</span>
-<span class="fc" id="L25">    }</span>
+
+<span class="fc" id="L15">    private fun configurationFromFile() = try {</span>
+<span class="fc" id="L16">        systemOperation.resolvePath(</span>
+<span class="fc" id="L17">            Global.homeDirectory,</span>
+<span class="fc" id="L18">            CONFIGURATION_FILENAME.toFileName(),</span>
+<span class="fc bfc" id="L19" title="All 4 branches covered.">        ).takeIf(systemOperation::exists)?.let {</span>
+<span class="fc" id="L20">            YAMLMapper().readValue(</span>
+<span class="fc" id="L21">                it.toFile(),</span>
+<span class="fc" id="L22">                Configuration::class.java,</span>
+<span class="fc" id="L23">            )</span>
+        }
+<span class="nc" id="L25">    } catch (ex: Exception) {</span>
+<span class="nc" id="L26">        reportFailure(ConfigurationFailure(ex))</span>
+<span class="pc" id="L27">        null</span>
+<span class="fc" id="L28">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

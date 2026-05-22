@@ -10,7 +10,6 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
-import de.pflugradts.passbird.domain.model.transfer.Input.Companion.emptyInput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import java.nio.file.Paths
 
@@ -59,15 +58,17 @@ class PassbirdSetup @Inject constructor(
     private fun createConfiguration(directory: Directory) = configurationSync.sync(directory)
 
     private fun receiveMasterPassword(): Input {
-        var input = emptyInput()
-        var inputRepeated = emptyInput()
-        while (input.isEmpty || input != inputRepeated) {
-            setupGuide.sendNonMatchingInputs()
+        var input: Input
+        var inputRepeated: Input
+        while (true) {
             input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("first input: ")))
             inputRepeated = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("second input: ")))
+            if (input.isNotEmpty && input == inputRepeated) {
+                userInterfaceAdapterPort.sendLineBreak()
+                return input
+            }
+            setupGuide.sendNonMatchingInputs()
         }
-        userInterfaceAdapterPort.sendLineBreak()
-        return input
     }
 
     private fun createKeyStore(directory: Directory, password: Input) {
