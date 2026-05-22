@@ -1,5 +1,4 @@
-name: build
-run-name: "verifying ${{ github.ref_name }}: \"${{ github.event.head_commit.message }}\""
+name: Build and Verify
 
 on:
     push:

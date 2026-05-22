@@ -1,5 +1,5 @@
-name: owasp
-run-name: "owasp checking latest commit for ${{ github.ref_name }}"
+name: OWASP Dependency Check
+run-name: "Dependency check (${{ github.event_name }})"
 
 on:
     schedule: [ cron: "0 0 * * *" ]

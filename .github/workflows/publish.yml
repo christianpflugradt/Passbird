@@ -1,5 +1,5 @@
-name: publish
-run-name: "publish semantic release (${{ github.event_name }} on ${{ github.ref_name }})"
+name: Publish Release
+run-name: "Semantic release (${{ github.event_name }})"
 
 on:
   workflow_dispatch:
