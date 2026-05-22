@@ -25,7 +25,7 @@ jobs:
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v6
       - id: dependency-check-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
           key: ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}update-${{ github.run_id }}
@@ -39,7 +39,7 @@ jobs:
           OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
         run: ./gradlew dependencyCheckUpdate --stacktrace
       - name: save refreshed dependency-check cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
           key: ${{ steps.dependency-check-cache.outputs.cache-primary-key }}

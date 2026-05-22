@@ -71,7 +71,7 @@ jobs:
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v6
       - id: dependency-check-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
           key: ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}build-${{ github.run_id }}
@@ -227,7 +227,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: configure GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: build GitHub Pages site
         uses: actions/jekyll-build-pages@v1
         with:
@@ -280,7 +280,7 @@ jobs:
           }
           EOF
       - name: upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./site
 
@@ -298,4 +298,4 @@ jobs:
     steps:
       - name: deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
