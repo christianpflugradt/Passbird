@@ -11,7 +11,9 @@ import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.emptyInput
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.fakeInput
 import io.mockk.Called
 import io.mockk.every
@@ -19,6 +21,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -236,5 +239,45 @@ class PassbirdSetupTest {
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
         verify { configurationSync wasNot Called }
+    }
+
+    @Test
+    fun `should only warn about non matching password input after the first failed attempt`() {
+        // given
+        val configurationDirectory = VALID_DIRECTORY
+        val passwordMismatch1 = fakeInput("bassword")
+        val passwordMismatch2 = fakeInput("guessword")
+        val passwordMatched = fakeInput("p4s5w0rD")
+        val pathSlot = slot<Path>()
+        fakeConfiguration(instance = configuration, withKeyStoreLocation = configurationDirectory)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseSecureInputs = listOf(
+                passwordMismatch1,
+                passwordMismatch2,
+                passwordMatched,
+                passwordMatched,
+            ),
+            withReceiveConfirmation = true,
+        )
+        fakeSystemOperation(
+            instance = systemOperation,
+            withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
+        )
+        every { keyStoreAdapterPort.storeKey(eq(passwordMatched.shell.toPlainShell()), capture(pathSlot)) } returns Unit
+
+        // when
+        passbirdSetup.boot()
+
+        // then
+        verifyOrder {
+            userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("first input: ")))
+            userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("second input: ")))
+            userInterfaceAdapterPort.send(outputOf(shellOf("Your inputs do not match, please repeat.")))
+            userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("first input: ")))
+            userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("second input: ")))
+        }
+        expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
+        expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
     }
 }
