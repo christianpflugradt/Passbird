@@ -202,6 +202,11 @@ jobs:
         with:
           source: ./
           destination: ./_site
+      - name: prepare writable Pages directory
+        run: |
+          rm -rf site
+          mkdir -p site
+          cp -R _site/. site/
       - uses: actions/download-artifact@v8
         with:
           name: test-coverage-report
@@ -211,11 +216,11 @@ jobs:
           python3 scripts/render_coverage_pages.py \
             --report-xml build/reports/jacoco/test/jacocoTestReport.xml \
             --report-html-dir build/reports/jacoco/test/html \
-            --site-dir _site
+            --site-dir site
       - name: upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./_site
+          path: ./site
 
   deploy-pages:
     runs-on: ubuntu-latest
