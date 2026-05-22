@@ -89,6 +89,7 @@ jobs:
           fi
       - name: check dependencies for vulnerabilities
         env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
           DEPENDENCY_CHECK_DATA_LOCATION: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
           DEPENDENCY_CHECK_NVD_DATAFEED_URL: ${{ steps.dependency-check-mirror.outputs.nvd_datafeed_url }}
           DEPENDENCY_CHECK_KEV_URL: ${{ steps.dependency-check-mirror.outputs.kev_url }}

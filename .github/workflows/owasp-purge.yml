@@ -33,6 +33,7 @@ jobs:
             ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}
       - name: purge and rebuild dependency-check cache
         env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
           DEPENDENCY_CHECK_DATA_LOCATION: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
           DEPENDENCY_CHECK_NVD_DATAFEED_URL: "https://${{ github.repository_owner }}.github.io/Passbird/odc/nvd/nvdcve-{0}.json.gz"
           DEPENDENCY_CHECK_KEV_URL: "https://${{ github.repository_owner }}.github.io/Passbird/odc/known_exploited_vulnerabilities.json"

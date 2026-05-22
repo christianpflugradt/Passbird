@@ -96,6 +96,7 @@ jobs:
           EOF
       - name: warm dependency-check cache from local mirror
         env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
           DEPENDENCY_CHECK_DATA_LOCATION: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
           DEPENDENCY_CHECK_NVD_DATAFEED_URL: "http://127.0.0.1:8000/odc/nvd/nvdcve-{0}.json.gz"
           DEPENDENCY_CHECK_KEV_URL: "http://127.0.0.1:8000/odc/known_exploited_vulnerabilities.json"
@@ -106,8 +107,12 @@ jobs:
           python3 -m http.server 8000 --directory site >/tmp/odc-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
-          curl --retry 10 --retry-delay 1 --silent --fail \
-            "http://127.0.0.1:8000/odc/nvd/nvdcve-modified.meta" >/dev/null
+          if ! curl --retry 30 --retry-delay 1 --retry-all-errors --retry-connrefused \
+            --silent --show-error --fail \
+            "http://127.0.0.1:8000/odc/nvd/nvdcve-modified.meta" >/dev/null; then
+            cat /tmp/odc-http.log
+            exit 1
+          fi
           ./gradlew dependencyCheckUpdate --stacktrace
       - name: save warmed dependency-check cache
         uses: actions/cache/save@v4
