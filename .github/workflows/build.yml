@@ -320,7 +320,7 @@ jobs:
               git rm -rf . >/dev/null 2>&1 || true
             fi
           )
-          rsync -a --delete site/ "$pages_worktree/"
+          rsync -a --delete --exclude '.git/' site/ "$pages_worktree/"
           touch "$pages_worktree/.nojekyll"
           (
             cd "$pages_worktree"
