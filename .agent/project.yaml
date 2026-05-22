@@ -1,0 +1,98 @@
+schema_version: 1
+last_reviewed: 2026-05-17
+project:
+  name: Passbird
+  synopsis: >
+    Lightweight terminal-based password manager built in Kotlin. It runs fully
+    offline, stores the encryption key in a Java KeyStore, encrypts password
+    data with AES-GCM, and persists its data in local files under a user-chosen
+    home directory.
+  product_principles:
+    - offline_first
+    - terminal_native
+    - local_file_storage
+    - security_over_convenience
+    - explicit_user_control
+  non_goals:
+    - browser integration
+    - cloud sync
+    - network services
+    - rich GUI workflows
+technical_profile:
+  language: Kotlin
+  runtime: Java 17
+  dependency_injection: Google Guice
+  test_stack:
+    - JUnit 5
+    - MockK
+    - Strikt
+    - Awaitility
+    - ArchUnit
+  build_features:
+    - fat_jar_packaging
+    - ktlint
+    - jacoco
+    - OWASP dependency check
+    - dependency license allowlist
+runtime_files:
+  home_directory_argument: required
+  files:
+    - name: passbird.yml
+      purpose: user configuration
+    - name: passbird.sec
+      purpose: keystore containing secret material used to derive the crypto provider key
+    - name: passbird.tree
+      purpose: encrypted password tree persistence file
+    - name: passbird-export.json
+      purpose: human-readable import and export format
+repository_layout:
+  - path: src/main/kotlin/de/pflugradts/passbird/application
+    role: application boot, command handling, configuration, process orchestration, security factories
+  - path: src/main/kotlin/de/pflugradts/passbird/domain/model
+    role: domain entities, value objects, events, transfer primitives
+  - path: src/main/kotlin/de/pflugradts/passbird/domain/service
+    role: business logic around eggs, nests, password operations, event handling
+  - path: src/main/kotlin/de/pflugradts/passbird/adapter
+    role: implementations for clipboard, exchange, keystore, password tree, and terminal UI
+  - path: src/test/kotlin
+    role: unit, integration, and architecture tests
+  - path: .github/workflows
+    role: GitHub CI
+  - path: .gitlab-ci.yml
+    role: GitLab CI and release flow
+key_entrypoints:
+  - file: src/main/kotlin/de/pflugradts/passbird/application/Main.kt
+    purpose: CLI entrypoint, argument validation, boot selection
+  - file: src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationModule.kt
+    purpose: Guice bindings and runtime wiring
+  - file: src/main/kotlin/de/pflugradts/passbird/application/boot/main/PassbirdApplication.kt
+    purpose: interactive main loop
+  - file: src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt
+    purpose: architectural guardrail suite
+observed_change_patterns:
+  recent_history:
+    - heavy dependency maintenance via Renovate
+    - repeated CI and OWASP workflow hardening
+    - recent feature work around egg ID memory and proteins
+    - explicit attention to documentation and usage clarity
+commands:
+  compile: ./gradlew compileKotlin compileTestKotlin compileJava compileTestJava
+  unit_tests: ./gradlew test
+  integration_tests: ./gradlew integration
+  architecture_tests: ./gradlew architecture
+  full_tests: ./gradlew allTests
+  lint: ./gradlew ktlintCheck
+  coverage_gate: ./gradlew jacocoTestCoverageVerification
+  license_gate: ./gradlew checkLicense
+  owasp: ./gradlew dependencyCheckAnalyze
+  pre_commit: ./gradlew preCommitCheck
+release_model:
+  versioning: semantic_versioning
+  primary_branch: main
+  automation:
+    - manual semantic-release job on GitLab for main
+    - GitHub and GitLab both run verification pipelines
+agent_notes:
+  - this repo values long-term maintenance, not only passing tests
+  - security claims in docs should remain modest; README explicitly says the project is not externally audited
+  - any design doc that overstates guarantees is a defect

@@ -1,0 +1,72 @@
+schema_version: 1
+entrypoint: AGENTS.md
+last_reviewed: 2026-05-17
+repository:
+  name: Passbird
+  type: secure offline terminal password manager
+  language: Kotlin
+  build_tool: Gradle Kotlin DSL
+  runtime:
+    java: "17+"
+  primary_artifact: passbird.jar
+  maintainer:
+    name: Christian Pflugradt
+knowledge_base:
+  location: .agent
+  format: yaml
+  intent:
+    - keep agent work aligned with the current architecture
+    - preserve security expectations in a password-management codebase
+    - make future feature work predictable and maintainable
+read_order:
+  - .agent/project.yaml
+  - .agent/architecture.yaml
+  - .agent/domain.yaml
+  - .agent/security.yaml
+  - .agent/delivery.yaml
+task_routing:
+  default:
+    - .agent/project.yaml
+    - .agent/architecture.yaml
+    - .agent/delivery.yaml
+  command_or_cli_change:
+    - .agent/domain.yaml
+    - .agent/architecture.yaml
+    - .agent/delivery.yaml
+  persistence_or_configuration_change:
+    - .agent/project.yaml
+    - .agent/architecture.yaml
+    - .agent/security.yaml
+    - .agent/delivery.yaml
+  crypto_or_secret_handling_change:
+    - .agent/security.yaml
+    - .agent/architecture.yaml
+    - .agent/delivery.yaml
+  documentation_only_change:
+    - .agent/project.yaml
+sources_reviewed:
+  docs:
+    - README.md
+    - CONFIGURATION.md
+  build_and_ci:
+    - build.gradle.kts
+    - .gitlab-ci.yml
+    - .github/workflows/build.yml
+    - .github/workflows/codeql.yml
+    - .github/workflows/owasp.yml
+  code:
+    - src/main/kotlin/de/pflugradts/passbird/application/Main.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationModule.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/boot/main/PassbirdApplication.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
+    - src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
+    - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeReader.kt
+    - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeWriter.kt
+    - src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt
+update_contract:
+  - if architecture or package boundaries change, update .agent/architecture.yaml
+  - if terminology or user workflows change, update .agent/domain.yaml
+  - if security guarantees, defaults, or sensitive flows change, update .agent/security.yaml
+  - if build, CI, release, or validation expectations change, update .agent/delivery.yaml
+  - if the repo layout or key entrypoints change, update .agent/project.yaml

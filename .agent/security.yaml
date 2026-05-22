@@ -1,0 +1,88 @@
+schema_version: 1
+last_reviewed: 2026-05-17
+security_posture:
+  classification: high_sensitivity_local_secret_manager
+  posture:
+    - offline_only by product design
+    - local file persistence
+    - secure defaults preferred over convenience defaults
+    - integrity verification built into password tree restore
+  explicit_limits:
+    - README says the project has not been reviewed by security experts
+    - agent docs must not overstate security guarantees beyond code and README
+sensitive_assets:
+  - master password entered by the user
+  - keystore secret stored in passbird.sec
+  - decrypted password and protein content
+  - password tree bytes in passbird.tree
+  - exported plaintext-equivalent password data in passbird-export.json
+current_security_relevant_implementation:
+  crypto_provider_factory:
+    file: src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
+    facts:
+      - prompts for the keystore password through secure terminal input
+      - allows three authentication attempts before exit
+  keystore:
+    file: src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
+    facts:
+      - uses JCEKS via SystemOperation
+      - stores a generated AES secret key under alias PwMan3Secret
+      - scrambles password material after use
+  cipher:
+    file: src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
+    facts:
+      - uses AES/GCM/NoPadding
+      - uses a 12-byte IV generated from SecureRandom
+      - derives an AES key through PBKDF2WithHmacSHA256 from the loaded key material
+      - currently uses a static salt and 100 PBKDF2 iterations
+  password_tree_integrity:
+    files:
+      - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeReader.kt
+      - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeWriter.kt
+    facts:
+      - verifies signature and checksum on restore
+      - can exit immediately when verification is configured as critical
+      - stores eggs, nests, and optionally persisted memory in a custom binary layout before encryption
+hard_guardrails:
+  - do not add network, browser, or cloud integration without explicit maintainer approval
+  - do not log, print, snapshot, or persist decrypted secrets for debugging
+  - do not replace secure input flows with plain input flows
+  - do not widen secret lifetimes unnecessarily; preserve scrambling and byte-oriented handling where practical
+  - do not weaken default verification behavior for checksum or signature checks without an explicit product decision
+  - do not silently change the password tree format or keystore behavior
+requires_explicit_human_review:
+  - any cryptographic algorithm change
+  - any change to key derivation parameters or keystore alias semantics
+  - any change to password tree binary layout, checksum calculation, or signature handling
+  - any change that alters offline-only posture
+  - any change that exports more secret material or increases clipboard exposure
+  - any default change affecting secure input, inactivity timeout, backup handling, or destructive prompts
+security_sensitive_files:
+  - src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
+  - src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
+  - src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
+  - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeReader.kt
+  - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeWriter.kt
+  - src/main/kotlin/de/pflugradts/passbird/adapter/exchange/FilePasswordExchange.kt
+  - src/main/kotlin/de/pflugradts/passbird/adapter/userinterface/CommandLineInterfaceService.kt
+validation_matrix:
+  crypto_or_persistence_change:
+    required:
+      - ./gradlew allTests
+      - ./gradlew architecture
+      - ./gradlew jacocoTestCoverageVerification
+    recommended:
+      - ./gradlew dependencyCheckAnalyze
+  dependency_or_build_change:
+    required:
+      - ./gradlew checkLicense
+      - ./gradlew dependencyCheckAnalyze
+      - ./gradlew allTests
+  ui_or_command_change_touching_secrets:
+    required:
+      - ./gradlew test
+      - ./gradlew integration
+      - ./gradlew architecture
+documentation_expectations:
+  - if a security-relevant behavior changes, update README or CONFIGURATION.md when user-visible
+  - keep wording precise about what is verified, encrypted, or merely obscured

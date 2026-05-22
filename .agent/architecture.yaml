@@ -1,0 +1,115 @@
+schema_version: 1
+last_reviewed: 2026-05-17
+architecture:
+  style: onion
+  enforcement:
+    file: src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt
+    mechanisms:
+      - ArchUnit onion architecture rules
+      - package placement assertions
+      - naming constraints
+      - event-handler constraints
+layers:
+  - name: domain_model
+    package: de.pflugradts.passbird.domain.model
+    responsibilities:
+      - represent Eggs, Nests, Proteins, Slots, Shells, and domain events
+      - keep domain state transitions explicit
+      - avoid infrastructure concerns
+    must_not_depend_on:
+      - application layer
+      - adapter layer
+  - name: domain_service
+    package: de.pflugradts.passbird.domain.service
+    responsibilities:
+      - coordinate repositories and domain objects
+      - own business operations on passwords and nests
+      - publish and react to domain events
+    may_access:
+      - domain model
+      - repositories in domain service package
+  - name: application
+    package: de.pflugradts.passbird.application
+    responsibilities:
+      - bootstrapping
+      - command parsing and dispatch
+      - configuration loading
+      - process orchestration
+      - factories that bridge runtime concerns into ports
+  - name: adapters
+    package: de.pflugradts.passbird.adapter
+    responsibilities:
+      - file IO
+      - keystore access
+      - clipboard access
+      - terminal UI
+      - import and export serialization
+structural_rules:
+  - repositories must only be accessed from domain services
+  - classes implementing AdapterPort interfaces must live under adapter packages
+  - no concrete classes may live directly in de.pflugradts.passbird.adapter or de.pflugradts.passbird.domain
+  - no class names may end with Impl
+  - no class names may end with Helper
+  - event handlers must not expose public methods
+  - handler methods for events must be annotated with Subscribe
+  - do not introduce java.util.Optional; the codebase uses custom Option and TryResult types
+runtime_design:
+  boot_sequence:
+    - Main.kt validates the home directory argument
+    - Launcher or setup boot path is selected via boot modules
+    - ApplicationModule wires adapters, services, and handlers with Guice
+    - PassbirdApplication enters the interactive command loop
+  interaction_model:
+    - user input is parsed into command types
+    - CommandFactory creates command objects
+    - CommandBus dispatches to handlers
+    - handlers call application and domain services
+    - event registries propagate side effects
+ports_and_adapters:
+  - port: UserInterfaceAdapterPort
+    implementation: adapter.userinterface.CommandLineInterfaceService
+    concern: terminal input and output including secure input mode
+  - port: ClipboardAdapterPort
+    implementation: adapter.clipboard.ClipboardService
+    concern: clipboard copy and reset behavior
+  - port: KeyStoreAdapterPort
+    implementation: adapter.keystore.KeyStoreService
+    concern: load and store secret material in JCEKS
+  - port: PasswordTreeAdapterPort
+    implementation: adapter.passwordtree.PasswordTreeFacade
+    concern: encrypted persistence of eggs, nests, and memory
+  - port: ExchangeAdapterPort
+    implementation: adapter.exchange.FilePasswordExchange
+    concern: import and export of human-readable password data
+important_extension_paths:
+  - change: add a new top-level command
+    steps:
+      - update command resolution in application.commandhandling.CommandType
+      - add or extend a command class under application.commandhandling.command
+      - wire a handler under application.commandhandling.handler
+      - register the handler in ApplicationModule multibinders
+      - add focused tests for parsing and handler behavior
+      - update README and .agent/domain.yaml if user-facing behavior changes
+  - change: add a new configuration option
+    steps:
+      - extend ReadableConfiguration and concrete configuration classes
+      - ensure ConfigurationFactory can still load old files safely
+      - define default behavior conservatively
+      - document the option in CONFIGURATION.md, README if user-facing, and .agent/security.yaml if it affects security
+  - change: add a new adapter
+    steps:
+      - keep the port in the application or domain layer
+      - implement the adapter under src/main/kotlin/de/pflugradts/passbird/adapter
+      - bind it in ApplicationModule
+      - cover it with tests at the right level
+  - change: modify password tree persistence
+    steps:
+      - treat as security-sensitive and compatibility-sensitive
+      - inspect PasswordTreeReader and PasswordTreeWriter together
+      - verify signatures, checksum handling, memory layout, nest layout, and egg layout end to end
+      - update migration docs if user data compatibility changes
+high_risk_files:
+  - src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationModule.kt
+  - src/main/kotlin/de/pflugradts/passbird/application/commandhandling
+  - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree
+  - src/main/kotlin/de/pflugradts/passbird/application/security

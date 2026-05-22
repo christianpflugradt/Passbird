@@ -15,6 +15,8 @@
     + [Proteins](#proteins)
     + [Memory](#memory)
     + [Custom Passwords](#custom-passwords)
+* [Development](#development)
+    + [Commit Messages](#commit-messages)
 * [Migrating Passbird 4.x.x to Passbird 5.x.x](#migrating-passbird-4xx-to-passbird-5xx)
 * [Frequently Asked Questions](#frequently-asked-questions)
 
@@ -342,6 +344,59 @@ To view all available configurations and their indices, input `s?`. Using the ex
         s? (help)                  Displays an overview of available password configurations.
 	    s[EggId] (set)             Sets a random password for the specified EggId using the default configuration.
         s[1-9][EggId] (set custom) Sets a random password for the specified EggId using a custom configuration.
+
+## Development
+
+### Commit Messages
+
+Passbird uses Conventional Commits and validates them in the local `commit-msg` hook before a commit is accepted.
+
+Supported commit types are:
+- `fix`
+- `feat`
+- `build`
+- `chore`
+- `ci`
+- `docs`
+- `perf`
+- `refactor`
+- `revert`
+- `style`
+- `test`
+- `major`
+
+Scopes are optional. When a scope is used, it must be one of:
+- `backup`
+- `boot`
+- `clipboard`
+- `commands`
+- `configuration`
+- `deps`
+- `egg`
+- `events`
+- `exchange`
+- `gradle`
+- `inactivity`
+- `keystore`
+- `memory`
+- `nest`
+- `password`
+- `passwordtree`
+- `protein`
+- `release`
+- `security`
+- `userinterface`
+
+Use scopes primarily for software areas, especially when a change is focused on one adapter or one part of the application or domain model. If a change is broad or cross-cutting, omit the scope. The `ci` type is usually scope-less.
+
+Examples:
+- `fix(passwordtree): preserve checksum verification on restore`
+- `feat(protein): add update confirmation message`
+- `refactor(commands): simplify memory command dispatch`
+- `test(keystore): cover failed key loading`
+- `docs(configuration): explain verifySignature behavior`
+- `chore(deps): update dependency gradle to v9.5.1`
+- `ci: upload owasp report on failure`
 
 ## Migrating Passbird 4.x.x to Passbird 5.x.x
 

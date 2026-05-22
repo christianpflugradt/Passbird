@@ -1,0 +1,91 @@
+schema_version: 1
+last_reviewed: 2026-05-17
+domain_language:
+  - term: Egg
+    meaning: aggregate root representing one password entry and its associated proteins in a specific nest
+  - term: EggId
+    meaning: user-facing identifier for an Egg
+  - term: Nest
+    meaning: category bucket for Eggs; default nest plus slots 1 through 9
+  - term: Protein
+    meaning: additional structured secret or metadata entry attached to an Egg
+  - term: EggIdMemory
+    meaning: short-term memory of recently used EggIds, maintained per nest
+  - term: Slot
+    meaning: bounded numeric position used for nests, proteins, and memory
+  - term: Shell
+    meaning: byte-oriented value object used to keep secret data out of String-first APIs
+  - term: PlainShell
+    meaning: shell form used before encryption and for secure input handling
+  - term: EncryptedShell
+    meaning: encrypted shell payload used in persistence and secret-bearing domain fields
+user_command_families:
+  - family: egg
+    commands:
+      - g[EggId]
+      - s[EggId]
+      - c[EggId]
+      - v[EggId]
+      - r[EggId]
+      - d[EggId]
+  - family: exchange
+    commands:
+      - e
+      - i
+  - family: nest
+    commands:
+      - n
+      - n[0-9]
+      - n+[1-9]
+      - n-[1-9]
+      - n[0-9][EggId]
+  - family: protein
+    commands:
+      - p?
+      - p[EggId]
+      - p*[EggId]
+      - p[0-9][EggId]
+      - p+[0-9][EggId]
+      - p-[0-9][EggId]
+  - family: memory
+    commands:
+      - m?
+      - m
+      - m[0-9]
+      - m[0-9]Command
+  - family: custom_password
+    commands:
+      - s?
+      - s[1-9][EggId]
+state_and_limits:
+  nests:
+    default_slot: 0
+    additional_slots: 1-9
+  proteins_per_egg: 10
+  memory_entries_per_nest: 10
+  custom_password_configurations: up_to_9_plus_default
+important_domain_invariants:
+  - Egg identity is tied to EggId plus associated nest
+  - egg operations emit domain events such as created, updated, renamed, moved, or discarded
+  - protein operations emit create, update, and discard events
+  - memory is per nest and may be disabled or non-persistent via configuration
+  - user-facing Unicode support is intentionally not guaranteed; README warns against Unicode input
+persistence_mapping:
+  - artifact: passbird.tree
+    contains:
+      - encrypted eggs
+      - nest metadata
+      - persisted memory when enabled
+  - artifact: passbird.sec
+    contains:
+      - keystore-managed secret used for crypto-provider creation
+  - artifact: passbird.yml
+    contains:
+      - application settings
+      - adapter settings
+      - domain settings
+task_hints_for_agents:
+  - when a user describes an account entry, map it to Egg plus optional Proteins
+  - when a user describes categories or workspaces, check whether a Nest concept already covers it
+  - when adding user-facing commands, keep command grammar terse and single-character-first unless the maintainer asks for a different direction
+  - if a new feature stretches the Egg, Nest, Protein, or Memory model, document the terminology change here

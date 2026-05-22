@@ -1,0 +1,117 @@
+schema_version: 1
+last_reviewed: 2026-05-22
+quality_gates:
+  formatting_and_style:
+    - ./gradlew ktlintCheck
+  test_suites:
+    - ./gradlew test
+    - ./gradlew integration
+    - ./gradlew architecture
+    - ./gradlew allTests
+  coverage:
+    command: ./gradlew jacocoTestCoverageVerification
+    thresholds:
+      instruction: ">= 0.90"
+      branch: ">= 0.85"
+  dependency_and_license:
+    - ./gradlew checkLicense
+    - ./gradlew dependencyCheckAnalyze
+  convenience_task:
+    - ./gradlew preCommitCheck
+ci_landscape:
+  github:
+    workflows:
+      - .github/workflows/build.yml
+      - .github/workflows/codeql.yml
+      - .github/workflows/owasp.yml
+    notes:
+      - architecture tests and coverage jobs run only on main in the observed GitHub workflow
+  gitlab:
+    file: .gitlab-ci.yml
+    notes:
+      - compile, lint, license, unit, integration, architecture, coverage, and OWASP jobs are defined
+      - semantic-release is a manual main-branch release job
+change_rules:
+  - keep changes small and intention-revealing in this security-sensitive codebase
+  - add or update tests with behavior changes; do not rely on docs alone
+  - update README for user-visible command, workflow, or migration changes
+  - update CONFIGURATION.md for any configuration-schema or default-value change
+  - update .agent docs whenever agent-facing guidance would otherwise become stale
+  - preserve backward compatibility unless the maintainer explicitly chooses a breaking change
+commit_messages:
+  standard: conventional_commits
+  enforced_by:
+    - local commit-msg hook generated from settings.gradle.kts
+  supported_types:
+    - fix
+    - feat
+    - build
+    - chore
+    - ci
+    - docs
+    - perf
+    - refactor
+    - revert
+    - style
+    - test
+    - major
+  optional_scopes:
+    - backup
+    - boot
+    - clipboard
+    - commands
+    - configuration
+    - deps
+    - egg
+    - events
+    - exchange
+    - gradle
+    - inactivity
+    - keystore
+    - memory
+    - nest
+    - password
+    - passwordtree
+    - protein
+    - release
+    - security
+    - userinterface
+  guidance:
+    - use scopes for localized software changes, especially adapter-focused work
+    - omit the scope for broad or cross-cutting changes
+    - prefer scope-less ci commits unless a scoped ci commit is clearly more readable
+recommended_validation_by_change_type:
+  docs_only:
+    run:
+      - review changed files for consistency
+  kotlin_code_non_structural:
+    run:
+      - ./gradlew test
+      - ./gradlew ktlintCheck
+  architecture_or_wiring:
+    run:
+      - ./gradlew test
+      - ./gradlew architecture
+      - ./gradlew ktlintCheck
+  config_or_user_workflow:
+    run:
+      - ./gradlew test
+      - ./gradlew integration
+      - ./gradlew ktlintCheck
+  security_or_persistence:
+    run:
+      - ./gradlew allTests
+      - ./gradlew architecture
+      - ./gradlew jacocoTestCoverageVerification
+      - ./gradlew dependencyCheckAnalyze
+release_and_history_notes:
+  versioning: semantic versioning
+  commit_patterns_observed:
+    - conventional commit style for automation and release tooling
+    - dependency updates are frequent and usually automated
+  release_guardrail:
+    - if a change impacts persistence format or migration behavior, document it before release
+escalation_rules:
+  - escalate when a change has hidden compatibility risk for stored data
+  - escalate when a request conflicts with offline-only posture
+  - escalate when a test-only green state would still leave the security model ambiguous
