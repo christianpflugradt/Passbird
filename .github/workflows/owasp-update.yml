@@ -116,6 +116,9 @@ jobs:
           key: ${{ steps.dependency-check-cache.outputs.cache-primary-key }}
       - name: store current Pages snapshot
         run: |
+          if git ls-remote --exit-code --heads origin "$PAGES_BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$PAGES_BRANCH" --depth=1
+          fi
           pages_worktree="$(mktemp -d)"
           git worktree add --detach "$pages_worktree"
           (
