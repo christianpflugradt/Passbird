@@ -90,7 +90,9 @@ release_model:
   primary_branch: main
   automation:
     - GitHub Actions build, CodeQL, and OWASP workflows verify the repository
-    - GitHub Actions build workflow publishes the GitHub Pages site from the repository root and refreshes the branch coverage badge and report on main
+    - GitHub Actions build workflow runs dependency-check analysis on push and publishes the GitHub Pages site from the repository root on main
+    - GitHub Actions refresh a GitHub Pages-backed dependency-check mirror daily and purge the warmed dependency-check cache weekly
+    - GitHub Actions build workflow refreshes the branch coverage badge and report on main while preserving the mirrored dependency-check assets on GitHub Pages
     - GitHub Actions publish workflow runs semantic-release on demand and every Monday at 03:00 Europe/Berlin
     - semantic-release publishes GitHub tags and GitHub releases with the passbird.jar asset when commit history requires a release
 agent_notes:

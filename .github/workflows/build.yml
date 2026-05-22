@@ -2,10 +2,15 @@ name: Build and Verify
 
 on:
     push:
+      branches-ignore:
+        - gh-pages
     workflow_dispatch:
 
 env:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  DEPENDENCY_CHECK_DATA_LOCATION: "${{ github.workspace }}/.dependency-check"
+  DEPENDENCY_CHECK_CACHE_KEY_PREFIX: "linux-dependency-check-v1-"
+  PAGES_BRANCH: "gh-pages"
 
 jobs:
 
@@ -56,6 +61,46 @@ jobs:
         with:
           name: dependencies-without-allowed-license
           path: build/reports/dependency-license/dependencies-without-allowed-license.json
+
+  owasp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - uses: gradle/actions/setup-gradle@v6
+      - id: dependency-check-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
+          key: ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}build-${{ github.run_id }}
+          restore-keys: |
+            ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}
+      - id: dependency-check-mirror
+        name: resolve dependency-check mirror
+        run: |
+          base_url="https://${GITHUB_REPOSITORY_OWNER}.github.io/Passbird/odc"
+          if curl --silent --fail --head "${base_url}/nvd/nvdcve-modified.meta" >/dev/null; then
+            echo "nvd_datafeed_url=${base_url}/nvd/nvdcve-{0}.json.gz" >> "$GITHUB_OUTPUT"
+            echo "kev_url=${base_url}/known_exploited_vulnerabilities.json" >> "$GITHUB_OUTPUT"
+            echo "hosted_suppressions_url=${base_url}/publishedSuppressions.xml" >> "$GITHUB_OUTPUT"
+          fi
+      - name: check dependencies for vulnerabilities
+        env:
+          DEPENDENCY_CHECK_DATA_LOCATION: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
+          DEPENDENCY_CHECK_NVD_DATAFEED_URL: ${{ steps.dependency-check-mirror.outputs.nvd_datafeed_url }}
+          DEPENDENCY_CHECK_KEV_URL: ${{ steps.dependency-check-mirror.outputs.kev_url }}
+          DEPENDENCY_CHECK_HOSTED_SUPPRESSIONS_URL: ${{ steps.dependency-check-mirror.outputs.hosted_suppressions_url }}
+          OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
+          OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
+        run: ./gradlew dependencyCheckAnalyze --stacktrace
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: dependency-check-report
+          path: build/reports/dependency-check-report.html
 
   unit-tests:
     runs-on: ubuntu-latest
@@ -192,7 +237,7 @@ jobs:
       - test-coverage-report
     if: github.ref == 'refs/heads/main'
     permissions:
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v6
       - name: configure GitHub Pages
@@ -217,6 +262,43 @@ jobs:
             --report-xml build/reports/jacoco/test/jacocoTestReport.xml \
             --report-html-dir build/reports/jacoco/test/html \
             --site-dir site
+      - name: restore mirrored dependency-check assets
+        run: |
+          if git ls-remote --exit-code --heads origin "$PAGES_BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$PAGES_BRANCH" --depth=1
+            pages_worktree="$(mktemp -d)"
+            git worktree add "$pages_worktree" "origin/$PAGES_BRANCH"
+            if [ -d "$pages_worktree/odc" ]; then
+              rsync -a "$pages_worktree/odc/" site/odc/
+            fi
+            git worktree remove "$pages_worktree" --force
+          fi
+      - name: store current Pages snapshot
+        run: |
+          pages_worktree="$(mktemp -d)"
+          git worktree add --detach "$pages_worktree"
+          (
+            cd "$pages_worktree"
+            if git show-ref --verify --quiet "refs/remotes/origin/$PAGES_BRANCH"; then
+              git checkout -B "$PAGES_BRANCH" "origin/$PAGES_BRANCH"
+            else
+              git checkout --orphan "$PAGES_BRANCH"
+              git rm -rf . >/dev/null 2>&1 || true
+            fi
+          )
+          rsync -a --delete site/ "$pages_worktree/"
+          touch "$pages_worktree/.nojekyll"
+          (
+            cd "$pages_worktree"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            if ! git diff --cached --quiet; then
+              git commit -m "ci: update github pages snapshot"
+              git push origin HEAD:"$PAGES_BRANCH"
+            fi
+          )
+          git worktree remove "$pages_worktree" --force
       - name: upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:

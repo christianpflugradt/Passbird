@@ -10,6 +10,8 @@ import org.jlleitschuh.gradle.ktlint.reporter.ReporterType.HTML
 import java.text.SimpleDateFormat
 import java.util.Date
 
+fun envOrNull(name: String): String? = System.getenv(name)?.takeIf { it.isNotBlank() }
+
 plugins {
     idea
     application
@@ -166,13 +168,16 @@ tasks.jacocoTestCoverageVerification {
 dependencyCheck {
     scanConfigurations = listOf("runtimeClasspath")
     failBuildOnCVSS = 0.0f
-    nvd.apiKey = System.getenv("NVD_API_KEY")
+    nvd.apiKey = envOrNull("NVD_API_KEY")
     nvd.delay = 16000
+    envOrNull("DEPENDENCY_CHECK_NVD_DATAFEED_URL")?.let { nvd.datafeedUrl = it }
     suppressionFile = "owasp-suppressions.xml"
+    envOrNull("DEPENDENCY_CHECK_HOSTED_SUPPRESSIONS_URL")?.let { hostedSuppressions.url = it }
     analyzers.apply {
+        envOrNull("DEPENDENCY_CHECK_KEV_URL")?.let { kev.url = it }
         ossIndex.apply {
-            username = System.getenv("OSS_INDEX_USERNAME")
-            password = System.getenv("OSS_INDEX_PASSWORD")
+            username = envOrNull("OSS_INDEX_USERNAME")
+            password = envOrNull("OSS_INDEX_PASSWORD")
         }
         centralEnabled = true // Maven Central
         assemblyEnabled = false // .NET
