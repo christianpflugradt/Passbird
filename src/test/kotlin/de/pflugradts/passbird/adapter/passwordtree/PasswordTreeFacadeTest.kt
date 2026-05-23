@@ -7,6 +7,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -43,6 +44,9 @@ import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 import strikt.java.exists
 import java.io.File
+import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermission.OWNER_READ
+import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
 import java.util.Collections
 import java.util.UUID
 
@@ -91,6 +95,9 @@ class PasswordTreeFacadeTest {
         // when
         passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream()}))
         expectThat(File(passwordTreeFilename)).exists()
+        posixPermissionsIfSupported(Paths.get(passwordTreeFilename))?.let {
+            expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
+        }
         val actual = passwordTreeFacade.restore()
 
         // then

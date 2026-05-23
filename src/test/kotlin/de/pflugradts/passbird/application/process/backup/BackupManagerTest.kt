@@ -7,6 +7,7 @@ import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.AfterEach
@@ -22,6 +23,9 @@ import strikt.assertions.isTrue
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE
+import java.nio.file.attribute.PosixFilePermission.OWNER_READ
+import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
 import java.util.UUID
 
 @Tag(INTEGRATION)
@@ -93,6 +97,33 @@ class BackupManagerTest {
 
         // then
         expectThat(files()) hasSize 1
+        val backupFile = Paths.get("$tempWorkingDirectory/${files().single()}")
+        posixPermissionsIfSupported(backupFile)?.let {
+            expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
+        }
+    }
+
+    @Test
+    fun `should harden newly created backup directory and file permissions`() {
+        // given
+        every { treeBackupSettings.enabled } returns true
+        every { treeBackupSettings.numberOfBackups } returns 3
+        every { treeBackupSettings.location } returns null
+        every { configuration.application.backup.location } returns "backups"
+        val backupDirectory = Paths.get(tempWorkingDirectory).resolve("backups")
+
+        // when
+        backupManager.run()
+
+        // then
+        expectThat(Files.isDirectory(backupDirectory)).isTrue()
+        posixPermissionsIfSupported(backupDirectory)?.let {
+            expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE)
+        }
+        val backupFile = backupDirectory.resolve(systemOperation.getFileNames(backupDirectory.toString().toDirectory()).single().value)
+        posixPermissionsIfSupported(backupFile)?.let {
+            expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
+        }
     }
 
     @Test

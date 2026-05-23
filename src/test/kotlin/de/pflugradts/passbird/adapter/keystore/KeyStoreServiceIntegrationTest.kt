@@ -4,6 +4,7 @@ import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -17,6 +18,8 @@ import strikt.assertions.isTrue
 import strikt.java.exists
 import java.io.File
 import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermission.OWNER_READ
+import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
 import java.util.UUID
 
 @Tag(INTEGRATION)
@@ -53,6 +56,9 @@ class KeyStoreServiceIntegrationTest {
 
         // when
         val actualStoreResult = tryCatching { keyStoreService!!.storeKey(oneTimePasswordPlainShell1, path) }
+        posixPermissionsIfSupported(path)?.let {
+            expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
+        }
         val actualLoadResult = keyStoreService!!.loadKey(oneTimePasswordPlainShell2, path)
 
         // then

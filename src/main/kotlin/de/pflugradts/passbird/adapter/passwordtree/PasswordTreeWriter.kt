@@ -55,7 +55,7 @@ class PasswordTreeWriter @Inject constructor(
     }
 
     private fun writeToDisk(shell: Shell) = tryCatching {
-        systemOperation.writeBytesToFile(filePath, cryptoProvider.encrypt(shell).toByteArray())
+        systemOperation.writeBytesToSensitiveFile(filePath, cryptoProvider.encrypt(shell).toByteArray())
     }.onFailure { reportFailure(WritePasswordTreeFailure(filePath, it)) }
 
     private fun calcRequiredContentSize(eggs: EggStreamSupplier): Int {

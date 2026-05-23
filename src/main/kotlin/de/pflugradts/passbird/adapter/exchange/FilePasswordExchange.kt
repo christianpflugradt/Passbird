@@ -26,10 +26,11 @@ class FilePasswordExchange @Inject constructor(
 
     override fun send(data: PasswordInfoMap) {
         try {
-            Files.writeString(
+            systemOperation.writeToSensitiveFile(
                 systemOperation.resolvePath(Global.homeDirectory, EXCHANGE_FILENAME.toFileName()),
-                mapper.writerWithDefaultPrettyPrinter().writeValueAsString(ExchangeWrapper(data.toSerializable())),
-            )
+            ) { outputStream ->
+                mapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, ExchangeWrapper(data.toSerializable()))
+            }
         } catch (e: IOException) {
             reportFailure(ExportFailure(e))
         }

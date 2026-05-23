@@ -6,6 +6,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Co
 import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import io.mockk.spyk
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -16,6 +17,9 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 import java.io.File
+import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermission.OWNER_READ
+import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
 import java.util.UUID
 
 @Tag(INTEGRATION)
@@ -47,6 +51,9 @@ class ReadableConfigurationTest {
 
         // now persist configuration to file system
         ConfigurationSyncService(configuration, systemOperation).sync(tempConfigurationDirectory.toDirectory())
+        posixPermissionsIfSupported(Paths.get(configurationFile))?.let {
+            expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
+        }
 
         // now load the persisted configuration and ensure the given configuration directory has been persisted too
         val loadedConfiguration = configurationFactory.loadConfiguration()

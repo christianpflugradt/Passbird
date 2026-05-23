@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-17
+last_reviewed: 2026-05-23
 security_posture:
   classification: high_sensitivity_local_secret_manager
   posture:
@@ -29,6 +29,16 @@ current_security_relevant_implementation:
       - uses JCEKS via SystemOperation
       - stores a generated AES secret key under alias PwMan3Secret
       - scrambles password material and temporary char arrays after use, including exception paths
+  local_persistence:
+    files:
+      - src/main/kotlin/de/pflugradts/passbird/application/util/SystemOperation.kt
+      - src/main/kotlin/de/pflugradts/passbird/application/configuration/ConfigurationSyncService.kt
+      - src/main/kotlin/de/pflugradts/passbird/adapter/exchange/FilePasswordExchange.kt
+      - src/main/kotlin/de/pflugradts/passbird/application/process/backup/BackupManager.kt
+    facts:
+      - writes sensitive files through temp-file replacement in the target directory before best-effort permission tightening
+      - applies owner-only POSIX permissions to newly written sensitive files when the filesystem exposes a PosixFileAttributeView
+      - creates backup directories with owner-only POSIX permissions when supported, while treating non-POSIX filesystems as a no-op instead of a failure
   cipher:
     file: src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
     facts:
@@ -59,8 +69,11 @@ requires_explicit_human_review:
   - any change that exports more secret material or increases clipboard exposure
   - any default change affecting secure input, inactivity timeout, backup handling, or destructive prompts
 security_sensitive_files:
+  - src/main/kotlin/de/pflugradts/passbird/application/util/SystemOperation.kt
+  - src/main/kotlin/de/pflugradts/passbird/application/configuration/ConfigurationSyncService.kt
   - src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
   - src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
+  - src/main/kotlin/de/pflugradts/passbird/application/process/backup/BackupManager.kt
   - src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
   - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeReader.kt
   - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeWriter.kt

@@ -37,7 +37,7 @@ class KeyStoreService @Inject constructor(private val systemOperation: SystemOpe
     override fun storeKey(password: PlainShell, path: Path) {
         val passwordChars = password.toCharArray()
         try {
-            systemOperation.newOutputStream(path).use { outputStream ->
+            systemOperation.writeToSensitiveFile(path) { outputStream ->
                 val keyStore = systemOperation.jceksInstance
                 keyStore.load(null, null)
                 val keyGenerator = KeyGenerator.getInstance(ALGORITHM)

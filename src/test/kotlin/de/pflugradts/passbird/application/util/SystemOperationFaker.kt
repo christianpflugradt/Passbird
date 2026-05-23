@@ -6,7 +6,9 @@ import de.pflugradts.passbird.application.toDirectory
 import io.mockk.every
 import io.mockk.mockk
 import java.io.IOException
+import java.io.OutputStream
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.security.KeyStoreException
 import java.time.Clock
 
@@ -23,6 +25,10 @@ fun fakeSystemOperation(
     every { instance.clock } returns withClock
     every { instance.newInputStream(any()) } returns mockk()
     every { instance.newOutputStream(any()) } returns mockk()
+    every { instance.writeToSensitiveFile(any(), any()) } answers {
+        secondArg<(OutputStream) -> Unit>().invoke(mockk<OutputStream>(relaxed = true))
+        Paths.get("")
+    }
     every { instance.isConsoleAvailable } returns withConsoleEnabled
     every { instance.readPasswordFromConsole() } returns withPasswordFromConsole
     if (withKeyStoreUnavailable) every { instance.jceksInstance } throws KeyStoreException()
@@ -31,4 +37,5 @@ fun fakeSystemOperation(
     every { instance.exit() } returns Unit
     if (withIoException) every { instance.resolvePath(any(Directory::class), any(FileName::class)) } throws IOException()
     if (withIoException) every { instance.resolvePath(any(Directory::class), any(Directory::class)) } throws IOException()
+    if (withIoException) every { instance.writeToSensitiveFile(any(), any()) } throws IOException()
 }

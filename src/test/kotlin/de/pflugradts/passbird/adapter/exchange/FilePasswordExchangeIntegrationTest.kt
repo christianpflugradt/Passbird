@@ -5,6 +5,7 @@ import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
@@ -17,8 +18,12 @@ import strikt.api.expectThat
 import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.containsKey
 import strikt.assertions.hasSize
+import strikt.assertions.isEqualTo
 import strikt.assertions.isTrue
 import java.io.File
+import java.nio.file.Paths
+import java.nio.file.attribute.PosixFilePermission.OWNER_READ
+import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
 import java.util.UUID
 
 @Tag(INTEGRATION)
@@ -57,6 +62,9 @@ class FilePasswordExchangeIntegrationTest {
                 Slot.S9.toNest() to listOf(givenEgg4, givenEgg5),
             ),
         )
+        posixPermissionsIfSupported(Paths.get(exchangeFile))?.let {
+            expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
+        }
         val actual = filePasswordExchange.receive()
 
         // then

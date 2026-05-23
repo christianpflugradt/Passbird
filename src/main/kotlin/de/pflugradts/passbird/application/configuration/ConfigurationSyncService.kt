@@ -22,10 +22,13 @@ class ConfigurationSyncService @Inject constructor(
                 .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
                 .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
                 .build()
-                .writeValue(
-                    systemOperation.resolvePath(directory, CONFIGURATION_FILENAME.toFileName()).toFile(),
-                    updatableConfiguration,
-                )
+                .let { mapper ->
+                    systemOperation.writeToSensitiveFile(
+                        systemOperation.resolvePath(directory, CONFIGURATION_FILENAME.toFileName()),
+                    ) { outputStream ->
+                        mapper.writeValue(outputStream, updatableConfiguration)
+                    }
+                }
         } catch (ex: Exception) {
             reportFailure(ConfigurationFailure(ex))
         }
