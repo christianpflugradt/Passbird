@@ -13,8 +13,10 @@ import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import jakarta.inject.Inject
 import java.nio.file.Files
@@ -65,10 +67,26 @@ class FilePasswordExchange @Inject constructor(
             entry.exportedEggs.map {
                 PasswordInfo(
                     first = ShellPair(shellOf(it.eggId), shellOf(it.password)),
-                    second = it.proteins.map { protein -> ShellPair(shellOf(protein.proteinType), shellOf(protein.proteinStructure)) },
+                    second = it.proteins.toShellPairsBySlot(),
                 )
             }
             )
+    }
+
+    private fun List<ExportedProtein>.toShellPairsBySlot(): List<ShellPair> {
+        val proteinsBySlot = mutableMapOf<Int, ShellPair>()
+        forEach { protein ->
+            require(protein.slot in Slot.entries.indices) { "Invalid protein slot ${protein.slot}" }
+            require(
+                proteinsBySlot.putIfAbsent(
+                    protein.slot,
+                    ShellPair(shellOf(protein.proteinType), shellOf(protein.proteinStructure)),
+                ) == null,
+            ) { "Duplicate protein slot ${protein.slot}" }
+        }
+        return Slot.entries.indices.map { slot ->
+            proteinsBySlot[slot] ?: ShellPair(emptyShell(), emptyShell())
+        }
     }
 }
 

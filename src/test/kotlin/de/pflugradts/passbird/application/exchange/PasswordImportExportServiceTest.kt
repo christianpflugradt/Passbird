@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.application.exchange
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
+import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.PasswordInfoMap
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
 import de.pflugradts.passbird.application.mainMocked
@@ -9,7 +11,9 @@ import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
@@ -20,6 +24,7 @@ import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.nest.createNestServiceSpyForTesting
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.Called
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -94,6 +99,39 @@ class PasswordImportExportServiceTest {
         verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(eggCountSlot.isCaptured)
         expectThat(eggCountSlot.captured.count) isEqualTo testData().size
+    }
+
+    @Test
+    fun `should import proteins into their declared slots when imported data is sparse`() {
+        // given
+        val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
+        val givenEggId = shellOf("EggId")
+        val givenPassword = shellOf("Password")
+        every { exchangeAdapterPort.receive() } returns success(
+            mapOf(
+                nestService.currentNest() to listOf(
+                    Pair(
+                        ShellPair(givenEggId, givenPassword),
+                        proteinShellPairs(
+                            Slot.S3 to ShellPair(shellOf("type3"), shellOf("structure3")),
+                            S9 to ShellPair(shellOf("type9"), shellOf("structure9")),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
+        fakePasswordService(instance = passwordService)
+
+        // when
+        importExportServiceSupplier.get().importEggs()
+
+        // then
+        verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
+        verify(exactly = 1) { passwordService.putEgg(givenEggId, givenPassword) }
+        verify(exactly = 1) { passwordService.putProtein(givenEggId, Slot.S3, shellOf("type3"), shellOf("structure3")) }
+        verify(exactly = 1) { passwordService.putProtein(givenEggId, S9, shellOf("type9"), shellOf("structure9")) }
+        verify(exactly = 2) { passwordService.putProtein(any(), any(), any(), any()) }
     }
 
     @Test
@@ -192,6 +230,12 @@ private fun expectThatActualBytePairsMatchExpected(actual: PasswordInfoMap, expe
             expectThat(it.first.second) isEqualTo expected[index++].viewPassword().fakeDec()
         }
     }
+}
+
+private fun proteinShellPairs(vararg proteins: Pair<Slot, ShellPair>) = MutableList(Slot.entries.size) {
+    ShellPair(emptyShell(), emptyShell())
+}.apply {
+    proteins.forEach { (slot, shells) -> this[slot.index()] = shells }
 }
 
 private fun testData() = listOf(

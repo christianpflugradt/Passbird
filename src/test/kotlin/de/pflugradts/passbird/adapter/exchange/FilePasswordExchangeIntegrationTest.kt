@@ -8,6 +8,7 @@ import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
@@ -20,6 +21,7 @@ import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.containsKey
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 import java.io.File
 import java.nio.file.Paths
@@ -51,11 +53,20 @@ class FilePasswordExchangeIntegrationTest {
     @Test
     fun `should export and re-import passwords across multiple nests`() {
         // given
-        val givenEgg1 = PasswordInfo(ShellPair(shellOf("EggId1"), shellOf("Password1")), emptyList())
-        val givenEgg2 = PasswordInfo(ShellPair(shellOf("EggId2"), shellOf("Password2")), emptyList())
-        val givenEgg3 = PasswordInfo(ShellPair(shellOf("EggId3"), shellOf("Password3")), emptyList())
-        val givenEgg4 = PasswordInfo(ShellPair(shellOf("EggId4"), shellOf("Password4")), emptyList())
-        val givenEgg5 = PasswordInfo(ShellPair(shellOf("EggId5"), shellOf("Password5")), emptyList())
+        val givenEgg1 = PasswordInfo(
+            ShellPair(shellOf("EggId1"), shellOf("Password1")),
+            proteinShellPairs(
+                Slot.DEFAULT to ShellPair(shellOf("type0"), shellOf("structure0")),
+                Slot.S3 to ShellPair(shellOf("type3"), shellOf("structure3")),
+            ),
+        )
+        val givenEgg2 = PasswordInfo(ShellPair(shellOf("EggId2"), shellOf("Password2")), proteinShellPairs())
+        val givenEgg3 = PasswordInfo(ShellPair(shellOf("EggId3"), shellOf("Password3")), proteinShellPairs())
+        val givenEgg4 = PasswordInfo(
+            ShellPair(shellOf("EggId4"), shellOf("Password4")),
+            proteinShellPairs(Slot.S9 to ShellPair(shellOf("type9"), shellOf("structure9"))),
+        )
+        val givenEgg5 = PasswordInfo(ShellPair(shellOf("EggId5"), shellOf("Password5")), proteinShellPairs())
 
         // whe
         filePasswordExchange.send(
@@ -76,6 +87,146 @@ class FilePasswordExchangeIntegrationTest {
         expectThat(actual[Slot.S2.toNest()]!!).containsExactlyInAnyOrder(givenEgg3)
         expectThat(actual[Slot.S9.toNest()]!!).containsExactlyInAnyOrder(givenEgg4, givenEgg5)
     }
+
+    @Test
+    fun `should receive proteins according to explicit slot values when json is sparse and reordered`() {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": [
+                        {
+                          "proteinType": "type9",
+                          "proteinStructure": "structure9",
+                          "slot": 9
+                        },
+                        {
+                          "proteinType": "type2",
+                          "proteinStructure": "structure2",
+                          "slot": 2
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        // when
+        val actual = filePasswordExchange.receive()
+
+        // then
+        expectThat(actual.failure).isFalse()
+        expectThat(actual.getOrNull()!![Slot.DEFAULT.toNest()]!!.single().second).isEqualTo(
+            proteinShellPairs(
+                Slot.S2 to ShellPair(shellOf("type2"), shellOf("structure2")),
+                Slot.S9 to ShellPair(shellOf("type9"), shellOf("structure9")),
+            ),
+        )
+    }
+
+    @Test
+    fun `should fail receive when protein slot values are duplicated`() {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": [
+                        {
+                          "proteinType": "type1",
+                          "proteinStructure": "structure1",
+                          "slot": 1
+                        },
+                        {
+                          "proteinType": "type1b",
+                          "proteinStructure": "structure1b",
+                          "slot": 1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        // when
+        val actual = filePasswordExchange.receive()
+
+        // then
+        expectThat(actual.failure).isTrue()
+    }
+
+    @Test
+    fun `should fail receive when protein slot values are out of range`() {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": [
+                        {
+                          "proteinType": "type10",
+                          "proteinStructure": "structure10",
+                          "slot": 10
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        // when
+        val actual = filePasswordExchange.receive()
+
+        // then
+        expectThat(actual.failure).isTrue()
+    }
+
+    private fun writeExchangeFile(content: String) {
+        File(exchangeFile).writeText(content.trimIndent())
+    }
 }
 
 private fun Slot.toNest() = createNest(shellOf(this.name), this)
+
+private fun proteinShellPairs(vararg proteins: Pair<Slot, ShellPair>) = MutableList(Slot.entries.size) {
+    ShellPair(emptyShell(), emptyShell())
+}.apply {
+    proteins.forEach { (slot, shells) -> this[slot.index()] = shells }
+}
