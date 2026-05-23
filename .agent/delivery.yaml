@@ -2,6 +2,7 @@ schema_version: 1
 last_reviewed: 2026-05-23
 quality_gates:
   formatting_and_style:
+    - run ./gradlew ktlintFormat before staging, committing, or pushing to auto-resolve formatting issues when possible
     - pre-commit hook runs ./gradlew ktlintCheck
   test_suites:
     - ./gradlew test
@@ -60,6 +61,7 @@ change_rules:
   - update CONFIGURATION.md for any configuration-schema or default-value change
   - update .agent docs whenever agent-facing guidance would otherwise become stale
   - preserve backward compatibility unless the maintainer explicitly chooses a breaking change
+  - run ./gradlew ktlintFormat before staging, committing, or pushing to auto-resolve formatting issues when possible
   - commit and, before pushing, run git pull -r on the current branch, then push immediately after a task is complete and releasable
   - delay commit and push only when maintainer input is still required or the current state is incomplete or not ready to release
 commit_messages:
