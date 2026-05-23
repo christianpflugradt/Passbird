@@ -1,10 +1,10 @@
 package de.pflugradts.passbird.application.commandhandling.handler
 
 import com.google.common.eventbus.Subscribe
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.HelpCommand
+import jakarta.inject.Inject
 
 class HelpCommandHandler @Inject constructor(
     private val canPrintInfo: CanPrintInfo,

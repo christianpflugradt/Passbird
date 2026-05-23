@@ -1,7 +1,5 @@
 package de.pflugradts.passbird.adapter.clipboard
 
-import com.google.inject.Inject
-import com.google.inject.Singleton
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -9,6 +7,8 @@ import de.pflugradts.passbird.application.failure.ClipboardFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Output
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 private const val MILLI_SECONDS = 1000L
 

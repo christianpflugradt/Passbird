@@ -1,9 +1,7 @@
 package de.pflugradts.passbird.application.boot.setup
 
 import com.google.inject.AbstractModule
-import com.google.inject.Inject
 import com.google.inject.Provider
-import com.google.inject.Singleton
 import de.pflugradts.passbird.adapter.keystore.KeyStoreService
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
@@ -15,6 +13,8 @@ import de.pflugradts.passbird.application.configuration.ConfigurationSync
 import de.pflugradts.passbird.application.configuration.ConfigurationSyncService
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.UpdatableConfiguration
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 class SetupModule(private val runContext: RunContext) : AbstractModule() {
     override fun configure() {
@@ -28,7 +28,7 @@ class SetupModule(private val runContext: RunContext) : AbstractModule() {
     }
 
     private class ConfigurationDependencyProvider @Inject constructor(
-        @Inject val configurationFactory: ConfigurationFactory,
+        val configurationFactory: ConfigurationFactory,
     ) : Provider<UpdatableConfiguration> {
         override fun get(): UpdatableConfiguration = configurationFactory.loadConfiguration()
     }

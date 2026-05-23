@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.handler.nest
 
 import com.google.common.eventbus.Subscribe
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
 import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
@@ -13,6 +12,7 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_A
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
+import jakarta.inject.Inject
 
 class MoveToNestCommandHandler @Inject constructor(
     private val canListAvailableNests: CanListAvailableNests,

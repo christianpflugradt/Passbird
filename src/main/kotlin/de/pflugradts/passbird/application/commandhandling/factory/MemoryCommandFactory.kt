@@ -1,11 +1,11 @@
 package de.pflugradts.passbird.application.commandhandling.factory
 
-import com.google.inject.Singleton
 import de.pflugradts.passbird.application.commandhandling.command.GetMemoryCommand
 import de.pflugradts.passbird.application.commandhandling.command.MemoryInfoCommand
 import de.pflugradts.passbird.application.commandhandling.command.UseMemoryCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewMemoryCommand
 import de.pflugradts.passbird.domain.model.transfer.Input
+import jakarta.inject.Singleton
 
 @Singleton
 class MemoryCommandFactory : SpecialCommandFactory() {

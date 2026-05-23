@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.application.boot.main
 
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.RunContext
@@ -16,21 +15,22 @@ import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
+import jakarta.inject.Inject
 
 class PassbirdTestMain @Inject constructor(
-    @Inject val bootable: Bootable,
-    @Inject val clipboardAdapterPort: ClipboardAdapterPort,
-    @Inject val eventRegistry: EventRegistry,
-    @Inject val importExportService: ImportExportService,
-    @Inject val keyStoreAdapterPort: KeyStoreAdapterPort,
-    @Inject val passwordProvider: PasswordProvider,
-    @Inject val passwordService: PasswordService,
-    @Inject val passwordTreeAdapterPort: PasswordTreeAdapterPort,
-    @Inject val runContext: RunContext,
-    @Inject val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-    @Inject val configuration: ReadableConfiguration,
-    @Inject val commandHandlers: Set<CommandHandler>,
-    @Inject val eventHandlers: Set<EventHandler>,
-    @Inject val initializers: Set<Initializer>,
-    @Inject val finalizers: Set<Finalizer>,
+    val bootable: Bootable,
+    val clipboardAdapterPort: ClipboardAdapterPort,
+    val eventRegistry: EventRegistry,
+    val importExportService: ImportExportService,
+    val keyStoreAdapterPort: KeyStoreAdapterPort,
+    val passwordProvider: PasswordProvider,
+    val passwordService: PasswordService,
+    val passwordTreeAdapterPort: PasswordTreeAdapterPort,
+    val runContext: RunContext,
+    val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    val configuration: ReadableConfiguration,
+    val commandHandlers: Set<CommandHandler>,
+    val eventHandlers: Set<EventHandler>,
+    val initializers: Set<Initializer>,
+    val finalizers: Set<Finalizer>,
 )

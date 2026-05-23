@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.adapter.exchange
 
 import com.fasterxml.jackson.databind.json.JsonMapper
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.PasswordInfoMap
@@ -16,6 +15,7 @@ import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
+import jakarta.inject.Inject
 import java.io.IOException
 import java.nio.file.Files
 

@@ -1,8 +1,8 @@
 package de.pflugradts.passbird.application.process.inactivity
 
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.process.Initializer
+import jakarta.inject.Inject
 import kotlin.concurrent.fixedRateTimer
 
 class InactivityHandlerScheduler @Inject constructor(

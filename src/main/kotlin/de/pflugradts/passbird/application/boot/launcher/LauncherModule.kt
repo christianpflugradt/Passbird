@@ -1,15 +1,15 @@
 package de.pflugradts.passbird.application.boot.launcher
 
 import com.google.inject.AbstractModule
-import com.google.inject.Inject
 import com.google.inject.Provider
-import com.google.inject.Singleton
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.ConfigurationFactory
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 class LauncherModule(private val runContext: RunContext) : AbstractModule() {
     override fun configure() {

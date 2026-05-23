@@ -1,10 +1,10 @@
 package de.pflugradts.passbird.application.commandhandling.handler
 
 import com.google.common.eventbus.Subscribe
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.ExportCommand
 import de.pflugradts.passbird.application.exchange.ImportExportService
+import jakarta.inject.Inject
 
 class ExportCommandHandler @Inject constructor(
     private val importExportService: ImportExportService,

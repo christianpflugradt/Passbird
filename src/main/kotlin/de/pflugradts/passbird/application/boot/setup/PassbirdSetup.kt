@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.application.boot.setup
 
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
@@ -12,6 +11,7 @@ import de.pflugradts.passbird.domain.model.shell.PlainShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import jakarta.inject.Inject
 import java.nio.file.Paths
 
 class PassbirdSetup @Inject constructor(

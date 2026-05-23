@@ -1,12 +1,12 @@
 package de.pflugradts.passbird.application.commandhandling.factory
 
-import com.google.inject.Singleton
 import de.pflugradts.passbird.application.commandhandling.command.AddNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.DiscardNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.SwitchNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
 import de.pflugradts.passbird.domain.model.transfer.Input
+import jakarta.inject.Singleton
 
 @Singleton
 class NestCommandFactory : SpecialCommandFactory() {

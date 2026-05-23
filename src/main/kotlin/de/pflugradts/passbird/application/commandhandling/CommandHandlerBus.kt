@@ -1,10 +1,10 @@
 package de.pflugradts.passbird.application.commandhandling
 
 import com.google.common.eventbus.EventBus
-import com.google.inject.Inject
-import com.google.inject.Singleton
 import de.pflugradts.passbird.application.commandhandling.command.base.Command
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class CommandHandlerBus @Inject constructor(commandHandlers: Set<CommandHandler>) : CommandBus {

@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.application.process.exchange
 
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -9,6 +8,7 @@ import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import jakarta.inject.Inject
 
 class ExportFileChecker @Inject constructor(
     private val configuration: ReadableConfiguration,

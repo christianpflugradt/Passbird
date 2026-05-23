@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.handler
 
 import com.google.common.eventbus.Subscribe
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitReason.INACTIVITY
@@ -12,6 +11,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ERROR_MESSAGE
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
+import jakarta.inject.Inject
 
 class QuitCommandHandler @Inject constructor(
     private val finalizers: Set<Finalizer>,

@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.application.exchange
 
-import com.google.inject.Inject
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.domain.model.event.EggsExported
@@ -13,6 +12,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import jakarta.inject.Inject
 
 class PasswordImportExportService @Inject constructor(
     private val exchangeFactory: ExchangeFactory,

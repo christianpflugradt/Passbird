@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.application.boot.launcher
 
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
@@ -20,6 +19,7 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ERROR_MESSA
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
+import jakarta.inject.Inject
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit

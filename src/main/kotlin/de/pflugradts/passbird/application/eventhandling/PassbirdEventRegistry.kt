@@ -1,12 +1,12 @@
 package de.pflugradts.passbird.application.eventhandling
 
 import com.google.common.eventbus.EventBus
-import com.google.inject.Inject
-import com.google.inject.Singleton
 import de.pflugradts.passbird.domain.model.ddd.AggregateRoot
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.util.ArrayDeque
 import java.util.Queue
 

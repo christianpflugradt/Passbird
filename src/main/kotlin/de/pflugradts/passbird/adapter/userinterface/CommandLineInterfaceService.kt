@@ -1,7 +1,5 @@
 package de.pflugradts.passbird.adapter.userinterface
 
-import com.google.inject.Inject
-import com.google.inject.Singleton
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -11,6 +9,8 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class CommandLineInterfaceService @Inject constructor(

@@ -1,12 +1,12 @@
 package de.pflugradts.passbird.application.process.inactivity
 
-import com.google.inject.Inject
-import com.google.inject.Singleton
 import de.pflugradts.passbird.application.commandhandling.CommandBus
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitReason.INACTIVITY
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import java.util.concurrent.atomic.AtomicLong
 
 @Singleton

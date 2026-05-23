@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.adapter.keystore
 
-import com.google.inject.Inject
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -8,6 +7,7 @@ import de.pflugradts.passbird.domain.model.shell.MAX_ASCII_VALUE
 import de.pflugradts.passbird.domain.model.shell.MIN_ASCII_VALUE
 import de.pflugradts.passbird.domain.model.shell.PlainShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import jakarta.inject.Inject
 import java.nio.file.Path
 import java.security.KeyStore
 import java.security.KeyStore.PasswordProtection

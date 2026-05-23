@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
 
 import com.google.common.eventbus.Subscribe
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.DiscardProteinCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
@@ -11,6 +10,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
+import jakarta.inject.Inject
 
 class DiscardProteinCommandHandler @Inject constructor(
     private val configuration: ReadableConfiguration,

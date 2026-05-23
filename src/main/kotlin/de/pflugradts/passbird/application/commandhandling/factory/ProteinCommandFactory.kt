@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.application.commandhandling.factory
 
-import com.google.inject.Singleton
 import de.pflugradts.passbird.application.commandhandling.command.DiscardProteinCommand
 import de.pflugradts.passbird.application.commandhandling.command.GetProteinCommand
 import de.pflugradts.passbird.application.commandhandling.command.ProteinInfoCommand
@@ -8,6 +7,7 @@ import de.pflugradts.passbird.application.commandhandling.command.SetProteinComm
 import de.pflugradts.passbird.application.commandhandling.command.ViewProteinStructuresCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewProteinTypesCommand
 import de.pflugradts.passbird.domain.model.transfer.Input
+import jakarta.inject.Singleton
 
 @Singleton
 class ProteinCommandFactory : SpecialCommandFactory() {

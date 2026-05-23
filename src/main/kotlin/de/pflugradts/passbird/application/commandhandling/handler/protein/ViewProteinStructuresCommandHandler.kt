@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
 
 import com.google.common.eventbus.Subscribe
-import com.google.inject.Inject
 import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.kotlinextensions.Option
@@ -13,6 +12,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import jakarta.inject.Inject
 
 class ViewProteinStructuresCommandHandler @Inject constructor(
     private val canPrintInfo: CanPrintInfo,

@@ -1,7 +1,5 @@
 package de.pflugradts.passbird.application.security
 
-import com.google.inject.Inject
-import com.google.inject.Singleton
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -12,6 +10,8 @@ import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class CryptoProviderFactory @Inject constructor(

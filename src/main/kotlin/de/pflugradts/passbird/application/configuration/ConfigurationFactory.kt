@@ -1,13 +1,13 @@
 package de.pflugradts.passbird.application.configuration
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.failure.ConfigurationFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
+import jakarta.inject.Inject
 
 class ConfigurationFactory @Inject constructor(
     private val systemOperation: SystemOperation,

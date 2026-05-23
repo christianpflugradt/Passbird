@@ -1,9 +1,7 @@
 package de.pflugradts.passbird.application.boot.main
 
 import com.google.inject.AbstractModule
-import com.google.inject.Inject
 import com.google.inject.Provider
-import com.google.inject.Singleton
 import com.google.inject.assistedinject.FactoryModuleBuilder
 import com.google.inject.multibindings.Multibinder
 import com.google.inject.name.Names
@@ -76,6 +74,8 @@ import de.pflugradts.passbird.domain.service.password.provider.RandomPasswordPro
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import de.pflugradts.passbird.domain.service.password.tree.NestingGround
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 class ApplicationModule(private val runContext: RunContext) : AbstractModule() {
     override fun configure() {

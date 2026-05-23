@@ -1,7 +1,5 @@
 package de.pflugradts.passbird.application.commandhandling.factory
 
-import com.google.inject.Inject
-import com.google.inject.Singleton
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.commandhandling.CommandType
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
@@ -20,6 +18,8 @@ import de.pflugradts.passbird.application.commandhandling.command.base.Command
 import de.pflugradts.passbird.application.failure.CommandFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.domain.model.transfer.Input
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 @Singleton
 class CommandFactory @Inject constructor(

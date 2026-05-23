@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.adapter.passwordtree
 
-import com.google.inject.Inject
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -25,6 +24,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
+import jakarta.inject.Inject
 import java.util.Arrays
 
 class PasswordTreeWriter @Inject constructor(

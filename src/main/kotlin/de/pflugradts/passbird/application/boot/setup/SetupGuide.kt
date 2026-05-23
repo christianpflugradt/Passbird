@@ -1,9 +1,9 @@
 package de.pflugradts.passbird.application.boot.setup
 
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import jakarta.inject.Inject
 
 class SetupGuide @Inject constructor(private val userInterfaceAdapterPort: UserInterfaceAdapterPort) {
     fun sendWelcome() {

@@ -41,6 +41,7 @@ private const val USERINTERFACE_ADAPTER = "userinterface"
 @Tag(ARCHITECTURE)
 class PassbirdTest {
     private var classes = ClassFileImporter().withImportOption(DoNotIncludeTests()).importPackages(ROOT)
+    private var allClasses = ClassFileImporter().importPackages(ROOT)
     private fun path(vararg segments: String) = "${segments.joinToString(".")}.."
 
     @Test
@@ -71,6 +72,21 @@ class PassbirdTest {
             noClasses().that().resideInAPackage(path(DOMAIN_ROOT))
                 .should().dependOnClassesThat().resideInAPackage("com.google.inject..")
                 .check(classes)
+        }
+
+        @Test
+        fun `no classes should depend on guice inject annotation`() {
+            noClasses().should().dependOnClassesThat().haveFullyQualifiedName("com.google.inject.Inject").check(allClasses)
+        }
+
+        @Test
+        fun `no classes should depend on guice singleton annotation`() {
+            noClasses().should().dependOnClassesThat().haveFullyQualifiedName("com.google.inject.Singleton").check(allClasses)
+        }
+
+        @Test
+        fun `no classes should depend on guice named annotation`() {
+            noClasses().should().dependOnClassesThat().haveFullyQualifiedName("com.google.inject.name.Named").check(allClasses)
         }
     }
 

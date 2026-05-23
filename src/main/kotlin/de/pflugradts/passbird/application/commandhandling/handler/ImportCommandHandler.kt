@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.handler
 
 import com.google.common.eventbus.Subscribe
-import com.google.inject.Inject
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.ImportCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -10,6 +9,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import jakarta.inject.Inject
 
 class ImportCommandHandler@Inject constructor(
     private val configuration: ReadableConfiguration,

@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
 
 import com.google.common.eventbus.Subscribe
-import com.google.inject.Inject
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
@@ -10,6 +9,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import jakarta.inject.Inject
 
 class ViewProteinTypesCommandHandler @Inject constructor(
     private val canPrintInfo: CanPrintInfo,

@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.adapter.passwordtree
 
-import com.google.inject.Inject
 import de.pflugradts.kotlinextensions.MutableOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
 import de.pflugradts.kotlinextensions.tryCatching
@@ -34,6 +33,7 @@ import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
+import jakarta.inject.Inject
 import java.util.ArrayDeque
 import java.util.Arrays
 

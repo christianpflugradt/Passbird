@@ -1,13 +1,13 @@
 package de.pflugradts.passbird.application.boot.setup
 
 import com.google.inject.Guice
-import com.google.inject.Inject
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.domain.model.slot.Slot
+import jakarta.inject.Inject
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -29,7 +29,7 @@ class PassbirdSetupModuleTest {
     }
 
     private class PassbirdTestSetup @Inject constructor(
-        @Inject val bootable: Bootable,
-        @Inject val runContext: RunContext,
+        val bootable: Bootable,
+        val runContext: RunContext,
     )
 }

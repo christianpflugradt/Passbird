@@ -1,7 +1,5 @@
 package de.pflugradts.passbird.application.boot.main
 
-import com.google.inject.Inject
-import com.google.inject.Singleton
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
@@ -14,6 +12,8 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
 import de.pflugradts.passbird.domain.service.nest.NestService
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 
 const val INTERRUPT = 0x03.toChar()
 
