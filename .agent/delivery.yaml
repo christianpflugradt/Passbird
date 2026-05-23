@@ -44,12 +44,14 @@ ci_landscape:
       - .github/workflows/owasp-purge.yml
       - .github/workflows/publish.yml
     notes:
-      - architecture tests and coverage jobs run only on main in the observed GitHub workflow
+      - architecture tests and coverage jobs run for pull requests targeting main and for main itself, while GitHub Pages publication stays main-only
       - the build workflow runs dependency-check analysis on push and restores its local database from the default-branch GitHub Actions cache when available
       - a daily OWASP workflow refreshes the dependency-check cache from the Gradle plugin update task
       - a weekly OWASP workflow purges and rebuilds the dependency-check cache during the Sunday-to-Monday overnight window
+      - CodeQL intentionally uses the nightly toolchain because stable CodeQL can lag behind current Kotlin support, and this repository prefers not to delay Kotlin upgrades for that gap
+      - the GitHub Pages site uses repository-owned Jekyll config and layout files so manual and push builds do not rely on GitHub metadata lookups for URL or repository details
       - the build workflow publishes the GitHub Pages site for coverage assets and refreshes the branch-coverage badge and report on main
-      - publish workflow runs semantic-release manually and on a Monday 03:00 Europe/Berlin schedule
+      - publish workflow runs semantic-release manually and on a Monday 03:00 Europe/Berlin schedule, but only after the current main commit already has a successful Build and Verify workflow run
       - scheduled and manual publish runs are expected to succeed even when no release is due
 change_rules:
   - keep changes small and intention-revealing in this security-sensitive codebase
