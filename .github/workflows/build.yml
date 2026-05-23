@@ -247,41 +247,10 @@ jobs:
           path: build/reports/jacoco/test
       - name: add coverage assets to Pages site
         run: |
-          report_xml="build/reports/jacoco/test/jacocoTestReport.xml"
-          branch_counter="$(grep -o '<counter type=\"BRANCH\" missed=\"[0-9]*\" covered=\"[0-9]*\"/>' "$report_xml" | tail -n1)"
-          missed="$(printf '%s\n' "$branch_counter" | sed -E 's/.*missed=\"([0-9]+)\".*/\1/')"
-          covered="$(printf '%s\n' "$branch_counter" | sed -E 's/.*covered=\"([0-9]+)\".*/\1/')"
-          total=$((missed + covered))
-          percentage_tenths="$(awk -v covered="$covered" -v total="$total" 'BEGIN { if (total == 0) print 0; else printf "%.0f", (covered * 1000) / total }')"
-          if [ $((percentage_tenths % 10)) -eq 0 ]; then
-            percentage="$((percentage_tenths / 10))%"
-          else
-            percentage="$((percentage_tenths / 10)).$((percentage_tenths % 10))%"
-          fi
-
-          if [ "$percentage_tenths" -lt 500 ]; then
-            color="e05d44"
-          elif [ "$percentage_tenths" -lt 700 ]; then
-            color="fe7d37"
-          elif [ "$percentage_tenths" -lt 850 ]; then
-            color="dfb317"
-          elif [ "$percentage_tenths" -lt 900 ]; then
-            color="97ca00"
-          else
-            color="4c1"
-          fi
-
-          mkdir -p site/coverage
-          rm -rf site/coverage/report
-          cp -R build/reports/jacoco/test/html site/coverage/report
-          cat > site/coverage/branch-coverage.json <<EOF
-          {
-            "schemaVersion": 1,
-            "label": "branch coverage",
-            "message": "$percentage",
-            "color": "$color"
-          }
-          EOF
+          python3 scripts/render_coverage_pages.py \
+            --report-xml build/reports/jacoco/test/jacocoTestReport.xml \
+            --report-html-dir build/reports/jacoco/test/html \
+            --site-dir site
       - name: upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
