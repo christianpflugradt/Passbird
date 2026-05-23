@@ -13,7 +13,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
-import de.pflugradts.passbird.domain.service.nest.NestingGroundService
+import de.pflugradts.passbird.domain.service.nest.NestService
 
 const val INTERRUPT = 0x03.toChar()
 
@@ -22,7 +22,7 @@ class PassbirdApplication @Inject constructor(
     private val inactivityHandler: InactivityHandler,
     private val initializers: Set<Initializer>,
     private val inputHandler: InputHandler,
-    private val nestService: NestingGroundService,
+    private val nestService: NestService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : Bootable {
 
