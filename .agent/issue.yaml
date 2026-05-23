@@ -15,6 +15,7 @@ issue_task:
     - load task-relevant .agent/*.yaml files based on the issue scope before making changes
     - implement the fix, add focused tests, and run the minimum validation required by .agent/delivery.yaml
     - update matching .agent/*.yaml files if the change affects behavior, architecture, security, persistence, configuration, or delivery guidance
+    - when the resolving commit closes the selected issue, add a Closes #<issue-number> footer line to the commit message
     - once the work is suitable for release, commit it, run git pull -r on the current branch, push it, and close the resolved issue according to AGENTS.md
   escalation_rules:
     - if the selected issue requires an important behavior, architecture, persistence, configuration, security, or wording decision that is not already answered by the project documents, return to the maintainer before deciding

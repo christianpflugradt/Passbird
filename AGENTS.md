@@ -40,6 +40,7 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 - If no open `bug` issues exist and it is simple to determine which remaining open issue is oldest, resolve the oldest open issue.
 - If the ordering is ambiguous or otherwise not simple to determine, resolve any open issue and proceed.
 - If no open issues exist, say so explicitly.
+- When the resolving commit closes the selected issue, add a `Closes #<issue-number>` footer line to the commit message.
 - If an important decision is not clearly answered by the project documents, return to the maintainer before deciding.
 
 ## Review Commands
