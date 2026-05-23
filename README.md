@@ -420,13 +420,13 @@ Examples:
 If you prefer the terminal to a graphical user interface and do not need to manage hundreds of passwords, Passbird might be a good choice for you. Note that Passbird does not use a hierarchical system for managing Eggs. As such, if you need to store hundreds of passwords, or if you require a detailed structure for related information like URLs or usernames, you may find it challenging to organize your data. 
 
 ### Is Passbird secure?
-Passbird has not been reviewed by security experts. It uses a Keystore and a Cipher to encrypt all data symmetrically with a master password chosen by the user. Sensitive data is generally handled as byte arrays, and decrypted data is immediately overwritten after use. The password database is doubly encoded, both at the individual Egg level and for the entire file, making it difficult to determine even the number of stored passwords from a hex editor. Passbird operates entirely offline. While these measures likely offer reasonable security, they are not guaranteed.
+Passbird has not been reviewed by security experts. It operates entirely offline, encrypts its password tree with AES-GCM, and stores local key material in a Java KeyStore that is unlocked with your master password. Passbird also prefers byte-oriented handling for sensitive data where practical. These measures are intended to reduce exposure, but they are not a guarantee of security.
 
 ### Does Passbird support Unicode?
 No. Many programs do not support Unicode characters in passwords, and some even restrict special characters like backslashes or spaces. Passbird translates every byte into an ASCII character. Inputting Unicode characters will result in multiple ASCII characters, which may cause inconsistencies and make certain Eggs undeletable. It is advised to avoid Unicode inputs.
 
 ### How do I update Passbird?
-Passbird follows semantic versioning (*x.y.z*, where `x` is the major version, `y` the minor version, and `z` the patch level). To update to a minor or patch version, download the latest JAR file and use it as usual. For major updates, consult the migration notes provided in this README.
+Passbird follows semantic versioning (`x.y.z`, where `x` is the major version, `y` the minor version, and `z` the patch level). To update to a minor or patch version, download the latest JAR file and use it as usual. For major updates, review the release notes carefully before upgrading so you can catch any migration or compatibility guidance.
 
 You can find current and historical Passbird versions [on GitHub Releases](https://github.com/christianpflugradt/Passbird/releases). Each release publishes the `passbird.jar` asset used by [Passbird-Updater](https://github.com/christianpflugradt/Passbird-Updater), though manual updates are still the more conservative option.
 
@@ -446,4 +446,4 @@ While Passbird does not offer built-in online backup features, you can securely 
 No. Passbird is designed with a 100% offline philosophy, ensuring maximum privacy and security. It does not integrate with browsers, plugins, or other tools. For users requiring browser integration, a different password manager may be more suitable.
 
 ### Can I run multiple instances of Passbird?
-Yes. For example, you might use separate databases for personal and work-related passwords. These can be run simultaneously in different terminal windows, as the instances operate independently.
+Yes, if each instance uses a separate home directory. For example, you might use one database for personal passwords and another for work passwords in different terminal windows. Running multiple instances against the same home directory is not recommended, as concurrent changes can overwrite each other.
