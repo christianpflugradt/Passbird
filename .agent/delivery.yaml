@@ -51,7 +51,7 @@ ci_landscape:
       - a weekly OWASP workflow purges and rebuilds the dependency-check cache during the Sunday-to-Monday overnight window
       - CodeQL intentionally uses the nightly toolchain because stable CodeQL can lag behind current Kotlin support, and this repository prefers not to delay Kotlin upgrades for that gap
       - the GitHub Pages site builds from a temporary Jekyll source assembled in the workflow from repository documentation plus workflow-owned Pages config under .github/pages so the product root stays free of Pages-only files
-      - the build workflow publishes the GitHub Pages site for coverage assets and refreshes the branch-coverage badge and report on main
+      - the build workflow publishes the GitHub Pages site for coverage assets and refreshes the branch-coverage badge, instruction-coverage badge, and report on main
       - publish workflow runs semantic-release manually and on a Monday 03:00 Europe/Berlin schedule, but only after the current main commit already has a successful Build and Verify workflow run
       - scheduled and manual publish runs are expected to succeed even when no release is due
 github_cli_usage:

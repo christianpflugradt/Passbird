@@ -253,35 +253,44 @@ jobs:
       - name: add coverage assets to Pages site
         run: |
           report_xml="build/reports/jacoco/test/jacocoTestReport.xml"
-          branch_counter="$(grep -o '<counter type=\"BRANCH\" missed=\"[0-9]*\" covered=\"[0-9]*\"/>' "$report_xml" | tail -n1)"
-          missed="$(printf '%s\n' "$branch_counter" | sed -E 's/.*missed=\"([0-9]+)\".*/\1/')"
-          covered="$(printf '%s\n' "$branch_counter" | sed -E 's/.*covered=\"([0-9]+)\".*/\1/')"
-          total=$((missed + covered))
-          percentage_tenths="$(awk -v covered="$covered" -v total="$total" 'BEGIN { if (total == 0) print 0; else printf "%.0f", (covered * 1000) / total }')"
-          if [ $((percentage_tenths % 10)) -eq 0 ]; then
-            percentage="$((percentage_tenths / 10))%"
-          else
-            percentage="$((percentage_tenths / 10)).$((percentage_tenths % 10))%"
-          fi
+          set_coverage_metrics() {
+            counter_type="$1"
+            counter="$(grep -o "<counter type=\"$counter_type\" missed=\"[0-9]*\" covered=\"[0-9]*\"/>" "$report_xml" | tail -n1)"
+            missed="$(printf '%s\n' "$counter" | sed -E 's/.*missed=\"([0-9]+)\".*/\1/')"
+            covered="$(printf '%s\n' "$counter" | sed -E 's/.*covered=\"([0-9]+)\".*/\1/')"
+            total=$((missed + covered))
+            percentage_tenths="$(awk -v covered="$covered" -v total="$total" 'BEGIN { if (total == 0) print 0; else printf "%.0f", (covered * 1000) / total }')"
+            if [ $((percentage_tenths % 10)) -eq 0 ]; then
+              percentage="$((percentage_tenths / 10))%"
+            else
+              percentage="$((percentage_tenths / 10)).$((percentage_tenths % 10))%"
+            fi
 
-          if [ "$percentage_tenths" -lt 500 ]; then
-            color="#e05d44"
-          elif [ "$percentage_tenths" -lt 700 ]; then
-            color="#fe7d37"
-          elif [ "$percentage_tenths" -lt 850 ]; then
-            color="#dfb317"
-          elif [ "$percentage_tenths" -lt 900 ]; then
-            color="#97ca00"
-          else
-            color="#4c1"
-          fi
+            if [ "$percentage_tenths" -lt 500 ]; then
+              color="#e05d44"
+            elif [ "$percentage_tenths" -lt 700 ]; then
+              color="#fe7d37"
+            elif [ "$percentage_tenths" -lt 850 ]; then
+              color="#dfb317"
+            elif [ "$percentage_tenths" -lt 900 ]; then
+              color="#97ca00"
+            else
+              color="#4c1"
+            fi
+          }
 
-          mkdir -p site/coverage
-          rm -rf site/coverage/report
-          cp -R build/reports/jacoco/test/html site/coverage/report
-          cat > site/coverage/branch-coverage.svg <<EOF
-          <svg xmlns="http://www.w3.org/2000/svg" width="148" height="20" role="img" aria-label="branch coverage: $percentage">
-            <title>branch coverage: $percentage</title>
+          render_badge() {
+            file_stem="$1"
+            label="$2"
+            label_width="$3"
+            total_width="$4"
+            value_width="$((total_width - label_width))"
+            label_center="$(awk -v width="$label_width" 'BEGIN { printf "%.1f", width / 2 }')"
+            value_center="$(awk -v label_width="$label_width" -v value_width="$value_width" 'BEGIN { printf "%.1f", label_width + (value_width / 2) }')"
+
+            cat > "site/coverage/${file_stem}.svg" <<EOF
+          <svg xmlns="http://www.w3.org/2000/svg" width="${total_width}" height="20" role="img" aria-label="${label}: ${percentage}">
+            <title>${label}: ${percentage}</title>
             <defs>
               <linearGradient id="smooth" x2="0" y2="100%">
                 <stop offset="0" stop-color="#fff" stop-opacity=".7"/>
@@ -290,30 +299,39 @@ jobs:
                 <stop offset="1" stop-opacity=".5"/>
               </linearGradient>
               <clipPath id="clip">
-                <rect width="148" height="20" rx="3" fill="#fff"/>
+                <rect width="${total_width}" height="20" rx="3" fill="#fff"/>
               </clipPath>
             </defs>
             <g clip-path="url(#clip)">
-              <rect width="101" height="20" fill="#555"/>
-              <rect x="101" width="47" height="20" fill="$color"/>
-              <rect width="148" height="20" fill="url(#smooth)"/>
+              <rect width="${label_width}" height="20" fill="#555"/>
+              <rect x="${label_width}" width="${value_width}" height="20" fill="${color}"/>
+              <rect width="${total_width}" height="20" fill="url(#smooth)"/>
             </g>
             <g fill="#fff" text-anchor="middle" font-family="Verdana, DejaVu Sans, sans-serif" font-size="11">
-              <text x="50.5" y="15" fill="#010101" fill-opacity=".3">branch coverage</text>
-              <text x="50.5" y="14">branch coverage</text>
-              <text x="124.5" y="15" fill="#010101" fill-opacity=".3">$percentage</text>
-              <text x="124.5" y="14">$percentage</text>
+              <text x="${label_center}" y="15" fill="#010101" fill-opacity=".3">${label}</text>
+              <text x="${label_center}" y="14">${label}</text>
+              <text x="${value_center}" y="15" fill="#010101" fill-opacity=".3">${percentage}</text>
+              <text x="${value_center}" y="14">${percentage}</text>
             </g>
           </svg>
           EOF
-          cat > site/coverage/branch-coverage.json <<EOF
+            cat > "site/coverage/${file_stem}.json" <<EOF
           {
             "schemaVersion": 1,
-            "label": "branch coverage",
-            "message": "$percentage",
+            "label": "${label}",
+            "message": "${percentage}",
             "color": "${color#\#}"
           }
           EOF
+          }
+
+          mkdir -p site/coverage
+          rm -rf site/coverage/report
+          cp -R build/reports/jacoco/test/html site/coverage/report
+          set_coverage_metrics "BRANCH"
+          render_badge "branch-coverage" "branch coverage" 101 148
+          set_coverage_metrics "INSTRUCTION"
+          render_badge "instruction-coverage" "instruction coverage" 118 165
       - name: upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:

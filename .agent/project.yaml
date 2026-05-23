@@ -94,7 +94,7 @@ release_model:
     - GitHub Actions build, CodeQL, and OWASP workflows verify the repository
     - GitHub Actions build workflow runs dependency-check analysis on push and publishes the GitHub Pages site on main from a temporary Jekyll source assembled from repository documentation and workflow-owned Pages config under .github/pages
     - GitHub Actions refresh the dependency-check cache daily and purge then rebuild it during the Sunday-to-Monday overnight window
-    - GitHub Actions build workflow refreshes the branch coverage badge and report on main
+    - GitHub Actions build workflow refreshes the branch and instruction coverage badges plus the coverage report on main
     - GitHub Actions publish workflow runs semantic-release on demand and every Monday at 03:00 Europe/Berlin
     - semantic-release publishes GitHub tags and GitHub releases with the passbird.jar asset when commit history requires a release
 agent_notes:
