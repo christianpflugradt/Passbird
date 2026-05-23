@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ImportCommandHandler
@@ -18,6 +19,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 
 @Tag(INTEGRATION)
 class ImportCommandTest {
@@ -105,6 +108,23 @@ class ImportCommandTest {
 
         // then
         verify(exactly = 0) { importExportService.importEggs() }
+    }
+
+    @Test
+    fun `should reject import command with trailing input`() {
+        // given
+        fakeConfiguration(instance = configuration)
+        val captureSystemErr = captureSystemErr()
+
+        // when
+        captureSystemErr.during {
+            inputHandler.handleInput(inputOf(shellOf("iimport")))
+        }
+
+        // then
+        verify(exactly = 0) { importExportService.importEggs() }
+        verify(exactly = 0) { importExportService.peekImportEggIdShells() }
+        expectThat(captureSystemErr.capture) isEqualTo "Command execution failed: Parameter for command 'i' not supported: import\n"
     }
 
     // FIXME add tests for eggIds across multiple nests

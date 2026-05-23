@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ListCommandHandler
@@ -63,5 +64,21 @@ internal class ListCommandTest {
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot.captured.shell.asString()) isEqualTo "Nest is empty"
+    }
+
+    @Test
+    fun `should reject list command with trailing input`() {
+        // given
+        val captureSystemErr = captureSystemErr()
+
+        // when
+        captureSystemErr.during {
+            inputHandler.handleInput(inputOf(shellOf("llist")))
+        }
+
+        // then
+        verify(exactly = 0) { passwordService.findAllEggIds() }
+        verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
+        expectThat(captureSystemErr.capture) isEqualTo "Command execution failed: Parameter for command 'l' not supported: list\n"
     }
 }

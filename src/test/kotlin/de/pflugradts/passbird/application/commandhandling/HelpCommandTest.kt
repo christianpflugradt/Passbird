@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
+import strikt.assertions.isEqualTo
 
 @Tag(INTEGRATION)
 class HelpCommandTest {
@@ -37,5 +39,25 @@ class HelpCommandTest {
 
         // then
         expectThat(captureSystemOut.capture) contains "Usage: [command][parameter]"
+    }
+
+    @Test
+    fun `should reject help command with trailing input`() {
+        // given
+        val input = Input.inputOf(shellOf("hhelp"))
+        fakeConfiguration(instance = configuration)
+        val captureSystemOut = CapturedOutputPrintStream.captureSystemOut()
+        val captureSystemErr = captureSystemErr()
+
+        // when
+        captureSystemErr.during {
+            captureSystemOut.during {
+                inputHandler.handleInput(input)
+            }
+        }
+
+        // then
+        expectThat(captureSystemOut.capture) isEqualTo ""
+        expectThat(captureSystemErr.capture) isEqualTo "Command execution failed: Parameter for command 'h' not supported: help\n"
     }
 }

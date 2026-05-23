@@ -72,6 +72,33 @@ class InvalidCommandTest {
             // then
             expectThat(actual) isEqualTo "Command execution failed: Parameter for command '$givenCommand' not supported: $givenArgument\n"
         }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "email",
+                "iimport",
+                "llist",
+                "hhelp",
+                "qquit",
+            ],
+        )
+        fun `should handle no argument command with invalid input`(givenInput: String) {
+            // given
+            val input = inputOf(shellOf(givenInput))
+            val givenCommand = givenInput.first()
+            val givenArgument = givenInput.substring(1)
+            val captureSystemErr = captureSystemErr()
+
+            // when
+            captureSystemErr.during {
+                inputHandler.handleInput(input)
+            }
+            val actual = captureSystemErr.capture
+
+            // then
+            expectThat(actual) isEqualTo "Command execution failed: Parameter for command '$givenCommand' not supported: $givenArgument\n"
+        }
     }
 
     @Nested
@@ -176,6 +203,31 @@ class InvalidCommandTest {
 
             // then
             expectThat(actual).isA<NullCommand>()
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "email",
+                "iimport",
+                "llist",
+                "hhelp",
+                "qquit",
+            ],
+        )
+        fun `should handle no argument command with trailing input`(givenInput: String) {
+            // given
+            val input = inputOf(shellOf(givenInput))
+
+            // when
+            val captureSystemErr = captureSystemErr()
+            val actual = captureSystemErr.during {
+                commandFactory.construct(CommandType.resolveCommandTypeFrom(input.command), input)
+            }
+
+            // then
+            expectThat(actual).isA<NullCommand>()
+            expectThat(captureSystemErr.capture) contains "Command execution failed:"
         }
     }
 }

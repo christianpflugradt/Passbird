@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemOut
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
+import strikt.assertions.isEqualTo
 
 @Tag(INTEGRATION)
 class QuitCommandTest {
@@ -54,6 +56,25 @@ class QuitCommandTest {
             verify(exactly = 1) { backupManager.run() }
             verify(exactly = 1) { systemOperation.exit() }
             expectThat(captureSystemOut.capture).not().contains("Terminating Passbird due to inactivity")
+        }
+
+        @Test
+        fun `should reject quit command with trailing input`() {
+            // given
+            val input = inputOf(shellOf("qquit"))
+            val captureSystemOut = captureSystemOut()
+            val captureSystemErr = captureSystemErr()
+
+            // when
+            captureSystemErr.during {
+                captureSystemOut.during { inputHandler.handleInput(input) }
+            }
+
+            // then
+            verify(exactly = 0) { backupManager.run() }
+            verify(exactly = 0) { systemOperation.exit() }
+            expectThat(captureSystemOut.capture) isEqualTo ""
+            expectThat(captureSystemErr.capture) isEqualTo "Command execution failed: Parameter for command 'q' not supported: quit\n"
         }
     }
 

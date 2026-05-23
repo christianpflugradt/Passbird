@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ExportCommandHandler
@@ -33,5 +34,20 @@ class ExportCommandTest {
 
         // then
         verify(exactly = 1) { importExportService.exportEggs() }
+    }
+
+    @Test
+    fun `should reject export command with trailing input`() {
+        // given
+        val captureSystemErr = captureSystemErr()
+
+        // when
+        captureSystemErr.during {
+            inputHandler.handleInput(inputOf(shellOf("email")))
+        }
+
+        // then
+        verify(exactly = 0) { importExportService.exportEggs() }
+        expectThat(captureSystemErr.capture) isEqualTo "Command execution failed: Parameter for command 'e' not supported: mail\n"
     }
 }
