@@ -132,7 +132,7 @@ application:
 adapter:
   clipboard:
     reset:
-      enabled: false
+      enabled: true
       delaySeconds: 10
   keyStore:
     location:
