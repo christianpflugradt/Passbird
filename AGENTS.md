@@ -23,6 +23,7 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 - Before changing any user-visible text shown by the password manager, get maintainer approval for the exact wording. Do not introduce wording changes without approval.
 - Before running shell commands, source `~/.zprofile` and `~/.zshrc` so repo-local tooling such as `rtk`, `gh`, and SDKMAN-managed runtimes are available.
 - After sourcing the shell environment, prefer the local `rtk` wrapper for shell commands; otherwise use direct commands.
+- For GitHub-hosted repository work where local files are not enough, use GitHub CLI rather than browser-only workflows. Inspect workflow registration, runs, jobs, and logs with `gh`; inspect and update issues, pull requests, releases, and repository metadata with `gh`. Prefer `rtk gh` for supported subcommands and otherwise use direct `gh` commands after sourcing the shell environment.
 - Do not create or switch to a new git branch unless the maintainer explicitly approves that branch action.
 - Before staging, committing, or pushing, run `./gradlew ktlintFormat` to auto-resolve formatting issues when possible.
 - Once a requested task is complete and suitable for release, commit it, run `git pull -r` on the current branch, and push it immediately.
@@ -37,6 +38,9 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 - Read `.agent/review.yaml` before performing one of these reviews.
 - Reviews use the current task, diff, or concern as the trigger, but they must assess the full workspace rather than only the touched files.
 - Review findings must be reported as `P0` to `P3`, ordered by severity, and every finding must include a proposed fix.
+- Before concluding a review, inspect relevant GitHub context with `gh` when it can change the conclusion or fix, especially existing issues and GitHub Actions workflow or run state.
+- Turn every unique actionable finding into a GitHub issue using `.github/ISSUE_TEMPLATE/review_finding.md`. Create or update the issue through `gh`, avoid duplicates when an existing issue already captures the finding, and include the resulting issue reference in the review report.
+- Populate each review-finding issue with enough context for another agent to continue without re-discovery: review area and trigger, priority, evidence with file or workflow references, impact, proposed fix, acceptance criteria, and handoff notes.
 - If no actionable findings are discovered for the selected area, say so explicitly.
 
 ## Commit Messages

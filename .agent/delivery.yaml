@@ -54,6 +54,21 @@ ci_landscape:
       - the build workflow publishes the GitHub Pages site for coverage assets and refreshes the branch-coverage badge and report on main
       - publish workflow runs semantic-release manually and on a Monday 03:00 Europe/Berlin schedule, but only after the current main commit already has a successful Build and Verify workflow run
       - scheduled and manual publish runs are expected to succeed even when no release is due
+github_cli_usage:
+  when_remote_state_matters:
+    - inspect local workflow YAML first for static behavior, then use gh for live GitHub-side workflow registration, runs, jobs, and logs
+    - use gh for GitHub-hosted artifacts such as issues, pull requests, releases, and repository metadata instead of browser-only interaction when auditability or automation matters
+  preferred_commands:
+    - gh workflow view
+    - gh run list
+    - gh run view
+    - gh issue list
+    - gh issue view
+    - gh issue create
+    - gh pr view
+    - gh release view
+  tooling_preference:
+    - prefer rtk gh for supported subcommands and use direct gh for unsupported subcommands such as gh workflow or gh release
 change_rules:
   - keep changes small and intention-revealing in this security-sensitive codebase
   - add or update tests with behavior changes; do not rely on docs alone
@@ -124,6 +139,7 @@ recommended_validation_by_change_type:
     run:
       - ./gradlew jar
       - review workflow and release config for consistency
+      - inspect relevant GitHub Actions runs or workflow metadata with gh when the question depends on GitHub-side state
       - run semantic-release in dry-run mode when credentials and tags are available
   security_or_persistence:
     run:
@@ -157,4 +173,6 @@ review_protocol:
     - workspace reviews must use the current concern as a trigger but evaluate the full workspace
     - findings must be reported as P0 to P3 and ordered by severity
     - every finding must include a proposed fix
+    - every unique actionable finding must be tracked in GitHub with the Review Finding issue template and referenced in the review output
+    - search existing GitHub issues with gh before creating a new review-finding issue, and update an existing issue instead of duplicating it when it already captures the finding
     - explicitly state when a selected review area has no actionable findings

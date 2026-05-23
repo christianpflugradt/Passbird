@@ -107,6 +107,7 @@ agent_notes:
   - invalid configuration files must abort startup after reporting the load failure; they must not be treated as missing configuration or routed into setup
   - do not add code comments unless the maintainer explicitly asks for them or an existing project convention clearly requires them; never leave design commentary, temporary notes, versioned implementation notes, or other agent-style annotations
   - treat all password-manager wording as maintainer-owned copy; do not change user-visible text without approval for the exact wording
+  - use GitHub CLI for GitHub-hosted repository work when local files are not enough; inspect Actions runs or workflow state, issues, pull requests, releases, and repository metadata with gh, preferring rtk gh when the needed subcommand is supported there
   - do not create or switch to a new git branch unless the maintainer explicitly approves that branch action
   - before pushing committed work, run git pull -r on the current branch to integrate remote updates without a merge commit
   - do not run OWASP dependency-check locally for routine verification; use the GitHub Actions workflows unless the maintainer explicitly asks for a local run

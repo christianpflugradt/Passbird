@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-22
+last_reviewed: 2026-05-23
 review_commands:
   syntax: review <area>
   supported_areas:
@@ -15,6 +15,7 @@ review_commands:
 review_process:
   - identify the highest-risk files and workflows for the selected area before forming conclusions
   - trace cross-file and cross-layer consequences, especially when a local change could weaken a broader guarantee
+  - inspect relevant GitHub context with gh when remote state can change the conclusion, especially existing issues and GitHub Actions workflow, run, job, or log state
   - prefer a small number of well-supported findings over a long list of shallow observations
   - report only actionable findings; praise and summaries are secondary
 output_contract:
@@ -30,7 +31,38 @@ output_contract:
     - evidence with file references
     - impact
     - proposed fix
+    - github issue reference
   no_findings_requirement: state explicitly when no actionable findings are present for the selected area
+github_cli_usage:
+  prefer_gh_when:
+    - inspecting GitHub Actions workflow registration, runs, jobs, or logs
+    - inspecting or updating GitHub issues that may affect review triage or deduplication
+  preferred_commands:
+    - gh workflow view
+    - gh run list
+    - gh run view
+    - gh issue list
+    - gh issue view
+    - gh issue create
+    - gh issue comment
+github_issue_tracking:
+  template:
+    path: .github/ISSUE_TEMPLATE/review_finding.md
+    name: Review Finding
+  rules:
+    - create or update a GitHub issue for every unique actionable finding
+    - search open and recently closed issues before creating a new review-finding issue
+    - reopen or comment on an existing issue instead of creating a duplicate when the finding is already tracked
+    - do not create review-finding issues when the selected area has no actionable findings
+  each_issue_must_include:
+    - review area and review trigger
+    - priority in the title and body
+    - concise problem statement
+    - evidence with file, command, workflow, or issue references
+    - impact and risk explanation
+    - proposed fix
+    - acceptance criteria
+    - handoff notes for a follow-up agent
 severity_scale:
   P0: release-blocking issue with catastrophic impact such as secret disclosure, irreversible data loss, or a broken release/update path
   P1: serious issue likely to affect users or weaken guarantees materially, including major security, integrity, or architectural regressions
