@@ -231,7 +231,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: prepare Pages source
         run: |
-          rm -rf .pages site
+          rm -rf .pages _site site
           mkdir -p .pages
           cp -R .github/pages/. .pages/
           cp README.md CONFIGURATION.md .pages/
@@ -241,7 +241,11 @@ jobs:
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./.pages
-          destination: ./site
+          destination: ./_site
+      - name: prepare writable Pages directory
+        run: |
+          mkdir -p site
+          cp -R _site/. site/
       - uses: actions/download-artifact@v8
         with:
           name: test-coverage-report
