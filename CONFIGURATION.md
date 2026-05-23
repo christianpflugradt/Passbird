@@ -29,7 +29,7 @@ Passbird’s behavior can be customized using the passbird.yml configuration fil
 | `adapter.keyStore.location`                           | Specifies the directory where the keystore file is located.                                      | *(set during setup)* |
 | `adapter.passwordTree.location`                       | Specifies the directory where the password tree file is located.                                 | *(set during setup)* |
 | `adapter.passwordTree.verifyChecksum`                 | Verifies the checksum of the password tree file to ensure its integrity.                         | true                 |
-| `adapter.passwordTree.verifySignature`                | Verifies the digital signature of the password tree file to ensure its authenticity.             | true                 |
+| `adapter.passwordTree.verifySignature`                | Verifies the password tree file's built-in signature marker to detect format mismatches.         | true                 |
 | `adapter.userInterface.ansiEscapeCodes.enabled`       | Enables or disables colorful mode in terminals that support ANSI escape codes.                   | false                |
 | `adapter.userInterface.audibleBell`                   | Enables or disables an audible bell as feedback for invalid input.                               | false                |
 | `adapter.userInterface.secureInput`                   | Hides sensitive user input (e.g., passwords) in the terminal.                                    | true                 |

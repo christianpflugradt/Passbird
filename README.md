@@ -160,6 +160,8 @@ Note: Default values may change with major updates. New parameters introduced in
 
 For a complete list of configuration settings and their descriptions, consult the [CONFIGURATION.md](CONFIGURATION.md) file. It provides an exhaustive reference to all available parameters, their purposes, and how to customize them.
 
+The `verifySignature` setting checks the password tree's built-in file signature marker. It is not a separate cryptographic digital signature.
+
 ### Custom Password Configuration
 
 Passbird supports up to nine custom password configurations for specific use cases (e.g., PINs or highly secure passwords). Each configuration has six customizable properties:
