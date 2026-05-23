@@ -23,6 +23,7 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 - Before changing any user-visible text shown by the password manager, get maintainer approval for the exact wording. Do not introduce wording changes without approval.
 - Before running shell commands, source `~/.zprofile` and `~/.zshrc` so repo-local tooling such as `rtk`, `gh`, and SDKMAN-managed runtimes are available.
 - After sourcing the shell environment, prefer the local `rtk` wrapper for shell commands; otherwise use direct commands.
+- Do not create or switch to a new git branch unless the maintainer explicitly approves that branch action.
 - Once a requested task is complete and suitable for release, commit and push it immediately.
 - Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.
 - Do not run `./gradlew dependencyCheckAnalyze` locally for verification. Treat OWASP dependency scanning as CI-only unless the maintainer explicitly asks for a local run.
