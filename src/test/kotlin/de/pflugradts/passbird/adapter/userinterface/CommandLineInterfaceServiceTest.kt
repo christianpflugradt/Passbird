@@ -239,24 +239,30 @@ class CommandLineInterfaceServiceTest {
 
     @Nested
     inner class ReceiveYesTest {
-        @Test
-        fun `should return true on input Y`() {
-            // given
-            val givenInput = "Y"
-
-            // when
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "Y",
+                "y",
+            ],
+        )
+        fun `should return true on yes input`(givenInput: String) {
+            // given / when
             val actual = mockSystemInWith("$givenInput\n") { commandLineInterfaceService.receiveYes(emptyOutput()) }
 
             // then
             expectThat(actual).isTrue()
         }
 
-        @Test
-        fun `should return true on input Y with windows line ending`() {
-            // given
-            val givenInput = "Y"
-
-            // when
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "Y",
+                "y",
+            ],
+        )
+        fun `should return true on yes input with windows line ending`(givenInput: String) {
+            // given / when
             val actual = mockSystemInWith("$givenInput\r\n") { commandLineInterfaceService.receiveYes(emptyOutput()) }
 
             // then
@@ -267,7 +273,6 @@ class CommandLineInterfaceServiceTest {
         @ValueSource(
             strings = [
                 "n",
-                "y",
                 "Yes",
                 "",
             ],
