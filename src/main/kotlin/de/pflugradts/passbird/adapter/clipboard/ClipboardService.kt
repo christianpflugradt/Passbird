@@ -17,19 +17,32 @@ class ClipboardService @Inject constructor(
     private val systemOperation: SystemOperation,
     private val configuration: ReadableConfiguration,
 ) : ClipboardAdapterPort {
+    private val cleanerLock = Any()
+    private var cleanerGeneration = 0L
 
-    private var cleanerThread: Thread? = null
-    override fun post(output: Output) {
-        cleanerThread?.interrupt()
-        tryCatching { systemOperation.copyToClipboard(output.shell.asString()) }
-            .onFailure { reportFailure(ClipboardFailure(it)) }
-        scheduleCleaner()
+    override fun post(output: Output) = tryCatching {
+        synchronized(cleanerLock) {
+            systemOperation.copyToClipboard(output.shell.asString())
+            cleanerGeneration += 1
+            cleanerGeneration
+        }
+    }.onFailure {
+        reportFailure(ClipboardFailure(it))
+    }.onSuccess(::scheduleCleaner).map {
+        Unit
     }
 
-    private fun scheduleCleaner() {
+    private fun scheduleCleaner(generation: Long) {
         if (isResetEnabled) {
-            cleanerThread = Thread { sleep().onSuccess { tryCatching { systemOperation.copyToClipboard("") } } }
-            cleanerThread!!.start()
+            Thread {
+                sleep().onSuccess {
+                    synchronized(cleanerLock) {
+                        if (cleanerGeneration == generation) {
+                            tryCatching { systemOperation.copyToClipboard("") }
+                        }
+                    }
+                }
+            }.start()
         }
     }
 

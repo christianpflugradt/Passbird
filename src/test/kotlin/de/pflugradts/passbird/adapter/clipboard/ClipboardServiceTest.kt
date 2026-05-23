@@ -34,9 +34,10 @@ class ClipboardServiceTest {
         fakeConfiguration(instance = configuration)
 
         // when
-        clipboardService.post(outputOf(shellOf(message)))
+        val actual = clipboardService.post(outputOf(shellOf(message)))
 
         // then
+        expectThat(actual.success) isEqualTo true
         verify(exactly = 1) { systemOperation.copyToClipboard(message) }
     }
 
@@ -50,13 +51,14 @@ class ClipboardServiceTest {
         val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
 
         // when
-        captureSystemErr.during {
+        val actual = captureSystemErr.during {
             clipboardService.post(outputOf(shellOf(message)))
         }
 
         // then
-        val actual = captureSystemErr.capture
-        expectThat(actual) isEqualTo "Clipboard could not be updated. Please check your Java version. Exception: $error\n"
+        expectThat(actual.failure) isEqualTo true
+        val errorOutput = captureSystemErr.capture
+        expectThat(errorOutput) isEqualTo "Clipboard could not be updated. Please check your Java version. Exception: $error\n"
     }
 
     @Test

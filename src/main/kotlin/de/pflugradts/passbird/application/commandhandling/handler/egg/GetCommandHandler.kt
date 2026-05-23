@@ -18,8 +18,9 @@ class GetCommandHandler @Inject constructor(
     @Subscribe
     private fun handleGetCommand(getCommand: GetCommand) {
         passwordService.viewPassword(getCommand.argument).ifPresent {
-            clipboardAdapterPort.post(outputOf(it))
-            userInterfaceAdapterPort.send(outputOf(shellOf("Password copied to clipboard.")))
+            clipboardAdapterPort.post(outputOf(it)).onSuccess {
+                userInterfaceAdapterPort.send(outputOf(shellOf("Password copied to clipboard.")))
+            }
         }
         getCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

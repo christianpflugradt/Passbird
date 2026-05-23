@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.protein
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
@@ -15,9 +17,11 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.Called
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -34,6 +38,11 @@ class GetProteinCommandTest {
     private val passwordService = mockk<PasswordService>()
     private val getProteinCommandHandler = GetProteinCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort)
     private val inputHandler = createInputHandlerFor(getProteinCommandHandler)
+
+    @BeforeEach
+    fun setup() {
+        every { clipboardAdapterPort.post(any()) } returns success(Unit)
+    }
 
     @ParameterizedTest
     @EnumSource(value = Slot::class)
@@ -113,6 +122,36 @@ class GetProteinCommandTest {
         verify(exactly = 1) {
             userInterfaceAdapterPort.send(eq(outputOf(shellOf("Specified Protein Structure is empty - Operation aborted."))))
         }
+        expectThat(command) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should not report successful clipboard copy when protein clipboard update fails`() {
+        // given
+        val args = "EggId"
+        val command = shellOf("p0$args")
+        val reference = command.copy()
+        val expectedStructure = shellOf("username")
+        fakePasswordService(
+            instance = passwordService,
+            withEggs = listOf(
+                createEggForTesting(
+                    withEggIdShell = shellOf(args),
+                    withProteins = mapOf(Slot.DEFAULT to Pair(shellOf("type"), expectedStructure)),
+                ),
+            ),
+        )
+        every { clipboardAdapterPort.post(any()) } returns failure(IllegalStateException("clipboard unavailable"))
+        val outputSlot = slot<Output>()
+
+        // when
+        expectThat(command) isEqualTo reference
+        inputHandler.handleInput(inputOf(command))
+
+        // then
+        verify { clipboardAdapterPort.post(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell) isEqualTo expectedStructure
+        verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
         expectThat(command) isNotEqualTo reference
     }
 }

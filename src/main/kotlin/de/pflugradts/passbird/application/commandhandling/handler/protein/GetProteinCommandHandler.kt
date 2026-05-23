@@ -20,8 +20,9 @@ class GetProteinCommandHandler @Inject constructor(
     private fun handleGetProteinCommand(getProteinCommand: GetProteinCommand) {
         passwordService.viewProteinStructure(getProteinCommand.argument, getProteinCommand.slot).orNull()?.also {
             if (it.isNotEmpty) {
-                clipboardAdapterPort.post(outputOf(it))
-                userInterfaceAdapterPort.send(outputOf(shellOf("Protein copied to clipboard.")))
+                clipboardAdapterPort.post(outputOf(it)).onSuccess {
+                    userInterfaceAdapterPort.send(outputOf(shellOf("Protein copied to clipboard.")))
+                }
             } else {
                 val msg = "Specified Protein Structure is empty - Operation aborted."
                 userInterfaceAdapterPort.send(outputOf(shellOf(msg), OutputFormatting.OPERATION_ABORTED))

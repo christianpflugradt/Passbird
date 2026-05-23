@@ -19,8 +19,9 @@ class GetMemoryCommandHandler @Inject constructor(
     private fun handleGetMemoryCommand(getMemoryCommand: GetMemoryCommand) {
         passwordService.viewMemoryEntry(getMemoryCommand.slot).ifPresentOrElse(
             block = {
-                clipboardAdapterPort.post(outputOf(it))
-                userInterfaceAdapterPort.send(outputOf(shellOf("EggId copied to clipboard.")))
+                clipboardAdapterPort.post(outputOf(it)).onSuccess {
+                    userInterfaceAdapterPort.send(outputOf(shellOf("EggId copied to clipboard.")))
+                }
             },
             other = {
                 userInterfaceAdapterPort.send(outputOf(shellOf("Memory entry at slot ${getMemoryCommand.slot.index()} does not exist.")))

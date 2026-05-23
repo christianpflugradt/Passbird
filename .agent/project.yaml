@@ -104,6 +104,7 @@ agent_notes:
   - do not add fallback behavior or fallback implementations unless the maintainer explicitly asks for them; if fallback handling is uncertain, stop and ask
   - invalid configuration files must abort startup after reporting the load failure; they must not be treated as missing configuration or routed into setup
   - setup must stop immediately if creating passbird.yml fails; do not continue into keystore creation or restart guidance after a failed configuration write
+  - clipboard success messages must only be shown after the clipboard adapter confirms a successful update; never claim a secret was copied when the adapter reported failure
   - do not add code comments unless the maintainer explicitly asks for them or an existing project convention clearly requires them; never leave design commentary, temporary notes, versioned implementation notes, or other agent-style annotations
   - treat all password-manager wording as maintainer-owned copy; do not change user-visible text without approval for the exact wording
   - use GitHub CLI for GitHub-hosted repository work when local files are not enough; inspect Actions runs or workflow state, issues, pull requests, releases, and repository metadata with gh, preferring rtk gh when the needed subcommand is supported there

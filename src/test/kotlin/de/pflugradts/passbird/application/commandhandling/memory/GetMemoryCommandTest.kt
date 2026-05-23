@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.memory
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
@@ -23,10 +25,13 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.Called
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
@@ -43,6 +48,11 @@ class GetMemoryCommandTest {
     private val passwordService = mockk<PasswordService>()
     private val getMemoryCommandHandler = GetMemoryCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort)
     private val inputHandler = createInputHandlerFor(getMemoryCommandHandler)
+
+    @BeforeEach
+    fun setup() {
+        every { clipboardAdapterPort.post(any()) } returns success(Unit)
+    }
 
     @ParameterizedTest
     @MethodSource("providedMemory")
@@ -74,6 +84,23 @@ class GetMemoryCommandTest {
         // then
         verify { clipboardAdapterPort wasNot Called }
         verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(shellOf("Memory entry at slot ${slot.index()} does not exist."))) }
+    }
+
+    @Test
+    fun `should not report successful clipboard copy when memory clipboard update fails`() {
+        // given
+        val command = shellOf("m0")
+        fakePasswordService(instance = passwordService, withMemory = testMemoryData())
+        every { clipboardAdapterPort.post(any()) } returns failure(IllegalStateException("clipboard unavailable"))
+        val outputSlot = slot<Output>()
+
+        // when
+        inputHandler.handleInput(inputOf(command))
+
+        // then
+        verify { clipboardAdapterPort.post(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell) isEqualTo shellOf("eggid0")
+        verify(exactly = 0) { userInterfaceAdapterPort.send(outputOf(shellOf("EggId copied to clipboard."))) }
     }
 
     companion object {
