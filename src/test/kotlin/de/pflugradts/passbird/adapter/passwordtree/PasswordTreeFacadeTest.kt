@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.adapter.passwordtree
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.containsExactly
+import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
@@ -163,6 +165,26 @@ class PasswordTreeFacadeTest {
         // then
         expectThat(actual.get().count()) isEqualTo 0
         expectThat(captureSystemErr.capture).isEqualTo("")
+    }
+
+    @Test
+    fun `should shut down on decrypt failure instead of falling back to empty tree`() {
+        // given
+        every { systemOperation.exit() } returns Unit
+        File(passwordTreeFilename).writeText("not an encrypted password tree")
+        expectThat(File(passwordTreeFilename)).exists()
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        // when
+        val actual = captureSystemErr.during {
+            tryCatching { passwordTreeFacade.restore() }
+        }
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isA<Exception>()
+        expectThat(captureSystemErr.capture) contains "Password Tree at 'passbird.tree' could not be decrypted:"
+        verify(exactly = 1) { systemOperation.exit() }
     }
 
     @Nested

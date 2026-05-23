@@ -52,6 +52,7 @@ current_security_relevant_implementation:
       - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeWriter.kt
     facts:
       - verifies a built-in file signature marker and checksum on restore
+      - treats password tree decrypt or read failures as fatal instead of falling back to an empty restore state
       - can exit immediately when verification is configured as critical
       - stores eggs, nests, and optionally persisted memory in a custom binary layout before encryption
 hard_guardrails:

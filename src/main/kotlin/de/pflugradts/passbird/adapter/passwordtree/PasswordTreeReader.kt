@@ -80,8 +80,14 @@ class PasswordTreeReader @Inject constructor(
             if (it.isEmpty()) emptyShell() else cryptoProvider.decrypt(encryptedShellOf(it))
         }
     }
-        .onFailure { reportFailure(DecryptPasswordTreeFailure(filePath, it)) }
-        .getOrNull()
+        .onFailure(::abortRestore)
+        .getOrNull()!!
+
+    private fun abortRestore(ex: Exception): Nothing {
+        reportFailure(DecryptPasswordTreeFailure(filePath, ex))
+        systemOperation.exit()
+        throw ex
+    }
 
     private fun verifySignature(bytes: ByteArray) {
         val expectedSignature = signature()

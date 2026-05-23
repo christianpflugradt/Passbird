@@ -72,6 +72,8 @@ The master password must be entered each time you run Passbird. Entering the inc
 
 Tip: If setup is triggered accidentally, press any key other than c to exit without making changes.
 
+If Passbird cannot decrypt `passbird.tree` during startup, it reports the failure and terminates without loading an empty password tree.
+
 ### Tutorial: Your first Password
 
 #### 1. Create a Password
