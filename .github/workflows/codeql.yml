@@ -58,6 +58,10 @@ jobs:
 
         # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
+        # Stay on the nightly CodeQL toolchain because Kotlin support in stable
+        # CodeQL often lags behind the latest Kotlin releases for too long.
+        # This repository prefers staying current with Kotlin rather than
+        # postponing Kotlin upgrades until stable CodeQL catches up.
         tools: nightly
 
     - uses: actions/setup-java@v5
