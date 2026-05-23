@@ -247,10 +247,68 @@ jobs:
           path: build/reports/jacoco/test
       - name: add coverage assets to Pages site
         run: |
-          python3 scripts/render_coverage_pages.py \
-            --report-xml build/reports/jacoco/test/jacocoTestReport.xml \
-            --report-html-dir build/reports/jacoco/test/html \
-            --site-dir site
+          report_xml="build/reports/jacoco/test/jacocoTestReport.xml"
+          branch_counter="$(grep -o '<counter type=\"BRANCH\" missed=\"[0-9]*\" covered=\"[0-9]*\"/>' "$report_xml" | tail -n1)"
+          missed="$(printf '%s\n' "$branch_counter" | sed -E 's/.*missed=\"([0-9]+)\".*/\1/')"
+          covered="$(printf '%s\n' "$branch_counter" | sed -E 's/.*covered=\"([0-9]+)\".*/\1/')"
+          total=$((missed + covered))
+          percentage_tenths="$(awk -v covered="$covered" -v total="$total" 'BEGIN { if (total == 0) print 0; else printf "%.0f", (covered * 1000) / total }')"
+          if [ $((percentage_tenths % 10)) -eq 0 ]; then
+            percentage="$((percentage_tenths / 10))%"
+          else
+            percentage="$((percentage_tenths / 10)).$((percentage_tenths % 10))%"
+          fi
+
+          if [ "$percentage_tenths" -lt 500 ]; then
+            color="#e05d44"
+          elif [ "$percentage_tenths" -lt 700 ]; then
+            color="#fe7d37"
+          elif [ "$percentage_tenths" -lt 850 ]; then
+            color="#dfb317"
+          elif [ "$percentage_tenths" -lt 900 ]; then
+            color="#97ca00"
+          else
+            color="#4c1"
+          fi
+
+          mkdir -p site/coverage
+          rm -rf site/coverage/report
+          cp -R build/reports/jacoco/test/html site/coverage/report
+          cat > site/coverage/branch-coverage.svg <<EOF
+          <svg xmlns="http://www.w3.org/2000/svg" width="148" height="20" role="img" aria-label="branch coverage: $percentage">
+            <title>branch coverage: $percentage</title>
+            <defs>
+              <linearGradient id="smooth" x2="0" y2="100%">
+                <stop offset="0" stop-color="#fff" stop-opacity=".7"/>
+                <stop offset=".1" stop-color="#aaa" stop-opacity=".1"/>
+                <stop offset=".9" stop-opacity=".3"/>
+                <stop offset="1" stop-opacity=".5"/>
+              </linearGradient>
+              <clipPath id="clip">
+                <rect width="148" height="20" rx="3" fill="#fff"/>
+              </clipPath>
+            </defs>
+            <g clip-path="url(#clip)">
+              <rect width="101" height="20" fill="#555"/>
+              <rect x="101" width="47" height="20" fill="$color"/>
+              <rect width="148" height="20" fill="url(#smooth)"/>
+            </g>
+            <g fill="#fff" text-anchor="middle" font-family="Verdana, DejaVu Sans, sans-serif" font-size="11">
+              <text x="50.5" y="15" fill="#010101" fill-opacity=".3">branch coverage</text>
+              <text x="50.5" y="14">branch coverage</text>
+              <text x="124.5" y="15" fill="#010101" fill-opacity=".3">$percentage</text>
+              <text x="124.5" y="14">$percentage</text>
+            </g>
+          </svg>
+          EOF
+          cat > site/coverage/branch-coverage.json <<EOF
+          {
+            "schemaVersion": 1,
+            "label": "branch coverage",
+            "message": "$percentage",
+            "color": "${color#\#}"
+          }
+          EOF
       - name: upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
