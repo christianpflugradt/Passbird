@@ -10,6 +10,7 @@ import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
@@ -302,6 +303,31 @@ class PasswordTreeFacadeTest {
             expectThat(actual) contains "Checksum of Password Tree could not be verified."
             expectThat(actual.contains("Shutting down due to checksum failure.")).isFalse()
             verify(exactly = 0) { systemOperation.exit() }
+        }
+
+        @Test
+        fun `should shut down when the final password tree content byte is corrupted`() {
+            // given
+            val eggs = someEggs()
+            every { systemOperation.exit() } returns Unit
+            fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifyChecksum = true)
+            passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream() }))
+            expectThat(File(passwordTreeFilename)).exists()
+            val decryptedTree = cryptoProvider.decrypt(encryptedShellOf(File(passwordTreeFilename).readBytes())).toByteArray()
+            decryptedTree[decryptedTree.size - checksumBytes() - 1] = (decryptedTree[decryptedTree.size - checksumBytes() - 1] + 1).toByte()
+            File(passwordTreeFilename).writeBytes(cryptoProvider.encrypt(shellOf(decryptedTree)).toByteArray())
+            val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+            // when
+            captureSystemErr.during {
+                passwordTreeFacade.restore()
+            }
+            val actual = captureSystemErr.capture
+
+            // then
+            expectThat(actual) contains "Checksum of Password Tree could not be verified."
+            expectThat(actual) contains "Shutting down due to checksum failure."
+            verify(exactly = 1) { systemOperation.exit() }
         }
     }
 

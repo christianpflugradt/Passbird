@@ -102,7 +102,11 @@ class PasswordTreeReader @Inject constructor(
 
     private fun verifyChecksum(bytes: ByteArray) {
         val contentSize = calcActualContentSize(bytes.size)
-        val expectedChecksum = if (contentSize > 0) checksum(Arrays.copyOfRange(bytes, signatureSize(), contentSize)) else 0x0
+        val expectedChecksum = if (contentSize > 0) {
+            checksum(Arrays.copyOfRange(bytes, signatureSize(), signatureSize() + contentSize))
+        } else {
+            0x0
+        }
         val actualCheckSum = bytes[bytes.size - 1]
         if (expectedChecksum != actualCheckSum) {
             val critical = configuration.adapter.passwordTree.verifyChecksum

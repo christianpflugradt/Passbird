@@ -49,7 +49,9 @@ class PasswordTreeWriter @Inject constructor(
             nestService.atNestSlot(slotAt(index)).nestAsByteArray().let { offset += copyBytes(it, bytes, offset, it.size) }
         }
         eggSupplier.get().forEach { egg -> egg.eggAsByteArray().let { offset += copyBytes(it, bytes, offset, it.size) } }
-        val checksumBytes = byteArrayOf(if (contentSize > 0) checksum(Arrays.copyOfRange(bytes, signatureSize(), contentSize)) else 0x0)
+        val checksumBytes = byteArrayOf(
+            if (contentSize > 0) checksum(Arrays.copyOfRange(bytes, signatureSize(), signatureSize() + contentSize)) else 0x0,
+        )
         copyBytes(checksumBytes, bytes, offset, checksumBytes())
         writeToDisk(shellOf(bytes))
     }
