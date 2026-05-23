@@ -82,6 +82,22 @@ class CommandLineInterfaceServiceTest {
             expectThat(actual.shell.asString()) isEqualTo givenInput
         }
 
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "hello world",
+                "n1",
+                "semail",
+            ],
+        )
+        fun `should receive input with windows line ending`(givenInput: String) {
+            // when
+            val actual = mockSystemInWith("$givenInput\r\n") { commandLineInterfaceService.receive() }
+
+            // then
+            expectThat(actual.shell.asString()) isEqualTo givenInput
+        }
+
         @Test
         fun `should receive input when sending output`() {
             // given
@@ -161,6 +177,21 @@ class CommandLineInterfaceServiceTest {
             verify(exactly = 0) { systemOperation.readPasswordFromConsole() }
             expectThat(actual.shell.asString()) isEqualTo givenInput
         }
+
+        @Test
+        fun `should receive secure input as plain with windows line ending if console is unavailable`() {
+            // given
+            val givenInput = "semail"
+            fakeSystemOperation(instance = systemOperation, withConsoleEnabled = false)
+            fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
+
+            // when
+            val actual = mockSystemInWith("$givenInput\r\n") { commandLineInterfaceService.receiveSecurely() }
+
+            // then
+            verify(exactly = 0) { systemOperation.readPasswordFromConsole() }
+            expectThat(actual.shell.asString()) isEqualTo givenInput
+        }
     }
 
     @Nested
@@ -172,6 +203,18 @@ class CommandLineInterfaceServiceTest {
 
             // when
             val actual = mockSystemInWith("$givenInput\n") { commandLineInterfaceService.receiveConfirmation(emptyOutput()) }
+
+            // then
+            expectThat(actual).isTrue()
+        }
+
+        @Test
+        fun `should return true on input c with windows line ending`() {
+            // given
+            val givenInput = "c"
+
+            // when
+            val actual = mockSystemInWith("$givenInput\r\n") { commandLineInterfaceService.receiveConfirmation(emptyOutput()) }
 
             // then
             expectThat(actual).isTrue()
@@ -203,6 +246,18 @@ class CommandLineInterfaceServiceTest {
 
             // when
             val actual = mockSystemInWith("$givenInput\n") { commandLineInterfaceService.receiveYes(emptyOutput()) }
+
+            // then
+            expectThat(actual).isTrue()
+        }
+
+        @Test
+        fun `should return true on input Y with windows line ending`() {
+            // given
+            val givenInput = "Y"
+
+            // when
+            val actual = mockSystemInWith("$givenInput\r\n") { commandLineInterfaceService.receiveYes(emptyOutput()) }
 
             // then
             expectThat(actual).isTrue()

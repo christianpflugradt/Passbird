@@ -23,12 +23,15 @@ class CommandLineInterfaceService @Inject constructor(
     private fun receivePlain(): Input {
         val bytes = ArrayList<Byte>()
         var next: Char
-        while (!isLinebreak(stdin().also { next = it })) bytes.add(next.code.toByte())
+        while (!isLinebreak(stdin().also { next = it })) {
+            if (!isCarriageReturn(next)) bytes.add(next.code.toByte())
+        }
         return inputOf(shellOf(bytes))
     }
 
     private fun stdin(): Char = System.`in`.read().toChar()
     private fun isLinebreak(chr: Char) = chr == '\n'
+    private fun isCarriageReturn(chr: Char) = chr == '\r'
 
     override fun receiveSecurely(output: Output): Input {
         sendWithoutLineBreak(output)
