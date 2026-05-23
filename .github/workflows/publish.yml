@@ -8,6 +8,7 @@ on:
       timezone: "Europe/Berlin"
 
 permissions:
+  actions: read
   contents: write
 
 concurrency:
@@ -18,7 +19,41 @@ env:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 
 jobs:
+  require-verified-main:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - id: require-build
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const workflowId = "build.yml";
+            const branch = "main";
+            const sha = context.sha;
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflowId,
+              branch,
+              status: "completed",
+              per_page: 50,
+            });
+
+            const successfulRun = data.workflow_runs.find((run) =>
+              run.head_sha === sha && run.conclusion === "success"
+            );
+
+            if (!successfulRun) {
+              core.setFailed(
+                `No successful Build and Verify run found for ${sha} on ${branch}. Publish runs are gated on a green build workflow for the current main commit.`
+              );
+              return;
+            }
+
+            core.notice(`Found successful Build and Verify run: ${successfulRun.html_url}`);
+
   publish:
+    needs: [ require-verified-main ]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
