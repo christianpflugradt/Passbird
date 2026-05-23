@@ -48,9 +48,11 @@ To start Passbird, use the following command:
 
 `java -jar passbird.jar home-directory`
 
-Replace home-directory with the path to an existing directory where your configuration file is stored. This directory is also used for import/export operations. Examples:
-- **Linux**: /etc/passbird
-- **Windows**: "C:\Program Files\Passbird"
+Replace home-directory with the path to an existing private directory where your configuration file is stored. This directory is also used for import/export operations and, by default, for backup storage. Prefer a location owned by your user account rather than a shared system directory. Examples:
+- **Linux**: ~/.passbird
+- **Windows**: "%LOCALAPPDATA%\Passbird"
+
+Avoid shared system locations such as `/etc` or `Program Files`.
 
 Note: Use quotes if the path contains spaces.
 
@@ -432,7 +434,7 @@ If you forget your master password, your only recourse is brute force guessing.
 ### How do I back up my passwords?
 Passbird supports file-based backups for the password database (`passbird.tree`), configuration file (`passbird.yml`), and keystore file (`passbird.sec`). These can be automatically managed through the backup settings in `passbird.yml`. Refer to the [configuration section](./CONFIGURATION.md) for details on enabling and customizing backups.
 
-While Passbird does not offer built-in online backup features, you can securely store these backup files using external tools like Nextcloud, Dropbox, or similar cloud services. Ensure that the storage location of your backups is well-protected, as these files contain sensitive data necessary for password recovery.
+While Passbird does not offer built-in online backup features, you can securely store these backup files using external tools like Nextcloud, Dropbox, or similar cloud services. Prefer per-user directories for local backup storage, and ensure that any backup location is well-protected, as these files contain sensitive data necessary for password recovery.
 
 ### Can Passbird integrate with browsers or other tools?
 No. Passbird is designed with a 100% offline philosophy, ensuring maximum privacy and security. It does not integrate with browsers, plugins, or other tools. For users requiring browser integration, a different password manager may be more suitable.

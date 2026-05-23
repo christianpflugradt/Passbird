@@ -2,20 +2,22 @@
 
 Passbird’s behavior can be customized using the passbird.yml configuration file. Below is a detailed explanation of all configuration parameters.
 
+Passbird stores sensitive local files such as the keystore, password tree, exports, and backups. Prefer private directories that are accessible only to your user account for the home directory and any configured storage locations.
+
 ## Parameter Descriptions
 
 | **Parameter**                                         | **Description**                                                                                  | **Default Value**    |
 |-------------------------------------------------------|--------------------------------------------------------------------------------------------------|----------------------|
-| `application.backup.location`                         | Specifies the directory where backup files are stored. Can be an absolute or relative path.      | backups              |
+| `application.backup.location`                         | Specifies the directory where backup files are stored. Can be an absolute or relative path. Prefer a private directory. | backups              |
 | `application.backup.numberOfBackups`                  | Sets the maximum number of backup files to retain per file.                                      | 10                   |
 | `application.backup.configuration.enabled`            | Enables or disables backups for the `passbird.yml` configuration file.                           | true                 |
-| `application.backup.configuration.location`           | Overrides the default backup location for the `passbird.yml` file.                               | *(unset)*            |
+| `application.backup.configuration.location`           | Overrides the default backup location for the `passbird.yml` file. Prefer a private directory.   | *(unset)*            |
 | `application.backup.configuration.numberOfBackups`    | Overrides the default number of backups to keep for the `passbird.yml` file.                     | *(unset)*            |
 | `application.backup.keyStore.enabled`                 | Enables or disables backups for the keystore file (`passbird.sec`).                              | true                 |
-| `application.backup.keyStore.location`                | Overrides the default backup location for the keystore file.                                     | *(unset)*            |
+| `application.backup.keyStore.location`                | Overrides the default backup location for the keystore file. Prefer a private directory.         | *(unset)*            |
 | `application.backup.keyStore.numberOfBackups`         | Overrides the default number of backups to keep for the keystore file.                           | *(unset)*            |
 | `application.backup.passwordTree.enabled`             | Enables or disables backups for the password tree file (`passbird.tree`).                        | true                 |
-| `application.backup.passwordTree.location`            | Overrides the default backup location for the password tree file.                                | *(unset)*            |
+| `application.backup.passwordTree.location`            | Overrides the default backup location for the password tree file. Prefer a private directory.    | *(unset)*            |
 | `application.backup.passwordTree.numberOfBackups`     | Overrides the default number of backups to keep for the password tree file.                      | *(unset)*            |
 | `application.exchange.promptOnExportFile`             | Prompts the user to confirm deletion if an export file is detected on program startup.           | true                 |
 | `application.inactivityLimit.enabled`                 | Enables or disables automatic termination of Passbird after a period of inactivity.              | false                |
@@ -26,8 +28,8 @@ Passbird’s behavior can be customized using the passbird.yml configuration fil
 | `application.password.customPasswordConfigurations`   | Allows defining custom password configurations for specific use cases (see [README](README.md)). | *(unset)*            |
 | `adapter.clipboard.reset.enabled`                     | Enables or disables automatic clearing of the clipboard after copying a password.                | true                 |
 | `adapter.clipboard.reset.delaySeconds`                | Specifies the seconds to wait before clearing the clipboard after copying a password.            | 10                   |
-| `adapter.keyStore.location`                           | Specifies the directory where the keystore file is located.                                      | *(set during setup)* |
-| `adapter.passwordTree.location`                       | Specifies the directory where the password tree file is located.                                 | *(set during setup)* |
+| `adapter.keyStore.location`                           | Specifies the directory where the keystore file is located. Prefer a private directory.          | *(set during setup)* |
+| `adapter.passwordTree.location`                       | Specifies the directory where the password tree file is located. Prefer a private directory.     | *(set during setup)* |
 | `adapter.passwordTree.verifyChecksum`                 | Verifies the checksum of the password tree file to ensure its integrity.                         | true                 |
 | `adapter.passwordTree.verifySignature`                | Verifies the password tree file's built-in signature marker to detect format mismatches.         | true                 |
 | `adapter.userInterface.ansiEscapeCodes.enabled`       | Enables or disables colorful mode in terminals that support ANSI escape codes.                   | false                |

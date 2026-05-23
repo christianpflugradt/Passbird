@@ -24,7 +24,7 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 - Before running shell commands, source `~/.zprofile` and `~/.zshrc` so repo-local tooling such as `rtk`, `gh`, and SDKMAN-managed runtimes are available.
 - After sourcing the shell environment, prefer the local `rtk` wrapper for shell commands; otherwise use direct commands.
 - Do not create or switch to a new git branch unless the maintainer explicitly approves that branch action.
-- Once a requested task is complete and suitable for release, commit and push it immediately.
+- Once a requested task is complete and suitable for release, commit it, run `git pull -r` on the current branch, and push it immediately.
 - Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.
 - Do not run `./gradlew dependencyCheckAnalyze` locally for verification. Treat OWASP dependency scanning as CI-only unless the maintainer explicitly asks for a local run.
 - Do not manually run verification tasks that are already covered by the local `pre-commit` hook. Before committing, run only focused tests for the behavior you changed or the tests you added, plus any extra checks that are not part of the hook but are truly needed for the change.

@@ -107,4 +107,5 @@ agent_notes:
   - do not add code comments unless the maintainer explicitly asks for them or an existing project convention clearly requires them; never leave design commentary, temporary notes, versioned implementation notes, or other agent-style annotations
   - treat all password-manager wording as maintainer-owned copy; do not change user-visible text without approval for the exact wording
   - do not create or switch to a new git branch unless the maintainer explicitly approves that branch action
+  - before pushing committed work, run git pull -r on the current branch to integrate remote updates without a merge commit
   - do not run OWASP dependency-check locally for routine verification; use the GitHub Actions workflows unless the maintainer explicitly asks for a local run
