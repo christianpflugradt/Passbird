@@ -1,6 +1,6 @@
 schema_version: 1
 entrypoint: AGENTS.md
-last_reviewed: 2026-05-22
+last_reviewed: 2026-05-23
 repository:
   name: Passbird
   type: secure offline terminal password manager
@@ -24,6 +24,7 @@ read_order:
   - .agent/domain.yaml
   - .agent/security.yaml
   - .agent/delivery.yaml
+  - .agent/issue.yaml
   - .agent/review.yaml
 task_routing:
   default:
@@ -45,6 +46,11 @@ task_routing:
     - .agent/delivery.yaml
   documentation_only_change:
     - .agent/project.yaml
+  issue_resolution:
+    - .agent/issue.yaml
+    - .agent/project.yaml
+    - .agent/architecture.yaml
+    - .agent/delivery.yaml
   workspace_review:
     - .agent/review.yaml
     - .agent/project.yaml
@@ -77,5 +83,6 @@ update_contract:
   - if terminology or user workflows change, update .agent/domain.yaml
   - if security guarantees, defaults, or sensitive flows change, update .agent/security.yaml
   - if build, CI, release, or validation expectations change, update .agent/delivery.yaml
+  - if issue-task selection rules or resolution expectations change, update .agent/issue.yaml
   - if the repo layout or key entrypoints change, update .agent/project.yaml
   - if review areas, severity rules, or review output expectations change, update .agent/review.yaml

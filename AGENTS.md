@@ -31,6 +31,17 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 - Do not run `./gradlew dependencyCheckAnalyze` locally for verification. Treat OWASP dependency scanning as CI-only unless the maintainer explicitly asks for a local run.
 - Do not manually run verification tasks that are already covered by the local `pre-commit` hook. Before committing, run only focused tests for the behavior you changed or the tests you added, plus any extra checks that are not part of the hook but are truly needed for the change.
 
+## Issue Task
+
+- Use `issue` to resolve one open GitHub issue end-to-end.
+- Read `.agent/issue.yaml` before performing this task.
+- Use the live open issue list to choose work.
+- If one or more open issues are labeled `bug` and it is simple to determine which one is oldest, resolve the oldest open `bug` issue.
+- If no open `bug` issues exist and it is simple to determine which remaining open issue is oldest, resolve the oldest open issue.
+- If the ordering is ambiguous or otherwise not simple to determine, resolve any open issue and proceed.
+- If no open issues exist, say so explicitly.
+- If an important decision is not clearly answered by the project documents, return to the maintainer before deciding.
+
 ## Review Commands
 
 - Use `review <area>` for standing workspace reviews.
