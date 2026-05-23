@@ -229,18 +229,19 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v6
+      - name: prepare Pages source
+        run: |
+          rm -rf .pages site
+          mkdir -p .pages
+          cp -R .github/pages/. .pages/
+          cp README.md CONFIGURATION.md .pages/
       - name: configure GitHub Pages
         uses: actions/configure-pages@v6
       - name: build GitHub Pages site
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./
-          destination: ./_site
-      - name: prepare writable Pages directory
-        run: |
-          rm -rf site
-          mkdir -p site
-          cp -R _site/. site/
+          source: ./.pages
+          destination: ./site
       - uses: actions/download-artifact@v8
         with:
           name: test-coverage-report
