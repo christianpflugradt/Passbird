@@ -31,6 +31,7 @@ class BackupManager @Inject constructor(
             Triple(backupConfiguration.keyStore, configuration.adapter.keyStore.location.toDirectory(), KEYSTORE_FILENAME),
         ).forEach { (settings, directory, fileName) ->
             if (settings.enabled && numberOfBackups(settings) > 0) {
+                val limit = numberOfBackups(settings)
                 val backupDirectory = systemOperation.getPath(runContext.homeDirectory)
                     .resolve(settings.location ?: backupConfiguration.location)
                     .toString().toDirectory()
@@ -39,17 +40,23 @@ class BackupManager @Inject constructor(
                 val backups = systemOperation.getFileNames(backupDirectory).filter {
                     it.value.matches("${fileName.stem()}_$backupPattern\\.${fileName.extension()}".toRegex())
                 }.sortedBy { it.value }
-                if (backups.isNotEmpty()) {
+                val backupWasCreated = if (backups.isNotEmpty()) {
                     val current = systemOperation.resolvePath(directory, fileName.toFileName())
                     val lastBackup = systemOperation.resolvePath(backupDirectory, backups.last())
                     if (backupContentHasChanged(current, lastBackup, fileName)) {
                         backup(directory, fileName, backupDirectory)
-                    }
-                    backups.take(0.coerceAtLeast((backups.size + 1) - numberOfBackups(settings))).forEach {
-                        systemOperation.delete(systemOperation.resolvePath(backupDirectory, it))
+                        true
+                    } else {
+                        false
                     }
                 } else {
                     backup(directory, fileName, backupDirectory)
+                    true
+                }
+                if (backupWasCreated) {
+                    backups.take(0.coerceAtLeast((backups.size + 1) - limit)).forEach {
+                        systemOperation.delete(systemOperation.resolvePath(backupDirectory, it))
+                    }
                 }
             }
         }
