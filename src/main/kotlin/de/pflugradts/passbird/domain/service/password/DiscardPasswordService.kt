@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.domain.service.password
 
+import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.slot.Slot
@@ -14,11 +15,11 @@ class DiscardPasswordService @Inject constructor(
     private val eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
 
-    fun discardEgg(eggIdShell: Shell) = find(eggIdShell)
+    fun discardEgg(eggIdShell: Shell): TryResult<Unit> = find(eggIdShell)
         .ifPresentOrElse({ it.discard() }, { eventRegistry.register(EggNotFound(eggIdShell)) })
-        .also { processEventsAndSync() }
+        .let { processEventsAndSync() }
 
-    fun discardProtein(eggIdShell: Shell, slot: Slot) = find(eggIdShell)
+    fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit> = find(eggIdShell)
         .ifPresentOrElse({ it.discardProtein(slot)}, { eventRegistry.register(EggNotFound(eggIdShell)) })
-        .also { processEventsAndSync() }
+        .let { processEventsAndSync() }
 }

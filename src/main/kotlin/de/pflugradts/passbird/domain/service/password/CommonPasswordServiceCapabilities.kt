@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
 import de.pflugradts.kotlinextensions.Option
+import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.kotlinextensions.toOption
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.EggIdMemory
@@ -35,7 +36,7 @@ abstract class CommonPasswordServiceCapabilities(
     fun encrypted(shell: Shell) = cryptoProvider.encrypt(shell)
     fun decrypted(encryptedShell: EncryptedShell) = cryptoProvider.decrypt(encryptedShell)
 
-    fun processEventsAndSync() = eventRegistry.processEvents().apply { eggRepository.sync() }
+    fun processEventsAndSync(): TryResult<Unit> = eggRepository.sync().onSuccess { eventRegistry.processEvents() }
 
     fun challengeEggId(shell: Shell) {
         if (plainValueOf(shell.getByte(0)).isDigit || anyMatch(shell.copy()) { plainValueOf(it).isSymbol }) {

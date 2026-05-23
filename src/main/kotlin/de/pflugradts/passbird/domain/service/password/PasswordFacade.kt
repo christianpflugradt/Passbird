@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.domain.service.password
 
+import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
@@ -25,14 +26,15 @@ class PasswordFacade @Inject constructor(
     override fun viewProteinStructures(eggIdShell: Shell) = viewPasswordService.viewProteinStructures(eggIdShell)
     override fun viewProteinType(eggIdShell: Shell, slot: Slot) = viewPasswordService.viewProteinType(eggIdShell, slot)
     override fun viewProteinTypes(eggIdShell: Shell) = viewPasswordService.viewProteinTypes(eggIdShell)
-    override fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell) = renamePasswordService.renameEgg(eggIdShell, newEggIdShell)
+    override fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell): TryResult<Unit> =
+        renamePasswordService.renameEgg(eggIdShell, newEggIdShell)
     override fun findAllEggIds() = viewPasswordService.findAllEggIds()
     override fun challengeEggId(shell: Shell) = putPasswordService.challengeEggId(shell)
-    override fun putEggs(eggs: Stream<ShellPair>) = putPasswordService.putEggs(eggs)
-    override fun putEgg(eggIdShell: Shell, passwordShell: Shell) = putPasswordService.putEgg(eggIdShell, passwordShell)
-    override fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell) =
+    override fun putEggs(eggs: Stream<ShellPair>): TryResult<Unit> = putPasswordService.putEggs(eggs)
+    override fun putEgg(eggIdShell: Shell, passwordShell: Shell): TryResult<Unit> = putPasswordService.putEgg(eggIdShell, passwordShell)
+    override fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell): TryResult<Unit> =
         putPasswordService.putProtein(eggIdShell, slot, typeShell, structureShell)
-    override fun discardEgg(eggIdShell: Shell) = discardPasswordService.discardEgg(eggIdShell)
-    override fun discardProtein(eggIdShell: Shell, slot: Slot) = discardPasswordService.discardProtein(eggIdShell, slot)
-    override fun moveEgg(eggIdShell: Shell, targetSlot: Slot) = movePasswordService.movePassword(eggIdShell, targetSlot)
+    override fun discardEgg(eggIdShell: Shell): TryResult<Unit> = discardPasswordService.discardEgg(eggIdShell)
+    override fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit> = discardPasswordService.discardProtein(eggIdShell, slot)
+    override fun moveEgg(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit> = movePasswordService.movePassword(eggIdShell, targetSlot)
 }

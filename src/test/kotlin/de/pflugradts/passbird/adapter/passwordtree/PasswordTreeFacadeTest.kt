@@ -8,6 +8,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
@@ -44,9 +45,11 @@ import strikt.assertions.containsExactly
 import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
+import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
 import strikt.java.exists
 import java.io.File
+import java.io.IOException
 import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission.OWNER_READ
 import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
@@ -166,6 +169,43 @@ class PasswordTreeFacadeTest {
         // then
         expectThat(actual.get().count()) isEqualTo 0
         expectThat(captureSystemErr.capture).isEqualTo("")
+    }
+
+    @Test
+    fun `should return sync failure when writing password tree fails`() {
+        // given
+        val failingSystemOperation = mockk<SystemOperation>()
+        fakeSystemOperation(instance = failingSystemOperation)
+        every {
+            failingSystemOperation.resolvePath(
+                any(de.pflugradts.passbird.application.Directory::class),
+                any(de.pflugradts.passbird.application.FileName::class),
+            )
+        } returns Paths.get(passwordTreeFilename)
+        every { failingSystemOperation.writeBytesToSensitiveFile(any(), any()) } throws IOException("disk full")
+        val failingPasswordTreeFacade = PasswordTreeFacade(
+            passwordTreeReader = PasswordTreeReader(
+                configuration = configuration,
+                cryptoProvider = cryptoProvider,
+                nestService = nestService,
+                systemOperation = failingSystemOperation,
+            ),
+            passwordTreeWriter = PasswordTreeWriter(
+                configuration = configuration,
+                cryptoProvider = cryptoProvider,
+                nestService = nestService,
+                systemOperation = failingSystemOperation,
+            ),
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        // when
+        val actual = captureSystemErr.during { failingPasswordTreeFacade.sync(EggStreamSupplier({ someEggs().stream() })) }
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isNotNull().isA<IOException>()
+        expectThat(captureSystemErr.capture) contains "Password Tree could not be synced: disk full"
     }
 
     @Test

@@ -353,7 +353,7 @@ class ViewPasswordServiceTest {
                 val updatedEgg = firstArg<Egg>()
                 memory.memorize(updatedEgg.viewEggId(), null)
             }
-            every { eggRepository.sync() } returns Unit
+            every { eggRepository.sync() } returns de.pflugradts.kotlinextensions.TryResult.Companion.success(Unit)
 
             // when
             passwordService.viewPassword(eggId)

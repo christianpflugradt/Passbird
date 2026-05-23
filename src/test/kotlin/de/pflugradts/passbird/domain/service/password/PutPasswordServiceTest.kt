@@ -23,8 +23,10 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
 import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
+import java.io.IOException
 import java.util.stream.Stream
 
 class PutPasswordServiceTest {
@@ -129,6 +131,30 @@ class PutPasswordServiceTest {
         verify(exactly = 1) { cryptoProvider.encrypt(newPassword) }
         verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { eventRegistry.processEvents() }
+        expectThat(passwordService.find(eggIdShell = existingEggId).orNull()?.viewPassword()?.fakeDec()) isEqualTo newPassword
+    }
+
+    @Test
+    fun `should return sync failure without processing success events when updating egg persistence fails`() {
+        // given
+        val existingEggId = shellOf("EggId")
+        val newPassword = shellOf("Password")
+        val matchingEgg = createEggForTesting(withEggIdShell = existingEggId)
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(
+            instance = eggRepository,
+            withEggs = listOf(matchingEgg),
+            withSyncFailure = IOException("disk full"),
+        )
+
+        // when
+        val actual = passwordService.putEgg(existingEggId, newPassword)
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isNotNull().isA<IOException>()
+        verify(exactly = 1) { eggRepository.sync() }
+        verify(exactly = 0) { eventRegistry.processEvents() }
         expectThat(passwordService.find(eggIdShell = existingEggId).orNull()?.viewPassword()?.fakeDec()) isEqualTo newPassword
     }
 

@@ -2,6 +2,7 @@ package de.pflugradts.passbird.domain.service
 
 import de.pflugradts.kotlinextensions.MutableOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.Protein
@@ -22,9 +23,9 @@ fun fakePasswordService(
     withNestService: NestService? = null,
     withMemory: Map<Slot, String> = emptyMap(),
 ) {
-    every { instance.putEgg(any(), any()) } returns Unit
-    every { instance.putEggs(any()) } returns Unit
-    every { instance.putProtein(any(), any(), any(), any()) } returns Unit
+    every { instance.putEgg(any(), any()) } returns success(Unit)
+    every { instance.putEggs(any()) } returns success(Unit)
+    every { instance.putProtein(any(), any(), any(), any()) } returns success(Unit)
     every { instance.findAllEggIds() } answers {
         if (withNestService != null) {
             withEggs
@@ -71,10 +72,10 @@ fun fakePasswordService(
     } else {
         every { instance.challengeEggId(any()) } returns Unit
     }
-    every { instance.discardEgg(any()) } returns Unit
-    every { instance.discardProtein(any(), any()) } returns Unit
-    every { instance.renameEgg(any(), any()) } returns Unit
-    every { instance.moveEgg(any(), any()) } returns Unit
+    every { instance.discardEgg(any()) } returns success(Unit)
+    every { instance.discardProtein(any(), any()) } returns success(Unit)
+    every { instance.renameEgg(any(), any()) } returns success(Unit)
+    every { instance.moveEgg(any(), any()) } returns success(Unit)
     every { instance.viewMemory() } answers { Slots<Shell>().apply { withMemory.forEach { this[it.key] = shellOf(it.value) } } }
     every { instance.viewMemoryEntry(any<Slot>()) } answers { instance.viewMemory()[firstArg<Slot>()] }
 }

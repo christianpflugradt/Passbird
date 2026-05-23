@@ -2,6 +2,7 @@ package de.pflugradts.passbird.domain.service.password.tree
 
 import de.pflugradts.kotlinextensions.MutableOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
+import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.MemoryMap
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
@@ -50,7 +51,7 @@ class NestingGround @Inject constructor(
         eventRegistry.deregister(egg)
     }
 
-    override fun sync() = passwordTreeAdapterPort.sync(EggStreamSupplier({ eggs.stream() }, memory))
+    override fun sync(): TryResult<Unit> = passwordTreeAdapterPort.sync(EggStreamSupplier({ eggs.stream() }, memory))
     override fun findAll(slot: Slot) = createEggStreamSupplier(slot).get()
     override fun findAll() = createEggStreamSupplier(inNest(currentNestSlot)).get()
     private fun createEggStreamSupplier(slot: Slot) = createEggStreamSupplier(inNest(slot))

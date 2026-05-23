@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
+import de.pflugradts.kotlinextensions.TryResult
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
@@ -18,12 +20,12 @@ class PutPasswordService @Inject constructor(
     eventRegistry: EventRegistry,
     private val nestService: NestService,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
-    fun putEggs(shellPairs: Stream<ShellPair>) {
+    fun putEggs(shellPairs: Stream<ShellPair>): TryResult<Unit> {
         shellPairs.forEach { putEgg(it.first, it.second, false) }
-        processEventsAndSync()
+        return processEventsAndSync()
     }
 
-    fun putEgg(eggIdShell: Shell, passwordShell: Shell, sync: Boolean = true) {
+    fun putEgg(eggIdShell: Shell, passwordShell: Shell, sync: Boolean = true): TryResult<Unit> {
         challengeEggId(eggIdShell)
         val encryptedPasswordShell = encrypted(passwordShell)
         val nestSlot = nestService.currentNest().slot
@@ -31,13 +33,13 @@ class PutPasswordService @Inject constructor(
             { it.updatePassword(encryptedPasswordShell) },
             { eggRepository.add(createEgg(nestSlot, encrypted(eggIdShell), encryptedPasswordShell)) },
         )
-        if (sync) processEventsAndSync()
+        return if (sync) processEventsAndSync() else success(Unit)
     }
 
-    fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell) {
+    fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell): TryResult<Unit> {
         if (eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             find(eggIdShell).get().updateProtein(slot, encrypted(typeShell), encrypted(structureShell))
         }
-        processEventsAndSync()
+        return processEventsAndSync()
     }
 }

@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.adapter.passwordtree
 
 import de.pflugradts.kotlinextensions.Option
+import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
@@ -34,7 +35,7 @@ class PasswordTreeWriter @Inject constructor(
     private val cryptoProvider: CryptoProvider,
 ) {
 
-    fun sync(eggSupplier: EggStreamSupplier) {
+    fun sync(eggSupplier: EggStreamSupplier): TryResult<Unit> {
         val contentSize = calcRequiredContentSize(eggSupplier)
         val bytes = ByteArray(calcActualTotalSize(contentSize))
         var offset = copyBytes(signature(), bytes, 0, signatureSize())
@@ -53,11 +54,12 @@ class PasswordTreeWriter @Inject constructor(
             if (contentSize > 0) checksum(Arrays.copyOfRange(bytes, signatureSize(), signatureSize() + contentSize)) else 0x0,
         )
         copyBytes(checksumBytes, bytes, offset, checksumBytes())
-        writeToDisk(shellOf(bytes))
+        return writeToDisk(shellOf(bytes))
     }
 
     private fun writeToDisk(shell: Shell) = tryCatching {
         systemOperation.writeBytesToSensitiveFile(filePath, cryptoProvider.encrypt(shell).toByteArray())
+        Unit
     }.onFailure { reportFailure(WritePasswordTreeFailure(filePath, it)) }
 
     private fun calcRequiredContentSize(eggs: EggStreamSupplier): Int {

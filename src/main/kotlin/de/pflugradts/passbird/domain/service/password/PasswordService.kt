@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.domain.service.password
 
 import de.pflugradts.kotlinextensions.Option
+import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
@@ -23,13 +24,13 @@ interface PasswordService {
     fun viewProteinStructures(eggIdShell: Shell): Option<List<Option<Shell>>>
     fun viewProteinType(eggIdShell: Shell, slot: Slot): Option<Shell>
     fun viewProteinTypes(eggIdShell: Shell): Option<List<Option<Shell>>>
-    fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell)
+    fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell): TryResult<Unit>
     fun challengeEggId(shell: Shell)
-    fun putEggs(eggs: Stream<ShellPair>)
-    fun putEgg(eggIdShell: Shell, passwordShell: Shell)
-    fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell)
-    fun discardEgg(eggIdShell: Shell)
-    fun discardProtein(eggIdShell: Shell, slot: Slot)
-    fun moveEgg(eggIdShell: Shell, targetSlot: Slot)
+    fun putEggs(eggs: Stream<ShellPair>): TryResult<Unit>
+    fun putEgg(eggIdShell: Shell, passwordShell: Shell): TryResult<Unit>
+    fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell): TryResult<Unit>
+    fun discardEgg(eggIdShell: Shell): TryResult<Unit>
+    fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit>
+    fun moveEgg(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit>
     fun findAllEggIds(): Stream<Shell>
 }
