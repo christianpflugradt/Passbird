@@ -43,7 +43,9 @@ class PassbirdSetup @Inject constructor(
 
     private fun configTemplateRoute() {
         setupGuide.sendInputPath("configuration")
-        createConfiguration(verifyValidDirectory(Directory(configuration.adapter.passwordTree.location)))
+        if (createConfiguration(verifyValidDirectory(Directory(configuration.adapter.passwordTree.location))).failure) {
+            return
+        }
         setupGuide.sendCreateKeyStoreInformation()
         createKeyStore(Directory(configuration.adapter.keyStore.location), receiveMasterPassword())
         setupGuide.sendRestart()

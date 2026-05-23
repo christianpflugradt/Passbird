@@ -58,7 +58,9 @@ class ReadableConfigurationTest {
         expectThat(captureSystemErr.capture).isEqualTo("")
 
         // now persist configuration to file system
-        ConfigurationSyncService(configuration, systemOperation).sync(tempConfigurationDirectory.toDirectory())
+        expectThat(
+            ConfigurationSyncService(configuration, systemOperation).sync(tempConfigurationDirectory.toDirectory()).success,
+        ).isTrue()
         posixPermissionsIfSupported(Paths.get(configurationFile))?.let {
             expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
         }

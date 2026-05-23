@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.application.boot.setup
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -69,7 +71,7 @@ class PassbirdSetupTest {
             instance = systemOperation,
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
-        every { configurationSync.sync(configurationDirectory.toDirectory()) } returns Unit
+        every { configurationSync.sync(configurationDirectory.toDirectory()) } returns success(Unit)
         every { keyStoreAdapterPort.storeKey(eq(password1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
@@ -106,6 +108,38 @@ class PassbirdSetupTest {
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
         verify { configurationSync wasNot Called }
+        verify { keyStoreAdapterPort wasNot Called }
+    }
+
+    @Test
+    fun `should abort config template route after failed configuration sync`() {
+        // given
+        val configurationDirectory = VALID_DIRECTORY
+        fakeConfiguration(
+            instance = configuration,
+            withConfigurationTemplate = true,
+            withPasswordTreeLocation = configurationDirectory,
+        )
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
+        fakeSystemOperation(
+            instance = systemOperation,
+            withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
+        )
+        every {
+            configurationSync.sync(configurationDirectory.toDirectory())
+        } returns failure(IllegalStateException("disk full"))
+
+        // when
+        passbirdSetup.boot()
+
+        // then
+        verify(exactly = 1) { setupGuide.sendWelcome() }
+        verify(exactly = 1) { setupGuide.sendConfigTemplateRouteInformation() }
+        verify(exactly = 1) { setupGuide.sendInputPath("configuration") }
+        verify(exactly = 0) { setupGuide.sendCreateKeyStoreInformation() }
+        verify(exactly = 0) { setupGuide.sendRestart() }
+        verify(exactly = 1) { setupGuide.sendGoodbye() }
+        verify(exactly = 1) { systemOperation.exit() }
         verify { keyStoreAdapterPort wasNot Called }
     }
 
