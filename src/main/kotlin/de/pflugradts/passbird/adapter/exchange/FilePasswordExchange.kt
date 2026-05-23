@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.adapter.exchange
 
 import com.fasterxml.jackson.databind.json.JsonMapper
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.PasswordInfoMap
@@ -16,7 +17,6 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import jakarta.inject.Inject
-import java.io.IOException
 import java.nio.file.Files
 
 class FilePasswordExchange @Inject constructor(
@@ -25,27 +25,21 @@ class FilePasswordExchange @Inject constructor(
 ) : ExchangeAdapterPort {
     private val mapper = JsonMapper()
 
-    override fun send(data: PasswordInfoMap) {
-        try {
-            systemOperation.writeToSensitiveFile(
-                systemOperation.resolvePath(runContext.homeDirectory, EXCHANGE_FILENAME.toFileName()),
-            ) { outputStream ->
-                mapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, ExchangeWrapper(data.toSerializable()))
-            }
-        } catch (e: IOException) {
-            reportFailure(ExportFailure(e))
+    override fun send(data: PasswordInfoMap) = tryCatching {
+        systemOperation.writeToSensitiveFile(
+            systemOperation.resolvePath(runContext.homeDirectory, EXCHANGE_FILENAME.toFileName()),
+        ) { outputStream ->
+            mapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, ExchangeWrapper(data.toSerializable()))
         }
-    }
+        Unit
+    }.onFailure { reportFailure(ExportFailure(it)) }
 
-    override fun receive() = try {
+    override fun receive() = tryCatching {
         mapper.readValue(
             Files.readString(systemOperation.resolvePath(runContext.homeDirectory, EXCHANGE_FILENAME.toFileName())),
             ExchangeWrapper::class.java,
         ).exportedContent.toPasswordInfoMap()
-    } catch (e: IOException) {
-        reportFailure(ImportFailure(e))
-        emptyMap()
-    }
+    }.onFailure { reportFailure(ImportFailure(it)) }
 
     private fun PasswordInfoMap.toSerializable() = entries.map { nest ->
         EggsPerNest(

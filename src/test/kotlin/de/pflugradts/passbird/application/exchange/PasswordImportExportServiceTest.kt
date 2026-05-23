@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.exchange
 import de.pflugradts.passbird.application.PasswordInfoMap
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
 import de.pflugradts.passbird.application.mainMocked
+import de.pflugradts.passbird.domain.model.ddd.DomainEvent
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggsExported
@@ -28,6 +29,7 @@ import strikt.api.expectThat
 import strikt.assertions.containsKey
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
 import java.util.function.Supplier
 
 class PasswordImportExportServiceTest {
@@ -56,7 +58,8 @@ class PasswordImportExportServiceTest {
 
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
-        expectThatActualEggIdsMatchExpected(actual, eggs)
+        expectThat(actual.failure).isFalse()
+        expectThatActualEggIdsMatchExpected(actual.getOrNull()!!, eggs)
         verify { passwordService wasNot Called }
     }
 
@@ -94,6 +97,29 @@ class PasswordImportExportServiceTest {
     }
 
     @Test
+    fun `should not import passwords or register success event if import exchange fails`() {
+        // given
+        val givenCurrentNestSlot = S2
+        fakeExchangeAdapterPort(
+            forExchangeFactory = exchangeFactory,
+            withReceiveFailure = IllegalStateException("import failed"),
+        )
+        fakePasswordService(instance = passwordService)
+        nestService.place(shellOf("n2"), S2)
+        nestService.moveToNestAt(givenCurrentNestSlot)
+
+        // when
+        importExportServiceSupplier.get().importEggs()
+
+        // then
+        verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
+        verify { passwordService wasNot Called }
+        verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
+        verify(exactly = 0) { eventRegistry.processEvents() }
+        expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
+    }
+
+    @Test
     fun `should export passwords across multiple nests`() {
         // given
         val givenCurrentNestSlot = S2
@@ -120,6 +146,30 @@ class PasswordImportExportServiceTest {
         verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(eggCountSlot.isCaptured)
         expectThat(eggCountSlot.captured.count) isEqualTo testData().size
+    }
+
+    @Test
+    fun `should not register success event if export exchange fails`() {
+        // given
+        val givenCurrentNestSlot = S2
+        val eggs = testData()
+        fakeExchangeAdapterPort(
+            forExchangeFactory = exchangeFactory,
+            withSendFailure = IllegalStateException("export failed"),
+        )
+        fakePasswordService(instance = passwordService, withEggs = eggs, withNestService = nestService)
+        nestService.place(shellOf("n2"), S2)
+        nestService.place(shellOf("n9"), S9)
+        nestService.moveToNestAt(givenCurrentNestSlot)
+
+        // when
+        importExportServiceSupplier.get().exportEggs()
+
+        // then
+        verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
+        verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
+        verify(exactly = 0) { eventRegistry.processEvents() }
+        expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
     }
 
     private fun Slot.toNest() = nestService.atNestSlot(this).get()

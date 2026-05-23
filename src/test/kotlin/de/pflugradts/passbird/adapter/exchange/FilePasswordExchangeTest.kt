@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.adapter.exchange
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
-import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -11,8 +10,6 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
-import strikt.assertions.isEmpty
-import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
 
 class FilePasswordExchangeTest {
@@ -28,12 +25,10 @@ class FilePasswordExchangeTest {
 
         // when
         val captureSystemErr = captureSystemErr()
-        val actual = captureSystemErr.during {
-            tryCatching { setupFilePasswordExchange().send(emptyMap()) }
-        }
+        val actual = captureSystemErr.during { setupFilePasswordExchange().send(emptyMap()) }
 
         // then
-        expectThat(actual.success).isTrue()
+        expectThat(actual.failure).isTrue()
         expectThat(captureSystemErr.capture) contains "Password Tree could not be exported"
     }
 
@@ -44,14 +39,10 @@ class FilePasswordExchangeTest {
 
         // when
         val captureSystemErr = captureSystemErr()
-        val actual = captureSystemErr.during {
-            tryCatching { setupFilePasswordExchange().receive() }
-        }
+        val actual = captureSystemErr.during { setupFilePasswordExchange().receive() }
 
         // then
-        expectThat(actual.success).isTrue()
-        expectThat(actual.getOrNull()).isNotNull()
-        expectThat(actual.getOrNull()!!.toList()).isEmpty()
+        expectThat(actual.failure).isTrue()
         expectThat(captureSystemErr.capture) contains "Password Tree could not be imported"
     }
 }

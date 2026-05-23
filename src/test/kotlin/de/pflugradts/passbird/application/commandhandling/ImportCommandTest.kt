@@ -1,6 +1,8 @@
 package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ImportCommandHandler
@@ -55,7 +57,7 @@ class ImportCommandTest {
         val treeEggId2 = shellOf("tree2")
         val givenEgg1 = createEggForTesting(withEggIdShell = treeEggId1)
         val givenEgg2 = createEggForTesting(withEggIdShell = treeEggId2)
-        every { importExportService.peekImportEggIdShells() } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
+        every { importExportService.peekImportEggIdShells() } returns success(mapOf(DEFAULT to listOf(importEggId1, importEggId2)))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
@@ -76,7 +78,7 @@ class ImportCommandTest {
         val treeEggId2 = shellOf("overlap")
         val givenEgg1 = createEggForTesting(withEggIdShell = treeEggId1)
         val givenEgg2 = createEggForTesting(withEggIdShell = treeEggId2)
-        every { importExportService.peekImportEggIdShells() } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
+        every { importExportService.peekImportEggIdShells() } returns success(mapOf(DEFAULT to listOf(importEggId1, importEggId2)))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
@@ -98,7 +100,7 @@ class ImportCommandTest {
         val treeEggId2 = shellOf("overlap")
         val givenEgg1 = createEggForTesting(withEggIdShell = treeEggId1)
         val givenEgg2 = createEggForTesting(withEggIdShell = treeEggId2)
-        every { importExportService.peekImportEggIdShells() } returns mapOf(DEFAULT to listOf(importEggId1, importEggId2))
+        every { importExportService.peekImportEggIdShells() } returns success(mapOf(DEFAULT to listOf(importEggId1, importEggId2)))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg1, givenEgg2))
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
         fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
@@ -108,6 +110,22 @@ class ImportCommandTest {
 
         // then
         verify(exactly = 0) { importExportService.importEggs() }
+    }
+
+    @Test
+    fun `should not prompt or import when import preview fails`() {
+        // given
+        val shell = shellOf("i")
+        every { importExportService.peekImportEggIdShells() } returns failure(IllegalStateException("preview failed"))
+        fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
+
+        // when
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 0) { userInterfaceAdapterPort.receiveConfirmation(any()) }
+        verify(exactly = 0) { importExportService.importEggs() }
+        verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
     }
 
     @Test

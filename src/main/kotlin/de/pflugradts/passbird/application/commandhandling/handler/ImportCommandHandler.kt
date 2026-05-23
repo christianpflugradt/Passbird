@@ -19,35 +19,50 @@ class ImportCommandHandler@Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleImportCommand(@Suppress("UNUSED_PARAMETER") importCommand: ImportCommand) {
-        if (commandConfirmed()) {
-            importExportService.importEggs()
-        } else {
-            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
+        when (commandConfirmed()) {
+            ImportCommandConfirmation.CONFIRMED -> importExportService.importEggs()
+
+            ImportCommandConfirmation.ABORTED ->
+                userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
+
+            ImportCommandConfirmation.FAILED -> Unit
         }
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    private fun commandConfirmed(): Boolean {
+    private fun commandConfirmed(): ImportCommandConfirmation {
         if (configuration.application.password.promptOnRemoval) {
-            val overlaps = importExportService.peekImportEggIdShells()
+            val importedEggIds = importExportService.peekImportEggIdShells()
+            if (importedEggIds.failure) {
+                return ImportCommandConfirmation.FAILED
+            }
+            val overlaps = importedEggIds.getOrNull()!!
                 .map { (nestSlot, eggIdShell) -> eggIdShell.map { Triple(nestSlot, it, passwordService.eggExists(it, nestSlot)) } }
                 .flatten()
                 .filter { it.third }
                 .map { Pair(it.first, it.second) }
             if (overlaps.isNotEmpty()) {
-                return userInterfaceAdapterPort.receiveConfirmation(
-                    outputOf(
-                        shellOf(
-                            "By importing this file ${overlaps.size} existing Passwords " +
-                                "will be irrevocably overwritten.\n" +
-                                "The following Eggs will be affected: " +
-                                "${overlaps.joinToString { "${it.second.asString()} (${it.first})" }}\n" +
-                                "Input 'c' to confirm or anything else to abort.\nYour input: ",
+                return if (
+                    userInterfaceAdapterPort.receiveConfirmation(
+                        outputOf(
+                            shellOf(
+                                "By importing this file ${overlaps.size} existing Passwords " +
+                                    "will be irrevocably overwritten.\n" +
+                                    "The following Eggs will be affected: " +
+                                    "${overlaps.joinToString { "${it.second.asString()} (${it.first})" }}\n" +
+                                    "Input 'c' to confirm or anything else to abort.\nYour input: ",
+                            ),
                         ),
-                    ),
-                )
+                    )
+                ) {
+                    ImportCommandConfirmation.CONFIRMED
+                } else {
+                    ImportCommandConfirmation.ABORTED
+                }
             }
         }
-        return true
+        return ImportCommandConfirmation.CONFIRMED
     }
 }
+
+private enum class ImportCommandConfirmation { CONFIRMED, ABORTED, FAILED }

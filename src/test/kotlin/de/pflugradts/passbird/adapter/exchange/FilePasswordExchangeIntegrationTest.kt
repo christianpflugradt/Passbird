@@ -64,11 +64,11 @@ class FilePasswordExchangeIntegrationTest {
                 Slot.S2.toNest() to listOf(givenEgg3),
                 Slot.S9.toNest() to listOf(givenEgg4, givenEgg5),
             ),
-        )
+        ).getOrNull()
         posixPermissionsIfSupported(Paths.get(exchangeFile))?.let {
             expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
         }
-        val actual = filePasswordExchange.receive()
+        val actual = filePasswordExchange.receive().getOrNull()!!
 
         // then
         expectThat(actual) hasSize 3 containsKey Slot.DEFAULT.toNest() containsKey Slot.S2.toNest() containsKey Slot.S9.toNest()

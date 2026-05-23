@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.application
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.application.exchange.ExchangeFactory
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.nest.Nest
@@ -10,10 +12,20 @@ import de.pflugradts.passbird.domain.model.shell.fakeDec
 import io.mockk.every
 import io.mockk.mockk
 
-fun fakeExchangeAdapterPort(forExchangeFactory: ExchangeFactory, withEggs: List<Egg> = emptyList()): ExchangeAdapterPort {
+fun fakeExchangeAdapterPort(
+    forExchangeFactory: ExchangeFactory,
+    withEggs: List<Egg> = emptyList(),
+    withReceiveFailure: Exception? = null,
+    withSendFailure: Exception? = null,
+): ExchangeAdapterPort {
     val instance = mockk<ExchangeAdapterPort>()
-    every { instance.send(any()) } returns Unit
+    every { instance.send(any()) } answers {
+        withSendFailure?.let { failure(it) } ?: success(Unit)
+    }
     every { instance.receive() } answers {
+        withReceiveFailure?.let {
+            return@answers failure(it)
+        }
         val result = mutableMapOf<Nest, MutableList<PasswordInfo>>()
         withEggs.forEach {
             it.associatedNest().run {
@@ -28,7 +40,7 @@ fun fakeExchangeAdapterPort(forExchangeFactory: ExchangeFactory, withEggs: List<
                 }
             }
         }
-        result
+        success(result)
     }
     every { forExchangeFactory.createPasswordExchange() } returns instance
     return instance
