@@ -1,8 +1,5 @@
 package de.pflugradts.passbird.domain.service.password.tree
 
-import com.google.inject.Inject
-import com.google.inject.Singleton
-import com.google.inject.name.Named
 import de.pflugradts.kotlinextensions.MutableOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
 import de.pflugradts.passbird.domain.model.egg.Egg
@@ -11,6 +8,9 @@ import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestService
+import jakarta.inject.Inject
+import jakarta.inject.Named
+import jakarta.inject.Singleton
 import java.util.function.Predicate
 
 @Singleton

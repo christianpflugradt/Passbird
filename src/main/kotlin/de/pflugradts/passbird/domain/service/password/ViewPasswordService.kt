@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.domain.service.password
 
-import com.google.inject.Inject
 import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.kotlinextensions.Option
@@ -14,6 +13,7 @@ import de.pflugradts.passbird.domain.model.slot.toSlots
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
+import jakarta.inject.Inject
 import java.util.stream.Stream
 
 class ViewPasswordService @Inject constructor(

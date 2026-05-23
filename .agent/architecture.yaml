@@ -53,6 +53,7 @@ structural_rules:
   - event handlers must not expose public methods
   - handler methods for events must be annotated with Subscribe
   - do not introduce java.util.Optional; the codebase uses custom Option and TryResult types
+  - domain packages must not depend on com.google.inject; use jakarta.inject types in the domain layer when DI metadata is needed
   - runtime context such as home directory and initial slot must flow through RunContext bindings, not global singleton state
 runtime_design:
   boot_sequence:

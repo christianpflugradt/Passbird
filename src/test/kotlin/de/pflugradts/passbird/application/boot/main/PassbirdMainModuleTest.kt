@@ -2,7 +2,6 @@ package de.pflugradts.passbird.application.boot.main
 
 import com.google.inject.AbstractModule
 import com.google.inject.Guice
-import com.google.inject.name.Names
 import com.google.inject.util.Modules
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.PassbirdRunContext
@@ -116,7 +115,6 @@ class PassbirdMainModuleTest {
 
     class PassbirdTestModule : AbstractModule() {
         public override fun configure() {
-            bind(Boolean::class.java).annotatedWith(Names.named("EggIdMemoryEnabledProvider")).toInstance(false)
             bind(CryptoProvider::class.java).toInstance(mockk<CryptoProvider>())
         }
     }

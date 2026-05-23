@@ -1,12 +1,12 @@
 package de.pflugradts.passbird.domain.service.password
 
-import com.google.inject.Inject
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
+import jakarta.inject.Inject
 
 class DiscardPasswordService @Inject constructor(
     cryptoProvider: CryptoProvider,

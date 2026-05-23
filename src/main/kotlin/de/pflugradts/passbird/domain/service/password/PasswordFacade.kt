@@ -1,10 +1,10 @@
 package de.pflugradts.passbird.domain.service.password
 
-import com.google.inject.Inject
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
+import jakarta.inject.Inject
 import java.util.stream.Stream
 
 class PasswordFacade @Inject constructor(

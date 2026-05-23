@@ -65,6 +65,13 @@ class PassbirdTest {
         fun `no classes should depend on Optional`() {
             noClasses().should().dependOnClassesThat().haveFullyQualifiedName("java.util.Optional").check(classes)
         }
+
+        @Test
+        fun `domain classes should not depend on guice`() {
+            noClasses().that().resideInAPackage(path(DOMAIN_ROOT))
+                .should().dependOnClassesThat().resideInAPackage("com.google.inject..")
+                .check(classes)
+        }
     }
 
     @Nested

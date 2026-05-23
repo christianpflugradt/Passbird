@@ -1,13 +1,13 @@
 package de.pflugradts.passbird.domain.service.eventhandling
 
 import com.google.common.eventbus.Subscribe
-import com.google.inject.Inject
-import com.google.inject.Provider
-import com.google.inject.Singleton
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.NestCreated
 import de.pflugradts.passbird.domain.model.event.NestDiscarded
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
+import jakarta.inject.Inject
+import jakarta.inject.Provider
+import jakarta.inject.Singleton
 
 @Singleton
 class DomainEventHandler @Inject constructor(private val eggRepositoryProvider: Provider<EggRepository>) : EventHandler {
