@@ -104,6 +104,7 @@ agent_notes:
   - security claims in docs should remain modest; README explicitly says the project is not externally audited
   - any design doc that overstates guarantees is a defect
   - do not add fallback behavior or fallback implementations unless the maintainer explicitly asks for them; if fallback handling is uncertain, stop and ask
+  - invalid configuration files must abort startup after reporting the load failure; they must not be treated as missing configuration or routed into setup
   - do not add code comments unless the maintainer explicitly asks for them or an existing project convention clearly requires them; never leave design commentary, temporary notes, versioned implementation notes, or other agent-style annotations
   - treat all password-manager wording as maintainer-owned copy; do not change user-visible text without approval for the exact wording
   - do not create or switch to a new git branch unless the maintainer explicitly approves that branch action

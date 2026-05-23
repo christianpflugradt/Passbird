@@ -160,6 +160,8 @@ domain:
 
 You may modify the parameters to suit your needs by editing the YAML file in a text editor. Ensure the file adheres to valid YAML syntax and only includes supported parameters. If you omit parameters, Passbird will revert to defaults.
 
+If the configuration file cannot be loaded, Passbird reports the configuration error and terminates instead of treating the file as missing and starting setup.
+
 Note: Default values may change with major updates. New parameters introduced in minor updates are usually inactive by default to preserve the existing user experience.
 
 For a complete list of configuration settings and their descriptions, consult the [CONFIGURATION.md](CONFIGURATION.md) file. It provides an exhaustive reference to all available parameters, their purposes, and how to customize them.

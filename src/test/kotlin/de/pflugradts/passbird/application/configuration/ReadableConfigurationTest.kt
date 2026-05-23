@@ -1,18 +1,22 @@
 package de.pflugradts.passbird.application.configuration
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
+import io.mockk.every
 import io.mockk.spyk
+import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
+import strikt.assertions.contains
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
@@ -59,5 +63,25 @@ class ReadableConfigurationTest {
         val loadedConfiguration = configurationFactory.loadConfiguration()
         expectThat(loadedConfiguration.adapter.keyStore.location) isEqualTo tempConfigurationDirectory
         expectThat(loadedConfiguration.template).isFalse()
+    }
+
+    @Test
+    fun `should terminate instead of loading template when configuration contains unsupported properties`() {
+        every { systemOperation.exit() } returns Unit
+        File(configurationFile).writeText(
+            """
+            application:
+              unsupported: true
+            """.trimIndent(),
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        val actual = captureSystemErr.during {
+            tryCatching { configurationFactory.loadConfiguration() }
+        }
+
+        expectThat(actual.failure).isTrue()
+        expectThat(captureSystemErr.capture) contains "Configuration contains unrecognized property and will not be used."
+        verify(exactly = 1) { systemOperation.exit() }
     }
 }

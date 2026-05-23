@@ -10,13 +10,14 @@ import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 
 class ConfigurationFactory @Inject constructor(private val systemOperation: SystemOperation) {
-    fun loadConfiguration() = configurationFromFile() ?: Configuration(template = true)
+    fun loadConfiguration() = if (!systemOperation.exists(filePath)) {
+        Configuration(template = true)
+    } else {
+        configurationFromFile()
+    }
 
     private fun configurationFromFile() = try {
-        systemOperation.resolvePath(
-            Global.homeDirectory,
-            CONFIGURATION_FILENAME.toFileName(),
-        ).takeIf(systemOperation::exists)?.let {
+        filePath.let {
             YAMLMapper().readValue(
                 it.toFile(),
                 Configuration::class.java,
@@ -24,6 +25,12 @@ class ConfigurationFactory @Inject constructor(private val systemOperation: Syst
         }
     } catch (ex: Exception) {
         reportFailure(ConfigurationFailure(ex))
-        null
+        systemOperation.exit()
+        throw ex
     }
+
+    private val filePath get() = systemOperation.resolvePath(
+        Global.homeDirectory,
+        CONFIGURATION_FILENAME.toFileName(),
+    )
 }
