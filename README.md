@@ -438,6 +438,8 @@ If you forget your master password, your only recourse is brute force guessing.
 ### How do I back up my passwords?
 Passbird supports file-based backups for the password database (`passbird.tree`), configuration file (`passbird.yml`), and keystore file (`passbird.sec`). These can be automatically managed through the backup settings in `passbird.yml`. Refer to the [configuration section](./CONFIGURATION.md) for details on enabling and customizing backups.
 
+Password tree backups are only rotated when the decrypted tree content changes, so a fresh AES-GCM IV alone does not consume an additional backup slot.
+
 While Passbird does not offer built-in online backup features, you can securely store these backup files using external tools like Nextcloud, Dropbox, or similar cloud services. Prefer per-user directories for local backup storage, and ensure that any backup location is well-protected, as these files contain sensitive data necessary for password recovery.
 
 ### Can Passbird integrate with browsers or other tools?

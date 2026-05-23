@@ -2,17 +2,21 @@ package de.pflugradts.passbird.application.process.backup
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.Configuration
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.mainMocked
+import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -32,10 +36,12 @@ import java.util.UUID
 class BackupManagerTest {
 
     private val tempWorkingDirectory = UUID.randomUUID().toString()
+    private val configurationBackupSettings = mockk<Configuration.BackupSettings>()
     private val treeBackupSettings = mockk<Configuration.BackupSettings>()
     private val configuration = mockk<Configuration>()
     private val systemOperation = SystemOperation()
-    private val backupManager = BackupManager(configuration, systemOperation)
+    private val cryptoProvider: CryptoProvider = createAesGcmCipherForTesting()
+    private val backupManager = BackupManager(configuration, systemOperation, cryptoProvider)
 
     @BeforeEach
     fun setup() {
@@ -48,9 +54,12 @@ class BackupManagerTest {
         )
         every { configuration.application.backup.location } returns ""
         every { configuration.application.backup.numberOfBackups } returns 0
-        every { configuration.application.backup.configuration } returns mockk<Configuration.BackupSettings>(relaxed = true)
+        every { configuration.application.backup.configuration } returns configurationBackupSettings
         every { configuration.application.backup.keyStore } returns mockk<Configuration.BackupSettings>(relaxed = true)
         every { configuration.application.backup.passwordTree } returns treeBackupSettings
+        every { configurationBackupSettings.enabled } returns false
+        every { configurationBackupSettings.numberOfBackups } returns 0
+        every { configurationBackupSettings.location } returns ""
         every { treeBackupSettings.location } returns ""
         updatePasswordTreeFileContent("initial")
     }
@@ -70,7 +79,7 @@ class BackupManagerTest {
         backupManager.run()
 
         // then
-        expectThat(files()).isEmpty()
+        expectThat(backupFiles(PASSWORD_TREE_FILENAME)).isEmpty()
     }
 
     @Test
@@ -83,7 +92,7 @@ class BackupManagerTest {
         backupManager.run()
 
         // then
-        expectThat(files()).isEmpty()
+        expectThat(backupFiles(PASSWORD_TREE_FILENAME)).isEmpty()
     }
 
     @Test
@@ -96,8 +105,8 @@ class BackupManagerTest {
         backupManager.run()
 
         // then
-        expectThat(files()) hasSize 1
-        val backupFile = Paths.get("$tempWorkingDirectory/${files().single()}")
+        expectThat(backupFiles(PASSWORD_TREE_FILENAME)) hasSize 1
+        val backupFile = Paths.get("$tempWorkingDirectory/${backupFiles(PASSWORD_TREE_FILENAME).single()}")
         posixPermissionsIfSupported(backupFile)?.let {
             expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
         }
@@ -120,7 +129,7 @@ class BackupManagerTest {
         posixPermissionsIfSupported(backupDirectory)?.let {
             expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE)
         }
-        val backupFile = backupDirectory.resolve(systemOperation.getFileNames(backupDirectory.toString().toDirectory()).single().value)
+        val backupFile = backupDirectory.resolve(backupFiles(PASSWORD_TREE_FILENAME, backupDirectory.toString()).single())
         posixPermissionsIfSupported(backupFile)?.let {
             expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
         }
@@ -140,24 +149,40 @@ class BackupManagerTest {
         backupManager.run()
 
         // then
-        expectThat(files()) hasSize 2
+        expectThat(backupFiles(PASSWORD_TREE_FILENAME)) hasSize 2
     }
 
-    // FIXME tree is always backed up due to random IV
-    @Disabled
     @Test
-    fun `should not create another backup if file has not changed`() {
+    fun `should not create another backup if decrypted password tree content has not changed`() {
         // given
         every { treeBackupSettings.enabled } returns true
         every { treeBackupSettings.numberOfBackups } returns 3
-        updatePasswordTreeFileContent("initial")
+        updatePasswordTreeFileContent("initial", cryptoProvider)
+        backupManager.run()
+        wait1Sec()
+        updatePasswordTreeFileContent("initial", cryptoProvider)
+
+        // when
+        backupManager.run()
+
+        // then
+        expectThat(backupFiles(PASSWORD_TREE_FILENAME)) hasSize 1
+    }
+
+    @Test
+    fun `should not create another backup if configuration file has not changed`() {
+        // given
+        every { treeBackupSettings.enabled } returns false
+        every { configurationBackupSettings.enabled } returns true
+        every { configurationBackupSettings.numberOfBackups } returns 3
+        Files.writeString(Paths.get("$tempWorkingDirectory/$CONFIGURATION_FILENAME"), "configuration")
         backupManager.run()
 
         // when
         backupManager.run()
 
         // then
-        expectThat(files()) hasSize 1
+        expectThat(backupFiles(CONFIGURATION_FILENAME)) hasSize 1
     }
 
     @Test
@@ -176,7 +201,7 @@ class BackupManagerTest {
         wait1Sec()
         updatePasswordTreeFileContent("third")
         backupManager.run()
-        expectThat(files()) hasSize 3
+        expectThat(backupFiles(PASSWORD_TREE_FILENAME)) hasSize 3
         wait1Sec()
         updatePasswordTreeFileContent(expectedContent)
         every { treeBackupSettings.numberOfBackups } returns 1
@@ -185,15 +210,25 @@ class BackupManagerTest {
         backupManager.run()
 
         // then
-        expectThat(files()) hasSize 1
-        val backupFile = Paths.get("$tempWorkingDirectory/${files()[0]}")
-        expectThat(Files.readString(backupFile)) isEqualTo expectedContent
+        expectThat(backupFiles(PASSWORD_TREE_FILENAME)) hasSize 1
+        val backupFile = Paths.get("$tempWorkingDirectory/${backupFiles(PASSWORD_TREE_FILENAME)[0]}")
+        expectThat(
+            cryptoProvider.decrypt(encryptedShellOf(Files.readAllBytes(backupFile))).asString(),
+        ) isEqualTo expectedContent
     }
 
-    private fun updatePasswordTreeFileContent(content: String) =
-        Files.writeString(Paths.get("$tempWorkingDirectory/$PASSWORD_TREE_FILENAME"), content)
+    private fun updatePasswordTreeFileContent(content: String, cryptoProvider: CryptoProvider = this.cryptoProvider) = Files.write(
+        Paths.get("$tempWorkingDirectory/$PASSWORD_TREE_FILENAME"),
+        cryptoProvider.encrypt(shellOf(content)).toByteArray(),
+    )
     private fun wait1Sec() = Thread.sleep(1000)
-    private fun files() = systemOperation.getFileNames(tempWorkingDirectory.toDirectory()).map { it.value }
-        .filterNot { it == tempWorkingDirectory }
-        .filterNot { it == PASSWORD_TREE_FILENAME }
+    private fun backupFiles(fileName: String, directory: String = tempWorkingDirectory) =
+        systemOperation.getFileNames(directory.toDirectory())
+            .map { it.value }
+            .filter {
+                it.matches(
+                    "${fileName.substringBefore(".")}_\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}\\.${fileName.substringAfter(".")}"
+                        .toRegex(),
+                )
+            }
 }

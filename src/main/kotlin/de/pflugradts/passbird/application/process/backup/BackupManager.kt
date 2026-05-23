@@ -11,12 +11,16 @@ import de.pflugradts.passbird.application.process.Finalizer
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
+import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
+import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class BackupManager @Inject constructor(
     private val configuration: ReadableConfiguration,
     private val systemOperation: SystemOperation,
+    private val cryptoProvider: CryptoProvider,
 ) : Finalizer {
     private val backupConfiguration get() = configuration.application.backup
     override fun run() {
@@ -37,7 +41,7 @@ class BackupManager @Inject constructor(
                 if (backups.isNotEmpty()) {
                     val current = systemOperation.resolvePath(directory, fileName.toFileName())
                     val lastBackup = systemOperation.resolvePath(backupDirectory, backups.last())
-                    if (systemOperation.readBytesFromFile(current) != systemOperation.readBytesFromFile(lastBackup)) {
+                    if (backupContentHasChanged(current, lastBackup, fileName)) {
                         backup(directory, fileName, backupDirectory)
                     }
                     backups.take(0.coerceAtLeast((backups.size + 1) - numberOfBackups(settings))).forEach {
@@ -52,6 +56,19 @@ class BackupManager @Inject constructor(
 
     private fun numberOfBackups(settings: ReadableConfiguration.BackupSettings) =
         settings.numberOfBackups ?: configuration.application.backup.numberOfBackups
+
+    private fun backupContentHasChanged(current: Path, lastBackup: Path, fileName: String) =
+        !readComparableBytes(current, fileName).contentEquals(readComparableBytes(lastBackup, fileName))
+
+    private fun readComparableBytes(path: Path, fileName: String) = if (fileName == PASSWORD_TREE_FILENAME) {
+        readPasswordTreeBytes(path)
+    } else {
+        systemOperation.readBytesFromFile(path)
+    }
+
+    private fun readPasswordTreeBytes(path: Path) = systemOperation.readBytesFromFile(path).let {
+        if (it.isEmpty()) byteArrayOf() else cryptoProvider.decrypt(encryptedShellOf(it)).toByteArray()
+    }
 
     private fun backup(directory: Directory, fileName: String, backupDirectory: Directory) {
         val format = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
