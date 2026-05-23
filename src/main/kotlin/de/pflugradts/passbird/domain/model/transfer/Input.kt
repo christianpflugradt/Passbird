@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.domain.model.transfer
 
 import de.pflugradts.passbird.domain.model.ddd.ValueObject
+import de.pflugradts.passbird.domain.model.shell.PlainShell
 import de.pflugradts.passbird.domain.model.shell.PlainValue.Companion.plainValueOf
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
@@ -27,6 +28,12 @@ class Input private constructor(val shell: Shell) : ValueObject {
     val data get() = if (shell.size > 1) shell.slice(command.size, shell.size) else emptyShell()
     val isEmpty get() = shell.isEmpty
     val isNotEmpty get() = shell.isNotEmpty
+    fun toPlainShell(): PlainShell = try {
+        shell.toPlainShell()
+    } finally {
+        invalidate()
+    }
+
     fun invalidate() = shell.scramble()
     fun extractNestSlot(): Slot = shell.asString().toIntOrNull()?.let {
         if (it in FIRST_SLOT - 1..LAST_SLOT) slotAt(it) else DEFAULT

@@ -8,6 +8,7 @@ import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.ConfigurationSync
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.shell.PlainShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -57,23 +58,27 @@ class PassbirdSetup @Inject constructor(
 
     private fun createConfiguration(directory: Directory) = configurationSync.sync(directory)
 
-    private fun receiveMasterPassword(): Input {
+    private fun receiveMasterPassword(): PlainShell {
         var input: Input
         var inputRepeated: Input
         while (true) {
             input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("first input: ")))
             inputRepeated = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("second input: ")))
             if (input.isNotEmpty && input == inputRepeated) {
+                val password = input.toPlainShell()
+                inputRepeated.invalidate()
                 userInterfaceAdapterPort.sendLineBreak()
-                return input
+                return password
             }
+            input.invalidate()
+            inputRepeated.invalidate()
             setupGuide.sendNonMatchingInputs()
         }
     }
 
-    private fun createKeyStore(directory: Directory, password: Input) {
+    private fun createKeyStore(directory: Directory, password: PlainShell) {
         keyStoreAdapterPort.storeKey(
-            password.shell.toPlainShell(),
+            password,
             Paths.get(directory.value).resolve(ReadableConfiguration.KEYSTORE_FILENAME),
         )
         setupGuide.sendCreateKeyStoreSucceeded()

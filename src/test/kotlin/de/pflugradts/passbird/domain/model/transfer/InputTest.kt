@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.domain.model.transfer
 
+import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -88,6 +89,20 @@ class InputTest {
         inputOf(shell).invalidate()
 
         // then
+        verify(exactly = 1) { shell.scramble() }
+    }
+
+    @Test
+    fun `should convert to plainShell and invalidate input`() {
+        // given
+        val shell = spyk<Shell>(shellOf("foo"))
+        val input = inputOf(shell)
+
+        // when
+        val actual = input.toPlainShell()
+
+        // then
+        expectThat(actual) isEqualTo plainShellOf(charArrayOf('f', 'o', 'o'))
         verify(exactly = 1) { shell.scramble() }
     }
 

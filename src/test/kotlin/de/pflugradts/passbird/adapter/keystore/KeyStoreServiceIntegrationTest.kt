@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
 import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
 import strikt.java.exists
@@ -61,5 +62,22 @@ class KeyStoreServiceIntegrationTest {
         expectThat(actualLoadResult.getOrNull()?.size) isEqualTo expectedByteArraySize
         expectThat(oneTimePasswordPlainShell1.toCharArray()) isNotEqualTo password.toCharArray()
         expectThat(oneTimePasswordPlainShell2.toCharArray()) isNotEqualTo password.toCharArray()
+    }
+
+    @Test
+    fun `should scramble password after failed key loading`() {
+        // given
+        val correctPassword = plainShellOf("p4s5wrD".toCharArray())
+        val invalidPassword = plainShellOf("invalid".toCharArray())
+        val path = Paths.get(keyStoreFile!!)
+
+        // when
+        val actualStoreResult = tryCatching { keyStoreService!!.storeKey(correctPassword, path) }
+        val actualLoadResult = keyStoreService!!.loadKey(invalidPassword, path)
+
+        // then
+        expectThat(actualStoreResult.success).isTrue()
+        expectThat(actualLoadResult.success).isFalse()
+        expectThat(invalidPassword.toCharArray()) isNotEqualTo "invalid".toCharArray()
     }
 }

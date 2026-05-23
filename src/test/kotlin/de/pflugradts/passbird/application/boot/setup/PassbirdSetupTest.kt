@@ -25,6 +25,7 @@ import io.mockk.verifyOrder
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNotEqualTo
 import java.nio.file.Path
 import kotlin.io.path.name
 
@@ -50,7 +51,8 @@ class PassbirdSetupTest {
     fun `should run config template route`() {
         // given
         val configurationDirectory = VALID_DIRECTORY
-        val password = fakeInput("p4s5w0rD")
+        val password1 = fakeInput("p4s5w0rD")
+        val password2 = fakeInput("p4s5w0rD")
         val pathSlot = slot<Path>()
         fakeConfiguration(
             instance = configuration,
@@ -60,7 +62,7 @@ class PassbirdSetupTest {
         )
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseSecureInputs = listOf(password, password),
+            withTheseSecureInputs = listOf(password1, password2),
             withReceiveConfirmation = true,
         )
         fakeSystemOperation(
@@ -68,7 +70,7 @@ class PassbirdSetupTest {
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
         every { configurationSync.sync(configurationDirectory.toDirectory()) } returns Unit
-        every { keyStoreAdapterPort.storeKey(eq(password.shell.toPlainShell()), capture(pathSlot)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(password1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
@@ -81,6 +83,8 @@ class PassbirdSetupTest {
         verify(exactly = 0) { setupGuide.sendNonMatchingInputs() }
         expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
         expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
+        expectThat(password1.shell.asString()) isNotEqualTo "p4s5w0rD"
+        expectThat(password2.shell.asString()) isNotEqualTo "p4s5w0rD"
         verify(exactly = 1) { setupGuide.sendRestart() }
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
@@ -109,19 +113,20 @@ class PassbirdSetupTest {
     fun `should run config key store route`() {
         // given
         val configurationDirectory = VALID_DIRECTORY
-        val password = fakeInput("p4s5w0rD")
+        val password1 = fakeInput("p4s5w0rD")
+        val password2 = fakeInput("p4s5w0rD")
         val pathSlot = slot<Path>()
         fakeConfiguration(instance = configuration, withKeyStoreLocation = configurationDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseSecureInputs = listOf(password, password),
+            withTheseSecureInputs = listOf(password1, password2),
             withReceiveConfirmation = true,
         )
         fakeSystemOperation(
             instance = systemOperation,
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
-        every { keyStoreAdapterPort.storeKey(eq(password.shell.toPlainShell()), capture(pathSlot)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(password1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
@@ -134,6 +139,8 @@ class PassbirdSetupTest {
         verify(exactly = 0) { setupGuide.sendNonMatchingInputs() }
         expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
         expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
+        expectThat(password1.shell.asString()) isNotEqualTo "p4s5w0rD"
+        expectThat(password2.shell.asString()) isNotEqualTo "p4s5w0rD"
         verify(exactly = 1) { setupGuide.sendRestart() }
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
@@ -166,13 +173,14 @@ class PassbirdSetupTest {
         val invalidConfigurationDirectory = "/dev/null"
         val nonexistentConfigurationDirectory = "/dev/none"
         val validDirectory = fakeInput(VALID_DIRECTORY)
-        val password = fakeInput("p4s5w0rD")
+        val password1 = fakeInput("p4s5w0rD")
+        val password2 = fakeInput("p4s5w0rD")
         val pathSlot = slot<Path>()
         fakeConfiguration(instance = configuration, withKeyStoreLocation = invalidConfigurationDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
             withTheseInputs = listOf(fakeInput(nonexistentConfigurationDirectory), validDirectory),
-            withTheseSecureInputs = listOf(password, password),
+            withTheseSecureInputs = listOf(password1, password2),
             withReceiveConfirmation = true,
         )
         fakeSystemOperation(
@@ -183,7 +191,7 @@ class PassbirdSetupTest {
                 Pair(nonexistentConfigurationDirectory, fakePath(exists = false, isDirectory = true)),
             ),
         )
-        every { keyStoreAdapterPort.storeKey(eq(password.shell.toPlainShell()), capture(pathSlot)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(password1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
@@ -192,6 +200,8 @@ class PassbirdSetupTest {
         verify(exactly = 1) { setupGuide.sendWelcome() }
         expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
         expectThat(pathSlot.captured.parent.name) isEqualTo VALID_DIRECTORY
+        expectThat(password1.shell.asString()) isNotEqualTo "p4s5w0rD"
+        expectThat(password2.shell.asString()) isNotEqualTo "p4s5w0rD"
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
     }
@@ -202,8 +212,10 @@ class PassbirdSetupTest {
         val configurationDirectory = VALID_DIRECTORY
         val passwordMismatch1 = fakeInput("bassword")
         val passwordMismatch2 = fakeInput("guessword")
-        val emptyPassword = emptyInput()
-        val passwordMatched = fakeInput("p4s5w0rD")
+        val emptyPassword1 = emptyInput()
+        val emptyPassword2 = emptyInput()
+        val passwordMatched1 = fakeInput("p4s5w0rD")
+        val passwordMatched2 = fakeInput("p4s5w0rD")
         val pathSlot = slot<Path>()
         fakeConfiguration(instance = configuration, withKeyStoreLocation = configurationDirectory)
         fakeUserInterfaceAdapterPort(
@@ -211,10 +223,10 @@ class PassbirdSetupTest {
             withTheseSecureInputs = listOf(
                 passwordMismatch1,
                 passwordMismatch2,
-                emptyPassword,
-                emptyPassword,
-                passwordMatched,
-                passwordMatched,
+                emptyPassword1,
+                emptyPassword2,
+                passwordMatched1,
+                passwordMatched2,
             ),
             withReceiveConfirmation = true,
         )
@@ -222,7 +234,7 @@ class PassbirdSetupTest {
             instance = systemOperation,
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
-        every { keyStoreAdapterPort.storeKey(eq(passwordMatched.shell.toPlainShell()), capture(pathSlot)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(passwordMatched1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
@@ -235,6 +247,10 @@ class PassbirdSetupTest {
         verify(exactly = 2) { setupGuide.sendNonMatchingInputs() }
         expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
         expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
+        expectThat(passwordMismatch1.shell.asString()) isNotEqualTo "bassword"
+        expectThat(passwordMismatch2.shell.asString()) isNotEqualTo "guessword"
+        expectThat(passwordMatched1.shell.asString()) isNotEqualTo "p4s5w0rD"
+        expectThat(passwordMatched2.shell.asString()) isNotEqualTo "p4s5w0rD"
         verify(exactly = 1) { setupGuide.sendRestart() }
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
@@ -247,7 +263,8 @@ class PassbirdSetupTest {
         val configurationDirectory = VALID_DIRECTORY
         val passwordMismatch1 = fakeInput("bassword")
         val passwordMismatch2 = fakeInput("guessword")
-        val passwordMatched = fakeInput("p4s5w0rD")
+        val passwordMatched1 = fakeInput("p4s5w0rD")
+        val passwordMatched2 = fakeInput("p4s5w0rD")
         val pathSlot = slot<Path>()
         fakeConfiguration(instance = configuration, withKeyStoreLocation = configurationDirectory)
         fakeUserInterfaceAdapterPort(
@@ -255,8 +272,8 @@ class PassbirdSetupTest {
             withTheseSecureInputs = listOf(
                 passwordMismatch1,
                 passwordMismatch2,
-                passwordMatched,
-                passwordMatched,
+                passwordMatched1,
+                passwordMatched2,
             ),
             withReceiveConfirmation = true,
         )
@@ -264,7 +281,7 @@ class PassbirdSetupTest {
             instance = systemOperation,
             withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
         )
-        every { keyStoreAdapterPort.storeKey(eq(passwordMatched.shell.toPlainShell()), capture(pathSlot)) } returns Unit
+        every { keyStoreAdapterPort.storeKey(eq(passwordMatched1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
         passbirdSetup.boot()
@@ -279,5 +296,9 @@ class PassbirdSetupTest {
         }
         expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
         expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
+        expectThat(passwordMismatch1.shell.asString()) isNotEqualTo "bassword"
+        expectThat(passwordMismatch2.shell.asString()) isNotEqualTo "guessword"
+        expectThat(passwordMatched1.shell.asString()) isNotEqualTo "p4s5w0rD"
+        expectThat(passwordMatched2.shell.asString()) isNotEqualTo "p4s5w0rD"
     }
 }

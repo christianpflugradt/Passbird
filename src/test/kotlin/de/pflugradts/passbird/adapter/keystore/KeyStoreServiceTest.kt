@@ -8,6 +8,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
+import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -22,55 +23,63 @@ class KeyStoreServiceTest {
     fun `should store key and fail on invalid path`() {
         // given
         val invalidPath = mockk<Path>()
+        val password = plainShellOf("Password".toCharArray())
 
         // when
-        val actual = tryCatching { keyStoreService.storeKey(plainShellOf("Password".toCharArray()), invalidPath) }
+        val actual = tryCatching { keyStoreService.storeKey(password, invalidPath) }
 
         // then
         expectThat(actual.failure).isTrue()
+        expectThat(password.toCharArray()) isNotEqualTo "Password".toCharArray()
     }
 
     @Test
     fun `should load key and fail on invalid path`() {
         // given
         val invalidPath = mockk<Path>()
+        val password = plainShellOf("Password".toCharArray())
 
         // when
-        val actual = keyStoreService.loadKey(plainShellOf("Password".toCharArray()), invalidPath)
+        val actual = keyStoreService.loadKey(password, invalidPath)
 
         // then
         expectThat(actual.failure).isTrue()
+        expectThat(password.toCharArray()) isNotEqualTo "Password".toCharArray()
     }
 
     @Test
     fun `should store key and fail on key store unavailable`() {
         // given
+        val password = plainShellOf("Password".toCharArray())
         fakeSystemOperation(
             instance = systemOperation,
             withKeyStoreUnavailable = true,
         )
 
         // when
-        val actual = tryCatching { keyStoreService.storeKey(plainShellOf("Password".toCharArray()), Paths.get("")) }
+        val actual = tryCatching { keyStoreService.storeKey(password, Paths.get("")) }
 
         // then
         expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isA<KeyStoreException>()
+        expectThat(password.toCharArray()) isNotEqualTo "Password".toCharArray()
     }
 
     @Test
     fun `should load key and fail on key store unavailable`() {
         // given
+        val password = plainShellOf("Password".toCharArray())
         fakeSystemOperation(
             instance = systemOperation,
             withKeyStoreUnavailable = true,
         )
 
         // when
-        val actual = keyStoreService.loadKey(plainShellOf("Password".toCharArray()), Paths.get(""))
+        val actual = keyStoreService.loadKey(password, Paths.get(""))
 
         // then
         expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isA<KeyStoreException>()
+        expectThat(password.toCharArray()) isNotEqualTo "Password".toCharArray()
     }
 }

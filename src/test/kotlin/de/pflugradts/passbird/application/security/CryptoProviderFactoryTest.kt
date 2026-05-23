@@ -24,6 +24,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isA
+import strikt.assertions.isNotEqualTo
 import java.nio.file.Path
 
 class CryptoProviderFactoryTest {
@@ -62,6 +63,7 @@ class CryptoProviderFactoryTest {
 
         // then
         expectThat(actual).isA<AesGcmCipher>()
+        expectThat(correctPassword.shell.asString()) isNotEqualTo "letmein"
     }
 
     @Test
@@ -94,12 +96,17 @@ class CryptoProviderFactoryTest {
 
         // then
         expectThat(actual).isA<AesGcmCipher>()
+        expectThat(incorrectPassword1.shell.asString()) isNotEqualTo "letmeout"
+        expectThat(incorrectPassword2.shell.asString()) isNotEqualTo "letmeout"
+        expectThat(correctPassword.shell.asString()) isNotEqualTo "letmein"
     }
 
     @Test
     fun `should create crypto provider and terminate application after 3 failed attempts`() {
         // given
-        val incorrectPassword = inputOf(shellOf("letmeout"))
+        val incorrectPassword1 = inputOf(shellOf("letmeout"))
+        val incorrectPassword2 = inputOf(shellOf("letmeout"))
+        val incorrectPassword3 = inputOf(shellOf("letmeout"))
         val keyStoreDirectory = "tmp"
         val keyStoreFilePath = fakePath()
         fakeSystemOperation(
@@ -113,15 +120,20 @@ class CryptoProviderFactoryTest {
         fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseSecureInputs = listOf(incorrectPassword, incorrectPassword, incorrectPassword),
+            withTheseSecureInputs = listOf(incorrectPassword1, incorrectPassword2, incorrectPassword3),
         )
-        givenLoginFails(incorrectPassword, keyStoreFilePath)
+        givenLoginFails(incorrectPassword1, keyStoreFilePath)
+        givenLoginFails(incorrectPassword2, keyStoreFilePath)
+        givenLoginFails(incorrectPassword3, keyStoreFilePath)
 
         // when
         tryCatching { cryptoProviderFactory.createCryptoProvider() }
 
         // then
         verify(exactly = 1) { systemOperation.exit() }
+        expectThat(incorrectPassword1.shell.asString()) isNotEqualTo "letmeout"
+        expectThat(incorrectPassword2.shell.asString()) isNotEqualTo "letmeout"
+        expectThat(incorrectPassword3.shell.asString()) isNotEqualTo "letmeout"
     }
 
     private fun givenLoginSucceeds(password: Input, keyStoreFilePath: Path) = every {

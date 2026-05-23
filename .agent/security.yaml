@@ -21,13 +21,14 @@ current_security_relevant_implementation:
     file: src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
     facts:
       - prompts for the keystore password through secure terminal input
+      - invalidates secure input buffers after converting them for keystore access
       - allows three authentication attempts before exit
   keystore:
     file: src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
     facts:
       - uses JCEKS via SystemOperation
       - stores a generated AES secret key under alias PwMan3Secret
-      - scrambles password material after use
+      - scrambles password material and temporary char arrays after use, including exception paths
   cipher:
     file: src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
     facts:

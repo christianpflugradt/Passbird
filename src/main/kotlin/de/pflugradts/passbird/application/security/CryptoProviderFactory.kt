@@ -38,5 +38,5 @@ class CryptoProviderFactory @Inject constructor(
         ),
     )
 
-    private fun receiveLogin() = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter key: "))).shell.toPlainShell()
+    private fun receiveLogin() = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter key: "))).toPlainShell()
 }
