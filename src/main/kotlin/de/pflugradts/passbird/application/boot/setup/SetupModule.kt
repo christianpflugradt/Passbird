@@ -7,6 +7,7 @@ import com.google.inject.Singleton
 import de.pflugradts.passbird.adapter.keystore.KeyStoreService
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.ConfigurationFactory
@@ -15,8 +16,9 @@ import de.pflugradts.passbird.application.configuration.ConfigurationSyncService
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.UpdatableConfiguration
 
-class SetupModule : AbstractModule() {
+class SetupModule(private val runContext: RunContext) : AbstractModule() {
     override fun configure() {
+        bind(RunContext::class.java).toInstance(runContext)
         bind(Bootable::class.java).to(PassbirdSetup::class.java)
         bind(KeyStoreAdapterPort::class.java).to(KeyStoreService::class.java)
         bind(UserInterfaceAdapterPort::class.java).to(CommandLineInterfaceService::class.java)

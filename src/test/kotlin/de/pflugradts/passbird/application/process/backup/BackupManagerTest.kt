@@ -1,17 +1,18 @@
 package de.pflugradts.passbird.application.process.backup
 
 import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
-import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.every
 import io.mockk.mockk
@@ -36,17 +37,17 @@ import java.util.UUID
 class BackupManagerTest {
 
     private val tempWorkingDirectory = UUID.randomUUID().toString()
+    private val runContext = PassbirdRunContext(tempWorkingDirectory.toDirectory(), Slot.DEFAULT)
     private val configurationBackupSettings = mockk<Configuration.BackupSettings>()
     private val treeBackupSettings = mockk<Configuration.BackupSettings>()
     private val configuration = mockk<Configuration>()
     private val systemOperation = SystemOperation()
     private val cryptoProvider: CryptoProvider = createAesGcmCipherForTesting()
-    private val backupManager = BackupManager(configuration, systemOperation, cryptoProvider)
+    private val backupManager = BackupManager(configuration, runContext, systemOperation, cryptoProvider)
 
     @BeforeEach
     fun setup() {
         expectThat(File(tempWorkingDirectory).mkdir()).isTrue()
-        mainMocked(arrayOf(tempWorkingDirectory))
         fakeConfiguration(
             instance = configuration,
             withKeyStoreLocation = tempWorkingDirectory,

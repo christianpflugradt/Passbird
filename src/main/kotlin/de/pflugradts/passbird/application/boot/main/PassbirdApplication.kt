@@ -2,7 +2,7 @@ package de.pflugradts.passbird.application.boot.main
 
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import de.pflugradts.passbird.application.Global
+import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.commandhandling.InputHandler
@@ -23,12 +23,13 @@ class PassbirdApplication @Inject constructor(
     private val initializers: Set<Initializer>,
     private val inputHandler: InputHandler,
     private val nestService: NestService,
+    private val runContext: RunContext,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : Bootable {
 
     override fun boot() {
         userInterfaceAdapterPort.sendLineBreak()
-        nestService.moveToNestAt(Global.initialSlot)
+        nestService.moveToNestAt(runContext.initialSlot)
         initializers.forEach { it.run() }
         var input: Input
         while (!isSigTerm(receiveInput().also { input = it })) {

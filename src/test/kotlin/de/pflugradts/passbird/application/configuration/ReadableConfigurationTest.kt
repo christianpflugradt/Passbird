@@ -3,11 +3,12 @@ package de.pflugradts.passbird.application.configuration
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
-import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
+import de.pflugradts.passbird.domain.model.slot.Slot
 import io.mockk.every
 import io.mockk.spyk
 import io.mockk.verify
@@ -29,14 +30,17 @@ import java.util.UUID
 @Tag(INTEGRATION)
 class ReadableConfigurationTest {
     private val systemOperation = spyk(SystemOperation())
-    private val configurationFactory = ConfigurationFactory(systemOperation)
+    private lateinit var configurationFactory: ConfigurationFactory
     private var tempConfigurationDirectory = UUID.randomUUID().toString()
     private var configurationFile = tempConfigurationDirectory + File.separator + CONFIGURATION_FILENAME
 
     @BeforeEach
     fun setup() {
         expectThat(File(tempConfigurationDirectory).mkdir()).isTrue()
-        mainMocked(arrayOf(tempConfigurationDirectory))
+        configurationFactory = ConfigurationFactory(
+            systemOperation,
+            PassbirdRunContext(tempConfigurationDirectory.toDirectory(), Slot.DEFAULT),
+        )
     }
 
     @AfterEach

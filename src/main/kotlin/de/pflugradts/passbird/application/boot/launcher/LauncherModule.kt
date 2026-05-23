@@ -5,13 +5,15 @@ import com.google.inject.Inject
 import com.google.inject.Provider
 import com.google.inject.Singleton
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
+import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.ConfigurationFactory
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 
-class LauncherModule : AbstractModule() {
+class LauncherModule(private val runContext: RunContext) : AbstractModule() {
     override fun configure() {
+        bind(RunContext::class.java).toInstance(runContext)
         bind(Bootable::class.java).to(PassbirdLauncher::class.java)
         bind(ReadableConfiguration::class.java).toProvider(ConfigurationDependencyProvider::class.java).`in`(Singleton::class.java)
         bind(UserInterfaceAdapterPort::class.java).to(CommandLineInterfaceService::class.java)

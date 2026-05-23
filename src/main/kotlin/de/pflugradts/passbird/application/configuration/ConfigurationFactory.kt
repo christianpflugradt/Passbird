@@ -2,14 +2,17 @@ package de.pflugradts.passbird.application.configuration
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.google.inject.Inject
-import de.pflugradts.passbird.application.Global
+import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.failure.ConfigurationFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 
-class ConfigurationFactory @Inject constructor(private val systemOperation: SystemOperation) {
+class ConfigurationFactory @Inject constructor(
+    private val systemOperation: SystemOperation,
+    private val runContext: RunContext,
+) {
     fun loadConfiguration() = if (!systemOperation.exists(filePath)) {
         Configuration(template = true)
     } else {
@@ -30,7 +33,7 @@ class ConfigurationFactory @Inject constructor(private val systemOperation: Syst
     }
 
     private val filePath get() = systemOperation.resolvePath(
-        Global.homeDirectory,
+        runContext.homeDirectory,
         CONFIGURATION_FILENAME.toFileName(),
     )
 }

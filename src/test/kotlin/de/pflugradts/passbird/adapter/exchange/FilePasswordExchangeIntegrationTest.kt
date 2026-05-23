@@ -1,9 +1,10 @@
 package de.pflugradts.passbird.adapter.exchange
 
 import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.application.mainMocked
+import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
@@ -31,12 +32,14 @@ class FilePasswordExchangeIntegrationTest {
 
     private val tempExchangeDirectory = UUID.randomUUID().toString()
     private val exchangeFile = tempExchangeDirectory + File.separator + ReadableConfiguration.EXCHANGE_FILENAME
-    private val filePasswordExchange = FilePasswordExchange(SystemOperation())
+    private val filePasswordExchange = FilePasswordExchange(
+        SystemOperation(),
+        PassbirdRunContext(tempExchangeDirectory.toDirectory(), Slot.DEFAULT),
+    )
 
     @BeforeEach
     fun setup() {
         expectThat(File(tempExchangeDirectory).mkdir()).isTrue()
-        mainMocked(arrayOf(tempExchangeDirectory))
     }
 
     @AfterEach

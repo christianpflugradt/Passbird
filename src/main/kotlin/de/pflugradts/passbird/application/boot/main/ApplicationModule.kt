@@ -15,6 +15,7 @@ import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.commandhandling.CommandBus
@@ -76,8 +77,9 @@ import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import de.pflugradts.passbird.domain.service.password.tree.NestingGround
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 
-class ApplicationModule : AbstractModule() {
+class ApplicationModule(private val runContext: RunContext) : AbstractModule() {
     override fun configure() {
+        bind(RunContext::class.java).toInstance(runContext)
         configureApplication()
         configureMultibinders()
         configureProviders()

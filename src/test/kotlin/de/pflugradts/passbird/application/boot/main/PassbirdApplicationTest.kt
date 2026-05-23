@@ -1,11 +1,13 @@
 package de.pflugradts.passbird.application.boot.main
 
+import de.pflugradts.passbird.application.PassbirdRunContext
+import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
-import de.pflugradts.passbird.application.mainMocked
 import de.pflugradts.passbird.application.process.Initializer
 import de.pflugradts.passbird.application.process.inactivity.InactivityHandler
+import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -17,7 +19,6 @@ import de.pflugradts.passbird.domain.service.nest.createNestServiceSpyForTesting
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.hasSize
@@ -32,18 +33,14 @@ class PassbirdApplicationTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>()
     private val nestService = createNestServiceSpyForTesting()
     private val inputHandler = mockk<InputHandler>()
-    private val passbirdApplication = PassbirdApplication(
+    private fun passbirdApplication(runContext: RunContext = PassbirdRunContext("/tmp".toDirectory(), Slot.DEFAULT)) = PassbirdApplication(
         inactivityHandler = inactivityHandler,
         initializers = setOf(initializer1, initializer2, initializer3),
         inputHandler = inputHandler,
         nestService = nestService,
+        runContext = runContext,
         userInterfaceAdapterPort = userInterfaceAdapterPort,
     )
-
-    @BeforeEach
-    fun setup() {
-        mainMocked(args = arrayOf("/tmp"), withMockedFileCheck = true)
-    }
 
     @Test
     fun `should delegate input`() {
@@ -59,7 +56,7 @@ class PassbirdApplicationTest {
         every { inputHandler.handleInput(any()) } returns Unit
 
         // when
-        passbirdApplication.boot()
+        passbirdApplication().boot()
 
         // then
         listOf(
@@ -85,7 +82,7 @@ class PassbirdApplicationTest {
         every { nestService.currentNest() } returns givenNest
 
         // when
-        passbirdApplication.boot()
+        passbirdApplication().boot()
 
         // then
         verify { userInterfaceAdapterPort.receive(capture(expectedNestPrefixSlot), capture(expectedPromptPrefixSlot)) }
@@ -109,7 +106,7 @@ class PassbirdApplicationTest {
         every { nestService.currentNest() } returns DEFAULT
 
         // when
-        passbirdApplication.boot()
+        passbirdApplication().boot()
 
         // then
         verify { userInterfaceAdapterPort.receive(capture(expectedNestPrefixSlot), capture(expectedPromptPrefixSlot)) }
@@ -130,9 +127,8 @@ class PassbirdApplicationTest {
         every { inputHandler.handleInput(any()) } returns Unit
 
         // when
-        mainMocked(args = arrayOf("/tmp", initialNestSlot), withMockedFileCheck = true)
         nestService.place(shellOf("nest5"), Slot.S5)
-        passbirdApplication.boot()
+        passbirdApplication(PassbirdRunContext("/tmp".toDirectory(), slotAt(initialNestSlot))).boot()
 
         // then
         verify(exactly = 1) { nestService.moveToNestAt(slotAt(initialNestSlot)) }
@@ -150,8 +146,7 @@ class PassbirdApplicationTest {
         every { inputHandler.handleInput(any()) } returns Unit
 
         // when
-        mainMocked(args = arrayOf("/tmp"), withMockedFileCheck = true)
-        passbirdApplication.boot()
+        passbirdApplication().boot()
 
         // then
         verify(exactly = 1) { initializer1.run() }

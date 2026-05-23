@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.boot.main
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
@@ -25,6 +26,7 @@ class PassbirdTestMain @Inject constructor(
     @Inject val passwordProvider: PasswordProvider,
     @Inject val passwordService: PasswordService,
     @Inject val passwordTreeAdapterPort: PasswordTreeAdapterPort,
+    @Inject val runContext: RunContext,
     @Inject val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     @Inject val configuration: ReadableConfiguration,
     @Inject val commandHandlers: Set<CommandHandler>,

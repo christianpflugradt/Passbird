@@ -1,19 +1,19 @@
 package de.pflugradts.passbird.application.process.exchange
 
-import de.pflugradts.passbird.application.Global
+import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
-import de.pflugradts.passbird.application.mainMocked
+import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
+import de.pflugradts.passbird.domain.model.slot.Slot
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class ExportFileCheckerTest {
@@ -21,12 +21,8 @@ class ExportFileCheckerTest {
     private val configuration = mockk<Configuration>(relaxed = true)
     private val systemOperation = mockk<SystemOperation>(relaxed = true)
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
-    private val exportFileChecker = ExportFileChecker(configuration, systemOperation, userInterfaceAdapterPort)
-
-    @BeforeEach
-    fun setup() {
-        mainMocked(arrayOf("/tmp"))
-    }
+    private val runContext = PassbirdRunContext("/tmp".toDirectory(), Slot.DEFAULT)
+    private val exportFileChecker = ExportFileChecker(configuration, runContext, systemOperation, userInterfaceAdapterPort)
 
     @Test
     fun `should delete export file if confirmed`() {
@@ -37,7 +33,7 @@ class ExportFileCheckerTest {
         fakeSystemOperation(
             instance = systemOperation,
             withDirectoryResolvingToFileName = Triple(
-                Global.homeDirectory,
+                runContext.homeDirectory,
                 ReadableConfiguration.EXCHANGE_FILENAME.toFileName(),
                 exportFile,
             ),
@@ -59,7 +55,7 @@ class ExportFileCheckerTest {
         fakeSystemOperation(
             instance = systemOperation,
             withDirectoryResolvingToFileName = Triple(
-                Global.homeDirectory,
+                runContext.homeDirectory,
                 ReadableConfiguration.EXCHANGE_FILENAME.toFileName(),
                 exportFile,
             ),
@@ -81,7 +77,7 @@ class ExportFileCheckerTest {
         fakeSystemOperation(
             instance = systemOperation,
             withDirectoryResolvingToFileName = Triple(
-                Global.homeDirectory,
+                runContext.homeDirectory,
                 ReadableConfiguration.EXCHANGE_FILENAME.toFileName(),
                 exportFile,
             ),
@@ -102,7 +98,7 @@ class ExportFileCheckerTest {
         fakeSystemOperation(
             instance = systemOperation,
             withDirectoryResolvingToFileName = Triple(
-                Global.homeDirectory,
+                runContext.homeDirectory,
                 ReadableConfiguration.EXCHANGE_FILENAME.toFileName(),
                 exportFile,
             ),

@@ -3,9 +3,9 @@ package de.pflugradts.passbird.adapter.exchange
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.google.inject.Inject
 import de.pflugradts.passbird.application.ExchangeAdapterPort
-import de.pflugradts.passbird.application.Global
 import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.PasswordInfoMap
+import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.EXCHANGE_FILENAME
 import de.pflugradts.passbird.application.failure.ExportFailure
 import de.pflugradts.passbird.application.failure.ImportFailure
@@ -21,13 +21,14 @@ import java.nio.file.Files
 
 class FilePasswordExchange @Inject constructor(
     private val systemOperation: SystemOperation,
+    private val runContext: RunContext,
 ) : ExchangeAdapterPort {
     private val mapper = JsonMapper()
 
     override fun send(data: PasswordInfoMap) {
         try {
             systemOperation.writeToSensitiveFile(
-                systemOperation.resolvePath(Global.homeDirectory, EXCHANGE_FILENAME.toFileName()),
+                systemOperation.resolvePath(runContext.homeDirectory, EXCHANGE_FILENAME.toFileName()),
             ) { outputStream ->
                 mapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, ExchangeWrapper(data.toSerializable()))
             }
@@ -38,7 +39,7 @@ class FilePasswordExchange @Inject constructor(
 
     override fun receive() = try {
         mapper.readValue(
-            Files.readString(systemOperation.resolvePath(Global.homeDirectory, EXCHANGE_FILENAME.toFileName())),
+            Files.readString(systemOperation.resolvePath(runContext.homeDirectory, EXCHANGE_FILENAME.toFileName())),
             ExchangeWrapper::class.java,
         ).exportedContent.toPasswordInfoMap()
     } catch (e: IOException) {

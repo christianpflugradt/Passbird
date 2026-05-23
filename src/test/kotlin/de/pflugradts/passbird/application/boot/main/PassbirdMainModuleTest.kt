@@ -5,6 +5,7 @@ import com.google.inject.Guice
 import com.google.inject.name.Names
 import com.google.inject.util.Modules
 import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.commandhandling.handler.ExportCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ImportCommandHandler
@@ -36,6 +37,8 @@ import de.pflugradts.passbird.application.eventhandling.ApplicationEventHandler
 import de.pflugradts.passbird.application.process.backup.BackupManager
 import de.pflugradts.passbird.application.process.exchange.ExportFileChecker
 import de.pflugradts.passbird.application.process.inactivity.InactivityHandlerScheduler
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.mockk
@@ -50,11 +53,13 @@ class PassbirdMainModuleTest {
     @Test
     fun `should resolve all dependencies`() {
         // given / when
-        val actual = Guice.createInjector(Modules.override(ApplicationModule()).with(PassbirdTestModule()))
+        val runContext = PassbirdRunContext("/tmp".toDirectory(), Slot.DEFAULT)
+        val actual = Guice.createInjector(Modules.override(ApplicationModule(runContext)).with(PassbirdTestModule()))
             .getInstance(PassbirdTestMain::class.java)
 
         // then
         expectThat(actual.bootable).isA<PassbirdApplication>()
+        expectThat(actual.runContext) isSameInstanceAs runContext
         val expectedCommandHandlers = listOf(
             AddNestCommandHandler::class.java,
             MoveToNestCommandHandler::class.java,

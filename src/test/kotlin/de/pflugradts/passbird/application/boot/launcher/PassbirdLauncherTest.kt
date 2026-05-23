@@ -1,6 +1,8 @@
 package de.pflugradts.passbird.application.boot.launcher
 
 import com.google.inject.Module
+import de.pflugradts.passbird.application.PassbirdRunContext
+import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.main.ApplicationModule
 import de.pflugradts.passbird.application.boot.setup.SetupModule
@@ -14,6 +16,7 @@ import de.pflugradts.passbird.application.unmockMain
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
+import de.pflugradts.passbird.domain.model.slot.Slot
 import io.mockk.mockk
 import io.mockk.slot
 import org.junit.jupiter.api.AfterEach
@@ -25,9 +28,10 @@ import strikt.assertions.isA
 class PassbirdLauncherTest {
 
     private val configuration = mockk<Configuration>(relaxed = true)
+    private val runContext: RunContext = PassbirdRunContext("/tmp".toDirectory(), Slot.DEFAULT)
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val systemOperation = mockk<SystemOperation>(relaxed = true)
-    private val passbirdLauncher = PassbirdLauncher(configuration, userInterfaceAdapterPort, systemOperation)
+    private val passbirdLauncher = PassbirdLauncher(configuration, runContext, userInterfaceAdapterPort, systemOperation)
     private val moduleSlot = slot<Module>()
 
     @BeforeEach

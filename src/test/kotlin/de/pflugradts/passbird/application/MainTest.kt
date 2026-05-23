@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.application
 
+import com.google.inject.Guice
+import com.google.inject.Module
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.application.boot.bootModule
 import de.pflugradts.passbird.application.boot.launcher.LauncherModule
@@ -17,6 +19,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot.S8
 import de.pflugradts.passbird.domain.model.slot.Slot.S9
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -31,10 +34,11 @@ import java.util.stream.Stream
 class MainTest {
 
     val systemOperation = mockk<SystemOperation>()
+    private val moduleSlot = slot<Module>()
 
     @BeforeEach
     fun setup() {
-        mockMain(systemOperationMock = systemOperation, withMockedFileCheck = false)
+        mockMain(moduleSlot = moduleSlot, systemOperationMock = systemOperation, withMockedFileCheck = false)
     }
 
     @AfterEach
@@ -54,7 +58,7 @@ class MainTest {
 
         // then
         verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
-        expectThat(Global.homeDirectory) isEqualTo givenHome.toDirectory()
+        expectThat(capturedRunContext().homeDirectory) isEqualTo givenHome.toDirectory()
     }
 
     @Test
@@ -120,8 +124,10 @@ class MainTest {
 
         // then
         verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
-        expectThat(Global.initialSlot) isEqualTo expectedInitialSlot
+        expectThat(capturedRunContext().initialSlot) isEqualTo expectedInitialSlot
     }
+
+    private fun capturedRunContext() = Guice.createInjector(moduleSlot.captured).getInstance(RunContext::class.java)
 
     companion object {
         @JvmStatic

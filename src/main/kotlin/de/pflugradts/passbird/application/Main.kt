@@ -8,16 +8,7 @@ import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.IS_NO
 import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.IS_NULL
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
-
-interface RunContext {
-    val homeDirectory: Directory
-    val initialSlot: Slot
-}
-
-private lateinit var global: RunContext
-val Global get() = global
 
 fun mainGetSystemOperation() = SystemOperation()
 
@@ -34,11 +25,14 @@ fun mainHasValidHomeDirectory(dir: String?): Boolean {
 
 fun main(args: Array<String>) {
     if (mainHasValidHomeDirectory(args.getOrNull(0))) {
-        global = object : RunContext {
-            override val homeDirectory = args[0].toDirectory()
-            override val initialSlot = slotAt(args.getOrElse(1) { 0.toString() })
-        }
-        bootModule(LauncherModule())
+        bootModule(
+            LauncherModule(
+                PassbirdRunContext(
+                    homeDirectory = args[0].toDirectory(),
+                    initialSlot = slotAt(args.getOrElse(1) { 0.toString() }),
+                ),
+            ),
+        )
     } else {
         mainGetSystemOperation().exit()
     }

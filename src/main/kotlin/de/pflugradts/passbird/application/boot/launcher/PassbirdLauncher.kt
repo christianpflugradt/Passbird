@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.boot.launcher
 
 import com.google.inject.Inject
+import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.boot.bootModule
@@ -32,6 +33,7 @@ private const val SLOGAN = "\tguarding your digital nest with secure feathers"
 
 class PassbirdLauncher @Inject constructor(
     private val configuration: ReadableConfiguration,
+    private val runContext: RunContext,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val systemOperation: SystemOperation,
 ) : Bootable {
@@ -42,7 +44,7 @@ class PassbirdLauncher @Inject constructor(
     override fun boot() {
         sendLicenseNotice()
         sendBanner()
-        bootModule(if (keystoreExists()) ApplicationModule() else SetupModule())
+        bootModule(if (keystoreExists()) ApplicationModule(runContext) else SetupModule(runContext))
     }
 
     private fun keystoreExists() = keyStoreLocation.isNotEmpty() &&
