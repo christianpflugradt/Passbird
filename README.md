@@ -17,6 +17,7 @@
     + [Memory](#memory)
     + [Custom Passwords](#custom-passwords)
 * [Development](#development)
+    + [Dependency Verification](#dependency-verification)
     + [Commit Messages](#commit-messages)
 * [Frequently Asked Questions](#frequently-asked-questions)
 
@@ -242,7 +243,7 @@ You can access Passbird’s in-app help at any time by pressing h and then Enter
 
         e (export)            Exports the Password Tree to a human-readable JSON file.
         i (import)            Imports passwords from a JSON file into the Password Tree.
-        k                     Changes the master password of the keystore.
+        k (keystore)          Changes the master password of the keystore.
         l (list)              Lists all EggIds in the current Nest.
         l[filter]             Lists EggIds in the current Nest whose name contains filter.
         l*                    Lists all EggIds across all Nests, grouped by Nest.
@@ -277,7 +278,9 @@ Passbird immediately updates the password database (Password Tree file) after ev
 
 `l*miro` lists EggIds across all Nests whose name contains `miro`, grouped by Nest.
 
-`k` changes the master password of the keystore.
+`k` changes the master password of the keystore. It prompts once for the current key, then prompts twice for the new
+key. If the current key is incorrect, if either new-key input is empty, or if the repeated input does not match, the
+operation is aborted.
 
 `remail` prompts you to rename the Egg identified by email. The new EggId must be unique (not already in use).
 
@@ -376,6 +379,16 @@ To view all available configurations and their indices, input `s?`. Using the ex
         s[1-9][EggId] (set custom) Sets a random password for the specified EggId using a custom configuration.
 
 ## Development
+
+### Dependency Verification
+
+Passbird uses Gradle dependency verification to record checksums for unsigned artifacts and trusted public keys for signed third-party dependencies and build plugins. The verification state lives in `gradle/verification-metadata.xml` and the ASCII-armored keyring `gradle/verification-keyring.keys`. This complements, but does not replace, the GitHub Actions OWASP dependency-check workflows.
+
+When a dependency or Gradle plugin version changes, refresh the verification files with:
+
+`./gradlew --write-verification-metadata sha256,pgp --export-keys help`
+
+Review the diff before committing. If Gradle reports keys that could not be downloaded, retry with `./gradlew --refresh-keys help` before deciding whether new checksum fallback entries or ignored keys are acceptable to keep.
 
 ### Commit Messages
 

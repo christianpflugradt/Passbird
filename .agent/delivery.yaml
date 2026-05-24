@@ -19,6 +19,7 @@ quality_gates:
       branch: ">= 0.85"
   dependency_and_license:
     - pre-commit hook runs ./gradlew checkLicense
+    - Gradle dependency verification uses gradle/verification-metadata.xml and the armored gradle/verification-keyring.keys file
     - GitHub Actions OWASP dependency check workflows
   convenience_task:
     - ./gradlew preCommitCheck
@@ -45,6 +46,15 @@ local_verification_policy:
     local_runs: discouraged
     default: rely_on_ci
     note: only run locally when the maintainer explicitly asks for it
+  dependency_verification:
+    files:
+      - gradle/verification-metadata.xml
+      - gradle/verification-keyring.keys
+    maintenance:
+      - when third-party dependencies or Gradle plugins change, refresh with ./gradlew --write-verification-metadata sha256,pgp --export-keys help
+      - retry with ./gradlew --refresh-keys help if key downloads fail before accepting new ignored-key entries
+      - review checksum fallback and ignored-key additions before committing them
+      - keep the armored keyring in version control and do not commit the generated gradle/verification-keyring.gpg file
 ci_landscape:
   github:
     workflows:

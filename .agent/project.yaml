@@ -33,6 +33,7 @@ technical_profile:
     - fat_jar_packaging
     - ktlint
     - jacoco
+    - Gradle dependency verification
     - OWASP dependency check
     - dependency license allowlist
 runtime_files:

@@ -7,6 +7,7 @@ security_posture:
     - local file persistence
     - secure defaults preferred over convenience defaults
     - integrity verification built into password tree restore
+    - Gradle dependency verification protects third-party runtime and build artifacts with checksums and trusted signing keys where available
   explicit_limits:
     - README says the project has not been reviewed by security experts
     - agent docs must not overstate security guarantees beyond code and README
@@ -63,6 +64,14 @@ current_security_relevant_implementation:
       - only publishes mutating password-operation success events after password tree sync succeeds
       - can exit immediately when verification is configured as critical
       - stores eggs, nests, and optionally persisted memory in a custom binary layout before encryption
+  build_supply_chain:
+    files:
+      - gradle/verification-metadata.xml
+      - gradle/verification-keyring.keys
+    facts:
+      - verifies third-party runtime dependencies and Gradle plugins with checksums and trusted signing keys where available
+      - falls back to recorded checksums when upstream artifacts are unsigned or public keys cannot be retrieved
+      - uses the ASCII-armored project keyring so trust updates remain reviewable in version control
 hard_guardrails:
   - do not add network, browser, or cloud integration without explicit maintainer approval
   - do not log, print, snapshot, or persist decrypted secrets for debugging
@@ -99,6 +108,7 @@ validation_matrix:
     required:
       - run only the focused tests relevant to the dependency or build change
     recommended:
+      - refresh and review dependency verification metadata when third-party dependencies or Gradle plugins change
       - rely on the pre-commit hook for license, coverage, and full-test enforcement
       - rely on GitHub Actions OWASP dependency-check workflows instead of local runs unless the maintainer explicitly asks otherwise
   ui_or_command_change_touching_secrets:
