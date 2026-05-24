@@ -29,6 +29,8 @@
          <ignored-key id="F6D4A1D411E9D1AE" reason="Key couldn't be downloaded from any key server"/>
       </ignored-keys>
       <trusted-keys>
+         <trusted-key id="03C123038C20AAE9E286C857479D601F3A7B5C1A" group="com.github.ajalt.clikt"/>
+         <trusted-key id="066263ABA3F9AA7BC0A1087D40B4D7ECFEAF091D" group="org.eclipse.parsson"/>
          <trusted-key id="0785B3EFF60B1B1BEA94E0BB7C25280EAE63EBE5" group="^org[.]apache[.]httpcomponents($|([.].*))" regex="true"/>
          <trusted-key id="07E20F0103D9DFC697C490D0368557390486F2C5" group="org.awaitility"/>
          <trusted-key id="09939C73246B4BA7444CAA453D002DBC5EA9615F" group="dev.drewhamilton.poko"/>
@@ -39,13 +41,20 @@
             <trusting group="org.owasp"/>
          </trusted-key>
          <trusted-key id="28118C070CB22A0175A2E8D43D12CA2AC19F3181" group="^com[.]fasterxml($|([.].*))" regex="true"/>
+         <trusted-key id="2BCBDD0F23EA1CAFCC11D4860374CF2E8DD1BDFD" group="^org[.]sonatype($|([.].*))" regex="true"/>
+         <trusted-key id="2D2F3E7BAB60EDC51AEB4531419A28E3A649A40B" group="com.kichik.pecoff4j" name="pecoff4j" version="0.4.1"/>
          <trusted-key id="2DB4F1EF0FA761ECC4EA935C86FDC7E2A11262CB">
             <trusting group="commons-codec"/>
             <trusting group="commons-validator"/>
             <trusting group="org.apache.commons"/>
          </trusted-key>
+         <trusted-key id="2E3A1AFFE42B5F53AF19F780BCF4173966770193" group="org.jetbrains" name="annotations" version="13.0"/>
+         <trusted-key id="2E92113263FC31C74CCBAAB20E91C2DE43B72BB1" group="org.ec4j.core"/>
          <trusted-key id="2FC53E6B1F681184F4CCD637F5C81DE10A0B8ECC" group="org.yaml" name="snakeyaml" version="2.5"/>
+         <trusted-key id="33FD4BFD33554634053D73C0C2148900BCD3C2AF" group="org.jetbrains" name="annotations" version="23.0.0"/>
          <trusted-key id="3690C240CE51B4670D30AD1C38EE757D69184620" group="org.tukaani" name="xz" version="1.9"/>
+         <trusted-key id="3F05DDA9F317301E927136D417A27CE7A60FF5F0" group="io.opentelemetry" name="opentelemetry-bom" version="1.49.0"/>
+         <trusted-key id="4021EEEAFF5DE8404DCD0A270AA3E5C3D232E79B" group="jakarta.inject" name="jakarta.inject-api" version="2.0.1"/>
          <trusted-key id="41CD49B4EF5876F9E9F691DABAC30622339994C4" group="org.jspecify" name="jspecify" version="1.0.0"/>
          <trusted-key id="45B1912987CB9DFA6A0D9693067091F1549B293F" group="org.semver4j" name="semver4j" version="5.8.0"/>
          <trusted-key id="47EB6836245D2D40E89DFB4136D4E9618F3ADAB5" group="io.github.oshai"/>
@@ -55,7 +64,12 @@
             <trusting group="javax.activation"/>
             <trusting group="javax.ws.rs"/>
          </trusted-key>
+         <trusted-key id="51343444EB1F7563B0C34F6AA141A874C360D694" group="io.strikt"/>
          <trusted-key id="56CEE778E1531BD70ECB0F47BEC27E87C49F2E2B" group="^com[.]google[.]inject($|([.].*))" regex="true"/>
+         <trusted-key id="5D283C23D9D9DC2D9C2130E6AADF2C18DCF95764">
+            <trusting group="com.github.package-url"/>
+            <trusting group="us.springett"/>
+         </trusted-key>
          <trusted-key id="60200AC4AE761F1614D6C46766D68DAA073BE985">
             <trusting group="ch.qos.logback"/>
             <trusting group="org.slf4j"/>
@@ -68,10 +82,12 @@
          <trusted-key id="767ABE5902DC1603C4B2468A3B42B015E1C86D65" group="org.anarres.jdiagnostics" name="jdiagnostics" version="1.0.7"/>
          <trusted-key id="839B8C32286C100BDB08F5522EB9468288817402" group="org.apache.commons"/>
          <trusted-key id="84789D24DF77A32433CE1F079EB80E92EB2135B1" group="org.apache" name="apache"/>
+         <trusted-key id="8569C95CADC508B09FE90F3002216ED811210DAA" group="io.github.detekt.sarif4k"/>
          <trusted-key id="A22931805BEA371C4B607CD9CCC16740C5666D5A" group="com.github.spullara.mustache.java"/>
          <trusted-key id="A28F589583F054D3114DF28FE561F0025AC4B54C" group="com.hankcs" name="aho-corasick-double-array-trie" version="1.2.3"/>
          <trusted-key id="A413F67D71BEEC23ADD0CE0ACB43338E060CF9FA" group="org.jacoco"/>
          <trusted-key id="A7892505CF1A58076453E52D7999BEFBA1039E8B" group="net.bytebuddy"/>
+         <trusted-key id="AA70C7C433D501636392EC02153E7A3C2B4E5118" group="org.eclipse.ee4j" name="project"/>
          <trusted-key id="ADBC987D1A7B91DB6B0AAA81995EFBF4A3D20BEB" group="com.pinterest.ktlint"/>
          <trusted-key id="AF7512AF66FE4004D84DEC8A04C8C902FEFB1A01" group="io.mockk"/>
          <trusted-key id="B41089A2DA79B0FA5810252872385FF0AF338D52" group="joda-time" name="joda-time" version="2.14.2"/>
@@ -82,6 +98,7 @@
          <trusted-key id="CF6FCDD747FD9C32304B180B58BD11D32974088F" group="com.h2database" name="h2" version="2.4.240"/>
          <trusted-key id="CFC10B69382CBCF5387E51484ECE492B63E38ACF" group="com.h3xstream.retirejs"/>
          <trusted-key id="D477D51812E692011DB11E66A6EA2E2BF22E0543" group="io.github.java-diff-utils"/>
+         <trusted-key id="E3A9F95079E84CE201F7CF60BEDE11EAF1164480" group="org.hamcrest" name="hamcrest" version="2.1"/>
          <trusted-key id="E4EDD17FF6346F018F6FC7F34871433C7653D10C" group="net.gpedro.integrations.slack" name="slack-webhook" version="1.4.0"/>
          <trusted-key id="E7DC75FC24FB3C8DFE8086AD3D5839A2262CBBFB" group="org.jetbrains.kotlinx"/>
          <trusted-key id="E85AED155021AF8A6C6B7A4A7C7D8456294423BA" group="org.objenesis"/>
@@ -242,7 +259,7 @@
       </component>
       <component group="com.google.guava" name="guava-parent" version="33.6.0-jre">
          <artifact name="guava-parent-33.6.0-jre.pom">
-            <sha256 value="374bd31f61b1cf612bee9ab2e4d70bbdf77dd85a49b431f809d4fbdc901f2dd4" origin="Generated by Gradle"/>
+            <sha256 value="374bd31f61b1cf612bee9ab2e4d70bbdf77dd85a49b431f809d4fbdc901f2dd4" origin="Generated by Gradle" reason="A key couldn't be downloaded"/>
          </artifact>
       </component>
       <component group="com.google.guava" name="listenablefuture" version="9999.0-empty-to-avoid-conflict-with-guava">
@@ -385,6 +402,7 @@
       </component>
       <component group="net.java" name="jvnet-parent" version="1">
          <artifact name="jvnet-parent-1.pom">
+            <pgp value="2BCBDD0F23EA1CAFCC11D4860374CF2E8DD1BDFD"/>
             <sha256 value="281440811268e65d9e266b3cc898297e214e04f09740d0386ceeb4a8923d63bf" origin="Generated by Gradle" reason="A key couldn't be downloaded"/>
          </artifact>
       </component>
@@ -600,6 +618,9 @@
          </artifact>
       </component>
       <component group="org.junit" name="junit-bom" version="5.13.3">
+         <artifact name="junit-bom-5.13.3.module">
+            <sha256 value="5dc84d74ef981d023c639eb0cbc4b1f9ef891034287ce1b101effbbc0f1534b4" origin="Generated by Gradle" reason="A key couldn't be downloaded"/>
+         </artifact>
          <artifact name="junit-bom-5.13.3.pom">
             <sha256 value="e3b93e9bb8871969cf11c0e8ff10f507841db1885ca10578e290846f660fd68e" origin="Generated by Gradle" reason="A key couldn't be downloaded"/>
          </artifact>
@@ -621,11 +642,17 @@
          </artifact>
       </component>
       <component group="org.junit" name="junit-bom" version="5.14.2">
+         <artifact name="junit-bom-5.14.2.module">
+            <sha256 value="5d26f4440392326dd2483cf490143eea1495d5095459a0b9651a7b1b38e24ebf" origin="Generated by Gradle" reason="A key couldn't be downloaded"/>
+         </artifact>
          <artifact name="junit-bom-5.14.2.pom">
             <sha256 value="ed2dcc7855bd460bccc93a1bf0c962e63b566ff7d8f1ded0f1f2593ba8183aaf" origin="Generated by Gradle" reason="A key couldn't be downloaded"/>
          </artifact>
       </component>
       <component group="org.junit" name="junit-bom" version="5.14.3">
+         <artifact name="junit-bom-5.14.3.module">
+            <sha256 value="f25c40bfa52c8b7b425d576a88f310f6432616d62ba5893203fa27dfbc9f025e" origin="Generated by Gradle" reason="A key couldn't be downloaded"/>
+         </artifact>
          <artifact name="junit-bom-5.14.3.pom">
             <sha256 value="08a02856e487c9357f9b29e38745f8ae805848111e72d15aad0352338f1632e1" origin="Generated by Gradle" reason="A key couldn't be downloaded"/>
          </artifact>
@@ -641,6 +668,9 @@
       <component group="org.junit" name="junit-bom" version="6.1.0">
          <artifact name="junit-bom-6.1.0.module">
             <sha256 value="48207f95cdec3bfb5ce6ccbf18d52ace51e815f211069dc16e0283b255a64d9a" origin="Generated by Gradle" reason="A key couldn't be downloaded"/>
+         </artifact>
+         <artifact name="junit-bom-6.1.0.pom">
+            <sha256 value="f7b665e5d573b01af6d434d3d2450aa5b741b683f3f10172f1eb44a3d0d0ac0c" origin="Generated by Gradle" reason="A key couldn't be downloaded"/>
          </artifact>
       </component>
       <component group="org.junit.jupiter" name="junit-jupiter" version="6.1.0">
@@ -778,7 +808,8 @@
       </component>
       <component group="org.sonatype.oss" name="oss-parent" version="9">
          <artifact name="oss-parent-9.pom">
-            <sha256 value="fb40265f982548212ff82e362e59732b2187ec6f0d80182885c14ef1f982827a" origin="Generated by Gradle"/>
+            <pgp value="44FBDBBC1A00FE414F1C1873586654072EAD6677"/>
+            <sha256 value="fb40265f982548212ff82e362e59732b2187ec6f0d80182885c14ef1f982827a" origin="Generated by Gradle" reason="A key couldn't be downloaded"/>
          </artifact>
       </component>
       <component group="org.sonatype.ossindex" name="ossindex-service" version="1.8.2">
