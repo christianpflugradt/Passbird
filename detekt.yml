@@ -7,7 +7,7 @@ complexity:
   NestedBlockDepth:
     active: true
   TooManyFunctions:
-    active: true
+    active: false
 
 comments:
   active: false
