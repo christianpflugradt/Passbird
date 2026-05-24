@@ -380,6 +380,14 @@ To view all available configurations and their indices, input `s?`. Using the ex
 
 ## Development
 
+### Verification Tasks
+
+- `./gradlew test` runs the default unit-oriented suite and excludes tagged `integration`, `architecture`, and `property` tests.
+- `./gradlew property` runs jqwik-based property tests for persistence, exchange, backup, and crypto invariants.
+- `./gradlew integration` runs tagged integration tests.
+- `./gradlew architecture` runs the ArchUnit-based architecture suite.
+- `./gradlew allTests` runs every tagged and untagged test suite.
+
 ### Dependency Verification
 
 Passbird uses Gradle dependency verification to record checksums for unsigned artifacts and trusted public keys for signed third-party dependencies and build plugins. The verification state lives in `gradle/verification-metadata.xml` and the ASCII-armored keyring `gradle/verification-keyring.keys`. This complements, but does not replace, the GitHub Actions OWASP dependency-check workflows.

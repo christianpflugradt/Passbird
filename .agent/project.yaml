@@ -25,6 +25,7 @@ technical_profile:
   shell_bootstrap: source ~/.zprofile && source ~/.zshrc
   test_stack:
     - JUnit 5
+    - jqwik
     - MockK
     - Strikt
     - Awaitility
@@ -58,7 +59,7 @@ repository_layout:
   - path: src/main/kotlin/de/pflugradts/passbird/adapter
     role: implementations for clipboard, exchange, keystore, password tree, and terminal UI
   - path: src/test/kotlin
-    role: unit, integration, and architecture tests
+    role: unit, property, integration, and architecture tests
   - path: smoke-test
     role: manual jar-level smoke verification assets for interactive terminal workflows
   - path: .github/workflows
@@ -83,6 +84,7 @@ observed_change_patterns:
 commands:
   compile: ./gradlew compileKotlin compileTestKotlin compileJava compileTestJava
   unit_tests: ./gradlew test
+  property_tests: ./gradlew property
   integration_tests: ./gradlew integration
   architecture_tests: ./gradlew architecture
   full_tests: ./gradlew allTests

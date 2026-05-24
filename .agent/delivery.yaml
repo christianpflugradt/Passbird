@@ -10,6 +10,7 @@ quality_gates:
     - Gradle deprecations are monitored through build output and CI logs, but they do not fail the build by default because third-party plugins may emit warnings outside repository control
   test_suites:
     - ./gradlew test
+    - ./gradlew property
     - ./gradlew integration
     - ./gradlew architecture
     - ./gradlew allTests
@@ -66,7 +67,7 @@ ci_landscape:
       - .github/workflows/owasp-purge.yml
       - .github/workflows/publish.yml
     notes:
-      - architecture tests and coverage jobs run for pull requests targeting main and for main itself, while GitHub Pages publication stays main-only
+      - architecture tests, property tests, and coverage jobs run as dedicated workflow jobs, while GitHub Pages publication stays main-only
       - the build workflow runs dependency-check analysis on push and restores its local database from the default-branch GitHub Actions cache when available
       - the build workflow runs detekt as a dedicated static-analysis job and uploads its reports as artifacts
       - a daily OWASP workflow refreshes the dependency-check cache from the Gradle plugin update task
@@ -158,7 +159,7 @@ recommended_validation_by_change_type:
       - ./gradlew architecture
   config_or_user_workflow:
     run:
-      - run only the focused unit and integration tests that cover the changed workflow
+      - run only the focused unit, property, and integration tests that cover the changed workflow
   ci_or_release_workflow:
     run:
       - ./gradlew jar

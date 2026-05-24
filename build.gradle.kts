@@ -45,6 +45,7 @@ val jacksonVersion = "2.21.3"
 val archunitVersion = "1.4.2"
 val awaitilityVersion = "4.3.0"
 val junitPlatformVersion = "6.1.0"
+val jqwikVersion = "1.9.3"
 val mockkVersion = "1.14.6"
 val striktVersion = "0.35.1"
 
@@ -65,6 +66,7 @@ dependencies {
     testImplementation("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testImplementation("net.jqwik:jqwik:$jqwikVersion")
 
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("com.tngtech.archunit:archunit:$archunitVersion")
@@ -115,7 +117,11 @@ ktlint {
 }
 
 tasks.test {
-    useJUnitPlatform { excludeTags("architecture", "integration", "non-headless") }
+    useJUnitPlatform { excludeTags("architecture", "integration", "non-headless", "property") }
+}
+
+tasks.register<Test>("property") {
+    useJUnitPlatform { includeTags("property") }
 }
 
 tasks.register<Test>("integration") {

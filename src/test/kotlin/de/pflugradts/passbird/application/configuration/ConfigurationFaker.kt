@@ -27,6 +27,8 @@ fun fakeConfiguration(
     withInactivityTimeLimit: Int = 0,
     withVerifyChecksum: Boolean = true,
     withVerifySignature: Boolean = true,
+    withEggIdMemoryEnabled: Boolean = false,
+    withEggIdMemoryPersisted: Boolean = false,
 ) {
     val clipboardReset = mockk<ClipboardReset>()
     every { clipboardReset.enabled } returns withClipboardResetEnabled
@@ -70,8 +72,8 @@ fun fakeConfiguration(
     every { protein.secureProteinStructureInput } returns withSecureProteinInputEnabled
     every { protein.promptForProteinStructureInputToggle } returns withPromptForProteinStructureInputToggle
     val eggIdMemory = mockk<Configuration.EggIdMemory>()
-    every { eggIdMemory.enabled } returns false
-    every { eggIdMemory.persisted } returns false
+    every { eggIdMemory.enabled } returns withEggIdMemoryEnabled
+    every { eggIdMemory.persisted } returns withEggIdMemoryPersisted
     val domain = mockk<Configuration.Domain>()
     every { domain.protein } returns protein
     every { domain.eggIdMemory } returns eggIdMemory

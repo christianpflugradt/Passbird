@@ -80,7 +80,7 @@ class BackupManager @Inject constructor(
 
     private fun backup(directory: Directory, fileName: String, backupDirectory: Directory) {
         val format = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
-        val backupName = "${fileName.stem()}_${LocalDateTime.now().format(format)}.${fileName.extension()}"
+        val backupName = "${fileName.stem()}_${LocalDateTime.now(systemOperation.clock).format(format)}.${fileName.extension()}"
         systemOperation.copyTo(
             systemOperation.resolvePath(directory, fileName.toFileName()),
             systemOperation.resolvePath(backupDirectory, backupName.toFileName()),
