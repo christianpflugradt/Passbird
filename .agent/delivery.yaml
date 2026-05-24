@@ -4,6 +4,7 @@ quality_gates:
   formatting_and_style:
     - run ./gradlew ktlintFormat before staging, committing, or pushing to auto-resolve formatting issues when possible
     - pre-commit hook runs ./gradlew ktlintCheck
+    - pre-commit hook runs ./gradlew detekt
   warning_enforcement:
     - Kotlin compilation treats warnings as errors across main and test sources
     - Gradle deprecations are monitored through build output and CI logs, but they do not fail the build by default because third-party plugins may emit warnings outside repository control
@@ -33,6 +34,7 @@ local_verification_policy:
       - ./gradlew --no-build-cache clean jar
       - ./smoke-test/run.sh
       - ./gradlew ktlintCheck
+      - ./gradlew detekt
       - ./gradlew checkLicense
       - ./gradlew jacocoTestCoverageVerification
       - ./gradlew allTests
@@ -66,6 +68,7 @@ ci_landscape:
     notes:
       - architecture tests and coverage jobs run for pull requests targeting main and for main itself, while GitHub Pages publication stays main-only
       - the build workflow runs dependency-check analysis on push and restores its local database from the default-branch GitHub Actions cache when available
+      - the build workflow runs detekt as a dedicated static-analysis job and uploads its reports as artifacts
       - a daily OWASP workflow refreshes the dependency-check cache from the Gradle plugin update task
       - a weekly OWASP workflow purges and rebuilds the dependency-check cache during the Sunday-to-Monday overnight window
       - the CodeQL workflow runs the broader built-in security-extended query suite while staying on the nightly toolchain for Kotlin compatibility

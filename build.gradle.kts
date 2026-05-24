@@ -220,6 +220,7 @@ tasks.register("preCommitCheck") {
 
     dependsOn(
         "ktlintCheck",
+        "detekt",
         "checkLicense",
         "jacocoTestCoverageVerification",
         "allTests",
