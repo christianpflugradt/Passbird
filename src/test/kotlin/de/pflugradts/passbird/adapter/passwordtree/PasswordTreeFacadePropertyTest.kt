@@ -13,6 +13,7 @@ import de.pflugradts.passbird.property.normalizeMemory
 import de.pflugradts.passbird.property.normalizedEggs
 import de.pflugradts.passbird.property.normalizedExplicitNests
 import de.pflugradts.passbird.property.normalizedMemory
+import de.pflugradts.passbird.property.orThrow
 import de.pflugradts.passbird.property.passwordTreeFixtures
 import de.pflugradts.passbird.property.populateNests
 import de.pflugradts.passbird.property.toEggStreamSupplier
@@ -20,16 +21,18 @@ import io.mockk.mockk
 import net.jqwik.api.ForAll
 import net.jqwik.api.Property
 import net.jqwik.api.Provide
+import net.jqwik.api.Report
+import net.jqwik.api.Reporting
 import net.jqwik.api.Tag
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import strikt.assertions.isFalse
 import java.nio.file.Files
 
 @Tag(PROPERTY)
 class PasswordTreeFacadePropertyTest {
 
     @Property(tries = 20)
+    @Report(Reporting.FALSIFIED)
     fun preservesPasswordTreeStateAcrossSyncAndRestore(@ForAll("fixtures") fixture: PasswordTreeFixture) {
         val passwordTreeDirectory = Files.createTempDirectory("passbird-tree-property")
 
@@ -61,10 +64,9 @@ class PasswordTreeFacadePropertyTest {
             )
 
             fixture.populateNests(writerNestService)
-            val syncResult = passwordTreeFacade.sync(fixture.toEggStreamSupplier(cryptoProvider))
+            passwordTreeFacade.sync(fixture.toEggStreamSupplier(cryptoProvider)).orThrow("password tree sync")
             val restoreResult = passwordTreeFacade.restore()
 
-            expectThat(syncResult.failure).isFalse()
             expectThat(normalizeEggs(restoreResult.get().toList(), cryptoProvider)) isEqualTo fixture.normalizedEggs()
             expectThat(normalizeExplicitNests(readerNestService)) isEqualTo fixture.normalizedExplicitNests()
             expectThat(normalizeMemory(restoreResult.memory(), cryptoProvider)) isEqualTo fixture.normalizedMemory()

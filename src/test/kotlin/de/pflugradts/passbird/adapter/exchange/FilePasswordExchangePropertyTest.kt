@@ -8,20 +8,23 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.property.ExchangeFixture
 import de.pflugradts.passbird.property.exchangeFixtures
 import de.pflugradts.passbird.property.normalizePasswordInfoMap
+import de.pflugradts.passbird.property.orThrow
 import de.pflugradts.passbird.property.toPasswordInfoMap
 import net.jqwik.api.ForAll
 import net.jqwik.api.Property
 import net.jqwik.api.Provide
+import net.jqwik.api.Report
+import net.jqwik.api.Reporting
 import net.jqwik.api.Tag
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import strikt.assertions.isFalse
 import java.nio.file.Files
 
 @Tag(PROPERTY)
 class FilePasswordExchangePropertyTest {
 
     @Property(tries = 25)
+    @Report(Reporting.FALSIFIED)
     fun preservesExchangeDataAcrossExportAndImport(@ForAll("fixtures") fixture: ExchangeFixture) {
         val homeDirectory = Files.createTempDirectory("passbird-exchange-property")
 
@@ -31,12 +34,10 @@ class FilePasswordExchangePropertyTest {
                 PassbirdRunContext(homeDirectory.toString().toDirectory(), Slot.DEFAULT),
             )
 
-            val sendResult = filePasswordExchange.send(fixture.toPasswordInfoMap())
-            val receiveResult = filePasswordExchange.receive()
+            filePasswordExchange.send(fixture.toPasswordInfoMap()).orThrow("password export")
+            val received = filePasswordExchange.receive().orThrow("password import")
 
-            expectThat(sendResult.failure).isFalse()
-            expectThat(receiveResult.failure).isFalse()
-            expectThat(normalizePasswordInfoMap(receiveResult.getOrNull()!!)) isEqualTo fixture
+            expectThat(normalizePasswordInfoMap(received)) isEqualTo fixture
         } finally {
             homeDirectory.toFile().deleteRecursively()
         }

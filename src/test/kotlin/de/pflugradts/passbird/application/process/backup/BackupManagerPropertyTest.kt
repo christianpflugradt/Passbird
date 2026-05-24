@@ -19,6 +19,8 @@ import net.jqwik.api.Arbitraries
 import net.jqwik.api.ForAll
 import net.jqwik.api.Property
 import net.jqwik.api.Provide
+import net.jqwik.api.Report
+import net.jqwik.api.Reporting
 import net.jqwik.api.Tag
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -31,6 +33,7 @@ import java.time.ZoneOffset
 class BackupManagerPropertyTest {
 
     @Property(tries = 20)
+    @Report(Reporting.FALSIFIED)
     fun keepsOnlyTheLatestDistinctPasswordTreeBackupsWithinTheRetentionLimit(
         @ForAll("backupContents") backupContents: List<String>,
         @ForAll("backupLimits") backupLimit: Int,
