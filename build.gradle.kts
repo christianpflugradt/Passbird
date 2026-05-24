@@ -1,5 +1,7 @@
 
-import groovy.lang.Closure
+import org.gradle.api.tasks.testing.TestDescriptor
+import org.gradle.api.tasks.testing.TestListener
+import org.gradle.api.tasks.testing.TestResult
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
@@ -85,7 +87,8 @@ tasks.withType<Jar> {
 
 tasks.withType<KotlinJvmCompile>().configureEach {
     compilerOptions {
-        freeCompilerArgs = listOf("-Xjsr305=strict")
+        allWarningsAsErrors.set(true)
+        freeCompilerArgs.add("-Xjsr305=strict")
         jvmTarget.set(JvmTarget.JVM_17)
     }
 }
@@ -125,9 +128,17 @@ tasks.withType<Test>().configureEach {
     testLogging { events(FAILED, PASSED, SKIPPED) }
     group = VERIFICATION_GROUP
     var testCount = 0
-    afterTest(
-        object : Closure<Unit>(this) {
-            fun doCall() = testCount++
+    addTestListener(
+        object : TestListener {
+            override fun beforeSuite(suite: TestDescriptor) = Unit
+
+            override fun afterSuite(suite: TestDescriptor, result: TestResult) = Unit
+
+            override fun beforeTest(testDescriptor: TestDescriptor) = Unit
+
+            override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) {
+                testCount++
+            }
         },
     )
     doLast { println("\nTotal Tests: $testCount") }
@@ -179,9 +190,11 @@ dependencyCheck {
             username = envOrNull("OSS_INDEX_USERNAME")
             password = envOrNull("OSS_INDEX_PASSWORD")
         }
+        nexus {
+            enabled.set(false)
+        }
         centralEnabled = true // Maven Central
         assemblyEnabled = false // .NET
-        nexusEnabled = false // Sonatype Nexus Repository
         retirejs.enabled = false // JavaScript
     }
     data {

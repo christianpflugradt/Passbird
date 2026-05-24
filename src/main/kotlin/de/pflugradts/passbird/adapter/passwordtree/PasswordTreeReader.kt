@@ -45,7 +45,7 @@ class PasswordTreeReader @Inject constructor(
 ) {
     fun restore(): EggStreamSupplier {
         val eggs = ArrayDeque<Egg>()
-        val shell = readFromDisk() ?: emptyShell()
+        val shell = readFromDisk()
         val byteArray = shell.toByteArray()
         if (byteArray.isNotEmpty()) {
             verifySignature(byteArray)
