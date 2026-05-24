@@ -35,6 +35,11 @@ fun fakePasswordService(
             withEggs.map { it.viewEggId().fakeDec() }.stream()
         }
     }
+    every { instance.findAllEggIds(any<Slot>()) } answers {
+        withEggs
+            .filter { it.associatedNest() == firstArg() }
+            .map { it.viewEggId().fakeDec() }.stream()
+    }
     every { instance.viewPassword(any()) } answers {
         optionOf(withEggs.find { it.viewEggId().fakeDec() == firstArg() }?.viewPassword()?.fakeDec())
     }

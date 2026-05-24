@@ -33,4 +33,5 @@ interface PasswordService {
     fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit>
     fun moveEgg(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit>
     fun findAllEggIds(): Stream<Shell>
+    fun findAllEggIds(slot: Slot): Stream<Shell>
 }

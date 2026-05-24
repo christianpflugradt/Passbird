@@ -4,6 +4,7 @@ import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captur
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.factory.CommandFactory
+import de.pflugradts.passbird.application.commandhandling.factory.ListCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.MemoryCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.NestCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.ProteinCommandFactory
@@ -79,7 +80,6 @@ class InvalidCommandTest {
                 "email",
                 "iimport",
                 "kkey",
-                "llist",
                 "hhelp",
                 "qquit",
             ],
@@ -105,6 +105,7 @@ class InvalidCommandTest {
     @Nested
     inner class CommandFactoryTest {
         private val commandFactory = CommandFactory(
+            listCommandFactory = ListCommandFactory(),
             memoryCommandFactory = MemoryCommandFactory(),
             nestCommandFactory = NestCommandFactory(),
             proteinCommandFactory = ProteinCommandFactory(),
@@ -212,7 +213,6 @@ class InvalidCommandTest {
                 "email",
                 "iimport",
                 "kkey",
-                "llist",
                 "hhelp",
                 "qquit",
             ],
@@ -230,6 +230,47 @@ class InvalidCommandTest {
             // then
             expectThat(actual).isA<NullCommand>()
             expectThat(captureSystemErr.capture) contains "Command execution failed:"
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "l***a",
+                "l???a",
+            ],
+        )
+        fun `should handle list command with too large command`(givenInput: String) {
+            // given
+            val input = inputOf(shellOf(givenInput))
+
+            // when
+            val captureSystemErr = captureSystemErr()
+            val actual = captureSystemErr.during {
+                commandFactory.construct(CommandType.resolveCommandTypeFrom(input.command), input)
+            }
+
+            // then
+            expectThat(actual).isA<NullCommand>()
+            expectThat(captureSystemErr.capture) contains "Command execution failed:"
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "l?",
+                "l+",
+                "l-",
+            ],
+        )
+        fun `should handle unknown list command`(givenInput: String) {
+            // given
+            val input = inputOf(shellOf(givenInput))
+
+            // when
+            val actual = commandFactory.construct(CommandType.resolveCommandTypeFrom(input.command), input)
+
+            // then
+            expectThat(actual).isA<NullCommand>()
         }
     }
 }

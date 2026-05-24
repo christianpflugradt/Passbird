@@ -22,6 +22,7 @@ class ViewPasswordService @Inject constructor(
     private val eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun findAllEggIds(): Stream<Shell> = eggRepository.findAll().map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
+    fun findAllEggIds(slot: Slot): Stream<Shell> = eggRepository.findAll(slot).map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
     fun viewPassword(eggIdShell: Shell): Option<Shell> = extractFromEgg(eggIdShell) { decrypted(it.viewPassword()) }
     fun proteinExists(eggIdShell: Shell, slot: Slot) = viewProteinStructure(eggIdShell, slot).map { it.isNotEmpty }.orElse(false)
     fun viewProteinStructure(eggIdShell: Shell, slot: Slot): Option<Shell> = extractFromEgg(eggIdShell) { egg ->

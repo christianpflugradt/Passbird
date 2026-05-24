@@ -24,6 +24,7 @@ import jakarta.inject.Singleton
 
 @Singleton
 class CommandFactory @Inject constructor(
+    private val listCommandFactory: ListCommandFactory,
     private val memoryCommandFactory: MemoryCommandFactory,
     private val nestCommandFactory: NestCommandFactory,
     private val proteinCommandFactory: ProteinCommandFactory,
@@ -37,7 +38,7 @@ class CommandFactory @Inject constructor(
         CommandType.HELP -> constructSafely(input) { HelpCommand() }
         CommandType.IMPORT -> constructSafely(input) { ImportCommand() }
         CommandType.KEYSTORE -> constructSafely(input) { ChangeMasterPasswordCommand() }
-        CommandType.LIST -> constructSafely(input) { ListCommand() }
+        CommandType.LIST -> constructSafely(listCommandFactory, input)
         CommandType.MEMORY -> constructSafely(memoryCommandFactory, input)
         CommandType.NEST -> constructSafely(nestCommandFactory, input)
         CommandType.PROTEIN -> constructSafely(proteinCommandFactory, input)

@@ -6,7 +6,6 @@ class ExportCommand : NoArgumentCommand
 class HelpCommand : NoArgumentCommand
 class ImportCommand : NoArgumentCommand
 class ChangeMasterPasswordCommand : NoArgumentCommand
-class ListCommand : NoArgumentCommand
 class MemoryInfoCommand : NoArgumentCommand
 class ProteinInfoCommand : NoArgumentCommand
 class QuitCommand(val quitReason: QuitReason) : NoArgumentCommand

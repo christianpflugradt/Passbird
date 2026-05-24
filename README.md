@@ -243,7 +243,10 @@ You can access Passbird’s in-app help at any time by pressing h and then Enter
         e (export)            Exports the Password Tree to a human-readable JSON file.
         i (import)            Imports passwords from a JSON file into the Password Tree.
         k                     Changes the master password of the keystore.
-        l (list)              Lists all Eggs in the current Nest.
+        l (list)              Lists all EggIds in the current Nest.
+        l[filter]             Lists EggIds in the current Nest whose name contains filter.
+        l*                    Lists all EggIds across all Nests, grouped by Nest.
+        l*[filter]            Lists EggIds across all Nests whose name contains filter, grouped by Nest.
         h (help)              Displays this help menu.
         q (quit)              Exits the Passbird application.
 
@@ -265,6 +268,14 @@ Passbird immediately updates the password database (Password Tree file) after ev
 `demail` deletes the Egg identified by email, including its associated password.
 
 `cemail` prompts you to input a custom password for the Egg identified by email. The input is hidden by default. Use this command if the system you’re storing the password for does not support Passbird’s standard password format. Be sure to verify your input immediately, as it is not confirmed.
+
+`l` lists all EggIds in the current Nest.
+
+`lmiro` lists EggIds in the current Nest whose name contains `miro`. Filtering is case-insensitive and preserves the original EggId casing in the output.
+
+`l*` lists all EggIds across all Nests, grouped by Nest.
+
+`l*miro` lists EggIds across all Nests whose name contains `miro`, grouped by Nest.
 
 `k` changes the master password of the keystore.
 

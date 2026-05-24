@@ -40,6 +40,7 @@ class HelpCommandTest {
         // then
         expectThat(captureSystemOut.capture) contains "Usage: [command][parameter]"
         expectThat(captureSystemOut.capture) contains "Changes the master password of the keystore."
+        expectThat(captureSystemOut.capture) contains "Lists all EggIds across all Nests, grouped by Nest."
     }
 
     @Test

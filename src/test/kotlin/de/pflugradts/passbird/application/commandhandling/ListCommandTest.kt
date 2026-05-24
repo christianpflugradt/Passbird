@@ -6,9 +6,11 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ListCommandHandler
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.fakePasswordService
+import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.mockk
 import io.mockk.slot
@@ -23,7 +25,8 @@ internal class ListCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val passwordService = mockk<PasswordService>()
-    private val listCommandHandler = ListCommandHandler(passwordService, userInterfaceAdapterPort)
+    private val nestService = createNestServiceForTesting()
+    private val listCommandHandler = ListCommandHandler(nestService, passwordService, userInterfaceAdapterPort)
     private val inputHandler = createInputHandlerFor(listCommandHandler)
 
     @Test
@@ -40,6 +43,7 @@ internal class ListCommandTest {
                 createEggForTesting(withEggIdShell = eggId2),
                 createEggForTesting(withEggIdShell = eggId3),
             ),
+            withNestService = nestService,
         )
         val outputSlot = slot<Output>()
 
@@ -52,7 +56,82 @@ internal class ListCommandTest {
     }
 
     @Test
-    fun `should handle list command with empty nest `() {
+    fun `should handle list command with case insensitive filter`() {
+        // given
+        val input = inputOf(shellOf("lmiro"))
+        fakePasswordService(
+            instance = passwordService,
+            withEggs = listOf(
+                createEggForTesting(withEggIdShell = shellOf("Miro")),
+                createEggForTesting(withEggIdShell = shellOf("Mail")),
+                createEggForTesting(withEggIdShell = shellOf("miroBoard")),
+                createEggForTesting(withEggIdShell = shellOf("miroWork"), withSlot = slotAt(2)),
+            ),
+            withNestService = nestService,
+        )
+        nestService.place(shellOf("Work"), slotAt(2))
+        val outputSlot = slot<Output>()
+
+        // when
+        inputHandler.handleInput(input)
+
+        // then
+        verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell.asString()) isEqualTo "Miro, miroBoard"
+    }
+
+    @Test
+    fun `should handle global list command grouped by nest`() {
+        // given
+        val input = inputOf(shellOf("l*"))
+        fakePasswordService(
+            instance = passwordService,
+            withEggs = listOf(
+                createEggForTesting(withEggIdShell = shellOf("EggId1")),
+                createEggForTesting(withEggIdShell = shellOf("EggId2")),
+                createEggForTesting(withEggIdShell = shellOf("EggId3"), withSlot = slotAt(2)),
+            ),
+            withNestService = nestService,
+        )
+        nestService.place(shellOf("Work"), slotAt(2))
+        val outputSlot = slot<Output>()
+
+        // when
+        inputHandler.handleInput(input)
+
+        // then
+        verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell.asString()) isEqualTo "0: Default\n\tEggId1, EggId2\n2: Work\n\tEggId3"
+    }
+
+    @Test
+    fun `should handle global list command with case insensitive filter grouped by nest`() {
+        // given
+        val input = inputOf(shellOf("l*miro"))
+        fakePasswordService(
+            instance = passwordService,
+            withEggs = listOf(
+                createEggForTesting(withEggIdShell = shellOf("Miro")),
+                createEggForTesting(withEggIdShell = shellOf("Mail")),
+                createEggForTesting(withEggIdShell = shellOf("miroWork"), withSlot = slotAt(2)),
+                createEggForTesting(withEggIdShell = shellOf("Calendar"), withSlot = slotAt(3)),
+            ),
+            withNestService = nestService,
+        )
+        nestService.place(shellOf("Work"), slotAt(2))
+        nestService.place(shellOf("Private"), slotAt(3))
+        val outputSlot = slot<Output>()
+
+        // when
+        inputHandler.handleInput(input)
+
+        // then
+        verify(exactly = 1) { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell.asString()) isEqualTo "0: Default\n\tMiro\n2: Work\n\tmiroWork"
+    }
+
+    @Test
+    fun `should handle list command with empty nest`() {
         // given
         val input = inputOf(shellOf("l"))
         fakePasswordService(instance = passwordService, withEggs = emptyList())
@@ -67,18 +146,18 @@ internal class ListCommandTest {
     }
 
     @Test
-    fun `should reject list command with trailing input`() {
+    fun `should reject list command with unsupported command variant`() {
         // given
         val captureSystemErr = captureSystemErr()
 
         // when
         captureSystemErr.during {
-            inputHandler.handleInput(inputOf(shellOf("llist")))
+            inputHandler.handleInput(inputOf(shellOf("l?")))
         }
 
         // then
         verify(exactly = 0) { passwordService.findAllEggIds() }
         verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
-        expectThat(captureSystemErr.capture) isEqualTo "Command execution failed: Parameter for command 'l' not supported: list\n"
+        expectThat(captureSystemErr.capture) isEqualTo ""
     }
 }

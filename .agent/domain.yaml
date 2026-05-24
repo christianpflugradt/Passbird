@@ -35,6 +35,12 @@ user_command_families:
   - family: keystore
     commands:
       - k
+  - family: list
+    commands:
+      - l
+      - l[filter]
+      - l*
+      - l*[filter]
   - family: nest
     commands:
       - n
@@ -73,6 +79,7 @@ important_domain_invariants:
   - protein operations emit create, update, and discard events
   - memory is per nest and may be disabled or non-persistent via configuration
   - user-facing Unicode support is intentionally not guaranteed; README warns against Unicode input
+  - list filtering is case-insensitive while preserving the original EggId casing in output
 persistence_mapping:
   - artifact: passbird.tree
     contains:

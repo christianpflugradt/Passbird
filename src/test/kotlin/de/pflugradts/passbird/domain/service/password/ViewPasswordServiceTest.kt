@@ -133,6 +133,29 @@ class ViewPasswordServiceTest {
         expectThat(actual.toList()).containsExactly(eggId1, eggId2, eggId3)
     }
 
+    @Test
+    fun `should find all eggIds for specified nest in alphabetical order`() {
+        // given
+        val eggId1 = shellOf("abc")
+        val eggId2 = shellOf("hij")
+        val eggId3 = shellOf("xyz")
+        val slot = Slot.S2
+        val egg1 = createEggForTesting(withEggIdShell = eggId1, withSlot = slot)
+        val egg2 = createEggForTesting(withEggIdShell = eggId2, withSlot = slot)
+        val egg3 = createEggForTesting(withEggIdShell = eggId3)
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(
+            instance = eggRepository,
+            withEggs = listOf(egg2, egg3, egg1),
+        )
+
+        // when
+        val actual = passwordService.findAllEggIds(slot)
+
+        // then
+        expectThat(actual.toList()).containsExactly(eggId1, eggId2)
+    }
+
     @Nested
     inner class ProteinTests {
         @Test
