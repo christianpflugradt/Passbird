@@ -1,0 +1,332 @@
+schema_version: 1
+name: passbird-jar-smoke-test
+artifact:
+  path: build/libs/passbird.jar
+  execution_mode: built_jar
+strategy:
+  restart_policy: mostly_one_mutating_command_per_process
+  grouped_sessions:
+    - informational command coverage is grouped into one session
+    - memory coverage is grouped because EggIdMemory is not persisted by default
+    - selected list and nest verification steps run multiple commands in sequence to prove the interactive loop handles consecutive commands
+  failure_policy: abort_on_first_failed_assertion
+homes:
+  source:
+    purpose: create, inspect, organize, and export data
+    config_patches:
+      - disable export file deletion prompt for deterministic restarts
+      - disable clipboard reset for deterministic clipboard assertions
+      - add one custom password configuration named pin4
+  imported:
+    purpose: import exported data into a clean installation and continue destructive verification there
+    config_patches:
+      - disable export file deletion prompt for deterministic restarts
+      - disable clipboard reset for deterministic clipboard assertions
+      - add one custom password configuration named pin4
+coverage:
+  included_commands:
+    - h
+    - s?
+    - s[EggId]
+    - s[1-9][EggId]
+    - c[EggId]
+    - g[EggId]
+    - v[EggId]
+    - r[EggId]
+    - d[EggId]
+    - e
+    - i
+    - l
+    - m
+    - m?
+    - m[0-9]
+    - m[0-9]Command
+    - n
+    - n0
+    - n[1-9]
+    - n+[1-9]
+    - n-[1-9]
+    - n[EggId]
+    - p?
+    - p[EggId]
+    - p*[EggId]
+    - p[0-9][EggId]
+    - p+[0-9][EggId]
+    - p-[0-9][EggId]
+    - q
+  intentionally_skipped:
+    - id: export-file-startup-prompt
+      reason: initializer behavior rather than a command, and disabling it keeps import and export assertions deterministic
+    - id: repeated-slot-variants
+      reason: representative slot coverage through slot 0 and slot 1 exercises the relevant parsing and persistence paths without duplicating effort
+expected_outcome:
+  - every session exits successfully
+  - every session log is free of stack traces, severe event bus logging, command parsing failures, and unexpected operation-aborted messages
+  - clipboard assertions remain stable because clipboard reset is disabled in the patched smoke configuration
+sessions:
+  - id: source-setup
+    home: source
+    inputs:
+      - c
+      - <source-home-absolute-path>
+      - <master-password>
+      - <master-password>
+    checks:
+      - passbird.yml exists
+      - passbird.sec exists
+      - smoke config patch applied
+  - id: source-info
+    home: source
+    inputs:
+      - <master-password>
+      - h
+      - s?
+      - m?
+      - p?
+      - n
+      - q
+    checks:
+      - help output is visible
+      - set configuration help is visible
+      - memory help is visible
+      - protein help is visible
+      - nest overview is visible
+  - id: source-create-default-egg
+    home: source
+    inputs:
+      - <master-password>
+      - semail
+      - q
+    checks:
+      - Egg email is created
+  - id: source-copy-default-password
+    home: source
+    inputs:
+      - <master-password>
+      - gemail
+      - q
+    checks:
+      - password copy success message is visible
+      - clipboard becomes the generated password
+  - id: source-view-default-password
+    home: source
+    inputs:
+      - <master-password>
+      - vemail
+      - q
+    checks:
+      - viewed password matches the copied password exactly
+  - id: source-memory
+    home: source
+    inputs:
+      - <master-password>
+      - vemail
+      - m
+      - m0
+      - m0v
+      - q
+    checks:
+      - memory shows email at slot 0
+      - memory copy places email on the clipboard
+      - memory use reproduces the same password value
+  - id: source-add-protein
+    home: source
+    inputs:
+      - <master-password>
+      - p+0email
+      - username
+      - alice@example.com
+      - q
+    checks:
+      - protein creation success message is visible
+  - id: source-verify-protein
+    home: source
+    inputs:
+      - <master-password>
+      - pemail
+      - p*email
+      - p0email
+      - q
+    checks:
+      - protein type table includes username
+      - protein structure table includes alice@example.com
+      - protein clipboard copy yields alice@example.com
+  - id: source-create-nest
+    home: source
+    inputs:
+      - <master-password>
+      - n+1
+      - Work
+      - q
+    checks:
+      - Work nest is created at slot 1
+  - id: source-move-egg-to-nest
+    home: source
+    inputs:
+      - <master-password>
+      - nemail
+      - 1
+      - q
+    checks:
+      - move command accepts the target nest input without error
+  - id: source-verify-nest-membership
+    home: source
+    inputs:
+      - <master-password>
+      - n1
+      - l
+      - q
+    checks:
+      - list output for nest 1 is exactly email
+  - id: source-rename-egg
+    home: source
+    inputs:
+      - <master-password>
+      - n1
+      - remail
+      - mail
+      - q
+    checks:
+      - rename success message reports the new EggId
+  - id: source-verify-rename
+    home: source
+    inputs:
+      - <master-password>
+      - n1
+      - l
+      - q
+    checks:
+      - list output for nest 1 is exactly mail
+  - id: source-create-custom-config-egg
+    home: source
+    inputs:
+      - <master-password>
+      - n1
+      - s1pin
+      - q
+    checks:
+      - Egg pin is created with custom configuration 1
+  - id: source-verify-custom-config-egg
+    home: source
+    inputs:
+      - <master-password>
+      - n1
+      - vpin
+      - q
+    checks:
+      - viewed custom-configuration password is exactly four digits
+  - id: source-export
+    home: source
+    inputs:
+      - <master-password>
+      - e
+      - q
+    checks:
+      - export success message reports two eggs
+      - passbird-export.json exists
+  - id: imported-setup
+    home: imported
+    inputs:
+      - c
+      - <import-home-absolute-path>
+      - <master-password>
+      - <master-password>
+    checks:
+      - passbird.yml exists
+      - passbird.sec exists
+      - smoke config patch applied
+  - id: imported-copy-export
+    home: imported
+    checks:
+      - passbird-export.json is copied from source to imported home
+  - id: imported-import
+    home: imported
+    inputs:
+      - <master-password>
+      - i
+      - q
+    checks:
+      - import success message reports two eggs
+  - id: imported-verify-mail-and-protein
+    home: imported
+    inputs:
+      - <master-password>
+      - n1
+      - l
+      - pmail
+      - p*mail
+      - q
+    checks:
+      - list output in nest 1 includes mail and pin
+      - imported protein type output includes username
+      - imported protein structure output includes alice@example.com
+  - id: imported-verify-pin
+    home: imported
+    inputs:
+      - <master-password>
+      - n1
+      - vpin
+      - q
+    checks:
+      - imported pin password matches the source pin password exactly
+  - id: imported-discard-protein
+    home: imported
+    inputs:
+      - <master-password>
+      - n1
+      - p-0mail
+      - c
+      - q
+    checks:
+      - protein discard success message is visible
+  - id: imported-discard-mail
+    home: imported
+    inputs:
+      - <master-password>
+      - n1
+      - dmail
+      - c
+      - q
+    checks:
+      - egg discard success message is visible
+  - id: imported-discard-work-nest
+    home: imported
+    inputs:
+      - <master-password>
+      - n1
+      - n-1
+      - 0
+      - q
+    checks:
+      - remaining egg is moved back to the default nest
+      - Work nest is discarded
+  - id: imported-verify-default-nest
+    home: imported
+    inputs:
+      - <master-password>
+      - n0
+      - l
+      - n
+      - q
+    checks:
+      - default nest switch command is accepted
+      - default nest list includes pin
+      - nest overview shows the current nest
+  - id: imported-custom-set-pin
+    home: imported
+    inputs:
+      - <master-password>
+      - cpin
+      - c
+      - smokeCustomPass42
+      - q
+    checks:
+      - custom set update success message is visible
+  - id: imported-verify-custom-set-persistence
+    home: imported
+    inputs:
+      - <master-password>
+      - vpin
+      - q
+    checks:
+      - viewed pin password matches smokeCustomPass42 exactly after restart

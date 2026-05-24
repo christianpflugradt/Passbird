@@ -19,14 +19,20 @@ quality_gates:
     - GitHub Actions OWASP dependency check workflows
   convenience_task:
     - ./gradlew preCommitCheck
+  hook_managed_checks:
+    - the generated .git/hooks/pre-commit script runs ./gradlew --no-build-cache clean jar before smoke-test/run.sh
+    - the generated .git/hooks/pre-commit script removes build/smoke-test-pre-commit before each smoke run for a clean interactive workspace
+    - the generated .git/hooks/pre-commit script then runs ./gradlew preCommitCheck
 local_verification_policy:
   pre_commit_hook:
     covers:
+      - ./gradlew --no-build-cache clean jar
+      - ./smoke-test/run.sh
       - ./gradlew ktlintCheck
       - ./gradlew checkLicense
       - ./gradlew jacocoTestCoverageVerification
       - ./gradlew allTests
-    note: do not rerun these manually unless the maintainer explicitly asks for it
+    note: do not rerun these manually unless the maintainer explicitly asks for it; preCommitCheck alone does not include the hook-only clean jar build and smoke pass
   focused_tests:
     default: run only tests that exercise the code you changed or the tests you added
     expand_scope_when:
@@ -146,6 +152,13 @@ recommended_validation_by_change_type:
       - run the focused persistence or workflow tests you changed or added
       - ./gradlew architecture
       - review CI OWASP coverage instead of running dependency-check locally
+  jar_or_terminal_smoke:
+    run:
+      - ./gradlew jar
+      - ./smoke-test/run.sh
+    notes:
+      - use when the maintainer explicitly asks to validate the built passbird.jar end to end through its interactive terminal flow
+      - treat smoke-test/run.sh as complementary manual verification rather than a replacement for focused Gradle tests
 release_and_history_notes:
   versioning: semantic versioning
   commit_patterns_observed:
