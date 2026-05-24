@@ -67,7 +67,8 @@ ci_landscape:
       - .github/workflows/owasp-purge.yml
       - .github/workflows/publish.yml
     notes:
-      - architecture tests, property tests, and coverage jobs run as dedicated workflow jobs, while GitHub Pages publication stays main-only
+      - ordinary branch pushes only prove the always-on compile, lint, static-analysis, license, OWASP, and non-conditional test jobs; they skip architecture-tests, test-coverage-verification, test-coverage-report, pages-site, and deploy-pages
+      - architecture tests and coverage jobs run only on pull requests and direct pushes to main, while GitHub Pages publication stays main-only
       - the build workflow runs dependency-check analysis on push and restores its local database from the default-branch GitHub Actions cache when available
       - the build workflow runs detekt as a dedicated static-analysis job and uploads its reports as artifacts
       - a daily OWASP workflow refreshes the dependency-check cache from the Gradle plugin update task
