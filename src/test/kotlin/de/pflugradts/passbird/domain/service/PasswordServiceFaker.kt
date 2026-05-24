@@ -23,9 +23,20 @@ fun fakePasswordService(
     withNestService: NestService? = null,
     withMemory: Map<Slot, String> = emptyMap(),
 ) {
+    fakeWriteOperations(instance)
+    fakeEggQueries(instance, withEggs, withNestService)
+    fakeProteinQueries(instance, withEggs)
+    fakeEggValidation(instance, withInvalidEggId)
+    fakeRemainingQueries(instance, withMemory)
+}
+
+private fun fakeWriteOperations(instance: PasswordService) {
     every { instance.putEgg(any(), any()) } returns success(Unit)
     every { instance.putEggs(any()) } returns success(Unit)
     every { instance.putProtein(any(), any(), any(), any()) } returns success(Unit)
+}
+
+private fun fakeEggQueries(instance: PasswordService, withEggs: List<Egg>, withNestService: NestService?) {
     every { instance.findAllEggIds() } answers {
         if (withNestService != null) {
             withEggs
@@ -49,6 +60,9 @@ fun fakePasswordService(
     every { instance.eggExists(any(), any<Slot>()) } answers {
         withEggs.find { it.viewEggId().fakeDec() == firstArg() && it.associatedNest() == secondArg() } != null
     }
+}
+
+private fun fakeProteinQueries(instance: PasswordService, withEggs: List<Egg>) {
     every { instance.proteinExists(any(), any<Slot>()) } answers {
         withEggs.find { it.viewEggId().fakeDec() == firstArg() && it.proteins[secondArg<Slot>().index()].isPresent } != null
     }
@@ -72,11 +86,17 @@ fun fakePasswordService(
             }?.proteins?.get(secondArg<Slot>().index())?.extractStructure(),
         )
     }
+}
+
+private fun fakeEggValidation(instance: PasswordService, withInvalidEggId: Boolean) {
     if (withInvalidEggId) {
         every { instance.challengeEggId(any()) } answers { throw InvalidEggIdException(firstArg()) }
     } else {
         every { instance.challengeEggId(any()) } returns Unit
     }
+}
+
+private fun fakeRemainingQueries(instance: PasswordService, withMemory: Map<Slot, String>) {
     every { instance.discardEgg(any()) } returns success(Unit)
     every { instance.discardProtein(any(), any()) } returns success(Unit)
     every { instance.renameEgg(any(), any()) } returns success(Unit)

@@ -24,35 +24,30 @@ class SetProteinCommandHandler @Inject constructor(
     private fun handleSetProteinCommand(setProteinCommand: SetProteinCommand) {
         val eggIdShell = setProteinCommand.argument
         val slot = setProteinCommand.slot
-        run {
-            if (passwordService.eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
-                if (!passwordService.proteinExists(eggIdShell, slot) || commandConfirmed(setProteinCommand)) {
-                    val type = passwordService.viewProteinType(setProteinCommand.argument, setProteinCommand.slot).get()
-                    val typeMsg = if (type.isEmpty) {
-                        "Enter Protein Type or just press enter to abort: "
-                    } else {
-                        "Enter new Protein Type to replace '${type.asString()}' or just press enter to keep it: "
-                    }
-                    val typeInput =
-                        userInterfaceAdapterPort.receive(outputOf(shellOf(typeMsg))).let { if (it.isEmpty) inputOf(type) else it }
-                    if (typeInput.isNotEmpty) {
-                        val structureInput = structureInputReceived(secureInputDetermined())
-                        if (structureInput.isNotEmpty) {
-                            passwordService.putProtein(
-                                eggIdShell = eggIdShell,
-                                slot = slot,
-                                typeShell = typeInput.shell,
-                                structureShell = structureInput.shell,
-                            )
-                            return@run
-                        }
-                    }
-                }
-                userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
-            }
+        if (!passwordService.eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
+            finish(setProteinCommand)
+            return
         }
-        setProteinCommand.invalidateInput()
-        userInterfaceAdapterPort.sendLineBreak()
+        if (passwordService.proteinExists(eggIdShell, slot) && !commandConfirmed(setProteinCommand)) {
+            abort(setProteinCommand)
+            return
+        }
+        val typeInput = receiveTypeInput(setProteinCommand) ?: run {
+            abort(setProteinCommand)
+            return
+        }
+        val structureInput = structureInputReceived(secureInputDetermined())
+        if (structureInput.isEmpty) {
+            abort(setProteinCommand)
+            return
+        }
+        passwordService.putProtein(
+            eggIdShell = eggIdShell,
+            slot = slot,
+            typeShell = typeInput.shell,
+            structureShell = structureInput.shell,
+        )
+        finish(setProteinCommand)
     }
 
     private fun commandConfirmed(setProteinCommand: SetProteinCommand) = if (configuration.application.password.promptOnRemoval &&
@@ -83,4 +78,26 @@ class SetProteinCommandHandler @Inject constructor(
                 false -> userInterfaceAdapterPort.receive(this)
             }
         }
+
+    private fun receiveTypeInput(setProteinCommand: SetProteinCommand) = passwordService.viewProteinType(
+        setProteinCommand.argument,
+        setProteinCommand.slot,
+    ).get().let { type ->
+        val typeMsg = if (type.isEmpty) {
+            "Enter Protein Type or just press enter to abort: "
+        } else {
+            "Enter new Protein Type to replace '${type.asString()}' or just press enter to keep it: "
+        }
+        userInterfaceAdapterPort.receive(outputOf(shellOf(typeMsg))).let { if (it.isEmpty) inputOf(type) else it }
+    }.takeIf { it.isNotEmpty }
+
+    private fun abort(setProteinCommand: SetProteinCommand) {
+        userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
+        finish(setProteinCommand)
+    }
+
+    private fun finish(setProteinCommand: SetProteinCommand) {
+        setProteinCommand.invalidateInput()
+        userInterfaceAdapterPort.sendLineBreak()
+    }
 }
