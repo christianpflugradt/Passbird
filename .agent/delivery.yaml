@@ -92,6 +92,7 @@ github_cli_usage:
 change_rules:
   - keep changes small and intention-revealing in this security-sensitive codebase
   - add or update tests with behavior changes; do not rely on docs alone
+  - never suppress detekt or ktlint findings in source code; fix the code or adjust the shared tool configuration instead
   - update README for user-visible command, workflow, or migration changes
   - update CONFIGURATION.md for any configuration-schema or default-value change
   - update .agent docs whenever agent-facing guidance would otherwise become stale

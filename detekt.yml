@@ -1,0 +1,34 @@
+complexity:
+  active: true
+  CyclomaticComplexMethod:
+    active: true
+  LongMethod:
+    active: true
+  NestedBlockDepth:
+    active: true
+  TooManyFunctions:
+    active: true
+
+comments:
+  active: false
+
+coroutines:
+  active: false
+
+empty-blocks:
+  active: false
+
+exceptions:
+  active: true
+
+naming:
+  active: false
+
+performance:
+  active: false
+
+potential-bugs:
+  active: true
+
+style:
+  active: false

@@ -30,6 +30,7 @@ technical_profile:
     - Awaitility
     - ArchUnit
   build_features:
+    - detekt
     - fat_jar_packaging
     - ktlint
     - jacoco
@@ -87,6 +88,7 @@ commands:
   full_tests: ./gradlew allTests
   smoke_test: ./smoke-test/run.sh
   lint: ./gradlew ktlintCheck
+  static_analysis: ./gradlew detekt
   coverage_gate: ./gradlew jacocoTestCoverageVerification
   license_gate: ./gradlew checkLicense
   owasp: GitHub Actions OWASP dependency-check workflows

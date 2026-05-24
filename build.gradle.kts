@@ -17,6 +17,7 @@ fun envOrNull(name: String): String? = System.getenv(name)?.takeIf { it.isNotBla
 plugins {
     idea
     application
+    id("dev.detekt") version "2.0.0-alpha.3"
     jacoco
     java
     kotlin("jvm") version "2.3.21"
@@ -28,6 +29,13 @@ plugins {
 
 repositories {
     mavenCentral()
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom("$projectDir/detekt.yml")
+    parallel = true
+    source.setFrom("src/main/kotlin", "src/test/kotlin")
 }
 
 val guavaVersion = "33.6.0-jre"
