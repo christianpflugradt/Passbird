@@ -17,6 +17,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.emptyInput
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -108,6 +109,34 @@ class KeyStoreAuthenticationServiceTest {
         expectThat(incorrectPassword1.shell.asString()) isNotEqualTo "letmeout1"
         expectThat(incorrectPassword2.shell.asString()) isNotEqualTo "letmeout2"
         expectThat(incorrectPassword3.shell.asString()) isNotEqualTo "letmeout3"
+    }
+
+    @Test
+    fun `should use provided prompt during authentication`() {
+        // given
+        val incorrectPassword = inputOf(shellOf("letmeout"))
+        val keyStoreDirectory = "tmp"
+        val keyStoreFilePath = fakePath()
+        fakeSystemOperation(
+            instance = systemOperation,
+            withDirectoryResolvingToFileName = Triple(
+                keyStoreDirectory.toDirectory(),
+                KEYSTORE_FILENAME.toFileName(),
+                keyStoreFilePath,
+            ),
+        )
+        fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectory)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseSecureInputs = listOf(incorrectPassword),
+        )
+        every { keyStoreAdapterPort.loadKey(any(), eq(keyStoreFilePath)) } returns failure(RuntimeException())
+
+        // when
+        keyStoreAuthenticationService.authenticate(maxAttempts = 1, prompt = "Enter current key: ")
+
+        // then
+        verify(exactly = 1) { userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter current key: "))) }
     }
 
     @Test

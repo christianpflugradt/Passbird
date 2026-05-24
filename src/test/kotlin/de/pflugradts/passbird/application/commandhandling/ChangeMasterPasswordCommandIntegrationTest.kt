@@ -11,7 +11,10 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.EVENT_HANDLED
 import io.mockk.mockk
+import io.mockk.verifyOrder
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -28,6 +31,12 @@ import java.util.UUID
 
 @Tag(INTEGRATION)
 class ChangeMasterPasswordCommandIntegrationTest {
+
+    private val keyStorePreamble =
+        "Your Passbird Keystore will be secured by a master password. This master password gives access to all " +
+            "passwords stored in Passbird. If you lose this password, you will not be able to access any passwords " +
+            "stored in Passbird. Choose your master password wisely. You have to input your master password twice. " +
+            "Your input will be hidden unless secure input is disabled in your configuration."
 
     private val userInterfaceAdapterPort = mockk<de.pflugradts.passbird.application.UserInterfaceAdapterPort>()
     private val systemOperation = SystemOperation()
@@ -98,5 +107,16 @@ class ChangeMasterPasswordCommandIntegrationTest {
         expectThat(newPasswordLoad.success).isTrue()
         expectThat(newPasswordLoad.getOrNull()) isEqualTo originalSecret
         expectThat(Files.readAllBytes(passwordTreeFile)).contentEquals(originalTreeBytes)
+        verifyOrder {
+            userInterfaceAdapterPort.sendLineBreak()
+            userInterfaceAdapterPort.send(outputOf(shellOf(keyStorePreamble)))
+            userInterfaceAdapterPort.sendLineBreak()
+            userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter current key: ")))
+            userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter new key: ")))
+            userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter new key again: ")))
+            userInterfaceAdapterPort.sendLineBreak()
+            userInterfaceAdapterPort.send(outputOf(shellOf("Keystore successfully updated."), EVENT_HANDLED))
+            userInterfaceAdapterPort.sendLineBreak()
+        }
     }
 }

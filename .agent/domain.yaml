@@ -98,5 +98,6 @@ task_hints_for_agents:
   - when a user describes an account entry, map it to Egg plus optional Proteins
   - when a user describes categories or workspaces, check whether a Nest concept already covers it
   - when adding user-facing commands, keep command grammar terse and single-character-first unless the maintainer asks for a different direction
+  - the k command changes the keystore master password by prompting once for the current key and twice for the new key; any incorrect current-key input, empty new-key input, or mismatch aborts the operation
   - do not change prompts, messages, labels, confirmations, errors, or any other user-visible password-manager text without approval for the exact wording
   - if a new feature stretches the Egg, Nest, Protein, or Memory model, document the terminology change here

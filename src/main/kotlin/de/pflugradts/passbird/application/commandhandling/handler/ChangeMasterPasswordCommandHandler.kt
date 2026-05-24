@@ -10,6 +10,7 @@ import de.pflugradts.passbird.application.security.KeyStoreAuthenticationService
 import de.pflugradts.passbird.domain.model.shell.PlainShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.EVENT_HANDLED
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import jakarta.inject.Inject
 
@@ -20,55 +21,67 @@ class ChangeMasterPasswordCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleChangeMasterPasswordCommand(@Suppress("UNUSED_PARAMETER") changeMasterPasswordCommand: ChangeMasterPasswordCommand) {
-        val key = keyStoreAuthenticationService.authenticate(maxAttempts = 3).getOrNull()
+        userInterfaceAdapterPort.sendLineBreak()
+        userInterfaceAdapterPort.send(outputOf(shellOf(KEYSTORE_PREAMBLE)))
+        userInterfaceAdapterPort.sendLineBreak()
+        val key = keyStoreAuthenticationService.authenticate(maxAttempts = 1, prompt = "Enter current key: ").getOrNull()
         if (key == null) {
-            abort()
+            abort("Current key is incorrect - Operation aborted.")
             return
         }
         try {
             val newPassword = receiveNewPassword()
             if (newPassword == null) {
-                abort()
                 return
             }
             keyStoreAdapterPort.storeExistingKey(key, newPassword, keyStoreAuthenticationService.keyStorePath())
         } catch (ex: Exception) {
             reportFailure(CommandFailure(ex))
-            abort()
+            abort("Operation aborted.")
             return
         } finally {
             key.scramble()
         }
+        userInterfaceAdapterPort.send(outputOf(shellOf("Keystore successfully updated."), EVENT_HANDLED))
         userInterfaceAdapterPort.sendLineBreak()
     }
 
     private fun receiveNewPassword(): PlainShell? {
-        while (true) {
-            val input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("first input: ")))
-            if (input.isEmpty) {
-                input.invalidate()
-                return null
-            }
-            val repeatedInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("second input: ")))
-            if (repeatedInput.isEmpty) {
-                input.invalidate()
-                repeatedInput.invalidate()
-                return null
-            }
-            if (input == repeatedInput) {
-                val password = input.toPlainShell()
-                repeatedInput.invalidate()
-                userInterfaceAdapterPort.sendLineBreak()
-                return password
-            }
+        val input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter new key: ")))
+        if (input.isEmpty) {
+            input.invalidate()
+            abort("Empty input - Operation aborted.")
+            return null
+        }
+        val repeatedInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter new key again: ")))
+        if (repeatedInput.isEmpty) {
             input.invalidate()
             repeatedInput.invalidate()
-            userInterfaceAdapterPort.send(outputOf(shellOf("Your inputs do not match, please repeat.")))
+            abort("Empty input - Operation aborted.")
+            return null
         }
+        if (input != repeatedInput) {
+            input.invalidate()
+            repeatedInput.invalidate()
+            abort("Your inputs do not match - Operation aborted.")
+            return null
+        }
+        val password = input.toPlainShell()
+        repeatedInput.invalidate()
+        userInterfaceAdapterPort.sendLineBreak()
+        return password
     }
 
-    private fun abort() {
-        userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
+    private fun abort(message: String) {
+        userInterfaceAdapterPort.send(outputOf(shellOf(message), OPERATION_ABORTED))
         userInterfaceAdapterPort.sendLineBreak()
+    }
+
+    private companion object {
+        const val KEYSTORE_PREAMBLE =
+            "Your Passbird Keystore will be secured by a master password. This master password gives access to all " +
+                "passwords stored in Passbird. If you lose this password, you will not be able to access any passwords " +
+                "stored in Passbird. Choose your master password wisely. You have to input your master password twice. " +
+                "Your input will be hidden unless secure input is disabled in your configuration."
     }
 }

@@ -24,7 +24,7 @@ class CryptoProviderFactoryTest {
     @Test
     fun `should create crypto provider`() {
         // given
-        every { keyStoreAuthenticationService.authenticate(any()) } returns success(value = emptyShell())
+        every { keyStoreAuthenticationService.authenticate(any(), any()) } returns success(value = emptyShell())
 
         // when
         val actual = cryptoProviderFactory.createCryptoProvider()
@@ -36,7 +36,7 @@ class CryptoProviderFactoryTest {
     @Test
     fun `should terminate application after failed authentication`() {
         // given
-        every { keyStoreAuthenticationService.authenticate(any()) } returns failure(ex = RuntimeException())
+        every { keyStoreAuthenticationService.authenticate(any(), any()) } returns failure(ex = RuntimeException())
 
         // when
         tryCatching { cryptoProviderFactory.createCryptoProvider() }

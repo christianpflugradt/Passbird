@@ -20,11 +20,11 @@ class KeyStoreAuthenticationService @Inject constructor(
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val systemOperation: SystemOperation,
 ) {
-    fun authenticate(maxAttempts: Int = 3): TryResult<Shell> {
-        var result = authenticate()
+    fun authenticate(maxAttempts: Int = 3, prompt: String = "Enter key: "): TryResult<Shell> {
+        var result = authenticate(prompt)
         repeat(maxAttempts - 1) {
             if (result.failure) {
-                result = authenticate()
+                result = authenticate(prompt)
             }
         }
         return result
@@ -35,8 +35,8 @@ class KeyStoreAuthenticationService @Inject constructor(
         ReadableConfiguration.KEYSTORE_FILENAME.toFileName(),
     )
 
-    private fun authenticate() = keyStoreAdapterPort.loadKey(
-        userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter key: "))).toPlainShell(),
+    private fun authenticate(prompt: String) = keyStoreAdapterPort.loadKey(
+        userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(prompt))).toPlainShell(),
         keyStorePath(),
     )
 }
