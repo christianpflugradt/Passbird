@@ -5,18 +5,31 @@ import de.pflugradts.passbird.application.commandhandling.command.DiscardNestCom
 import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.SwitchNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.transfer.Input
 import jakarta.inject.Singleton
 
 @Singleton
 class NestCommandFactory : SpecialCommandFactory() {
-    override fun internalConstruct(input: Input) = input.command.let { cmd ->
+    override fun internalConstruct(input: Input) = when {
+        input.hasNoData() -> constructWithoutData(input.command)
+        input.hasData() -> constructWithData(input)
+        else -> null
+    }
+
+    private fun constructWithoutData(command: Shell) = when (command.size) {
+        1 -> ViewNestCommand()
+        2 -> command.takeIf { it.isSlotted() }?.let { SwitchNestCommand(it.getSlot()) }
+        3 -> constructVariant(command)
+        else -> null
+    }
+
+    private fun constructWithData(input: Input) = input.command.takeIf { it.size1() }?.let { MoveToNestCommand(input) }
+
+    private fun constructVariant(command: Shell) = command.takeIf { it.isSlotted() }?.let {
         when {
-            input.hasNoData() && cmd.size1() -> ViewNestCommand()
-            input.hasData() && cmd.size1() -> MoveToNestCommand(input)
-            input.hasNoData() && cmd.size2() && cmd.isSlotted() -> SwitchNestCommand(cmd.getSlot())
-            input.hasNoData() && cmd.size3() && cmd.isAddVariant() && cmd.isSlotted() -> AddNestCommand(cmd.getSlot())
-            input.hasNoData() && cmd.size3() && cmd.isDiscardVariant() && cmd.isSlotted() -> DiscardNestCommand(cmd.getSlot())
+            it.isAddVariant() -> AddNestCommand(it.getSlot())
+            it.isDiscardVariant() -> DiscardNestCommand(it.getSlot())
             else -> null
         }
     }

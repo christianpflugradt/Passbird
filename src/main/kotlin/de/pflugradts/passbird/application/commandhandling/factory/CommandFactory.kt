@@ -30,23 +30,36 @@ class CommandFactory @Inject constructor(
     private val proteinCommandFactory: ProteinCommandFactory,
     private val setCommandFactory: SetCommandFactory,
 ) {
-    fun construct(commandType: CommandType, input: Input) = when (commandType) {
+    fun construct(commandType: CommandType, input: Input) = constructDirectly(commandType, input)
+        ?: constructWithoutArguments(commandType, input)
+        ?: constructViaSpecialFactory(commandType, input)
+        ?: NullCommand()
+
+    private fun constructDirectly(commandType: CommandType, input: Input) = when (commandType) {
         CommandType.CUSTOM_SET -> CustomSetCommand(input)
         CommandType.DISCARD -> DiscardCommand(input)
-        CommandType.EXPORT -> constructSafely(input) { ExportCommand() }
         CommandType.GET -> GetCommand(input)
+        CommandType.RENAME -> RenameCommand(input)
+        CommandType.VIEW -> ViewCommand(input)
+        else -> null
+    }
+
+    private fun constructWithoutArguments(commandType: CommandType, input: Input) = when (commandType) {
+        CommandType.EXPORT -> constructSafely(input) { ExportCommand() }
         CommandType.HELP -> constructSafely(input) { HelpCommand() }
         CommandType.IMPORT -> constructSafely(input) { ImportCommand() }
         CommandType.KEYSTORE -> constructSafely(input) { ChangeMasterPasswordCommand() }
+        CommandType.QUIT -> constructSafely(input) { QuitCommand(quitReason = USER) }
+        else -> null
+    }
+
+    private fun constructViaSpecialFactory(commandType: CommandType, input: Input) = when (commandType) {
         CommandType.LIST -> constructSafely(listCommandFactory, input)
         CommandType.MEMORY -> constructSafely(memoryCommandFactory, input)
         CommandType.NEST -> constructSafely(nestCommandFactory, input)
         CommandType.PROTEIN -> constructSafely(proteinCommandFactory, input)
-        CommandType.QUIT -> constructSafely(input) { QuitCommand(quitReason = USER) }
-        CommandType.RENAME -> RenameCommand(input)
         CommandType.SET -> constructSafely(setCommandFactory, input)
-        CommandType.VIEW -> ViewCommand(input)
-        else -> NullCommand()
+        else -> null
     }
 
     private fun constructSafely(factory: SpecialCommandFactory, input: Input) = tryCatching { factory.constructFromInput(input) }

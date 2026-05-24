@@ -6,19 +6,41 @@ import de.pflugradts.passbird.application.commandhandling.command.ProteinInfoCom
 import de.pflugradts.passbird.application.commandhandling.command.SetProteinCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewProteinStructuresCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewProteinTypesCommand
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.transfer.Input
 import jakarta.inject.Singleton
 
 @Singleton
 class ProteinCommandFactory : SpecialCommandFactory() {
-    override fun internalConstruct(input: Input) = input.command.let { cmd ->
+    override fun internalConstruct(input: Input) = when {
+        input.hasNoData() -> constructWithoutData(input.command)
+        input.hasData() -> constructWithData(input.command, input)
+        else -> null
+    }
+
+    private fun constructWithoutData(command: Shell) = when (command.size) {
+        1 -> ProteinInfoCommand()
+        2 -> command.takeIf { it.isInfoVariant() }?.let { ProteinInfoCommand() }
+        else -> null
+    }
+
+    private fun constructWithData(command: Shell, input: Input) = when (command.size) {
+        1 -> ViewProteinTypesCommand(input)
+        2 -> constructSizeTwoCommand(command, input)
+        3 -> constructSizeThreeCommand(command, input)
+        else -> null
+    }
+
+    private fun constructSizeTwoCommand(command: Shell, input: Input) = when {
+        command.isShowAllVariant() -> ViewProteinStructuresCommand(input)
+        command.isSlotted() -> GetProteinCommand(command.getSlot(), input)
+        else -> null
+    }
+
+    private fun constructSizeThreeCommand(command: Shell, input: Input) = command.takeIf { it.isSlotted() }?.let {
         when {
-            input.hasNoData() && (cmd.size1() || (cmd.size2() && cmd.isInfoVariant())) -> ProteinInfoCommand()
-            input.hasData() && cmd.size1() -> ViewProteinTypesCommand(input)
-            input.hasData() && cmd.size2() && cmd.isShowAllVariant() -> ViewProteinStructuresCommand(input)
-            input.hasData() && cmd.size2() && cmd.isSlotted() -> GetProteinCommand(cmd.getSlot(), input)
-            input.hasData() && cmd.size3() && cmd.isAddVariant() && cmd.isSlotted() -> SetProteinCommand(cmd.getSlot(), input)
-            input.hasData() && cmd.size3() && cmd.isDiscardVariant() && cmd.isSlotted() -> DiscardProteinCommand(cmd.getSlot(), input)
+            it.isAddVariant() -> SetProteinCommand(it.getSlot(), input)
+            it.isDiscardVariant() -> DiscardProteinCommand(it.getSlot(), input)
             else -> null
         }
     }
