@@ -18,6 +18,7 @@ plugins {
     idea
     application
     id("dev.detekt") version "2.0.0-alpha.3"
+    id("info.solidsoft.pitest") version "1.19.0"
     jacoco
     java
     kotlin("jvm") version "2.3.21"
@@ -47,6 +48,9 @@ val awaitilityVersion = "4.3.0"
 val junitPlatformVersion = "6.1.0"
 val jqwikVersion = "1.9.3"
 val mockkVersion = "1.14.6"
+val pitestCoreVersion = "1.22.1"
+val pitestJunit5Version = "1.2.3"
+val jqwikDatabasePath = layout.buildDirectory.file(".jqwik-database")
 val striktVersion = "0.35.1"
 
 dependencies {
@@ -136,9 +140,53 @@ tasks.register<Test>("allTests") {
     useJUnitPlatform()
 }
 
+pitest {
+    targetClasses.set(
+        setOf(
+            "de.pflugradts.passbird.adapter.passwordtree.PasswordTreeFacade",
+            "de.pflugradts.passbird.adapter.passwordtree.PasswordTreeReader",
+            "de.pflugradts.passbird.adapter.passwordtree.PasswordTreeWriter",
+            "de.pflugradts.passbird.adapter.exchange.FilePasswordExchange",
+            "de.pflugradts.passbird.application.process.backup.BackupManager",
+            "de.pflugradts.passbird.application.security.AesGcmCipher",
+            "de.pflugradts.passbird.application.security.CryptoProviderFactory",
+            "de.pflugradts.passbird.application.security.KeyStoreAuthenticationService",
+        ),
+    )
+    targetTests.set(
+        setOf(
+            "de.pflugradts.passbird.adapter.passwordtree.PasswordTreeFacadeTest",
+            "de.pflugradts.passbird.adapter.exchange.FilePasswordExchangeTest",
+            "de.pflugradts.passbird.adapter.exchange.FilePasswordExchangeIntegrationTest",
+            "de.pflugradts.passbird.application.process.backup.BackupManagerTest",
+            "de.pflugradts.passbird.application.security.AesGcmCipherTest",
+            "de.pflugradts.passbird.application.security.CryptoProviderFactoryTest",
+            "de.pflugradts.passbird.application.security.KeyStoreAuthenticationServiceTest",
+        ),
+    )
+    pitestVersion.set(pitestCoreVersion)
+    junit5PluginVersion.set(pitestJunit5Version)
+    threads.set(1)
+    jvmArgs.set(listOf("-Djqwik.database=${jqwikDatabasePath.get().asFile.absolutePath}"))
+    verbose.set(true)
+    timeoutFactor.set("2.0".toBigDecimal())
+    timeoutConstInMillis.set(10000)
+    outputFormats.set(setOf("XML", "HTML"))
+    exportLineCoverage.set(true)
+    failWhenNoMutations.set(true)
+    timestampedReports.set(false)
+}
+
+tasks.register("mutation") {
+    group = VERIFICATION_GROUP
+    description = "Runs mutation testing for high-risk persistence, exchange, backup, and security code."
+    dependsOn("pitest")
+}
+
 tasks.withType<Test>().configureEach {
     testClassesDirs = sourceSets["test"].output.classesDirs
     classpath = sourceSets["test"].runtimeClasspath
+    systemProperty("jqwik.database", jqwikDatabasePath.get().asFile.absolutePath)
     testLogging { events(FAILED, PASSED, SKIPPED) }
     group = VERIFICATION_GROUP
     var testCount = 0

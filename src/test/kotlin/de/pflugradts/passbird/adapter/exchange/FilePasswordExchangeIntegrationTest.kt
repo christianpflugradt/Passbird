@@ -13,7 +13,6 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -24,30 +23,24 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission.OWNER_READ
 import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
-import java.util.UUID
 
 @Tag(INTEGRATION)
 class FilePasswordExchangeIntegrationTest {
 
-    private val tempExchangeDirectory = UUID.randomUUID().toString()
+    private val tempExchangeDirectory = Files.createTempDirectory("passbird-exchange-integration").toString()
     private val exchangeFile = tempExchangeDirectory + File.separator + ReadableConfiguration.EXCHANGE_FILENAME
     private val filePasswordExchange = FilePasswordExchange(
         SystemOperation(),
         PassbirdRunContext(tempExchangeDirectory.toDirectory(), Slot.DEFAULT),
     )
 
-    @BeforeEach
-    fun setup() {
-        expectThat(File(tempExchangeDirectory).mkdir()).isTrue()
-    }
-
     @AfterEach
     fun cleanup() {
-        expectThat(File(exchangeFile).delete()).isTrue()
-        expectThat(File(tempExchangeDirectory).delete()).isTrue()
+        expectThat(File(tempExchangeDirectory).deleteRecursively()).isTrue()
     }
 
     @Test

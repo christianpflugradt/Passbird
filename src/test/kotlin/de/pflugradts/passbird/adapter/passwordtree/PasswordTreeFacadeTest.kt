@@ -50,11 +50,11 @@ import strikt.assertions.isTrue
 import strikt.java.exists
 import java.io.File
 import java.io.IOException
+import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission.OWNER_READ
 import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
 import java.util.Collections
-import java.util.UUID
 
 @Tag(INTEGRATION)
 class PasswordTreeFacadeTest {
@@ -78,19 +78,18 @@ class PasswordTreeFacadeTest {
         ),
     )
 
-    private var tempPasswordTreeDirectory = UUID.randomUUID().toString()
+    private var tempPasswordTreeDirectory = Files.createTempDirectory("passbird-password-tree").toString()
     private var passwordTreeFilename = tempPasswordTreeDirectory + File.separator + ReadableConfiguration.PASSWORD_TREE_FILENAME
 
     @BeforeEach
     fun setup() {
-        expectThat(File(tempPasswordTreeDirectory).mkdir()).isTrue()
         fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory)
+        every { systemOperation.exit() } returns Unit
     }
 
     @AfterEach
     fun cleanup() {
-        expectThat(!File(passwordTreeFilename).exists() || File(passwordTreeFilename).delete()).isTrue()
-        expectThat(File(tempPasswordTreeDirectory).delete()).isTrue()
+        expectThat(File(tempPasswordTreeDirectory).deleteRecursively()).isTrue()
     }
 
     @Test

@@ -31,12 +31,11 @@ import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE
 import java.nio.file.attribute.PosixFilePermission.OWNER_READ
 import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
-import java.util.UUID
 
 @Tag(INTEGRATION)
 class BackupManagerTest {
 
-    private val tempWorkingDirectory = UUID.randomUUID().toString()
+    private val tempWorkingDirectory = Files.createTempDirectory("passbird-backup-integration").toString()
     private val runContext = PassbirdRunContext(tempWorkingDirectory.toDirectory(), Slot.DEFAULT)
     private val configurationBackupSettings = mockk<Configuration.BackupSettings>()
     private val treeBackupSettings = mockk<Configuration.BackupSettings>()
@@ -47,7 +46,6 @@ class BackupManagerTest {
 
     @BeforeEach
     fun setup() {
-        expectThat(File(tempWorkingDirectory).mkdir()).isTrue()
         fakeConfiguration(
             instance = configuration,
             withKeyStoreLocation = tempWorkingDirectory,

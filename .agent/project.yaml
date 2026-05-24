@@ -35,6 +35,7 @@ technical_profile:
     - fat_jar_packaging
     - ktlint
     - jacoco
+    - pitest mutation testing
     - Gradle dependency verification
     - OWASP dependency check
     - dependency license allowlist
@@ -85,6 +86,7 @@ commands:
   compile: ./gradlew compileKotlin compileTestKotlin compileJava compileTestJava
   unit_tests: ./gradlew test
   property_tests: ./gradlew property
+  mutation_tests: ./gradlew mutation
   integration_tests: ./gradlew integration
   architecture_tests: ./gradlew architecture
   full_tests: ./gradlew allTests
@@ -101,6 +103,7 @@ release_model:
   automation:
     - GitHub Actions build, CodeQL, and OWASP workflows verify the repository
     - GitHub Actions build workflow runs dependency-check analysis on push and publishes the GitHub Pages site on main from a temporary Jekyll source assembled from repository documentation and workflow-owned Pages config under .github/pages
+    - GitHub Actions build workflow runs a dedicated PIT mutation-testing job for high-risk persistence, exchange, backup, and security code and uploads mutation reports plus line-coverage data as artifacts
     - GitHub Actions refresh the dependency-check cache daily and purge then rebuild it during the Sunday-to-Monday overnight window
     - GitHub Actions build workflow refreshes the branch and instruction coverage badges plus the coverage report on main
     - GitHub Actions publish workflow runs semantic-release on demand and every Monday at 03:00 Europe/Berlin

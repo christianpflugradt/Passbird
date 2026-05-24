@@ -11,6 +11,7 @@ quality_gates:
   test_suites:
     - ./gradlew test
     - ./gradlew property
+    - ./gradlew mutation
     - ./gradlew integration
     - ./gradlew architecture
     - ./gradlew allTests
@@ -71,6 +72,7 @@ ci_landscape:
       - architecture tests and coverage jobs run only on pull requests and direct pushes to main, while GitHub Pages publication stays main-only
       - the build workflow runs dependency-check analysis on push and restores its local database from the default-branch GitHub Actions cache when available
       - the build workflow runs detekt as a dedicated static-analysis job and uploads its reports as artifacts
+      - jqwik failure databases and PIT mutation reports are uploaded as workflow artifacts so falsified samples, seeds, and mutation context remain inspectable after CI failures
       - a daily OWASP workflow refreshes the dependency-check cache from the Gradle plugin update task
       - a weekly OWASP workflow purges and rebuilds the dependency-check cache during the Sunday-to-Monday overnight window
       - the CodeQL workflow runs the broader built-in security-extended query suite while staying on the nightly toolchain for Kotlin compatibility
