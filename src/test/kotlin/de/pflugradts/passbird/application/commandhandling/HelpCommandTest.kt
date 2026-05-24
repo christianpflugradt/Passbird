@@ -39,6 +39,7 @@ class HelpCommandTest {
 
         // then
         expectThat(captureSystemOut.capture) contains "Usage: [command][parameter]"
+        expectThat(captureSystemOut.capture) contains "Changes the master password of the keystore."
     }
 
     @Test

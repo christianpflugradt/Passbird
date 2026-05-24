@@ -26,6 +26,7 @@ class HelpCommandHandler @Inject constructor(
                 out("\n"),
                 outBold("\te"), out(" (export)            Exports the Password Tree to a human-readable JSON file.\n"),
                 outBold("\ti"), out(" (import)            Imports passwords from a JSON file into the Password Tree.\n"),
+                outBold("\tk"), out("                     Changes the master password of the keystore.\n"),
                 outBold("\tl"), out(" (list)              Lists all Eggs in the current Nest.\n"),
                 outBold("\th"), out(" (help)              Displays this help menu.\n"),
                 outBold("\tq"), out(" (quit)              Exits the Passbird application.\n"),

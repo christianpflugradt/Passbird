@@ -78,6 +78,7 @@ class InvalidCommandTest {
             strings = [
                 "email",
                 "iimport",
+                "kkey",
                 "llist",
                 "hhelp",
                 "qquit",
@@ -210,6 +211,7 @@ class InvalidCommandTest {
             strings = [
                 "email",
                 "iimport",
+                "kkey",
                 "llist",
                 "hhelp",
                 "qquit",

@@ -6,12 +6,15 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.MAX_ASCII_VALUE
 import de.pflugradts.passbird.domain.model.shell.MIN_ASCII_VALUE
 import de.pflugradts.passbird.domain.model.shell.PlainShell
+import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.SECURE_RANDOM
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import jakarta.inject.Inject
 import java.nio.file.Path
 import java.security.KeyStore
 import java.security.KeyStore.PasswordProtection
 import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
 
 private const val SECRET_ALIAS = "PwMan3Secret"
 private const val ALGORITHM = "AES"
@@ -37,21 +40,38 @@ class KeyStoreService @Inject constructor(private val systemOperation: SystemOpe
     override fun storeKey(password: PlainShell, path: Path) {
         val passwordChars = password.toCharArray()
         try {
-            systemOperation.writeToSensitiveFile(path) { outputStream ->
-                val keyStore = systemOperation.jceksInstance
-                keyStore.load(null, null)
-                val keyGenerator = KeyGenerator.getInstance(ALGORITHM)
-                keyGenerator.init(KEYSTORE_KEY_BITS)
-                keyStore.setEntry(
-                    SECRET_ALIAS,
-                    KeyStore.SecretKeyEntry(keyGenerator.generateKey()),
-                    PasswordProtection(passwordChars),
-                )
-                keyStore.store(outputStream, passwordChars)
-            }
+            val keyGenerator = KeyGenerator.getInstance(ALGORITHM)
+            keyGenerator.init(KEYSTORE_KEY_BITS)
+            persistKey(keyGenerator.generateKey(), passwordChars, path)
         } finally {
             passwordChars.scramble()
             password.scramble()
+        }
+    }
+
+    override fun storeExistingKey(key: de.pflugradts.passbird.domain.model.shell.Shell, password: PlainShell, path: Path) {
+        val keyBytes = key.toByteArray()
+        val passwordChars = password.toCharArray()
+        try {
+            persistKey(SecretKeySpec(keyBytes, ALGORITHM), passwordChars, path)
+        } finally {
+            keyBytes.scramble()
+            key.scramble()
+            passwordChars.scramble()
+            password.scramble()
+        }
+    }
+
+    private fun persistKey(secretKey: SecretKey, passwordChars: CharArray, path: Path) {
+        systemOperation.writeToSensitiveFile(path) { outputStream ->
+            val keyStore = systemOperation.jceksInstance
+            keyStore.load(null, null)
+            keyStore.setEntry(
+                SECRET_ALIAS,
+                KeyStore.SecretKeyEntry(secretKey),
+                PasswordProtection(passwordChars),
+            )
+            keyStore.store(outputStream, passwordChars)
         }
     }
 }
@@ -59,3 +79,5 @@ class KeyStoreService @Inject constructor(private val systemOperation: SystemOpe
 private fun CharArray.scramble() = indices.forEach {
     this[it] = (PlainShell.SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toChar()
 }
+
+private fun ByteArray.scramble() = SECURE_RANDOM.nextBytes(this)

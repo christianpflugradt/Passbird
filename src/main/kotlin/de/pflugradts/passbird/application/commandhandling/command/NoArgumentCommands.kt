@@ -5,6 +5,7 @@ import de.pflugradts.passbird.application.commandhandling.command.base.NoArgumen
 class ExportCommand : NoArgumentCommand
 class HelpCommand : NoArgumentCommand
 class ImportCommand : NoArgumentCommand
+class ChangeMasterPasswordCommand : NoArgumentCommand
 class ListCommand : NoArgumentCommand
 class MemoryInfoCommand : NoArgumentCommand
 class ProteinInfoCommand : NoArgumentCommand

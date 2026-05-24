@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-23
+last_reviewed: 2026-05-24
 security_posture:
   classification: high_sensitivity_local_secret_manager
   posture:
@@ -20,14 +20,20 @@ current_security_relevant_implementation:
   crypto_provider_factory:
     file: src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
     facts:
+      - delegates keystore password prompting and verification to KeyStoreAuthenticationService
+      - allows three authentication attempts before exit
+  keystore_authentication:
+    file: src/main/kotlin/de/pflugradts/passbird/application/security/KeyStoreAuthenticationService.kt
+    facts:
       - prompts for the keystore password through secure terminal input
       - invalidates secure input buffers after converting them for keystore access
-      - allows three authentication attempts before exit
+      - treats empty and incorrect passwords as unsuccessful attempts
   keystore:
     file: src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
     facts:
       - uses JCEKS via SystemOperation
       - stores a generated AES secret key under alias PwMan3Secret
+      - can re-protect the existing AES secret under a new master password without regenerating the secret
       - scrambles password material and temporary char arrays after use, including exception paths
   local_persistence:
     files:

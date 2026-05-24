@@ -20,6 +20,7 @@ import de.pflugradts.passbird.application.commandhandling.CommandBus
 import de.pflugradts.passbird.application.commandhandling.CommandHandlerBus
 import de.pflugradts.passbird.application.commandhandling.CommandInputHandler
 import de.pflugradts.passbird.application.commandhandling.InputHandler
+import de.pflugradts.passbird.application.commandhandling.handler.ChangeMasterPasswordCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ExportCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHandler
@@ -110,6 +111,7 @@ class ApplicationModule(private val runContext: RunContext) : AbstractModule() {
                 AddNestCommandHandler::class.java,
                 MoveToNestCommandHandler::class.java,
                 CustomSetCommandHandler::class.java,
+                ChangeMasterPasswordCommandHandler::class.java,
                 DiscardCommandHandler::class.java,
                 DiscardNestCommandHandler::class.java,
                 DiscardProteinCommandHandler::class.java,

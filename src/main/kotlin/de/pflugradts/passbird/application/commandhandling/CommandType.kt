@@ -9,6 +9,7 @@ enum class CommandType(val type: Char) {
     GET('g'),
     HELP('h'),
     IMPORT('i'),
+    KEYSTORE('k'),
     LIST('l'),
     MEMORY('m'),
     NEST('n'),

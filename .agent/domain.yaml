@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-22
+last_reviewed: 2026-05-24
 domain_language:
   - term: Egg
     meaning: aggregate root representing one password entry and its associated proteins in a specific nest
@@ -32,6 +32,9 @@ user_command_families:
     commands:
       - e
       - i
+  - family: keystore
+    commands:
+      - k
   - family: nest
     commands:
       - n

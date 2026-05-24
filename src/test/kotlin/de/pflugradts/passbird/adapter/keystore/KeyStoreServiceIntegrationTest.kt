@@ -86,4 +86,34 @@ class KeyStoreServiceIntegrationTest {
         expectThat(actualLoadResult.success).isFalse()
         expectThat(invalidPassword.toCharArray()) isNotEqualTo "invalid".toCharArray()
     }
+
+    @Test
+    fun `should rotate key store password without changing stored secret`() {
+        // given
+        val oldPassword = "p4s5wrD"
+        val newPassword = "n3wp4s5"
+        val path = Paths.get(keyStoreFile!!)
+        val oldPasswordForStore = plainShellOf(oldPassword.toCharArray())
+        val oldPasswordForLoad = plainShellOf(oldPassword.toCharArray())
+        val oldPasswordForFailingLoad = plainShellOf(oldPassword.toCharArray())
+        val newPasswordForStore = plainShellOf(newPassword.toCharArray())
+        val newPasswordForLoad = plainShellOf(newPassword.toCharArray())
+
+        // when
+        expectThat(tryCatching { keyStoreService!!.storeKey(oldPasswordForStore, path) }.success).isTrue()
+        val originalSecret = keyStoreService!!.loadKey(oldPasswordForLoad, path).getOrNull()!!
+        expectThat(tryCatching { keyStoreService!!.storeExistingKey(originalSecret.copy(), newPasswordForStore, path) }.success).isTrue()
+        val oldPasswordLoad = keyStoreService!!.loadKey(oldPasswordForFailingLoad, path)
+        val newPasswordLoad = keyStoreService!!.loadKey(newPasswordForLoad, path)
+
+        // then
+        expectThat(oldPasswordLoad.success).isFalse()
+        expectThat(newPasswordLoad.success).isTrue()
+        expectThat(newPasswordLoad.getOrNull()) isEqualTo originalSecret
+        expectThat(oldPasswordForStore.toCharArray()) isNotEqualTo oldPassword.toCharArray()
+        expectThat(oldPasswordForLoad.toCharArray()) isNotEqualTo oldPassword.toCharArray()
+        expectThat(oldPasswordForFailingLoad.toCharArray()) isNotEqualTo oldPassword.toCharArray()
+        expectThat(newPasswordForStore.toCharArray()) isNotEqualTo newPassword.toCharArray()
+        expectThat(newPasswordForLoad.toCharArray()) isNotEqualTo newPassword.toCharArray()
+    }
 }

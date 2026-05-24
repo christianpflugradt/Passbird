@@ -8,4 +8,5 @@ import java.nio.file.Path
 interface KeyStoreAdapterPort {
     fun loadKey(password: PlainShell, path: Path): TryResult<Shell>
     fun storeKey(password: PlainShell, path: Path)
+    fun storeExistingKey(key: Shell, password: PlainShell, path: Path)
 }

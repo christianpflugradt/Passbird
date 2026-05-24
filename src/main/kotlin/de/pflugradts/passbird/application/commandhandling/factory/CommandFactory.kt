@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.factory
 
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.commandhandling.CommandType
+import de.pflugradts.passbird.application.commandhandling.command.ChangeMasterPasswordCommand
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
 import de.pflugradts.passbird.application.commandhandling.command.DiscardCommand
 import de.pflugradts.passbird.application.commandhandling.command.ExportCommand
@@ -35,6 +36,7 @@ class CommandFactory @Inject constructor(
         CommandType.GET -> GetCommand(input)
         CommandType.HELP -> constructSafely(input) { HelpCommand() }
         CommandType.IMPORT -> constructSafely(input) { ImportCommand() }
+        CommandType.KEYSTORE -> constructSafely(input) { ChangeMasterPasswordCommand() }
         CommandType.LIST -> constructSafely(input) { ListCommand() }
         CommandType.MEMORY -> constructSafely(memoryCommandFactory, input)
         CommandType.NEST -> constructSafely(nestCommandFactory, input)

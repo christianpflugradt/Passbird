@@ -5,6 +5,7 @@ import com.google.inject.Guice
 import com.google.inject.util.Modules
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.PassbirdRunContext
+import de.pflugradts.passbird.application.commandhandling.handler.ChangeMasterPasswordCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ExportCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ImportCommandHandler
@@ -63,6 +64,7 @@ class PassbirdMainModuleTest {
             AddNestCommandHandler::class.java,
             MoveToNestCommandHandler::class.java,
             CustomSetCommandHandler::class.java,
+            ChangeMasterPasswordCommandHandler::class.java,
             DiscardCommandHandler::class.java,
             DiscardNestCommandHandler::class.java,
             DiscardProteinCommandHandler::class.java,
