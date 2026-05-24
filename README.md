@@ -386,13 +386,22 @@ To view all available configurations and their indices, input `s?`. Using the ex
 
 ## Development
 
-### Verification Tasks
+### Verification
+
+While working locally, prefer focused manual checks for the behavior you changed:
 
 - `./gradlew test` runs the default unit-oriented suite and excludes tagged `integration`, `architecture`, and `property` tests.
 - `./gradlew property` runs jqwik-based property tests for persistence, exchange, backup, and crypto invariants.
 - `./gradlew integration` runs tagged integration tests.
 - `./gradlew architecture` runs the ArchUnit-based architecture suite.
-- `./gradlew allTests` runs every tagged and untagged test suite.
+
+The generated local pre-commit hook runs the broader release gate automatically:
+
+- `./gradlew --no-build-cache clean jar`
+- `./smoke-test/run.sh`
+- `./gradlew preCommitCheck`, which runs `ktlintCheck`, `detekt`, `checkLicense`, `jacocoTestCoverageVerification`, and `allTests`
+
+GitHub Actions enforces the same verification model in CI and also runs dedicated workflow jobs for `ktlintCheck`, `detekt`, `checkLicense`, and OWASP dependency scanning.
 
 ### Dependency Verification
 

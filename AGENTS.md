@@ -69,5 +69,5 @@ Use `.agent/delivery.yaml` to choose the right checks. At minimum:
 
 - run only the focused tests that cover the code you changed or the tests you added
 - run `./gradlew architecture` only for structural or wiring changes that are not already otherwise covered
-- rely on the local `pre-commit` hook for `ktlintCheck`, `checkLicense`, `jacocoTestCoverageVerification`, and the full test suite
+- rely on the local `pre-commit` hook for `./gradlew --no-build-cache clean jar`, `./smoke-test/run.sh`, `ktlintCheck`, `detekt`, `checkLicense`, `jacocoTestCoverageVerification`, and `allTests`
 - rely on GitHub Actions for OWASP dependency scanning unless the maintainer explicitly requests a local run
