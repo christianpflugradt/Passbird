@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.handler
 
 import com.google.common.eventbus.Subscribe
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.ChangeMasterPasswordCommand
@@ -34,11 +35,14 @@ class ChangeMasterPasswordCommandHandler @Inject constructor(
             if (newPassword == null) {
                 return
             }
-            keyStoreAdapterPort.storeExistingKey(key, newPassword, keyStoreAuthenticationService.keyStorePath())
-        } catch (ex: Exception) {
-            reportFailure(CommandFailure(ex))
-            abort("Operation aborted.")
-            return
+            val storeResult = tryCatching {
+                keyStoreAdapterPort.storeExistingKey(key, newPassword, keyStoreAuthenticationService.keyStorePath())
+            }
+            if (storeResult.failure) {
+                reportFailure(CommandFailure(storeResult.exceptionOrNull()!!))
+                abort("Operation aborted.")
+                return
+            }
         } finally {
             key.scramble()
         }

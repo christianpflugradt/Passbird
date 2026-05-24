@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.configuration
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.failure.ConfigurationFailure
@@ -19,17 +20,20 @@ class ConfigurationFactory @Inject constructor(
         configurationFromFile()
     }
 
-    private fun configurationFromFile() = try {
+    private fun configurationFromFile() = tryCatching {
         filePath.let {
             YAMLMapper().readValue(
                 it.toFile(),
                 Configuration::class.java,
             )
         }
-    } catch (ex: Exception) {
-        reportFailure(ConfigurationFailure(ex))
-        systemOperation.exit()
-        throw ex
+    }.let { result ->
+        result.exceptionOrNull()?.let {
+            reportFailure(ConfigurationFailure(it))
+            systemOperation.exit()
+            throw it
+        }
+        result.getOrNull()!!
     }
 
     private val filePath get() = systemOperation.resolvePath(

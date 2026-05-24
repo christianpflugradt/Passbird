@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.util
 
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.application.FileName
 import de.pflugradts.passbird.application.toFileName
@@ -52,14 +53,17 @@ class SystemOperation {
     fun writeToSensitiveFile(path: Path, write: (OutputStream) -> Unit): Path {
         val targetPath = path.toAbsolutePath()
         val tempPath = Files.createTempFile(targetPath.parent, ".${targetPath.fileName}.", ".tmp")
-        return try {
+        return tryCatching {
             newOutputStream(tempPath).use(write)
             Files.move(tempPath, targetPath, REPLACE_EXISTING)
             applyPosixPermissionsIfSupported(targetPath, PRIVATE_FILE_PERMISSIONS)
             targetPath
-        } catch (ex: Exception) {
-            runCatching { Files.deleteIfExists(tempPath) }
-            throw ex
+        }.let { result ->
+            result.exceptionOrNull()?.let {
+                runCatching { Files.deleteIfExists(tempPath) }
+                throw it
+            }
+            result.getOrNull()!!
         }
     }
     fun writeBytesToSensitiveFile(path: Path, byteArray: ByteArray): Path = writeToSensitiveFile(path) { outputStream ->

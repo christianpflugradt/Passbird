@@ -3,11 +3,15 @@ package de.pflugradts.kotlinextensions
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 
-inline fun <R> tryCatching(block: () -> R) = try {
-    success(block())
-} catch (ex: Exception) {
-    failure(ex)
-}
+inline fun <R> tryCatching(block: () -> R) = runCatching(block).fold(
+    onSuccess = { success(it) },
+    onFailure = { ex ->
+        when (ex) {
+            is Exception -> failure(ex)
+            else -> throw ex
+        }
+    },
+)
 
 private class Failure(val ex: Exception)
 
