@@ -17,6 +17,7 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.slot.Slot
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import org.junit.jupiter.api.AfterEach
@@ -55,9 +56,10 @@ class PassbirdLauncherTest {
             withDirectoryResolvingToFileName = Triple(
                 keyStoreDirectoryName.toDirectory(),
                 keyStoreFileName.toFileName(),
-                fakePath(exists = true),
+                fakePath(),
             ),
         )
+        every { systemOperation.exists(any<java.nio.file.Path>()) } returns true
 
         // when
         passbirdLauncher.boot()
@@ -73,12 +75,16 @@ class PassbirdLauncherTest {
         val keyStoreDirectoryName = "/tmp"
         val keyStoreFileName = KEYSTORE_FILENAME
         fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectoryName)
-        val keyStoreFilePath = fakePath(exists = false)
-        val keyStoreDirPath = fakePath(resolvingTo = Pair(keyStoreFilePath, keyStoreFileName))
+        val keyStoreFilePath = fakePath()
         fakeSystemOperation(
             instance = systemOperation,
-            withPaths = listOf(Pair(keyStoreDirectoryName, keyStoreDirPath)),
+            withDirectoryResolvingToFileName = Triple(
+                keyStoreDirectoryName.toDirectory(),
+                keyStoreFileName.toFileName(),
+                keyStoreFilePath,
+            ),
         )
+        every { systemOperation.exists(keyStoreFilePath) } returns false
 
         // when
         passbirdLauncher.boot()

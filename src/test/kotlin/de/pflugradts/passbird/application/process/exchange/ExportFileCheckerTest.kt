@@ -12,6 +12,7 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakePath
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.slot.Slot
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
@@ -27,7 +28,7 @@ class ExportFileCheckerTest {
     @Test
     fun `should delete export file if confirmed`() {
         // given
-        val exportFile = fakePath(exists = true)
+        val exportFile = fakePath()
         fakeConfiguration(instance = configuration, withPromptOnExportFile = true)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveYes = true)
         fakeSystemOperation(
@@ -38,6 +39,7 @@ class ExportFileCheckerTest {
                 exportFile,
             ),
         )
+        every { systemOperation.exists(exportFile) } returns true
 
         // when
         exportFileChecker.run()
@@ -49,7 +51,7 @@ class ExportFileCheckerTest {
     @Test
     fun `should not delete export file if not confirmed`() {
         // given
-        val exportFile = fakePath(exists = true)
+        val exportFile = fakePath()
         fakeConfiguration(instance = configuration, withPromptOnExportFile = true)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveYes = false)
         fakeSystemOperation(
@@ -60,6 +62,7 @@ class ExportFileCheckerTest {
                 exportFile,
             ),
         )
+        every { systemOperation.exists(exportFile) } returns true
 
         // when
         exportFileChecker.run()
@@ -71,7 +74,7 @@ class ExportFileCheckerTest {
     @Test
     fun `should not offer to delete file if it does not exist`() {
         // given
-        val exportFile = fakePath(exists = false)
+        val exportFile = fakePath()
         fakeConfiguration(instance = configuration, withPromptOnExportFile = true)
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveYes = true)
         fakeSystemOperation(
@@ -82,6 +85,7 @@ class ExportFileCheckerTest {
                 exportFile,
             ),
         )
+        every { systemOperation.exists(exportFile) } returns false
 
         // when
         exportFileChecker.run()
@@ -93,7 +97,7 @@ class ExportFileCheckerTest {
     @Test
     fun `should not offer to delete file if it configuration parameter is not enabled`() {
         // given
-        val exportFile = fakePath(exists = true)
+        val exportFile = fakePath()
         fakeConfiguration(instance = configuration, withPromptOnExportFile = false)
         fakeSystemOperation(
             instance = systemOperation,
@@ -103,6 +107,7 @@ class ExportFileCheckerTest {
                 exportFile,
             ),
         )
+        every { systemOperation.exists(exportFile) } returns true
 
         // when
         exportFileChecker.run()

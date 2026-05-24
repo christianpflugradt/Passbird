@@ -115,6 +115,7 @@ agent_notes:
   - do not add fallback behavior or fallback implementations unless the maintainer explicitly asks for them; if fallback handling is uncertain, stop and ask
   - invalid configuration files must abort startup after reporting the load failure; they must not be treated as missing configuration or routed into setup
   - setup must stop immediately if creating passbird.yml fails; do not continue into keystore creation or restart guidance after a failed configuration write
+  - setup directory prompts must consume the entered directory and must never silently fall back to the current working directory or an empty configured path
   - clipboard success messages must only be shown after the clipboard adapter confirms a successful update; never claim a secret was copied when the adapter reported failure
   - when creating or relabeling GitHub issues for compatibility work that keeps a potentially breaking change non-breaking for end users, add the migration label
   - do not add code comments unless the maintainer explicitly asks for them or an existing project convention clearly requires them; never leave design commentary, temporary notes, versioned implementation notes, or other agent-style annotations

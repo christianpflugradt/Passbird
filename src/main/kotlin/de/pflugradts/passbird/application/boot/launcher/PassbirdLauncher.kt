@@ -48,7 +48,12 @@ class PassbirdLauncher @Inject constructor(
     }
 
     private fun keystoreExists() = keyStoreLocation.isNotEmpty() &&
-        systemOperation.resolvePath(keyStoreLocation.toDirectory(), ReadableConfiguration.KEYSTORE_FILENAME.toFileName()).toFile().exists()
+        systemOperation.exists(
+            systemOperation.resolvePath(
+                keyStoreLocation.toDirectory(),
+                ReadableConfiguration.KEYSTORE_FILENAME.toFileName(),
+            ),
+        )
 
     private fun sendBanner() {
         userInterfaceAdapterPort.sendLineBreak()

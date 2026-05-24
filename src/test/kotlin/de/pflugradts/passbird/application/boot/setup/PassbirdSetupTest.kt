@@ -53,24 +53,25 @@ class PassbirdSetupTest {
     fun `should run config template route`() {
         // given
         val configurationDirectory = VALID_DIRECTORY
+        val chosenDirectory = fakeInput(configurationDirectory)
         val password1 = fakeInput("p4s5w0rD")
         val password2 = fakeInput("p4s5w0rD")
         val pathSlot = slot<Path>()
         fakeConfiguration(
             instance = configuration,
             withConfigurationTemplate = true,
-            withPasswordTreeLocation = configurationDirectory,
-            withKeyStoreLocation = configurationDirectory,
+            withPasswordTreeLocation = "",
+            withKeyStoreLocation = "",
         )
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(chosenDirectory),
             withTheseSecureInputs = listOf(password1, password2),
             withReceiveConfirmation = true,
         )
-        fakeSystemOperation(
-            instance = systemOperation,
-            withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
-        )
+        fakeSystemOperation(instance = systemOperation)
+        every { systemOperation.exists(VALID_DIRECTORY.toDirectory()) } returns true
+        every { systemOperation.isDirectory(VALID_DIRECTORY.toDirectory()) } returns true
         every { configurationSync.sync(configurationDirectory.toDirectory()) } returns success(Unit)
         every { keyStoreAdapterPort.storeKey(eq(password1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
@@ -115,16 +116,20 @@ class PassbirdSetupTest {
     fun `should abort config template route after failed configuration sync`() {
         // given
         val configurationDirectory = VALID_DIRECTORY
+        val chosenDirectory = fakeInput(configurationDirectory)
         fakeConfiguration(
             instance = configuration,
             withConfigurationTemplate = true,
-            withPasswordTreeLocation = configurationDirectory,
+            withPasswordTreeLocation = "",
         )
-        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
-        fakeSystemOperation(
-            instance = systemOperation,
-            withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(chosenDirectory),
+            withReceiveConfirmation = true,
         )
+        fakeSystemOperation(instance = systemOperation)
+        every { systemOperation.exists(VALID_DIRECTORY.toDirectory()) } returns true
+        every { systemOperation.isDirectory(VALID_DIRECTORY.toDirectory()) } returns true
         every {
             configurationSync.sync(configurationDirectory.toDirectory())
         } returns failure(IllegalStateException("disk full"))
@@ -146,20 +151,21 @@ class PassbirdSetupTest {
     @Test
     fun `should run config key store route`() {
         // given
-        val configurationDirectory = VALID_DIRECTORY
+        val configurationDirectory = "configured"
+        val chosenDirectory = fakeInput(VALID_DIRECTORY)
         val password1 = fakeInput("p4s5w0rD")
         val password2 = fakeInput("p4s5w0rD")
         val pathSlot = slot<Path>()
         fakeConfiguration(instance = configuration, withKeyStoreLocation = configurationDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(chosenDirectory),
             withTheseSecureInputs = listOf(password1, password2),
             withReceiveConfirmation = true,
         )
-        fakeSystemOperation(
-            instance = systemOperation,
-            withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
-        )
+        fakeSystemOperation(instance = systemOperation)
+        every { systemOperation.exists(VALID_DIRECTORY.toDirectory()) } returns true
+        every { systemOperation.isDirectory(VALID_DIRECTORY.toDirectory()) } returns true
         every { keyStoreAdapterPort.storeKey(eq(password1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
@@ -172,7 +178,7 @@ class PassbirdSetupTest {
         verify(exactly = 1) { setupGuide.sendCreateKeyStoreInformation() }
         verify(exactly = 0) { setupGuide.sendNonMatchingInputs() }
         expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
-        expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
+        expectThat(pathSlot.captured.parent.name) isEqualTo VALID_DIRECTORY
         expectThat(password1.shell.asString()) isNotEqualTo "p4s5w0rD"
         expectThat(password2.shell.asString()) isNotEqualTo "p4s5w0rD"
         verify(exactly = 1) { setupGuide.sendRestart() }
@@ -205,7 +211,7 @@ class PassbirdSetupTest {
     fun `should accept corrected directory`() {
         // given
         val invalidConfigurationDirectory = "/dev/null"
-        val nonexistentConfigurationDirectory = "/dev/none"
+        val nonexistentConfigurationDirectory = fakeInput("/dev/none")
         val validDirectory = fakeInput(VALID_DIRECTORY)
         val password1 = fakeInput("p4s5w0rD")
         val password2 = fakeInput("p4s5w0rD")
@@ -213,18 +219,15 @@ class PassbirdSetupTest {
         fakeConfiguration(instance = configuration, withKeyStoreLocation = invalidConfigurationDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseInputs = listOf(fakeInput(nonexistentConfigurationDirectory), validDirectory),
+            withTheseInputs = listOf(nonexistentConfigurationDirectory, validDirectory),
             withTheseSecureInputs = listOf(password1, password2),
             withReceiveConfirmation = true,
         )
-        fakeSystemOperation(
-            instance = systemOperation,
-            withPaths = listOf(
-                Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true)),
-                Pair(invalidConfigurationDirectory, fakePath(exists = true, isDirectory = false)),
-                Pair(nonexistentConfigurationDirectory, fakePath(exists = false, isDirectory = true)),
-            ),
-        )
+        fakeSystemOperation(instance = systemOperation)
+        every { systemOperation.exists(VALID_DIRECTORY.toDirectory()) } returns true
+        every { systemOperation.isDirectory(VALID_DIRECTORY.toDirectory()) } returns true
+        every { systemOperation.exists(nonexistentConfigurationDirectory.shell.asString().toDirectory()) } returns false
+        every { systemOperation.isDirectory(nonexistentConfigurationDirectory.shell.asString().toDirectory()) } returns true
         every { keyStoreAdapterPort.storeKey(eq(password1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
@@ -243,7 +246,8 @@ class PassbirdSetupTest {
     @Test
     fun `should create key store with matching password input`() {
         // given
-        val configurationDirectory = VALID_DIRECTORY
+        val configurationDirectory = "configured"
+        val chosenDirectory = fakeInput(VALID_DIRECTORY)
         val passwordMismatch1 = fakeInput("bassword")
         val passwordMismatch2 = fakeInput("guessword")
         val emptyPassword1 = emptyInput()
@@ -254,6 +258,7 @@ class PassbirdSetupTest {
         fakeConfiguration(instance = configuration, withKeyStoreLocation = configurationDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(chosenDirectory),
             withTheseSecureInputs = listOf(
                 passwordMismatch1,
                 passwordMismatch2,
@@ -264,10 +269,9 @@ class PassbirdSetupTest {
             ),
             withReceiveConfirmation = true,
         )
-        fakeSystemOperation(
-            instance = systemOperation,
-            withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
-        )
+        fakeSystemOperation(instance = systemOperation)
+        every { systemOperation.exists(VALID_DIRECTORY.toDirectory()) } returns true
+        every { systemOperation.isDirectory(VALID_DIRECTORY.toDirectory()) } returns true
         every { keyStoreAdapterPort.storeKey(eq(passwordMatched1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
@@ -280,7 +284,7 @@ class PassbirdSetupTest {
         verify(exactly = 1) { setupGuide.sendCreateKeyStoreInformation() }
         verify(exactly = 2) { setupGuide.sendNonMatchingInputs() }
         expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
-        expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
+        expectThat(pathSlot.captured.parent.name) isEqualTo VALID_DIRECTORY
         expectThat(passwordMismatch1.shell.asString()) isNotEqualTo "bassword"
         expectThat(passwordMismatch2.shell.asString()) isNotEqualTo "guessword"
         expectThat(passwordMatched1.shell.asString()) isNotEqualTo "p4s5w0rD"
@@ -294,7 +298,8 @@ class PassbirdSetupTest {
     @Test
     fun `should only warn about non matching password input after the first failed attempt`() {
         // given
-        val configurationDirectory = VALID_DIRECTORY
+        val configurationDirectory = "configured"
+        val chosenDirectory = fakeInput(VALID_DIRECTORY)
         val passwordMismatch1 = fakeInput("bassword")
         val passwordMismatch2 = fakeInput("guessword")
         val passwordMatched1 = fakeInput("p4s5w0rD")
@@ -303,6 +308,7 @@ class PassbirdSetupTest {
         fakeConfiguration(instance = configuration, withKeyStoreLocation = configurationDirectory)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(chosenDirectory),
             withTheseSecureInputs = listOf(
                 passwordMismatch1,
                 passwordMismatch2,
@@ -311,10 +317,9 @@ class PassbirdSetupTest {
             ),
             withReceiveConfirmation = true,
         )
-        fakeSystemOperation(
-            instance = systemOperation,
-            withPaths = listOf(Pair(VALID_DIRECTORY, fakePath(exists = true, isDirectory = true))),
-        )
+        fakeSystemOperation(instance = systemOperation)
+        every { systemOperation.exists(VALID_DIRECTORY.toDirectory()) } returns true
+        every { systemOperation.isDirectory(VALID_DIRECTORY.toDirectory()) } returns true
         every { keyStoreAdapterPort.storeKey(eq(passwordMatched1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
 
         // when
@@ -329,7 +334,7 @@ class PassbirdSetupTest {
             userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("second input: ")))
         }
         expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
-        expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
+        expectThat(pathSlot.captured.parent.name) isEqualTo VALID_DIRECTORY
         expectThat(passwordMismatch1.shell.asString()) isNotEqualTo "bassword"
         expectThat(passwordMismatch2.shell.asString()) isNotEqualTo "guessword"
         expectThat(passwordMatched1.shell.asString()) isNotEqualTo "p4s5w0rD"

@@ -18,7 +18,7 @@ class ExportFileChecker @Inject constructor(
 ) : Initializer {
     override fun run() {
         val exchangeFile = systemOperation.resolvePath(runContext.homeDirectory, ReadableConfiguration.EXCHANGE_FILENAME.toFileName())
-        if (configuration.application.exchange.promptOnExportFile && exchangeFile.toFile().exists()) {
+        if (configuration.application.exchange.promptOnExportFile && systemOperation.exists(exchangeFile)) {
             val prompt = "An password export file has been detected. Should this file be deleted? Y/n "
             if (userInterfaceAdapterPort.receiveYes(outputOf(shellOf(prompt)))) {
                 systemOperation.delete(exchangeFile)

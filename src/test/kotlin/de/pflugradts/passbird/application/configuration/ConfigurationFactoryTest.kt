@@ -31,7 +31,7 @@ class ConfigurationFactoryTest {
             withDirectoryResolvingToFileName = Triple(
                 homeDirectory.toDirectory(),
                 ReadableConfiguration.CONFIGURATION_FILENAME.toFileName(),
-                fakePath(exists = false),
+                fakePath(),
             ),
         )
         every { systemOperation.exists(any<java.nio.file.Path>()) } returns false

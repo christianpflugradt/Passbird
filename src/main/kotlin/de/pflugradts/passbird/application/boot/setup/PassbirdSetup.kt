@@ -43,18 +43,19 @@ class PassbirdSetup @Inject constructor(
 
     private fun configTemplateRoute() {
         setupGuide.sendInputPath("configuration")
-        if (createConfiguration(verifyValidDirectory(Directory(configuration.adapter.passwordTree.location))).failure) {
+        val directory = receiveValidDirectory()
+        if (createConfiguration(directory).failure) {
             return
         }
         setupGuide.sendCreateKeyStoreInformation()
-        createKeyStore(Directory(configuration.adapter.keyStore.location), receiveMasterPassword())
+        createKeyStore(directory, receiveMasterPassword())
         setupGuide.sendRestart()
     }
 
     private fun configKeyStoreRoute() {
         setupGuide.sendInputPath("keystore")
         setupGuide.sendCreateKeyStoreInformation()
-        createKeyStore(verifyValidDirectory(Directory(configuration.adapter.keyStore.location)), receiveMasterPassword())
+        createKeyStore(receiveValidDirectory(), receiveMasterPassword())
         setupGuide.sendRestart()
     }
 
@@ -86,13 +87,13 @@ class PassbirdSetup @Inject constructor(
         setupGuide.sendCreateKeyStoreSucceeded()
     }
 
-    private fun verifyValidDirectory(givenDirectory: Directory): Directory {
-        var directory = givenDirectory
+    private fun receiveValidDirectory(): Directory {
+        var directory = Directory(userInterfaceAdapterPort.receive(outputOf(shellOf("your input: "))).shell.asString())
         while (!isValidDirectory(directory)) {
             directory = Directory(userInterfaceAdapterPort.receive(outputOf(shellOf("your input: "))).shell.asString())
         }
         return directory
     }
 
-    private fun isValidDirectory(directory: Directory) = systemOperation.getPath(directory).toFile().let { it.isDirectory && it.exists() }
+    private fun isValidDirectory(directory: Directory) = systemOperation.exists(directory) && systemOperation.isDirectory(directory)
 }
