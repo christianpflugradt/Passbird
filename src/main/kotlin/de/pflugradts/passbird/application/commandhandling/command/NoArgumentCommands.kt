@@ -2,9 +2,9 @@ package de.pflugradts.passbird.application.commandhandling.command
 
 import de.pflugradts.passbird.application.commandhandling.command.base.NoArgumentCommand
 
-class ExportCommand : NoArgumentCommand
+class ExportCommand(val selective: Boolean = false) : NoArgumentCommand
 class HelpCommand : NoArgumentCommand
-class ImportCommand : NoArgumentCommand
+class ImportCommand(val selective: Boolean = false) : NoArgumentCommand
 class ChangeMasterPasswordCommand : NoArgumentCommand
 class MemoryInfoCommand : NoArgumentCommand
 class ProteinInfoCommand : NoArgumentCommand

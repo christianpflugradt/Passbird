@@ -9,13 +9,18 @@ import de.pflugradts.passbird.application.commandhandling.handler.ImportCommandH
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.exchange.ImportExportService
+import de.pflugradts.passbird.application.exchange.ImportNestPreview
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.slot.Slot.S2
+import de.pflugradts.passbird.domain.model.slot.Slot.S9
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
+import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.DO_NOTHING
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -30,8 +35,15 @@ class ImportCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val importExportService = mockk<ImportExportService>(relaxed = true)
     private val configuration = mockk<Configuration>()
+    private val nestService = createNestServiceForTesting()
     private val passwordService = mockk<PasswordService>()
-    private val importCommandHandler = ImportCommandHandler(configuration, importExportService, passwordService, userInterfaceAdapterPort)
+    private val importCommandHandler = ImportCommandHandler(
+        configuration,
+        importExportService,
+        nestService,
+        passwordService,
+        userInterfaceAdapterPort,
+    )
     private val inputHandler = createInputHandlerFor(importCommandHandler)
 
     @Test
@@ -45,6 +57,83 @@ class ImportCommandTest {
 
         // then
         verify(exactly = 1) { importExportService.importEggs() }
+    }
+
+    @Test
+    fun `should handle selective import command into an empty target nest slot`() {
+        // given
+        every { importExportService.peekImportNests() } returns success(listOf(importPreview(slot = S9, nestId = "work", "import1")))
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf("9")), inputOf(shellOf("2"))),
+        )
+        fakePasswordService(instance = passwordService)
+        fakeConfiguration(instance = configuration)
+
+        // when
+        inputHandler.handleInput(inputOf(shellOf("i*")))
+
+        // then
+        verify(exactly = 1) { importExportService.importEggs(S9, S2) }
+    }
+
+    @Test
+    fun `should confirm selective import using overlaps from the target nest slot`() {
+        // given
+        val overlappingEggId = shellOf("overlap")
+        val givenEgg = createEggForTesting(withEggIdShell = overlappingEggId, withSlot = S2)
+        every { importExportService.peekImportNests() } returns success(listOf(importPreview(slot = S9, nestId = "work", "overlap")))
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf("9")), inputOf(shellOf("2"))),
+            withReceiveConfirmation = true,
+        )
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
+
+        // when
+        inputHandler.handleInput(inputOf(shellOf("i*")))
+
+        // then
+        verify(exactly = 1) { passwordService.eggExists(overlappingEggId, S2) }
+        verify(exactly = 1) { userInterfaceAdapterPort.receiveConfirmation(any()) }
+        verify(exactly = 1) { importExportService.importEggs(S9, S2) }
+        verify(exactly = 0) { passwordService.eggExists(overlappingEggId, S9) }
+    }
+
+    @Test
+    fun `should abort selective import when target slot is occupied by a different nest`() {
+        // given
+        nestService.place(shellOf("local"), S2)
+        every { importExportService.peekImportNests() } returns success(listOf(importPreview(slot = S9, nestId = "work", "import1")))
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf("9")), inputOf(shellOf("2"))),
+        )
+        fakeConfiguration(instance = configuration)
+
+        // when
+        inputHandler.handleInput(inputOf(shellOf("i*")))
+
+        // then
+        verify(exactly = 0) { importExportService.importEggs(any(), any()) }
+    }
+
+    @Test
+    fun `should abort selective import into default slot for a non default nest`() {
+        // given
+        every { importExportService.peekImportNests() } returns success(listOf(importPreview(slot = S9, nestId = "work", "import1")))
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf("9")), inputOf(shellOf("0"))),
+        )
+        fakeConfiguration(instance = configuration)
+
+        // when
+        inputHandler.handleInput(inputOf(shellOf("i*")))
+
+        // then
+        verify(exactly = 0) { importExportService.importEggs(any(), any()) }
     }
 
     @Test
@@ -147,3 +236,9 @@ class ImportCommandTest {
 
     // FIXME add tests for eggIds across multiple nests
 }
+
+private fun importPreview(slot: de.pflugradts.passbird.domain.model.slot.Slot, nestId: String, vararg eggIds: String) = ImportNestPreview(
+    nestId = shellOf(nestId),
+    slot = slot,
+    eggIds = eggIds.map(::shellOf),
+)

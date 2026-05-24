@@ -242,7 +242,9 @@ You can access Passbird’s in-app help at any time by pressing h and then Enter
         d[EggId] (discard)    Deletes the specified Egg and its associated password.
 
         e (export)            Exports the Password Tree to a human-readable JSON file.
+        e* (selective export) Exports selected Nests or all Nests except selected Nests.
         i (import)            Imports passwords from a JSON file into the Password Tree.
+        i* (selective import) Imports one Nest from a JSON file into a selected Nest Slot.
         k (keystore)          Changes the master password of the keystore.
         l (list)              Lists all EggIds in the current Nest.
         l[filter]             Lists EggIds in the current Nest whose name contains filter.
@@ -286,7 +288,11 @@ operation is aborted.
 
 `e` exports all Eggs to a file named `passbird-export.json` in the directory specified during program start.
 
+`e*` previews deployed Nests and lets you export only selected Nest Slots or all Nests except selected Nest Slots.
+
 `i` imports all Eggs from a `passbird-export.json` file located in the directory specified during program start.
+
+`i*` previews the Nests in `passbird-export.json`, imports one selected Nest, and lets you restore it into a chosen Nest Slot.
 
 ### Nests
 

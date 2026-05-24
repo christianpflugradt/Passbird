@@ -9,6 +9,7 @@ import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
+import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestService
@@ -21,49 +22,45 @@ class PasswordImportExportService @Inject constructor(
     private val nestService: NestService,
     private val eventRegistry: EventRegistry,
 ) : ImportExportService {
-    override fun peekImportEggIdShells(): TryResult<ShellMap> = exchangeFactory.createPasswordExchange().receive().map { eggsByNest ->
-        eggsByNest.entries.associate { it.key.slot to it.value.map { passwordInfo -> passwordInfo.first.first } }
-    }
+    override fun peekImportEggIdShells(): TryResult<ShellMap> = receiveImportData().map(::toShellMap)
 
-    override fun importEggs() {
-        exchangeFactory.createPasswordExchange().receive().onSuccess { eggsByNest ->
-            val currentNest = nestService.currentNest()
-            try {
-                eggsByNest.forEach { (nest, passwordInfos) ->
-                    val deployedNest = nestService.atNestSlot(nest.slot)
-                    if (deployedNest.isEmpty) {
-                        nestService.place(nest.viewNestId(), nest.slot)
-                    }
-                    nestService.moveToNestAt(nest.slot)
-                    passwordInfos.forEach { passwordInfo ->
-                        passwordService.putEgg(passwordInfo.first.first, passwordInfo.first.second)
-                        passwordInfo.second.forEachIndexed { index, shellPair ->
-                            if (shellPair.first.isNotEmpty && shellPair.second.isNotEmpty) {
-                                passwordService.putProtein(
-                                    eggIdShell = passwordInfo.first.first,
-                                    slot = slotAt(index),
-                                    typeShell = shellPair.first,
-                                    structureShell = shellPair.second,
-                                )
-                            }
-                        }
-                    }
-                }
-            } finally {
-                nestService.moveToNestAt(currentNest.slot)
-            }
-            eventRegistry.register(EggsImported(eggsByNest.values.sumOf { it.size }))
-            eventRegistry.processEvents()
+    override fun peekImportNests(): TryResult<List<ImportNestPreview>> = receiveImportData().map { eggsByNest ->
+        eggsByNest.entries.map { (nest, passwordInfos) ->
+            ImportNestPreview(
+                nestId = nest.viewNestId(),
+                slot = nest.slot,
+                eggIds = passwordInfos.map { passwordInfo -> passwordInfo.first.first },
+            )
         }
     }
 
-    override fun exportEggs() {
+    override fun importEggs() {
+        receiveImportData().onSuccess { eggsByNest ->
+            importEggs(eggsByNest)
+        }
+    }
+
+    override fun importEggs(sourceSlot: Slot, targetSlot: Slot) {
+        receiveImportData().onSuccess { eggsByNest ->
+            eggsByNest.entries.firstOrNull { (nest, _) -> nest.slot == sourceSlot }?.let { (nest, passwordInfos) ->
+                importEggs(listOf(Triple(nest, targetSlot, passwordInfos)))
+            }
+        }
+    }
+
+    override fun exportEggs() = exportEggs(allNestSlots())
+
+    override fun exportEggs(slots: Set<Slot>) {
+        if (slots.isEmpty()) {
+            return
+        }
         val currentNest = nestService.currentNest()
         val eggsByNest = mutableMapOf<Nest, List<PasswordInfo>>()
         try {
             nestService.all(includeDefault = true)
                 .filter { it.isPresent }
                 .map { it.get() }
+                .filter { it.slot in slots }
                 .forEach { nest ->
                     nestService.moveToNestAt(nest.slot)
                     eggsByNest[nest] = passwordService.findAllEggIds()
@@ -83,6 +80,55 @@ class PasswordImportExportService @Inject constructor(
             eventRegistry.processEvents()
         }
     }
+
+    private fun receiveImportData() = exchangeFactory.createPasswordExchange().receive()
+
+    private fun toShellMap(eggsByNest: Map<Nest, List<PasswordInfo>>) = eggsByNest.entries.associate { (nest, passwordInfos) ->
+        nest.slot to passwordInfos.map { passwordInfo -> passwordInfo.first.first }
+    }
+
+    private fun importEggs(eggsByNest: Map<Nest, List<PasswordInfo>>) {
+        importEggs(eggsByNest.entries.map { (nest, passwordInfos) -> Triple(nest, nest.slot, passwordInfos) })
+    }
+
+    private fun importEggs(imports: List<Triple<Nest, Slot, List<PasswordInfo>>>) {
+        if (imports.isEmpty()) {
+            return
+        }
+        val currentNest = nestService.currentNest()
+        try {
+            imports.forEach { (nest, targetSlot, passwordInfos) ->
+                val deployedNest = nestService.atNestSlot(targetSlot)
+                if (deployedNest.isEmpty) {
+                    nestService.place(nest.viewNestId(), targetSlot)
+                }
+                nestService.moveToNestAt(targetSlot)
+                passwordInfos.forEach { passwordInfo ->
+                    passwordService.putEgg(passwordInfo.first.first, passwordInfo.first.second)
+                    passwordInfo.second.forEachIndexed { index, shellPair ->
+                        if (shellPair.first.isNotEmpty && shellPair.second.isNotEmpty) {
+                            passwordService.putProtein(
+                                eggIdShell = passwordInfo.first.first,
+                                slot = slotAt(index),
+                                typeShell = shellPair.first,
+                                structureShell = shellPair.second,
+                            )
+                        }
+                    }
+                }
+            }
+        } finally {
+            nestService.moveToNestAt(currentNest.slot)
+        }
+        eventRegistry.register(EggsImported(imports.sumOf { it.third.size }))
+        eventRegistry.processEvents()
+    }
+
+    private fun allNestSlots() = nestService.all(includeDefault = true)
+        .filter { it.isPresent }
+        .map { it.get().slot }
+        .toList()
+        .toSet()
 }
 
 fun Option<List<Option<Shell>>>.toShellList() = map { list -> list.map { it.orElse(emptyShell()) } }.orElse(List(10) { emptyShell() })

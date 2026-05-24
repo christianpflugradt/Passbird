@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.factory
 
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.commandhandling.CommandType
+import de.pflugradts.passbird.application.commandhandling.CommandVariant
 import de.pflugradts.passbird.application.commandhandling.command.ChangeMasterPasswordCommand
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
 import de.pflugradts.passbird.application.commandhandling.command.DiscardCommand
@@ -45,9 +46,9 @@ class CommandFactory @Inject constructor(
     }
 
     private fun constructWithoutArguments(commandType: CommandType, input: Input) = when (commandType) {
-        CommandType.EXPORT -> constructSafely(input) { ExportCommand() }
+        CommandType.EXPORT -> constructWithOptionalStarVariant(input) { ExportCommand(it) }
         CommandType.HELP -> constructSafely(input) { HelpCommand() }
-        CommandType.IMPORT -> constructSafely(input) { ImportCommand() }
+        CommandType.IMPORT -> constructWithOptionalStarVariant(input) { ImportCommand(it) }
         CommandType.KEYSTORE -> constructSafely(input) { ChangeMasterPasswordCommand() }
         CommandType.QUIT -> constructSafely(input) { QuitCommand(quitReason = USER) }
         else -> null
@@ -71,6 +72,20 @@ class CommandFactory @Inject constructor(
             "Parameter for command '${input.command.getChar(0)}' not supported: ${unsupportedParameter(input)}"
         }
         supplier()
+    }.onFailure { reportFailure(CommandFailure(it)) }
+        .getOrElse(NullCommand())
+
+    private fun constructWithOptionalStarVariant(input: Input, supplier: (Boolean) -> Command) = tryCatching {
+        require(input.data.isEmpty) {
+            "Parameter for command '${input.command.getChar(0)}' not supported: ${unsupportedParameter(input)}"
+        }
+        require(
+            input.command.size == 1 ||
+                (input.command.size == 2 && input.command.getChar(1) == CommandVariant.SHOW_ALL.value),
+        ) {
+            "Parameter for command '${input.command.getChar(0)}' not supported: ${unsupportedParameter(input)}"
+        }
+        supplier(input.command.size == 2)
     }.onFailure { reportFailure(CommandFailure(it)) }
         .getOrElse(NullCommand())
 

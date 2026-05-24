@@ -31,7 +31,9 @@ user_command_families:
   - family: exchange
     commands:
       - e
+      - e*
       - i
+      - i*
   - family: keystore
     commands:
       - k
