@@ -55,6 +55,9 @@ task_specific_specs:
   - file: specs/flows/nests.yaml
     read_when:
       - touching nest creation, switching, assignment, movement, or discard flows
+  - file: specs/flows/favorites.yaml
+    read_when:
+      - touching favorites commands, quick-access EggId reuse, or favorite-slot persistence
   - file: specs/flows/proteins.yaml
     read_when:
       - touching protein prompts, secure-input toggles, or protein slot behavior

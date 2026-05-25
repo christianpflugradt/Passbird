@@ -21,13 +21,14 @@ fun fakePasswordService(
     withInvalidEggId: Boolean = false,
     withEggs: List<Egg> = emptyList(),
     withNestService: NestService? = null,
+    withFavorites: Map<Slot, String> = emptyMap(),
     withMemory: Map<Slot, String> = emptyMap(),
 ) {
     fakeWriteOperations(instance)
     fakeEggQueries(instance, withEggs, withNestService)
     fakeProteinQueries(instance, withEggs)
     fakeEggValidation(instance, withInvalidEggId)
-    fakeRemainingQueries(instance, withMemory)
+    fakeRemainingQueries(instance, withFavorites, withMemory)
 }
 
 private fun fakeWriteOperations(instance: PasswordService) {
@@ -96,11 +97,15 @@ private fun fakeEggValidation(instance: PasswordService, withInvalidEggId: Boole
     }
 }
 
-private fun fakeRemainingQueries(instance: PasswordService, withMemory: Map<Slot, String>) {
+private fun fakeRemainingQueries(instance: PasswordService, withFavorites: Map<Slot, String>, withMemory: Map<Slot, String>) {
+    every { instance.putFavorite(any(), any()) } returns success(Unit)
+    every { instance.discardFavorite(any()) } returns success(Unit)
     every { instance.discardEgg(any()) } returns success(Unit)
     every { instance.discardProtein(any(), any()) } returns success(Unit)
     every { instance.renameEgg(any(), any()) } returns success(Unit)
     every { instance.moveEgg(any(), any()) } returns success(Unit)
+    every { instance.viewFavorites() } answers { Slots<Shell>().apply { withFavorites.forEach { this[it.key] = shellOf(it.value) } } }
+    every { instance.viewFavoriteEntry(any<Slot>()) } answers { instance.viewFavorites()[firstArg<Slot>()] }
     every { instance.viewMemory() } answers { Slots<Shell>().apply { withMemory.forEach { this[it.key] = shellOf(it.value) } } }
     every { instance.viewMemoryEntry(any<Slot>()) } answers { instance.viewMemory()[firstArg<Slot>()] }
 }

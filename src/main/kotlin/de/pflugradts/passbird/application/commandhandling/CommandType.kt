@@ -6,6 +6,7 @@ enum class CommandType(val type: Char) {
     CUSTOM_SET('c'),
     DISCARD('d'),
     EXPORT('e'),
+    FAVORITE('f'),
     GET('g'),
     HELP('h'),
     IMPORT('i'),

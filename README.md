@@ -14,6 +14,7 @@
     + [General Usage](#general-usage)
     + [Nests](#nests)
     + [Proteins](#proteins)
+    + [Favorites](#favorites)
     + [Memory](#memory)
     + [Custom Passwords](#custom-passwords)
 * [Development](#development)
@@ -255,6 +256,7 @@ You can access Passbird’s in-app help at any time by pressing h and then Enter
         q (quit)              Exits the Passbird application.
 
         n (Nests)             Displays available Nests and related commands.
+        f? (Favorites)        Displays Favorites-related usage information.
         m? (Memory)           Displays Memory-related usage information.
         p? (Proteins)         Displays Protein-related usage information.
         s? (Password configs) Displays available password configurations and related help.
@@ -331,9 +333,32 @@ Each Egg contains ten Protein Slots, which are initially empty. To create or upd
 
 To delete a Protein from a specific Slot, e.g. Slot 1, input `p-1email`. This command removes both the Type and Structure from the specified Slot.
 
+### Favorites
+
+Favorites let you pin up to ten frequently used EggIds per Nest for quick access. Favorites are stored in `passbird.tree`, so they survive restarts and move along with the rest of the password tree through backups and migrations.
+
+To view commands related to Favorites, input `f?` and press Enter.
+
+    f? (help)             Displays this help menu for Favorite commands.
+    f (info)              Lists the favorite EggIds for the current Nest.
+    f[0-9] (copy)         Copies the EggId from the specified Favorite Slot to the clipboard.
+    f[0-9]Command (use)   Executes the specified command using the EggId from the given Favorite Slot.
+    f+[0-9][EggId]        Assigns the specified EggId to the given Favorite Slot.
+    f-[0-9]               Clears the specified Favorite Slot.
+
+Use `f` to list the populated Favorite slots in the current Nest. If no Favorites are assigned for the current Nest, Passbird reports that the Favorite EggIds are empty.
+
+To assign the EggId `email` to Favorite Slot 0, input `f+0email`. The Egg must exist in the current Nest.
+
+Once stored, `f0` copies the favorited EggId to the clipboard. To reuse it for another command, input a command suffix such as `f0g` to run `gemail`, or `f0p+1` to run `p+1email`.
+
+Favorites are maintained per Nest. Renaming an Egg updates matching Favorites, discarding or moving an Egg clears matching Favorites in the source Nest, and discarding a Nest clears that Nest's Favorites.
+
 ### Memory
 
 The EggIdMemory stores up to ten of the most recently accessed EggIds for each Nest. This feature allows you to avoid retyping the same EggId repeatedly, which is particularly useful when performing multiple operations on the same Egg, such as setting multiple Proteins.
+
+Unlike Favorites, Memory is filled automatically from recent use and can be disabled or left non-persistent through configuration.
 
 To view commands related to the EggIdMemory, input `m?`. This displays the following options:
 

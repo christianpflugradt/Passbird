@@ -20,11 +20,12 @@ import java.util.stream.Stream
 
 abstract class CommonPasswordServiceCapabilities(
     private val cryptoProvider: CryptoProvider,
-    private val eggRepository: EggRepository,
-    private val eventRegistry: EventRegistry,
+    protected val eggRepository: EggRepository,
+    protected val eventRegistry: EventRegistry,
 ) {
     fun find(eggIdShell: Shell, slot: Slot): Option<Egg> = eggRepository.findAll(slot).findDecrypted(eggIdShell)
     fun find(eggIdShell: Shell): Option<Egg> = eggRepository.findAll().findDecrypted(eggIdShell).apply { ifPresent { updateMemory(it) } }
+    fun findWithoutUpdatingMemory(eggIdShell: Shell): Option<Egg> = eggRepository.findAll().findDecrypted(eggIdShell)
 
     private fun Stream<Egg>.findDecrypted(eggIdShell: Shell) = filter { decrypted(it.viewEggId()) == eggIdShell }.findAny().toOption()
     private fun EggIdMemory.findDuplicate(egg: Egg) = find { entry ->
@@ -37,6 +38,10 @@ abstract class CommonPasswordServiceCapabilities(
     fun decrypted(encryptedShell: EncryptedShell) = cryptoProvider.decrypt(encryptedShell)
 
     fun processEventsAndSync(): TryResult<Unit> = eggRepository.sync().onSuccess { eventRegistry.processEvents() }
+    fun registerEggNotFound(eggIdShell: Shell) {
+        eventRegistry.register(EggNotFound(eggIdShell))
+        eventRegistry.processEvents()
+    }
 
     fun challengeEggId(shell: Shell) {
         if (plainValueOf(shell.getByte(0)).isDigit || anyMatch(shell.copy()) { plainValueOf(it).isSymbol }) {

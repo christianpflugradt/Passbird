@@ -19,7 +19,12 @@ class RenamePasswordService @Inject constructor(
         challengeEggId(newEggIdShell)
         if (eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             if (find(newEggIdShell).isEmpty) {
-                encrypted(newEggIdShell).let { find(eggIdShell).get().rename(it) }
+                val egg = find(eggIdShell).get()
+                val oldEggId = egg.viewEggId().copy()
+                encrypted(newEggIdShell).let {
+                    eggRepository.renameFavorites(egg.associatedNest(), oldEggId, it)
+                    egg.rename(it)
+                }
                 return processEventsAndSync()
             } else {
                 throw EggIdAlreadyExistsException(newEggIdShell)

@@ -16,7 +16,7 @@ import java.util.stream.Stream
 
 class PutPasswordService @Inject constructor(
     cryptoProvider: CryptoProvider,
-    private val eggRepository: EggRepository,
+    eggRepository: EggRepository,
     eventRegistry: EventRegistry,
     private val nestService: NestService,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {

@@ -18,8 +18,8 @@ import java.util.stream.Stream
 
 class ViewPasswordService @Inject constructor(
     cryptoProvider: CryptoProvider,
-    private val eggRepository: EggRepository,
-    private val eventRegistry: EventRegistry,
+    eggRepository: EggRepository,
+    eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun findAllEggIds(): Stream<Shell> = eggRepository.findAll().map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
     fun findAllEggIds(slot: Slot): Stream<Shell> = eggRepository.findAll(slot).map { decrypted(it.viewEggId()) }.sorted(ShellComparator())

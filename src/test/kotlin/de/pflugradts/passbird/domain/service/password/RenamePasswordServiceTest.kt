@@ -43,6 +43,7 @@ class RenamePasswordServiceTest {
 
         // then
         expectThat(givenEgg.viewEggId().fakeDec()) isEqualTo newEggId isNotEqualTo oldEggId
+        verify(exactly = 1) { eggRepository.renameFavorites(any(), any(), any()) }
     }
 
     @Test
@@ -65,6 +66,7 @@ class RenamePasswordServiceTest {
         expectThat(givenEgg.viewEggId().fakeDec()) isEqualTo oldEggId isNotEqualTo newEggId
         expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isA<EggIdAlreadyExistsException>()
+        verify(exactly = 0) { eggRepository.renameFavorites(any(), any(), any()) }
     }
 
     @Test

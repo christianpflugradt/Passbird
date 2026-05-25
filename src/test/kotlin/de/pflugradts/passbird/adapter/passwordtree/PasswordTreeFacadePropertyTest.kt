@@ -12,9 +12,11 @@ import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.property.PasswordTreeFixture
 import de.pflugradts.passbird.property.normalizeEggs
 import de.pflugradts.passbird.property.normalizeExplicitNests
+import de.pflugradts.passbird.property.normalizeFavorites
 import de.pflugradts.passbird.property.normalizeMemory
 import de.pflugradts.passbird.property.normalizedEggs
 import de.pflugradts.passbird.property.normalizedExplicitNests
+import de.pflugradts.passbird.property.normalizedFavorites
 import de.pflugradts.passbird.property.normalizedMemory
 import de.pflugradts.passbird.property.orThrow
 import de.pflugradts.passbird.property.passwordTreeFixtures
@@ -78,6 +80,7 @@ class PasswordTreeFacadePropertyTest {
 
             expectThat(normalizeEggs(restoreResult.get().toList(), cryptoProvider)) isEqualTo fixture.normalizedEggs()
             expectThat(normalizeExplicitNests(readerNestService)) isEqualTo fixture.normalizedExplicitNests()
+            expectThat(normalizeFavorites(restoreResult.favorites(), cryptoProvider)) isEqualTo fixture.normalizedFavorites()
             expectThat(normalizeMemory(restoreResult.memory(), cryptoProvider)) isEqualTo fixture.normalizedMemory()
         } finally {
             passwordTreeDirectory.toFile().deleteRecursively()

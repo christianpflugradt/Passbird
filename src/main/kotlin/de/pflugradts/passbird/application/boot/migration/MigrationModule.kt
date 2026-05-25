@@ -15,6 +15,7 @@ import de.pflugradts.passbird.application.process.migration.AuthenticatedMigrati
 import de.pflugradts.passbird.application.process.migration.Migration
 import de.pflugradts.passbird.application.process.migration.MigrationRequest
 import de.pflugradts.passbird.application.process.migration.keystore.KeyStoreFormatMigration
+import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeFavoritesMigration
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigration
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -38,6 +39,7 @@ class MigrationModule(
         Multibinder.newSetBinder(binder(), Migration::class.java).apply {
             addBinding().to(KeyStoreFormatMigration::class.java)
             addBinding().to(PasswordTreeKeyDerivationMigration::class.java)
+            addBinding().to(PasswordTreeFavoritesMigration::class.java)
         }
     }
 

@@ -41,6 +41,7 @@ class HelpCommandHandler @Inject constructor(
                 outBold("\tq"), out(" (quit)              Exits the Passbird application.\n"),
                 out("\n"),
                 outBold("\tn"), out(" (Nests)             Displays available Nests and related commands.\n"),
+                outBold("\tf?"), out(" (Favorites)         Displays Favorites-related usage information.\n"),
                 outBold("\tm?"), out(" (Memory)           Displays Memory-related usage information.\n"),
                 outBold("\tp?"), out(" (Proteins)         Displays Protein-related usage information.\n"),
                 outBold("\ts?"), out(" (Password configs) Displays available password configurations and related help.\n"),

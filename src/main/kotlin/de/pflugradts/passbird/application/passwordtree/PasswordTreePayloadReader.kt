@@ -12,7 +12,9 @@ import de.pflugradts.passbird.application.util.readBytes
 import de.pflugradts.passbird.application.util.readInt
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
+import de.pflugradts.passbird.domain.model.egg.EggIdFavorites
 import de.pflugradts.passbird.domain.model.egg.EggIdMemory
+import de.pflugradts.passbird.domain.model.egg.FavoriteMap
 import de.pflugradts.passbird.domain.model.egg.MemoryMap
 import de.pflugradts.passbird.domain.model.egg.Protein.Companion.createProtein
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
@@ -23,6 +25,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.model.slot.Slots
 import de.pflugradts.passbird.domain.model.slot.Slots.Companion.slotIterator
+import de.pflugradts.passbird.domain.service.password.tree.emptyFavorites
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
 import jakarta.inject.Inject
 import java.util.ArrayDeque
@@ -50,15 +53,17 @@ class PasswordTreePayloadReader @Inject constructor(
             offset = incrementedOffset
             if (eggIdMemoryEnabled) retrievedMemory else emptyMemory()
         }
-        val (nests, incrementedOffset) = retrieveNests(byteArray, offset)
-        offset = incrementedOffset
+        val (incrementedFavoriteOffset, favorites) = retrieveFavorites(byteArray, offset)
+        offset = incrementedFavoriteOffset
+        val (nests, incrementedNestOffset) = retrieveNests(byteArray, offset)
+        offset = incrementedNestOffset
         val eggs = ArrayDeque<Egg>()
         while (offset < byteArray.size - checksumBytes()) {
             val (egg, newOffset) = byteArray.asEgg(offset)
             eggs.add(egg)
             offset = newOffset
         }
-        return PasswordTreeSnapshot(eggs = eggs.toList(), memory = memory, nests = nests)
+        return PasswordTreeSnapshot(eggs = eggs.toList(), favorites = favorites, memory = memory, nests = nests)
     }
 
     private fun verifySignature(bytes: ByteArray) {
@@ -160,6 +165,23 @@ class PasswordTreePayloadReader @Inject constructor(
             mutableOptionOf()
         }
         return Pair(encryptedShellOption, incrementedOffset)
+    }
+
+    private fun retrieveFavorites(byteArray: ByteArray, offset: Int): Pair<Int, FavoriteMap> {
+        var incrementedOffset = offset
+        return Slots<EggIdFavorites>().apply {
+            slotIterator().forEach { nestSlot ->
+                this[nestSlot].set(
+                    EggIdFavorites().apply {
+                        slotIterator().forEach { slot ->
+                            val (entry, newOffset) = byteArray.asMemoryEntry(incrementedOffset)
+                            entry.ifPresent { assign(slot, it) }
+                            incrementedOffset = newOffset
+                        }
+                    },
+                )
+            }
+        }.let { Pair(incrementedOffset, it) }
     }
 
     private fun retrieveMemory(byteArray: ByteArray, offset: Int): Pair<Int, MemoryMap> {

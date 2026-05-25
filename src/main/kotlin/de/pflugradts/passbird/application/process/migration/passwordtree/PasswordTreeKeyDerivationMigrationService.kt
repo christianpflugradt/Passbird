@@ -3,8 +3,8 @@ package de.pflugradts.passbird.application.process.migration.passwordtree
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
+import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
-import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeSnapshot
 import de.pflugradts.passbird.application.security.AesGcmCipher
@@ -30,7 +30,7 @@ import jakarta.inject.Singleton
 class PasswordTreeKeyDerivationMigrationService @Inject constructor(
     private val configuration: ReadableConfiguration,
     private val passwordTreeEnvelope: PasswordTreeEnvelope,
-    private val passwordTreePayloadReader: PasswordTreePayloadReader,
+    private val legacyPasswordTreePayloadReader: LegacyPasswordTreePayloadReader,
     private val passwordTreePayloadWriter: PasswordTreePayloadWriter,
     private val systemOperation: SystemOperation,
 ) {
@@ -40,7 +40,7 @@ class PasswordTreeKeyDerivationMigrationService @Inject constructor(
             val currentProvider = AesGcmCipher(keyShell)
             val snapshot = systemOperation.readBytesFromFile(filePath)
                 .let { legacyProvider.decrypt(encryptedShellOf(it)) }
-                .let(passwordTreePayloadReader::read)
+                .let(legacyPasswordTreePayloadReader::read)
             val migratedSnapshot = snapshot.migrate(legacyProvider, currentProvider)
             val migratedBytes = passwordTreeEnvelope.wrap(
                 currentProvider.encrypt(passwordTreePayloadWriter.write(migratedSnapshot)).toByteArray(),

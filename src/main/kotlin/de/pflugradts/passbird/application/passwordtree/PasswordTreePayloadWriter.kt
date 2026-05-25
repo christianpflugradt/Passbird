@@ -22,6 +22,13 @@ class PasswordTreePayloadWriter @Inject constructor() {
                 }
             }
         }
+        snapshot.favorites.forEach { favoriteListOption ->
+            favoriteListOption.ifPresent { favoriteList ->
+                favoriteList.forEach { favoriteEntry ->
+                    favoriteEntry.encryptedShellAsByteArray().let { offset += copyBytes(it, bytes, offset, it.size) }
+                }
+            }
+        }
         snapshot.nests.forEach { nestShell ->
             nestShell.nestAsByteArray().let { offset += copyBytes(it, bytes, offset, it.size) }
         }
@@ -39,6 +46,9 @@ class PasswordTreePayloadWriter @Inject constructor() {
         val memorySize = 100 * Integer.BYTES + snapshot.memory.fold(0) { acc, inner ->
             acc + inner.map { slots -> slots.sumOf { it.map(EncryptedShell::size).orElse(0) } }.orElse(0)
         }
+        val favoriteSize = 100 * Integer.BYTES + snapshot.favorites.fold(0) { acc, inner ->
+            acc + inner.map { slots -> slots.sumOf { it.map(EncryptedShell::size).orElse(0) } }.orElse(0)
+        }
         val eggDataSize = snapshot.eggs.sumOf { egg ->
             intBytes() + egg.viewEggId().size + egg.viewPassword().size + egg.proteins.filter { it.isPresent }.sumOf {
                 it.get().viewType().size + it.get().viewStructure().size
@@ -46,7 +56,7 @@ class PasswordTreePayloadWriter @Inject constructor() {
         }
         val eggMetaSize = snapshot.eggs.size * 22 * intBytes()
         val nestSize = snapshot.nests.size * intBytes() + snapshot.nests.filter { !it.isEmpty }.sumOf { it.size }
-        return memorySize + eggDataSize + eggMetaSize + nestSize
+        return memorySize + favoriteSize + eggDataSize + eggMetaSize + nestSize
     }
 
     private fun Option<EncryptedShell>.encryptedShellAsByteArray() = if (isPresent) {

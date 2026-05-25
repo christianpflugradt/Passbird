@@ -35,6 +35,12 @@ import de.pflugradts.passbird.application.commandhandling.handler.egg.OneTimeSet
 import de.pflugradts.passbird.application.commandhandling.handler.egg.RenameCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.favorite.AddFavoriteCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.favorite.DiscardFavoriteCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.favorite.FavoriteInfoCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.favorite.GetFavoriteCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.favorite.UseFavoriteCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.favorite.ViewFavoriteCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.GetMemoryCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.MemoryInfoCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.UseMemoryCommandHandler
@@ -109,15 +115,19 @@ class ApplicationModule(private val runContext: RunContext) : AbstractModule() {
     private fun configureMultibinders() {
         Multibinder.newSetBinder(binder(), CommandHandler::class.java).apply {
             listOf(
+                AddFavoriteCommandHandler::class.java,
                 AddNestCommandHandler::class.java,
                 MoveToNestCommandHandler::class.java,
                 CustomSetCommandHandler::class.java,
                 OneTimeSetCommandHandler::class.java,
                 ChangeMasterPasswordCommandHandler::class.java,
                 DiscardCommandHandler::class.java,
+                DiscardFavoriteCommandHandler::class.java,
                 DiscardNestCommandHandler::class.java,
                 DiscardProteinCommandHandler::class.java,
                 ExportCommandHandler::class.java,
+                FavoriteInfoCommandHandler::class.java,
+                GetFavoriteCommandHandler::class.java,
                 GetCommandHandler::class.java,
                 GetMemoryCommandHandler::class.java,
                 GetProteinCommandHandler::class.java,
@@ -132,8 +142,10 @@ class ApplicationModule(private val runContext: RunContext) : AbstractModule() {
                 SetInfoCommandHandler::class.java,
                 SetProteinCommandHandler::class.java,
                 SwitchNestCommandHandler::class.java,
+                UseFavoriteCommandHandler::class.java,
                 UseMemoryCommandHandler::class.java,
                 ViewCommandHandler::class.java,
+                ViewFavoriteCommandHandler::class.java,
                 ViewMemoryCommandHandler::class.java,
                 ViewNestCommandHandler::class.java,
                 ViewProteinStructuresCommandHandler::class.java,

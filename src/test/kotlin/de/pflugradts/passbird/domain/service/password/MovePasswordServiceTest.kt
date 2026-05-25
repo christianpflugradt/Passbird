@@ -45,6 +45,7 @@ internal class MovePasswordServiceTest {
 
         // then
         expectThat(givenEgg.associatedNest()) isEqualTo newSlot isNotEqualTo givenSlot
+        verify(exactly = 1) { eggRepository.discardFavorites(givenSlot, givenEgg.viewEggId()) }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 
@@ -63,6 +64,7 @@ internal class MovePasswordServiceTest {
         verify { passbirdEventRegistry.register(capture(eggNotFoundSlot)) }
         expectThat(eggNotFoundSlot.isCaptured).isTrue()
         expectThat(eggNotFoundSlot.captured.eggIdShell) isEqualTo givenEggId
+        verify(exactly = 0) { eggRepository.discardFavorites(any(), any()) }
         verify(exactly = 1) { passbirdEventRegistry.processEvents() }
     }
 
@@ -83,6 +85,7 @@ internal class MovePasswordServiceTest {
         // then
         expectThat(actual.exceptionOrNull()).isNotNull().isA<EggIdAlreadyExistsException>()
         expectThat(givenEgg.associatedNest()) isEqualTo givenSlot isNotEqualTo newSlot
+        verify(exactly = 0) { eggRepository.discardFavorites(any(), any()) }
         verify { passbirdEventRegistry wasNot Called }
     }
 }

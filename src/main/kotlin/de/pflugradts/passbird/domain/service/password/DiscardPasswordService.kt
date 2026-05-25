@@ -12,11 +12,17 @@ import jakarta.inject.Inject
 class DiscardPasswordService @Inject constructor(
     cryptoProvider: CryptoProvider,
     eggRepository: EggRepository,
-    private val eventRegistry: EventRegistry,
+    eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
 
     fun discardEgg(eggIdShell: Shell): TryResult<Unit> = find(eggIdShell)
-        .ifPresentOrElse({ it.discard() }, { eventRegistry.register(EggNotFound(eggIdShell)) })
+        .ifPresentOrElse(
+            {
+                eggRepository.discardFavorites(it.associatedNest(), it.viewEggId())
+                it.discard()
+            },
+            { eventRegistry.register(EggNotFound(eggIdShell)) },
+        )
         .let { processEventsAndSync() }
 
     fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit> = find(eggIdShell)

@@ -1,0 +1,57 @@
+schema_version: 1
+last_reviewed: 2026-05-25
+flow_family: favorites
+applies_interaction_rules_from: specs/interaction.yaml
+flows:
+  - id: view_favorite_commands
+    commands:
+      - f?
+      - f
+    user_experience:
+      help_command:
+        - f? prints an Available Favorite commands section listing f?, f, f[0-9], f[0-9]Command, f+[0-9][EggId], and f-[0-9]
+      view_command:
+        - f lists Favorite EggIds for the current Nest only
+        - populated Favorite slots print one line each as <slot>: <EggId>
+        - empty Favorite slots are omitted from the listing
+        - if the current Nest has no Favorite EggIds, Passbird prints Favorite EggIds are empty.
+        - both commands use the same leading and trailing blank-line spacing pattern as other secondary help and info commands
+  - id: copy_or_use_favorite
+    commands:
+      - f[0-9]
+      - f[0-9]Command
+    user_experience:
+      copy_command:
+        - if the selected Favorite slot contains an EggId, Passbird copies that EggId to the clipboard
+        - on successful clipboard update, Passbird prints EggId copied to clipboard.
+        - if the selected Favorite slot is empty, Passbird prints Favorite entry at slot <slot> does not exist.
+      use_command:
+        - if the selected Favorite slot contains an EggId, Passbird prepends the requested command fragment and re-enters normal command handling with that EggId
+        - the delegated command behaves exactly as if the user had typed the resolved command directly
+        - if the selected Favorite slot is empty, Passbird prints Favorite entry at slot <slot> does not exist.
+      finish:
+        - both commands end with a blank line after their main output
+  - id: assign_or_clear_favorite
+    commands:
+      - f+[0-9][EggId]
+      - f-[0-9]
+    user_experience:
+      assign_command:
+        - f+[0-9][EggId] only resolves Eggs from the current Nest
+        - if the Egg exists in the current Nest, Passbird stores its EggId in the selected Favorite slot and prints no dedicated success line
+        - if the Egg does not exist in the current Nest, Passbird emits the standard not-found event output Egg '<EggId>' not found.
+        - the not-found event also triggers the warning sound defined in specs/interaction.yaml
+      clear_command:
+        - f-[0-9] clears the selected Favorite slot for the current Nest
+        - clearing an already-empty slot is allowed and prints no dedicated success line
+      finish:
+        - both commands end with a blank line
+  - id: favorite_lifecycle_consistency
+    trigger:
+      - an Egg or Nest change would otherwise leave a stored Favorite pointing at stale or moved state
+    user_experience:
+      - Favorites are scoped per Nest and persisted in passbird.tree
+      - renaming an Egg updates matching Favorite slots in that Egg's Nest
+      - discarding or moving an Egg clears matching Favorite slots in the source Nest
+      - moving an Egg does not create or copy a Favorite entry in the target Nest automatically
+      - discarding a Nest clears every Favorite slot owned by that Nest

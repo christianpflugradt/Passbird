@@ -17,7 +17,10 @@ interface PasswordService {
     fun eggExists(eggIdShell: Shell, slot: Slot): Boolean
     fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction): Boolean
     fun proteinExists(eggIdShell: Shell, slot: Slot): Boolean
+    fun viewFavorites(): Slots<Shell>
+    fun viewFavoriteEntry(slot: Slot): Option<Shell>
     fun viewMemory(): Slots<Shell>
+    fun putFavorite(slot: Slot, eggIdShell: Shell): TryResult<Unit>
     fun viewMemoryEntry(slot: Slot): Option<Shell>
     fun viewPassword(eggIdShell: Shell): Option<Shell>
     fun viewProteinStructure(eggIdShell: Shell, slot: Slot): Option<Shell>
@@ -29,6 +32,7 @@ interface PasswordService {
     fun putEggs(eggs: Stream<ShellPair>): TryResult<Unit>
     fun putEgg(eggIdShell: Shell, passwordShell: Shell): TryResult<Unit>
     fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell): TryResult<Unit>
+    fun discardFavorite(slot: Slot): TryResult<Unit>
     fun discardEgg(eggIdShell: Shell): TryResult<Unit>
     fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit>
     fun moveEgg(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit>

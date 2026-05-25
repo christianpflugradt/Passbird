@@ -12,6 +12,8 @@ import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.application.keystore.KeyStoreFormat
 import de.pflugradts.passbird.application.keystore.KeyStoreFormatDetector
+import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadReader
+import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadWriter
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
@@ -55,6 +57,7 @@ class KeyStoreFormatMigrationIntegrationTest {
     private val systemOperation = SystemOperation()
     private val keyStoreFormatDetector = KeyStoreFormatDetector()
     private val passwordTreeEnvelope = PasswordTreeEnvelope()
+    private val legacyPasswordTreePayloadWriter = LegacyPasswordTreePayloadWriter()
     private val passwordTreePayloadWriter = PasswordTreePayloadWriter()
     private lateinit var homeDirectory: Path
     private lateinit var keyStoreFile: Path
@@ -127,7 +130,7 @@ class KeyStoreFormatMigrationIntegrationTest {
             passwordTreeKeyDerivationMigrationService = PasswordTreeKeyDerivationMigrationService(
                 configuration = configuration,
                 passwordTreeEnvelope = passwordTreeEnvelope,
-                passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
+                legacyPasswordTreePayloadReader = LegacyPasswordTreePayloadReader(configuration, systemOperation),
                 passwordTreePayloadWriter = passwordTreePayloadWriter,
                 systemOperation = systemOperation,
             ),
@@ -190,7 +193,7 @@ class KeyStoreFormatMigrationIntegrationTest {
     }
 
     private fun writeLegacyPasswordTree(snapshot: PasswordTreeSnapshot, legacyCryptoProvider: CryptoProvider) {
-        Files.write(passwordTreeFile, legacyCryptoProvider.encrypt(passwordTreePayloadWriter.write(snapshot)).toByteArray())
+        Files.write(passwordTreeFile, legacyCryptoProvider.encrypt(legacyPasswordTreePayloadWriter.write(snapshot)).toByteArray())
     }
 
     private fun createLegacySnapshot(legacyCryptoProvider: CryptoProvider): PasswordTreeSnapshot {

@@ -4,6 +4,7 @@ import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captur
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.factory.CommandFactory
+import de.pflugradts.passbird.application.commandhandling.factory.FavoriteCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.ListCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.MemoryCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.NestCommandFactory
@@ -105,6 +106,7 @@ class InvalidCommandTest {
     @Nested
     inner class CommandFactoryTest {
         private val commandFactory = CommandFactory(
+            favoriteCommandFactory = FavoriteCommandFactory(),
             listCommandFactory = ListCommandFactory(),
             memoryCommandFactory = MemoryCommandFactory(),
             nestCommandFactory = NestCommandFactory(),

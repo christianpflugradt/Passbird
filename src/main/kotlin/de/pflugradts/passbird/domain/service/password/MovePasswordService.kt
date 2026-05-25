@@ -13,13 +13,19 @@ import jakarta.inject.Inject
 class MovePasswordService @Inject constructor(
     cryptoProvider: CryptoProvider,
     eggRepository: EggRepository,
-    private val eventRegistry: EventRegistry,
+    eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
     fun movePassword(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit> {
         if (eggExists(eggIdShell, targetSlot)) {
             throw EggIdAlreadyExistsException(eggIdShell)
         } else {
-            find(eggIdShell).ifPresentOrElse({ it.moveToNestAt(targetSlot) }, { eventRegistry.register(EggNotFound(eggIdShell)) })
+            find(eggIdShell).ifPresentOrElse(
+                {
+                    eggRepository.discardFavorites(it.associatedNest(), it.viewEggId())
+                    it.moveToNestAt(targetSlot)
+                },
+                { eventRegistry.register(EggNotFound(eggIdShell)) },
+            )
             return processEventsAndSync()
         }
     }

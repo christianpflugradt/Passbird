@@ -37,6 +37,7 @@ class PasswordTreeWriter @Inject constructor(
             passwordTreePayloadWriter.write(
                 PasswordTreeSnapshot(
                     eggs = eggs,
+                    favorites = eggSupplier.favorites(),
                     memory = eggSupplier.memory(),
                     nests = (FIRST_SLOT..LAST_SLOT).map { slot ->
                         nestService.atNestSlot(slotAt(slot)).map { it.viewNestId() }.orElse(emptyShell())

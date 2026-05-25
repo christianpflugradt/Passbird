@@ -47,11 +47,13 @@ command_surface:
       - h
       - q
       - n
+      - f?
       - m?
       - p?
       - s?
     secondary_help_menus:
       - n displays current Nest state plus Nest-specific commands
+      - f? displays Favorites-specific commands
       - m? displays Memory-specific commands
       - p? displays Protein-specific commands
       - s? displays available password configurations plus Set-specific commands
@@ -81,6 +83,12 @@ command_surface:
     - n+[1-9]
     - n-[1-9]
     - n[EggId]
+    - f?
+    - f
+    - f[0-9]
+    - f[0-9][Command...]
+    - f+[0-9][EggId]
+    - f-[0-9]
     - m?
     - m
     - m[0-9]
@@ -141,6 +149,18 @@ capabilities:
       - p[0-9][EggId]
       - p+[0-9][EggId]
       - p-[0-9][EggId]
+  - name: favorites
+    user_outcomes:
+      - pin frequently used EggIds per Nest
+      - list the pinned EggIds for the current Nest
+      - reuse a pinned EggId without retyping it
+    commands:
+      - f?
+      - f
+      - f[0-9]
+      - f[0-9][Command...]
+      - f+[0-9][EggId]
+      - f-[0-9]
   - name: import_export
     user_outcomes:
       - export all Eggs or selected Nests into passbird-export.json

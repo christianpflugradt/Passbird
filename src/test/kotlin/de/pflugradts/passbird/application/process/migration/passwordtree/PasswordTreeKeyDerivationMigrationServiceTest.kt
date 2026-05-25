@@ -5,6 +5,8 @@ import de.pflugradts.passbird.adapter.passwordtree.PasswordTreeReader
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadReader
+import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadWriter
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
@@ -38,6 +40,7 @@ class PasswordTreeKeyDerivationMigrationServiceTest {
     private val configuration = mockk<Configuration>()
     private val systemOperation = SystemOperation()
     private val passwordTreeEnvelope = PasswordTreeEnvelope()
+    private val legacyPasswordTreePayloadWriter = LegacyPasswordTreePayloadWriter()
     private val passwordTreePayloadWriter = PasswordTreePayloadWriter()
     private lateinit var passwordTreeDirectory: Path
     private lateinit var passwordTreeFile: Path
@@ -82,6 +85,7 @@ class PasswordTreeKeyDerivationMigrationServiceTest {
         expectThat(
             restored.memory()[Slot.S3].get()[0].map { currentCryptoProvider.decrypt(it).asString() }.orElse(""),
         ) isEqualTo "bank"
+        expectThat(restored.favorites()[Slot.DEFAULT].get().any { it.isPresent }).isEqualTo(false)
         expectThat(restoredNestService.atNestSlot(Slot.S1).get().viewNestId().asString()) isEqualTo "work"
         expectThat(restoredNestService.atNestSlot(Slot.S3).get().viewNestId().asString()) isEqualTo "finance"
     }
@@ -129,13 +133,13 @@ class PasswordTreeKeyDerivationMigrationServiceTest {
         snapshot: PasswordTreeSnapshot,
         legacyCryptoProvider: de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider,
     ) {
-        Files.write(passwordTreeFile, legacyCryptoProvider.encrypt(passwordTreePayloadWriter.write(snapshot)).toByteArray())
+        Files.write(passwordTreeFile, legacyCryptoProvider.encrypt(legacyPasswordTreePayloadWriter.write(snapshot)).toByteArray())
     }
 
     private fun createMigrationService() = PasswordTreeKeyDerivationMigrationService(
         configuration = configuration,
         passwordTreeEnvelope = passwordTreeEnvelope,
-        passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
+        legacyPasswordTreePayloadReader = LegacyPasswordTreePayloadReader(configuration, systemOperation),
         passwordTreePayloadWriter = passwordTreePayloadWriter,
         systemOperation = systemOperation,
     )

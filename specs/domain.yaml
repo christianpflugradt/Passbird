@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-24
+last_reviewed: 2026-05-25
 domain_language:
   - term: Egg
     meaning: aggregate root representing one password entry and its associated proteins in a specific nest
@@ -11,8 +11,10 @@ domain_language:
     meaning: additional structured secret or metadata entry attached to an Egg
   - term: EggIdMemory
     meaning: short-term memory of recently used EggIds, maintained per nest
+  - term: EggIdFavorites
+    meaning: persistent quick-access EggId slots, maintained per nest
   - term: Slot
-    meaning: bounded numeric position used for nests, proteins, and memory
+    meaning: bounded numeric position used for nests, proteins, favorites, and memory
   - term: Shell
     meaning: byte-oriented value object used to keep secret data out of String-first APIs
   - term: PlainShell
@@ -64,6 +66,14 @@ user_command_families:
       - m
       - m[0-9]
       - m[0-9]Command
+  - family: favorites
+    commands:
+      - f?
+      - f
+      - f[0-9]
+      - f[0-9]Command
+      - f+[0-9][EggId]
+      - f-[0-9]
   - family: custom_password
     commands:
       - s?
@@ -74,12 +84,17 @@ state_and_limits:
     default_slot: 0
     additional_slots: 1-9
   proteins_per_egg: 10
+  favorites_per_nest: 10
   memory_entries_per_nest: 10
   custom_password_configurations: up_to_9_plus_default
 important_domain_invariants:
   - Egg identity is tied to EggId plus associated nest
   - egg operations emit domain events such as created, updated, renamed, moved, or discarded
   - protein operations emit create, update, and discard events
+  - favorites are per nest, persist in the password tree, and use fixed slots
+  - renaming an Egg updates matching favorites in that Egg's nest
+  - discarding or moving an Egg clears matching favorites in the source nest
+  - discarding a Nest clears every favorite stored for that Nest
   - memory is per nest and may be disabled or non-persistent via configuration
   - user-facing Unicode support is intentionally not guaranteed; README warns against Unicode input
   - list filtering is case-insensitive while preserving the original EggId casing in output
@@ -88,6 +103,7 @@ persistence_mapping:
     contains:
       - encrypted eggs
       - nest metadata
+      - persisted favorites
       - persisted memory when enabled
   - artifact: passbird.sec
     contains:

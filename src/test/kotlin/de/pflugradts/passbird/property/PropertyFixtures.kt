@@ -3,7 +3,9 @@ package de.pflugradts.passbird.property
 import de.pflugradts.passbird.application.PasswordInfoMap
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
+import de.pflugradts.passbird.domain.model.egg.EggIdFavorites
 import de.pflugradts.passbird.domain.model.egg.EggIdMemory
+import de.pflugradts.passbird.domain.model.egg.FavoriteMap
 import de.pflugradts.passbird.domain.model.egg.MemoryMap
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
@@ -27,10 +29,12 @@ data class PlainEggData(
 )
 
 data class MemoryCell(val nestSlot: Slot, val memorySlot: Slot)
+data class FavoriteCell(val nestSlot: Slot, val favoriteSlot: Slot)
 
 data class PasswordTreeFixture(
     val nests: Map<Slot, String>,
     val eggs: List<PlainEggData>,
+    val favorites: Map<FavoriteCell, String>,
     val memory: Map<MemoryCell, String>,
 )
 
@@ -49,8 +53,8 @@ data class ExchangeFixture(val nests: Map<Slot, ExchangeNestData>)
 
 fun passwordTreeFixtures(): Arbitrary<PasswordTreeFixture> = explicitNests().flatMap { nests ->
     val slots = listOf(Slot.DEFAULT) + nests.keys.sortedBy(Slot::index)
-    Combinators.combine(plainEggs(slots), memoryEntries()).`as` { eggs, memory ->
-        PasswordTreeFixture(nests = nests, eggs = eggs, memory = memory)
+    Combinators.combine(plainEggs(slots), favoriteEntries(), memoryEntries()).`as` { eggs, favorites, memory ->
+        PasswordTreeFixture(nests = nests, eggs = eggs, favorites = favorites, memory = memory)
     }
 }
 
@@ -77,7 +81,7 @@ fun byteContents(): Arbitrary<List<Byte>> = Arbitraries.bytes().list().ofMaxSize
 
 fun PasswordTreeFixture.toEggStreamSupplier(cryptoProvider: CryptoProvider): EggStreamSupplier {
     val eggs = eggs.map { egg -> egg.toEgg(cryptoProvider) }
-    return EggStreamSupplier({ eggs.stream() }, toMemoryMap(cryptoProvider))
+    return EggStreamSupplier({ eggs.stream() }, toMemoryMap(cryptoProvider), toFavoriteMap(cryptoProvider))
 }
 
 fun PasswordTreeFixture.populateNests(nestService: NestService) {
@@ -93,6 +97,8 @@ fun normalizeExplicitNests(nestService: NestService): Map<Slot, String> = Slot.e
     }.toMap().toSortedMap(compareBy(Slot::index))
 
 fun PasswordTreeFixture.normalizedEggs(): List<PlainEggData> = eggs
+fun PasswordTreeFixture.normalizedFavorites(): Map<FavoriteCell, String> =
+    favorites.toSortedMap(compareBy(FavoriteCell::nestSlot, FavoriteCell::favoriteSlot))
 
 fun normalizeEggs(eggs: List<Egg>, cryptoProvider: CryptoProvider): List<PlainEggData> = eggs.map { egg ->
     PlainEggData(
@@ -122,6 +128,18 @@ fun normalizeMemory(memory: MemoryMap, cryptoProvider: CryptoProvider): Map<Memo
         }
     }
 }.toSortedMap(compareBy(MemoryCell::nestSlot, MemoryCell::memorySlot))
+
+fun normalizeFavorites(favorites: FavoriteMap, cryptoProvider: CryptoProvider): Map<FavoriteCell, String> = buildMap {
+    Slot.entries.forEach { nestSlot ->
+        favorites[nestSlot].get().let { eggIdFavorites ->
+            Slot.entries.forEach { favoriteSlot ->
+                eggIdFavorites[favoriteSlot].ifPresent { encryptedShell ->
+                    put(FavoriteCell(nestSlot, favoriteSlot), cryptoProvider.decrypt(encryptedShell).asString())
+                }
+            }
+        }
+    }
+}.toSortedMap(compareBy(FavoriteCell::nestSlot, FavoriteCell::favoriteSlot))
 
 fun ExchangeFixture.toPasswordInfoMap(): PasswordInfoMap = nests.entries.associate { (slot, nestData) ->
     createNest(shellOf(nestData.nestId), slot) to nestData.eggs.map(PlainPasswordInfoData::toPasswordInfo)
@@ -177,6 +195,13 @@ private fun memoryEntries(): Arbitrary<Map<MemoryCell, String>> =
         }
     }
 
+private fun favoriteEntries(): Arbitrary<Map<FavoriteCell, String>> =
+    Arbitraries.of(allFavoriteCells).list().uniqueElements().ofMaxSize(12).flatMap { cells ->
+        textValues().list().ofSize(cells.size).map { values ->
+            cells.zip(values).toMap().toSortedMap(compareBy(FavoriteCell::nestSlot, FavoriteCell::favoriteSlot))
+        }
+    }
+
 private fun plainPasswordInfoLists(): Arbitrary<List<PlainPasswordInfoData>> = plainPasswordInfoData().list().ofMaxSize(6)
 
 private fun plainPasswordInfoData(): Arbitrary<PlainPasswordInfoData> = Combinators.combine(
@@ -218,10 +243,24 @@ private fun PasswordTreeFixture.toMemoryMap(cryptoProvider: CryptoProvider): Mem
     }
 }
 
+private fun PasswordTreeFixture.toFavoriteMap(cryptoProvider: CryptoProvider): FavoriteMap = Slots<EggIdFavorites>().apply {
+    Slot.entries.forEach { nestSlot ->
+        this[nestSlot] = toEggIdFavorites(nestSlot, cryptoProvider)
+    }
+}
+
 private fun PasswordTreeFixture.toEggIdMemory(nestSlot: Slot, cryptoProvider: CryptoProvider): EggIdMemory = EggIdMemory().apply {
     Slot.entries.forEach { memorySlot ->
         memory[MemoryCell(nestSlot, memorySlot)]?.let { eggId ->
             this[memorySlot].set(cryptoProvider.encrypt(shellOf(eggId)))
+        }
+    }
+}
+
+private fun PasswordTreeFixture.toEggIdFavorites(nestSlot: Slot, cryptoProvider: CryptoProvider): EggIdFavorites = EggIdFavorites().apply {
+    Slot.entries.forEach { favoriteSlot ->
+        favorites[FavoriteCell(nestSlot, favoriteSlot)]?.let { eggId ->
+            assign(favoriteSlot, cryptoProvider.encrypt(shellOf(eggId)))
         }
     }
 }
@@ -234,5 +273,8 @@ private fun PlainPasswordInfoData.toPasswordInfo() = (shellOf(eggId) to shellOf(
 
 private val ALLOWED_TEXT_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !@#\$%^&*()_-+=[]{}:;,.?/|~\t\n"
 private val nonDefaultSlotEntries = Slot.entries.filterNot { it == Slot.DEFAULT }
+private val allFavoriteCells = Slot.entries.flatMap { nestSlot ->
+    Slot.entries.map { favoriteSlot -> FavoriteCell(nestSlot, favoriteSlot) }
+}
 private val allMemoryCells = Slot.entries.flatMap { nestSlot -> Slot.entries.map { memorySlot -> MemoryCell(nestSlot, memorySlot) } }
 private val emptyProteinPair = emptyShell() to emptyShell()

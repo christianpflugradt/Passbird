@@ -9,6 +9,7 @@ import jakarta.inject.Inject
 import java.util.stream.Stream
 
 class PasswordFacade @Inject constructor(
+    private val favoritePasswordService: FavoritePasswordService,
     private val putPasswordService: PutPasswordService,
     private val viewPasswordService: ViewPasswordService,
     private val discardPasswordService: DiscardPasswordService,
@@ -19,7 +20,10 @@ class PasswordFacade @Inject constructor(
     override fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction) =
         viewPasswordService.eggExists(eggIdShell, eggNotExistsAction)
     override fun proteinExists(eggIdShell: Shell, slot: Slot) = viewPasswordService.proteinExists(eggIdShell, slot)
+    override fun viewFavorites() = favoritePasswordService.viewFavorites()
+    override fun viewFavoriteEntry(slot: Slot) = favoritePasswordService.viewFavoriteEntry(slot)
     override fun viewMemory() = viewPasswordService.viewMemory()
+    override fun putFavorite(slot: Slot, eggIdShell: Shell) = favoritePasswordService.putFavorite(slot, eggIdShell)
     override fun viewMemoryEntry(slot: Slot) = viewPasswordService.viewMemoryEntry(slot)
     override fun viewPassword(eggIdShell: Shell) = viewPasswordService.viewPassword(eggIdShell)
     override fun viewProteinStructure(eggIdShell: Shell, slot: Slot) = viewPasswordService.viewProteinStructure(eggIdShell, slot)
@@ -35,6 +39,7 @@ class PasswordFacade @Inject constructor(
     override fun putEgg(eggIdShell: Shell, passwordShell: Shell): TryResult<Unit> = putPasswordService.putEgg(eggIdShell, passwordShell)
     override fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell): TryResult<Unit> =
         putPasswordService.putProtein(eggIdShell, slot, typeShell, structureShell)
+    override fun discardFavorite(slot: Slot): TryResult<Unit> = favoritePasswordService.discardFavorite(slot)
     override fun discardEgg(eggIdShell: Shell): TryResult<Unit> = discardPasswordService.discardEgg(eggIdShell)
     override fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit> = discardPasswordService.discardProtein(eggIdShell, slot)
     override fun moveEgg(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit> = movePasswordService.movePassword(eggIdShell, targetSlot)

@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-24
+last_reviewed: 2026-05-25
 security_posture:
   classification: high_sensitivity_local_secret_manager
   posture:
@@ -14,6 +14,7 @@ security_posture:
 sensitive_assets:
   - master password entered by the user
   - keystore secret stored in passbird.sec
+  - decrypted EggIds and Favorite mappings
   - decrypted password and protein content
   - password tree bytes in passbird.tree
   - exported plaintext-equivalent password data in passbird-export.json
@@ -26,7 +27,7 @@ current_security_relevant_implementation:
       - src/main/kotlin/de/pflugradts/passbird/application/process/migration/MigrationProcessing.kt
     facts:
       - startup may be routed into a dedicated migration boot path before the main application boot path starts
-      - migration routing exists for compatibility-sensitive persistence changes such as keystore or password-tree format work
+      - migration routing exists for compatibility-sensitive persistence changes such as keystore work, password-tree key-derivation updates, and password-tree format extensions
       - migration authentication may reuse one successful keystore unlock across multiple migrations within the same migration boot run
       - migration boot may require a separate authenticated session from the normal application startup and exits after reporting success instead of continuing into the main loop
   crypto_provider_factory:
@@ -78,8 +79,8 @@ current_security_relevant_implementation:
       - treats password tree decrypt or read failures as fatal instead of falling back to an empty restore state
       - only publishes mutating password-operation success events after password tree sync succeeds
       - can exit immediately when verification is configured as critical
-      - stores eggs, nests, and optionally persisted memory in a custom binary layout before encryption
-      - detects legacy pre-envelope password tree files before main startup and routes them through the dedicated migration boot path
+      - stores eggs, nests, per-nest Favorite slots, and optionally persisted memory in a custom binary layout before encryption
+      - detects both legacy pre-envelope password tree files and legacy current-format trees that require a Favorites migration before main startup
   build_supply_chain:
     files:
       - gradle/verification-metadata.xml

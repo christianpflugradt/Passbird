@@ -31,7 +31,9 @@ class PasswordTreeKeyDerivationMigrationDetector @Inject constructor(
     }
 
     private fun migrationRequired() = systemOperation.exists(filePath) &&
-        systemOperation.readBytesFromFile(filePath).let { bytes -> bytes.isNotEmpty() && !passwordTreeEnvelope.isCurrent(bytes) }
+        systemOperation.readBytesFromFile(filePath).let { bytes ->
+            bytes.isNotEmpty() && !passwordTreeEnvelope.isCurrent(bytes) && !passwordTreeEnvelope.isLegacyCurrent(bytes)
+        }
 
     private val filePath get() = systemOperation.resolvePath(
         configuration.adapter.passwordTree.location.toDirectory(),

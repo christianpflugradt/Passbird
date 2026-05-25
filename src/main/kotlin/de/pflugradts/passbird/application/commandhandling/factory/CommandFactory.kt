@@ -25,6 +25,7 @@ import jakarta.inject.Singleton
 
 @Singleton
 class CommandFactory @Inject constructor(
+    private val favoriteCommandFactory: FavoriteCommandFactory,
     private val listCommandFactory: ListCommandFactory,
     private val memoryCommandFactory: MemoryCommandFactory,
     private val nestCommandFactory: NestCommandFactory,
@@ -55,6 +56,7 @@ class CommandFactory @Inject constructor(
     }
 
     private fun constructViaSpecialFactory(commandType: CommandType, input: Input) = when (commandType) {
+        CommandType.FAVORITE -> constructSafely(favoriteCommandFactory, input)
         CommandType.LIST -> constructSafely(listCommandFactory, input)
         CommandType.MEMORY -> constructSafely(memoryCommandFactory, input)
         CommandType.NEST -> constructSafely(nestCommandFactory, input)

@@ -172,4 +172,13 @@ class NestingGroundServiceTest {
         expectThat(actual.get().slot) isEqualTo Slot.S3
         verify(exactly = 1) { eggRepository.sync() }
     }
+
+    @Test
+    fun `should clear favorites when discarding nest`() {
+        nestingGroundService.place(shellOf("Nest"), Slot.S3)
+
+        nestingGroundService.discardNestAt(Slot.S3)
+
+        verify(exactly = 1) { eggRepository.discardFavorites(Slot.S3) }
+    }
 }

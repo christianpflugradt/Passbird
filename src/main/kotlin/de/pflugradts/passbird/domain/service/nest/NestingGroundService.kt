@@ -51,6 +51,7 @@ class NestingGroundService @Inject constructor(
     }
     override fun discardNestAt(slot: Slot) {
         atNestSlot(slot).ifPresent { it.discard() }
+        eggRepository.discardFavorites(slot)
         nests[slot.nestIndex()] = EMPTY_NEST_SUPPLIER.get()
         eventRegistry.processEvents()
     }

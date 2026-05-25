@@ -45,6 +45,7 @@ class DiscardPasswordServiceTest {
         // then
         verify(exactly = 1) { eventRegistry.processEvents() }
         verify(exactly = 1) { eggRepository.sync() }
+        verify(exactly = 1) { eggRepository.discardFavorites(givenEgg.associatedNest(), givenEgg.viewEggId()) }
         expectThat(givenEgg.viewPassword()) isNotEqualTo givenPassword.fakeEnc()
     }
 
@@ -67,6 +68,7 @@ class DiscardPasswordServiceTest {
         expectThat(eggNotFoundSlot.captured.eggIdShell) isEqualTo otherEggId
         verify(exactly = 1) { eventRegistry.processEvents() }
         verify(exactly = 1) { eggRepository.sync() }
+        verify(exactly = 0) { eggRepository.discardFavorites(any(), any()) }
     }
 
     @Test

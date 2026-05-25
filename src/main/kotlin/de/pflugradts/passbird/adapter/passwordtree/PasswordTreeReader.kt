@@ -29,7 +29,7 @@ class PasswordTreeReader @Inject constructor(
     fun restore(): EggStreamSupplier {
         val snapshot = passwordTreePayloadReader.read(readFromDisk())
         nestService.populate(snapshot.nests)
-        return EggStreamSupplier({ snapshot.eggs.stream() }, snapshot.memory)
+        return EggStreamSupplier({ snapshot.eggs.stream() }, snapshot.memory, snapshot.favorites)
     }
 
     private fun readFromDisk() = tryCatching {
