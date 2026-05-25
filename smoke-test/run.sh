@@ -310,6 +310,24 @@ assert_smoke_config() {
     assert_contains "$config_path" "length: 4"
 }
 
+read_clipboard_with_java() {
+    local reader="$TMP_ROOT/ReadClipboard.java"
+    if [[ ! -f "$reader" ]]; then
+        cat > "$reader" <<'EOF'
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+
+class ReadClipboard {
+    public static void main(String[] args) throws Exception {
+        Object clipboardData = Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+        System.out.print(clipboardData == null ? "" : clipboardData.toString());
+    }
+}
+EOF
+    fi
+    java "$reader"
+}
+
 read_clipboard() {
     local clipboard=""
     local supported_targets=""
@@ -319,6 +337,9 @@ read_clipboard() {
         pbpaste
     elif command -v wl-paste >/dev/null 2>&1; then
         wl-paste -n
+    elif clipboard="$(read_clipboard_with_java 2>/dev/null)"; then
+        printf '%s' "$clipboard"
+        return 0
     elif command -v xclip >/dev/null 2>&1; then
         supported_targets="$(xclip -o -selection clipboard -t TARGETS 2>/dev/null | tr '\r\n' '  ' || true)"
         for target in "${xclip_targets[@]}"; do
