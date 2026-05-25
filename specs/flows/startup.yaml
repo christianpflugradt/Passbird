@@ -44,9 +44,52 @@ flows:
       - each command flow is responsible for its own result output and spacing before the next prompt appears
     exit_rule:
       - a raw interrupt character entered as the command with no trailing data ends the loop without extra output from PassbirdApplication itself
+      - this raw interrupt path bypasses the quit command handler, finalizers, inactivity hint, and farewell block
   - id: inactivity_and_quit
     trigger:
       - a running session becomes inactive or the user exits
-    user_experience:
-      - inactivity checking is configuration-controlled
-      - exact quit output and exact inactivity-visible behavior are specified elsewhere and remain to be detailed
+    inactivity_monitoring_rules:
+      - inactivity checking runs only if application.inactivityLimit.enabled is true
+      - when enabled, Passbird starts a daemon timer at boot that checks inactivity every 10 seconds
+      - the inactivity threshold is exceeded only when elapsed idle time is strictly greater than application.inactivityLimit.limitInMinutes multiplied by 60 seconds
+      - each received non-interrupt command input refreshes the last-interaction timestamp before the command handler runs
+    user_quit_command:
+      accepted_command_shape:
+        - q
+      rejected_command_shapes:
+        - any additional command characters after q
+        - any trailing argument data after q
+      exact_parse_failure_behavior:
+        - parse rejection happens before the quit handler starts
+        - on parse rejection, Passbird performs no finalizer run and no process exit
+        - parse rejection is reported to standard error as Command execution failed: Parameter for command 'q' not supported: <UnsupportedParameter>
+      exact_visible_behavior:
+        - on accepted q, Passbird runs finalizers before printing the farewell block
+        - in the current product, the registered quit finalizer path does not emit user-visible output of its own
+        - after finalization, Passbird emits one empty line
+        - Passbird then prints exactly three farewell lines followed by one empty line
+      farewell_block_format:
+        - "  -,     <FarewellLine1>"
+        - " ( '<    <FarewellLine2>"
+        - "/ ) )    <FarewellLine3>"
+      farewell_content_rules:
+        - the three FarewellLine values are chosen together as one random farewell triplet from the fixed built-in farewell set
+        - user-triggered quit does not print the inactivity hint
+      termination_rule:
+        - after the farewell block, Passbird terminates the process
+    inactivity_termination:
+      trigger:
+        - the inactivity monitor detects elapsed idle time above the configured threshold
+      exact_visible_behavior:
+        - Passbird posts the same quit path with quit reason INACTIVITY
+        - because inactivity termination happens while the command prompt is already open, Passbird first ends the prompt line
+        - Passbird then emits one empty line
+        - Passbird prints Terminating Passbird due to inactivity.
+        - Passbird emits one empty line after the inactivity hint
+        - Passbird then prints the same three-line farewell block used for user-triggered quit
+        - Passbird emits one empty line after the farewell block and then terminates the process
+      observable_rules:
+        - inactivity termination requires no confirmation
+        - the inactivity hint appears only for quit reason INACTIVITY
+        - the same finalizers run before the inactivity hint and farewell block
+        - a raw interrupt character does not use this quit flow
