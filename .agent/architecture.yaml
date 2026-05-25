@@ -60,7 +60,8 @@ runtime_design:
   boot_sequence:
     - Main.kt validates the home directory argument and constructs the RunContext
     - LauncherModule binds the RunContext and selects the launcher boot path
-    - Launcher or setup boot path is selected via boot modules that carry the same RunContext
+    - Launcher, migration, or setup boot path is selected via boot modules that carry the same RunContext
+    - pre-launch migration detectors may route startup into a dedicated migration boot path before the main application may continue
     - ApplicationModule wires adapters, services, and handlers with Guice
     - PassbirdApplication enters the interactive command loop
   interaction_model:

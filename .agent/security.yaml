@@ -18,6 +18,16 @@ sensitive_assets:
   - password tree bytes in passbird.tree
   - exported plaintext-equivalent password data in passbird-export.json
 current_security_relevant_implementation:
+  migration_boot_path:
+    files:
+      - src/main/kotlin/de/pflugradts/passbird/application/boot/launcher/PassbirdLauncher.kt
+      - src/main/kotlin/de/pflugradts/passbird/application/boot/migration/MigrationModule.kt
+      - src/main/kotlin/de/pflugradts/passbird/application/boot/migration/PassbirdMigration.kt
+      - src/main/kotlin/de/pflugradts/passbird/application/process/migration/MigrationProcessing.kt
+    facts:
+      - startup may be routed into a dedicated migration boot path before the main application boot path starts
+      - migration routing exists for compatibility-sensitive persistence changes such as keystore or password-tree format work
+      - migration boot exits after running instead of continuing into the normal application in the same process
   crypto_provider_factory:
     file: src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
     facts:

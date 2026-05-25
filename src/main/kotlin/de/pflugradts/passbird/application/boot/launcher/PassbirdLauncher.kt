@@ -5,8 +5,10 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.boot.bootModule
 import de.pflugradts.passbird.application.boot.main.ApplicationModule
+import de.pflugradts.passbird.application.boot.migration.MigrationModule
 import de.pflugradts.passbird.application.boot.setup.SetupModule
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.process.migration.PreLaunchMigrationLocator
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -33,6 +35,7 @@ private const val SLOGAN = "\tguarding your digital nest with secure feathers"
 
 class PassbirdLauncher @Inject constructor(
     private val configuration: ReadableConfiguration,
+    private val preLaunchMigrationLocator: PreLaunchMigrationLocator,
     private val runContext: RunContext,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val systemOperation: SystemOperation,
@@ -44,7 +47,15 @@ class PassbirdLauncher @Inject constructor(
     override fun boot() {
         sendLicenseNotice()
         sendBanner()
-        bootModule(if (keystoreExists()) ApplicationModule(runContext) else SetupModule(runContext))
+        bootModule(
+            if (!keystoreExists()) {
+                SetupModule(runContext)
+            } else {
+                preLaunchMigrationLocator.detect().let { migrationRequest ->
+                    if (migrationRequest.required) MigrationModule(runContext, migrationRequest) else ApplicationModule(runContext)
+                }
+            },
+        )
     }
 
     private fun keystoreExists() = keyStoreLocation.isNotEmpty() &&

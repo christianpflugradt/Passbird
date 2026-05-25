@@ -5,11 +5,15 @@ import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.main.ApplicationModule
+import de.pflugradts.passbird.application.boot.migration.MigrationModule
 import de.pflugradts.passbird.application.boot.setup.SetupModule
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.mockMain
+import de.pflugradts.passbird.application.process.migration.MigrationRequest
+import de.pflugradts.passbird.application.process.migration.PendingMigration
+import de.pflugradts.passbird.application.process.migration.PreLaunchMigrationLocator
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.unmockMain
@@ -20,6 +24,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,15 +34,23 @@ import strikt.assertions.isA
 class PassbirdLauncherTest {
 
     private val configuration = mockk<Configuration>(relaxed = true)
+    private val preLaunchMigrationLocator = mockk<PreLaunchMigrationLocator>()
     private val runContext: RunContext = PassbirdRunContext("/tmp".toDirectory(), Slot.DEFAULT)
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val systemOperation = mockk<SystemOperation>(relaxed = true)
-    private val passbirdLauncher = PassbirdLauncher(configuration, runContext, userInterfaceAdapterPort, systemOperation)
+    private val passbirdLauncher = PassbirdLauncher(
+        configuration,
+        preLaunchMigrationLocator,
+        runContext,
+        userInterfaceAdapterPort,
+        systemOperation,
+    )
     private val moduleSlot = slot<Module>()
 
     @BeforeEach
     fun setup() {
         mockMain(moduleSlot)
+        every { preLaunchMigrationLocator.detect() } returns MigrationRequest.empty()
     }
 
     @AfterEach
@@ -70,6 +83,33 @@ class PassbirdLauncherTest {
     }
 
     @Test
+    fun `should launch migration if migration is required`() {
+        // given
+        val keyStoreDirectoryName = "/tmp"
+        val keyStoreFileName = KEYSTORE_FILENAME
+        val keyStoreFilePath = fakePath()
+        fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectoryName)
+        fakeSystemOperation(
+            instance = systemOperation,
+            withDirectoryResolvingToFileName = Triple(
+                keyStoreDirectoryName.toDirectory(),
+                keyStoreFileName.toFileName(),
+                keyStoreFilePath,
+            ),
+        )
+        every { preLaunchMigrationLocator.detect() } returns MigrationRequest(setOf(PendingMigration("keystore-format")))
+        every { systemOperation.exists(keyStoreFilePath) } returns true
+
+        // when
+        passbirdLauncher.boot()
+
+        // then
+        expectThat(moduleSlot.captured).isA<MigrationModule>()
+        expectThat(moduleSlot.captured).not().isA<ApplicationModule>()
+        expectThat(moduleSlot.captured).not().isA<SetupModule>()
+    }
+
+    @Test
     fun `should launch setup if key store does not exist`() {
         // given
         val keyStoreDirectoryName = "/tmp"
@@ -92,6 +132,7 @@ class PassbirdLauncherTest {
         // then
         expectThat(moduleSlot.captured).isA<SetupModule>()
         expectThat(moduleSlot.captured).not().isA<ApplicationModule>()
+        verify(exactly = 0) { preLaunchMigrationLocator.detect() }
     }
 
     @Test
@@ -106,5 +147,6 @@ class PassbirdLauncherTest {
         // then
         expectThat(moduleSlot.captured).isA<SetupModule>()
         expectThat(moduleSlot.captured).not().isA<ApplicationModule>()
+        verify(exactly = 0) { preLaunchMigrationLocator.detect() }
     }
 }
