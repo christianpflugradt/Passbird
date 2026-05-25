@@ -63,8 +63,13 @@ areas:
       - changes generated password shape and whether destructive password updates require confirmation
       - changes which custom set configurations appear in s? help output and which s[1-9][EggId] commands are available
     behavioral_contract:
-      - the default set configuration is addressed as slot 0 in s? output and uses application.password.length plus application.password.specialCharacters
+      - the default set configuration is addressed as slot 0 in s? output and uses application.password.length plus application.password.specialCharacters while keeping numbers, lowercase letters, and uppercase letters enabled
       - custom password configurations are addressed by 1-based list position so the first entry backs s1[EggId], the second backs s2[EggId], and so on
+      - a password configuration is valid only if length is positive
+      - a password configuration is valid only if at least one character type is enabled across numbers, lowercase letters, uppercase letters, or special characters
+      - a password configuration is valid only if length is at least the number of enabled character-type groups
+      - if special characters are the only enabled character type, unusedSpecialCharacters may exclude at most 20 characters
+      - if special characters are enabled, at least one allowed special character must remain after excluding unusedSpecialCharacters
       - if a selected custom configuration slot does not exist in the configured list, Passbird aborts the set command with Specified configuration does not exist - Operation aborted.
       - if a selected custom configuration resolves to invalid password requirements, Passbird aborts the set command with Specified configuration is invalid - Operation aborted.
       - s? output prints each custom configuration name and length
