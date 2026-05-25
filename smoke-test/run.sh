@@ -311,12 +311,27 @@ assert_smoke_config() {
 }
 
 read_clipboard() {
+    local clipboard=""
+    local supported_targets=""
+    local target=""
+    local xclip_targets=("UTF8_STRING" "text/plain;charset=utf-8" "text/plain" "TEXT" "STRING")
     if command -v pbpaste >/dev/null 2>&1; then
         pbpaste
     elif command -v wl-paste >/dev/null 2>&1; then
         wl-paste -n
     elif command -v xclip >/dev/null 2>&1; then
-        xclip -o -selection clipboard
+        supported_targets="$(xclip -o -selection clipboard -t TARGETS 2>/dev/null | tr '\r\n' '  ' || true)"
+        for target in "${xclip_targets[@]}"; do
+            if [[ "$supported_targets" == *"$target"* ]] && clipboard="$(xclip -o -selection clipboard -t "$target" 2>/dev/null)"; then
+                printf '%s' "$clipboard"
+                return 0
+            fi
+        done
+        if clipboard="$(xclip -o -selection clipboard 2>/dev/null)"; then
+            printf '%s' "$clipboard"
+            return 0
+        fi
+        fail "Clipboard contents could not be read via xclip. Available targets: ${supported_targets:-unknown}"
     elif command -v xsel >/dev/null 2>&1; then
         xsel --clipboard --output
     else
