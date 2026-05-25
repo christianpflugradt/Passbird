@@ -39,6 +39,7 @@ current_security_relevant_implementation:
     file: src/main/kotlin/de/pflugradts/passbird/application/security/KeyStoreAuthenticationService.kt
     facts:
       - prompts for the keystore password through secure terminal input
+      - fails closed when secure input is enabled but no console is available instead of falling back to echoed stdin
       - invalidates secure input buffers after converting them for keystore access
       - treats empty and incorrect passwords as unsuccessful attempts
   keystore:

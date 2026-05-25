@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.boot.setup
 
 import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.ConfigurationSync
@@ -24,16 +25,19 @@ class PassbirdSetup @Inject constructor(
 ) : Bootable {
     override fun boot() {
         setupGuide.sendWelcome()
-        if (configuration.template) {
-            setupGuide.sendConfigTemplateRouteInformation()
-            if (continueRoute()) {
-                configTemplateRoute()
+        try {
+            if (configuration.template) {
+                setupGuide.sendConfigTemplateRouteInformation()
+                if (continueRoute()) {
+                    configTemplateRoute()
+                }
+            } else {
+                setupGuide.sendConfigKeyStoreRouteInformation(configuration.adapter.keyStore.location)
+                if (continueRoute()) {
+                    configKeyStoreRoute()
+                }
             }
-        } else {
-            setupGuide.sendConfigKeyStoreRouteInformation(configuration.adapter.keyStore.location)
-            if (continueRoute()) {
-                configKeyStoreRoute()
-            }
+        } catch (_: SecureInputUnavailableException) {
         }
         setupGuide.sendGoodbye()
         systemOperation.exit()
@@ -62,11 +66,17 @@ class PassbirdSetup @Inject constructor(
     private fun createConfiguration(directory: Directory) = configurationSync.sync(directory)
 
     private fun receiveMasterPassword(): PlainShell {
-        var input: Input
-        var inputRepeated: Input
+        var input: Input? = null
+        var inputRepeated: Input? = null
         while (true) {
-            input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("first input: ")))
-            inputRepeated = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("second input: ")))
+            try {
+                input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("first input: ")))
+                inputRepeated = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("second input: ")))
+            } catch (ex: SecureInputUnavailableException) {
+                input?.invalidate()
+                inputRepeated?.invalidate()
+                throw ex
+            }
             if (input.isNotEmpty && input == inputRepeated) {
                 val password = input.toPlainShell()
                 inputRepeated.invalidate()

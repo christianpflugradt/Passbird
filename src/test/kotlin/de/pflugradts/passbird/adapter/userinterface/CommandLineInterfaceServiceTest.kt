@@ -2,6 +2,7 @@ package de.pflugradts.passbird.adapter.userinterface
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemOut
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.mockSystemInWith
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -16,6 +17,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -164,33 +166,36 @@ class CommandLineInterfaceServiceTest {
         }
 
         @Test
-        fun `should receive secure input as plain if console is unavailable`() {
+        fun `should abort secure input if console is unavailable`() {
             // given
-            val givenInput = "hello world"
             fakeSystemOperation(instance = systemOperation, withConsoleEnabled = false)
             fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
 
             // when
-            val actual = mockSystemInWith("$givenInput\n") { commandLineInterfaceService.receiveSecurely() }
+            assertThrows<SecureInputUnavailableException> { commandLineInterfaceService.receiveSecurely() }
 
             // then
             verify(exactly = 0) { systemOperation.readPasswordFromConsole() }
-            expectThat(actual.shell.asString()) isEqualTo givenInput
         }
 
         @Test
-        fun `should receive secure input as plain with windows line ending if console is unavailable`() {
+        fun `should abort secure input after sending output if console is unavailable`() {
             // given
-            val givenInput = "semail"
+            val givenMessage = "hello world"
             fakeSystemOperation(instance = systemOperation, withConsoleEnabled = false)
             fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
+            val captureSystemOut = captureSystemOut()
 
             // when
-            val actual = mockSystemInWith("$givenInput\r\n") { commandLineInterfaceService.receiveSecurely() }
+            captureSystemOut.during {
+                assertThrows<SecureInputUnavailableException> {
+                    commandLineInterfaceService.receiveSecurely(outputOf(shellOf(givenMessage)))
+                }
+            }
 
             // then
             verify(exactly = 0) { systemOperation.readPasswordFromConsole() }
-            expectThat(actual.shell.asString()) isEqualTo givenInput
+            expectThat(captureSystemOut.capture) isEqualTo givenMessage
         }
     }
 

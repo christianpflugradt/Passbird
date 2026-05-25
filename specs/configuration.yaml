@@ -114,7 +114,7 @@ areas:
     visible_effects:
       - changes whether the startup banner and formatted CLI output use ANSI colors
       - changes whether abort-formatted output can trigger an audible terminal bell
-      - changes whether sensitive prompts use the console password reader or plain visible line input
+      - changes whether sensitive prompts require hidden console input or are allowed to use plain visible line input
   - name: memory_and_proteins
     keys:
       - domain.eggIdMemory.enabled

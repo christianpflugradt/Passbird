@@ -112,6 +112,7 @@ flows:
       password_capture:
         - the first password prompt is "first input: "
         - the second password prompt is "second input: "
+        - if secure input is enabled but no console is available, setup aborts keystore creation instead of falling back to visible password input
         - acceptance requires the first input to be non-empty and exactly equal to the second input
         - two empty inputs are rejected and handled the same way as mismatched inputs
         - on every rejected attempt, setup sends Your inputs do not match, please repeat.

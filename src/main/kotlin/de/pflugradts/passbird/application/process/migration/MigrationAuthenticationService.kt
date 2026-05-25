@@ -1,8 +1,10 @@
 package de.pflugradts.passbird.application.process.migration
 
 import de.pflugradts.kotlinextensions.TryResult
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.toDirectory
@@ -62,14 +64,18 @@ class MigrationAuthenticationService @Inject constructor(
 
     private fun authenticate(prompt: String): TryResult<MigrationCredentials> {
         migrationCredentials?.let { return success(it) }
-        val input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(prompt)))
-        val loadPassword = input.shell.copy().toPlainShell()
-        val password = input.toPlainShell()
-        return keyStoreAdapterPort.loadKey(loadPassword, keyStorePath())
-            .map { key ->
-                MigrationCredentials.migrationCredentialsOf(key, password).also { migrationCredentials = it }
-            }
-            .onFailure { password.scramble() }
+        return try {
+            val input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(prompt)))
+            val loadPassword = input.shell.copy().toPlainShell()
+            val password = input.toPlainShell()
+            keyStoreAdapterPort.loadKey(loadPassword, keyStorePath())
+                .map { key ->
+                    MigrationCredentials.migrationCredentialsOf(key, password).also { migrationCredentials = it }
+                }
+                .onFailure { password.scramble() }
+        } catch (ex: SecureInputUnavailableException) {
+            failure(ex)
+        }
     }
 
     private fun keyStorePath() = systemOperation.resolvePath(

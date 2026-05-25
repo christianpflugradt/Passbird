@@ -4,6 +4,7 @@ import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ChangeMasterPasswordCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
@@ -62,6 +63,27 @@ class ChangeMasterPasswordCommandTest {
             userInterfaceAdapterPort.send(outputOf(shellOf(keyStorePreamble)))
             userInterfaceAdapterPort.sendLineBreak()
             userInterfaceAdapterPort.send(outputOf(shellOf("Current key is incorrect - Operation aborted."), OPERATION_ABORTED))
+            userInterfaceAdapterPort.sendLineBreak()
+        }
+    }
+
+    @Test
+    fun `should abort master password change when secure input is unavailable during current password authentication`() {
+        // given
+        every {
+            keyStoreAuthenticationService.authenticate(1, "Enter current key: ")
+        } returns failure(SecureInputUnavailableException())
+
+        // when
+        inputHandler.handleInput(inputOf(shellOf("k")))
+
+        // then
+        verify(exactly = 0) { keyStoreAdapterPort.storeExistingKey(any(), any(), any()) }
+        verifyOrder {
+            userInterfaceAdapterPort.sendLineBreak()
+            userInterfaceAdapterPort.send(outputOf(shellOf(keyStorePreamble)))
+            userInterfaceAdapterPort.sendLineBreak()
+            userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             userInterfaceAdapterPort.sendLineBreak()
         }
     }

@@ -17,7 +17,7 @@ input_semantics:
   secure_input:
     - if adapter.userInterface.secureInput is enabled and a console is available, receiveSecurely reads characters through the console password reader instead of standard line input
     - if secure input is disabled, receiveSecurely falls back to the same plain line reader used by receive
-    - if secure input is enabled but no console is available, receiveSecurely still falls back to the same plain line reader used by receive
+    - if secure input is enabled but no console is available, receiveSecurely aborts the current secure-entry flow instead of falling back to visible line input
   affirmations:
     - empty input is never affirmative
     - receiveYes accepts only a single explicit y or Y with no trailing data

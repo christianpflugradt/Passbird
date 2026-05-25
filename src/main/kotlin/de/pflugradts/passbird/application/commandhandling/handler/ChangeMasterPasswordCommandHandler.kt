@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.commandhandling.handler
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.ChangeMasterPasswordCommand
@@ -11,6 +12,7 @@ import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.security.KeyStoreAuthenticationService
 import de.pflugradts.passbird.domain.model.shell.PlainShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.EVENT_HANDLED
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
@@ -26,9 +28,16 @@ class ChangeMasterPasswordCommandHandler @Inject constructor(
         userInterfaceAdapterPort.sendLineBreak()
         userInterfaceAdapterPort.send(outputOf(shellOf(KEYSTORE_PREAMBLE)))
         userInterfaceAdapterPort.sendLineBreak()
-        val key = keyStoreAuthenticationService.authenticate(maxAttempts = 1, prompt = "Enter current key: ").getOrNull()
+        val authenticationResult = keyStoreAuthenticationService.authenticate(maxAttempts = 1, prompt = "Enter current key: ")
+        val key = authenticationResult.getOrNull()
         if (key == null) {
-            abort("Current key is incorrect - Operation aborted.")
+            abort(
+                if (authenticationResult.exceptionOrNull() is SecureInputUnavailableException) {
+                    "Operation aborted."
+                } else {
+                    "Current key is incorrect - Operation aborted."
+                },
+            )
             return
         }
         try {
@@ -53,29 +62,36 @@ class ChangeMasterPasswordCommandHandler @Inject constructor(
     }
 
     private fun receiveNewPassword(): PlainShell? {
-        val input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter new key: ")))
-        if (input.isEmpty) {
-            input.invalidate()
-            abort("Empty input - Operation aborted.")
-            return null
-        }
-        val repeatedInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter new key again: ")))
-        if (repeatedInput.isEmpty) {
-            input.invalidate()
+        var input: Input? = null
+        return try {
+            input = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter new key: ")))
+            if (input.isEmpty) {
+                input.invalidate()
+                abort("Empty input - Operation aborted.")
+                return null
+            }
+            val repeatedInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter new key again: ")))
+            if (repeatedInput.isEmpty) {
+                input.invalidate()
+                repeatedInput.invalidate()
+                abort("Empty input - Operation aborted.")
+                return null
+            }
+            if (input != repeatedInput) {
+                input.invalidate()
+                repeatedInput.invalidate()
+                abort("Your inputs do not match - Operation aborted.")
+                return null
+            }
+            val password = input.toPlainShell()
             repeatedInput.invalidate()
-            abort("Empty input - Operation aborted.")
-            return null
+            userInterfaceAdapterPort.sendLineBreak()
+            password
+        } catch (_: SecureInputUnavailableException) {
+            input?.invalidate()
+            abort("Operation aborted.")
+            null
         }
-        if (input != repeatedInput) {
-            input.invalidate()
-            repeatedInput.invalidate()
-            abort("Your inputs do not match - Operation aborted.")
-            return null
-        }
-        val password = input.toPlainShell()
-        repeatedInput.invalidate()
-        userInterfaceAdapterPort.sendLineBreak()
-        return password
     }
 
     private fun abort(message: String) {

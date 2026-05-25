@@ -1,7 +1,9 @@
 package de.pflugradts.passbird.application.security
 
 import de.pflugradts.kotlinextensions.TryResult
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.toDirectory
@@ -35,8 +37,12 @@ class KeyStoreAuthenticationService @Inject constructor(
         ReadableConfiguration.KEYSTORE_FILENAME.toFileName(),
     )
 
-    private fun authenticate(prompt: String) = keyStoreAdapterPort.loadKey(
-        userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(prompt))).toPlainShell(),
-        keyStorePath(),
-    )
+    private fun authenticate(prompt: String): TryResult<Shell> = try {
+        keyStoreAdapterPort.loadKey(
+            userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(prompt))).toPlainShell(),
+            keyStorePath(),
+        )
+    } catch (ex: SecureInputUnavailableException) {
+        failure(ex)
+    }
 }

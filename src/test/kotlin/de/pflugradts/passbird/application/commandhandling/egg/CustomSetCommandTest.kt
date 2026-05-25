@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.egg
 
 import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.egg.CustomSetCommandHandler
@@ -16,6 +17,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
@@ -92,6 +94,26 @@ class CustomSetCommandTest {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."))) }
+        verify(exactly = 0) { passwordService.putEgg(eq(shellOf(args)), any()) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should abort custom set command when secure input is unavailable`() {
+        // given
+        val args = "EggId"
+        val shell = shellOf("c$args")
+        val reference = shell.copy()
+        fakePasswordService(instance = passwordService)
+        fakeConfiguration(instance = configuration)
+        every { userInterfaceAdapterPort.receiveSecurely(any()) } throws SecureInputUnavailableException()
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED)) }
         verify(exactly = 0) { passwordService.putEgg(eq(shellOf(args)), any()) }
         expectThat(shell) isNotEqualTo reference
     }

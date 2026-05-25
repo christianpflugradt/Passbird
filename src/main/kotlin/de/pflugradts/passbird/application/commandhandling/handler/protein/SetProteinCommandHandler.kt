@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
 
 import com.google.common.eventbus.Subscribe
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.SetProteinCommand
@@ -38,7 +39,12 @@ class SetProteinCommandHandler @Inject constructor(
             abort(setProteinCommand)
             return
         }
-        val structureInput = structureInputReceived(secureInputDetermined())
+        val structureInput = try {
+            structureInputReceived(secureInputDetermined())
+        } catch (_: SecureInputUnavailableException) {
+            abort(setProteinCommand)
+            return
+        }
         if (structureInput.isEmpty) {
             abort(setProteinCommand)
             return

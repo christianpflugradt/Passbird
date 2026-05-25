@@ -34,7 +34,7 @@ Passbird stores sensitive local files such as the keystore, password tree, expor
 | `adapter.passwordTree.verifySignature`                | Verifies the password tree file's built-in signature marker to detect format mismatches.         | true                 |
 | `adapter.userInterface.ansiEscapeCodes.enabled`       | Enables or disables colorful mode in terminals that support ANSI escape codes.                   | false                |
 | `adapter.userInterface.audibleBell`                   | Enables or disables an audible bell as feedback for invalid input.                               | false                |
-| `adapter.userInterface.secureInput`                   | Hides sensitive user input (e.g., passwords) in the terminal.                                    | true                 |
+| `adapter.userInterface.secureInput`                   | Hides sensitive user input (e.g., passwords) in the terminal and aborts secure prompts when no console is available. | true                 |
 | `domain.eggIdMemory.enabled`                          | Enables or disables EggIdMemory, tracking the most recently used EggIds for quick access.        | true                 |
 | `domain.eggIdMemory.persisted`                        | Retains the EggId memory across Passbird restarts, if enabled.                                   | false                |
 | `domain.protein.secureProteinStructureInput`          | Treats protein structures as sensitive input, hiding them by default.                            | true                 |

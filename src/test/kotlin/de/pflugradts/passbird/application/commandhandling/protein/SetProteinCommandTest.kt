@@ -1,6 +1,8 @@
 package de.pflugradts.passbird.application.commandhandling.protein
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.protein.SetProteinCommandHandler
@@ -16,6 +18,7 @@ import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Nested
@@ -53,6 +56,37 @@ class SetProteinCommandTest {
             withTheseInputs = listOf(inputOf(shellOf(givenType))),
             withTheseSecureInputs = listOf(inputOf(shellOf(givenStructure))),
         )
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) {
+            passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+        }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should handle set protein command when storing protein fails`() {
+        // given
+        val args = "EggId"
+        val slot = DEFAULT
+        val shell = shellOf("p+${slot.index()}$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
+        val givenType = "url"
+        val givenStructure = "example.com"
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf(givenType))),
+            withTheseSecureInputs = listOf(inputOf(shellOf(givenStructure))),
+        )
+        every { passwordService.putProtein(eq(shellOf(args)), eq(slot), eq(shellOf(givenType)), eq(shellOf(givenStructure))) } returns
+            failure(RuntimeException())
 
         // when
         expectThat(shell) isEqualTo reference
@@ -111,6 +145,33 @@ class SetProteinCommandTest {
         verify(exactly = 1) {
             passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
         }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should abort set protein command when secure input is unavailable`() {
+        // given
+        val args = "EggId"
+        val slot = DEFAULT
+        val shell = shellOf("p+${slot.index()}$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
+        val givenType = "url"
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf(givenType))),
+        )
+        every { userInterfaceAdapterPort.receiveSecurely(any()) } throws SecureInputUnavailableException()
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+        verify(exactly = 0) { passwordService.putProtein(eq(shellOf(args)), slot, any(), any()) }
         expectThat(shell) isNotEqualTo reference
     }
 

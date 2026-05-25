@@ -276,7 +276,7 @@ Passbird immediately updates the password database (Password Tree file) after ev
 
 `demail` deletes the Egg identified by email, including its associated password.
 
-`cemail` prompts you to input a custom password for the Egg identified by email. The input is hidden by default. Use this command if the system you’re storing the password for does not support Passbird’s standard password format. Be sure to verify your input immediately, as it is not confirmed.
+`cemail` prompts you to input a custom password for the Egg identified by email. The input is hidden by default when a console is available. Use this command if the system you’re storing the password for does not support Passbird’s standard password format. Be sure to verify your input immediately, as it is not confirmed.
 
 `l` lists all EggIds in the current Nest.
 

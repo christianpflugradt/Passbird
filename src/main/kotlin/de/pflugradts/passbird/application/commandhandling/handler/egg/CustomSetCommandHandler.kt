@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.handler.egg
 
 import com.google.common.eventbus.Subscribe
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
@@ -8,6 +9,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -22,28 +24,42 @@ class CustomSetCommandHandler @Inject constructor(
     @Subscribe
     private fun handleCustomSetCommand(customSetCommand: CustomSetCommand) {
         if (commandConfirmed(customSetCommand)) {
-            try {
-                passwordService.challengeEggId(customSetCommand.argument)
-                val secureInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter custom Password: ")))
-                if (secureInput.isEmpty) {
-                    CommandExecutionTracker.markAborted()
-                    userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
-                } else {
-                    if (passwordService.putEgg(customSetCommand.argument, secureInput.shell).failure) {
-                        CommandExecutionTracker.markFailure()
-                    }
-                }
-                secureInput.invalidate()
-            } catch (ex: InvalidEggIdException) {
-                CommandExecutionTracker.markAborted()
-                userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
-            }
+            processConfirmedCustomSetCommand(customSetCommand)
         } else {
             CommandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
         }
         customSetCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
+    }
+
+    private fun processConfirmedCustomSetCommand(customSetCommand: CustomSetCommand) {
+        try {
+            passwordService.challengeEggId(customSetCommand.argument)
+            receiveCustomPassword()?.let { secureInput ->
+                try {
+                    if (secureInput.isEmpty) {
+                        CommandExecutionTracker.markAborted()
+                        userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
+                    } else if (passwordService.putEgg(customSetCommand.argument, secureInput.shell).failure) {
+                        CommandExecutionTracker.markFailure()
+                    }
+                } finally {
+                    secureInput.invalidate()
+                }
+            }
+        } catch (ex: InvalidEggIdException) {
+            CommandExecutionTracker.markAborted()
+            userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
+        }
+    }
+
+    private fun receiveCustomPassword(): Input? = try {
+        userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter custom Password: ")))
+    } catch (_: SecureInputUnavailableException) {
+        CommandExecutionTracker.markAborted()
+        userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
+        null
     }
 
     private fun commandConfirmed(customSetCommand: CustomSetCommand) =

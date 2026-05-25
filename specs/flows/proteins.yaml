@@ -69,6 +69,7 @@ flows:
       structure_prompt_behavior:
         - after type selection, Passbird prompts with Enter Protein Structure or just press enter to abort:
         - the structure prompt is received either through secure-input handling or regular visible input according to the effective mode determined for this command
+        - if the effective mode is secure input and no console is available, the command aborts instead of falling back to visible structure input
         - empty structure input prints Operation aborted.
         - every structure-abort path ends with one trailing blank line
       success_behavior:

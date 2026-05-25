@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.adapter.userinterface
 
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -35,10 +36,10 @@ class CommandLineInterfaceService @Inject constructor(
 
     override fun receiveSecurely(output: Output): Input {
         sendWithoutLineBreak(output)
-        return if (configuration.adapter.userInterface.secureInput && systemOperation.isConsoleAvailable) {
-            inputOf(plainShellOf(systemOperation.readPasswordFromConsole()).toShell())
-        } else {
-            receive()
+        return when {
+            !configuration.adapter.userInterface.secureInput -> receivePlain()
+            systemOperation.isConsoleAvailable -> inputOf(plainShellOf(systemOperation.readPasswordFromConsole()).toShell())
+            else -> throw SecureInputUnavailableException()
         }
     }
 

@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.boot.setup
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ConfigurationSync
@@ -205,6 +206,38 @@ class PassbirdSetupTest {
         verify(exactly = 1) { systemOperation.exit() }
         verify { configurationSync wasNot Called }
         verify { keyStoreAdapterPort wasNot Called }
+    }
+
+    @Test
+    fun `should abort config key store route when secure input is unavailable`() {
+        // given
+        val configurationDirectory = VALID_DIRECTORY
+        val chosenDirectory = fakeInput(VALID_DIRECTORY)
+        fakeConfiguration(instance = configuration, withKeyStoreLocation = configurationDirectory)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(chosenDirectory),
+            withReceiveConfirmation = true,
+        )
+        fakeSystemOperation(instance = systemOperation)
+        every { systemOperation.exists(VALID_DIRECTORY.toDirectory()) } returns true
+        every { systemOperation.isDirectory(VALID_DIRECTORY.toDirectory()) } returns true
+        every { userInterfaceAdapterPort.receiveSecurely(any()) } throws SecureInputUnavailableException()
+
+        // when
+        passbirdSetup.boot()
+
+        // then
+        verify(exactly = 1) { setupGuide.sendWelcome() }
+        verify(exactly = 1) { setupGuide.sendConfigKeyStoreRouteInformation(configurationDirectory) }
+        verify(exactly = 1) { setupGuide.sendInputPath("keystore") }
+        verify(exactly = 1) { setupGuide.sendCreateKeyStoreInformation() }
+        verify(exactly = 0) { setupGuide.sendCreateKeyStoreSucceeded() }
+        verify(exactly = 0) { setupGuide.sendRestart() }
+        verify(exactly = 1) { setupGuide.sendGoodbye() }
+        verify(exactly = 1) { systemOperation.exit() }
+        verify { keyStoreAdapterPort wasNot Called }
+        verify { configurationSync wasNot Called }
     }
 
     @Test

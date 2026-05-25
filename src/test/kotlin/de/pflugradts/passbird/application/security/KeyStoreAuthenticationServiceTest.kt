@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.security
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
+import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
@@ -137,6 +138,19 @@ class KeyStoreAuthenticationServiceTest {
 
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter current key: "))) }
+    }
+
+    @Test
+    fun `should fail authentication when secure input is unavailable`() {
+        // given
+        every { userInterfaceAdapterPort.receiveSecurely(any()) } throws SecureInputUnavailableException()
+
+        // when
+        val actual = keyStoreAuthenticationService.authenticate(maxAttempts = 1)
+
+        // then
+        expectThat(actual.failure).isTrue()
+        verify(exactly = 0) { keyStoreAdapterPort.loadKey(any(), any()) }
     }
 
     @Test

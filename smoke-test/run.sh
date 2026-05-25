@@ -77,7 +77,101 @@ run_session() {
     shift 2
     SESSION_INDEX=$((SESSION_INDEX + 1))
     LAST_OUTPUT="$ARTIFACT_DIR/$(printf '%02d' "$SESSION_INDEX")-$(slugify "$step_name").log"
-    if ! { printf '%s\n' "$@"; } | java -jar "$JAR_PATH" "$home" >"$LAST_OUTPUT" 2>&1; then
+    if ! python3 - "$JAR_PATH" "$home" "$LAST_OUTPUT" "$@" <<'PY'
+import errno
+import os
+import pty
+import select
+import subprocess
+import sys
+import termios
+import time
+
+jar_path, home, output_path, *inputs = sys.argv[1:]
+master_fd, slave_fd = pty.openpty()
+attributes = termios.tcgetattr(slave_fd)
+attributes[3] &= ~termios.ECHO
+termios.tcsetattr(slave_fd, termios.TCSANOW, attributes)
+
+process = subprocess.Popen(
+    ["java", "-jar", jar_path, home],
+    stdin=slave_fd,
+    stdout=slave_fd,
+    stderr=slave_fd,
+    close_fds=True,
+)
+os.close(slave_fd)
+pending = [f"{value}\n".encode() for value in inputs]
+prompt_suffixes = [
+    "Your input: ",
+    "your input: ",
+    "first input: ",
+    "second input: ",
+    "Enter key: ",
+    "Enter command: ",
+    "Enter current key: ",
+    "Enter new key: ",
+    "Enter new key again: ",
+    "Enter custom Password: ",
+    "Enter Nest you want to move Egg to: ",
+    "Enter password length or just press enter to abort: ",
+    "Specify a Nest Slot 0-9 to move them to or anything else to abort: ",
+    "Enter unused special characters or just press enter to keep all: ",
+    "Include numbers? Y/n ",
+    "Include lowercase letters? Y/n ",
+    "Include uppercase letters? Y/n ",
+    "Include special characters? Y/n ",
+    "Enter Protein Type or just press enter to abort: ",
+    "Enter new Protein Type to replace '",
+    "Enter Protein Structure or just press enter to abort: ",
+    "Enter new EggId or nothing to abort: ",
+    "secure input for next input? Y/n ",
+    "or just press enter to keep it: ",
+]
+recent_output = ""
+
+with open(output_path, "wb") as output:
+    while True:
+        poll = process.poll()
+        read_ready, _, _ = select.select([master_fd], [], [], 0.05)
+        if master_fd in read_ready:
+            try:
+                chunk = os.read(master_fd, 4096)
+            except OSError as ex:
+                if ex.errno != errno.EIO:
+                    raise
+                chunk = b""
+            if chunk:
+                output.write(chunk)
+                output.flush()
+                recent_output = (recent_output + chunk.decode(errors="ignore"))[-4096:]
+                while pending and any(recent_output.endswith(suffix) for suffix in prompt_suffixes):
+                    try:
+                        os.write(master_fd, pending.pop(0))
+                    except OSError:
+                        pending.clear()
+                        break
+                    recent_output = ""
+                    time.sleep(0.02)
+
+        if poll is not None:
+            while True:
+                try:
+                    chunk = os.read(master_fd, 4096)
+                except OSError as ex:
+                    if ex.errno != errno.EIO:
+                        raise
+                    chunk = b""
+                if not chunk:
+                    break
+                output.write(chunk)
+                output.flush()
+            break
+
+os.close(master_fd)
+raise SystemExit(process.returncode)
+PY
+    then
         fail "$step_name: Passbird exited with a non-zero status."
     fi
     reject_unexpected_errors "$step_name" "$LAST_OUTPUT"
