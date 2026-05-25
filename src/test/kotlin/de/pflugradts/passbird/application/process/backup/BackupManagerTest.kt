@@ -8,6 +8,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Co
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
+import de.pflugradts.passbird.application.security.createLegacyAesGcmCipherForTesting
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
@@ -168,6 +169,28 @@ class BackupManagerTest {
 
         // then
         expectThat(backupFiles(PASSWORD_TREE_FILENAME)) hasSize 1
+    }
+
+    @Test
+    fun `should create only one fresh backup after encountering a legacy password tree backup`() {
+        // given
+        every { treeBackupSettings.enabled } returns true
+        every { treeBackupSettings.numberOfBackups } returns 3
+        val legacyBackupFile = Paths.get("$tempWorkingDirectory/passbird_2000-01-01_00-00-00.tree")
+        Files.write(legacyBackupFile, createLegacyAesGcmCipherForTesting().encrypt(shellOf("initial")).toByteArray())
+
+        // when
+        backupManager.run()
+        wait1Sec()
+        backupManager.run()
+
+        // then
+        expectThat(backupFiles(PASSWORD_TREE_FILENAME)) hasSize 2
+        val latestBackup = Paths.get("$tempWorkingDirectory/${backupFiles(PASSWORD_TREE_FILENAME).sorted().last()}")
+        expectThat(passwordTreeEnvelope.isCurrent(Files.readAllBytes(latestBackup))).isTrue()
+        expectThat(
+            cryptoProvider.decrypt(encryptedShellOf(passwordTreeEnvelope.unwrap(Files.readAllBytes(latestBackup)))).asString(),
+        ) isEqualTo "initial"
     }
 
     @Test

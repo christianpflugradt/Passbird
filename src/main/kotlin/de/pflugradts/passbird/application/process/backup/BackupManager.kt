@@ -67,17 +67,28 @@ class BackupManager @Inject constructor(
     private fun numberOfBackups(settings: ReadableConfiguration.BackupSettings) =
         settings.numberOfBackups ?: configuration.application.backup.numberOfBackups
 
-    private fun backupContentHasChanged(current: Path, lastBackup: Path, fileName: String) =
-        !readComparableBytes(current, fileName).contentEquals(readComparableBytes(lastBackup, fileName))
-
-    private fun readComparableBytes(path: Path, fileName: String) = if (fileName == PASSWORD_TREE_FILENAME) {
-        readPasswordTreeBytes(path)
+    private fun backupContentHasChanged(current: Path, lastBackup: Path, fileName: String) = if (fileName == PASSWORD_TREE_FILENAME) {
+        backupContentHasChanged(current, lastBackup)
     } else {
-        systemOperation.readBytesFromFile(path)
+        !systemOperation.readBytesFromFile(current).contentEquals(systemOperation.readBytesFromFile(lastBackup))
     }
 
-    private fun readPasswordTreeBytes(path: Path) = systemOperation.readBytesFromFile(path).let {
-        if (it.isEmpty()) byteArrayOf() else cryptoProvider.decrypt(encryptedShellOf(passwordTreeEnvelope.unwrap(it))).toByteArray()
+    private fun backupContentHasChanged(current: Path, lastBackup: Path): Boolean {
+        val currentBytes = readComparablePasswordTreeBytesOrNull(current)
+        val lastBackupBytes = readComparablePasswordTreeBytesOrNull(lastBackup)
+        return currentBytes == null || lastBackupBytes == null || !currentBytes.contentEquals(lastBackupBytes)
+    }
+
+    private fun readComparablePasswordTreeBytesOrNull(path: Path) = systemOperation.readBytesFromFile(path).let {
+        when {
+            it.isEmpty() -> byteArrayOf()
+
+            passwordTreeEnvelope.isCurrent(it) -> cryptoProvider.decrypt(
+                encryptedShellOf(passwordTreeEnvelope.unwrap(it)),
+            ).toByteArray()
+
+            else -> null
+        }
     }
 
     private fun backup(directory: Directory, fileName: String, backupDirectory: Directory) {
