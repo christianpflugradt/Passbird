@@ -6,28 +6,47 @@ flows:
   - id: normal_boot
     trigger:
       - Passbird starts with a valid home directory and usable local state
-    user_experience:
-      - the session begins with a separating blank line
-      - Passbird moves to the initial Nest before entering the main command loop
-      - startup initializers run before the steady-state Enter command prompt appears
+    exact_sequence:
+      - the normal application boot path emits one empty line before any startup-specific prompt or command prompt
+      - Passbird moves to the initial Nest from the run context before entering the steady-state command loop
+      - startup initializers run before the first Enter command: prompt is shown
+    visible_rules:
+      - there is no welcome banner or startup summary in the normal boot path itself
+      - if no initializer emits user-visible output, the first visible steady-state content after the opening empty line is the command prompt
   - id: export_file_reminder
     trigger:
       - application.exchange.promptOnExportFile is enabled and passbird-export.json exists at startup
-    user_experience:
-      - Passbird asks whether the export file should be deleted
-      - deletion requires explicit y or Y
-      - empty input is not treated as yes
-      - declining or omitting confirmation keeps the file and repeats the reminder on the next start
+    exact_prompt: "An password export file has been detected. Should this file be deleted? Y/n "
+    accepted_inputs:
+      - y
+      - Y
+    rejected_as_affirmative:
+      - empty input
+      - n
+      - any other non-y input
+    exact_branches:
+      - on explicit y or Y, Passbird deletes passbird-export.json and then prints Export file has been successfully deleted.
+      - on any non-affirmative input, Passbird keeps passbird-export.json and then prints Export file has not been deleted but prompt for deletion will be repeated upon next program start.
+    spacing_rules:
+      - after either branch, Passbird emits one empty line before the next output or command prompt
+    observable_rules:
+      - the reminder is shown at most once per startup run
+      - if the file does not exist, or prompting is disabled in configuration, this flow produces no output
   - id: command_loop
     trigger:
       - startup initializers have completed
-    user_experience:
-      - the prompt is Enter command:
-      - the current Nest prefix is shown when the current Nest is not the default Nest
-      - each command flow controls its own result spacing before the next prompt
+    exact_prompt_when_default_nest: "Enter command: "
+    exact_prompt_when_non_default_nest: "[<CurrentNestId>] Enter command: "
+    prompt_rules:
+      - the Nest prefix is omitted for the default Nest
+      - the Nest prefix includes square brackets around the current NestId followed by one trailing space
+      - the prompt is written without a newline so user input continues on the same line
+      - each command flow is responsible for its own result output and spacing before the next prompt appears
+    exit_rule:
+      - a raw interrupt character entered as the command with no trailing data ends the loop without extra output from PassbirdApplication itself
   - id: inactivity_and_quit
     trigger:
       - a running session becomes inactive or the user exits
     user_experience:
-      - inactivity behavior is configuration-controlled
-      - quit-related messaging uses deliberate blank-line separation rather than dense output
+      - inactivity checking is configuration-controlled
+      - exact quit output and exact inactivity-visible behavior are specified elsewhere and remain to be detailed
