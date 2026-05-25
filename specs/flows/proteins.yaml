@@ -111,4 +111,25 @@ flows:
   - id: discard_protein
     command: p-[0-9][EggId]
     user_experience:
-      - destructive discard paths use explicit confirmation and abort on omitted confirmation
+      command_scope:
+        - the addressed slot index selects the Protein slot to discard, with 0 addressing the default Protein slot
+      missing_egg_behavior:
+        - the command first checks whether the Egg exists
+        - if the Egg does not exist, Passbird does not prompt for confirmation and does not attempt a discard
+        - a missing Egg triggers the standard event output Egg '<EggId>' not found.
+        - the missing-Egg event also triggers the warning sound defined in specs/interaction.yaml
+        - the missing-Egg path ends with one trailing blank line
+      empty_slot_behavior:
+        - if the Egg exists but the addressed Protein slot is already empty, Passbird performs no confirmation prompt
+        - the empty-slot path prints no success line and no abort line of its own
+        - the empty-slot path ends with one trailing blank line
+      confirmation_behavior:
+        - confirmation is only considered when the Egg exists and the addressed Protein slot currently contains a Protein
+        - if promptOnRemoval is disabled, Passbird discards the Protein immediately
+        - if promptOnRemoval is enabled, Passbird prompts with Discarding a Protein is an irrevocable action.
+        - the discard prompt then continues with Input 'c' to confirm or anything else to abort. and Your input:
+        - declining that confirmation prints Operation aborted.
+        - the confirmation-abort path ends with one trailing blank line
+      success_behavior:
+        - on successful discard of an existing Protein, Passbird triggers the event output Protein '<Type>' of egg '<EggId>' successfully discarded.
+        - the success path ends with one trailing blank line
