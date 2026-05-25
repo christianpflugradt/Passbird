@@ -60,6 +60,25 @@ flows:
       abort_branch:
         - no keystore is created
         - setup then sends Goodbye! and exits the process
+  - id: configuration_template_write
+    trigger:
+      - the first-run template route continues after confirmation
+      - the user has entered a valid existing directory for configuration creation
+    user_experience:
+      success_path:
+        - configuration sync writes passbird.yml into the chosen directory before any keystore prompts begin
+        - after successful configuration sync, setup continues directly into the keystore explanation block
+      failure_path:
+        - if configuration sync fails, setup does not print the keystore explanation block
+        - if configuration sync fails, setup does not ask for first input: or second input:
+        - if configuration sync fails, setup does not print Now restart Passbird to use it.
+        - setup then falls through to Goodbye! and exits the process
+      delegated_error_reporting:
+        - configuration sync failure reporting is emitted by the configuration layer on stderr rather than by SetupGuide
+        - the current stderr wording is Configuration could not be loaded: <message>
+    side_effects:
+      - on success, passbird.yml is written to <chosen-directory>/passbird.yml
+      - on failure, passbird.yml creation is incomplete or absent and passbird.sec is not created
   - id: keystore_creation
     trigger:
       - setup proceeds into keystore creation
@@ -105,3 +124,8 @@ flows:
         - setup exits the process after Goodbye!
     side_effects:
       - passbird.sec is written to <chosen-directory>/passbird.sec
+known_visible_drifts:
+  - area: configuration_template_write_failure_wording
+    current_stderr_shape: Configuration could not be loaded: <message>
+    observed_context:
+      - this message is also used when configuration creation or sync fails during setup, even though the operation is a write rather than a load
