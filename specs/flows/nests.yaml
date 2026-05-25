@@ -47,8 +47,30 @@ flows:
   - id: discard_nest
     command: n-[1-9]
     user_experience:
-      - the default Nest cannot be discarded
-      - discard handling surfaces conflicts such as occupied Nests rather than silently moving data
+      guard_paths:
+        - n-0 is accepted by the current parser but aborts immediately with Default Nest cannot be discarded - Operation aborted.
+        - if the requested Nest slot does not contain a deployed Nest, Passbird aborts immediately with Specified Nest does not exist - Operation aborted.
+        - both immediate guard aborts use the OPERATION_ABORTED path and return without the trailing blank line used by the main discard flow
+      empty_nest_discard:
+        - if the target Nest exists and contains no Eggs, Passbird discards it immediately without any confirmation or relocation prompt
+        - successful empty-Nest discard prints no dedicated success line
+        - successful empty-Nest discard ends with a blank line
+      occupied_nest_relocation_prompt:
+        - if the target Nest exists and contains Eggs, Passbird prompts with Nest '<NestId>' contains <count> Eggs. Specify a Nest Slot 0-9 to move them to or anything else to abort:
+        - this relocation prompt uses regular visible input, not secure-input handling
+        - input must be exactly one digit from 0 to 9
+        - any non-digit or multi-character input prints Operation aborted.
+        - if the chosen target slot has no deployed Nest, Passbird prints Nest Slot <slot> is empty - Operation aborted.
+      occupied_nest_conflicts_and_success:
+        - if the chosen target Nest already contains any EggIds also present in the Nest being discarded, Passbird prints a multi-line advisory message listing those EggIds
+        - that advisory message is followed by a separate Operation aborted. line
+        - in that overlap case, Passbird does not move any Eggs and does not discard the Nest
+        - if there are no overlaps, Passbird moves every Egg from the discarded Nest into the chosen target Nest and then discards the original Nest
+        - successful occupied-Nest discard prints no dedicated success line
+        - all main occupied-Nest paths end with a blank line
+      current_nest_restoration:
+        - if a different Nest was current before discard processing began, Passbird returns to that original current Nest after processing
+        - if the Nest being discarded was itself current, Passbird ends in the default Nest after processing
   - id: assign_and_move
     commands:
       - n[EggId]
