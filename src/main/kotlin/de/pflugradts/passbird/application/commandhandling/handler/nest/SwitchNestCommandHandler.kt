@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.nest
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.SwitchNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -23,6 +24,7 @@ class SwitchNestCommandHandler @Inject constructor(
         } else if (nestService.atNestSlot(switchNestCommand.slot).isPresent) {
             nestService.moveToNestAt(switchNestCommand.slot)
         } else {
+            CommandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted."), OPERATION_ABORTED))
         }
         userInterfaceAdapterPort.sendLineBreak()

@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.protein
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.ViewProteinTypesCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
@@ -21,7 +22,7 @@ class ViewProteinTypesCommandHandler @Inject constructor(
         passwordService.viewProteinTypes(viewProteinTypesCommand.argument).orNull()?.also {
             userInterfaceAdapterPort.send(*outputsOfHeader())
             it.forEachIndexed { index, proteinType -> userInterfaceAdapterPort.send(*outputsOf(index, proteinType)) }
-        }
+        } ?: CommandExecutionTracker.markFailure()
         viewProteinTypesCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }

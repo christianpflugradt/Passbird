@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.nest
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
 import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
@@ -28,19 +29,26 @@ class MoveToNestCommandHandler @Inject constructor(
             val input = userInterfaceAdapterPort.receive(outputOf(shellOf("\nEnter Nest you want to move Egg to: ")))
             val nestSlot = input.extractNestSlot()
             if (nestSlot === nestService.currentNest().slot) {
+                CommandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(
                     outputOf(shellOf("Egg is already in the specified Nest - Operation aborted."), OPERATION_ABORTED),
                 )
             } else if (nestService.atNestSlot(nestSlot).isEmpty) {
+                CommandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted."), OPERATION_ABORTED))
             } else if (passwordService.eggExists(moveToNestCommand.argument, nestSlot)) {
+                CommandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(
                     outputOf(shellOf("Egg with same EggId already exists in target Nest - Operation aborted."), OPERATION_ABORTED),
                 )
             } else {
-                passwordService.moveEgg(moveToNestCommand.argument, nestSlot)
+                if (passwordService.moveEgg(moveToNestCommand.argument, nestSlot).failure) {
+                    CommandExecutionTracker.markFailure()
+                }
             }
             input.invalidate()
+        } else {
+            CommandExecutionTracker.markFailure()
         }
         moveToNestCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

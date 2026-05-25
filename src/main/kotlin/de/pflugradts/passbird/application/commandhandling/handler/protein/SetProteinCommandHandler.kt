@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.protein
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.SetProteinCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -25,6 +26,7 @@ class SetProteinCommandHandler @Inject constructor(
         val eggIdShell = setProteinCommand.argument
         val slot = setProteinCommand.slot
         if (!passwordService.eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
+            CommandExecutionTracker.markFailure()
             finish(setProteinCommand)
             return
         }
@@ -41,12 +43,15 @@ class SetProteinCommandHandler @Inject constructor(
             abort(setProteinCommand)
             return
         }
-        passwordService.putProtein(
-            eggIdShell = eggIdShell,
-            slot = slot,
-            typeShell = typeInput.shell,
-            structureShell = structureInput.shell,
-        )
+        if (passwordService.putProtein(
+                eggIdShell = eggIdShell,
+                slot = slot,
+                typeShell = typeInput.shell,
+                structureShell = structureInput.shell,
+            ).failure
+        ) {
+            CommandExecutionTracker.markFailure()
+        }
         finish(setProteinCommand)
     }
 
@@ -92,6 +97,7 @@ class SetProteinCommandHandler @Inject constructor(
     }.takeIf { it.isNotEmpty }
 
     private fun abort(setProteinCommand: SetProteinCommand) {
+        CommandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
         finish(setProteinCommand)
     }

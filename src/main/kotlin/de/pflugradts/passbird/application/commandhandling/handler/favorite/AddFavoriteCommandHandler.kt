@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.favorite
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.AddFavoriteCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -13,7 +14,9 @@ class AddFavoriteCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleAddFavoriteCommand(addFavoriteCommand: AddFavoriteCommand) {
-        passwordService.putFavorite(addFavoriteCommand.slot, addFavoriteCommand.argument)
+        if (passwordService.putFavorite(addFavoriteCommand.slot, addFavoriteCommand.argument).failure) {
+            CommandExecutionTracker.markFailure()
+        }
         addFavoriteCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }

@@ -10,6 +10,7 @@ class ChangeMasterPasswordCommand : NoArgumentCommand
 class MemoryInfoCommand : NoArgumentCommand
 class ProteinInfoCommand : NoArgumentCommand
 class QuitCommand(val quitReason: QuitReason) : NoArgumentCommand
+class RepeatLastCommand : NoArgumentCommand
 class SetInfoCommand : NoArgumentCommand
 class ViewFavoriteCommand : NoArgumentCommand
 class ViewNestCommand : NoArgumentCommand

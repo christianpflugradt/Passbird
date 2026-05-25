@@ -27,6 +27,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHan
 import de.pflugradts.passbird.application.commandhandling.handler.ImportCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ListCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.QuitCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.RepeatLastCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.SetInfoCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.CustomSetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.DiscardCommandHandler
@@ -137,6 +138,7 @@ class ApplicationModule(private val runContext: RunContext) : AbstractModule() {
                 MemoryInfoCommandHandler::class.java,
                 ProteinInfoCommandHandler::class.java,
                 QuitCommandHandler::class.java,
+                RepeatLastCommandHandler::class.java,
                 RenameCommandHandler::class.java,
                 SetCommandHandler::class.java,
                 SetInfoCommandHandler::class.java,

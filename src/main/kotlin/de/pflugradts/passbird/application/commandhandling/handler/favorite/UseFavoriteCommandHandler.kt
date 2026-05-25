@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.favorite
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.application.commandhandling.command.UseFavoriteCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
@@ -19,8 +20,12 @@ class UseFavoriteCommandHandler @Inject constructor(
     @Subscribe
     private fun handleUseFavoriteCommand(useFavoriteCommand: UseFavoriteCommand) {
         passwordService.viewFavoriteEntry(useFavoriteCommand.slot).ifPresentOrElse(
-            block = { inputHandler.handleInput(inputOf(useFavoriteCommand.argument + it)) },
+            block = {
+                inputHandler.handleInput(inputOf(useFavoriteCommand.argument + it))
+                CommandExecutionTracker.mark(CommandExecutionTracker.lastCompletedOutcome())
+            },
             other = {
+                CommandExecutionTracker.markFailure()
                 userInterfaceAdapterPort.send(
                     outputOf(shellOf("Favorite entry at slot ${useFavoriteCommand.slot.index()} does not exist.")),
                 )

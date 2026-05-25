@@ -37,6 +37,7 @@ class HelpCommandHandler @Inject constructor(
                 outBold("\tl[filter]"), out("              Lists EggIds in the current Nest whose name contains filter.\n"),
                 outBold("\tl*"), out("                    Lists all EggIds across all Nests, grouped by Nest.\n"),
                 outBold("\tl*[filter]"), out("             Lists EggIds across all Nests whose name contains filter, grouped by Nest.\n"),
+                outBold("\t."), out(" (repeat)            Repeats the last successful non-repeat command.\n"),
                 outBold("\th"), out(" (help)              Displays this help menu.\n"),
                 outBold("\tq"), out(" (quit)              Exits the Passbird application.\n"),
                 out("\n"),

@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.nest
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.DiscardNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell
@@ -57,6 +58,7 @@ class DiscardNestCommandHandler @Inject constructor(
         val targetNestSlot = receiveTargetNestSlot(eggIds) ?: return
         val overlaps = overlappingEggIds(discardNestSlot, targetNestSlot, eggIds)
         if (overlaps.isNotEmpty()) {
+            CommandExecutionTracker.markAborted()
             val overlapsMessage = "The following EggIds exist in both Nests. " +
                 "Please move them manually before discarding the Nest: ${System.lineSeparator()}- " + joinToString(overlaps)
             userInterfaceAdapterPort.send(outputOf(shellOf(overlapsMessage)))
@@ -73,11 +75,13 @@ class DiscardNestCommandHandler @Inject constructor(
         val input = userInterfaceAdapterPort.receive(outputOf(shellOf(prompt)))
         val nestSlot = input.shell.asString()
         if (nestSlot.length != 1 || !nestSlot[0].isDigit()) {
+            CommandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             return null
         }
         val targetNestOption = nestService.atNestSlot(slotAt(nestSlot))
         if (targetNestOption.isEmpty) {
+            CommandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Nest Slot $nestSlot is empty - Operation aborted."), OPERATION_ABORTED))
             return null
         }
@@ -97,6 +101,7 @@ class DiscardNestCommandHandler @Inject constructor(
     private fun joinToString(shells: List<Shell>) = shells.joinToString(separator = "${System.lineSeparator()}- ") { id -> id.asString() }
 
     private fun sendAbortMessage(message: String) {
+        CommandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf(message), OPERATION_ABORTED))
     }
 }

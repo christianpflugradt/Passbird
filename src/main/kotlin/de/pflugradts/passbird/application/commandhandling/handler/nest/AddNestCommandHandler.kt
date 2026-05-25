@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.nest
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.AddNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -18,6 +19,7 @@ class AddNestCommandHandler @Inject constructor(
     @Subscribe
     private fun handleAddNestCommand(addNestCommand: AddNestCommand) {
         if (addNestCommand.slot == DEFAULT) {
+            CommandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Default Nest cannot be replaced - Operation aborted."), OPERATION_ABORTED))
             return
         }
@@ -29,6 +31,7 @@ class AddNestCommandHandler @Inject constructor(
         }
         val input = userInterfaceAdapterPort.receive(outputOf(shellOf(prompt)))
         if (input.isEmpty) {
+            CommandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
         } else {
             nestService.place(input.shell, addNestCommand.slot)

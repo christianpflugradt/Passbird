@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.egg
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.egg.EggIdException
@@ -21,15 +22,21 @@ class RenameCommandHandler @Inject constructor(
         if (passwordService.eggExists(renameCommand.argument, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             val secureInput = userInterfaceAdapterPort.receive(outputOf(shellOf("Enter new EggId or nothing to abort: ")))
             if (secureInput.isEmpty) {
+                CommandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
             } else {
                 try {
-                    passwordService.renameEgg(renameCommand.argument, secureInput.shell)
+                    if (passwordService.renameEgg(renameCommand.argument, secureInput.shell).failure) {
+                        CommandExecutionTracker.markFailure()
+                    }
                 } catch (ex: EggIdException) {
+                    CommandExecutionTracker.markAborted()
                     userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
                 }
             }
             secureInput.invalidate()
+        } else {
+            CommandExecutionTracker.markFailure()
         }
         userInterfaceAdapterPort.sendLineBreak()
         renameCommand.invalidateInput()

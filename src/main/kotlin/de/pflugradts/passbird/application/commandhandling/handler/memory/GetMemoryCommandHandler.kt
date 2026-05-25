@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.memory
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.GetMemoryCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -19,11 +20,16 @@ class GetMemoryCommandHandler @Inject constructor(
     private fun handleGetMemoryCommand(getMemoryCommand: GetMemoryCommand) {
         passwordService.viewMemoryEntry(getMemoryCommand.slot).ifPresentOrElse(
             block = {
-                clipboardAdapterPort.post(outputOf(it)).onSuccess {
+                val clipboardResult = clipboardAdapterPort.post(outputOf(it))
+                if (clipboardResult.failure) {
+                    CommandExecutionTracker.markFailure()
+                }
+                clipboardResult.onSuccess {
                     userInterfaceAdapterPort.send(outputOf(shellOf("EggId copied to clipboard.")))
                 }
             },
             other = {
+                CommandExecutionTracker.markFailure()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Memory entry at slot ${getMemoryCommand.slot.index()} does not exist.")))
             },
         )

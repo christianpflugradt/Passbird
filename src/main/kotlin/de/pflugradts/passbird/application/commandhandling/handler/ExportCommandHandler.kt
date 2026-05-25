@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
 import de.pflugradts.passbird.application.commandhandling.command.ExportCommand
 import de.pflugradts.passbird.application.exchange.ImportExportService
@@ -73,6 +74,7 @@ class ExportCommandHandler @Inject constructor(
         ?.takeIf { selectedSlots -> selectedSlots.all(availableNestSlots::contains) }
 
     private fun sendAbortMessage() {
+        CommandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
     }
 }

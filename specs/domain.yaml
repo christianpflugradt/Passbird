@@ -13,6 +13,8 @@ domain_language:
     meaning: short-term memory of recently used EggIds, maintained per nest
   - term: EggIdFavorites
     meaning: persistent quick-access EggId slots, maintained per nest
+  - term: RememberedCommand
+    meaning: session-only copy of the last successful non-repeat command input, used by the repeat command
   - term: Slot
     meaning: bounded numeric position used for nests, proteins, favorites, and memory
   - term: Shell
@@ -39,6 +41,11 @@ user_command_families:
   - family: keystore
     commands:
       - k
+  - family: session_control
+    commands:
+      - .
+      - h
+      - q
   - family: list
     commands:
       - l
@@ -96,6 +103,7 @@ important_domain_invariants:
   - discarding or moving an Egg clears matching favorites in the source nest
   - discarding a Nest clears every favorite stored for that Nest
   - memory is per nest and may be disabled or non-persistent via configuration
+  - the remembered repeat-command input is session-only, is never persisted, and is replaced only by a successful non-repeat command
   - user-facing Unicode support is intentionally not guaranteed; README warns against Unicode input
   - list filtering is case-insensitive while preserving the original EggId casing in output
 persistence_mapping:

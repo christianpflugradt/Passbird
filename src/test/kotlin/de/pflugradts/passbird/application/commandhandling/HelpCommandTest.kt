@@ -44,6 +44,7 @@ class HelpCommandTest {
         expectThat(captureSystemOut.capture) contains "e*"
         expectThat(captureSystemOut.capture) contains "f? (Favorites)"
         expectThat(captureSystemOut.capture) contains "i*"
+        expectThat(captureSystemOut.capture) contains ". (repeat)"
         expectThat(captureSystemOut.capture) contains "s*[EggId] (set once)"
     }
 

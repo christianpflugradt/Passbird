@@ -252,6 +252,7 @@ You can access Passbird’s in-app help at any time by pressing h and then Enter
         l[filter]             Lists EggIds in the current Nest whose name contains filter.
         l*                    Lists all EggIds across all Nests, grouped by Nest.
         l*[filter]            Lists EggIds across all Nests whose name contains filter, grouped by Nest.
+        . (repeat)            Repeats the last successful non-repeat command.
         h (help)              Displays this help menu.
         q (quit)              Exits the Passbird application.
 
@@ -284,6 +285,8 @@ Passbird immediately updates the password database (Password Tree file) after ev
 `l*` lists all EggIds across all Nests, grouped by Nest.
 
 `l*miro` lists EggIds across all Nests whose name contains `miro`, grouped by Nest.
+
+`.` repeats the last successful non-repeat command using the exact original command input.
 
 `k` changes the master password of the keystore. It prompts once for the current key, then prompts twice for the new
 key. If the current key is incorrect, if either new-key input is empty, or if the repeated input does not match, the

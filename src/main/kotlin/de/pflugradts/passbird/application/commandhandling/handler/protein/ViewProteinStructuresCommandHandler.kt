@@ -5,6 +5,7 @@ import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.ViewProteinStructuresCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
@@ -27,8 +28,8 @@ class ViewProteinStructuresCommandHandler @Inject constructor(
                 types.zip(structures).forEachIndexed { index, proteinPair ->
                     userInterfaceAdapterPort.send(*outputsOf(index, proteinPair.toShellPairOption()))
                 }
-            }
-        }
+            } ?: CommandExecutionTracker.markFailure()
+        } ?: CommandExecutionTracker.markFailure()
         viewProteinStructuresCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }

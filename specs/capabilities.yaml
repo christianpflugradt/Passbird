@@ -44,6 +44,7 @@ command_surface:
       - l[filter]
       - l*
       - l*[filter]
+      - .
       - h
       - q
       - n
@@ -77,6 +78,7 @@ command_surface:
     - l[filter]
     - l*
     - l*[filter]
+    - .
     - n
     - n0
     - n[1-9]
@@ -179,8 +181,10 @@ capabilities:
   - name: help_and_session_control
     user_outcomes:
       - inspect the top-level command catalog
+      - repeat the last successful non-repeat command
       - exit the interactive session explicitly
     commands:
+      - .
       - h
       - q
   - name: memory_and_listing

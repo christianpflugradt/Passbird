@@ -15,6 +15,7 @@ import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitReason.USER
 import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
+import de.pflugradts.passbird.application.commandhandling.command.RepeatLastCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewCommand
 import de.pflugradts.passbird.application.commandhandling.command.base.Command
 import de.pflugradts.passbird.application.failure.CommandFailure
@@ -52,6 +53,7 @@ class CommandFactory @Inject constructor(
         CommandType.IMPORT -> constructWithOptionalStarVariant(input) { ImportCommand(it) }
         CommandType.KEYSTORE -> constructSafely(input) { ChangeMasterPasswordCommand() }
         CommandType.QUIT -> constructSafely(input) { QuitCommand(quitReason = USER) }
+        CommandType.REPEAT -> constructSafely(input) { RepeatLastCommand() }
         else -> null
     }
 

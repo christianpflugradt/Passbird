@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.egg
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -25,15 +26,20 @@ class CustomSetCommandHandler @Inject constructor(
                 passwordService.challengeEggId(customSetCommand.argument)
                 val secureInput = userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter custom Password: ")))
                 if (secureInput.isEmpty) {
+                    CommandExecutionTracker.markAborted()
                     userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
                 } else {
-                    passwordService.putEgg(customSetCommand.argument, secureInput.shell)
+                    if (passwordService.putEgg(customSetCommand.argument, secureInput.shell).failure) {
+                        CommandExecutionTracker.markFailure()
+                    }
                 }
                 secureInput.invalidate()
             } catch (ex: InvalidEggIdException) {
+                CommandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
             }
         } else {
+            CommandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
         }
         customSetCommand.invalidateInput()

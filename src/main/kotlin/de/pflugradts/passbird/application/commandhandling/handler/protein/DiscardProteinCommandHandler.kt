@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.protein
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.DiscardProteinCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -24,10 +25,15 @@ class DiscardProteinCommandHandler @Inject constructor(
         run {
             if (passwordService.eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
                 if (!passwordService.proteinExists(eggIdShell, slot) || commandConfirmed(discardProteinCommand)) {
-                    passwordService.discardProtein(eggIdShell, slot)
+                    if (passwordService.discardProtein(eggIdShell, slot).failure) {
+                        CommandExecutionTracker.markFailure()
+                    }
                 } else {
+                    CommandExecutionTracker.markAborted()
                     userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
                 }
+            } else {
+                CommandExecutionTracker.markFailure()
             }
         }
         discardProteinCommand.invalidateInput()

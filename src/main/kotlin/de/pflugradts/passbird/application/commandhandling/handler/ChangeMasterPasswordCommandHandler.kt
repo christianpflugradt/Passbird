@@ -4,6 +4,7 @@ import com.google.common.eventbus.Subscribe
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.ChangeMasterPasswordCommand
 import de.pflugradts.passbird.application.failure.CommandFailure
 import de.pflugradts.passbird.application.failure.reportFailure
@@ -39,6 +40,7 @@ class ChangeMasterPasswordCommandHandler @Inject constructor(
                 keyStoreAdapterPort.storeExistingKey(key, newPassword, keyStoreAuthenticationService.keyStorePath())
             }
             if (storeResult.failure) {
+                CommandExecutionTracker.markFailure()
                 reportFailure(CommandFailure(storeResult.exceptionOrNull()!!))
                 abort("Operation aborted.")
                 return
@@ -77,6 +79,7 @@ class ChangeMasterPasswordCommandHandler @Inject constructor(
     }
 
     private fun abort(message: String) {
+        CommandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf(message), OPERATION_ABORTED))
         userInterfaceAdapterPort.sendLineBreak()
     }

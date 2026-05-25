@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.ImportCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.exchange.ImportExportService
@@ -34,10 +35,12 @@ class ImportCommandHandler@Inject constructor(
                 importExportService.importEggs()
             }
 
-            ImportCommandConfirmation.ABORTED ->
+            ImportCommandConfirmation.ABORTED -> {
+                CommandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
+            }
 
-            ImportCommandConfirmation.FAILED -> Unit
+            ImportCommandConfirmation.FAILED -> CommandExecutionTracker.markFailure()
         }
         userInterfaceAdapterPort.sendLineBreak()
     }

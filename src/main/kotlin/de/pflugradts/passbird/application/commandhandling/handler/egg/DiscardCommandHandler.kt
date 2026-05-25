@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.egg
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.DiscardCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -20,10 +21,15 @@ class DiscardCommandHandler @Inject constructor(
     private fun handleDiscardCommand(discardCommand: DiscardCommand) {
         if (passwordService.viewPassword(discardCommand.argument).isPresent) {
             if (commandConfirmed()) {
-                passwordService.discardEgg(discardCommand.argument)
+                if (passwordService.discardEgg(discardCommand.argument).failure) {
+                    CommandExecutionTracker.markFailure()
+                }
             } else {
+                CommandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             }
+        } else {
+            CommandExecutionTracker.markFailure()
         }
         discardCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

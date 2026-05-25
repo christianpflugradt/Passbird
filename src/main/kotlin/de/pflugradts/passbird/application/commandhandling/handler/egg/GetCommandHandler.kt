@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.egg
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.GetCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -17,11 +18,20 @@ class GetCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleGetCommand(getCommand: GetCommand) {
-        passwordService.viewPassword(getCommand.argument).ifPresent {
-            clipboardAdapterPort.post(outputOf(it)).onSuccess {
-                userInterfaceAdapterPort.send(outputOf(shellOf("Password copied to clipboard.")))
-            }
-        }
+        passwordService.viewPassword(getCommand.argument).ifPresentOrElse(
+            block = {
+                val clipboardResult = clipboardAdapterPort.post(outputOf(it))
+                if (clipboardResult.failure) {
+                    CommandExecutionTracker.markFailure()
+                }
+                clipboardResult.onSuccess {
+                    userInterfaceAdapterPort.send(outputOf(shellOf("Password copied to clipboard.")))
+                }
+            },
+            other = {
+                CommandExecutionTracker.markFailure()
+            },
+        )
         getCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }

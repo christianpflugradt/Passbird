@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.egg
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.SetCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -29,6 +30,7 @@ class SetCommandHandler @Inject constructor(
     @Subscribe
     private fun handleSetCommand(setCommand: SetCommand) {
         if (setCommand.slot != DEFAULT && customPasswordConfigurations.size < setCommand.slot.index()) {
+            CommandExecutionTracker.markAborted()
             val msg = "Specified configuration does not exist - Operation aborted."
             userInterfaceAdapterPort.send(outputOf(shellOf(msg), OPERATION_ABORTED))
         } else {
@@ -38,16 +40,21 @@ class SetCommandHandler @Inject constructor(
                 customPasswordConfigurations[setCommand.slot.index() - 1].toPasswordRequirements()
             }
             if (!passwordRequirements.isValid()) {
+                CommandExecutionTracker.markAborted()
                 val msg = "Specified configuration is invalid - Operation aborted."
                 userInterfaceAdapterPort.send(outputOf(shellOf(msg), OPERATION_ABORTED))
             } else if (commandConfirmed(setCommand)) {
                 try {
                     passwordService.challengeEggId(setCommand.argument)
-                    passwordService.putEgg(setCommand.argument, passwordProvider.createNewPassword(passwordRequirements))
+                    if (passwordService.putEgg(setCommand.argument, passwordProvider.createNewPassword(passwordRequirements)).failure) {
+                        CommandExecutionTracker.markFailure()
+                    }
                 } catch (ex: InvalidEggIdException) {
+                    CommandExecutionTracker.markAborted()
                     userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
                 }
             } else {
+                CommandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             }
         }

@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.handler.egg
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.OneTimeSetCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -28,10 +29,12 @@ class OneTimeSetCommandHandler @Inject constructor(
             val passwordLengthInput = receivePasswordLength()
             when {
                 passwordLengthInput.isAborted -> {
+                    CommandExecutionTracker.markAborted()
                     userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
                 }
 
                 passwordLengthInput.value == null -> {
+                    CommandExecutionTracker.markAborted()
                     userInterfaceAdapterPort.send(
                         outputOf(shellOf("Specified configuration is invalid - Operation aborted."), OPERATION_ABORTED),
                     )
@@ -41,25 +44,31 @@ class OneTimeSetCommandHandler @Inject constructor(
                     val passwordRequirements = receivePasswordRequirements(passwordLengthInput.value)
                     when {
                         !passwordRequirements.isValid() -> {
+                            CommandExecutionTracker.markAborted()
                             userInterfaceAdapterPort.send(
                                 outputOf(shellOf("Specified configuration is invalid - Operation aborted."), OPERATION_ABORTED),
                             )
                         }
 
                         commandConfirmed(oneTimeSetCommand) -> {
-                            passwordService.putEgg(
-                                oneTimeSetCommand.argument,
-                                passwordProvider.createNewPassword(passwordRequirements),
-                            )
+                            if (passwordService.putEgg(
+                                    oneTimeSetCommand.argument,
+                                    passwordProvider.createNewPassword(passwordRequirements),
+                                ).failure
+                            ) {
+                                CommandExecutionTracker.markFailure()
+                            }
                         }
 
                         else -> {
+                            CommandExecutionTracker.markAborted()
                             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
                         }
                     }
                 }
             }
         } catch (ex: InvalidEggIdException) {
+            CommandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
         }
         oneTimeSetCommand.invalidateInput()

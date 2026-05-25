@@ -16,6 +16,7 @@ enum class CommandType(val type: Char) {
     NEST('n'),
     PROTEIN('p'),
     QUIT('q'),
+    REPEAT('.'),
     RENAME('r'),
     SET('s'),
     VIEW('v'),
