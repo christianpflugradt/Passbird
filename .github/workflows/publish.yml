@@ -62,7 +62,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-java@v5
         with:
-          java-version: "17"
+          java-version: "25"
           distribution: "temurin"
       - uses: gradle/actions/setup-gradle@v6
       - name: build release jar
