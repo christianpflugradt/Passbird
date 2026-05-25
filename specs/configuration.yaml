@@ -20,6 +20,7 @@ configuration_surface:
     - application.password.length defaults to 20
     - application.password.specialCharacters defaults to true
     - application.password.promptOnRemoval defaults to true
+    - application.password.customPasswordConfigurations defaults to an empty list
     - adapter.userInterface.ansiEscapeCodes.enabled defaults to false
     - adapter.userInterface.audibleBell defaults to false
     - adapter.userInterface.secureInput defaults to true
@@ -60,6 +61,15 @@ areas:
       - application.password.customPasswordConfigurations
     visible_effects:
       - changes generated password shape and whether destructive password updates require confirmation
+      - changes which custom set configurations appear in s? help output and which s[1-9][EggId] commands are available
+    behavioral_contract:
+      - the default set configuration is addressed as slot 0 in s? output and uses application.password.length plus application.password.specialCharacters
+      - custom password configurations are addressed by 1-based list position so the first entry backs s1[EggId], the second backs s2[EggId], and so on
+      - if a selected custom configuration slot does not exist in the configured list, Passbird aborts the set command with Specified configuration does not exist - Operation aborted.
+      - if a selected custom configuration resolves to invalid password requirements, Passbird aborts the set command with Specified configuration is invalid - Operation aborted.
+      - s? output prints each custom configuration name and length
+      - s? output also prints no numbers, no letters, no lowercase letters, no uppercase letters, no special characters, and unused special characters details according to the configured flags
+      - unused special characters are only shown in s? output when that custom configuration still enables special characters
   - name: backup_and_storage_locations
     keys:
       - application.backup.location
@@ -109,6 +119,17 @@ areas:
     visible_effects:
       - changes whether recent EggIds are shown and remembered across restarts
       - changes whether Protein structure input is hidden and whether the user is prompted to toggle it
+    behavioral_contract:
+      - domain.eggIdMemory.enabled controls whether EggId memory is updated at all during session activity
+      - if domain.eggIdMemory.enabled is false, in-session memory updates are suppressed and restored memory is effectively unavailable
+      - cross-restart EggId memory restoration requires both domain.eggIdMemory.enabled and domain.eggIdMemory.persisted to be true
+      - if domain.eggIdMemory.persisted is false, Passbird restores empty EggId memory on startup even if older tree data contains remembered entries
+      - domain.protein.secureProteinStructureInput controls only the Protein Structure prompt, not the Protein Type prompt
+      - if domain.protein.secureProteinStructureInput is true, Protein Structure input uses secure input by default; if false, it uses plain visible line input by default
+      - if domain.protein.promptForProteinStructureInputToggle is true, Passbird asks once before the Protein Structure prompt whether secure input should be flipped for that next structure input only
+      - when the configured default is secure input, the toggle prompt text starts with Disable secure input for next input? Y/n
+      - when the configured default is plain input, the toggle prompt text starts with Enable secure input for next input? Y/n
+      - only explicit y or Y flips the structure-input mode for that next prompt; any other response leaves the configured mode unchanged
   - name: password_tree_integrity_checks
     keys:
       - adapter.passwordTree.verifySignature
