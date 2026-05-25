@@ -25,6 +25,8 @@ configuration_surface:
     - adapter.userInterface.secureInput defaults to true
     - adapter.clipboard.reset.enabled defaults to true
     - adapter.clipboard.reset.delaySeconds defaults to 10
+    - adapter.passwordTree.verifySignature defaults to true
+    - adapter.passwordTree.verifyChecksum defaults to true
     - application.inactivityLimit.enabled defaults to false
     - application.inactivityLimit.limitInMinutes defaults to 10
     - domain.eggIdMemory.enabled defaults to true
@@ -71,6 +73,16 @@ areas:
       - changes where passbird.sec and passbird.tree are read and written
       - changes where backup files are written and how many distinct backups are retained
       - setup-created configurations persist the chosen storage directory instead of silently keeping an empty or previous location
+    behavioral_contract:
+      - a backup category runs only if its enabled flag is true and its effective numberOfBackups is greater than 0
+      - per-category numberOfBackups overrides the global application.backup.numberOfBackups when set
+      - per-category location overrides application.backup.location when set; otherwise the global backup location is used
+      - if no matching backup exists yet for a category, Passbird creates one backup immediately
+      - for configuration and keystore backups, Passbird creates a new backup only when the current file bytes differ from the latest backup bytes
+      - for password-tree backups, Passbird compares decrypted current-format content so encryption randomness alone does not create a new backup
+      - if the password tree content has not changed, Passbird keeps the existing backups unchanged even at the retention limit
+      - when a new distinct backup is created above the retention limit, Passbird removes the oldest matching backups and keeps only the newest retained set
+      - encountering a legacy password-tree backup format causes one fresh current-format backup to be created; repeated runs after that do not keep creating duplicates if content is unchanged
   - name: clipboard_behavior
     keys:
       - adapter.clipboard.reset.enabled
@@ -97,9 +109,25 @@ areas:
     visible_effects:
       - changes whether recent EggIds are shown and remembered across restarts
       - changes whether Protein structure input is hidden and whether the user is prompted to toggle it
+  - name: password_tree_integrity_checks
+    keys:
+      - adapter.passwordTree.verifySignature
+      - adapter.passwordTree.verifyChecksum
+      - adapter.passwordTree.location
+    visible_effects:
+      - changes where passbird.tree is restored from and synced to
+      - changes whether signature and checksum mismatches only warn or also terminate the current restore path
+    behavioral_contract:
+      - if passbird.tree is missing at the configured location, Passbird restores an empty password tree instead of treating this as a decrypt failure
+      - if passbird.tree exists but cannot be decrypted or unwrapped, Passbird reports the decrypt failure for passbird.tree and exits instead of falling back to an empty tree
+      - if verifySignature is true and the stored signature is invalid, Passbird reports the signature failure and exits during restore
+      - if verifySignature is false and the stored signature is invalid, Passbird still reports the signature failure but continues restoring the tree
+      - if verifyChecksum is true and the stored checksum is invalid, Passbird reports the checksum failure and exits during restore
+      - if verifyChecksum is false and the stored checksum is invalid, Passbird still reports the checksum failure but continues restoring the tree
 configuration_rules:
   - invalid configuration files must abort startup after reporting the load failure
   - missing configuration and invalid configuration are different product states and must not be treated the same
   - setup must consume the directory the user entered and must not silently fall back to another directory
   - setup must not continue to keystore creation if writing passbird.yml fails
+  - weakening verifySignature or verifyChecksum changes corruption-handling behavior and must be treated as a user-visible integrity-policy change
   - user-visible configuration defaults are part of the product contract and should be reflected here and in CONFIGURATION.md
