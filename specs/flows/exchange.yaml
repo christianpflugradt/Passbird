@@ -1,0 +1,36 @@
+schema_version: 1
+last_reviewed: 2026-05-25
+flow_family: exchange
+applies_interaction_rules_from: specs/interaction.yaml
+shared_artifact:
+  filename: passbird-export.json
+  role:
+    - export target
+    - import source
+flows:
+  - id: export_all
+    command: e
+    user_experience:
+      - exports all Eggs from deployed Nests into passbird-export.json in the startup home directory
+      - emits a separating blank line after the command finishes
+  - id: export_selective
+    command: e*
+    user_experience:
+      - shows available Nests first
+      - asks whether to export only selected Nests or all except selected Nests
+      - accepts comma-separated Nest Slot input
+      - invalid or empty selection aborts instead of guessing
+  - id: import_all
+    command: i
+    user_experience:
+      - imports all Eggs from passbird-export.json
+      - relies on the shared exchange file rather than prompting for a different filename
+  - id: import_selective
+    command: i*
+    user_experience:
+      - previews imported Nests
+      - lets the user choose one exported Nest and one target Nest Slot
+      - uses explicit confirmation before destructive overwrite paths
+observable_rules:
+  - the exchange filename is fixed unless the product specification is explicitly changed
+  - import and export behavior must stay aligned with README and startup reminder behavior

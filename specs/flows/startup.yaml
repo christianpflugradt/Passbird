@@ -1,0 +1,33 @@
+schema_version: 1
+last_reviewed: 2026-05-25
+flow_family: startup_and_session
+applies_interaction_rules_from: specs/interaction.yaml
+flows:
+  - id: normal_boot
+    trigger:
+      - Passbird starts with a valid home directory and usable local state
+    user_experience:
+      - the session begins with a separating blank line
+      - Passbird moves to the initial Nest before entering the main command loop
+      - startup initializers run before the steady-state Enter command prompt appears
+  - id: export_file_reminder
+    trigger:
+      - application.exchange.promptOnExportFile is enabled and passbird-export.json exists at startup
+    user_experience:
+      - Passbird asks whether the export file should be deleted
+      - deletion requires explicit y or Y
+      - empty input is not treated as yes
+      - declining or omitting confirmation keeps the file and repeats the reminder on the next start
+  - id: command_loop
+    trigger:
+      - startup initializers have completed
+    user_experience:
+      - the prompt is Enter command:
+      - the current Nest prefix is shown when the current Nest is not the default Nest
+      - each command flow controls its own result spacing before the next prompt
+  - id: inactivity_and_quit
+    trigger:
+      - a running session becomes inactive or the user exits
+    user_experience:
+      - inactivity behavior is configuration-controlled
+      - quit-related messaging uses deliberate blank-line separation rather than dense output

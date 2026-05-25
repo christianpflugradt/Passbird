@@ -1,0 +1,61 @@
+schema_version: 1
+last_reviewed: 2026-05-25
+configuration_surface:
+  source_of_truth_files:
+    - passbird.yml
+    - CONFIGURATION.md
+  user_visible_defaults:
+    - application.exchange.promptOnExportFile defaults to true
+    - application.password.promptOnRemoval defaults to true
+    - adapter.userInterface.secureInput defaults to true
+    - adapter.clipboard.reset.enabled defaults to true
+    - application.inactivityLimit.enabled defaults to false
+areas:
+  - name: startup_and_exchange
+    keys:
+      - application.exchange.promptOnExportFile
+      - application.inactivityLimit.enabled
+      - application.inactivityLimit.limitInMinutes
+    visible_effects:
+      - controls whether startup reminds about an existing passbird-export.json file
+      - controls whether inactivity can terminate an otherwise running session
+  - name: password_generation_and_confirmation
+    keys:
+      - application.password.length
+      - application.password.specialCharacters
+      - application.password.promptOnRemoval
+      - application.password.customPasswordConfigurations
+    visible_effects:
+      - changes generated password shape and whether destructive password updates require confirmation
+  - name: backup_and_storage_locations
+    keys:
+      - application.backup.location
+      - application.backup.numberOfBackups
+      - application.backup.configuration.enabled
+      - application.backup.keyStore.enabled
+      - application.backup.passwordTree.enabled
+      - adapter.keyStore.location
+      - adapter.passwordTree.location
+    visible_effects:
+      - changes where files are written and whether backups are kept
+  - name: terminal_behavior
+    keys:
+      - adapter.userInterface.ansiEscapeCodes.enabled
+      - adapter.userInterface.audibleBell
+      - adapter.userInterface.secureInput
+    visible_effects:
+      - changes color output, bell feedback, and whether sensitive input is hidden
+  - name: memory_and_proteins
+    keys:
+      - domain.eggIdMemory.enabled
+      - domain.eggIdMemory.persisted
+      - domain.protein.secureProteinStructureInput
+      - domain.protein.promptForProteinStructureInputToggle
+    visible_effects:
+      - changes whether recent EggIds are shown and remembered across restarts
+      - changes whether Protein structure input is hidden and whether the user is prompted to toggle it
+configuration_rules:
+  - invalid configuration files must abort startup after reporting the load failure
+  - missing configuration and invalid configuration are different product states and must not be treated the same
+  - setup must consume the directory the user entered and must not silently fall back to another directory
+  - user-visible configuration defaults are part of the product contract and should be reflected here and in CONFIGURATION.md

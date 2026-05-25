@@ -97,13 +97,13 @@ important_extension_paths:
       - wire a handler under application.commandhandling.handler
       - register the handler in ApplicationModule multibinders
       - add focused tests for parsing and handler behavior
-      - update README and .agent/domain.yaml if user-facing behavior changes
+      - update README and specs/domain.yaml if user-facing behavior changes
   - change: add a new configuration option
     steps:
       - extend ReadableConfiguration and concrete configuration classes
       - ensure ConfigurationFactory can still load old files safely
       - define default behavior conservatively
-      - document the option in CONFIGURATION.md, README if user-facing, and .agent/security.yaml if it affects security
+      - document the option in CONFIGURATION.md, README if user-facing, and specs/security.yaml if it affects security
   - change: add a new adapter
     steps:
       - keep the port in the application or domain layer

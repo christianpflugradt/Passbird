@@ -1,0 +1,31 @@
+schema_version: 1
+last_reviewed: 2026-05-25
+flow_family: proteins
+applies_interaction_rules_from: specs/interaction.yaml
+flows:
+  - id: inspect_proteins
+    commands:
+      - p?
+      - p[EggId]
+      - p*[EggId]
+    user_experience:
+      - protein views are read-only unless the user enters a write command
+  - id: set_or_replace_protein
+    commands:
+      - p[0-9][EggId]
+      - p+[0-9][EggId]
+    user_experience:
+      - overwriting an existing Protein requires explicit confirmation where prompted
+      - secure input for Protein structure follows configuration defaults unless explicitly toggled
+      - empty structure input aborts
+      - empty replacement type input keeps the existing type when the prompt says so
+  - id: secure_input_toggle_prompt
+    trigger:
+      - domain.protein.promptForProteinStructureInputToggle is enabled
+    user_experience:
+      - the toggle prompt uses explicit y or Y only
+      - empty input keeps the current secure-input behavior
+  - id: discard_protein
+    command: p-[0-9][EggId]
+    user_experience:
+      - destructive discard paths use explicit confirmation and abort on omitted confirmation

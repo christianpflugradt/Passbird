@@ -1,0 +1,140 @@
+schema_version: 1
+entrypoint: AGENTS.md
+last_reviewed: 2026-05-23
+repository:
+  name: Passbird
+  type: secure offline terminal password manager
+  language: Kotlin
+  build_tool: Gradle Kotlin DSL
+  runtime:
+    java: "17+"
+  primary_artifact: passbird.jar
+  maintainer:
+    name: Christian Pflugradt
+knowledge_base:
+  location: specs
+  format: yaml
+  intent:
+    - make specs the written source of truth for product behavior when code or reviews are ambiguous
+    - keep agent work aligned with the current architecture
+    - make interaction semantics explicit so behavior reviews and issue triage do not rely on generic CLI assumptions
+    - preserve security expectations in a password-management codebase
+    - make future feature work predictable and maintainable
+read_order:
+  - specs/project.yaml
+  - specs/capabilities.yaml
+  - specs/domain.yaml
+  - specs/interaction.yaml
+  - specs/configuration.yaml
+  - specs/architecture.yaml
+  - specs/security.yaml
+  - specs/delivery.yaml
+  - specs/issue.yaml
+  - specs/review.yaml
+task_specific_specs:
+  - file: specs/capabilities.yaml
+    read_when:
+      - clarifying supported user-facing features, commands, or use cases
+      - deciding whether a requested behavior fits the current product surface
+  - file: specs/configuration.yaml
+    read_when:
+      - changing configuration keys, defaults, or user-visible configuration effects
+      - reasoning about startup behavior controlled by passbird.yml
+  - file: specs/flows/setup.yaml
+    read_when:
+      - touching first-run setup, missing configuration handling, or keystore creation guidance
+  - file: specs/flows/startup.yaml
+    read_when:
+      - touching startup, initializers, session boot, inactivity, quit handling, or export-file reminders
+  - file: specs/flows/exchange.yaml
+    read_when:
+      - touching import, export, or passbird-export.json handling
+  - file: specs/flows/passwords.yaml
+    read_when:
+      - touching password, clipboard, overwrite, rename, discard, or master-password rotation flows
+  - file: specs/flows/nests.yaml
+    read_when:
+      - touching nest creation, switching, assignment, movement, or discard flows
+  - file: specs/flows/proteins.yaml
+    read_when:
+      - touching protein prompts, secure-input toggles, or protein slot behavior
+  - file: specs/flows/migration.yaml
+    read_when:
+      - touching migration boot, migration consent, or compatibility-preserving startup rerouting
+task_routing:
+  default:
+    - specs/project.yaml
+    - specs/capabilities.yaml
+    - specs/interaction.yaml
+    - specs/delivery.yaml
+  command_or_cli_change:
+    - specs/domain.yaml
+    - specs/capabilities.yaml
+    - specs/interaction.yaml
+    - specs/architecture.yaml
+    - specs/delivery.yaml
+  persistence_or_configuration_change:
+    - specs/project.yaml
+    - specs/configuration.yaml
+    - specs/architecture.yaml
+    - specs/security.yaml
+    - specs/delivery.yaml
+  crypto_or_secret_handling_change:
+    - specs/security.yaml
+    - specs/architecture.yaml
+    - specs/delivery.yaml
+  documentation_only_change:
+    - specs/project.yaml
+    - specs/capabilities.yaml
+  issue_resolution:
+    - specs/issue.yaml
+    - specs/project.yaml
+    - specs/capabilities.yaml
+    - specs/architecture.yaml
+    - specs/interaction.yaml
+    - specs/delivery.yaml
+  workspace_review:
+    - specs/review.yaml
+    - specs/project.yaml
+    - specs/capabilities.yaml
+    - specs/architecture.yaml
+    - specs/interaction.yaml
+    - specs/security.yaml
+    - specs/delivery.yaml
+sources_reviewed:
+  docs:
+    - README.md
+    - CONFIGURATION.md
+  build_and_ci:
+    - build.gradle.kts
+    - .github/workflows/build.yml
+    - .github/workflows/codeql.yml
+    - .github/workflows/owasp-update.yml
+    - .github/workflows/owasp-purge.yml
+    - .github/workflows/publish.yml
+  code:
+    - src/main/kotlin/de/pflugradts/passbird/application/Main.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/UserInterfaceAdapterPort.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationModule.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/boot/main/PassbirdApplication.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/boot/setup/SetupGuide.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/commandhandling/handler/ExportCommandHandler.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
+    - src/main/kotlin/de/pflugradts/passbird/adapter/userinterface/CommandLineInterfaceService.kt
+    - src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
+    - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeReader.kt
+    - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeWriter.kt
+    - src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt
+update_contract:
+  - if architecture or package boundaries change, update specs/architecture.yaml
+  - if supported capabilities, commands, or end-user use cases change, update specs/capabilities.yaml
+  - if user-visible configuration behavior or defaults change, update specs/configuration.yaml
+  - if terminology or user workflows change, update specs/domain.yaml
+  - if prompts, confirmations, empty-input behavior, or CLI spacing rules change, update specs/interaction.yaml
+  - if a user-visible setup, startup, exchange, password, nest, protein, or migration flow changes, update the matching file under specs/flows/
+  - if security guarantees, defaults, or sensitive flows change, update specs/security.yaml
+  - if build, CI, release, or validation expectations change, update specs/delivery.yaml
+  - if issue-task selection rules or resolution expectations change, update specs/issue.yaml
+  - if the repo layout or key entrypoints change, update specs/project.yaml
+  - if review areas, severity rules, or review output expectations change, update specs/review.yaml

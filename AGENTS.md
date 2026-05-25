@@ -2,20 +2,20 @@
 
 Use `AGENTS.md` as the repository entrypoint. The plural form is the established convention and is the filename toolchains are most likely to discover automatically.
 
-This repository keeps its agent-facing product, design, and guardrail material in `.agent/` as structured YAML. Start with `.agent/manifest.yaml`, then read only the files relevant to the task.
+This repository keeps its agent-facing product specifications, design rules, and delivery guardrails in `specs/` as structured YAML. Start with `specs/manifest.yaml`, then read only the files relevant to the task.
 
 ## Read Order
 
-1. `.agent/manifest.yaml`
-2. `.agent/project.yaml`
-3. Task-specific files named in `.agent/manifest.yaml`
+1. `specs/manifest.yaml`
+2. `specs/project.yaml`
+3. Task-specific files named in `specs/manifest.yaml`
 
 ## Working Agreement
 
 - Code, tests, and build configuration are the source of truth if a document ever drifts.
-- When changing behavior, architecture, security posture, persistence, configuration, or verification rules, update the matching `.agent/*.yaml` files in the same change.
-- Read `.agent/interaction.yaml` before touching prompts, confirmations, CLI input parsing, blank-line layout, or user-interaction defaults.
-- Read `.agent/security.yaml` before touching crypto, keystore handling, password tree persistence, backup behavior, import/export, secure input, or configuration defaults.
+- When changing behavior, architecture, security posture, persistence, configuration, or verification rules, update the matching files under `specs/` in the same change.
+- Read `specs/interaction.yaml` before touching prompts, confirmations, CLI input parsing, blank-line layout, or user-interaction defaults.
+- Read `specs/security.yaml` before touching crypto, keystore handling, password tree persistence, backup behavior, import/export, secure input, or configuration defaults.
 - Preserve the onion architecture enforced by `src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt`.
 - Preserve the offline-first product posture. Do not add network or browser integration unless explicitly requested by the maintainer.
 - Prefer additive, backward-conscious changes. Escalate before changing persistence formats, cryptographic parameters, or user-visible security defaults.
@@ -35,7 +35,7 @@ This repository keeps its agent-facing product, design, and guardrail material i
 ## Issue Task
 
 - Use `issue` to resolve one open GitHub issue end-to-end.
-- Read `.agent/issue.yaml` before performing this task.
+- Read `specs/issue.yaml` before performing this task.
 - Use the live open issue list to choose work.
 - If one or more open issues are labeled `bug` and it is simple to determine which one is oldest, resolve the oldest open `bug` issue.
 - If no open `bug` issues exist and it is simple to determine which remaining open issue is oldest, resolve the oldest open issue.
@@ -48,7 +48,7 @@ This repository keeps its agent-facing product, design, and guardrail material i
 
 - Use `review <area>` for standing workspace reviews.
 - Supported review areas are `security`, `architecture`, `integrity`, `behavior`, and `delivery`.
-- Read `.agent/review.yaml` before performing one of these reviews.
+- Read `specs/review.yaml` before performing one of these reviews.
 - Reviews use the current task, diff, or concern as the trigger, but they must assess the full workspace rather than only the touched files.
 - Review findings must be reported as `P0` to `P3`, ordered by severity, and every finding must include a proposed fix.
 - Before concluding a review, inspect relevant GitHub context with `gh` when it can change the conclusion or fix, especially existing issues and GitHub Actions workflow or run state.
@@ -66,7 +66,7 @@ This repository keeps its agent-facing product, design, and guardrail material i
 
 ## Minimum Validation
 
-Use `.agent/delivery.yaml` to choose the right checks. At minimum:
+Use `specs/delivery.yaml` to choose the right checks. At minimum:
 
 - run only the focused tests that cover the code you changed or the tests you added
 - run `./gradlew architecture` only for structural or wiring changes that are not already otherwise covered

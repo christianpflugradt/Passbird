@@ -1,0 +1,29 @@
+schema_version: 1
+last_reviewed: 2026-05-25
+flow_family: nests
+applies_interaction_rules_from: specs/interaction.yaml
+flows:
+  - id: view_and_switch
+    commands:
+      - n
+      - n[0-9]
+    user_experience:
+      - the default Nest is slot 0
+      - switching to a missing Nest Slot aborts with user feedback
+  - id: create_nest
+    command: n+[1-9]
+    user_experience:
+      - prompts for a Nest name
+      - empty input aborts instead of inventing a name
+      - the default Nest cannot be replaced
+  - id: discard_nest
+    command: n-[1-9]
+    user_experience:
+      - the default Nest cannot be discarded
+      - discard handling surfaces conflicts such as occupied Nests rather than silently moving data
+  - id: assign_and_move
+    commands:
+      - n[0-9][EggId]
+    user_experience:
+      - moving an Egg into another Nest respects EggId conflicts
+      - conflicting moves abort instead of silently overwriting another Egg

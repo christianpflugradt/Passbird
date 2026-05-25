@@ -103,7 +103,7 @@ change_rules:
   - never suppress detekt or ktlint findings in source code; fix the code or adjust the shared tool configuration instead
   - update README for user-visible command, workflow, or migration changes
   - update CONFIGURATION.md for any configuration-schema or default-value change
-  - update .agent docs whenever agent-facing guidance would otherwise become stale
+  - update specs docs whenever agent-facing guidance would otherwise become stale
   - preserve backward compatibility unless the maintainer explicitly chooses a breaking change
   - run ./gradlew ktlintFormat before staging, committing, or pushing to auto-resolve formatting issues when possible
   - commit and, before pushing, run git pull -r on the current branch, then push immediately after a task is complete and releasable

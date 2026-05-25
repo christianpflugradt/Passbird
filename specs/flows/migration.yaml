@@ -1,0 +1,22 @@
+schema_version: 1
+last_reviewed: 2026-05-25
+flow_family: migration
+applies_interaction_rules_from: specs/interaction.yaml
+flows:
+  - id: migration_boot_reroute
+    trigger:
+      - startup detects state that requires a compatibility-preserving migration before the normal application boot path can continue
+    user_experience:
+      - migration runs in a dedicated boot path rather than inside the normal command loop
+  - id: migration_consent
+    trigger:
+      - a required migration is pending
+    user_experience:
+      - the user is warned to keep an up-to-date backup
+      - continuing requires explicit y or Y
+      - empty input is not affirmative
+  - id: migration_completion
+    trigger:
+      - pending migrations finish successfully
+    user_experience:
+      - Passbird reports success and instructs the user to start Passbird again

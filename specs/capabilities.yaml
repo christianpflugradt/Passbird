@@ -1,0 +1,96 @@
+schema_version: 1
+last_reviewed: 2026-05-25
+product_shape:
+  audience:
+    - individual users who want an offline terminal password manager
+  primary_mode:
+    - interactive local CLI started with a home directory argument
+  non_goals:
+    - browser integration
+    - cloud sync
+    - network services
+    - rich GUI workflows
+use_cases:
+  - maintain passwords as Eggs grouped into Nests
+  - reveal or copy stored secrets on demand
+  - enrich an Egg with additional Protein entries such as usernames, URLs, or recovery data
+  - import or export passwords through a human-readable exchange file
+  - rotate the keystore master password without replacing the underlying secret
+  - restore or continue using existing local state across restarts while staying offline
+capabilities:
+  - name: password_entry_management
+    user_outcomes:
+      - create a password entry
+      - replace an existing password entry
+      - reveal a password
+      - copy a password to the clipboard
+      - rename an EggId
+      - discard a password entry
+    commands:
+      - g[EggId]
+      - s[EggId]
+      - c[EggId]
+      - v[EggId]
+      - r[EggId]
+      - d[EggId]
+  - name: selective_password_generation
+    user_outcomes:
+      - generate passwords with default or named custom configurations
+    commands:
+      - s[EggId]
+      - s[1-9][EggId]
+      - s?
+  - name: nest_management
+    user_outcomes:
+      - switch between Nest contexts
+      - create and discard Nests
+      - assign Eggs to Nests
+    commands:
+      - n
+      - n[0-9]
+      - n+[1-9]
+      - n-[1-9]
+      - n[0-9][EggId]
+  - name: protein_management
+    user_outcomes:
+      - inspect Protein types and structures
+      - create, overwrite, or discard Proteins in fixed slots
+    commands:
+      - p?
+      - p[EggId]
+      - p*[EggId]
+      - p[0-9][EggId]
+      - p+[0-9][EggId]
+      - p-[0-9][EggId]
+  - name: import_export
+    user_outcomes:
+      - export all Eggs or selected Nests into passbird-export.json
+      - import all exported Eggs or selectively restore one exported Nest into a chosen slot
+    commands:
+      - e
+      - e*
+      - i
+      - i*
+  - name: keystore_maintenance
+    user_outcomes:
+      - change the keystore master password
+      - complete first-run keystore creation during setup
+    commands:
+      - k
+  - name: memory_and_listing
+    user_outcomes:
+      - list Eggs in the current Nest or across Nests
+      - reuse recently used EggIds from memory slots
+    commands:
+      - l
+      - l[filter]
+      - l*
+      - l*[filter]
+      - m?
+      - m
+      - m[0-9]
+      - m[0-9]Command
+observable_product_rules:
+  - every interactive capability is terminal-native and local-file-backed
+  - commands stay terse and character-first unless the maintainer explicitly changes that direction
+  - command families are part of the public product surface and should not drift from README, help output, or flow specs
