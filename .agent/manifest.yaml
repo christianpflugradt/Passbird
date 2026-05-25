@@ -16,12 +16,14 @@ knowledge_base:
   format: yaml
   intent:
     - keep agent work aligned with the current architecture
+    - make interaction semantics explicit so behavior reviews and issue triage do not rely on generic CLI assumptions
     - preserve security expectations in a password-management codebase
     - make future feature work predictable and maintainable
 read_order:
   - .agent/project.yaml
   - .agent/architecture.yaml
   - .agent/domain.yaml
+  - .agent/interaction.yaml
   - .agent/security.yaml
   - .agent/delivery.yaml
   - .agent/issue.yaml
@@ -30,9 +32,11 @@ task_routing:
   default:
     - .agent/project.yaml
     - .agent/architecture.yaml
+    - .agent/interaction.yaml
     - .agent/delivery.yaml
   command_or_cli_change:
     - .agent/domain.yaml
+    - .agent/interaction.yaml
     - .agent/architecture.yaml
     - .agent/delivery.yaml
   persistence_or_configuration_change:
@@ -50,11 +54,13 @@ task_routing:
     - .agent/issue.yaml
     - .agent/project.yaml
     - .agent/architecture.yaml
+    - .agent/interaction.yaml
     - .agent/delivery.yaml
   workspace_review:
     - .agent/review.yaml
     - .agent/project.yaml
     - .agent/architecture.yaml
+    - .agent/interaction.yaml
     - .agent/security.yaml
     - .agent/delivery.yaml
 sources_reviewed:
@@ -70,10 +76,14 @@ sources_reviewed:
     - .github/workflows/publish.yml
   code:
     - src/main/kotlin/de/pflugradts/passbird/application/Main.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/UserInterfaceAdapterPort.kt
     - src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationModule.kt
     - src/main/kotlin/de/pflugradts/passbird/application/boot/main/PassbirdApplication.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/boot/setup/SetupGuide.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/commandhandling/handler/ExportCommandHandler.kt
     - src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
     - src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
+    - src/main/kotlin/de/pflugradts/passbird/adapter/userinterface/CommandLineInterfaceService.kt
     - src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
     - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeReader.kt
     - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeWriter.kt
@@ -81,6 +91,7 @@ sources_reviewed:
 update_contract:
   - if architecture or package boundaries change, update .agent/architecture.yaml
   - if terminology or user workflows change, update .agent/domain.yaml
+  - if prompts, confirmations, empty-input behavior, or CLI spacing rules change, update .agent/interaction.yaml
   - if security guarantees, defaults, or sensitive flows change, update .agent/security.yaml
   - if build, CI, release, or validation expectations change, update .agent/delivery.yaml
   - if issue-task selection rules or resolution expectations change, update .agent/issue.yaml

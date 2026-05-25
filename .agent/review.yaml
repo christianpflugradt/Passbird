@@ -114,6 +114,7 @@ areas:
   - term: behavior
     review_question: Will users still get correct, understandable, and safely guided CLI behavior across normal and edge-case workflows?
     hotspots:
+      - .agent/interaction.yaml
       - src/main/kotlin/de/pflugradts/passbird/application/commandhandling
       - src/main/kotlin/de/pflugradts/passbird/application/boot
       - src/main/kotlin/de/pflugradts/passbird/application/process
@@ -123,7 +124,7 @@ areas:
     focus:
       - command parsing, dispatch, prompts, confirmations, and failure handling
       - setup, startup, inactivity, and quit flows that could surprise or mislead users
-      - consistency between documented commands and real terminal behavior
+      - consistency between .agent interaction guidance, documented commands, and real terminal behavior
       - user-facing changes that need tests or docs to stay safe and understandable
   - term: delivery
     review_question: Is the project still verifiable and releasable, with trustworthy automation, coverage, dependency checks, and updater-compatible assets?

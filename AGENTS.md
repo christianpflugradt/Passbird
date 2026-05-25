@@ -2,7 +2,7 @@
 
 Use `AGENTS.md` as the repository entrypoint. The plural form is the established convention and is the filename toolchains are most likely to discover automatically.
 
-This repository keeps its agent-facing design and guardrail material in `.agent/` as structured YAML. Start with `.agent/manifest.yaml`, then read only the files relevant to the task.
+This repository keeps its agent-facing product, design, and guardrail material in `.agent/` as structured YAML. Start with `.agent/manifest.yaml`, then read only the files relevant to the task.
 
 ## Read Order
 
@@ -14,6 +14,7 @@ This repository keeps its agent-facing design and guardrail material in `.agent/
 
 - Code, tests, and build configuration are the source of truth if a document ever drifts.
 - When changing behavior, architecture, security posture, persistence, configuration, or verification rules, update the matching `.agent/*.yaml` files in the same change.
+- Read `.agent/interaction.yaml` before touching prompts, confirmations, CLI input parsing, blank-line layout, or user-interaction defaults.
 - Read `.agent/security.yaml` before touching crypto, keystore handling, password tree persistence, backup behavior, import/export, secure input, or configuration defaults.
 - Preserve the onion architecture enforced by `src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt`.
 - Preserve the offline-first product posture. Do not add network or browser integration unless explicitly requested by the maintainer.

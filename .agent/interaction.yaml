@@ -1,0 +1,40 @@
+schema_version: 1
+last_reviewed: 2026-05-25
+interaction_model:
+  medium: line_oriented_terminal_cli
+  posture:
+    - explicit_user_control
+    - low_surprise
+    - non_destructive_on_omitted_confirmation_input
+    - spacing_is_part_of_the_user_experience
+input_semantics:
+  line_handling:
+    - receive and receiveSecurely consume one line of terminal input at a time
+    - carriage returns are ignored before newline so Windows line endings behave the same as Unix line endings
+    - an empty submitted line yields empty input
+  affirmations:
+    - empty input is never affirmative
+    - receiveYes accepts only a single explicit y or Y with no trailing data
+    - receiveConfirmation accepts only a single explicit c with no trailing data
+    - omitted or ambiguous confirmation input resolves to the non-destructive branch
+prompt_contract:
+  - prompts that say Input 'c' to confirm or anything else to abort require explicit c and abort on any other input
+  - prompts ending in Y/n still require explicit y or Y in Passbird; they must not be interpreted as Enter means yes
+  - prompts that say just press enter to abort or nothing to abort intentionally use empty input as abort
+  - prompts that say press enter to keep intentionally use empty input to preserve the current value
+consent_rules:
+  - destructive, irreversible, or secret-affecting actions should require explicit user consent
+  - when confirmation input is omitted, prefer abort, keep, or remind later over irreversible mutation
+  - repeated reminder flows are acceptable when they reduce accidental destruction or accidental retention decisions without forcing an immediate irreversible action
+spacing_and_output:
+  - blank lines are intentional separators between boot phases, informational blocks, command results, and the next prompt
+  - sendLineBreak is the standard way to emit an empty separator line
+  - some multi-step flows intentionally embed leading newlines inside prompt text to visually separate local menus or sections
+  - preserve surrounding spacing patterns when editing handlers; do not normalize blank lines mechanically across the CLI
+copy_and_drift_rules:
+  - prompt wording is maintainer-owned and must not be changed without approval for the exact text
+  - when docs describe command input semantics, keep them aligned with receiveYes, receiveConfirmation, and empty-input behavior
+  - do not file behavior issues based only on generic shell prompt conventions; verify Passbird interaction semantics first
+agent_hints:
+  - inspect UserInterfaceAdapterPort and CommandLineInterfaceService first when a task depends on prompt semantics or raw input parsing
+  - compare prompt text, parser behavior, and focused tests before concluding there is a behavior drift
