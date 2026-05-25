@@ -31,6 +31,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.SetInfoCommand
 import de.pflugradts.passbird.application.commandhandling.handler.egg.CustomSetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.DiscardCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.GetCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.egg.OneTimeSetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.RenameCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
@@ -111,6 +112,7 @@ class ApplicationModule(private val runContext: RunContext) : AbstractModule() {
                 AddNestCommandHandler::class.java,
                 MoveToNestCommandHandler::class.java,
                 CustomSetCommandHandler::class.java,
+                OneTimeSetCommandHandler::class.java,
                 ChangeMasterPasswordCommandHandler::class.java,
                 DiscardCommandHandler::class.java,
                 DiscardNestCommandHandler::class.java,

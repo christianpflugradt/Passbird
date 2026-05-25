@@ -236,6 +236,7 @@ You can access Passbird’s in-app help at any time by pressing h and then Enter
     commands:
         g[EggId] (get)        Copies the password for the specified Egg to the clipboard.
         s[EggId] (set)        Sets a random password for the specified Egg, overwriting any existing one.
+        s*[EggId] (set once)   Sets a random password for the specified EggId using a one-time configuration.
         c[EggId] (custom set) Prompts the user to input a custom password for the specified Egg.
         v[EggId] (view)       Displays the password for the specified Egg in the console.
         r[EggId] (rename)     Renames the specified Egg by prompting the user for a new EggId.
@@ -265,6 +266,8 @@ Passbird immediately updates the password database (Password Tree file) after ev
 `gemail` copies the password for the Egg identified by email to the clipboard.
 
 `semail` sets a random password for the Egg identified by email. By default, the password is 20 characters long and includes digits, lowercase and uppercase letters, and special characters. If the EggId already exists, the existing password will be replaced.
+
+`s*email` sets a random password for the Egg identified by email using a one-time configuration. Passbird prompts for the password length, whether numbers, lowercase letters, uppercase letters, and special characters should be included, and optionally for unused special characters.
 
 `vemail` displays the password for the Egg identified by email in the terminal (standard output).
 
@@ -355,6 +358,8 @@ Custom passwords are an advanced feature briefly introduced in the configuration
 
 The command `semail` is interchangeable with `s0email`, which uses the default configuration. For custom configurations, use commands `s1email` through `s9email` to apply the respective custom settings, provided they have been defined in the configuration file.
 
+The command `s*email` applies a one-time configuration entered interactively for the current command only. It does not modify `passbird.yml` or save a named password configuration.
+
 To view all available configurations and their indices, input `s?`. Using the example configuration provided earlier, the output might appear as follows:
 
     0: Default
@@ -382,6 +387,7 @@ To view all available configurations and their indices, input `s?`. Using the ex
 
         s? (help)                  Displays an overview of available password configurations.
 	    s[EggId] (set)             Sets a random password for the specified EggId using the default configuration.
+        s*[EggId] (set once)       Sets a random password for the specified EggId using a one-time configuration.
         s[1-9][EggId] (set custom) Sets a random password for the specified EggId using a custom configuration.
 
 ## Development

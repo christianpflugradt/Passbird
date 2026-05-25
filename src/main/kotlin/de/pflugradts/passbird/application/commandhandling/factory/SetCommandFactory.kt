@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.factory
 
+import de.pflugradts.passbird.application.commandhandling.command.OneTimeSetCommand
 import de.pflugradts.passbird.application.commandhandling.command.SetCommand
 import de.pflugradts.passbird.application.commandhandling.command.SetInfoCommand
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
@@ -12,6 +13,7 @@ class SetCommandFactory : SpecialCommandFactory() {
         when {
             input.hasData() && cmd.size1() -> SetCommand(DEFAULT, input)
             input.hasNoData() && cmd.size2() && cmd.isInfoVariant() -> SetInfoCommand()
+            input.hasData() && cmd.size2() && cmd.isShowAllVariant() -> OneTimeSetCommand(input)
             input.hasData() && cmd.size2() && cmd.isSlotted() -> SetCommand(cmd.getSlot(), input)
             else -> null
         }

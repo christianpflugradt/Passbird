@@ -188,6 +188,7 @@ class InvalidCommandTest {
         @ValueSource(
             strings = [
                 "s",
+                "s*",
                 "s1",
                 "s?1",
                 "s?eggId",

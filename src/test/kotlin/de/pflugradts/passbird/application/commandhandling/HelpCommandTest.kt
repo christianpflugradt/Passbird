@@ -43,6 +43,7 @@ class HelpCommandTest {
         expectThat(captureSystemOut.capture) contains "Lists all EggIds across all Nests, grouped by Nest."
         expectThat(captureSystemOut.capture) contains "e*"
         expectThat(captureSystemOut.capture) contains "i*"
+        expectThat(captureSystemOut.capture) contains "s*[EggId] (set once)"
     }
 
     @Test

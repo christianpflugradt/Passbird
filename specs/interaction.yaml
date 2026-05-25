@@ -38,3 +38,4 @@ copy_and_drift_rules:
 agent_hints:
   - inspect UserInterfaceAdapterPort and CommandLineInterfaceService first when a task depends on prompt semantics or raw input parsing
   - compare prompt text, parser behavior, and focused tests before concluding there is a behavior drift
+  - the s* one-time password configuration flow aborts only when the password-length prompt is submitted empty; its subsequent Y/n prompts treat only explicit y or Y as yes

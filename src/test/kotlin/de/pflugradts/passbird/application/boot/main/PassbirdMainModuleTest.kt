@@ -15,6 +15,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.SetInfoCommand
 import de.pflugradts.passbird.application.commandhandling.handler.egg.CustomSetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.DiscardCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.GetCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.egg.OneTimeSetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.RenameCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
@@ -60,10 +61,32 @@ class PassbirdMainModuleTest {
         // then
         expectThat(actual.bootable).isA<PassbirdApplication>()
         expectThat(actual.runContext) isSameInstanceAs runContext
-        val expectedCommandHandlers = listOf(
+        actual.commandHandlers.forEachIndexed { index, commandHandler ->
+            expectThat(commandHandler::class.java) isSameInstanceAs expectedCommandHandlers[index]
+        }
+        actual.eventHandlers.forEachIndexed { index, eventHandler ->
+            expectThat(eventHandler::class.java) isSameInstanceAs expectedEventHandlers[index]
+        }
+        actual.initializers.forEachIndexed { index, initializer ->
+            expectThat(initializer::class.java) isSameInstanceAs expectedInitializers[index]
+        }
+        actual.finalizers.forEachIndexed { index, finalizer ->
+            expectThat(finalizer::class.java) isSameInstanceAs expectedFinalizers[index]
+        }
+    }
+
+    class PassbirdTestModule : AbstractModule() {
+        public override fun configure() {
+            bind(CryptoProvider::class.java).toInstance(mockk<CryptoProvider>())
+        }
+    }
+
+    companion object {
+        private val expectedCommandHandlers = listOf(
             AddNestCommandHandler::class.java,
             MoveToNestCommandHandler::class.java,
             CustomSetCommandHandler::class.java,
+            OneTimeSetCommandHandler::class.java,
             ChangeMasterPasswordCommandHandler::class.java,
             DiscardCommandHandler::class.java,
             DiscardNestCommandHandler::class.java,
@@ -90,34 +113,16 @@ class PassbirdMainModuleTest {
             ViewProteinStructuresCommandHandler::class.java,
             ViewProteinTypesCommandHandler::class.java,
         )
-        actual.commandHandlers.forEachIndexed { index, commandHandler ->
-            expectThat(commandHandler::class.java) isSameInstanceAs expectedCommandHandlers[index]
-        }
-        val expectedEventHandlers = listOf(
+        private val expectedEventHandlers = listOf(
             ApplicationEventHandler::class.java,
             DomainEventHandler::class.java,
         )
-        actual.eventHandlers.forEachIndexed { index, eventHandler ->
-            expectThat(eventHandler::class.java) isSameInstanceAs expectedEventHandlers[index]
-        }
-        val expectedInitializers = listOf(
+        private val expectedInitializers = listOf(
             ExportFileChecker::class.java,
             InactivityHandlerScheduler::class.java,
         )
-        actual.initializers.forEachIndexed { index, initializer ->
-            expectThat(initializer::class.java) isSameInstanceAs expectedInitializers[index]
-        }
-        val expectedFinalizers = listOf(
+        private val expectedFinalizers = listOf(
             BackupManager::class.java,
         )
-        actual.finalizers.forEachIndexed { index, finalizer ->
-            expectThat(finalizer::class.java) isSameInstanceAs expectedFinalizers[index]
-        }
-    }
-
-    class PassbirdTestModule : AbstractModule() {
-        public override fun configure() {
-            bind(CryptoProvider::class.java).toInstance(mockk<CryptoProvider>())
-        }
     }
 }

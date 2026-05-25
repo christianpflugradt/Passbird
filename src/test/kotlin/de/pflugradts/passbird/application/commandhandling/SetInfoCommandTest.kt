@@ -37,6 +37,7 @@ class SetInfoCommandTest {
 
         // then
         expectThat(captureSystemOut.capture) contains "Available Set commands"
+        expectThat(captureSystemOut.capture) contains "s*[EggId] (set once)"
     }
 
     @Test

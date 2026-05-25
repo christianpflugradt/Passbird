@@ -67,6 +67,7 @@ user_command_families:
   - family: custom_password
     commands:
       - s?
+      - s*[EggId]
       - s[1-9][EggId]
 state_and_limits:
   nests:

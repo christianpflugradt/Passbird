@@ -1,5 +1,8 @@
 package de.pflugradts.passbird.domain.model.egg
 
+import de.pflugradts.passbird.domain.model.shell.MAX_ASCII_VALUE
+import de.pflugradts.passbird.domain.model.shell.MIN_ASCII_VALUE
+import de.pflugradts.passbird.domain.model.shell.PlainValue.Companion.plainValueOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -13,7 +16,7 @@ class PasswordRequirementsTest {
     fun `requirements with positive length should be valid`() {
         // given
         val givenPasswordRequirements = PasswordRequirements(
-            length = 1,
+            length = 4,
             hasNumbers = true,
             hasLowercaseLetters = true,
             hasUppercaseLetters = true,
@@ -187,4 +190,47 @@ class PasswordRequirementsTest {
         // then
         expectThat(actual).isFalse()
     }
+
+    @Test
+    fun `requirements with more required character types than available length should not be valid`() {
+        // given
+        val givenPasswordRequirements = PasswordRequirements(
+            length = 1,
+            hasNumbers = true,
+            hasLowercaseLetters = true,
+            hasUppercaseLetters = false,
+            hasSpecialCharacters = false,
+            unusedSpecialCharacters = "",
+        )
+
+        // when
+        val actual = givenPasswordRequirements.isValid()
+
+        // then
+        expectThat(actual).isFalse()
+    }
+
+    @Test
+    fun `requirements without available special characters should not be valid`() {
+        // given
+        val givenPasswordRequirements = PasswordRequirements(
+            length = 20,
+            hasNumbers = false,
+            hasLowercaseLetters = false,
+            hasUppercaseLetters = false,
+            hasSpecialCharacters = true,
+            unusedSpecialCharacters = allAvailableSpecialCharacters(),
+        )
+
+        // when
+        val actual = givenPasswordRequirements.isValid()
+
+        // then
+        expectThat(actual).isFalse()
+    }
+
+    private fun allAvailableSpecialCharacters() = (MIN_ASCII_VALUE until MAX_ASCII_VALUE)
+        .map { it.toChar() }
+        .filter { plainValueOf(it).isSymbol }
+        .joinToString("")
 }

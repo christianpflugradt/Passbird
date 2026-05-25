@@ -9,6 +9,7 @@ fun fakeUserInterfaceAdapterPort(
     instance: UserInterfaceAdapterPort,
     withReceiveConfirmation: Boolean = false,
     withReceiveYes: Boolean = false,
+    withTheseYesInputs: List<Boolean> = emptyList(),
     withTheseInputs: List<Input> = emptyList(),
     withTheseSecureInputs: List<Input> = emptyList(),
 ) {
@@ -19,7 +20,12 @@ fun fakeUserInterfaceAdapterPort(
     every { instance.receiveSecurely() } answers { withTheseSecureInputs[secureInputCount.getAndIncrement()] }
     every { instance.receiveSecurely(any<Output>()) } answers { withTheseSecureInputs[secureInputCount.getAndIncrement()] }
     every { instance.receiveConfirmation(any<Output>()) } returns withReceiveConfirmation
-    every { instance.receiveYes(any<Output>()) } returns withReceiveYes
+    if (withTheseYesInputs.isEmpty()) {
+        every { instance.receiveYes(any<Output>()) } returns withReceiveYes
+    } else {
+        val yesInputCount = AtomicInteger(0)
+        every { instance.receiveYes(any<Output>()) } answers { withTheseYesInputs[yesInputCount.getAndIncrement()] }
+    }
     every { instance.send(any()) } returns Unit
     every { instance.sendLineBreak() } returns Unit
     every { instance.warningSound() } returns Unit

@@ -45,6 +45,8 @@ class SetInfoCommandHandler @Inject constructor(
                 out(" (help)                  Displays an overview of available password configurations.\n"),
                 outBold("\n\ts[EggId]"),
                 out(" (set)             Sets a random password for the specified EggId using the default configuration."),
+                outBold("\n\ts*[EggId]"),
+                out(" (set once)   Sets a random password for the specified EggId using a one-time configuration."),
                 outBold("\n\ts[1-9][EggId]"),
                 out(" (set custom) Sets a random password for the specified EggId using a custom configuration."),
                 out("\n"),

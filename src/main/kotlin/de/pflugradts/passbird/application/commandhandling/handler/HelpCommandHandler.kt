@@ -19,6 +19,10 @@ class HelpCommandHandler @Inject constructor(
                 outBold("Commands:\n\n"),
                 outBold("\tg[EggId]"), out(" (get)        Copies the password for the specified Egg to the clipboard.\n"),
                 outBold("\ts[EggId]"), out(" (set)        Sets a random password for the specified Egg, overwriting any existing one.\n"),
+                outBold(
+                    "\ts*[EggId]",
+                ),
+                out(" (set once)   Sets a random password for the specified EggId using a one-time configuration.\n"),
                 outBold("\tc[EggId]"), out(" (custom set) Prompts the user to input a custom password for the specified Egg.\n"),
                 outBold("\tv[EggId]"), out(" (view)       Displays the password for the specified Egg in the console.\n"),
                 outBold("\tr[EggId]"), out(" (rename)     Renames the specified Egg by prompting the user for a new EggId.\n"),
