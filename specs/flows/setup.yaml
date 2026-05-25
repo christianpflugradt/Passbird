@@ -63,8 +63,45 @@ flows:
   - id: keystore_creation
     trigger:
       - setup proceeds into keystore creation
+      - template-route keystore creation only starts after a valid configuration directory is entered and configuration sync succeeds
+      - missing-keystore-route creation starts after the user confirms setup continuation
     user_experience:
-      - the master-password consequences are explained before input
-      - the user enters the master password twice
-      - non-matching inputs are surfaced and require repetition
-      - restart guidance is shown after successful setup
+      route_specific_ordering:
+        template_route:
+          - after Please input an absolute path to a directory in which to create the 'configuration' file. the next prompt is your input:
+          - the same directory prompt repeats until the input names an existing directory for which exists(directory) and isDirectory(directory) are both true
+          - invalid directory input produces no explanatory error message
+          - once configuration sync succeeds, setup prints the keystore explanation block before password capture begins
+          - the chosen configuration directory is also the target directory for passbird.sec
+        missing_keystore_route:
+          - after Please input an absolute path to a directory in which to create the 'keystore' file. setup immediately prints the keystore explanation block
+          - only after that explanation block does setup begin directory capture with the prompt your input:
+          - the same directory prompt repeats until the input names an existing directory for which exists(directory) and isDirectory(directory) are both true
+          - invalid directory input produces no explanatory error message
+          - the chosen directory replaces the missing configured keystore location for the new passbird.sec file
+      keystore_explanation_block:
+        - blank line
+        - Your Passbird Keystore will be secured by a master password.
+        - This master password gives access to all passwords stored in Passbird.
+        - If you lose this password, you will not be able to access any passwords stored in Passbird.
+        - Choose your master password wisely.
+        - blank line
+        - You have to input your master password twice.
+        - Your input will be hidden unless secure input is disabled in your configuration.
+        - If your inputs do not match, you will have to repeat the procedure.
+        - blank line
+      password_capture:
+        - the first password prompt is "first input: "
+        - the second password prompt is "second input: "
+        - acceptance requires the first input to be non-empty and exactly equal to the second input
+        - two empty inputs are rejected and handled the same way as mismatched inputs
+        - on every rejected attempt, setup sends Your inputs do not match, please repeat.
+        - after a rejected attempt, setup restarts at the first input prompt
+        - after a successful matched pair, setup emits one blank line before reporting success
+      success_and_exit:
+        - Keystore has been created successfully!
+        - Now restart Passbird to use it.
+        - Goodbye!
+        - setup exits the process after Goodbye!
+    side_effects:
+      - passbird.sec is written to <chosen-directory>/passbird.sec
