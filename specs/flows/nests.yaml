@@ -27,9 +27,23 @@ flows:
   - id: create_nest
     command: n+[1-9]
     user_experience:
-      - prompts for a Nest name
-      - empty input aborts instead of inventing a name
-      - the default Nest cannot be replaced
+      create_new_nest:
+        - if the target custom Nest slot is empty, Passbird prompts with Enter name for Nest or nothing to abort and then Your input:
+        - this Nest-name prompt uses regular visible input, not secure-input handling
+        - non-empty input creates or places the Nest in the requested slot
+        - successful creation prints no dedicated success line
+        - successful creation ends with a blank line
+      rename_existing_nest:
+        - if the target custom Nest slot already contains a Nest, Passbird prompts with Enter new name for existing Nest '<current NestId>' or nothing to abort and then Your input:
+        - non-empty input replaces the existing Nest name in that slot
+        - successful rename prints no dedicated success line
+        - successful rename ends with a blank line
+      abort_and_guard_paths:
+        - empty input prints Empty input - Operation aborted.
+        - the empty-input abort uses the OPERATION_ABORTED path and therefore also triggers the warning-sound behavior from specs/interaction.yaml
+        - the empty-input path ends with a blank line
+        - n+0 is accepted by the current parser but aborts immediately with Default Nest cannot be replaced - Operation aborted.
+        - that default-slot abort uses the OPERATION_ABORTED path and returns without the extra trailing blank line used by the other add-Nest paths
   - id: discard_nest
     command: n-[1-9]
     user_experience:
