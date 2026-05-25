@@ -8,8 +8,22 @@ flows:
       - n
       - n[0-9]
     user_experience:
-      - the default Nest is slot 0
-      - switching to a missing Nest Slot aborts with user feedback
+      view_command:
+        - n prints a Current Nest section, an Available Nests section, and an Available Nest commands section in that order
+        - the Current Nest section prints the current Nest id directly after Current Nest:
+        - the default Nest is shown as slot 0 with the id Default
+        - the Available Nests section always includes the default nest line as 0: Default
+        - each deployed custom Nest is listed on its own line as <slot>: <NestId>
+        - if no custom Nests exist, the Available Nests section appends the hint (use the n+ command to create custom Nests)
+        - the Available Nest commands section lists n, n0, n[1-9], n[0-9][EggId], n+[1-9], and n-[1-9]
+      switch_command:
+        - n0 switches to the default Nest
+        - n[1-9] switches to the Nest in the specified slot if that Nest exists
+        - successful switching prints no dedicated success line
+        - if the requested Nest is already current, Passbird prints '<NestId>' is already the current Nest.
+        - if the requested Nest slot does not exist, Passbird prints Specified Nest does not exist - Operation aborted.
+        - the missing-Nest abort uses the OPERATION_ABORTED path and therefore also triggers the warning-sound behavior from specs/interaction.yaml
+        - every switch path ends with a blank line
   - id: create_nest
     command: n+[1-9]
     user_experience:
