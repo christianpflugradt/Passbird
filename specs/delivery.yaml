@@ -80,8 +80,8 @@ ci_landscape:
       - CodeQL intentionally uses the nightly toolchain because stable CodeQL can lag behind current Kotlin support, and this repository prefers not to delay Kotlin upgrades for that gap
       - the GitHub Pages site builds from a temporary Jekyll source assembled in the workflow from repository documentation plus workflow-owned Pages config under .github/pages so the product root stays free of Pages-only files
       - the build workflow publishes the GitHub Pages site for coverage assets and refreshes the branch-coverage badge, instruction-coverage badge, and report on main
-      - publish workflow runs semantic-release manually and on a Monday 03:00 Europe/Berlin schedule, but only after the current main commit already has a successful Build and Verify workflow run
-      - scheduled and manual publish runs are expected to succeed even when no release is due
+      - publish workflow creates manual GitHub prereleases from the latest official stable base version and runs semantic-release only on the Monday 03:00 Europe/Berlin schedule, but only after the current main commit already has a successful Build and Verify workflow run
+      - scheduled stable publish runs are expected to succeed even when no release is due, while manual publish runs are expected to produce a new development prerelease
 github_cli_usage:
   when_remote_state_matters:
     - inspect local workflow YAML first for static behavior, then use gh for live GitHub-side workflow registration, runs, jobs, and logs
@@ -169,7 +169,7 @@ recommended_validation_by_change_type:
       - ./gradlew jar
       - review workflow and release config for consistency
       - inspect relevant GitHub Actions runs or workflow metadata with gh when the question depends on GitHub-side state
-      - run semantic-release in dry-run mode when credentials and tags are available
+      - run semantic-release in dry-run mode when credentials and tags are available for scheduled stable-release behavior
   security_or_persistence:
     run:
       - run the focused persistence or workflow tests you changed or added
@@ -188,8 +188,9 @@ release_and_history_notes:
     - conventional commit style for automation and release tooling
     - dependency updates are frequent and usually automated
   automation:
-    - semantic-release now publishes on GitHub rather than GitLab
-    - release assets are expected to include passbird.jar for updater compatibility
+    - semantic-release now publishes scheduled stable releases on GitHub rather than GitLab
+    - manual publish runs create GitHub prereleases whose tags are prefixed with dev- while their visible versions remain updater-compatible
+    - release assets are expected to include passbird.jar for updater compatibility on both stable and development channels
   release_guardrail:
     - if a change impacts persistence format or migration behavior, document it before release
     - agents should not push partial or unreleasable states simply to satisfy the default commit-and-push rule

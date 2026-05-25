@@ -112,8 +112,9 @@ release_model:
     - GitHub Actions build workflow runs a dedicated PIT mutation-testing job for high-risk persistence, exchange, backup, and security code and uploads mutation reports plus line-coverage data as artifacts
     - GitHub Actions refresh the dependency-check cache daily and purge then rebuild it during the Sunday-to-Monday overnight window
     - GitHub Actions build workflow refreshes the branch and instruction coverage badges plus the coverage report on main
-    - GitHub Actions publish workflow runs semantic-release on demand and every Monday at 03:00 Europe/Berlin
-    - semantic-release publishes GitHub tags and GitHub releases with the passbird.jar asset when commit history requires a release
+    - GitHub Actions publish workflow creates development prereleases on manual dispatch and runs semantic-release every Monday at 03:00 Europe/Berlin for official stable releases
+    - official stable releases use plain semantic versions and semantic-release publishes their GitHub tags and GitHub releases with the passbird.jar asset when commit history requires a release
+    - manual development prereleases use the latest official stable version as their base and publish passbird.jar assets under GitHub prerelease tags prefixed with dev-
 agent_notes:
   - this repo values long-term maintenance, not only passing tests
   - security claims in docs should remain modest; README explicitly says the project is not externally audited

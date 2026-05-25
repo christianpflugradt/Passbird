@@ -39,7 +39,7 @@ If that is your preference, continuing to use 5.x.x is a valid choice.
 
 Download the latest version of Passbird [from GitHub Releases](https://github.com/christianpflugradt/Passbird/releases/latest).
 
-Each GitHub release publishes a `passbird.jar` asset. Alternatively, you can build Passbird yourself by cloning the project repository and running the Gradle jar task.
+Each official GitHub release publishes a `passbird.jar` asset. The `latest` release link always points to the newest official stable release. Manual publish runs create opt-in development prereleases on the full releases page. Alternatively, you can build Passbird yourself by cloning the project repository and running the Gradle jar task.
 
 ### Running Passbird
 
@@ -489,7 +489,7 @@ Some releases may require a one-time migration before Passbird can start normall
 
 Versions up to `6.2.0` created `passbird.sec` as a JCEKS keystore. Current releases create PKCS12 keystores instead and automatically route legacy `passbird.sec` files through the migration boot path before normal startup.
 
-You can find current and historical Passbird versions [on GitHub Releases](https://github.com/christianpflugradt/Passbird/releases). Each release publishes the `passbird.jar` asset used by [Passbird-Updater](https://github.com/christianpflugradt/Passbird-Updater), though manual updates are still the more conservative option.
+You can find current and historical Passbird versions [on GitHub Releases](https://github.com/christianpflugradt/Passbird/releases). Official stable releases use plain semantic versions such as `6.4.0`. Manual publish runs create development prereleases with versions such as `6.4.0-dev.20260525.1`. Each release publishes the `passbird.jar` asset used by [Passbird-Updater](https://github.com/christianpflugradt/Passbird-Updater), which defaults to official stable releases and can opt into development prereleases with `--channel dev`, though manual updates are still the more conservative option.
 
 ### What happens if I lose my master password or keystore file?
 Losing your master password or keystore file results in permanent data loss. The master password is required to decrypt the database, and the keystore file stores the encryption key. Even recreating the keystore with the same master password will not regenerate the same encryption key.

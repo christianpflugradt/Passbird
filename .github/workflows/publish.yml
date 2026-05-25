@@ -52,9 +52,9 @@ jobs:
 
             core.notice(`Found successful Build and Verify run: ${successfulRun.html_url}`);
 
-  publish:
+  publish-stable:
     needs: [ require-verified-main ]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -74,3 +74,63 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx --yes --package semantic-release@24.2.5 --package conventional-changelog-conventionalcommits@9.0.0 semantic-release
+  publish-dev:
+    needs: [ require-verified-main ]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+      - uses: gradle/actions/setup-gradle@v6
+      - name: build release jar
+        run: ./gradlew -PcreatedBy="GitHub Actions" jar
+      - id: compute-dev-version
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const berlinDate = new Intl.DateTimeFormat("en-CA", {
+              timeZone: "Europe/Berlin",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            }).format(new Date()).replaceAll("-", "");
+
+            const { owner, repo } = context.repo;
+            const latestRelease = await github.rest.repos.getLatestRelease({ owner, repo });
+            const baseVersion = latestRelease.data.tag_name;
+            const prefix = `dev-${baseVersion}-dev.${berlinDate}.`;
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner,
+              repo,
+              per_page: 100,
+            });
+
+            const sequence = releases
+              .map((release) => release.tag_name)
+              .filter((tagName) => tagName.startsWith(prefix))
+              .map((tagName) => Number(tagName.substring(prefix.length)))
+              .filter((value) => Number.isInteger(value))
+              .reduce((currentMax, value) => Math.max(currentMax, value), 0) + 1;
+
+            const version = `${baseVersion}-dev.${berlinDate}.${sequence}`;
+            core.setOutput("base_version", baseVersion);
+            core.setOutput("version", version);
+            core.setOutput("tag_name", `dev-${version}`);
+      - name: create GitHub prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_VERSION: ${{ steps.compute-dev-version.outputs.base_version }}
+          VERSION: ${{ steps.compute-dev-version.outputs.version }}
+          TAG_NAME: ${{ steps.compute-dev-version.outputs.tag_name }}
+        run: |
+          gh release create "$TAG_NAME" build/libs/passbird.jar \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$VERSION" \
+            --notes "Development prerelease based on official Passbird release $BASE_VERSION." \
+            --prerelease
