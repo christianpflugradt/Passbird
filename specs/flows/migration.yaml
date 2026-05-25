@@ -35,6 +35,19 @@ flows:
       - after the first successful migration authentication in a run, Passbird caches the resulting credentials for reuse
       - later authenticated migrations in the same migration run reuse those cached credentials without prompting again
       - when both keystore-format and password-tree-key-derivation migrations are pending together, the user is prompted only once for the whole migration session
+  - id: keystore_format_migration
+    trigger:
+      - the keystore file exists and its leading bytes identify the legacy JCEKS format
+    user_experience:
+      - this migration contributes the pending migration id keystore-format
+      - it is a pre-launch migration and therefore participates in the shared migration boot path rather than the normal command loop
+      - it runs before password-tree-key-derivation when both migrations are pending in the same run
+      - after successful shared migration authentication, Passbird rewrites the existing keystore file in place using the current keystore writer
+      - the migrated keystore is stored in the current PKCS12 format rather than the legacy JCEKS format
+      - the master password the user entered for migration continues to unlock the migrated keystore after migration
+      - the stored secret inside the keystore is preserved across the format migration
+      - after successful migration, future startup detection no longer requests keystore-format migration for that keystore file
+      - this migration produces no dedicated user-visible success line beyond the shared overall migration success message
   - id: migration_completion
     trigger:
       - pending migrations finish successfully
