@@ -51,7 +51,25 @@ flows:
       - discard handling surfaces conflicts such as occupied Nests rather than silently moving data
   - id: assign_and_move
     commands:
-      - n[0-9][EggId]
+      - n[EggId]
     user_experience:
-      - moving an Egg into another Nest respects EggId conflicts
-      - conflicting moves abort instead of silently overwriting another Egg
+      target_selection:
+        - after validating that the source Egg exists, Passbird prints an Available Nests section before asking for the target Nest
+        - the target list excludes the current Nest and includes only selectable destination Nests
+        - if the current Nest is default, only deployed custom Nests are listed as targets
+        - if the current Nest is custom, the target list includes 0: Default and any other deployed custom Nests except the current one
+        - Passbird then prompts with Enter Nest you want to move Egg to:
+        - this target-Nest prompt uses regular visible input, not secure-input handling
+      source_egg_gating:
+        - if the source Egg does not exist, Passbird does not print the target-selection list or prompt
+        - a missing source Egg triggers the standard not-found event output Egg '<EggId>' not found.
+        - the not-found event also triggers the warning sound defined in specs/interaction.yaml
+      move_and_conflict_rules:
+        - if the chosen target slot is the current Nest, Passbird prints Egg is already in the specified Nest - Operation aborted.
+        - if the chosen target slot does not contain a deployed Nest, Passbird prints Specified Nest does not exist - Operation aborted.
+        - if a different Egg with the same EggId already exists in the target Nest, Passbird prints Egg with same EggId already exists in target Nest - Operation aborted.
+        - on success, Passbird moves the Egg to the selected Nest slot
+        - successful moves print no dedicated success line from the handler
+      finish:
+        - all abort branches in this flow use the OPERATION_ABORTED path and therefore also trigger the warning-sound behavior from specs/interaction.yaml
+        - every command path ends with a blank line
