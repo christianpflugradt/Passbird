@@ -17,6 +17,49 @@ use_cases:
   - import or export passwords through a human-readable exchange file
   - rotate the keystore master password without replacing the underlying secret
   - restore or continue using existing local state across restarts while staying offline
+command_surface:
+  parsing_rules:
+    - commands are entered as a continuous token without separating whitespace
+    - for data-carrying commands, parsing stops at the first alphabetic character after the command prefix and treats the remaining characters as data
+    - examples of that parsing rule include lfilter, l*filter, pEggId, m0p0, and nEggId
+  primary_entry_commands:
+    - h
+    - q
+    - g[EggId]
+    - s[EggId]
+    - s*[EggId]
+    - s[1-9][EggId]
+    - c[EggId]
+    - v[EggId]
+    - r[EggId]
+    - d[EggId]
+    - e
+    - e*
+    - i
+    - i*
+    - k
+    - l
+    - l[filter]
+    - l*
+    - l*[filter]
+    - n
+    - n0
+    - n[1-9]
+    - n+[1-9]
+    - n-[1-9]
+    - n[EggId]
+    - m?
+    - m
+    - m[0-9]
+    - m[0-9][Command...]
+    - p
+    - p?
+    - p[EggId]
+    - p*[EggId]
+    - p[0-9][EggId]
+    - p+[0-9][EggId]
+    - p-[0-9][EggId]
+    - s?
 capabilities:
   - name: password_entry_management
     user_outcomes:
@@ -38,24 +81,27 @@ capabilities:
       - generate passwords with default or named custom configurations
     commands:
       - s[EggId]
+      - s*[EggId]
       - s[1-9][EggId]
       - s?
   - name: nest_management
     user_outcomes:
       - switch between Nest contexts
       - create and discard Nests
-      - assign Eggs to Nests
+      - assign Eggs to Nests by entering the EggId and then choosing the target Nest interactively
     commands:
       - n
-      - n[0-9]
+      - n0
+      - n[1-9]
       - n+[1-9]
       - n-[1-9]
-      - n[0-9][EggId]
+      - n[EggId]
   - name: protein_management
     user_outcomes:
       - inspect Protein types and structures
       - create, overwrite, or discard Proteins in fixed slots
     commands:
+      - p
       - p?
       - p[EggId]
       - p*[EggId]
@@ -77,6 +123,13 @@ capabilities:
       - complete first-run keystore creation during setup
     commands:
       - k
+  - name: help_and_session_control
+    user_outcomes:
+      - inspect the top-level command catalog
+      - exit the interactive session explicitly
+    commands:
+      - h
+      - q
   - name: memory_and_listing
     user_outcomes:
       - list Eggs in the current Nest or across Nests
@@ -89,7 +142,13 @@ capabilities:
       - m?
       - m
       - m[0-9]
-      - m[0-9]Command
+      - m[0-9][Command...]
+known_surface_drifts:
+  - area: nest_assignment
+    current_help_output_shape: n[0-9][EggId]
+    actual_accepted_shape: n[EggId]
+    actual_follow_up_behavior:
+      - after the EggId is entered, Passbird prompts for the target Nest slot interactively
 observable_product_rules:
   - every interactive capability is terminal-native and local-file-backed
   - commands stay terse and character-first unless the maintainer explicitly changes that direction
