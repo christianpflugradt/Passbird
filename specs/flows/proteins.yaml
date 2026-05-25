@@ -45,10 +45,37 @@ flows:
     commands:
       - p+[0-9][EggId]
     user_experience:
-      - overwriting an existing Protein requires explicit confirmation where prompted
-      - secure input for Protein structure follows configuration defaults unless explicitly toggled
-      - empty structure input aborts
-      - empty replacement type input keeps the existing type when the prompt says so
+      command_scope:
+        - the addressed slot index selects the Protein slot to create or replace, with 0 addressing the default Protein slot
+        - the same command is used both for creating a previously empty Protein slot and for updating an existing Protein slot
+      missing_egg_behavior:
+        - the command first checks whether the Egg exists
+        - if the Egg does not exist, Passbird asks no further questions and does not attempt to store a Protein
+        - a missing Egg triggers the standard event output Egg '<EggId>' not found.
+        - the missing-Egg event also triggers the warning sound defined in specs/interaction.yaml
+        - the missing-Egg path ends with one trailing blank line
+      overwrite_confirmation:
+        - overwrite confirmation is only considered when the addressed Protein slot already contains a Protein
+        - if the slot is empty, Passbird skips overwrite confirmation even when promptOnRemoval is enabled
+        - if the slot is occupied and promptOnRemoval is enabled, Passbird prompts with Existing Protein at Slot '<SlotIndex>' of Egg '<EggId>' will be irrevocably overwritten.
+        - the overwrite prompt then continues with Input 'c' to confirm or anything else to abort. and Your input:
+        - declining that confirmation prints Operation aborted.
+        - the overwrite-abort path ends with one trailing blank line
+      type_prompt_behavior:
+        - if the addressed slot is empty, Passbird prompts with Enter Protein Type or just press enter to abort:
+        - if the addressed slot already has a Type '<CurrentType>', Passbird prompts with Enter new Protein Type to replace '<CurrentType>' or just press enter to keep it:
+        - on an empty slot, empty type input prints Operation aborted.
+        - on an occupied slot, empty type input keeps the existing Protein Type and continues to the structure prompt
+      structure_prompt_behavior:
+        - after type selection, Passbird prompts with Enter Protein Structure or just press enter to abort:
+        - the structure prompt is received either through secure-input handling or regular visible input according to the effective mode determined for this command
+        - empty structure input prints Operation aborted.
+        - every structure-abort path ends with one trailing blank line
+      success_behavior:
+        - if the slot was previously empty, successful storage triggers the event output Protein '<Type>' for egg '<EggId>' successfully created.
+        - if the slot was previously occupied and the Type stays unchanged, successful storage triggers the event output Protein '<Type>' at slot <SlotIndex> for egg '<EggId>' successfully updated.
+        - if the slot was previously occupied and the Type changes, successful storage triggers the event output Protein for egg '<EggId>' at slot <SlotIndex> successfully updated from '<OldType>' to '<NewType>'.
+        - the success path ends with one trailing blank line
   - id: get_protein
     commands:
       - p[0-9][EggId]
@@ -72,8 +99,15 @@ flows:
     trigger:
       - domain.protein.promptForProteinStructureInputToggle is enabled
     user_experience:
-      - the toggle prompt uses explicit y or Y only
-      - empty input keeps the current secure-input behavior
+      prompt_variants:
+        - if the configured secure protein input mode is enabled, Passbird prompts with Disable secure input for next input? Y/n 
+        - if the configured secure protein input mode is disabled, Passbird prompts with Enable secure input for next input? Y/n 
+      behavior:
+        - the toggle prompt is shown immediately before the Protein Structure prompt and applies only to that next structure input
+        - the toggle prompt uses explicit y or Y only
+        - explicit y or Y flips the configured secure-input mode for that one structure prompt
+        - empty input keeps the current secure-input behavior
+        - any other non-y input also keeps the current secure-input behavior
   - id: discard_protein
     command: p-[0-9][EggId]
     user_experience:
