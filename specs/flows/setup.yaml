@@ -5,19 +5,61 @@ applies_interaction_rules_from: specs/interaction.yaml
 flows:
   - id: first_run_without_configuration
     trigger:
-      - Passbird is started without a usable configuration file
+      - setup module is booted with configuration.template = true
+      - at launcher level this corresponds to startup without a usable configured keystore location, which typically means no usable configuration was provided
     user_experience:
-      - setup explains why the user landed in setup and how to start Passbird with a configuration directory
-      - continuing setup requires explicit c-style confirmation
-      - setup uses blank lines to separate informational blocks
+      opening_output:
+        - Welcome to Passbird Setup!
+        - blank line
+      guidance_block:
+        - You have landed here because you did not provide a configuration.
+        - If you have a configuration file, then please start Passbird as follows:
+        - java -jar passbird.jar "absolute-path-to-directory-with-configuration-file"
+        - blank line
+        - Example for a Linux path: /etc/passbird
+        - Example for a Windows path: c:\programs\passbird
+        - The configuration file must be in the specified directory and it must be named 'passbird.yml.'
+        - blank line
+        - To (c)ontinue setup, press 'c'. To quit setup, press any other key
+        - prompt: "Your input: "
+      confirmation_semantics:
+        - only a single-character input c continues
+        - cc, any non-c character, or empty input aborts
+        - the confirmation prompt uses receiveConfirmation semantics rather than yes/no semantics
+      continue_branch:
+        - the next visible line is Please input an absolute path to a directory in which to create the 'configuration' file.
+        - the flow then proceeds into configuration creation and keystore creation
+      abort_branch:
+        - no configuration file is written
+        - no keystore is created
+        - setup then sends Goodbye! and exits the process
     side_effects:
       - may create passbird.yml and passbird.sec in user-chosen directories
   - id: missing_keystore_guidance
     trigger:
-      - configuration exists but the configured keystore file is missing
+      - setup module is booted with configuration.template = false
+      - launcher entered setup because no usable keystore could be resolved
+      - the concrete launcher conditions are an empty keyStore.location or a missing passbird.sec at the configured location
     user_experience:
-      - setup explains the configured location and the missing passbird.sec file
-      - continuing still requires explicit confirmation
+      opening_output:
+        - Welcome to Passbird Setup!
+        - blank line
+      guidance_block:
+        - You have landed here because the keystore specified in your configuration does not exist.
+        - Your configuration specifies the keystore to be in the following directory: <configured-location>
+        - However in that directory there is no file 'passbird.sec'
+        - blank line
+        - To (c)ontinue setup, press 'c'. To quit setup, press any other key
+        - prompt: "Your input: "
+      confirmation_semantics:
+        - only a single-character input c continues
+        - any other input, including empty input, aborts setup
+      continue_branch:
+        - the next visible line is Please input an absolute path to a directory in which to create the 'keystore' file.
+        - the flow then proceeds into keystore creation using the chosen directory instead of the missing configured directory
+      abort_branch:
+        - no keystore is created
+        - setup then sends Goodbye! and exits the process
   - id: keystore_creation
     trigger:
       - setup proceeds into keystore creation
