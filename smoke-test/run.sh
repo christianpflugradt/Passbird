@@ -17,6 +17,7 @@ LAST_OUTPUT=""
 SESSION_INDEX=0
 DEFAULT_PASSWORD=""
 PIN_PASSWORD=""
+CAPTURED_CLIPBOARD=""
 
 cleanup() {
     local status=$?
@@ -177,6 +178,156 @@ PY
     reject_unexpected_errors "$step_name" "$LAST_OUTPUT"
 }
 
+ensure_java_clipboard_reader() {
+    local reader="$TMP_ROOT/ReadClipboard.java"
+    if [[ ! -f "$reader" ]]; then
+        cat > "$reader" <<'EOF'
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+
+class ReadClipboard {
+    public static void main(String[] args) throws Exception {
+        Object clipboardData = Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+        System.out.print(clipboardData == null ? "" : clipboardData.toString());
+    }
+}
+EOF
+    fi
+    printf '%s' "$reader"
+}
+
+run_clipboard_session() {
+    local step_name="$1"
+    local home="$2"
+    local clipboard_output=""
+    local clipboard_reader=""
+    shift 2
+    CAPTURED_CLIPBOARD=""
+    SESSION_INDEX=$((SESSION_INDEX + 1))
+    LAST_OUTPUT="$ARTIFACT_DIR/$(printf '%02d' "$SESSION_INDEX")-$(slugify "$step_name").log"
+    clipboard_output="$ARTIFACT_DIR/$(printf '%02d' "$SESSION_INDEX")-$(slugify "$step_name").clipboard"
+    clipboard_reader="$(ensure_java_clipboard_reader)"
+    if ! python3 - "$JAR_PATH" "$home" "$LAST_OUTPUT" "$clipboard_output" "$clipboard_reader" "$@" <<'PY'
+import errno
+import os
+import pty
+import select
+import subprocess
+import sys
+import termios
+import time
+
+jar_path, home, output_path, clipboard_output_path, clipboard_reader_path, *inputs = sys.argv[1:]
+master_fd, slave_fd = pty.openpty()
+attributes = termios.tcgetattr(slave_fd)
+attributes[3] &= ~termios.ECHO
+termios.tcsetattr(slave_fd, termios.TCSANOW, attributes)
+
+process = subprocess.Popen(
+    ["java", "-jar", jar_path, home],
+    stdin=slave_fd,
+    stdout=slave_fd,
+    stderr=slave_fd,
+    close_fds=True,
+)
+os.close(slave_fd)
+pending = [f"{value}\n".encode() for value in inputs]
+prompt_suffixes = [
+    "Your input: ",
+    "your input: ",
+    "first input: ",
+    "second input: ",
+    "Enter key: ",
+    "Enter command: ",
+    "Enter current key: ",
+    "Enter new key: ",
+    "Enter new key again: ",
+    "Enter custom Password: ",
+    "Enter Nest you want to move Egg to: ",
+    "Enter password length or just press enter to abort: ",
+    "Specify a Nest Slot 0-9 to move them to or anything else to abort: ",
+    "Enter unused special characters or just press enter to keep all: ",
+    "Include numbers? Y/n ",
+    "Include lowercase letters? Y/n ",
+    "Include uppercase letters? Y/n ",
+    "Include special characters? Y/n ",
+    "Enter Protein Type or just press enter to abort: ",
+    "Enter new Protein Type to replace '",
+    "Enter Protein Structure or just press enter to abort: ",
+    "Enter new EggId or nothing to abort: ",
+    "secure input for next input? Y/n ",
+    "or just press enter to keep it: ",
+]
+recent_output = ""
+clipboard_captured = False
+
+with open(output_path, "wb") as output:
+    while True:
+        poll = process.poll()
+        read_ready, _, _ = select.select([master_fd], [], [], 0.05)
+        if master_fd in read_ready:
+            try:
+                chunk = os.read(master_fd, 4096)
+            except OSError as ex:
+                if ex.errno != errno.EIO:
+                    raise
+                chunk = b""
+            if chunk:
+                output.write(chunk)
+                output.flush()
+                recent_output = (recent_output + chunk.decode(errors="ignore"))[-4096:]
+                prompt_reached = any(recent_output.endswith(suffix) for suffix in prompt_suffixes)
+                while pending and prompt_reached:
+                    try:
+                        os.write(master_fd, pending.pop(0))
+                    except OSError:
+                        pending.clear()
+                        break
+                    recent_output = ""
+                    prompt_reached = False
+                    time.sleep(0.02)
+                if prompt_reached and not pending and not clipboard_captured:
+                    clipboard_result = subprocess.run(
+                        ["java", clipboard_reader_path],
+                        check=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                    )
+                    with open(clipboard_output_path, "w", encoding="utf-8") as clipboard_output:
+                        clipboard_output.write(clipboard_result.stdout)
+                    os.write(master_fd, b"q\n")
+                    clipboard_captured = True
+                    recent_output = ""
+                    time.sleep(0.02)
+
+        if poll is not None:
+            while True:
+                try:
+                    chunk = os.read(master_fd, 4096)
+                except OSError as ex:
+                    if ex.errno != errno.EIO:
+                        raise
+                    chunk = b""
+                if not chunk:
+                    break
+                output.write(chunk)
+                output.flush()
+            break
+
+os.close(master_fd)
+if not clipboard_captured:
+    raise SystemExit(1)
+raise SystemExit(process.returncode)
+PY
+    then
+        fail "$step_name: Passbird exited with a non-zero status."
+    fi
+    [[ -f "$clipboard_output" ]] || fail "$step_name: expected clipboard capture at '$clipboard_output'."
+    CAPTURED_CLIPBOARD="$(<"$clipboard_output")"
+    reject_unexpected_errors "$step_name" "$LAST_OUTPUT"
+}
+
 assert_file_exists() {
     local path="$1"
     [[ -f "$path" ]] || fail "$CURRENT_STEP: expected file '$path' to exist."
@@ -310,56 +461,6 @@ assert_smoke_config() {
     assert_contains "$config_path" "length: 4"
 }
 
-read_clipboard_with_java() {
-    local reader="$TMP_ROOT/ReadClipboard.java"
-    if [[ ! -f "$reader" ]]; then
-        cat > "$reader" <<'EOF'
-import java.awt.Toolkit;
-import java.awt.datatransfer.DataFlavor;
-
-class ReadClipboard {
-    public static void main(String[] args) throws Exception {
-        Object clipboardData = Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
-        System.out.print(clipboardData == null ? "" : clipboardData.toString());
-    }
-}
-EOF
-    fi
-    java "$reader"
-}
-
-read_clipboard() {
-    local clipboard=""
-    local supported_targets=""
-    local target=""
-    local xclip_targets=("UTF8_STRING" "text/plain;charset=utf-8" "text/plain" "TEXT" "STRING")
-    if command -v pbpaste >/dev/null 2>&1; then
-        pbpaste
-    elif command -v wl-paste >/dev/null 2>&1; then
-        wl-paste -n
-    elif clipboard="$(read_clipboard_with_java 2>/dev/null)"; then
-        printf '%s' "$clipboard"
-        return 0
-    elif command -v xclip >/dev/null 2>&1; then
-        supported_targets="$(xclip -o -selection clipboard -t TARGETS 2>/dev/null | tr '\r\n' '  ' || true)"
-        for target in "${xclip_targets[@]}"; do
-            if [[ "$supported_targets" == *"$target"* ]] && clipboard="$(xclip -o -selection clipboard -t "$target" 2>/dev/null)"; then
-                printf '%s' "$clipboard"
-                return 0
-            fi
-        done
-        if clipboard="$(xclip -o -selection clipboard 2>/dev/null)"; then
-            printf '%s' "$clipboard"
-            return 0
-        fi
-        fail "Clipboard contents could not be read via xclip. Available targets: ${supported_targets:-unknown}"
-    elif command -v xsel >/dev/null 2>&1; then
-        xsel --clipboard --output
-    else
-        fail "No supported clipboard reader was found."
-    fi
-}
-
 prepare_home() {
     local home="$1"
     mkdir -p "$home"
@@ -397,9 +498,9 @@ assert_contains "$LAST_OUTPUT" "Egg 'email' successfully created."
 pass "$CURRENT_STEP"
 
 CURRENT_STEP="source-copy-default-password"
-run_session "$CURRENT_STEP" "$SOURCE_HOME" "$MASTER_PASSWORD" "gemail" "q"
+run_clipboard_session "$CURRENT_STEP" "$SOURCE_HOME" "$MASTER_PASSWORD" "gemail"
 assert_contains "$LAST_OUTPUT" "Password copied to clipboard."
-DEFAULT_PASSWORD="$(read_clipboard)"
+DEFAULT_PASSWORD="$CAPTURED_CLIPBOARD"
 assert_nonempty "$DEFAULT_PASSWORD" "default password copied to clipboard"
 pass "$CURRENT_STEP"
 
@@ -409,10 +510,10 @@ assert_equals "$(extract_inline_result "$LAST_OUTPUT" 1)" "$DEFAULT_PASSWORD" "v
 pass "$CURRENT_STEP"
 
 CURRENT_STEP="source-memory"
-run_session "$CURRENT_STEP" "$SOURCE_HOME" "$MASTER_PASSWORD" "vemail" "m" "m0" "m0v" "q"
+run_clipboard_session "$CURRENT_STEP" "$SOURCE_HOME" "$MASTER_PASSWORD" "vemail" "m" "m0" "m0v"
 assert_contains "$LAST_OUTPUT" "0: email"
 assert_occurrence_at_least "$LAST_OUTPUT" "$DEFAULT_PASSWORD" 2
-assert_equals "$(read_clipboard)" "email" "memory clipboard value"
+assert_equals "$CAPTURED_CLIPBOARD" "email" "memory clipboard value"
 pass "$CURRENT_STEP"
 
 CURRENT_STEP="source-add-protein"
@@ -421,11 +522,11 @@ assert_contains "$LAST_OUTPUT" "Protein '$PROTEIN_TYPE' for egg 'email' successf
 pass "$CURRENT_STEP"
 
 CURRENT_STEP="source-verify-protein"
-run_session "$CURRENT_STEP" "$SOURCE_HOME" "$MASTER_PASSWORD" "pemail" "p*email" "p0email" "q"
+run_clipboard_session "$CURRENT_STEP" "$SOURCE_HOME" "$MASTER_PASSWORD" "pemail" "p*email" "p0email"
 assert_contains "$LAST_OUTPUT" "$PROTEIN_TYPE"
 assert_contains "$LAST_OUTPUT" "$PROTEIN_STRUCTURE"
 assert_contains "$LAST_OUTPUT" "Protein copied to clipboard."
-assert_equals "$(read_clipboard)" "$PROTEIN_STRUCTURE" "protein clipboard value"
+assert_equals "$CAPTURED_CLIPBOARD" "$PROTEIN_STRUCTURE" "protein clipboard value"
 pass "$CURRENT_STEP"
 
 CURRENT_STEP="source-create-nest"
