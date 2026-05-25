@@ -22,6 +22,19 @@ flows:
       - empty input is not affirmative
       - if the user declines or presses enter, Passbird runs no migrations, prints no success line, invalidates migration authentication state, and exits immediately
       - if the user accepts, Passbird merges the already-detected pre-launch migrations with any authenticated migration detections before execution
+  - id: migration_authentication_session
+    trigger:
+      - at least one pending migration requires authenticated access to the current keystore contents
+    user_experience:
+      - the current authenticated migrations use the default secure prompt Enter key:
+      - this prompt uses secure-input handling and therefore follows the secure-input fallback rules from specs/interaction.yaml
+      - each authenticated migration requests credentials through the shared migration authentication service
+      - if no credentials are cached yet, Passbird allows up to 3 attempts with the same Enter key: prompt
+      - failed attempts repeat the same prompt until authentication succeeds or 3 attempts have been consumed
+      - if authentication still fails after 3 attempts, Passbird reports Login failed. Shutting down after 3 unsuccessful attempts. and exits
+      - after the first successful migration authentication in a run, Passbird caches the resulting credentials for reuse
+      - later authenticated migrations in the same migration run reuse those cached credentials without prompting again
+      - when both keystore-format and password-tree-key-derivation migrations are pending together, the user is prompted only once for the whole migration session
   - id: migration_completion
     trigger:
       - pending migrations finish successfully
