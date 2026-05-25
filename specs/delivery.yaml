@@ -68,7 +68,8 @@ ci_landscape:
       - .github/workflows/owasp-purge.yml
       - .github/workflows/publish.yml
     notes:
-      - ordinary branch pushes only prove the always-on compile, lint, static-analysis, license, OWASP, and non-conditional test jobs; they skip architecture-tests, test-coverage-verification, test-coverage-report, pages-site, and deploy-pages
+      - ordinary branch pushes prove the always-on compile, lint, static-analysis, license, OWASP, jar-smoke, and non-conditional test jobs; they skip architecture-tests, test-coverage-verification, test-coverage-report, pages-site, and deploy-pages
+      - the build workflow installs Xvfb and xclip, builds the releasable passbird.jar with the GitHub Actions manifest metadata, and runs smoke-test/run.sh against that artifact under xvfb-run
       - architecture tests and coverage jobs run only on pull requests and direct pushes to main, while GitHub Pages publication stays main-only
       - the build workflow runs dependency-check analysis on push and restores its local database from the default-branch GitHub Actions cache when available
       - Java-based GitHub Actions workflows run on Temurin 25 LTS while the Gradle build still targets Java 17 bytecode for released artifacts
@@ -191,6 +192,7 @@ release_and_history_notes:
     - semantic-release now publishes scheduled stable releases on GitHub rather than GitLab
     - manual publish runs create GitHub prereleases whose tags are prefixed with dev- while their visible versions remain updater-compatible
     - release assets are expected to include passbird.jar for updater compatibility on both stable and development channels
+    - publish runs stay gated on a fully successful Build and Verify workflow for the same main commit, which now includes jar-level smoke validation of the releasable artifact
   release_guardrail:
     - if a change impacts persistence format or migration behavior, document it before release
     - agents should not push partial or unreleasable states simply to satisfy the default commit-and-push rule

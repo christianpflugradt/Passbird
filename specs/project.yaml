@@ -66,7 +66,7 @@ repository_layout:
   - path: src/test/kotlin
     role: unit, property, integration, and architecture tests
   - path: smoke-test
-    role: manual jar-level smoke verification assets for interactive terminal workflows
+    role: jar-level smoke verification assets used by the local pre-commit hook and GitHub-side artifact validation
   - path: .github/workflows
     role: GitHub CI, security checks, and release automation
   - path: .github/pages
@@ -108,6 +108,7 @@ release_model:
   primary_branch: main
   automation:
     - GitHub Actions build, CodeQL, and OWASP workflows verify the repository
+    - GitHub Actions build workflow builds the releasable passbird.jar and smoke-validates it under Xvfb before a main commit can satisfy the publish gate
     - GitHub Actions build workflow runs dependency-check analysis on push and publishes the GitHub Pages site on main from a temporary Jekyll source assembled from repository documentation and workflow-owned Pages config under .github/pages
     - GitHub Actions build workflow runs a dedicated PIT mutation-testing job for high-risk persistence, exchange, backup, and security code and uploads mutation reports plus line-coverage data as artifacts
     - GitHub Actions refresh the dependency-check cache daily and purge then rebuild it during the Sunday-to-Monday overnight window
