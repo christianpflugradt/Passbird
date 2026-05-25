@@ -10,27 +10,148 @@ shared_artifact:
 flows:
   - id: export_all
     command: e
-    user_experience:
-      - exports all Eggs from deployed Nests into passbird-export.json in the startup home directory
-      - emits a separating blank line after the command finishes
+    preconditions:
+      - no additional interactive input is requested by the command handler itself
+    exact_success_output:
+      - on successful export, Passbird prints <EggCount> eggs successfully exported.
+      - after the success message, Passbird emits one empty line
+    exact_failure_output:
+      - on export failure, Passbird prints Password Tree could not be exported: <ExceptionMessage> to standard error
+      - after the failure report, Passbird still emits one empty line from the command handler
+    observable_rules:
+      - the export target is passbird-export.json in the startup home directory
+      - the command handler itself does not print a banner, prompt, or summary before starting the export
   - id: export_selective
     command: e*
-    user_experience:
-      - shows available Nests first
-      - asks whether to export only selected Nests or all except selected Nests
-      - accepts comma-separated Nest Slot input
-      - invalid or empty selection aborts instead of guessing
+    exact_menu_intro:
+      - Passbird starts this flow with a leading empty line before the Available Nests heading
+      - Passbird prints Available Nests:
+      - Passbird prints one empty line after that heading before the Nest list
+      - Passbird then prints a tab-indented Nest list including the default Nest at slot 0 and every deployed custom Nest
+    nest_list_template:
+      - "\t0: <DefaultNestId>"
+      - "\t<SlotIndex>: <NestId>"
+    exact_selection_mode_prompt: "\nInput 1 to export only selected Nests or 2 to export all Nests except selected Nests.\nYour input: "
+    accepted_selection_mode_inputs:
+      - "1"
+      - "2"
+    rejected_selection_mode_inputs:
+      - empty input
+      - any input other than the single-character strings 1 or 2
+    exact_nest_slot_prompt: "Specify Nest Slots separated by ','.\nYour input: "
+    accepted_nest_slot_input_shape:
+      - one or more single-digit slot indices separated by commas
+      - surrounding whitespace around each comma-separated part is ignored
+      - every selected slot must refer to a currently available Nest
+    rejected_nest_slot_input_shape:
+      - empty input
+      - any non-digit entry
+      - any multi-character slot token
+      - any slot not currently available for export
+    exact_branches:
+      - selection mode 1 exports exactly the specified Nest Slots
+      - selection mode 2 exports every available Nest Slot except the specified ones
+      - if selection mode input is invalid, Passbird prints Operation aborted.
+      - if the Nest Slot input is invalid, Passbird prints Operation aborted.
+      - if the resulting export set is empty, Passbird prints Operation aborted.
+    exact_success_output:
+      - on successful selective export, Passbird prints <EggCount> eggs successfully exported.
+      - after the success message, Passbird emits one empty line
+    exact_abort_output:
+      - on an abort path, Passbird prints Operation aborted.
+      - after the abort message, Passbird emits one empty line
+    exact_failure_output:
+      - if the export itself fails after valid selections, Passbird prints Password Tree could not be exported: <ExceptionMessage> to standard error
+      - after the failure report, Passbird emits one empty line
   - id: import_all
     command: i
-    user_experience:
-      - imports all Eggs from passbird-export.json
-      - relies on the shared exchange file rather than prompting for a different filename
+    preconditions:
+      - import always reads from passbird-export.json in the startup home directory
+    confirmation_rules:
+      - if application.password.promptOnRemoval is disabled, the handler does not ask for overwrite confirmation
+      - if application.password.promptOnRemoval is enabled, Passbird first previews imported EggIds and checks for overlaps against the target Nest of each imported Egg
+      - if there are no overlaps, Passbird proceeds without a confirmation prompt
+    exact_overwrite_confirmation_template:
+      - "By importing this file <OverlapCount> existing Passwords will be irrevocably overwritten.\nThe following Eggs will be affected: <EggId1> (<SlotName>), <EggId2> (<SlotName>)\nInput 'c' to confirm or anything else to abort.\nYour input: "
+      - SlotName is rendered with the raw Slot enum text such as DEFAULT or S2
+    confirmation_input_rules:
+      - explicit c confirms the overwrite
+      - any other input, including empty input, aborts the import
+    exact_branches:
+      - if overwrite confirmation is not needed, Passbird imports immediately
+      - if overwrite confirmation is shown and the user confirms, Passbird imports
+      - if overwrite confirmation is shown and the user declines, Passbird aborts without importing
+    exact_success_output:
+      - on successful import, Passbird prints <EggCount> eggs successfully imported.
+      - after the success message, Passbird emits one empty line
+    exact_abort_output:
+      - if overwrite confirmation is declined, Passbird prints Operation aborted.
+      - after the abort message, Passbird emits one empty line
+    exact_failure_output:
+      - if previewing the import file fails before the import starts, the import handler prints no Operation aborted. message
+      - if import parsing or reading fails with a generic import failure, Passbird prints Password Tree could not be imported. to standard error
+      - if import parsing fails because an eggId contains digits or special characters, Passbird prints Password Tree could not be imported because at least one eggId contains digits or special characters. Please correct invalid eggIds and try again. Erroneous eggId: <EggId> to standard error
+      - after a FAILED path, the command handler still emits one empty line
   - id: import_selective
     command: i*
-    user_experience:
-      - previews imported Nests
-      - lets the user choose one exported Nest and one target Nest Slot
-      - uses explicit confirmation before destructive overwrite paths
+    exact_menu_intro:
+      - Passbird starts this flow with a leading empty line before the Available Nests in import file heading
+      - Passbird prints Available Nests in import file:
+      - Passbird prints one empty line after that heading before the preview list
+      - Passbird then prints a tab-indented list in the form \t<SourceSlotIndex>: <NestId>
+    exact_source_slot_prompt: "\nSpecify a Nest Slot 0-9 to import or anything else to abort: "
+    exact_target_slot_prompt: "Specify a target Nest Slot 0-9 or anything else to abort: "
+    accepted_slot_input_shape:
+      - a single decimal digit corresponding to an allowed slot in the current prompt
+    rejected_slot_input_shape:
+      - empty input
+      - any non-digit input
+      - any multi-character input
+      - any slot outside the currently allowed set
+    exact_abort_conditions:
+      - the import preview contains no selectable Nests
+      - the source slot input is invalid
+      - the target slot input is invalid
+      - the chosen target slot is DEFAULT while the chosen source slot is not DEFAULT
+      - the chosen target slot already contains a different NestId than the selected import preview
+      - overwrite confirmation is declined when overlapping EggIds exist in the chosen target slot
+    exact_branch_rules:
+      - if the chosen target slot is empty, Passbird imports into that slot without an extra Nest-mismatch prompt
+      - if the chosen target slot already contains the same NestId as the selected import preview, Passbird may proceed
+      - if overlapping EggIds exist in the chosen target slot, Passbird asks for overwrite confirmation against the target slot, not the source slot
+    exact_overwrite_confirmation_template:
+      - "By importing this file <OverlapCount> existing Passwords will be irrevocably overwritten.\nThe following Eggs will be affected: <EggId1> (<SlotName>), <EggId2> (<SlotName>)\nInput 'c' to confirm or anything else to abort.\nYour input: "
+      - SlotName is rendered with the raw Slot enum text such as DEFAULT or S2
+    confirmation_input_rules:
+      - explicit c confirms the overwrite
+      - any other input, including empty input, aborts the selective import
+    exact_success_output:
+      - on successful selective import, Passbird prints <EggCount> eggs successfully imported.
+      - after the success message, Passbird emits one empty line
+    exact_abort_output:
+      - on an abort path, Passbird prints Operation aborted.
+      - after the abort message, Passbird emits one empty line
+    exact_failure_output:
+      - if previewing or parsing the import file fails before a selectable preview is available, the import handler prints no Operation aborted. message
+      - generic import read or parse failures are reported to standard error as Password Tree could not be imported.
+      - invalid eggId import failures are reported to standard error with the longer invalid-eggId message
+      - after a FAILED path, the command handler still emits one empty line
+command_parse_rules:
+  accepted_command_shapes:
+    - e
+    - e*
+    - i
+    - i*
+  rejected_command_shapes:
+    - any additional command characters beyond the optional single trailing *
+    - any trailing argument data after the command token
+  exact_parse_failure_behavior:
+    - parse rejection happens before the export or import handler starts
+    - on parse rejection, Passbird performs no interactive exchange prompts and no import or export service call
+    - parse rejection is reported to standard error as Command execution failed: Parameter for command '<CommandLetter>' not supported: <UnsupportedParameter>
+  verified_examples:
+    - input email is rejected with Command execution failed: Parameter for command 'e' not supported: mail
+    - input iimport is rejected with Command execution failed: Parameter for command 'i' not supported: import
 observable_rules:
   - the exchange filename is fixed unless the product specification is explicitly changed
   - import and export behavior must stay aligned with README and startup reminder behavior
