@@ -4,12 +4,43 @@ configuration_surface:
   source_of_truth_files:
     - passbird.yml
     - CONFIGURATION.md
+  fixed_runtime_filenames:
+    - passbird.yml is the configuration filename resolved from the run home directory
+    - passbird.sec is the keystore filename wherever adapter.keyStore.location points
+    - passbird.tree is the password-tree filename wherever adapter.passwordTree.location points
+    - passbird-export.json is the fixed exchange filename in the run home directory
   user_visible_defaults:
+    - template configuration mode defaults to true only when passbird.yml is missing from the run home directory
+    - application.backup.location defaults to backups before setup rewrites it into a concrete directory path
+    - application.backup.numberOfBackups defaults to 10
+    - application.backup.configuration.enabled defaults to true
+    - application.backup.keyStore.enabled defaults to true
+    - application.backup.passwordTree.enabled defaults to true
     - application.exchange.promptOnExportFile defaults to true
+    - application.password.length defaults to 20
+    - application.password.specialCharacters defaults to true
     - application.password.promptOnRemoval defaults to true
+    - adapter.userInterface.ansiEscapeCodes.enabled defaults to false
+    - adapter.userInterface.audibleBell defaults to false
     - adapter.userInterface.secureInput defaults to true
     - adapter.clipboard.reset.enabled defaults to true
+    - adapter.clipboard.reset.delaySeconds defaults to 10
     - application.inactivityLimit.enabled defaults to false
+    - application.inactivityLimit.limitInMinutes defaults to 10
+    - domain.eggIdMemory.enabled defaults to true
+    - domain.eggIdMemory.persisted defaults to false
+    - domain.protein.secureProteinStructureInput defaults to true
+    - domain.protein.promptForProteinStructureInputToggle defaults to false
+  loading_behavior:
+    - if passbird.yml does not exist in the run home directory, Passbird loads a template configuration instead of reporting a load failure
+    - if passbird.yml exists and contains an unrecognized property, Passbird reports that the configuration contains an unrecognized property, exits, and does not fall back to template mode
+    - if passbird.yml exists and cannot otherwise be parsed or loaded, Passbird reports Configuration could not be loaded: <ExceptionMessage> and exits
+  setup_materialization_rules:
+    - when setup persists a new configuration for chosen directory <D>, it writes passbird.yml to <D>/passbird.yml
+    - when setup persists a new configuration for chosen directory <D>, application.backup.location is rewritten to <D>/backups
+    - when setup persists a new configuration for chosen directory <D>, adapter.keyStore.location is rewritten to <D>
+    - when setup persists a new configuration for chosen directory <D>, adapter.passwordTree.location is rewritten to <D>
+    - when setup creates a keystore in chosen directory <D>, the created file path is <D>/passbird.sec
 areas:
   - name: startup_and_exchange
     keys:
@@ -37,14 +68,26 @@ areas:
       - adapter.keyStore.location
       - adapter.passwordTree.location
     visible_effects:
-      - changes where files are written and whether backups are kept
+      - changes where passbird.sec and passbird.tree are read and written
+      - changes where backup files are written and how many distinct backups are retained
+      - setup-created configurations persist the chosen storage directory instead of silently keeping an empty or previous location
+  - name: clipboard_behavior
+    keys:
+      - adapter.clipboard.reset.enabled
+      - adapter.clipboard.reset.delaySeconds
+    visible_effects:
+      - when enabled, clipboard copies are cleared automatically after the configured delay
+      - posting a newer clipboard value resets the pending clear timer so only the latest generation is cleared
+      - when disabled, clipboard content is not auto-cleared by Passbird
   - name: terminal_behavior
     keys:
       - adapter.userInterface.ansiEscapeCodes.enabled
       - adapter.userInterface.audibleBell
       - adapter.userInterface.secureInput
     visible_effects:
-      - changes color output, bell feedback, and whether sensitive input is hidden
+      - changes whether the startup banner and formatted CLI output use ANSI colors
+      - changes whether abort-formatted output can trigger an audible terminal bell
+      - changes whether sensitive prompts use the console password reader or plain visible line input
   - name: memory_and_proteins
     keys:
       - domain.eggIdMemory.enabled
@@ -58,4 +101,5 @@ configuration_rules:
   - invalid configuration files must abort startup after reporting the load failure
   - missing configuration and invalid configuration are different product states and must not be treated the same
   - setup must consume the directory the user entered and must not silently fall back to another directory
+  - setup must not continue to keystore creation if writing passbird.yml fails
   - user-visible configuration defaults are part of the product contract and should be reflected here and in CONFIGURATION.md
