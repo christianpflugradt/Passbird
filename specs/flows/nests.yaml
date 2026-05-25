@@ -20,6 +20,7 @@ flows:
         - n0 switches to the default Nest
         - n[1-9] switches to the Nest in the specified slot if that Nest exists
         - successful switching prints no dedicated success line
+        - successful switching immediately changes which Nest-scoped Favorite slots and EggIdMemory entries are active
         - if the requested Nest is already current, Passbird prints '<NestId>' is already the current Nest.
         - if the requested Nest slot does not exist, Passbird prints Specified Nest does not exist - Operation aborted.
         - the missing-Nest abort uses the OPERATION_ABORTED path and therefore also triggers the warning-sound behavior from specs/interaction.yaml
@@ -36,6 +37,7 @@ flows:
       rename_existing_nest:
         - if the target custom Nest slot already contains a Nest, Passbird prompts with Enter new name for existing Nest '<current NestId>' or nothing to abort and then Your input:
         - non-empty input replaces the existing Nest name in that slot
+        - renaming an existing Nest keeps the Eggs, Favorites, and EggIdMemory already attached to that Nest slot
         - successful rename prints no dedicated success line
         - successful rename ends with a blank line
       abort_and_guard_paths:

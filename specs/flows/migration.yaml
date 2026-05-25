@@ -59,6 +59,7 @@ flows:
       - the migrated password tree is wrapped in the current password-tree envelope format after migration
       - the stored eggs, passwords, proteins, nest assignments, and persisted EggId memory entries are preserved across the migration
       - Favorite slots are initialized empty because the legacy source format predates Favorite persistence
+      - because this migration rewrites directly into the latest password-tree format, no follow-up password-tree-favorites migration is required for the same file
       - the migrated password tree remains readable with the current crypto path after migration
       - after successful migration, future startup detection no longer requests password-tree-key-derivation migration for that password tree file
       - this migration produces no dedicated user-visible success line beyond the shared overall migration success message
@@ -68,10 +69,13 @@ flows:
     user_experience:
       - this migration contributes the pending migration id password-tree-favorites
       - it is a pre-launch migration and therefore participates in the shared migration boot path rather than the normal command loop
+      - this migration is requested only for the previous current-format tree layout; missing files, empty files, legacy pre-envelope files, and already-latest trees do not trigger it
       - it runs after keystore-format when both migrations are pending in the same run
+      - this migration does not co-occur with password-tree-key-derivation for the same password tree because the two detectors target different source formats
       - after successful shared migration authentication, Passbird decrypts the previous current-format password tree and rewrites it in the latest Favorites-capable password-tree format
       - the stored eggs, passwords, proteins, nest assignments, and persisted EggId memory entries are preserved across the migration
       - Favorite slots are initialized empty across all Nests during migration
+      - after the next normal startup, Favorite commands are available immediately but every Favorite slot starts empty until the user assigns one
       - the migrated password tree remains readable with the current crypto path after migration
       - after successful migration, future startup detection no longer requests password-tree-favorites migration for that password tree file
       - this migration produces no dedicated user-visible success line beyond the shared overall migration success message

@@ -10,9 +10,12 @@ flows:
     user_experience:
       help_command:
         - f? prints an Available Favorite commands section listing f?, f, f[0-9], f[0-9]Command, f+[0-9][EggId], and f-[0-9]
+        - the help text labels f as the info command, f[0-9] as copy, and f[0-9]Command as use
       view_command:
-        - f lists Favorite EggIds for the current Nest only
-        - populated Favorite slots print one line each as <slot>: <EggId>
+        - f reads the Favorite map for the current Nest only
+        - switching to a different Nest changes the Favorite listing immediately because each Nest owns its own ten Favorite slots
+        - populated Favorite slots print one bare line each as <slot>: <EggId> in ascending slot order
+        - the listing does not add a section header or current-Nest banner beyond the surrounding blank-line spacing
         - empty Favorite slots are omitted from the listing
         - if the current Nest has no Favorite EggIds, Passbird prints Favorite EggIds are empty.
         - both commands use the same leading and trailing blank-line spacing pattern as other secondary help and info commands
@@ -21,16 +24,23 @@ flows:
       - f[0-9]
       - f[0-9]Command
     user_experience:
+      dispatch_rules:
+        - the bare slotted form f[0-9] is interpreted as the copy command
+        - adding any trailing command fragment after the slot digit changes interpretation to the use command
+        - examples: f0g resolves to g<EggId> and f0p+1 resolves to p+1<EggId>
       copy_command:
-        - if the selected Favorite slot contains an EggId, Passbird copies that EggId to the clipboard
+        - if the selected Favorite slot contains an EggId, Passbird copies that EggId, not the stored password, to the clipboard
         - on successful clipboard update, Passbird prints EggId copied to clipboard.
+        - if the clipboard update fails, the Favorite command prints no success line of its own
         - if the selected Favorite slot is empty, Passbird prints Favorite entry at slot <slot> does not exist.
       use_command:
         - if the selected Favorite slot contains an EggId, Passbird prepends the requested command fragment and re-enters normal command handling with that EggId
-        - the delegated command behaves exactly as if the user had typed the resolved command directly
+        - Passbird concatenates the command fragment and EggId without inserting a separator
+        - the delegated command behaves exactly as if the user had typed the resolved command directly, including that command's own prompts, confirmations, and output rules
         - if the selected Favorite slot is empty, Passbird prints Favorite entry at slot <slot> does not exist.
       finish:
-        - both commands end with a blank line after their main output
+        - the copy command ends with one trailing blank line after its main output
+        - the use command invalidates its original Favorite input after delegation and then appends its own trailing blank line
   - id: assign_or_clear_favorite
     commands:
       - f+[0-9][EggId]
@@ -38,19 +48,24 @@ flows:
     user_experience:
       assign_command:
         - f+[0-9][EggId] only resolves Eggs from the current Nest
+        - assigning a populated Favorite slot silently replaces the previously stored EggId in that slot
+        - assigning a Favorite never prompts for overwrite confirmation
         - if the Egg exists in the current Nest, Passbird stores its EggId in the selected Favorite slot and prints no dedicated success line
-        - if the Egg does not exist in the current Nest, Passbird emits the standard not-found event output Egg '<EggId>' not found.
+        - if the Egg does not exist in the current Nest, Passbird emits the standard not-found event output Egg '<EggId>' not found. and leaves the existing Favorite slot unchanged
         - the not-found event also triggers the warning sound defined in specs/interaction.yaml
       clear_command:
         - f-[0-9] clears the selected Favorite slot for the current Nest
         - clearing an already-empty slot is allowed and prints no dedicated success line
+        - clearing one Favorite slot does not affect any other Favorite slot in the current or any other Nest
       finish:
         - both commands end with a blank line
   - id: favorite_lifecycle_consistency
     trigger:
       - an Egg or Nest change would otherwise leave a stored Favorite pointing at stale or moved state
     user_experience:
-      - Favorites are scoped per Nest and persisted in passbird.tree
+      - Favorites are scoped per Nest slot and persisted in passbird.tree rather than passbird.yml
+      - switching Nests changes which Favorite set is active
+      - renaming a Nest keeps its Favorites attached to that Nest slot because Favorites are slot-scoped rather than name-scoped
       - renaming an Egg updates matching Favorite slots in that Egg's Nest
       - discarding or moving an Egg clears matching Favorite slots in the source Nest
       - moving an Egg does not create or copy a Favorite entry in the target Nest automatically
