@@ -67,11 +67,12 @@ gitHooks {
             |first_line="$(head -n 1 "${'$'}msg_file")"
             |
             |r_types="(${conventionalCommitTypes.joinToString("|")})"
-            |r_scope="(\\([[:alnum:] \\/-]+\\))?"
+            |r_scope_value='[a-z0-9-]+'
+            |r_scope="(\\(${'$'}r_scope_value\\))?"
             |r_delim='!?:'
             |r_subject=" [[:graph:]].+"
             |pattern="^${'$'}r_types${'$'}r_scope${'$'}r_delim${'$'}r_subject${'$'}"
-            |scope_regex='^[a-z]+\(([a-z0-9-]+)\)!?: '
+            |scope_regex="^[a-z]+\\((${'$'}r_scope_value)\\)!?: "
             |
             |if test -t 1 && test -n "$(tput colors)"; then
             |    RED='\033[0;31m'
@@ -94,11 +95,11 @@ gitHooks {
             |followed by a colon (:),
             |followed by the commit message.
             |Example commit message fixing a bug non-breaking backwards compatibility:
-            |    ${'$'}{GREEN}fix(module): fix bug #42${'$'}{NC}
+            |    ${'$'}{GREEN}fix(passwordtree): preserve checksum verification on restore${'$'}{NC}
             |Example commit message adding a non-breaking feature:
-            |    ${'$'}{GREEN}feat(module): add new API${'$'}{NC}
+            |    ${'$'}{GREEN}feat(protein): add update confirmation message${'$'}{NC}
             |Example commit message with a breaking change:
-            |    ${'$'}{GREEN}refactor(module)!: remove infinite loop${'$'}{NC}
+            |    ${'$'}{GREEN}refactor(commands)!: remove legacy command parser${'$'}{NC}
             |"
             |    exit 1
             |fi
