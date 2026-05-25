@@ -13,6 +13,7 @@ data class DecryptPasswordTreeFailure(val path: Path, val ex: Exception) : Failu
 data class ExportFailure(val ex: Exception) : Failure
 data class HomeDirectoryFailure(val homeDirectory: String? = null, val case: HomeDirectoryFailureCase) : Failure
 data class ImportFailure(val ex: Exception) : Failure
+data class InitialNestSlotFailure(val initialNestSlot: String) : Failure
 data class LoginFailure(val attempts: Int) : Failure
 data class SignatureCheckFailure(val actualSignature: Shell, val critical: Boolean) : Failure
 data class WritePasswordTreeFailure(val path: Path, val ex: Exception) : Failure

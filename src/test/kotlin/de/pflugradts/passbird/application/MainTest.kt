@@ -59,6 +59,7 @@ class MainTest {
         // then
         verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
         expectThat(capturedRunContext().homeDirectory) isEqualTo givenHome.toDirectory()
+        expectThat(capturedRunContext().initialSlot) isEqualTo DEFAULT
     }
 
     @Test
@@ -112,7 +113,7 @@ class MainTest {
     }
 
     @ParameterizedTest
-    @MethodSource("expectedNestSlotMapping")
+    @MethodSource("expectedValidNestSlotMapping")
     fun `should persist initial nest`(givenParam: String, expectedInitialSlot: Slot) {
         // given
         val givenHome = "/foo"
@@ -127,11 +128,32 @@ class MainTest {
         expectThat(capturedRunContext().initialSlot) isEqualTo expectedInitialSlot
     }
 
+    @ParameterizedTest
+    @MethodSource("expectedInvalidNestSlotParameters")
+    fun `should exit if specified initial nest is not supported`(givenParam: String) {
+        // given
+        val givenHome = "/foo"
+        every { systemOperation.exists(givenHome.toDirectory()) } returns true
+        every { systemOperation.isDirectory(givenHome.toDirectory()) } returns true
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        // when
+        captureSystemErr.during {
+            main(arrayOf(givenHome, givenParam))
+        }
+
+        // then
+        expectThat(captureSystemErr.capture) isEqualTo
+            "Shutting down: Specified initial Nest Slot is not supported: $givenParam\n"
+        verify(exactly = 0) { bootModule(any(LauncherModule::class)) }
+        verify(exactly = 1) { systemOperation.exit() }
+    }
+
     private fun capturedRunContext() = Guice.createInjector(moduleSlot.captured).getInstance(RunContext::class.java)
 
     companion object {
         @JvmStatic
-        private fun expectedNestSlotMapping() = Stream.of(
+        private fun expectedValidNestSlotMapping() = Stream.of(
             Arguments.of("1", S1),
             Arguments.of("2", S2),
             Arguments.of("3", S3),
@@ -141,12 +163,16 @@ class MainTest {
             Arguments.of("7", S7),
             Arguments.of("8", S8),
             Arguments.of("9", S9),
-            Arguments.of("", DEFAULT),
-            Arguments.of("0", DEFAULT),
-            Arguments.of("-1", DEFAULT),
-            Arguments.of("10", DEFAULT),
-            Arguments.of("foo", DEFAULT),
-            Arguments.of("n1", DEFAULT),
+        )
+
+        @JvmStatic
+        private fun expectedInvalidNestSlotParameters() = Stream.of(
+            Arguments.of(""),
+            Arguments.of("0"),
+            Arguments.of("-1"),
+            Arguments.of("10"),
+            Arguments.of("foo"),
+            Arguments.of("n1"),
         )
     }
 }

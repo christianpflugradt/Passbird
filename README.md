@@ -63,6 +63,7 @@ You may optionally specify an initial Nest (explained in detail later) by adding
 `java -jar passbird.jar home-directory 1`
 
 This starts Passbird with the Nest at Slot 1 selected.
+Any explicit initial Nest argument outside Slots 1 through 9 is rejected and Passbird shuts down instead of silently selecting the default Nest.
 
 ### Setup
 

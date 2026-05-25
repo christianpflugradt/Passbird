@@ -37,6 +37,8 @@ fun reportFailure(homeDirectoryFailure: HomeDirectoryFailure) = err(
         IS_NOT_A_DIRECTORY -> "Specified home directory is actually not a directory: ${homeDirectoryFailure.homeDirectory}"
     },
 )
+fun reportFailure(initialNestSlotFailure: InitialNestSlotFailure) =
+    err("Shutting down: Specified initial Nest Slot is not supported: ${initialNestSlotFailure.initialNestSlot}")
 fun reportFailure(importFailure: ImportFailure) = if (importFailure.ex is InvalidEggIdException) {
     err(
         "Password Tree could not be imported because at least one eggId contains digits or special characters. " +

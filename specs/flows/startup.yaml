@@ -13,6 +13,12 @@ flows:
     visible_rules:
       - there is no welcome banner or startup summary in the normal boot path itself
       - if no initializer emits user-visible output, the first visible steady-state content after the opening empty line is the command prompt
+  - id: invalid_initial_nest_slot
+    trigger:
+      - Passbird starts with a valid home directory and a second CLI argument outside Nest Slots 1 through 9
+    exact_visible_behavior:
+      - Passbird prints Shutting down: Specified initial Nest Slot is not supported: <ArgumentValue>.
+      - Passbird terminates without entering the application boot path or command loop
   - id: export_file_reminder
     trigger:
       - application.exchange.promptOnExportFile is enabled and passbird-export.json exists at startup
