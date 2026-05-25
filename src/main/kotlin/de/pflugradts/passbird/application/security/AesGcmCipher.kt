@@ -20,9 +20,10 @@ private const val TAG_LENGTH_BIT = 128
 private const val AES_KEY_LENGTH_BIT = 128
 private val SALT = "PassbirdSalt2024".toByteArray()
 
-class AesGcmCipher(keyShell: Shell) : CryptoProvider {
+class AesGcmCipher internal constructor(private val secretKeySpec: SecretKeySpec) : CryptoProvider {
+    constructor(keyShell: Shell) : this(createCurrentSecretKeySpec(keyShell))
+
     private val secureRandom = SecureRandom()
-    private val secretKeySpec = createSecretKeySpec(keyShell)
 
     override fun encrypt(shell: Shell) = requestSecureIv().let {
         EncryptedShell(payload = cipherize(ENCRYPT_MODE, shell, it.toByteArray()), iv = it)
@@ -36,15 +37,19 @@ class AesGcmCipher(keyShell: Shell) : CryptoProvider {
         .apply { init(mode, secretKeySpec, GCMParameterSpec(TAG_LENGTH_BIT, iv)) }
         .doFinal(shell.toByteArray()).toShell()
 
-    private fun createSecretKeySpec(keyShell: Shell) = SecretKeySpec(
-        SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM)
-            .generateSecret(PBEKeySpec(keyShell.toPlainShell().toCharArray(), SALT, 100, AES_KEY_LENGTH_BIT)).encoded,
-        ENCRYPTION_ALGORITHM,
-    )
-
     private fun ByteArray.toShell() = shellOf(this)
 
     companion object {
         const val IV_SIZE = 12
     }
 }
+
+internal fun createLegacyAesGcmCipher(keyShell: Shell) = AesGcmCipher(createLegacySecretKeySpec(keyShell))
+
+private fun createCurrentSecretKeySpec(keyShell: Shell) = SecretKeySpec(keyShell.toByteArray(), ENCRYPTION_ALGORITHM)
+
+private fun createLegacySecretKeySpec(keyShell: Shell) = SecretKeySpec(
+    SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM)
+        .generateSecret(PBEKeySpec(keyShell.toPlainShell().toCharArray(), SALT, 100, AES_KEY_LENGTH_BIT)).encoded,
+    ENCRYPTION_ALGORITHM,
+)

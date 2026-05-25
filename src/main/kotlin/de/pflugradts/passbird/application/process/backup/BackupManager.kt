@@ -6,6 +6,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
+import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.process.Finalizer
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
@@ -22,6 +23,7 @@ class BackupManager @Inject constructor(
     private val runContext: RunContext,
     private val systemOperation: SystemOperation,
     private val cryptoProvider: CryptoProvider,
+    private val passwordTreeEnvelope: PasswordTreeEnvelope,
 ) : Finalizer {
     private val backupConfiguration get() = configuration.application.backup
     override fun run() {
@@ -75,7 +77,7 @@ class BackupManager @Inject constructor(
     }
 
     private fun readPasswordTreeBytes(path: Path) = systemOperation.readBytesFromFile(path).let {
-        if (it.isEmpty()) byteArrayOf() else cryptoProvider.decrypt(encryptedShellOf(it)).toByteArray()
+        if (it.isEmpty()) byteArrayOf() else cryptoProvider.decrypt(encryptedShellOf(passwordTreeEnvelope.unwrap(it))).toByteArray()
     }
 
     private fun backup(directory: Directory, fileName: String, backupDirectory: Directory) {

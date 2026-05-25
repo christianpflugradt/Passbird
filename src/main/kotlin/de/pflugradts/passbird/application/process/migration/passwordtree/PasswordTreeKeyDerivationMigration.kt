@@ -1,0 +1,60 @@
+package de.pflugradts.passbird.application.process.migration.passwordtree
+
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
+import de.pflugradts.passbird.application.failure.LoginFailure
+import de.pflugradts.passbird.application.failure.reportFailure
+import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
+import de.pflugradts.passbird.application.process.migration.Migration
+import de.pflugradts.passbird.application.process.migration.MigrationRequest
+import de.pflugradts.passbird.application.process.migration.PendingMigration
+import de.pflugradts.passbird.application.process.migration.PreLaunchMigrationDetector
+import de.pflugradts.passbird.application.security.KeyStoreAuthenticationService
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.toFileName
+import de.pflugradts.passbird.application.util.SystemOperation
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+
+private const val PASSWORD_TREE_KEY_DERIVATION_MIGRATION_ID = "password-tree-key-derivation"
+
+@Singleton
+class PasswordTreeKeyDerivationMigrationDetector @Inject constructor(
+    private val configuration: ReadableConfiguration,
+    private val passwordTreeEnvelope: PasswordTreeEnvelope,
+    private val systemOperation: SystemOperation,
+) : PreLaunchMigrationDetector {
+    override fun detect() = if (migrationRequired()) {
+        MigrationRequest(setOf(PendingMigration(PASSWORD_TREE_KEY_DERIVATION_MIGRATION_ID)))
+    } else {
+        MigrationRequest.empty()
+    }
+
+    private fun migrationRequired() = systemOperation.exists(filePath) &&
+        systemOperation.readBytesFromFile(filePath).let { bytes -> bytes.isNotEmpty() && !passwordTreeEnvelope.isCurrent(bytes) }
+
+    private val filePath get() = systemOperation.resolvePath(
+        configuration.adapter.passwordTree.location.toDirectory(),
+        PASSWORD_TREE_FILENAME.toFileName(),
+    )
+}
+
+@Singleton
+class PasswordTreeKeyDerivationMigration @Inject constructor(
+    private val keyStoreAuthenticationService: KeyStoreAuthenticationService,
+    private val passwordTreeKeyDerivationMigrationService: PasswordTreeKeyDerivationMigrationService,
+    private val systemOperation: SystemOperation,
+) : Migration {
+    override val id = PASSWORD_TREE_KEY_DERIVATION_MIGRATION_ID
+    override val order = 1
+
+    override fun run() {
+        keyStoreAuthenticationService.authenticate(maxAttempts = 3)
+            .onSuccess(passwordTreeKeyDerivationMigrationService::migrate)
+            .onFailure {
+                reportFailure(LoginFailure(3))
+                systemOperation.exit()
+            }
+            .getOrNull()
+    }
+}

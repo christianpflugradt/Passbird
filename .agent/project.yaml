@@ -45,14 +45,16 @@ runtime_files:
     - name: passbird.yml
       purpose: user configuration
     - name: passbird.sec
-      purpose: keystore containing secret material used to derive the crypto provider key
+      purpose: keystore containing secret material used as the current crypto provider key material
     - name: passbird.tree
-      purpose: encrypted password tree persistence file
+      purpose: versioned password tree persistence file containing an encrypted password tree payload
     - name: passbird-export.json
       purpose: human-readable import and export format
 repository_layout:
   - path: src/main/kotlin/de/pflugradts/passbird/application
     role: application boot, command handling, configuration, process orchestration, security factories
+  - path: src/main/kotlin/de/pflugradts/passbird/application/passwordtree
+    role: shared password-tree envelope and payload format helpers used by adapters, backup comparison, and migrations
   - path: src/main/kotlin/de/pflugradts/passbird/domain/model
     role: domain entities, value objects, events, transfer primitives
   - path: src/main/kotlin/de/pflugradts/passbird/domain/service

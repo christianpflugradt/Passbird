@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.boot.migration
 
+import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.process.migration.AuthenticatedMigrationLocator
 import de.pflugradts.passbird.application.process.migration.MigrationRequest
 import de.pflugradts.passbird.application.process.migration.MigrationRunner
@@ -14,18 +15,21 @@ class PassbirdMigrationTest {
 
     private val authenticatedMigrationLocator = mockk<AuthenticatedMigrationLocator>()
     private val migrationRunner = mockk<MigrationRunner>(relaxed = true)
+    private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val systemOperation = mockk<SystemOperation>(relaxed = true)
     private val migrationRequest = MigrationRequest(setOf(PendingMigration("keystore-format")))
     private val passbirdMigration = PassbirdMigration(
         authenticatedMigrationLocator = authenticatedMigrationLocator,
         migrationRequest = migrationRequest,
         migrationRunner = migrationRunner,
+        userInterfaceAdapterPort = userInterfaceAdapterPort,
         systemOperation = systemOperation,
     )
 
     @Test
     fun `should run requested and authenticated migrations before exit`() {
         // given
+        every { userInterfaceAdapterPort.receiveYes(any()) } returns true
         every { authenticatedMigrationLocator.detect() } returns MigrationRequest(
             setOf(
                 PendingMigration("keystore-format"),
@@ -47,6 +51,22 @@ class PassbirdMigrationTest {
                 ),
             )
         }
+        verify(exactly = 1) { userInterfaceAdapterPort.send(any()) }
+        verify(exactly = 1) { systemOperation.exit() }
+    }
+
+    @Test
+    fun `should exit without running migrations when user declines`() {
+        // given
+        every { userInterfaceAdapterPort.receiveYes(any()) } returns false
+
+        // when
+        passbirdMigration.boot()
+
+        // then
+        verify(exactly = 0) { authenticatedMigrationLocator.detect() }
+        verify(exactly = 0) { migrationRunner.run(any()) }
+        verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
         verify(exactly = 1) { systemOperation.exit() }
     }
 }

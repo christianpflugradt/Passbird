@@ -3,6 +3,9 @@ package de.pflugradts.passbird.adapter.passwordtree
 import de.pflugradts.passbird.PROPERTY
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
+import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
+import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
@@ -30,6 +33,8 @@ import java.nio.file.Files
 
 @Tag(PROPERTY)
 class PasswordTreeFacadePropertyTest {
+    private val passwordTreeEnvelope = PasswordTreeEnvelope()
+    private val passwordTreePayloadWriter = PasswordTreePayloadWriter()
 
     @Property(tries = 20)
     @Report(Reporting.FALSIFIED)
@@ -50,16 +55,20 @@ class PasswordTreeFacadePropertyTest {
             val systemOperation = SystemOperation()
             val passwordTreeFacade = PasswordTreeFacade(
                 passwordTreeReader = PasswordTreeReader(
-                    configuration = configuration,
-                    cryptoProvider = cryptoProvider,
-                    nestService = readerNestService,
                     systemOperation = systemOperation,
+                    configuration = configuration,
+                    nestService = readerNestService,
+                    cryptoProvider = cryptoProvider,
+                    passwordTreeEnvelope = passwordTreeEnvelope,
+                    passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
                 ),
                 passwordTreeWriter = PasswordTreeWriter(
-                    configuration = configuration,
-                    cryptoProvider = cryptoProvider,
-                    nestService = writerNestService,
                     systemOperation = systemOperation,
+                    configuration = configuration,
+                    nestService = writerNestService,
+                    cryptoProvider = cryptoProvider,
+                    passwordTreeEnvelope = passwordTreeEnvelope,
+                    passwordTreePayloadWriter = passwordTreePayloadWriter,
                 ),
             )
 

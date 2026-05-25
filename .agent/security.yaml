@@ -27,7 +27,7 @@ current_security_relevant_implementation:
     facts:
       - startup may be routed into a dedicated migration boot path before the main application boot path starts
       - migration routing exists for compatibility-sensitive persistence changes such as keystore or password-tree format work
-      - migration boot exits after running instead of continuing into the normal application in the same process
+      - migration boot may require a separate authenticated session from the normal application startup and exits after reporting success instead of continuing into the main loop
   crypto_provider_factory:
     file: src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
     facts:
@@ -62,18 +62,21 @@ current_security_relevant_implementation:
     facts:
       - uses AES/GCM/NoPadding
       - uses a 12-byte IV generated from SecureRandom
-      - derives an AES key through PBKDF2WithHmacSHA256 from the loaded key material
-      - currently uses a static salt and 100 PBKDF2 iterations
+      - uses the loaded keystore secret bytes directly as the AES key material for the current password tree format
+      - keeps the former PBKDF2WithHmacSHA256 static-salt 100-iteration derivation only as a legacy migration path for pre-migration password trees
   password_tree_integrity:
     files:
       - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeReader.kt
       - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeWriter.kt
+      - src/main/kotlin/de/pflugradts/passbird/application/passwordtree
     facts:
+      - stores the current password tree as a versioned outer file envelope wrapped around the AES-GCM-encrypted binary payload
       - verifies a built-in file signature marker and checksum across the full plaintext payload on restore
       - treats password tree decrypt or read failures as fatal instead of falling back to an empty restore state
       - only publishes mutating password-operation success events after password tree sync succeeds
       - can exit immediately when verification is configured as critical
       - stores eggs, nests, and optionally persisted memory in a custom binary layout before encryption
+      - detects legacy pre-envelope password tree files before main startup and routes them through the dedicated migration boot path
   build_supply_chain:
     files:
       - gradle/verification-metadata.xml
@@ -100,6 +103,7 @@ security_sensitive_files:
   - src/main/kotlin/de/pflugradts/passbird/application/util/SystemOperation.kt
   - src/main/kotlin/de/pflugradts/passbird/application/configuration/ConfigurationSyncService.kt
   - src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
+  - src/main/kotlin/de/pflugradts/passbird/application/passwordtree
   - src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
   - src/main/kotlin/de/pflugradts/passbird/application/process/backup/BackupManager.kt
   - src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt

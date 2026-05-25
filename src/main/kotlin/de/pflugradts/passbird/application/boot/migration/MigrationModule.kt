@@ -14,6 +14,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.process.migration.AuthenticatedMigrationDetector
 import de.pflugradts.passbird.application.process.migration.Migration
 import de.pflugradts.passbird.application.process.migration.MigrationRequest
+import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigration
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 
@@ -33,7 +34,9 @@ class MigrationModule(
 
     private fun configureMultibinders() {
         Multibinder.newSetBinder(binder(), AuthenticatedMigrationDetector::class.java)
-        Multibinder.newSetBinder(binder(), Migration::class.java)
+        Multibinder.newSetBinder(binder(), Migration::class.java).apply {
+            addBinding().to(PasswordTreeKeyDerivationMigration::class.java)
+        }
     }
 
     private class ConfigurationDependencyProvider @Inject constructor(

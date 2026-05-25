@@ -4,7 +4,6 @@ import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -24,7 +23,7 @@ class CryptoProviderFactoryTest {
     @Test
     fun `should create crypto provider`() {
         // given
-        every { keyStoreAuthenticationService.authenticate(any(), any()) } returns success(value = emptyShell())
+        every { keyStoreAuthenticationService.authenticate(any(), any()) } returns success(value = createTestKeyShell())
 
         // when
         val actual = cryptoProviderFactory.createCryptoProvider()

@@ -479,6 +479,8 @@ No. Many programs do not support Unicode characters in passwords, and some even 
 ### How do I update Passbird?
 Passbird follows semantic versioning (`x.y.z`, where `x` is the major version, `y` the minor version, and `z` the patch level). To update to a minor or patch version, download the latest JAR file and use it as usual. For major updates, review the release notes carefully before upgrading so you can catch any migration or compatibility guidance.
 
+Some releases may require a one-time migration before Passbird can start normally. When that happens, Passbird will stop before entering the main application, prompt for confirmation, run the migration, and then ask you to start Passbird again. Keep an up-to-date backup before upgrading so you can revert safely if a migration or upgrade fails.
+
 You can find current and historical Passbird versions [on GitHub Releases](https://github.com/christianpflugradt/Passbird/releases). Each release publishes the `passbird.jar` asset used by [Passbird-Updater](https://github.com/christianpflugradt/Passbird-Updater), though manual updates are still the more conservative option.
 
 ### What happens if I lose my master password or keystore file?

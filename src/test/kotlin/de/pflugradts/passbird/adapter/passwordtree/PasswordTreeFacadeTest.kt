@@ -6,6 +6,12 @@ import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
+import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
+import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
+import de.pflugradts.passbird.application.passwordtree.checksum
+import de.pflugradts.passbird.application.passwordtree.checksumBytes
+import de.pflugradts.passbird.application.passwordtree.signature
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
@@ -63,18 +69,24 @@ class PasswordTreeFacadeTest {
     private val cryptoProvider = createAesGcmCipherForTesting()
     private val nestService = createNestServiceForTesting()
     private val systemOperation = spyk(SystemOperation())
+    private val passwordTreeEnvelope = PasswordTreeEnvelope()
+    private val passwordTreePayloadWriter = PasswordTreePayloadWriter()
     private var passwordTreeFacade: PasswordTreeFacade = PasswordTreeFacade(
         passwordTreeReader = PasswordTreeReader(
-            configuration = configuration,
-            cryptoProvider = cryptoProvider,
-            nestService = nestService,
             systemOperation = systemOperation,
+            configuration = configuration,
+            nestService = nestService,
+            cryptoProvider = cryptoProvider,
+            passwordTreeEnvelope = passwordTreeEnvelope,
+            passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
         ),
         passwordTreeWriter = PasswordTreeWriter(
-            configuration = configuration,
-            cryptoProvider = cryptoProvider,
-            nestService = nestService,
             systemOperation = systemOperation,
+            configuration = configuration,
+            nestService = nestService,
+            cryptoProvider = cryptoProvider,
+            passwordTreeEnvelope = passwordTreeEnvelope,
+            passwordTreePayloadWriter = passwordTreePayloadWriter,
         ),
     )
 
@@ -184,16 +196,20 @@ class PasswordTreeFacadeTest {
         every { failingSystemOperation.writeBytesToSensitiveFile(any(), any()) } throws IOException("disk full")
         val failingPasswordTreeFacade = PasswordTreeFacade(
             passwordTreeReader = PasswordTreeReader(
-                configuration = configuration,
-                cryptoProvider = cryptoProvider,
-                nestService = nestService,
                 systemOperation = failingSystemOperation,
+                configuration = configuration,
+                nestService = nestService,
+                cryptoProvider = cryptoProvider,
+                passwordTreeEnvelope = passwordTreeEnvelope,
+                passwordTreePayloadReader = PasswordTreePayloadReader(configuration, failingSystemOperation),
             ),
             passwordTreeWriter = PasswordTreeWriter(
-                configuration = configuration,
-                cryptoProvider = cryptoProvider,
-                nestService = nestService,
                 systemOperation = failingSystemOperation,
+                configuration = configuration,
+                nestService = nestService,
+                cryptoProvider = cryptoProvider,
+                passwordTreeEnvelope = passwordTreeEnvelope,
+                passwordTreePayloadWriter = passwordTreePayloadWriter,
             ),
         )
         val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
@@ -352,9 +368,11 @@ class PasswordTreeFacadeTest {
             fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifyChecksum = true)
             passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream() }))
             expectThat(File(passwordTreeFilename)).exists()
-            val decryptedTree = cryptoProvider.decrypt(encryptedShellOf(File(passwordTreeFilename).readBytes())).toByteArray()
+            val decryptedTree = cryptoProvider.decrypt(
+                encryptedShellOf(passwordTreeEnvelope.unwrap(File(passwordTreeFilename).readBytes())),
+            ).toByteArray()
             decryptedTree[decryptedTree.size - checksumBytes() - 1] = (decryptedTree[decryptedTree.size - checksumBytes() - 1] + 1).toByte()
-            File(passwordTreeFilename).writeBytes(cryptoProvider.encrypt(shellOf(decryptedTree)).toByteArray())
+            File(passwordTreeFilename).writeBytes(passwordTreeEnvelope.wrap(cryptoProvider.encrypt(shellOf(decryptedTree)).toByteArray()))
             val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
 
             // when

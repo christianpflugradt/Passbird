@@ -5,6 +5,7 @@ import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -45,6 +46,7 @@ class BackupManagerPropertyTest {
             val passwordTreeBackupSettings = mockk<Configuration.BackupSettings>()
             val systemOperation = spyk(SystemOperation())
             val cryptoProvider = createAesGcmCipherForTesting()
+            val passwordTreeEnvelope = PasswordTreeEnvelope()
             var now = Instant.parse("2026-01-01T00:00:00Z")
             every { systemOperation.clock } answers { Clock.fixed(now, ZoneOffset.UTC) }
             val backupManager = BackupManager(
@@ -52,6 +54,7 @@ class BackupManagerPropertyTest {
                 runContext = PassbirdRunContext(workingDirectory.toString().toDirectory(), Slot.DEFAULT),
                 systemOperation = systemOperation,
                 cryptoProvider = cryptoProvider,
+                passwordTreeEnvelope = passwordTreeEnvelope,
             )
 
             fakeConfiguration(
@@ -71,7 +74,7 @@ class BackupManagerPropertyTest {
             backupContents.forEach { content ->
                 Files.write(
                     workingDirectory.resolve(PASSWORD_TREE_FILENAME),
-                    cryptoProvider.encrypt(shellOf(content)).toByteArray(),
+                    passwordTreeEnvelope.wrap(cryptoProvider.encrypt(shellOf(content)).toByteArray()),
                 )
                 backupManager.run()
                 now = now.plusSeconds(1)
@@ -85,7 +88,7 @@ class BackupManagerPropertyTest {
                 .sorted()
                 .toList()
                 .map { path ->
-                    cryptoProvider.decrypt(encryptedShellOf(Files.readAllBytes(path))).asString()
+                    cryptoProvider.decrypt(encryptedShellOf(passwordTreeEnvelope.unwrap(Files.readAllBytes(path)))).asString()
                 }
 
             expectThat(actual) isEqualTo expectedBackups(backupContents, backupLimit)

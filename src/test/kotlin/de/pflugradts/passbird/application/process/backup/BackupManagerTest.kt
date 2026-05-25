@@ -6,6 +6,7 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -42,7 +43,8 @@ class BackupManagerTest {
     private val configuration = mockk<Configuration>()
     private val systemOperation = SystemOperation()
     private val cryptoProvider: CryptoProvider = createAesGcmCipherForTesting()
-    private val backupManager = BackupManager(configuration, runContext, systemOperation, cryptoProvider)
+    private val passwordTreeEnvelope = PasswordTreeEnvelope()
+    private val backupManager = BackupManager(configuration, runContext, systemOperation, cryptoProvider, passwordTreeEnvelope)
 
     @BeforeEach
     fun setup() {
@@ -235,13 +237,13 @@ class BackupManagerTest {
         expectThat(backupFiles(PASSWORD_TREE_FILENAME)) hasSize 1
         val backupFile = Paths.get("$tempWorkingDirectory/${backupFiles(PASSWORD_TREE_FILENAME)[0]}")
         expectThat(
-            cryptoProvider.decrypt(encryptedShellOf(Files.readAllBytes(backupFile))).asString(),
+            cryptoProvider.decrypt(encryptedShellOf(passwordTreeEnvelope.unwrap(Files.readAllBytes(backupFile)))).asString(),
         ) isEqualTo expectedContent
     }
 
     private fun updatePasswordTreeFileContent(content: String, cryptoProvider: CryptoProvider = this.cryptoProvider) = Files.write(
         Paths.get("$tempWorkingDirectory/$PASSWORD_TREE_FILENAME"),
-        cryptoProvider.encrypt(shellOf(content)).toByteArray(),
+        passwordTreeEnvelope.wrap(cryptoProvider.encrypt(shellOf(content)).toByteArray()),
     )
     private fun wait1Sec() = Thread.sleep(1000)
     private fun backupFiles(fileName: String, directory: String = tempWorkingDirectory) =
