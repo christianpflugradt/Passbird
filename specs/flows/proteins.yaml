@@ -3,22 +3,71 @@ last_reviewed: 2026-05-25
 flow_family: proteins
 applies_interaction_rules_from: specs/interaction.yaml
 flows:
+  - id: protein_info
+    commands:
+      - p
+      - p?
+    user_experience:
+      accepted_surface:
+        - p and p? both open the same Protein help menu
+        - the built-in help text teaches p? rather than bare p, so bare p is an accepted but not explicitly advertised alias
+      exact_visible_block:
+        - the command begins with one blank line
+        - Passbird then prints the heading Available Protein commands:
+        - the help block then lists these six indented command lines in this exact order: p?, p[EggId], p*[EggId], p[0-9][EggId], p+[0-9][EggId], p-[0-9][EggId]
+        - the corresponding help descriptions are exactly: Displays this help menu for Protein commands.; Displays the Protein Types associated with the specified Egg.; Displays both the Protein Types and their Structures for the specified Egg.; Copies the Protein Structure in the specified Slot (0–9) to the clipboard.; Updates the Protein Structure and optionally the Type in the specified Slot.; Deletes the Protein Structure and Type from the specified Slot.
+        - the help block ends with one trailing blank line
   - id: inspect_proteins
     commands:
-      - p?
       - p[EggId]
       - p*[EggId]
     user_experience:
-      - protein views are read-only unless the user enters a write command
+      shared_table_rendering:
+        - both commands are read-only views and never modify stored Protein data
+        - both commands begin visible table output with one blank line
+        - both commands then print the same three-column header with the labels Slot, Type, and Structure
+        - the header and each row use a fixed table layout: the Slot cell is padded to width 5, the Type cell to width 20, and the Structure cell to width 20, with cells separated by the literal string " | "
+        - rows are rendered in slot order from 0 through 9, where slot 0 is the default Protein slot
+        - empty Type cells are rendered as ---
+        - empty Structure cells are rendered as ---
+        - every inspect path ends with one trailing blank line
+      type_only_view:
+        - p[EggId] masks every non-empty Structure cell as *****
+        - p[EggId] still shows the actual Protein Type in each occupied slot
+      structure_detail_view:
+        - p*[EggId] shows the actual Structure value in each occupied slot
+        - p*[EggId] also shows the actual Protein Type in each occupied slot
+      missing_egg_behavior:
+        - if the Egg does not exist, the table is skipped entirely
+        - a missing Egg triggers the standard event output Egg '<EggId>' not found.
+        - the missing-Egg event also triggers the warning sound defined in specs/interaction.yaml
   - id: set_or_replace_protein
     commands:
-      - p[0-9][EggId]
       - p+[0-9][EggId]
     user_experience:
       - overwriting an existing Protein requires explicit confirmation where prompted
       - secure input for Protein structure follows configuration defaults unless explicitly toggled
       - empty structure input aborts
       - empty replacement type input keeps the existing type when the prompt says so
+  - id: get_protein
+    commands:
+      - p[0-9][EggId]
+    user_experience:
+      successful_copy:
+        - the addressed slot index selects the Protein Structure to copy, with 0 addressing the default Protein slot
+        - on successful clipboard update of a non-empty Protein Structure, Passbird prints Protein copied to clipboard.
+        - after a successful copy, the command ends with one trailing blank line
+      missing_or_empty_targets:
+        - if the Egg does not exist, Passbird does not attempt a clipboard update
+        - a missing Egg triggers the standard event output Egg '<EggId>' not found.
+        - the missing-Egg event also triggers the warning sound defined in specs/interaction.yaml
+        - if the Egg exists but the addressed Protein Structure is empty, Passbird prints Specified Protein Structure is empty - Operation aborted.
+        - the empty-Structure abort uses the operation-aborted formatting defined in specs/interaction.yaml
+        - both non-success branches end with one trailing blank line
+      clipboard_failure_behavior:
+        - if the clipboard adapter rejects the update, this command handler prints no success line
+        - with the default clipboard adapter, clipboard failure reporting is delegated to stderr
+        - clipboard failure still ends with one trailing blank line
   - id: secure_input_toggle_prompt
     trigger:
       - domain.protein.promptForProteinStructureInputToggle is enabled
