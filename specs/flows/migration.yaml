@@ -7,16 +7,26 @@ flows:
     trigger:
       - startup detects state that requires a compatibility-preserving migration before the normal application boot path can continue
     user_experience:
-      - migration runs in a dedicated boot path rather than inside the normal command loop
+      - migration is a boot-time reroute, not a command-loop feature
+      - if the keystore does not exist or no pre-launch migration is required, Passbird does not enter the migration boot path
+      - if the keystore exists and pre-launch migration detection returns at least one pending migration, Passbird launches the dedicated migration boot path instead of the normal application module
+      - migration boot happens after the normal launcher license/banner output, not before it
+      - the migration boot path never reaches the normal interactive command prompt in the same run
   - id: migration_consent
     trigger:
       - a required migration is pending
     user_experience:
-      - the user is warned to keep an up-to-date backup
+      - migration boot prompts exactly once with Migration required before using Passbird. Migration will run automatically. Make sure you have an up to date backup. If something goes wrong, revert to the previous version. Continue Y/n?
+      - this prompt uses the global receiveYes semantics from specs/interaction.yaml
       - continuing requires explicit y or Y
       - empty input is not affirmative
+      - if the user declines or presses enter, Passbird runs no migrations, prints no success line, invalidates migration authentication state, and exits immediately
+      - if the user accepts, Passbird merges the already-detected pre-launch migrations with any authenticated migration detections before execution
   - id: migration_completion
     trigger:
       - pending migrations finish successfully
     user_experience:
-      - Passbird reports success and instructs the user to start Passbird again
+      - pending migrations run in registered order
+      - after all requested migrations finish, Passbird prints exactly Migration successful. Please start Passbird again
+      - after migration boot, Passbird always invalidates cached migration credentials and exits the process
+      - successful migration does not fall through into the normal application command loop in the same run
