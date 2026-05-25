@@ -22,6 +22,39 @@ command_surface:
     - commands are entered as a continuous token without separating whitespace
     - for data-carrying commands, parsing stops at the first alphabetic character after the command prefix and treats the remaining characters as data
     - examples of that parsing rule include lfilter, l*filter, pEggId, m0p0, and nEggId
+  discoverability:
+    top_level_help_command:
+      - h is the explicit top-level help command
+      - the top-level help screen presents the syntax contract as [command][parameter]
+      - the top-level help screen describes commands as taking at most one parameter, usually an EggId
+    top_level_help_advertised_entrypoints:
+      - g[EggId]
+      - s[EggId]
+      - s*[EggId]
+      - c[EggId]
+      - v[EggId]
+      - r[EggId]
+      - d[EggId]
+      - e
+      - e*
+      - i
+      - i*
+      - k
+      - l
+      - l[filter]
+      - l*
+      - l*[filter]
+      - h
+      - q
+      - n
+      - m?
+      - p?
+      - s?
+    secondary_help_menus:
+      - n displays current Nest state plus Nest-specific commands
+      - m? displays Memory-specific commands
+      - p? displays Protein-specific commands
+      - s? displays available password configurations plus Set-specific commands
   primary_entry_commands:
     - h
     - q
@@ -149,7 +182,13 @@ known_surface_drifts:
     actual_accepted_shape: n[EggId]
     actual_follow_up_behavior:
       - after the EggId is entered, Passbird prompts for the target Nest slot interactively
+  - area: protein_info_discoverability
+    top_level_help_advertised_shape: p?
+    actual_additional_accepted_shape: p
+    actual_behavior:
+      - bare p resolves to the same Protein info/help screen as p?
 observable_product_rules:
   - every interactive capability is terminal-native and local-file-backed
   - commands stay terse and character-first unless the maintainer explicitly changes that direction
   - command families are part of the public product surface and should not drift from README, help output, or flow specs
+  - discoverability is part of the product surface, not just parser behavior
