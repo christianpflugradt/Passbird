@@ -9,13 +9,20 @@ interaction_model:
     - spacing_is_part_of_the_user_experience
 input_semantics:
   line_handling:
+    - receive writes any provided prompt output exactly as given and without appending a newline before reading input
+    - receive with multiple output fragments renders them in argument order on the same pending line
     - receive and receiveSecurely consume one line of terminal input at a time
     - carriage returns are ignored before newline so Windows line endings behave the same as Unix line endings
     - an empty submitted line yields empty input
+  secure_input:
+    - if adapter.userInterface.secureInput is enabled and a console is available, receiveSecurely reads characters through the console password reader instead of standard line input
+    - if secure input is disabled, receiveSecurely falls back to the same plain line reader used by receive
+    - if secure input is enabled but no console is available, receiveSecurely still falls back to the same plain line reader used by receive
   affirmations:
     - empty input is never affirmative
     - receiveYes accepts only a single explicit y or Y with no trailing data
     - receiveConfirmation accepts only a single explicit c with no trailing data
+    - multi-character confirmation attempts such as cc or Yes are not treated as affirmative
     - omitted or ambiguous confirmation input resolves to the non-destructive branch
 prompt_contract:
   - prompts that say Input 'c' to confirm or anything else to abort require explicit c and abort on any other input
@@ -27,10 +34,21 @@ consent_rules:
   - when confirmation input is omitted, prefer abort, keep, or remind later over irreversible mutation
   - repeated reminder flows are acceptable when they reduce accidental destruction or accidental retention decisions without forcing an immediate irreversible action
 spacing_and_output:
+  transport_rules:
+    - send writes its output fragments in argument order and then appends exactly one newline
+    - sendLineBreak emits exactly one newline and no other visible text
+    - output formatting changes rendering only; it does not change the underlying emitted text content
   - blank lines are intentional separators between boot phases, informational blocks, command results, and the next prompt
   - sendLineBreak is the standard way to emit an empty separator line
   - some multi-step flows intentionally embed leading newlines inside prompt text to visually separate local menus or sections
   - preserve surrounding spacing patterns when editing handlers; do not normalize blank lines mechanically across the CLI
+  formatting_and_feedback:
+    - if adapter.userInterface.ansiEscapeCodes.enabled is true, each output fragment is wrapped individually in ANSI color begin and reset escape codes
+    - the ANSI color mapping is fixed: DEFAULT -> 231, SPECIAL -> 220, OPERATION_ABORTED -> 208, ERROR_MESSAGE -> 196, HIGHLIGHT -> 207, NEST -> 39, EVENT_HANDLED -> 118
+    - if ANSI escape codes are disabled, the same text is emitted without escape sequences
+    - output fragments formatted as OPERATION_ABORTED trigger warningSound after their text is emitted
+    - warningSound emits the terminal BEL character only if adapter.userInterface.audibleBell is enabled
+    - if audibleBell is disabled, warningSound emits nothing
 copy_and_drift_rules:
   - prompt wording is maintainer-owned and must not be changed without approval for the exact text
   - when docs describe command input semantics, keep them aligned with receiveYes, receiveConfirmation, and empty-input behavior
