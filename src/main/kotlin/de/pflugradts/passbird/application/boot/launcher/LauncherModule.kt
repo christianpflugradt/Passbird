@@ -10,6 +10,7 @@ import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.ConfigurationFactory
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.process.migration.PreLaunchMigrationDetector
+import de.pflugradts.passbird.application.process.migration.keystore.KeyStoreFormatMigrationDetector
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigrationDetector
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -21,6 +22,7 @@ class LauncherModule(private val runContext: RunContext) : AbstractModule() {
         bind(ReadableConfiguration::class.java).toProvider(ConfigurationDependencyProvider::class.java).`in`(Singleton::class.java)
         bind(UserInterfaceAdapterPort::class.java).to(CommandLineInterfaceService::class.java)
         Multibinder.newSetBinder(binder(), PreLaunchMigrationDetector::class.java).apply {
+            addBinding().to(KeyStoreFormatMigrationDetector::class.java)
             addBinding().to(PasswordTreeKeyDerivationMigrationDetector::class.java)
         }
     }

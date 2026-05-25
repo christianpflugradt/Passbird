@@ -1,10 +1,11 @@
-package de.pflugradts.passbird.application.process.migration.passwordtree
+package de.pflugradts.passbird.application.process.migration.keystore
 
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
 import de.pflugradts.passbird.application.failure.LoginFailure
 import de.pflugradts.passbird.application.failure.reportFailure
-import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
+import de.pflugradts.passbird.application.keystore.KeyStoreFormat
+import de.pflugradts.passbird.application.keystore.KeyStoreFormatDetector
 import de.pflugradts.passbird.application.process.migration.Migration
 import de.pflugradts.passbird.application.process.migration.MigrationAuthenticationService
 import de.pflugradts.passbird.application.process.migration.MigrationRequest
@@ -16,43 +17,41 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 
-private const val PASSWORD_TREE_KEY_DERIVATION_MIGRATION_ID = "password-tree-key-derivation"
+private const val KEYSTORE_FORMAT_MIGRATION_ID = "keystore-format"
 
 @Singleton
-class PasswordTreeKeyDerivationMigrationDetector @Inject constructor(
+class KeyStoreFormatMigrationDetector @Inject constructor(
     private val configuration: ReadableConfiguration,
-    private val passwordTreeEnvelope: PasswordTreeEnvelope,
+    private val keyStoreFormatDetector: KeyStoreFormatDetector,
     private val systemOperation: SystemOperation,
 ) : PreLaunchMigrationDetector {
     override fun detect() = if (migrationRequired()) {
-        MigrationRequest(setOf(PendingMigration(PASSWORD_TREE_KEY_DERIVATION_MIGRATION_ID)))
+        MigrationRequest(setOf(PendingMigration(KEYSTORE_FORMAT_MIGRATION_ID)))
     } else {
         MigrationRequest.empty()
     }
 
     private fun migrationRequired() = systemOperation.exists(filePath) &&
-        systemOperation.readBytesFromFile(filePath).let { bytes -> bytes.isNotEmpty() && !passwordTreeEnvelope.isCurrent(bytes) }
+        keyStoreFormatDetector.detect(systemOperation.readBytesFromFile(filePath)) == KeyStoreFormat.JCEKS
 
     private val filePath get() = systemOperation.resolvePath(
-        configuration.adapter.passwordTree.location.toDirectory(),
-        PASSWORD_TREE_FILENAME.toFileName(),
+        configuration.adapter.keyStore.location.toDirectory(),
+        KEYSTORE_FILENAME.toFileName(),
     )
 }
 
 @Singleton
-class PasswordTreeKeyDerivationMigration @Inject constructor(
+class KeyStoreFormatMigration @Inject constructor(
+    private val keyStoreFormatMigrationService: KeyStoreFormatMigrationService,
     private val migrationAuthenticationService: MigrationAuthenticationService,
-    private val passwordTreeKeyDerivationMigrationService: PasswordTreeKeyDerivationMigrationService,
     private val systemOperation: SystemOperation,
 ) : Migration {
-    override val id = PASSWORD_TREE_KEY_DERIVATION_MIGRATION_ID
-    override val order = 2
+    override val id = KEYSTORE_FORMAT_MIGRATION_ID
+    override val order = 1
 
     override fun run() {
         migrationAuthenticationService.authenticate(maxAttempts = 3)
-            .onSuccess { migrationCredentials ->
-                passwordTreeKeyDerivationMigrationService.migrate(migrationCredentials.keyCopy())
-            }
+            .onSuccess(keyStoreFormatMigrationService::migrate)
             .onFailure {
                 reportFailure(LoginFailure(3))
                 systemOperation.exit()

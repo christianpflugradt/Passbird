@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.boot.migration
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.process.migration.AuthenticatedMigrationLocator
+import de.pflugradts.passbird.application.process.migration.MigrationAuthenticationService
 import de.pflugradts.passbird.application.process.migration.MigrationRequest
 import de.pflugradts.passbird.application.process.migration.MigrationRunner
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -19,17 +20,22 @@ private const val MIGRATION_SUCCESS = "Migration successful. Please start Passbi
 @Singleton
 class PassbirdMigration @Inject constructor(
     private val authenticatedMigrationLocator: AuthenticatedMigrationLocator,
+    private val migrationAuthenticationService: MigrationAuthenticationService,
     private val migrationRequest: MigrationRequest,
     private val migrationRunner: MigrationRunner,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val systemOperation: SystemOperation,
 ) : Bootable {
     override fun boot() {
-        if (migrationRequest.required && userInterfaceAdapterPort.receiveYes(outputOf(shellOf(MIGRATION_PROMPT)))) {
-            val pendingMigrations = migrationRequest + authenticatedMigrationLocator.detect()
-            migrationRunner.run(pendingMigrations)
-            userInterfaceAdapterPort.send(outputOf(shellOf(MIGRATION_SUCCESS)))
+        try {
+            if (migrationRequest.required && userInterfaceAdapterPort.receiveYes(outputOf(shellOf(MIGRATION_PROMPT)))) {
+                val pendingMigrations = migrationRequest + authenticatedMigrationLocator.detect()
+                migrationRunner.run(pendingMigrations)
+                userInterfaceAdapterPort.send(outputOf(shellOf(MIGRATION_SUCCESS)))
+            }
+        } finally {
+            migrationAuthenticationService.invalidate()
+            systemOperation.exit()
         }
-        systemOperation.exit()
     }
 }

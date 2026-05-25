@@ -4,9 +4,9 @@ project:
   name: Passbird
   synopsis: >
     Lightweight terminal-based password manager built in Kotlin. It runs fully
-    offline, stores the encryption key in a Java KeyStore, encrypts password
-    data with AES-GCM, and persists its data in local files under a user-chosen
-    home directory.
+    offline, stores the encryption key in a PKCS12 Java KeyStore, encrypts
+    password data with AES-GCM, and persists its data in local files under a
+    user-chosen home directory.
   product_principles:
     - offline_first
     - terminal_native
@@ -45,7 +45,7 @@ runtime_files:
     - name: passbird.yml
       purpose: user configuration
     - name: passbird.sec
-      purpose: keystore containing secret material used as the current crypto provider key material
+      purpose: PKCS12 keystore containing secret material used as the current crypto provider key material
     - name: passbird.tree
       purpose: versioned password tree persistence file containing an encrypted password tree payload
     - name: passbird-export.json
@@ -55,6 +55,8 @@ repository_layout:
     role: application boot, command handling, configuration, process orchestration, security factories
   - path: src/main/kotlin/de/pflugradts/passbird/application/passwordtree
     role: shared password-tree envelope and payload format helpers used by adapters, backup comparison, and migrations
+  - path: src/main/kotlin/de/pflugradts/passbird/application/keystore
+    role: shared keystore format detection helpers used by migration routing and migration-only compatibility adapters
   - path: src/main/kotlin/de/pflugradts/passbird/domain/model
     role: domain entities, value objects, events, transfer primitives
   - path: src/main/kotlin/de/pflugradts/passbird/domain/service

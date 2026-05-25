@@ -62,7 +62,9 @@ runtime_design:
     - LauncherModule binds the RunContext and selects the launcher boot path
     - Launcher, migration, or setup boot path is selected via boot modules that carry the same RunContext
     - pre-launch migration detectors may route startup into a dedicated migration boot path before the main application may continue
+    - migration boot may bind compatibility adapters that can read legacy persistence formats without widening the normal runtime path
     - shared password-tree format helpers live under application.passwordtree so migration and backup orchestration can use them without depending on adapter internals
+    - shared keystore format helpers live under application.keystore so launcher detection and migration-only adapters can classify passbird.sec without guessing from release history
     - ApplicationModule wires adapters, services, and handlers with Guice
     - PassbirdApplication enters the interactive command loop
   interaction_model:
@@ -80,7 +82,7 @@ ports_and_adapters:
     concern: clipboard copy and reset behavior
   - port: KeyStoreAdapterPort
     implementation: adapter.keystore.KeyStoreService
-    concern: load and store secret material in JCEKS
+    concern: load and store secret material in PKCS12, while migration boot may bind compatibility adapters for legacy JCEKS reads
   - port: PasswordTreeAdapterPort
     implementation: adapter.passwordtree.PasswordTreeFacade
     concern: encrypted persistence of eggs, nests, and memory

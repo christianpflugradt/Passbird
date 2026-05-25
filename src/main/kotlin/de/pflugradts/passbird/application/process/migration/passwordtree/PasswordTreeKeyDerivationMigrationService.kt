@@ -35,16 +35,20 @@ class PasswordTreeKeyDerivationMigrationService @Inject constructor(
     private val systemOperation: SystemOperation,
 ) {
     fun migrate(keyShell: Shell) {
-        val legacyProvider = createLegacyAesGcmCipher(keyShell)
-        val currentProvider = AesGcmCipher(keyShell)
-        val snapshot = systemOperation.readBytesFromFile(filePath)
-            .let { legacyProvider.decrypt(encryptedShellOf(it)) }
-            .let(passwordTreePayloadReader::read)
-        val migratedSnapshot = snapshot.migrate(legacyProvider, currentProvider)
-        val migratedBytes = passwordTreeEnvelope.wrap(
-            currentProvider.encrypt(passwordTreePayloadWriter.write(migratedSnapshot)).toByteArray(),
-        )
-        systemOperation.writeBytesToSensitiveFile(filePath, migratedBytes)
+        try {
+            val legacyProvider = createLegacyAesGcmCipher(keyShell)
+            val currentProvider = AesGcmCipher(keyShell)
+            val snapshot = systemOperation.readBytesFromFile(filePath)
+                .let { legacyProvider.decrypt(encryptedShellOf(it)) }
+                .let(passwordTreePayloadReader::read)
+            val migratedSnapshot = snapshot.migrate(legacyProvider, currentProvider)
+            val migratedBytes = passwordTreeEnvelope.wrap(
+                currentProvider.encrypt(passwordTreePayloadWriter.write(migratedSnapshot)).toByteArray(),
+            )
+            systemOperation.writeBytesToSensitiveFile(filePath, migratedBytes)
+        } finally {
+            keyShell.scramble()
+        }
     }
 
     private fun PasswordTreeSnapshot.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider) = PasswordTreeSnapshot(

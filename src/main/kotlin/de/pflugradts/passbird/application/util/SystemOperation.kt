@@ -22,6 +22,7 @@ import kotlin.io.path.name
 import kotlin.system.exitProcess
 
 private const val JCEKS_KEYSTORE = "JCEKS"
+private const val PKCS12_KEYSTORE = "PKCS12"
 private val PRIVATE_DIRECTORY_PERMISSIONS = setOf(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE)
 private val PRIVATE_FILE_PERMISSIONS = setOf(OWNER_READ, OWNER_WRITE)
 
@@ -29,6 +30,7 @@ class SystemOperation {
     val clock = Clock.systemUTC()
     val isConsoleAvailable: Boolean get() = System.console() != null
     val jceksInstance: KeyStore get() = KeyStore.getInstance(JCEKS_KEYSTORE)
+    val pkcs12Instance: KeyStore get() = KeyStore.getInstance(PKCS12_KEYSTORE)
 
     fun readPasswordFromConsole(): CharArray = System.console().readPassword()
     fun getFileNames(directory: Directory): List<FileName> = Files.list(getPath(directory)).map { it.name.toFileName() }.toList()

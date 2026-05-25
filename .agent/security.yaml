@@ -27,6 +27,7 @@ current_security_relevant_implementation:
     facts:
       - startup may be routed into a dedicated migration boot path before the main application boot path starts
       - migration routing exists for compatibility-sensitive persistence changes such as keystore or password-tree format work
+      - migration authentication may reuse one successful keystore unlock across multiple migrations within the same migration boot run
       - migration boot may require a separate authenticated session from the normal application startup and exits after reporting success instead of continuing into the main loop
   crypto_provider_factory:
     file: src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
@@ -42,9 +43,10 @@ current_security_relevant_implementation:
   keystore:
     file: src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
     facts:
-      - uses JCEKS via SystemOperation
+      - uses PKCS12 via SystemOperation for the current runtime keystore format
       - stores a generated AES secret key under alias PwMan3Secret
       - can re-protect the existing AES secret under a new master password without regenerating the secret
+      - keeps legacy JCEKS read compatibility limited to the migration boot path instead of the normal runtime path
       - scrambles password material and temporary char arrays after use, including exception paths
   local_persistence:
     files:
@@ -103,6 +105,7 @@ security_sensitive_files:
   - src/main/kotlin/de/pflugradts/passbird/application/util/SystemOperation.kt
   - src/main/kotlin/de/pflugradts/passbird/application/configuration/ConfigurationSyncService.kt
   - src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
+  - src/main/kotlin/de/pflugradts/passbird/application/keystore
   - src/main/kotlin/de/pflugradts/passbird/application/passwordtree
   - src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
   - src/main/kotlin/de/pflugradts/passbird/application/process/backup/BackupManager.kt

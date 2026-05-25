@@ -32,6 +32,7 @@ fun fakeSystemOperation(
     every { instance.isConsoleAvailable } returns withConsoleEnabled
     every { instance.readPasswordFromConsole() } returns withPasswordFromConsole
     if (withKeyStoreUnavailable) every { instance.jceksInstance } throws KeyStoreException()
+    if (withKeyStoreUnavailable) every { instance.pkcs12Instance } throws KeyStoreException()
     withPaths.forEach { every { instance.getPath(it.first.toDirectory()) } returns it.second }
     withDirectoryResolvingToFileName?.run { every { instance.resolvePath(first, second) } returns third }
     every { instance.exit() } returns Unit
