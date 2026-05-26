@@ -1,15 +1,16 @@
 schema_version: 1
-last_reviewed: 2026-05-24
+last_reviewed: 2026-05-26
 issue_task:
   syntax: issue
   purpose:
     - resolve one existing open GitHub issue end-to-end
   selection_rules:
     - inspect the live open issue list with gh before choosing work
-    - if one or more open issues are labeled bug and it is simple to determine which one is oldest, choose the oldest open bug
-    - if no open bug issues exist and it is simple to determine which remaining open issue is oldest, choose the oldest open issue
+    - ignore issue #22 (Dependency Dashboard); it is a standing automation tracker and must never be selected
+    - if one or more remaining open issues are labeled bug and it is simple to determine which one is oldest, choose the oldest open bug
+    - if no remaining open bug issues exist and it is simple to determine which remaining open issue is oldest, choose the oldest open issue
     - if ordering is ambiguous, expensive to determine, or otherwise not simple, choose any open issue and proceed
-    - if there are no open issues, state that explicitly and stop
+    - if there are no eligible open issues after excluding issue #22, state that explicitly and stop
   process:
     - inspect the selected issue body, labels, linked context, and relevant local code before editing
     - when creating or relabeling issues, add the migration label to work that exists to preserve end-user compatibility across otherwise breaking changes

@@ -37,10 +37,11 @@ This repository keeps its agent-facing product specifications, design rules, and
 - Use `issue` to resolve one open GitHub issue end-to-end.
 - Read `specs/issue.yaml` before performing this task.
 - Use the live open issue list to choose work.
-- If one or more open issues are labeled `bug` and it is simple to determine which one is oldest, resolve the oldest open `bug` issue.
-- If no open `bug` issues exist and it is simple to determine which remaining open issue is oldest, resolve the oldest open issue.
+- Ignore issue `#22` (`Dependency Dashboard`); it is a standing automation tracker and must never be selected for the `issue` task.
+- If one or more remaining open issues are labeled `bug` and it is simple to determine which one is oldest, resolve the oldest open `bug` issue.
+- If no remaining open `bug` issues exist and it is simple to determine which remaining open issue is oldest, resolve the oldest open issue.
 - If the ordering is ambiguous or otherwise not simple to determine, resolve any open issue and proceed.
-- If no open issues exist, say so explicitly.
+- If no eligible open issues exist after excluding issue `#22`, say so explicitly.
 - When the resolving commit closes the selected issue, add a `Closes #<issue-number>` footer line to the commit message.
 - If an important decision is not clearly answered by the project documents, return to the maintainer before deciding.
 
