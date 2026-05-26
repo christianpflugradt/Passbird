@@ -34,6 +34,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot.S8
 import de.pflugradts.passbird.domain.model.slot.Slot.S9
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
+import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -108,7 +109,7 @@ class PasswordTreeFacadeTest {
         val eggs = someEggs()
 
         // when
-        passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream()}))
+        passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream() }))
         expectThat(File(passwordTreeFilename)).exists()
         posixPermissionsIfSupported(Paths.get(passwordTreeFilename))?.let {
             expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
@@ -149,6 +150,45 @@ class PasswordTreeFacadeTest {
         ).forEach { (k, v) ->
             expectThat(actual.nests()[k.index() - 1]) isEqualTo v
         }
+    }
+
+    @Test
+    fun `should persist egg id memory when configured`() {
+        fakeConfiguration(
+            instance = configuration,
+            withPasswordTreeLocation = tempPasswordTreeDirectory,
+            withEggIdMemoryEnabled = true,
+            withEggIdMemoryPersisted = true,
+        )
+
+        passwordTreeFacade.sync(EggStreamSupplier({ someEggs().stream() }, memory = memoryWith("email")))
+
+        val actual = passwordTreeFacade.restore()
+
+        expectThat(restoredMemoryEntry(actual)).isEqualTo("email")
+    }
+
+    @Test
+    fun `should scrub egg id memory from future writes when persistence is disabled`() {
+        fakeConfiguration(
+            instance = configuration,
+            withPasswordTreeLocation = tempPasswordTreeDirectory,
+            withEggIdMemoryEnabled = true,
+            withEggIdMemoryPersisted = false,
+        )
+
+        passwordTreeFacade.sync(EggStreamSupplier({ someEggs().stream() }, memory = memoryWith("email")))
+
+        fakeConfiguration(
+            instance = configuration,
+            withPasswordTreeLocation = tempPasswordTreeDirectory,
+            withEggIdMemoryEnabled = true,
+            withEggIdMemoryPersisted = true,
+        )
+
+        val actual = passwordTreeFacade.restore()
+
+        expectThat(restoredMemoryEntry(actual)).isEqualTo("")
     }
 
     @Test
@@ -387,6 +427,15 @@ class PasswordTreeFacadeTest {
         createEggFromStrings(eggId = "EggId2", password = "Password2"),
         createEggFromStrings(eggId = "EggId3", password = "Password3"),
     )
+
+    private fun memoryWith(vararg eggIds: String) = emptyMemory().apply {
+        eggIds.forEachIndexed { index, eggId ->
+            this[DEFAULT].get()[index].set(cryptoProvider.encrypt(shellOf(eggId)))
+        }
+    }
+
+    private fun restoredMemoryEntry(actual: EggStreamSupplier) =
+        actual.memory()[DEFAULT].get()[0].map { cryptoProvider.decrypt(it).asString() }.orElse("")
 
     private fun createEggFromStrings(slot: Slot = DEFAULT, eggId: String, password: String) = createEgg(
         slot = slot,

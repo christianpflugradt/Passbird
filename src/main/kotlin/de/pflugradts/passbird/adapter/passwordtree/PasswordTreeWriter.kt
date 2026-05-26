@@ -15,6 +15,7 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
+import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
 import jakarta.inject.Inject
 
 class PasswordTreeWriter @Inject constructor(
@@ -32,7 +33,7 @@ class PasswordTreeWriter @Inject constructor(
                 PasswordTreeSnapshot(
                     eggs = eggs,
                     favorites = eggSupplier.favorites(),
-                    memory = eggSupplier.memory(),
+                    memory = if (configuration.domain.eggIdMemory.persisted) eggSupplier.memory() else emptyMemory(),
                     nests = eggSupplier.nests(),
                 ),
             ),
