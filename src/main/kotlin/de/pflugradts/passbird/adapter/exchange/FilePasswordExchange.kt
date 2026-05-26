@@ -17,7 +17,6 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
-import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import jakarta.inject.Inject
 import java.nio.file.Files
 
@@ -63,14 +62,21 @@ class FilePasswordExchange @Inject constructor(
     }
 
     private fun List<EggsPerNest>.toPasswordInfoMap() = associate { entry ->
-        createNest(shellOf(entry.exportedNest.nestId), slotAt(entry.exportedNest.slot)) to (
+        createNest(shellOf(entry.exportedNest.nestId), entry.exportedNest.toValidatedSlot()) to
             entry.exportedEggs.map {
                 PasswordInfo(
                     first = ShellPair(shellOf(it.eggId), shellOf(it.password)),
                     second = it.proteins.toShellPairsBySlot(),
                 )
             }
-            )
+    }.also { passwordInfoMap ->
+        require(passwordInfoMap.size == size) { "Duplicate nest slot in import file" }
+    }
+
+    private fun ExportedNest.toValidatedSlot(): Slot {
+        val slot = requireNotNull(slot) { "Missing nest slot in import file" }
+        require(slot in Slot.entries.indices) { "Invalid nest slot $slot" }
+        return Slot.entries[slot]
     }
 
     private fun List<ExportedProtein>.toShellPairsBySlot(): List<ShellPair> {
@@ -92,6 +98,6 @@ class FilePasswordExchange @Inject constructor(
 
 private class ExportedProtein(var proteinType: String = "", var proteinStructure: String = "", var slot: Int = 0)
 private class ExportedEgg(var eggId: String = "", var password: String = "", var proteins: List<ExportedProtein> = emptyList())
-private class ExportedNest(var nestId: String = "", var slot: Int = 0)
+private class ExportedNest(var nestId: String = "", var slot: Int? = null)
 private class EggsPerNest(var exportedNest: ExportedNest = ExportedNest(), var exportedEggs: List<ExportedEgg> = emptyList())
 private class ExchangeWrapper(val exportedContent: List<EggsPerNest> = emptyList())

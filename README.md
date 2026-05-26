@@ -303,6 +303,8 @@ operation is aborted.
 
 `i*` previews the Nests in `passbird-export.json`, imports one selected Nest, and lets you restore it into a chosen Nest Slot.
 
+Import expects every exported Nest record in `passbird-export.json` to declare a unique Slot from `0` to `9`. If Nest metadata is missing, duplicated, or out of range, Passbird rejects the file instead of importing it into another Nest.
+
 ### Nests
 
 Nests are an advanced feature in Passbird, allowing you to organize passwords into categories. For example, you might create one Nest for online shopping, another for social networks, or separate Nests for personal and work-related accounts. To access Nest-specific help, press n followed by Enter.

@@ -19,6 +19,7 @@ import strikt.api.expectThat
 import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.containsKey
 import strikt.assertions.hasSize
+import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
@@ -209,6 +210,117 @@ class FilePasswordExchangeIntegrationTest {
 
         // then
         expectThat(actual.failure).isTrue()
+    }
+
+    @Test
+    fun `should fail receive when nest slot value is missing`() {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT"
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": []
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        // when
+        val actual = filePasswordExchange.receive()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
+    }
+
+    @Test
+    fun `should fail receive when nest slot value is duplicated`() {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "Default",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": []
+                    }
+                  ]
+                },
+                {
+                  "exportedNest": {
+                    "nestId": "Other",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId2",
+                      "password": "Password2",
+                      "proteins": []
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        // when
+        val actual = filePasswordExchange.receive()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
+    }
+
+    @Test
+    fun `should fail receive when nest slot value is out of range`() {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 10
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": []
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        // when
+        val actual = filePasswordExchange.receive()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
     }
 
     private fun writeExchangeFile(content: String) {

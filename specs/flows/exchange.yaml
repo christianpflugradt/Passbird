@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-25
+last_reviewed: 2026-05-26
 flow_family: exchange
 applies_interaction_rules_from: specs/interaction.yaml
 shared_artifact:
@@ -90,6 +90,7 @@ flows:
     exact_failure_output:
       - if previewing the import file fails before the import starts, the import handler prints no Operation aborted. message
       - if import parsing or reading fails with a generic import failure, Passbird prints Password Tree could not be imported. to standard error
+      - missing, duplicate, or out-of-range exportedNest.slot metadata is treated as a generic import failure rather than being coerced to another Nest
       - if import parsing fails because an eggId contains digits or special characters, Passbird prints Password Tree could not be imported because at least one eggId contains digits or special characters. Please correct invalid eggIds and try again. Erroneous eggId: <EggId> to standard error
       - after a FAILED path, the command handler still emits one empty line
   - id: import_selective
@@ -134,6 +135,7 @@ flows:
     exact_failure_output:
       - if previewing or parsing the import file fails before a selectable preview is available, the import handler prints no Operation aborted. message
       - generic import read or parse failures are reported to standard error as Password Tree could not be imported.
+      - missing, duplicate, or out-of-range exportedNest.slot metadata is treated as a generic import failure before any preview list or local mutation is produced
       - invalid eggId import failures are reported to standard error with the longer invalid-eggId message
       - after a FAILED path, the command handler still emits one empty line
 command_parse_rules:
