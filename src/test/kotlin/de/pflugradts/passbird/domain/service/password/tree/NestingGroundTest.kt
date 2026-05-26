@@ -51,6 +51,8 @@ class NestingGroundTest {
     fun `should sync`() {
         // given
         val eggsSlot = slot<EggStreamSupplier>()
+        val nestShell = shellOf("Nest")
+        nestService.place(nestShell, Slot.S2)
 
         // when
         nestingGround.sync()
@@ -58,6 +60,7 @@ class NestingGroundTest {
         // then
         verify { passwordTreeAdapterPort.sync(capture(eggsSlot)) }
         expectThat(eggsSlot.captured.get().toList()).containsExactlyInAnyOrder(givenEgg1, givenEgg2)
+        expectThat(eggsSlot.captured.nests()[1]) isEqualTo nestShell
     }
 
     @Test

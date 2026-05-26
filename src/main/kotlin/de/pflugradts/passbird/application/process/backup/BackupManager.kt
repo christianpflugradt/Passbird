@@ -13,6 +13,7 @@ import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
+import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 import jakarta.inject.Inject
 import java.nio.file.Path
 import java.time.LocalDateTime
@@ -24,6 +25,7 @@ class BackupManager @Inject constructor(
     private val systemOperation: SystemOperation,
     private val cryptoProvider: CryptoProvider,
     private val passwordTreeEnvelope: PasswordTreeEnvelope,
+    private val passwordTreeAdapterPort: PasswordTreeAdapterPort,
 ) : Finalizer {
     private val backupConfiguration get() = configuration.application.backup
     override fun run() {
@@ -33,6 +35,9 @@ class BackupManager @Inject constructor(
             Triple(backupConfiguration.keyStore, configuration.adapter.keyStore.location.toDirectory(), KEYSTORE_FILENAME),
         ).forEach { (settings, directory, fileName) ->
             if (settings.enabled && numberOfBackups(settings) > 0) {
+                val current = systemOperation.resolvePath(directory, fileName.toFileName())
+                ensurePasswordTreeExists(current, fileName)
+                if (!systemOperation.exists(current)) return@forEach
                 val limit = numberOfBackups(settings)
                 val backupDirectory = systemOperation.getPath(runContext.homeDirectory)
                     .resolve(settings.location ?: backupConfiguration.location)
@@ -43,7 +48,6 @@ class BackupManager @Inject constructor(
                     it.value.matches("${fileName.stem()}_$backupPattern\\.${fileName.extension()}".toRegex())
                 }.sortedBy { it.value }
                 val backupWasCreated = if (backups.isNotEmpty()) {
-                    val current = systemOperation.resolvePath(directory, fileName.toFileName())
                     val lastBackup = systemOperation.resolvePath(backupDirectory, backups.last())
                     if (backupContentHasChanged(current, lastBackup, fileName)) {
                         backup(directory, fileName, backupDirectory)
@@ -61,6 +65,12 @@ class BackupManager @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun ensurePasswordTreeExists(current: Path, fileName: String) {
+        if (fileName == PASSWORD_TREE_FILENAME && !systemOperation.exists(current)) {
+            passwordTreeAdapterPort.sync(passwordTreeAdapterPort.restore())
         }
     }
 

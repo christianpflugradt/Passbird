@@ -8,6 +8,7 @@ import de.pflugradts.passbird.domain.model.egg.EggIdMemory
 import de.pflugradts.passbird.domain.model.egg.FavoriteMap
 import de.pflugradts.passbird.domain.model.egg.MemoryMap
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
@@ -81,7 +82,7 @@ fun byteContents(): Arbitrary<List<Byte>> = Arbitraries.bytes().list().ofMaxSize
 
 fun PasswordTreeFixture.toEggStreamSupplier(cryptoProvider: CryptoProvider): EggStreamSupplier {
     val eggs = eggs.map { egg -> egg.toEgg(cryptoProvider) }
-    return EggStreamSupplier({ eggs.stream() }, toMemoryMap(cryptoProvider), toFavoriteMap(cryptoProvider))
+    return EggStreamSupplier({ eggs.stream() }, toMemoryMap(cryptoProvider), toFavoriteMap(cryptoProvider), toNestShells())
 }
 
 fun PasswordTreeFixture.populateNests(nestService: NestService) {
@@ -95,6 +96,10 @@ fun normalizeExplicitNests(nestService: NestService): Map<Slot, String> = Slot.e
     .mapNotNull { slot ->
         nestService.atNestSlot(slot).orNull()?.let { slot to it.viewNestId().asString() }
     }.toMap().toSortedMap(compareBy(Slot::index))
+
+fun normalizeExplicitNests(nestShells: List<Shell>): Map<Slot, String> = nestShells.mapIndexedNotNull { index, nestShell ->
+    nestShell.takeUnless(Shell::isEmpty)?.let { Slot.slotAt(index + 1) to it.asString() }
+}.toMap().toSortedMap(compareBy(Slot::index))
 
 fun PasswordTreeFixture.normalizedEggs(): List<PlainEggData> = eggs
 fun PasswordTreeFixture.normalizedFavorites(): Map<FavoriteCell, String> =
@@ -218,6 +223,10 @@ private fun proteinEntries(): Arbitrary<Map<Slot, Pair<String, String>>> =
             slots.zip(proteins).toMap().toSortedMap(compareBy(Slot::index))
         }
     }
+
+private fun PasswordTreeFixture.toNestShells() = Slot.entries
+    .filterNot { it == Slot.DEFAULT }
+    .map { slot -> nests[slot]?.let(::shellOf) ?: emptyShell() }
 
 private fun nonEmptyProteinPairs(): Arbitrary<Pair<String, String>> =
     Combinators.combine(nonEmptyTextValues(), nonEmptyTextValues()).`as`(::Pair)

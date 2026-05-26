@@ -74,6 +74,7 @@ import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestService
+import de.pflugradts.passbird.domain.service.nest.NestStateView
 import de.pflugradts.passbird.domain.service.nest.NestingGroundService
 import de.pflugradts.passbird.domain.service.password.PasswordFacade
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -106,6 +107,7 @@ class ApplicationModule(private val runContext: RunContext) : AbstractModule() {
         bind(InputHandler::class.java).to(CommandInputHandler::class.java)
         bind(KeyStoreAdapterPort::class.java).to(KeyStoreService::class.java)
         bind(EggRepository::class.java).to(NestingGround::class.java)
+        bind(NestStateView::class.java).to(NestingGroundService::class.java)
         bind(NestService::class.java).to(NestingGroundService::class.java)
         bind(PasswordProvider::class.java).to(RandomPasswordProvider::class.java)
         bind(PasswordService::class.java).to(PasswordFacade::class.java)

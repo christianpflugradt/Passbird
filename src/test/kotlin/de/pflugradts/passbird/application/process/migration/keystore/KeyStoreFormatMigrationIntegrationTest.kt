@@ -157,11 +157,9 @@ class KeyStoreFormatMigrationIntegrationTest {
 
     private fun assertMigratedState(password: String, migrationFixture: MigrationFixture) {
         val currentCryptoProvider = createAesGcmCipherForTesting()
-        val restoredNestService = createNestServiceForTesting()
         val restoredTree = PasswordTreeReader(
             systemOperation = systemOperation,
             configuration = configuration,
-            nestService = restoredNestService,
             cryptoProvider = currentCryptoProvider,
             passwordTreeEnvelope = passwordTreeEnvelope,
             passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
@@ -180,8 +178,8 @@ class KeyStoreFormatMigrationIntegrationTest {
             "email"
         expectThat(restoredTree.memory()[Slot.S3].get()[0].map { currentCryptoProvider.decrypt(it).asString() }.orElse("")) isEqualTo
             "bank"
-        expectThat(restoredNestService.atNestSlot(Slot.S1).get().viewNestId().asString()) isEqualTo "work"
-        expectThat(restoredNestService.atNestSlot(Slot.S3).get().viewNestId().asString()) isEqualTo "finance"
+        expectThat(restoredTree.nests()[Slot.S1.index() - 1].asString()) isEqualTo "work"
+        expectThat(restoredTree.nests()[Slot.S3.index() - 1].asString()) isEqualTo "finance"
     }
 
     private fun writeLegacyKeyStore(password: String) {

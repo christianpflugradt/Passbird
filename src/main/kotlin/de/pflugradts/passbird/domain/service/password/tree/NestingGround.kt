@@ -10,7 +10,7 @@ import de.pflugradts.passbird.domain.model.egg.MemoryMap
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
-import de.pflugradts.passbird.domain.service.nest.NestService
+import de.pflugradts.passbird.domain.service.nest.NestStateView
 import jakarta.inject.Inject
 import jakarta.inject.Named
 import jakarta.inject.Singleton
@@ -21,7 +21,7 @@ class NestingGround @Inject constructor(
     @param:Named("EggIdMemoryEnabled")
     private val eggIdMemoryEnabled: Boolean,
     private val passwordTreeAdapterPort: PasswordTreeAdapterPort,
-    private val nestService: NestService,
+    private val nestStateView: NestStateView,
     private val eventRegistry: EventRegistry,
 ) : EggRepository {
     private val lazyFavorites: MutableOption<FavoriteMap> = mutableOptionOf()
@@ -30,7 +30,7 @@ class NestingGround @Inject constructor(
     private val favorites: FavoriteMap get() = initializeIfEmpty().run { lazyFavorites.get() }
     private val memory: MemoryMap get() = initializeIfEmpty().run { lazyMemory.get() }
     private val eggs: MutableList<Egg> get() = initializeIfEmpty().run { lazyEggs.get() }
-    private val currentNestSlot get() = nestService.currentNest().slot
+    private val currentNestSlot get() = nestStateView.currentNestSlot()
 
     private fun initializeIfEmpty() {
         if (lazyEggs.isEmpty) {
@@ -56,7 +56,9 @@ class NestingGround @Inject constructor(
         eventRegistry.deregister(egg)
     }
 
-    override fun sync(): TryResult<Unit> = passwordTreeAdapterPort.sync(EggStreamSupplier({ eggs.stream() }, memory, favorites))
+    override fun sync(): TryResult<Unit> = passwordTreeAdapterPort.sync(
+        EggStreamSupplier({ eggs.stream() }, memory, favorites, nestStateView.snapshot()),
+    )
     override fun findAll(slot: Slot) = createEggStreamSupplier(slot).get()
     override fun findAll() = createEggStreamSupplier(inNest(currentNestSlot)).get()
     private fun createEggStreamSupplier(slot: Slot) = createEggStreamSupplier(inNest(slot))

@@ -118,6 +118,25 @@ class PassbirdTest {
     }
 
     @Nested
+    inner class PersistenceCycleTest {
+        @Test
+        fun `password tree persistence should not depend on nest service`() {
+            noClasses().that().haveFullyQualifiedName("$DOMAIN_SERVICES.password.tree.NestingGround")
+                .or().haveFullyQualifiedName("$ADAPTER_ROOT.passwordtree.PasswordTreeReader")
+                .or().haveFullyQualifiedName("$ADAPTER_ROOT.passwordtree.PasswordTreeWriter")
+                .should().dependOnClassesThat().haveFullyQualifiedName("$DOMAIN_SERVICES.nest.NestService")
+                .check(classes)
+        }
+
+        @Test
+        fun `nest service should not depend on egg repository`() {
+            noClasses().that().haveFullyQualifiedName("$DOMAIN_SERVICES.nest.NestingGroundService")
+                .should().dependOnClassesThat().haveFullyQualifiedName("$DOMAIN_SERVICES.password.tree.EggRepository")
+                .check(classes)
+        }
+    }
+
+    @Nested
     inner class RepositoryAccessTest {
         @Test
         fun `repositories should only be accessed from domain services`() {

@@ -12,6 +12,7 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 import de.pflugradts.passbird.property.textValues
 import io.mockk.every
 import io.mockk.mockk
@@ -55,6 +56,7 @@ class BackupManagerPropertyTest {
                 systemOperation = systemOperation,
                 cryptoProvider = cryptoProvider,
                 passwordTreeEnvelope = passwordTreeEnvelope,
+                passwordTreeAdapterPort = mockk<PasswordTreeAdapterPort>(relaxed = true),
             )
 
             fakeConfiguration(

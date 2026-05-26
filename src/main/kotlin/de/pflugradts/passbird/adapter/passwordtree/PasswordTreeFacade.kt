@@ -12,5 +12,5 @@ class PasswordTreeFacade @Inject constructor(
     val passwordTreeWriter: PasswordTreeWriter,
 ) : PasswordTreeAdapterPort {
     override fun restore(): EggStreamSupplier = passwordTreeReader.restore()
-    override fun sync(supplier: EggStreamSupplier): TryResult<Unit> = passwordTreeWriter.sync(supplier)
+    override fun sync(snapshot: EggStreamSupplier): TryResult<Unit> = passwordTreeWriter.sync(snapshot)
 }

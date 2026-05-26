@@ -11,9 +11,7 @@ import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
-import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
-import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import jakarta.inject.Inject
@@ -21,15 +19,13 @@ import jakarta.inject.Inject
 class PasswordTreeReader @Inject constructor(
     private val systemOperation: SystemOperation,
     private val configuration: ReadableConfiguration,
-    private val nestService: NestService,
     private val cryptoProvider: CryptoProvider,
     private val passwordTreeEnvelope: PasswordTreeEnvelope,
     private val passwordTreePayloadReader: PasswordTreePayloadReader,
 ) {
     fun restore(): EggStreamSupplier {
         val snapshot = passwordTreePayloadReader.read(readFromDisk())
-        nestService.populate(snapshot.nests)
-        return EggStreamSupplier({ snapshot.eggs.stream() }, snapshot.memory, snapshot.favorites)
+        return EggStreamSupplier({ snapshot.eggs.stream() }, snapshot.memory, snapshot.favorites, snapshot.nests)
     }
 
     private fun readFromDisk() = tryCatching {

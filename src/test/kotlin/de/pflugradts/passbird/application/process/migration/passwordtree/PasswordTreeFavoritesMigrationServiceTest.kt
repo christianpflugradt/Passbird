@@ -18,7 +18,6 @@ import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
-import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
 import io.mockk.mockk
 import org.junit.jupiter.api.AfterEach
@@ -68,11 +67,9 @@ class PasswordTreeFavoritesMigrationServiceTest {
         expectThat(detector.detect().required).isTrue()
 
         createMigrationService().migrate(createTestKeyShell())
-        val restoredNestService = createNestServiceForTesting()
         val restored = PasswordTreeReader(
             systemOperation = systemOperation,
             configuration = configuration,
-            nestService = restoredNestService,
             cryptoProvider = cryptoProvider,
             passwordTreeEnvelope = passwordTreeEnvelope,
             passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
@@ -86,8 +83,8 @@ class PasswordTreeFavoritesMigrationServiceTest {
         )
         expectThat(restored.memory()[Slot.DEFAULT].get()[0].map { cryptoProvider.decrypt(it).asString() }.orElse("")) isEqualTo "email"
         expectThat(restored.favorites()[Slot.DEFAULT].get().any { it.isPresent }).isEqualTo(false)
-        expectThat(restoredNestService.atNestSlot(Slot.S1).get().viewNestId().asString()) isEqualTo "work"
-        expectThat(restoredNestService.atNestSlot(Slot.S3).get().viewNestId().asString()) isEqualTo "finance"
+        expectThat(restored.nests()[Slot.S1.index() - 1].asString()) isEqualTo "work"
+        expectThat(restored.nests()[Slot.S3.index() - 1].asString()) isEqualTo "finance"
     }
 
     private fun createLegacySnapshot(): PasswordTreeSnapshot {

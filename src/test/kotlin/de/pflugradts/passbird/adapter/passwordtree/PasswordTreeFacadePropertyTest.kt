@@ -8,7 +8,6 @@ import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.property.PasswordTreeFixture
 import de.pflugradts.passbird.property.normalizeEggs
 import de.pflugradts.passbird.property.normalizeExplicitNests
@@ -20,7 +19,6 @@ import de.pflugradts.passbird.property.normalizedFavorites
 import de.pflugradts.passbird.property.normalizedMemory
 import de.pflugradts.passbird.property.orThrow
 import de.pflugradts.passbird.property.passwordTreeFixtures
-import de.pflugradts.passbird.property.populateNests
 import de.pflugradts.passbird.property.toEggStreamSupplier
 import io.mockk.mockk
 import net.jqwik.api.ForAll
@@ -52,14 +50,11 @@ class PasswordTreeFacadePropertyTest {
                 withEggIdMemoryPersisted = true,
             )
             val cryptoProvider = createAesGcmCipherForTesting()
-            val writerNestService = createNestServiceForTesting()
-            val readerNestService = createNestServiceForTesting()
             val systemOperation = SystemOperation()
             val passwordTreeFacade = PasswordTreeFacade(
                 passwordTreeReader = PasswordTreeReader(
                     systemOperation = systemOperation,
                     configuration = configuration,
-                    nestService = readerNestService,
                     cryptoProvider = cryptoProvider,
                     passwordTreeEnvelope = passwordTreeEnvelope,
                     passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
@@ -67,19 +62,17 @@ class PasswordTreeFacadePropertyTest {
                 passwordTreeWriter = PasswordTreeWriter(
                     systemOperation = systemOperation,
                     configuration = configuration,
-                    nestService = writerNestService,
                     cryptoProvider = cryptoProvider,
                     passwordTreeEnvelope = passwordTreeEnvelope,
                     passwordTreePayloadWriter = passwordTreePayloadWriter,
                 ),
             )
 
-            fixture.populateNests(writerNestService)
             passwordTreeFacade.sync(fixture.toEggStreamSupplier(cryptoProvider)).orThrow("password tree sync")
             val restoreResult = passwordTreeFacade.restore()
 
             expectThat(normalizeEggs(restoreResult.get().toList(), cryptoProvider)) isEqualTo fixture.normalizedEggs()
-            expectThat(normalizeExplicitNests(readerNestService)) isEqualTo fixture.normalizedExplicitNests()
+            expectThat(normalizeExplicitNests(restoreResult.nests())) isEqualTo fixture.normalizedExplicitNests()
             expectThat(normalizeFavorites(restoreResult.favorites(), cryptoProvider)) isEqualTo fixture.normalizedFavorites()
             expectThat(normalizeMemory(restoreResult.memory(), cryptoProvider)) isEqualTo fixture.normalizedMemory()
         } finally {

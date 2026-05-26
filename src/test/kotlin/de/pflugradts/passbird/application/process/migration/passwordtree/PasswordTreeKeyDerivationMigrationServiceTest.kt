@@ -20,7 +20,6 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
-import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
 import io.mockk.mockk
 import org.junit.jupiter.api.AfterEach
@@ -70,8 +69,7 @@ class PasswordTreeKeyDerivationMigrationServiceTest {
         writeLegacyPasswordTree(createLegacySnapshot(legacyCryptoProvider), legacyCryptoProvider)
         expectThat(detector.detect().required).isTrue()
         createMigrationService().migrate(createTestKeyShell())
-        val restoredNestService = createNestServiceForTesting()
-        val restored = createPasswordTreeReader(currentCryptoProvider, restoredNestService).restore()
+        val restored = createPasswordTreeReader(currentCryptoProvider).restore()
 
         expectThat(detector.detect().required) isEqualTo false
         expectThat(passwordTreeEnvelope.isCurrent(Files.readAllBytes(passwordTreeFile))).isTrue()
@@ -86,8 +84,8 @@ class PasswordTreeKeyDerivationMigrationServiceTest {
             restored.memory()[Slot.S3].get()[0].map { currentCryptoProvider.decrypt(it).asString() }.orElse(""),
         ) isEqualTo "bank"
         expectThat(restored.favorites()[Slot.DEFAULT].get().any { it.isPresent }).isEqualTo(false)
-        expectThat(restoredNestService.atNestSlot(Slot.S1).get().viewNestId().asString()) isEqualTo "work"
-        expectThat(restoredNestService.atNestSlot(Slot.S3).get().viewNestId().asString()) isEqualTo "finance"
+        expectThat(restored.nests()[Slot.S1.index() - 1].asString()) isEqualTo "work"
+        expectThat(restored.nests()[Slot.S3.index() - 1].asString()) isEqualTo "finance"
     }
 
     private fun createLegacySnapshot(
@@ -144,17 +142,14 @@ class PasswordTreeKeyDerivationMigrationServiceTest {
         systemOperation = systemOperation,
     )
 
-    private fun createPasswordTreeReader(
-        currentCryptoProvider: de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider,
-        restoredNestService: de.pflugradts.passbird.domain.service.nest.NestService,
-    ) = PasswordTreeReader(
-        systemOperation = systemOperation,
-        configuration = configuration,
-        nestService = restoredNestService,
-        cryptoProvider = currentCryptoProvider,
-        passwordTreeEnvelope = passwordTreeEnvelope,
-        passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
-    )
+    private fun createPasswordTreeReader(currentCryptoProvider: de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider) =
+        PasswordTreeReader(
+            systemOperation = systemOperation,
+            configuration = configuration,
+            cryptoProvider = currentCryptoProvider,
+            passwordTreeEnvelope = passwordTreeEnvelope,
+            passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
+        )
 }
 
 private fun de.pflugradts.passbird.domain.model.egg.Egg.decryptedSummary(

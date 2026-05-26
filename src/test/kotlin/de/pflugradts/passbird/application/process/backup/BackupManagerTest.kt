@@ -16,8 +16,11 @@ import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryp
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
+import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
+import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -45,7 +48,15 @@ class BackupManagerTest {
     private val systemOperation = SystemOperation()
     private val cryptoProvider: CryptoProvider = createAesGcmCipherForTesting()
     private val passwordTreeEnvelope = PasswordTreeEnvelope()
-    private val backupManager = BackupManager(configuration, runContext, systemOperation, cryptoProvider, passwordTreeEnvelope)
+    private val passwordTreeAdapterPort = mockk<PasswordTreeAdapterPort>(relaxed = true)
+    private val backupManager = BackupManager(
+        configuration,
+        runContext,
+        systemOperation,
+        cryptoProvider,
+        passwordTreeEnvelope,
+        passwordTreeAdapterPort,
+    )
 
     @BeforeEach
     fun setup() {
@@ -112,6 +123,22 @@ class BackupManagerTest {
         posixPermissionsIfSupported(backupFile)?.let {
             expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
         }
+    }
+
+    @Test
+    fun `should try to materialize missing password tree before backup`() {
+        // given
+        every { treeBackupSettings.enabled } returns true
+        every { treeBackupSettings.numberOfBackups } returns 3
+        every { passwordTreeAdapterPort.restore() } returns
+            EggStreamSupplier({ emptyList<de.pflugradts.passbird.domain.model.egg.Egg>().stream() })
+        Files.deleteIfExists(Paths.get("$tempWorkingDirectory/$PASSWORD_TREE_FILENAME"))
+
+        // when
+        backupManager.run()
+
+        // then
+        verify(exactly = 1) { passwordTreeAdapterPort.sync(any()) }
     }
 
     @Test

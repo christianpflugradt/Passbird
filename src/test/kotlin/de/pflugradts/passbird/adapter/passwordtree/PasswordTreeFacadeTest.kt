@@ -75,7 +75,6 @@ class PasswordTreeFacadeTest {
         passwordTreeReader = PasswordTreeReader(
             systemOperation = systemOperation,
             configuration = configuration,
-            nestService = nestService,
             cryptoProvider = cryptoProvider,
             passwordTreeEnvelope = passwordTreeEnvelope,
             passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
@@ -83,7 +82,6 @@ class PasswordTreeFacadeTest {
         passwordTreeWriter = PasswordTreeWriter(
             systemOperation = systemOperation,
             configuration = configuration,
-            nestService = nestService,
             cryptoProvider = cryptoProvider,
             passwordTreeEnvelope = passwordTreeEnvelope,
             passwordTreePayloadWriter = passwordTreePayloadWriter,
@@ -137,21 +135,19 @@ class PasswordTreeFacadeTest {
         val eggs = listOf(egg1, egg2, egg3a, egg3b)
 
         // when
-        passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream()}))
-        nestService.populate(Collections.nCopies(CAPACITY, emptyShell()))
+        passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream() }, nests = nestService.snapshot()))
         expectThat(File(passwordTreeFilename)).exists()
         val actual = passwordTreeFacade.restore()
 
         // then
         expectThat(actual.get().toList()) containsExactly eggs
-        listOf(S2, S4, S5, S6, S7, S8).forEach { expectThat(nestService.atNestSlot(it).isPresent).isFalse() }
+        listOf(S2, S4, S5, S6, S7, S8).forEach { expectThat(actual.nests()[it.index() - 1].isEmpty).isTrue() }
         mapOf(
             S1 to nest1,
             S3 to nest3,
             S9 to nest9,
         ).forEach { (k, v) ->
-            expectThat(nestService.atNestSlot(k).isPresent)
-            expectThat(nestService.atNestSlot(k).get().viewNestId()) isEqualTo v
+            expectThat(actual.nests()[k.index() - 1]) isEqualTo v
         }
     }
 
@@ -198,7 +194,6 @@ class PasswordTreeFacadeTest {
             passwordTreeReader = PasswordTreeReader(
                 systemOperation = failingSystemOperation,
                 configuration = configuration,
-                nestService = nestService,
                 cryptoProvider = cryptoProvider,
                 passwordTreeEnvelope = passwordTreeEnvelope,
                 passwordTreePayloadReader = PasswordTreePayloadReader(configuration, failingSystemOperation),
@@ -206,7 +201,6 @@ class PasswordTreeFacadeTest {
             passwordTreeWriter = PasswordTreeWriter(
                 systemOperation = failingSystemOperation,
                 configuration = configuration,
-                nestService = nestService,
                 cryptoProvider = cryptoProvider,
                 passwordTreeEnvelope = passwordTreeEnvelope,
                 passwordTreePayloadWriter = passwordTreePayloadWriter,

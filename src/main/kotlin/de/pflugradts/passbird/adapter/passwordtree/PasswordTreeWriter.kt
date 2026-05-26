@@ -13,11 +13,6 @@ import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell
-import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
-import de.pflugradts.passbird.domain.model.slot.Slot.Companion.FIRST_SLOT
-import de.pflugradts.passbird.domain.model.slot.Slot.Companion.LAST_SLOT
-import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
-import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import jakarta.inject.Inject
@@ -25,7 +20,6 @@ import jakarta.inject.Inject
 class PasswordTreeWriter @Inject constructor(
     private val systemOperation: SystemOperation,
     private val configuration: ReadableConfiguration,
-    private val nestService: NestService,
     private val cryptoProvider: CryptoProvider,
     private val passwordTreeEnvelope: PasswordTreeEnvelope,
     private val passwordTreePayloadWriter: PasswordTreePayloadWriter,
@@ -39,9 +33,7 @@ class PasswordTreeWriter @Inject constructor(
                     eggs = eggs,
                     favorites = eggSupplier.favorites(),
                     memory = eggSupplier.memory(),
-                    nests = (FIRST_SLOT..LAST_SLOT).map { slot ->
-                        nestService.atNestSlot(slotAt(slot)).map { it.viewNestId() }.orElse(emptyShell())
-                    },
+                    nests = eggSupplier.nests(),
                 ),
             ),
         )

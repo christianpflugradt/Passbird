@@ -24,7 +24,8 @@ class DomainEventHandler @Inject constructor(private val eggRepositoryProvider: 
     }
 
     @Subscribe
-    private fun handleNestDiscarded(@Suppress("UNUSED_PARAMETER") nestDiscarded: NestDiscarded) {
+    private fun handleNestDiscarded(nestDiscarded: NestDiscarded) {
+        eggRepository.discardFavorites(nestDiscarded.nest.slot)
         eggRepository.sync()
     }
 }
