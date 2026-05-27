@@ -91,6 +91,7 @@ flows:
         - a missing source Egg triggers the standard not-found event output Egg '<EggId>' not found.
         - the not-found event also triggers the warning sound defined in specs/interaction.yaml
       move_and_conflict_rules:
+        - if the target input is not exactly one digit from 0 to 9, Passbird prints Operation aborted.
         - if the chosen target slot is the current Nest, Passbird prints Egg is already in the specified Nest - Operation aborted.
         - if the chosen target slot does not contain a deployed Nest, Passbird prints Specified Nest does not exist - Operation aborted.
         - if a different Egg with the same EggId already exists in the target Nest, Passbird prints Egg with same EggId already exists in target Nest - Operation aborted.

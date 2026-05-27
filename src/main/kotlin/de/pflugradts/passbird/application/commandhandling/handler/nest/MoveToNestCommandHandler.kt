@@ -7,6 +7,8 @@ import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAv
 import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.HIGHLIGHT
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
@@ -27,8 +29,11 @@ class MoveToNestCommandHandler @Inject constructor(
             userInterfaceAdapterPort.send(outputOf(shellOf("\nAvailable Nests: \n"), HIGHLIGHT))
             userInterfaceAdapterPort.send(outputOf(shellOf(canListAvailableNests.getAvailableNests(includeCurrent = false))))
             val input = userInterfaceAdapterPort.receive(outputOf(shellOf("\nEnter Nest you want to move Egg to: ")))
-            val nestSlot = input.extractNestSlot()
-            if (nestSlot === nestService.currentNest().slot) {
+            val nestSlot = input.shell.asString().toTargetNestSlot()
+            if (nestSlot == null) {
+                CommandExecutionTracker.markAborted()
+                userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
+            } else if (nestSlot === nestService.currentNest().slot) {
                 CommandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(
                     outputOf(shellOf("Egg is already in the specified Nest - Operation aborted."), OPERATION_ABORTED),
@@ -53,4 +58,6 @@ class MoveToNestCommandHandler @Inject constructor(
         moveToNestCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
+
+    private fun String.toTargetNestSlot(): Slot? = takeIf { it.length == 1 && it[0].isDigit() }?.let(::slotAt)
 }

@@ -18,6 +18,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.hasSize
@@ -181,6 +183,37 @@ class MoveToNestCommandTest {
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot) hasSize 3
         expectThat(outputSlot[2].shell.asString()) contains "Specified Nest does not exist"
+        verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
+        expectThat(givenInput) isNotEqualTo referenceInput
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["", "x", "10", "-1"])
+    fun `should abort move when target nest input is invalid`(invalidTargetNestInput: String) {
+        // given
+        val givenEggId = "a"
+        val givenInput = shellOf("n$givenEggId")
+        val referenceInput = givenInput.copy()
+        val currentNestSlot = 0
+        val targetNestSlot = 1
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(givenEggId), withSlot = slotAt(currentNestSlot))
+        nestService.moveToNestAt(slotAt(currentNestSlot))
+        nestService.place(shellOf("Nest"), slotAt(targetNestSlot))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf(invalidTargetNestInput))),
+        )
+        val outputSlot = mutableListOf<Output>()
+
+        // when
+        expectThat(givenInput) isEqualTo referenceInput
+        inputHandler.handleInput(inputOf(givenInput))
+
+        // then
+        verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot) hasSize 3
+        expectThat(outputSlot[2].shell.asString()) isEqualTo "Operation aborted."
         verify(exactly = 0) { passwordService.moveEgg(any(), any()) }
         expectThat(givenInput) isNotEqualTo referenceInput
     }
