@@ -1,4 +1,5 @@
 
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.TestDescriptor
 import org.gradle.api.tasks.testing.TestListener
 import org.gradle.api.tasks.testing.TestResult
@@ -77,7 +78,12 @@ dependencies {
 }
 
 java.sourceCompatibility = JavaVersion.VERSION_17
+java.targetCompatibility = JavaVersion.VERSION_17
 group = "de.pflugradts"
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(17)
+}
 
 tasks.withType<Jar> {
     archiveBaseName.set("passbird")
@@ -103,6 +109,7 @@ tasks.withType<KotlinJvmCompile>().configureEach {
     compilerOptions {
         allWarningsAsErrors.set(true)
         freeCompilerArgs.add("-Xjsr305=strict")
+        freeCompilerArgs.add("-Xjdk-release=17")
         jvmTarget.set(JvmTarget.JVM_17)
     }
 }

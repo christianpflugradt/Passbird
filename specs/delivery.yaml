@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-24
+last_reviewed: 2026-05-27
 quality_gates:
   formatting_and_style:
     - run ./gradlew ktlintFormat before staging, committing, or pushing to auto-resolve formatting issues when possible
@@ -68,11 +68,11 @@ ci_landscape:
       - .github/workflows/owasp-purge.yml
       - .github/workflows/publish.yml
     notes:
-      - ordinary branch pushes prove the always-on compile, lint, static-analysis, license, OWASP, jar-smoke, and non-conditional test jobs; they skip architecture-tests, test-coverage-verification, test-coverage-report, pages-site, and deploy-pages
-      - the build workflow installs Xvfb and xclip, builds the releasable passbird.jar with the GitHub Actions manifest metadata, and runs smoke-test/run.sh against that artifact under xvfb-run
+      - ordinary branch pushes prove the always-on compile, lint, static-analysis, license, OWASP, LTS jar-smoke matrix, and non-conditional test jobs; they skip architecture-tests, test-coverage-verification, test-coverage-report, pages-site, and deploy-pages
+      - the build workflow installs Xvfb and xclip, builds the releasable passbird.jar once with the GitHub Actions manifest metadata on Temurin 25 LTS, and runs smoke-test/run.sh against that same artifact under xvfb-run on Java 17, 21, and 25
       - architecture tests and coverage jobs run only on pull requests and direct pushes to main, while GitHub Pages publication stays main-only
       - the build workflow runs dependency-check analysis on push and restores its local database from the default-branch GitHub Actions cache when available
-      - Java-based GitHub Actions workflows run on Temurin 25 LTS while the Gradle build still targets Java 17 bytecode for released artifacts
+      - single-run Java-based GitHub Actions workflow jobs use Temurin 25 LTS while the Gradle build enforces a Java 17 API floor for compilation and the build workflow proves runtime compatibility for the current LTS line
       - the build workflow runs detekt as a dedicated static-analysis job and uploads its reports as artifacts
       - jqwik failure databases and PIT mutation reports are uploaded as workflow artifacts so falsified samples, seeds, and mutation context remain inspectable after CI failures
       - a daily OWASP workflow refreshes the dependency-check cache from the Gradle plugin update task
