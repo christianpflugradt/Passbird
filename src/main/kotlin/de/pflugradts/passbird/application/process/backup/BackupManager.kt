@@ -12,6 +12,8 @@ import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
+import de.pflugradts.passbird.domain.model.shell.Shell
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 import jakarta.inject.Inject
@@ -84,18 +86,26 @@ class BackupManager @Inject constructor(
     }
 
     private fun backupContentHasChanged(current: Path, lastBackup: Path): Boolean {
-        val currentBytes = readComparablePasswordTreeBytesOrNull(current)
-        val lastBackupBytes = readComparablePasswordTreeBytesOrNull(lastBackup)
-        return currentBytes == null || lastBackupBytes == null || !currentBytes.contentEquals(lastBackupBytes)
+        val currentShell = readComparablePasswordTreeShellOrNull(current)
+        return try {
+            val lastBackupShell = readComparablePasswordTreeShellOrNull(lastBackup)
+            try {
+                currentShell == null || lastBackupShell == null || currentShell != lastBackupShell
+            } finally {
+                lastBackupShell?.scramble()
+            }
+        } finally {
+            currentShell?.scramble()
+        }
     }
 
-    private fun readComparablePasswordTreeBytesOrNull(path: Path) = systemOperation.readBytesFromFile(path).let {
+    private fun readComparablePasswordTreeShellOrNull(path: Path): Shell? = systemOperation.readBytesFromFile(path).let {
         when {
-            it.isEmpty() -> byteArrayOf()
+            it.isEmpty() -> emptyShell()
 
             passwordTreeEnvelope.isCurrent(it) -> cryptoProvider.decrypt(
                 encryptedShellOf(passwordTreeEnvelope.unwrap(it)),
-            ).toByteArray()
+            )
 
             else -> null
         }

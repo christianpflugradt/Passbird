@@ -60,7 +60,7 @@ current_security_relevant_implementation:
       - writes sensitive files through temp-file replacement in the target directory before best-effort permission tightening
       - applies owner-only POSIX permissions to newly written sensitive files when the filesystem exposes a PosixFileAttributeView
       - creates backup directories with owner-only POSIX permissions when supported, while treating non-POSIX filesystems as a no-op instead of a failure
-      - compares decrypted password tree content before rotating tree backups so AES-GCM IV changes alone do not consume backup slots
+      - compares decrypted password tree content as temporary Shell values and scrambles them after comparison so AES-GCM IV changes alone do not consume backup slots
       - when password-tree backup is enabled but passbird.tree is missing, materializes the current password-tree snapshot before running backup comparison and retention logic
       - treats a latest password-tree backup from a legacy tree format as changed and creates one fresh current-format backup instead of aborting session shutdown
   cipher:
