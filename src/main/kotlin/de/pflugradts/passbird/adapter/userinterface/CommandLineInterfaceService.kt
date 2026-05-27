@@ -1,8 +1,10 @@
 package de.pflugradts.passbird.adapter.userinterface
 
+import de.pflugradts.passbird.application.InactivityTerminationRequestedException
 import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.process.inactivity.InactivityTerminationSignal
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -13,24 +15,41 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 
+private const val INPUT_POLL_INTERVAL_IN_MILLIS = 50L
+
 @Singleton
 class CommandLineInterfaceService @Inject constructor(
     private val systemOperation: SystemOperation,
     private val configuration: ReadableConfiguration,
+    private val inactivityTerminationSignal: InactivityTerminationSignal,
 ) : UserInterfaceAdapterPort {
+    constructor(
+        systemOperation: SystemOperation,
+        configuration: ReadableConfiguration,
+    ) : this(systemOperation, configuration, InactivityTerminationSignal())
 
     override fun receive(vararg output: Output) = output.forEach { sendWithoutLineBreak(it) }.run { receivePlain() }
 
     private fun receivePlain(): Input {
         val bytes = ArrayList<Byte>()
         var next: Char
-        while (!isLinebreak(stdin().also { next = it })) {
-            if (!isCarriageReturn(next)) bytes.add(next.code.toByte())
+        while (true) {
+            if (hasPendingInput()) {
+                if (isLinebreak(stdin().also { next = it })) {
+                    return inputOf(shellOf(bytes))
+                }
+                if (!isCarriageReturn(next)) bytes.add(next.code.toByte())
+            } else if (inactivityTerminationSignal.isRequested()) {
+                throw InactivityTerminationRequestedException()
+            } else {
+                systemOperation.sleepMilliseconds(INPUT_POLL_INTERVAL_IN_MILLIS)
+            }
         }
-        return inputOf(shellOf(bytes))
     }
 
-    private fun stdin(): Char = System.`in`.read().toChar()
+    private fun hasPendingInput() = systemOperation.availableInputBytes() > 0
+
+    private fun stdin(): Char = systemOperation.readCharFromStdin()
     private fun isLinebreak(chr: Char) = chr == '\n'
     private fun isCarriageReturn(chr: Char) = chr == '\r'
 

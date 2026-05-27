@@ -74,6 +74,7 @@ runtime_design:
     - CommandBus dispatches to handlers
     - handlers call application and domain services
     - event registries propagate side effects
+    - inactivity monitoring may request shutdown from a daemon timer, but PassbirdApplication serializes the resulting QuitCommand on the interactive execution path instead of letting the timer thread post directly to the command bus
 ports_and_adapters:
   - port: UserInterfaceAdapterPort
     implementation: adapter.userinterface.CommandLineInterfaceService

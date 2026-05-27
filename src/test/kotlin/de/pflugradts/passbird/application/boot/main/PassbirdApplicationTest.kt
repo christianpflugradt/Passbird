@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.boot.main
 
+import de.pflugradts.passbird.application.InactivityTerminationRequestedException
 import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
@@ -16,6 +17,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.fakeInput
 import de.pflugradts.passbird.domain.service.nest.createNestServiceSpyForTesting
+import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -152,5 +154,37 @@ class PassbirdApplicationTest {
         verify(exactly = 1) { initializer1.run() }
         verify(exactly = 1) { initializer2.run() }
         verify(exactly = 1) { initializer3.run() }
+    }
+
+    @Test
+    fun `should handle inactivity termination while waiting for the next command`() {
+        // given
+        every { userInterfaceAdapterPort.sendLineBreak() } returns Unit
+        every { userInterfaceAdapterPort.receive(any(), any()) } throws InactivityTerminationRequestedException()
+
+        // when
+        passbirdApplication().boot()
+
+        // then
+        verify(exactly = 1) { inactivityHandler.handlePendingTermination() }
+        verify { inputHandler wasNot Called }
+    }
+
+    @Test
+    fun `should handle inactivity termination raised from a nested prompt`() {
+        // given
+        val input = fakeInput("m1")
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(input),
+        )
+        every { inputHandler.handleInput(input) } throws InactivityTerminationRequestedException()
+
+        // when
+        passbirdApplication().boot()
+
+        // then
+        verify(exactly = 1) { inactivityHandler.registerInteraction() }
+        verify(exactly = 1) { inactivityHandler.handlePendingTermination() }
     }
 }

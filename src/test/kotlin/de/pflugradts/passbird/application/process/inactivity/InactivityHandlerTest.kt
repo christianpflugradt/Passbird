@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.application.process.inactivity
 
-import de.pflugradts.passbird.application.commandhandling.CommandHandlerBus
+import de.pflugradts.passbird.application.commandhandling.CommandBus
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitReason.INACTIVITY
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 import java.time.Clock
 import java.time.Instant
@@ -25,8 +26,9 @@ private const val FIVE_MINUTES = 5 * 60
 
 class InactivityHandlerTest {
 
-    private val commandBus = mockk<CommandHandlerBus>(relaxed = true)
+    private val commandBus = mockk<CommandBus>(relaxed = true)
     private val configuration = mockk<Configuration>()
+    private val inactivityTerminationSignal = InactivityTerminationSignal()
     private val systemOperation = mockk<SystemOperation>()
     private val clock = AdjustableClock()
 
@@ -38,26 +40,24 @@ class InactivityHandlerTest {
     }
 
     @Test
-    fun `should send quit command when inactivity limit is exceeded`() {
+    fun `should request termination when inactivity limit is exceeded`() {
         // given
-        val inactivityHandler = InactivityHandler(commandBus, configuration, systemOperation)
+        val inactivityHandler = InactivityHandler(commandBus, configuration, inactivityTerminationSignal, systemOperation)
         inactivityHandler.registerInteraction()
-        val commandSlot = slot<QuitCommand>()
 
         // when
         clock.setEpochSecond((FIVE_MINUTES + 1).toLong())
         inactivityHandler.checkInactivity()
 
         // then
-        verify { commandBus.post(capture(commandSlot)) }
-        expectThat(commandSlot.isCaptured).isTrue()
-        expectThat(commandSlot.captured.quitReason) isEqualTo INACTIVITY
+        verify { commandBus wasNot Called }
+        expectThat(inactivityTerminationSignal.isRequested()).isTrue()
     }
 
     @Test
-    fun `should not send quit command when inactivity limit is not exceeded`() {
+    fun `should not request termination when inactivity limit is not exceeded`() {
         // given
-        val inactivityHandler = InactivityHandler(commandBus, configuration, systemOperation)
+        val inactivityHandler = InactivityHandler(commandBus, configuration, inactivityTerminationSignal, systemOperation)
         inactivityHandler.registerInteraction()
 
         // when
@@ -66,6 +66,38 @@ class InactivityHandlerTest {
 
         // then
         verify { commandBus wasNot Called }
+        expectThat(inactivityTerminationSignal.isRequested()).isFalse()
+    }
+
+    @Test
+    fun `should send quit command when pending termination is handled`() {
+        // given
+        val inactivityHandler = InactivityHandler(commandBus, configuration, inactivityTerminationSignal, systemOperation)
+        val commandSlot = slot<QuitCommand>()
+        inactivityTerminationSignal.request()
+
+        // when
+        inactivityHandler.handlePendingTermination()
+
+        // then
+        verify { commandBus.post(capture(commandSlot)) }
+        expectThat(commandSlot.isCaptured).isTrue()
+        expectThat(commandSlot.captured.quitReason) isEqualTo INACTIVITY
+        expectThat(inactivityTerminationSignal.isRequested()).isFalse()
+    }
+
+    @Test
+    fun `should handle pending termination only once`() {
+        // given
+        val inactivityHandler = InactivityHandler(commandBus, configuration, inactivityTerminationSignal, systemOperation)
+        inactivityTerminationSignal.request()
+
+        // when
+        inactivityHandler.handlePendingTermination()
+        inactivityHandler.handlePendingTermination()
+
+        // then
+        verify(exactly = 1) { commandBus.post(any()) }
     }
 
     private class AdjustableClock(

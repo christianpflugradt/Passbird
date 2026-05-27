@@ -23,6 +23,8 @@ fun fakeSystemOperation(
     withIoException: Boolean = false,
 ) {
     every { instance.clock } returns withClock
+    every { instance.availableInputBytes() } answers { System.`in`.available() }
+    every { instance.readCharFromStdin() } answers { System.`in`.read().toChar() }
     every { instance.newInputStream(any()) } returns mockk()
     every { instance.newOutputStream(any()) } returns mockk()
     every { instance.writeToSensitiveFile(any(), any()) } answers {
@@ -31,6 +33,7 @@ fun fakeSystemOperation(
     }
     every { instance.isConsoleAvailable } returns withConsoleEnabled
     every { instance.readPasswordFromConsole() } returns withPasswordFromConsole
+    every { instance.sleepMilliseconds(any()) } returns Unit
     if (withKeyStoreUnavailable) every { instance.jceksInstance } throws KeyStoreException()
     if (withKeyStoreUnavailable) every { instance.pkcs12Instance } throws KeyStoreException()
     withPaths.forEach { every { instance.getPath(it.first.toDirectory()) } returns it.second }

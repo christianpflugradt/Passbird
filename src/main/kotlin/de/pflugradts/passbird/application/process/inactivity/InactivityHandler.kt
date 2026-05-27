@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicLong
 class InactivityHandler @Inject constructor(
     private val commandBus: CommandBus,
     private val configuration: ReadableConfiguration,
+    private val inactivityTerminationSignal: InactivityTerminationSignal,
     private val systemOperation: SystemOperation,
 ) {
     private val inactivityLimitInMinutes get() = configuration.application.inactivityLimit.limitInMinutes
@@ -24,6 +25,12 @@ class InactivityHandler @Inject constructor(
 
     fun checkInactivity() = run {
         if ((now() - lastInteraction.get()) > (inactivityLimitInMinutes * 60)) {
+            inactivityTerminationSignal.request()
+        }
+    }
+
+    fun handlePendingTermination() {
+        if (inactivityTerminationSignal.consume()) {
             commandBus.post(QuitCommand(quitReason = INACTIVITY))
         }
     }

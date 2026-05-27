@@ -2,9 +2,11 @@ package de.pflugradts.passbird.adapter.userinterface
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemOut
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.mockSystemInWith
+import de.pflugradts.passbird.application.InactivityTerminationRequestedException
 import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.process.inactivity.InactivityTerminationSignal
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -12,6 +14,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
@@ -38,6 +41,7 @@ class CommandLineInterfaceServiceTest {
     @BeforeEach
     fun setup() {
         fakeConfiguration(instance = configuration)
+        fakeSystemOperation(instance = systemOperation)
     }
 
     @Nested
@@ -115,6 +119,20 @@ class CommandLineInterfaceServiceTest {
 
             // then
             expectThat(captureSystemOut.capture) isEqualTo givenMessage
+        }
+
+        @Test
+        fun `should abort input when inactivity termination is requested`() {
+            // given
+            val inactivityTerminationSignal = InactivityTerminationSignal()
+            val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration, inactivityTerminationSignal)
+            every { systemOperation.availableInputBytes() } returns 0
+            every { systemOperation.sleepMilliseconds(any()) } answers {
+                inactivityTerminationSignal.request()
+            }
+
+            // when / then
+            assertThrows<InactivityTerminationRequestedException> { commandLineInterfaceService.receive() }
         }
     }
 

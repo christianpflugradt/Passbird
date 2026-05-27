@@ -32,7 +32,10 @@ class SystemOperation {
     val jceksInstance: KeyStore get() = KeyStore.getInstance(JCEKS_KEYSTORE)
     val pkcs12Instance: KeyStore get() = KeyStore.getInstance(PKCS12_KEYSTORE)
 
+    fun availableInputBytes(): Int = System.`in`.available()
+    fun readCharFromStdin(): Char = System.`in`.read().toChar()
     fun readPasswordFromConsole(): CharArray = System.console().readPassword()
+    fun sleepMilliseconds(milliseconds: Long) = Thread.sleep(milliseconds)
     fun getFileNames(directory: Directory): List<FileName> = Files.list(getPath(directory)).map { it.name.toFileName() }.toList()
     fun getPath(directory: Directory): Path = Paths.get(directory.value)
     fun resolvePath(directory: Directory, fileName: FileName): Path = getPath(directory).resolve(fileName.value)

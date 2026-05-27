@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.kotlinextensions.tryCatching
+import de.pflugradts.passbird.application.InactivityTerminationRequestedException
 import de.pflugradts.passbird.application.commandhandling.CommandType.Companion.resolveCommandTypeFrom
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.command.RepeatLastCommand
@@ -27,17 +28,24 @@ class CommandInputHandler @Inject constructor(
             CommandExecutionTracker.markFailure()
             reportFailure(CommandFailure(it))
         }.getOrNull()
+
         val outcome = if (command == null) {
             CommandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
         } else {
             tryCatching {
                 commandBus.post(command)
                 CommandExecutionTracker.finish(command.defaultOutcome())
-            }.onFailure {
+            }.onFailure { ex ->
+                if (ex is InactivityTerminationRequestedException) {
+                    CommandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
+                    originalInput.scramble()
+                    throw ex
+                }
                 CommandExecutionTracker.markFailure()
-                reportFailure(CommandFailure(it))
-            }.getOrElse(CommandExecutionTracker.finish(CommandExecutionOutcome.FAILURE))
+                reportFailure(CommandFailure(ex))
+            }.getOrNull() ?: CommandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
         }
+
         if (outcome == CommandExecutionOutcome.SUCCESS && command !is RepeatLastCommand) {
             rememberedCommandMemory.remember(originalInput)
         } else {

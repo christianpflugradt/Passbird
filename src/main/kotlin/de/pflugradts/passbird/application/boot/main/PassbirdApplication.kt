@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.boot.main
 
+import de.pflugradts.passbird.application.InactivityTerminationRequestedException
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
@@ -31,10 +32,19 @@ class PassbirdApplication @Inject constructor(
         userInterfaceAdapterPort.sendLineBreak()
         nestService.moveToNestAt(runContext.initialSlot)
         initializers.forEach { it.run() }
-        var input: Input
-        while (!isSigTerm(receiveInput().also { input = it })) {
-            inactivityHandler.registerInteraction()
-            inputHandler.handleInput(input)
+        while (true) {
+            try {
+                receiveInput().let { input ->
+                    if (isSigTerm(input)) {
+                        return
+                    }
+                    inactivityHandler.registerInteraction()
+                    inputHandler.handleInput(input)
+                }
+            } catch (_: InactivityTerminationRequestedException) {
+                inactivityHandler.handlePendingTermination()
+                return
+            }
         }
     }
 
