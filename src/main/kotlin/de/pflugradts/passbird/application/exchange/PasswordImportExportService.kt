@@ -96,6 +96,7 @@ class PasswordImportExportService @Inject constructor(
             return
         }
         val currentNest = nestService.currentNest()
+        var importedEggCount = 0
         try {
             imports.forEach { (nest, targetSlot, passwordInfos) ->
                 val deployedNest = nestService.atNestSlot(targetSlot)
@@ -104,24 +105,39 @@ class PasswordImportExportService @Inject constructor(
                 }
                 nestService.moveToNestAt(targetSlot)
                 passwordInfos.forEach { passwordInfo ->
-                    passwordService.putEgg(passwordInfo.first.first, passwordInfo.first.second)
-                    passwordInfo.second.forEachIndexed { index, shellPair ->
-                        if (shellPair.first.isNotEmpty && shellPair.second.isNotEmpty) {
-                            passwordService.putProtein(
-                                eggIdShell = passwordInfo.first.first,
-                                slot = slotAt(index),
-                                typeShell = shellPair.first,
-                                structureShell = shellPair.second,
-                            )
-                        }
+                    if (passwordService.putEgg(passwordInfo.first.first, passwordInfo.first.second).failure) {
+                        eventRegistry.clearEvents()
+                        return
                     }
+                    if (!importProteins(passwordInfo)) {
+                        return
+                    }
+                    importedEggCount++
                 }
             }
         } finally {
             nestService.moveToNestAt(currentNest.slot)
         }
-        eventRegistry.register(EggsImported(imports.sumOf { it.third.size }))
+        eventRegistry.register(EggsImported(importedEggCount))
         eventRegistry.processEvents()
+    }
+
+    private fun importProteins(passwordInfo: PasswordInfo): Boolean {
+        passwordInfo.second.forEachIndexed { index, shellPair ->
+            if (shellPair.first.isNotEmpty && shellPair.second.isNotEmpty) {
+                if (passwordService.putProtein(
+                        eggIdShell = passwordInfo.first.first,
+                        slot = slotAt(index),
+                        typeShell = shellPair.first,
+                        structureShell = shellPair.second,
+                    ).failure
+                ) {
+                    eventRegistry.clearEvents()
+                    return false
+                }
+            }
+        }
+        return true
     }
 
     private fun allNestSlots() = nestService.all(includeDefault = true)

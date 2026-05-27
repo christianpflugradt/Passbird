@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.exchange
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.PasswordInfoMap
@@ -224,6 +225,75 @@ class PasswordImportExportServiceTest {
         verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
         verify(exactly = 0) { eventRegistry.processEvents() }
         expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
+    }
+
+    @Test
+    fun `should stop importing and suppress success events when putting an egg fails`() {
+        // given
+        val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
+        val firstEggId = shellOf("EggId1")
+        val firstPassword = shellOf("Password1")
+        val secondEggId = shellOf("EggId2")
+        val secondPassword = shellOf("Password2")
+        every { exchangeAdapterPort.receive() } returns success(
+            mapOf(
+                nestService.currentNest() to listOf(
+                    Pair(ShellPair(firstEggId, firstPassword), emptyList()),
+                    Pair(ShellPair(secondEggId, secondPassword), emptyList()),
+                ),
+            ),
+        )
+        every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
+        fakePasswordService(instance = passwordService)
+        every { passwordService.putEgg(firstEggId, firstPassword) } returns failure(IllegalStateException("disk full"))
+
+        // when
+        importExportServiceSupplier.get().importEggs()
+
+        // then
+        verify(exactly = 1) { passwordService.putEgg(firstEggId, firstPassword) }
+        verify(exactly = 0) { passwordService.putEgg(secondEggId, secondPassword) }
+        verify(exactly = 0) { passwordService.putProtein(any(), any(), any(), any()) }
+        verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
+        verify(exactly = 0) { eventRegistry.processEvents() }
+        verify(exactly = 1) { eventRegistry.clearEvents() }
+    }
+
+    @Test
+    fun `should stop importing and suppress success events when putting a protein fails`() {
+        // given
+        val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
+        val firstEggId = shellOf("EggId1")
+        val firstPassword = shellOf("Password1")
+        val secondEggId = shellOf("EggId2")
+        val secondPassword = shellOf("Password2")
+        every { exchangeAdapterPort.receive() } returns success(
+            mapOf(
+                nestService.currentNest() to listOf(
+                    Pair(
+                        ShellPair(firstEggId, firstPassword),
+                        proteinShellPairs(S3 to ShellPair(shellOf("type3"), shellOf("structure3"))),
+                    ),
+                    Pair(ShellPair(secondEggId, secondPassword), emptyList()),
+                ),
+            ),
+        )
+        every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
+        fakePasswordService(instance = passwordService)
+        every {
+            passwordService.putProtein(firstEggId, S3, shellOf("type3"), shellOf("structure3"))
+        } returns failure(IllegalStateException("disk full"))
+
+        // when
+        importExportServiceSupplier.get().importEggs()
+
+        // then
+        verify(exactly = 1) { passwordService.putEgg(firstEggId, firstPassword) }
+        verify(exactly = 1) { passwordService.putProtein(firstEggId, S3, shellOf("type3"), shellOf("structure3")) }
+        verify(exactly = 0) { passwordService.putEgg(secondEggId, secondPassword) }
+        verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
+        verify(exactly = 0) { eventRegistry.processEvents() }
+        verify(exactly = 1) { eventRegistry.clearEvents() }
     }
 
     @Test

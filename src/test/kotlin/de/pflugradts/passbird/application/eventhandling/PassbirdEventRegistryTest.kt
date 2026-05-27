@@ -70,4 +70,23 @@ class PassbirdEventRegistryTest {
         verify { eventBus wasNot Called }
         expectThat(aggregate.getDomainEvents()).contains(domainEvent1)
     }
+
+    @Test
+    fun `should clear queued aggregate and domain events`() {
+        // given
+        val aggregate = createEggForTesting()
+        val aggregateEvent = EggCreated(aggregate)
+        val queuedEvent = mockk<DomainEvent>()
+        aggregate.registerDomainEvent(aggregateEvent)
+        passbirdEventRegistry.register(aggregate)
+        passbirdEventRegistry.register(queuedEvent)
+
+        // when
+        passbirdEventRegistry.clearEvents()
+        passbirdEventRegistry.processEvents()
+
+        // then
+        verify { eventBus wasNot Called }
+        expectThat(aggregate.getDomainEvents()).isEmpty()
+    }
 }

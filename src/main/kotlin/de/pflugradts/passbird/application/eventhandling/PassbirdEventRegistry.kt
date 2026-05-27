@@ -39,6 +39,13 @@ class PassbirdEventRegistry @Inject constructor(
         processAbandonedAggregateRoots()
     }
 
+    override fun clearEvents() {
+        processAbandonedAggregateRoots()
+        aggregateRoots.forEach { it.clearDomainEvents() }
+        domainEvents.clear()
+        abandonedAggregateRoots.clear()
+    }
+
     private fun processAggregateRoots() {
         aggregateRoots.forEach { aggregateRoot ->
             aggregateRoot.getDomainEvents().forEach { eventBus.post(it) }

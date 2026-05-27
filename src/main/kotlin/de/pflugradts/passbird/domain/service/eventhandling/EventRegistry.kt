@@ -8,4 +8,5 @@ interface EventRegistry {
     fun register(domainEvent: DomainEvent)
     fun deregister(aggregateRoot: AggregateRoot)
     fun processEvents()
+    fun clearEvents()
 }
