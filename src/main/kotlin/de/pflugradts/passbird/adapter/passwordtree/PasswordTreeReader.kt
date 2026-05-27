@@ -33,7 +33,10 @@ class PasswordTreeReader @Inject constructor(
             return@tryCatching emptyShell()
         }
         systemOperation.readBytesFromFile(filePath).let {
-            if (it.isEmpty()) emptyShell() else cryptoProvider.decrypt(encryptedShellOf(passwordTreeEnvelope.unwrap(it)))
+            if (it.isEmpty()) {
+                throw IllegalStateException("Unsupported password tree format.")
+            }
+            cryptoProvider.decrypt(encryptedShellOf(passwordTreeEnvelope.unwrap(it)))
         }
     }
         .onFailure(::abortRestore)

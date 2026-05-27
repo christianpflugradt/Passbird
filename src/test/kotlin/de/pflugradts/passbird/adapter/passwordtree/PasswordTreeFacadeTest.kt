@@ -202,20 +202,25 @@ class PasswordTreeFacadeTest {
         // then
         expectThat(actual.get().count()) isEqualTo 0
         expectThat(captureSystemErr.capture).isEqualTo("")
+        verify(exactly = 0) { systemOperation.exit() }
     }
 
     @Test
-    fun `should create empty tree if file is empty without reporting a failure`() {
+    fun `should shut down on empty password tree instead of falling back to empty tree`() {
         // given
         expectThat(File(passwordTreeFilename).createNewFile()).isTrue()
         val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
 
         // when
-        val actual = captureSystemErr.during { passwordTreeFacade.restore() }
+        val actual = captureSystemErr.during {
+            tryCatching { passwordTreeFacade.restore() }
+        }
 
         // then
-        expectThat(actual.get().count()) isEqualTo 0
-        expectThat(captureSystemErr.capture).isEqualTo("")
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isA<IllegalStateException>()
+        expectThat(captureSystemErr.capture) contains "Password Tree at 'passbird.tree' could not be decrypted:"
+        verify(exactly = 1) { systemOperation.exit() }
     }
 
     @Test
