@@ -2,6 +2,7 @@ package de.pflugradts.passbird.adapter.keystore
 
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.util.withScrambledBytes
 import de.pflugradts.passbird.domain.model.shell.MAX_ASCII_VALUE
 import de.pflugradts.passbird.domain.model.shell.MIN_ASCII_VALUE
 import de.pflugradts.passbird.domain.model.shell.PlainShell
@@ -28,7 +29,7 @@ internal class KeyStorePersistence(private val systemOperation: SystemOperation)
                 val keyStore = openKeyStore()
                 keyStore.load(it, passwordChars)
                 val secret = keyStore.getKey(SECRET_ALIAS, passwordChars)
-                shellOf(secret.encoded)
+                withScrambledBytes(secret.encoded) { shellOf(it) }
             }
         } finally {
             passwordChars.scramble()

@@ -1,6 +1,10 @@
 package de.pflugradts.passbird.application.security
 
+import de.pflugradts.passbird.application.util.withScrambledBytes
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
+import de.pflugradts.passbird.domain.model.shell.MAX_ASCII_VALUE
+import de.pflugradts.passbird.domain.model.shell.MIN_ASCII_VALUE
+import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.SECURE_RANDOM
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
@@ -46,10 +50,33 @@ class AesGcmCipher internal constructor(private val secretKeySpec: SecretKeySpec
 
 internal fun createLegacyAesGcmCipher(keyShell: Shell) = AesGcmCipher(createLegacySecretKeySpec(keyShell))
 
-private fun createCurrentSecretKeySpec(keyShell: Shell) = SecretKeySpec(keyShell.toByteArray(), ENCRYPTION_ALGORITHM)
+private fun createCurrentSecretKeySpec(keyShell: Shell) = withCurrentKeyBytes(keyShell) {
+    SecretKeySpec(it, ENCRYPTION_ALGORITHM)
+}
 
-private fun createLegacySecretKeySpec(keyShell: Shell) = SecretKeySpec(
-    SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM)
-        .generateSecret(PBEKeySpec(keyShell.toPlainShell().toCharArray(), SALT, 100, AES_KEY_LENGTH_BIT)).encoded,
-    ENCRYPTION_ALGORITHM,
-)
+private fun createLegacySecretKeySpec(keyShell: Shell) = withLegacyKeyBytes(keyShell) {
+    SecretKeySpec(it, ENCRYPTION_ALGORITHM)
+}
+
+internal inline fun <T> withCurrentKeyBytes(keyShell: Shell, block: (ByteArray) -> T) = withScrambledBytes(keyShell.toByteArray(), block)
+
+internal inline fun <T> withLegacyKeyBytes(keyShell: Shell, block: (ByteArray) -> T): T {
+    val passwordChars = CharArray(keyShell.size) { keyShell.getChar(it) }
+    try {
+        val keySpec = PBEKeySpec(passwordChars, SALT, 100, AES_KEY_LENGTH_BIT)
+        try {
+            return withScrambledBytes(
+                SecretKeyFactory.getInstance(SECRET_KEY_ALGORITHM).generateSecret(keySpec).encoded,
+                block,
+            )
+        } finally {
+            keySpec.clearPassword()
+        }
+    } finally {
+        passwordChars.scramble()
+    }
+}
+
+private fun CharArray.scramble() = indices.forEach {
+    this[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toChar()
+}
