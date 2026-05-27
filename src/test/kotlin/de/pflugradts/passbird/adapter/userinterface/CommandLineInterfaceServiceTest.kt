@@ -4,6 +4,7 @@ import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captur
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.mockSystemInWith
 import de.pflugradts.passbird.application.InactivityTerminationRequestedException
 import de.pflugradts.passbird.application.SecureInputUnavailableException
+import de.pflugradts.passbird.application.StdinTerminationRequestedException
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.process.inactivity.InactivityTerminationSignal
@@ -30,6 +31,9 @@ import strikt.assertions.contains
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
+import java.io.IOException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 
 class CommandLineInterfaceServiceTest {
@@ -122,17 +126,76 @@ class CommandLineInterfaceServiceTest {
         }
 
         @Test
+        fun `should not consume input beyond the submitted line`() {
+            // given
+            val nextPromptInputRead = CountDownLatch(1)
+            var readCount = 0
+            every { systemOperation.readCharFromStdin() } answers {
+                when (++readCount) {
+                    1 -> 'c'
+
+                    2 -> '\n'
+
+                    else -> {
+                        nextPromptInputRead.countDown()
+                        Char.MAX_VALUE
+                    }
+                }
+            }
+
+            // when
+            val actual = commandLineInterfaceService.receive()
+
+            // then
+            expectThat(actual.shell.asString()) isEqualTo "c"
+            expectThat(nextPromptInputRead.await(100, TimeUnit.MILLISECONDS)).isFalse()
+            verify(exactly = 2) { systemOperation.readCharFromStdin() }
+        }
+
+        @Test
         fun `should abort input when inactivity termination is requested`() {
             // given
             val inactivityTerminationSignal = InactivityTerminationSignal()
             val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration, inactivityTerminationSignal)
-            every { systemOperation.availableInputBytes() } returns 0
-            every { systemOperation.sleepMilliseconds(any()) } answers {
+            every { systemOperation.readCharFromStdin() } answers {
                 inactivityTerminationSignal.request()
+                Thread.sleep(100)
+                Char.MAX_VALUE
             }
 
             // when / then
             assertThrows<InactivityTerminationRequestedException> { commandLineInterfaceService.receive() }
+        }
+
+        @Test
+        fun `should abort input when stdin is exhausted before any character is read`() {
+            // given
+            every { systemOperation.readCharFromStdin() } returns Char.MAX_VALUE
+
+            // when / then
+            assertThrows<StdinTerminationRequestedException> { commandLineInterfaceService.receive() }
+        }
+
+        @Test
+        fun `should abort input when stdin read fails`() {
+            // given
+            every { systemOperation.readCharFromStdin() } throws IOException()
+
+            // when / then
+            assertThrows<StdinTerminationRequestedException> { commandLineInterfaceService.receive() }
+        }
+
+        @Test
+        fun `should return buffered input when stdin is exhausted without a trailing newline`() {
+            // given
+            val stdin = listOf('q', Char.MAX_VALUE).iterator()
+            every { systemOperation.readCharFromStdin() } answers { stdin.next() }
+
+            // when
+            val actual = commandLineInterfaceService.receive()
+
+            // then
+            expectThat(actual.shell.asString()) isEqualTo "q"
         }
     }
 

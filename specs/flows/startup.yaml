@@ -51,6 +51,7 @@ flows:
     exit_rule:
       - a raw interrupt character entered as the command with no trailing data ends the loop without extra output from PassbirdApplication itself
       - this raw interrupt path bypasses the quit command handler, finalizers, inactivity hint, and farewell block
+      - if stdin reaches EOF before the next command line starts, Passbird ends the loop without extra output from PassbirdApplication itself
   - id: inactivity_and_quit
     trigger:
       - a running session becomes inactive or the user exits

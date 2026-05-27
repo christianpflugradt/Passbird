@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.boot.main
 
 import de.pflugradts.passbird.application.InactivityTerminationRequestedException
 import de.pflugradts.passbird.application.RunContext
+import de.pflugradts.passbird.application.StdinTerminationRequestedException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.commandhandling.InputHandler
@@ -43,6 +44,8 @@ class PassbirdApplication @Inject constructor(
                 }
             } catch (_: InactivityTerminationRequestedException) {
                 inactivityHandler.handlePendingTermination()
+                return
+            } catch (_: StdinTerminationRequestedException) {
                 return
             }
         }

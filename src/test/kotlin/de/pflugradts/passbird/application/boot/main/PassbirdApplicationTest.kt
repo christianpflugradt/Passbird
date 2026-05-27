@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.boot.main
 import de.pflugradts.passbird.application.InactivityTerminationRequestedException
 import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.RunContext
+import de.pflugradts.passbird.application.StdinTerminationRequestedException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
@@ -171,6 +172,20 @@ class PassbirdApplicationTest {
     }
 
     @Test
+    fun `should stop cleanly when stdin terminates while waiting for the next command`() {
+        // given
+        every { userInterfaceAdapterPort.sendLineBreak() } returns Unit
+        every { userInterfaceAdapterPort.receive(any(), any()) } throws StdinTerminationRequestedException()
+
+        // when
+        passbirdApplication().boot()
+
+        // then
+        verify(exactly = 0) { inactivityHandler.handlePendingTermination() }
+        verify { inputHandler wasNot Called }
+    }
+
+    @Test
     fun `should handle inactivity termination raised from a nested prompt`() {
         // given
         val input = fakeInput("m1")
@@ -186,5 +201,23 @@ class PassbirdApplicationTest {
         // then
         verify(exactly = 1) { inactivityHandler.registerInteraction() }
         verify(exactly = 1) { inactivityHandler.handlePendingTermination() }
+    }
+
+    @Test
+    fun `should stop cleanly when stdin termination is raised from a nested prompt`() {
+        // given
+        val input = fakeInput("m1")
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(input),
+        )
+        every { inputHandler.handleInput(input) } throws StdinTerminationRequestedException()
+
+        // when
+        passbirdApplication().boot()
+
+        // then
+        verify(exactly = 1) { inactivityHandler.registerInteraction() }
+        verify(exactly = 0) { inactivityHandler.handlePendingTermination() }
     }
 }

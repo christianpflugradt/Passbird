@@ -14,6 +14,8 @@ input_semantics:
     - receive and receiveSecurely consume one line of terminal input at a time
     - carriage returns are ignored before newline so Windows line endings behave the same as Unix line endings
     - an empty submitted line yields empty input
+    - if visible stdin reaches EOF after at least one character and before newline, receive returns the buffered characters as the final line
+    - if visible stdin reaches EOF before any character is read, receive terminates the interactive session instead of fabricating input
   secure_input:
     - if adapter.userInterface.secureInput is enabled and a console is available, receiveSecurely reads characters through the console password reader instead of standard line input
     - if secure input is disabled, receiveSecurely falls back to the same plain line reader used by receive

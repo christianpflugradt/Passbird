@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.InactivityTerminationRequestedException
+import de.pflugradts.passbird.application.StdinTerminationRequestedException
 import de.pflugradts.passbird.application.commandhandling.CommandType.Companion.resolveCommandTypeFrom
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.command.RepeatLastCommand
@@ -36,7 +37,7 @@ class CommandInputHandler @Inject constructor(
                 commandBus.post(command)
                 CommandExecutionTracker.finish(command.defaultOutcome())
             }.onFailure { ex ->
-                if (ex is InactivityTerminationRequestedException) {
+                if (ex is InactivityTerminationRequestedException || ex is StdinTerminationRequestedException) {
                     CommandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
                     originalInput.scramble()
                     throw ex
