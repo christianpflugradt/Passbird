@@ -91,7 +91,7 @@ flows:
       - if previewing the import file fails before the import starts, the import handler prints no Operation aborted. message
       - if import parsing or reading fails with a generic import failure, Passbird prints Password Tree could not be imported. to standard error
       - if persisting an imported egg or protein fails after import starts, Passbird stops importing remaining entries, preserves the existing password-tree sync failure output, and does not emit the final success summary
-      - missing, duplicate, or out-of-range exportedNest.slot metadata is treated as a generic import failure rather than being coerced to another Nest
+      - missing, duplicate, or out-of-range exportedNest.slot metadata, or duplicate EggIds within one exported Nest, is treated as a generic import failure rather than being coerced to another Nest
       - if import parsing fails because an eggId contains digits or special characters, Passbird prints Password Tree could not be imported because at least one eggId contains digits or special characters. Please correct invalid eggIds and try again. Erroneous eggId: <EggId> to standard error
       - after a FAILED path, the command handler still emits one empty line
   - id: import_selective
@@ -137,7 +137,7 @@ flows:
       - if previewing or parsing the import file fails before a selectable preview is available, the import handler prints no Operation aborted. message
       - generic import read or parse failures are reported to standard error as Password Tree could not be imported.
       - if persisting an imported egg or protein fails after selective import starts, Passbird stops importing remaining entries, preserves the existing password-tree sync failure output, and does not emit the final success summary
-      - missing, duplicate, or out-of-range exportedNest.slot metadata is treated as a generic import failure before any preview list or local mutation is produced
+      - missing, duplicate, or out-of-range exportedNest.slot metadata, or duplicate EggIds within one exported Nest, is treated as a generic import failure before any preview list or local mutation is produced
       - invalid eggId import failures are reported to standard error with the longer invalid-eggId message
       - after a FAILED path, the command handler still emits one empty line
 command_parse_rules:

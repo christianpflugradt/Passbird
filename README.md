@@ -303,7 +303,7 @@ operation is aborted.
 
 `i*` previews the Nests in `passbird-export.json`, imports one selected Nest, and lets you restore it into a chosen Nest Slot.
 
-Import expects every exported Nest record in `passbird-export.json` to declare a unique Slot from `0` to `9`. If Nest metadata is missing, duplicated, or out of range, Passbird rejects the file instead of importing it into another Nest.
+Import expects every exported Nest record in `passbird-export.json` to declare a unique Slot from `0` to `9`, and every exported Nest to contain distinct EggIds. If Nest metadata is missing, duplicated, or out of range, or if one exported Nest repeats an EggId, Passbird rejects the file instead of importing it into another Nest.
 
 ### Nests
 

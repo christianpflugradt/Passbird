@@ -63,14 +63,20 @@ class FilePasswordExchange @Inject constructor(
 
     private fun List<EggsPerNest>.toPasswordInfoMap() = associate { entry ->
         createNest(shellOf(entry.exportedNest.nestId), entry.exportedNest.toValidatedSlot()) to
-            entry.exportedEggs.map {
-                PasswordInfo(
-                    first = ShellPair(shellOf(it.eggId), shellOf(it.password)),
-                    second = it.proteins.toShellPairsBySlot(),
-                )
-            }
+            entry.exportedEggs.toValidatedPasswordInfos()
     }.also { passwordInfoMap ->
         require(passwordInfoMap.size == size) { "Duplicate nest slot in import file" }
+    }
+
+    private fun List<ExportedEgg>.toValidatedPasswordInfos(): List<PasswordInfo> {
+        val eggIds = mutableSetOf<String>()
+        return map {
+            require(eggIds.add(it.eggId)) { "Duplicate eggId in import file" }
+            PasswordInfo(
+                first = ShellPair(shellOf(it.eggId), shellOf(it.password)),
+                second = it.proteins.toShellPairsBySlot(),
+            )
+        }
     }
 
     private fun ExportedNest.toValidatedSlot(): Slot {

@@ -207,7 +207,9 @@ private fun favoriteEntries(): Arbitrary<Map<FavoriteCell, String>> =
         }
     }
 
-private fun plainPasswordInfoLists(): Arbitrary<List<PlainPasswordInfoData>> = plainPasswordInfoData().list().ofMaxSize(6)
+private fun plainPasswordInfoLists(): Arbitrary<List<PlainPasswordInfoData>> = plainPasswordInfoData().list().ofMaxSize(6).map {
+    it.distinctBy(PlainPasswordInfoData::eggId)
+}
 
 private fun plainPasswordInfoData(): Arbitrary<PlainPasswordInfoData> = Combinators.combine(
     textValues(),
