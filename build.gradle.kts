@@ -47,11 +47,10 @@ val jacksonVersion = "2.21.3"
 val archunitVersion = "1.4.2"
 val awaitilityVersion = "4.3.0"
 val junitPlatformVersion = "6.1.0"
-val jqwikVersion = "1.10.0"
+val kotestPropertyVersion = "6.1.11"
 val mockkVersion = "1.14.6"
 val pitestCoreVersion = "1.22.1"
 val pitestJunit5Version = "1.2.3"
-val jqwikDatabasePath = layout.buildDirectory.file(".jqwik-database")
 val striktVersion = "0.35.1"
 
 dependencies {
@@ -71,7 +70,7 @@ dependencies {
     testImplementation("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
-    testImplementation("net.jqwik:jqwik:$jqwikVersion")
+    testImplementation("io.kotest:kotest-property:$kotestPropertyVersion")
 
     testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("com.tngtech.archunit:archunit:$archunitVersion")
@@ -174,7 +173,6 @@ pitest {
     pitestVersion.set(pitestCoreVersion)
     junit5PluginVersion.set(pitestJunit5Version)
     threads.set(1)
-    jvmArgs.set(listOf("-Djqwik.database=${jqwikDatabasePath.get().asFile.absolutePath}"))
     verbose.set(true)
     timeoutFactor.set("2.0".toBigDecimal())
     timeoutConstInMillis.set(10000)
@@ -193,7 +191,6 @@ tasks.register("mutation") {
 tasks.withType<Test>().configureEach {
     testClassesDirs = sourceSets["test"].output.classesDirs
     classpath = sourceSets["test"].runtimeClasspath
-    systemProperty("jqwik.database", jqwikDatabasePath.get().asFile.absolutePath)
     testLogging { events(FAILED, PASSED, SKIPPED) }
     group = VERIFICATION_GROUP
     var testCount = 0

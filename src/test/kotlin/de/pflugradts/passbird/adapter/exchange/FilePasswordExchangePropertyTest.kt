@@ -10,12 +10,10 @@ import de.pflugradts.passbird.property.exchangeFixtures
 import de.pflugradts.passbird.property.normalizePasswordInfoMap
 import de.pflugradts.passbird.property.orThrow
 import de.pflugradts.passbird.property.toPasswordInfoMap
-import net.jqwik.api.ForAll
-import net.jqwik.api.Property
-import net.jqwik.api.Provide
-import net.jqwik.api.Report
-import net.jqwik.api.Reporting
-import net.jqwik.api.Tag
+import io.kotest.property.checkAll
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import java.nio.file.Files
@@ -23,26 +21,26 @@ import java.nio.file.Files
 @Tag(PROPERTY)
 class FilePasswordExchangePropertyTest {
 
-    @Property(tries = 25)
-    @Report(Reporting.FALSIFIED)
-    fun preservesExchangeDataAcrossExportAndImport(@ForAll("fixtures") fixture: ExchangeFixture) {
-        val homeDirectory = Files.createTempDirectory("passbird-exchange-property")
+    @Test
+    fun preservesExchangeDataAcrossExportAndImport() {
+        runBlocking {
+            checkAll(25, exchangeFixtures()) { fixture ->
+                val homeDirectory = Files.createTempDirectory("passbird-exchange-property")
 
-        try {
-            val filePasswordExchange = FilePasswordExchange(
-                SystemOperation(),
-                PassbirdRunContext(homeDirectory.toString().toDirectory(), Slot.DEFAULT),
-            )
+                try {
+                    val filePasswordExchange = FilePasswordExchange(
+                        SystemOperation(),
+                        PassbirdRunContext(homeDirectory.toString().toDirectory(), Slot.DEFAULT),
+                    )
 
-            filePasswordExchange.send(fixture.toPasswordInfoMap()).orThrow("password export")
-            val received = filePasswordExchange.receive().orThrow("password import")
+                    filePasswordExchange.send(fixture.toPasswordInfoMap()).orThrow("password export")
+                    val received = filePasswordExchange.receive().orThrow("password import")
 
-            expectThat(normalizePasswordInfoMap(received)) isEqualTo fixture
-        } finally {
-            homeDirectory.toFile().deleteRecursively()
+                    expectThat(normalizePasswordInfoMap(received)) isEqualTo fixture
+                } finally {
+                    homeDirectory.toFile().deleteRecursively()
+                }
+            }
         }
     }
-
-    @Provide
-    fun fixtures() = exchangeFixtures()
 }

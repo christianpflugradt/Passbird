@@ -18,9 +18,15 @@ import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
-import net.jqwik.api.Arbitraries
-import net.jqwik.api.Arbitrary
-import net.jqwik.api.Combinators
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.byte
+import io.kotest.property.arbitrary.element
+import io.kotest.property.arbitrary.flatMap
+import io.kotest.property.arbitrary.list
+import io.kotest.property.arbitrary.map
+import io.kotest.property.arbitrary.set
+import io.kotest.property.arbitrary.string
 
 data class PlainEggData(
     val nestSlot: Slot,
@@ -52,16 +58,16 @@ data class PlainPasswordInfoData(
 
 data class ExchangeFixture(val nests: Map<Slot, ExchangeNestData>)
 
-fun passwordTreeFixtures(): Arbitrary<PasswordTreeFixture> = explicitNests().flatMap { nests ->
+fun passwordTreeFixtures(): Arb<PasswordTreeFixture> = explicitNests().flatMap { nests ->
     val slots = listOf(Slot.DEFAULT) + nests.keys.sortedBy(Slot::index)
-    Combinators.combine(plainEggs(slots), favoriteEntries(), memoryEntries()).`as` { eggs, favorites, memory ->
+    Arb.bind(plainEggs(slots), favoriteEntries(), memoryEntries()) { eggs, favorites, memory ->
         PasswordTreeFixture(nests = nests, eggs = eggs, favorites = favorites, memory = memory)
     }
 }
 
-fun exchangeFixtures(): Arbitrary<ExchangeFixture> = exchangeSlots().flatMap { slots ->
-    nonEmptyTextValues().list().ofSize(slots.size).flatMap { nestIds ->
-        plainPasswordInfoLists().list().ofSize(slots.size).map { eggLists ->
+fun exchangeFixtures(): Arb<ExchangeFixture> = exchangeSlots().flatMap { slots ->
+    Arb.list(nonEmptyTextValues(), slots.size..slots.size).flatMap { nestIds ->
+        Arb.list(plainPasswordInfoLists(), slots.size..slots.size).map { eggLists ->
             ExchangeFixture(
                 slots.indices.associate { index ->
                     slots[index] to ExchangeNestData(
@@ -74,11 +80,9 @@ fun exchangeFixtures(): Arbitrary<ExchangeFixture> = exchangeSlots().flatMap { s
     }
 }
 
-fun textValues(): Arbitrary<String> = Arbitraries.strings()
-    .withChars(ALLOWED_TEXT_CHARACTERS)
-    .ofMaxLength(16)
+fun textValues(): Arb<String> = Arb.string(0..16, ALLOWED_TEXT_CHARACTERS)
 
-fun byteContents(): Arbitrary<List<Byte>> = Arbitraries.bytes().list().ofMaxSize(128)
+fun byteContents(): Arb<List<Byte>> = Arb.list(Arb.byte(), 0..128)
 
 fun PasswordTreeFixture.toEggStreamSupplier(cryptoProvider: CryptoProvider): EggStreamSupplier {
     val eggs = eggs.map { egg -> egg.toEgg(cryptoProvider) }
@@ -170,58 +174,60 @@ fun normalizePasswordInfoMap(passwordInfoMap: PasswordInfoMap): ExchangeFixture 
     }.toSortedMap(compareBy(Slot::index)),
 )
 
-private fun explicitNests(): Arbitrary<Map<Slot, String>> = nonDefaultSlots().flatMap { slots ->
-    nonEmptyTextValues().list().ofSize(slots.size).map { nestIds ->
+private fun explicitNests(): Arb<Map<Slot, String>> = nonDefaultSlots().flatMap { slots ->
+    Arb.list(nonEmptyTextValues(), slots.size..slots.size).map { nestIds ->
         slots.zip(nestIds).toMap().toSortedMap(compareBy(Slot::index))
     }
 }
 
-private fun nonDefaultSlots(): Arbitrary<List<Slot>> =
-    Arbitraries.of(nonDefaultSlotEntries).list().uniqueElements().ofMaxSize(nonDefaultSlotEntries.size)
+private fun nonDefaultSlots(): Arb<List<Slot>> = Arb.set(Arb.element(nonDefaultSlotEntries), 0..nonDefaultSlotEntries.size).map { slots ->
+    slots.sortedBy(Slot::index)
+}
 
-private fun exchangeSlots(): Arbitrary<List<Slot>> =
-    Arbitraries.of(Slot.entries).list().uniqueElements().ofMinSize(1).ofMaxSize(Slot.entries.size)
+private fun exchangeSlots(): Arb<List<Slot>> =
+    Arb.set(Arb.element(Slot.entries), 1..Slot.entries.size).map { slots -> slots.sortedBy(Slot::index) }
 
-private fun plainEggs(slots: List<Slot>): Arbitrary<List<PlainEggData>> = plainEggData(slots).list().ofMaxSize(12)
+private fun plainEggs(slots: List<Slot>): Arb<List<PlainEggData>> = Arb.list(plainEggData(slots), 0..12)
 
-private fun plainEggData(slots: List<Slot>): Arbitrary<PlainEggData> = Combinators.combine(
-    Arbitraries.of(slots),
+private fun plainEggData(slots: List<Slot>): Arb<PlainEggData> = Arb.bind(
+    Arb.element(slots),
     textValues(),
     textValues(),
     proteinEntries(),
-).`as` { slot, eggId, password, proteins ->
+) { slot, eggId, password, proteins ->
     PlainEggData(slot, eggId, password, proteins)
 }
 
-private fun memoryEntries(): Arbitrary<Map<MemoryCell, String>> =
-    Arbitraries.of(allMemoryCells).list().uniqueElements().ofMaxSize(12).flatMap { cells ->
-        textValues().list().ofSize(cells.size).map { values ->
-            cells.zip(values).toMap().toSortedMap(compareBy(MemoryCell::nestSlot, MemoryCell::memorySlot))
-        }
+private fun memoryEntries(): Arb<Map<MemoryCell, String>> = Arb.set(Arb.element(allMemoryCells), 0..12).flatMap { generatedCells ->
+    val cells = generatedCells.sortedWith(compareBy(MemoryCell::nestSlot, MemoryCell::memorySlot))
+    Arb.list(textValues(), cells.size..cells.size).map { values ->
+        cells.zip(values).toMap().toSortedMap(compareBy(MemoryCell::nestSlot, MemoryCell::memorySlot))
     }
+}
 
-private fun favoriteEntries(): Arbitrary<Map<FavoriteCell, String>> =
-    Arbitraries.of(allFavoriteCells).list().uniqueElements().ofMaxSize(12).flatMap { cells ->
-        textValues().list().ofSize(cells.size).map { values ->
-            cells.zip(values).toMap().toSortedMap(compareBy(FavoriteCell::nestSlot, FavoriteCell::favoriteSlot))
-        }
+private fun favoriteEntries(): Arb<Map<FavoriteCell, String>> = Arb.set(Arb.element(allFavoriteCells), 0..12).flatMap { generatedCells ->
+    val cells = generatedCells.sortedWith(compareBy(FavoriteCell::nestSlot, FavoriteCell::favoriteSlot))
+    Arb.list(textValues(), cells.size..cells.size).map { values ->
+        cells.zip(values).toMap().toSortedMap(compareBy(FavoriteCell::nestSlot, FavoriteCell::favoriteSlot))
     }
+}
 
-private fun plainPasswordInfoLists(): Arbitrary<List<PlainPasswordInfoData>> = plainPasswordInfoData().list().ofMaxSize(6).map {
+private fun plainPasswordInfoLists(): Arb<List<PlainPasswordInfoData>> = Arb.list(plainPasswordInfoData(), 0..6).map {
     it.distinctBy(PlainPasswordInfoData::eggId)
 }
 
-private fun plainPasswordInfoData(): Arbitrary<PlainPasswordInfoData> = Combinators.combine(
+private fun plainPasswordInfoData(): Arb<PlainPasswordInfoData> = Arb.bind(
     textValues(),
     textValues(),
     proteinEntries(),
-).`as` { eggId, password, proteins ->
+) { eggId, password, proteins ->
     PlainPasswordInfoData(eggId, password, proteins)
 }
 
-private fun proteinEntries(): Arbitrary<Map<Slot, Pair<String, String>>> =
-    Arbitraries.of(Slot.entries).list().uniqueElements().ofMaxSize(Slot.entries.size).flatMap { slots ->
-        nonEmptyProteinPairs().list().ofSize(slots.size).map { proteins ->
+private fun proteinEntries(): Arb<Map<Slot, Pair<String, String>>> =
+    Arb.set(Arb.element(Slot.entries), 0..Slot.entries.size).flatMap { generatedSlots ->
+        val slots = generatedSlots.sortedBy(Slot::index)
+        Arb.list(nonEmptyProteinPairs(), slots.size..slots.size).map { proteins ->
             slots.zip(proteins).toMap().toSortedMap(compareBy(Slot::index))
         }
     }
@@ -230,13 +236,9 @@ private fun PasswordTreeFixture.toNestShells() = Slot.entries
     .filterNot { it == Slot.DEFAULT }
     .map { slot -> nests[slot]?.let(::shellOf) ?: emptyShell() }
 
-private fun nonEmptyProteinPairs(): Arbitrary<Pair<String, String>> =
-    Combinators.combine(nonEmptyTextValues(), nonEmptyTextValues()).`as`(::Pair)
+private fun nonEmptyProteinPairs(): Arb<Pair<String, String>> = Arb.bind(nonEmptyTextValues(), nonEmptyTextValues(), ::Pair)
 
-private fun nonEmptyTextValues(): Arbitrary<String> = Arbitraries.strings()
-    .withChars(ALLOWED_TEXT_CHARACTERS)
-    .ofMinLength(1)
-    .ofMaxLength(16)
+private fun nonEmptyTextValues(): Arb<String> = Arb.string(1..16, ALLOWED_TEXT_CHARACTERS)
 
 private fun PlainEggData.toEgg(cryptoProvider: CryptoProvider): Egg = createEgg(
     slot = nestSlot,

@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-24
+last_reviewed: 2026-05-29
 project:
   name: Passbird
   synopsis: >
@@ -25,7 +25,7 @@ technical_profile:
   shell_bootstrap: source ~/.zprofile && source ~/.zshrc
   test_stack:
     - JUnit 5
-    - jqwik
+    - Kotest Property
     - MockK
     - Strikt
     - Awaitility

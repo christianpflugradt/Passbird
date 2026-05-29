@@ -20,13 +20,11 @@ import de.pflugradts.passbird.property.normalizedMemory
 import de.pflugradts.passbird.property.orThrow
 import de.pflugradts.passbird.property.passwordTreeFixtures
 import de.pflugradts.passbird.property.toEggStreamSupplier
+import io.kotest.property.checkAll
 import io.mockk.mockk
-import net.jqwik.api.ForAll
-import net.jqwik.api.Property
-import net.jqwik.api.Provide
-import net.jqwik.api.Report
-import net.jqwik.api.Reporting
-import net.jqwik.api.Tag
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import java.nio.file.Files
@@ -36,50 +34,50 @@ class PasswordTreeFacadePropertyTest {
     private val passwordTreeEnvelope = PasswordTreeEnvelope()
     private val passwordTreePayloadWriter = PasswordTreePayloadWriter()
 
-    @Property(tries = 20)
-    @Report(Reporting.FALSIFIED)
-    fun preservesPasswordTreeStateAcrossSyncAndRestore(@ForAll("fixtures") fixture: PasswordTreeFixture) {
-        val passwordTreeDirectory = Files.createTempDirectory("passbird-tree-property")
+    @Test
+    fun preservesPasswordTreeStateAcrossSyncAndRestore() {
+        runBlocking {
+            checkAll(20, passwordTreeFixtures()) { fixture ->
+                val passwordTreeDirectory = Files.createTempDirectory("passbird-tree-property")
 
-        try {
-            val configuration = mockk<Configuration>()
-            fakeConfiguration(
-                instance = configuration,
-                withPasswordTreeLocation = passwordTreeDirectory.toString(),
-                withEggIdMemoryEnabled = true,
-                withEggIdMemoryPersisted = true,
-            )
-            val cryptoProvider = createAesGcmCipherForTesting()
-            val systemOperation = SystemOperation()
-            val passwordTreeFacade = PasswordTreeFacade(
-                passwordTreeReader = PasswordTreeReader(
-                    systemOperation = systemOperation,
-                    configuration = configuration,
-                    cryptoProvider = cryptoProvider,
-                    passwordTreeEnvelope = passwordTreeEnvelope,
-                    passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
-                ),
-                passwordTreeWriter = PasswordTreeWriter(
-                    systemOperation = systemOperation,
-                    configuration = configuration,
-                    cryptoProvider = cryptoProvider,
-                    passwordTreeEnvelope = passwordTreeEnvelope,
-                    passwordTreePayloadWriter = passwordTreePayloadWriter,
-                ),
-            )
+                try {
+                    val configuration = mockk<Configuration>()
+                    fakeConfiguration(
+                        instance = configuration,
+                        withPasswordTreeLocation = passwordTreeDirectory.toString(),
+                        withEggIdMemoryEnabled = true,
+                        withEggIdMemoryPersisted = true,
+                    )
+                    val cryptoProvider = createAesGcmCipherForTesting()
+                    val systemOperation = SystemOperation()
+                    val passwordTreeFacade = PasswordTreeFacade(
+                        passwordTreeReader = PasswordTreeReader(
+                            systemOperation = systemOperation,
+                            configuration = configuration,
+                            cryptoProvider = cryptoProvider,
+                            passwordTreeEnvelope = passwordTreeEnvelope,
+                            passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
+                        ),
+                        passwordTreeWriter = PasswordTreeWriter(
+                            systemOperation = systemOperation,
+                            configuration = configuration,
+                            cryptoProvider = cryptoProvider,
+                            passwordTreeEnvelope = passwordTreeEnvelope,
+                            passwordTreePayloadWriter = passwordTreePayloadWriter,
+                        ),
+                    )
 
-            passwordTreeFacade.sync(fixture.toEggStreamSupplier(cryptoProvider)).orThrow("password tree sync")
-            val restoreResult = passwordTreeFacade.restore()
+                    passwordTreeFacade.sync(fixture.toEggStreamSupplier(cryptoProvider)).orThrow("password tree sync")
+                    val restoreResult = passwordTreeFacade.restore()
 
-            expectThat(normalizeEggs(restoreResult.get().toList(), cryptoProvider)) isEqualTo fixture.normalizedEggs()
-            expectThat(normalizeExplicitNests(restoreResult.nests())) isEqualTo fixture.normalizedExplicitNests()
-            expectThat(normalizeFavorites(restoreResult.favorites(), cryptoProvider)) isEqualTo fixture.normalizedFavorites()
-            expectThat(normalizeMemory(restoreResult.memory(), cryptoProvider)) isEqualTo fixture.normalizedMemory()
-        } finally {
-            passwordTreeDirectory.toFile().deleteRecursively()
+                    expectThat(normalizeEggs(restoreResult.get().toList(), cryptoProvider)) isEqualTo fixture.normalizedEggs()
+                    expectThat(normalizeExplicitNests(restoreResult.nests())) isEqualTo fixture.normalizedExplicitNests()
+                    expectThat(normalizeFavorites(restoreResult.favorites(), cryptoProvider)) isEqualTo fixture.normalizedFavorites()
+                    expectThat(normalizeMemory(restoreResult.memory(), cryptoProvider)) isEqualTo fixture.normalizedMemory()
+                } finally {
+                    passwordTreeDirectory.toFile().deleteRecursively()
+                }
+            }
         }
     }
-
-    @Provide
-    fun fixtures() = passwordTreeFixtures()
 }

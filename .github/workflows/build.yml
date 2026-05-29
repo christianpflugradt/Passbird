@@ -184,13 +184,6 @@ jobs:
         with:
           name: property-test-execution-data
           path: build/jacoco/property.exec
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: property-jqwik-database
-          path: build/.jqwik-database*
-          if-no-files-found: ignore
-
   mutation-tests:
     runs-on: ubuntu-latest
     needs: [ compile ]
@@ -219,13 +212,6 @@ jobs:
           name: mutation-line-coverage
           path: build/reports/pitest/linecoverage.xml
           if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: mutation-jqwik-database
-          path: build/.jqwik-database*
-          if-no-files-found: ignore
-
   release-jar:
     runs-on: ubuntu-latest
     steps:

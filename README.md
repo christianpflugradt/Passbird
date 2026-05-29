@@ -428,7 +428,7 @@ To view all available configurations and their indices, input `s?`. Using the ex
 While working locally, prefer focused manual checks for the behavior you changed:
 
 - `./gradlew test` runs the default unit-oriented suite and excludes tagged `integration`, `architecture`, and `property` tests.
-- `./gradlew property` runs jqwik-based property tests for persistence, exchange, backup, and crypto invariants.
+- `./gradlew property` runs Kotest Property tests for persistence, exchange, backup, and crypto invariants.
 - `./gradlew mutation` runs PIT mutation testing for high-risk persistence, exchange, backup, and security code.
 - `./gradlew integration` runs tagged integration tests.
 - `./gradlew architecture` runs the ArchUnit-based architecture suite.
