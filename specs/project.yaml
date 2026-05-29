@@ -113,7 +113,7 @@ release_model:
     - GitHub Actions refresh the dependency-check cache daily and purge then rebuild it during the Sunday-to-Monday overnight window
     - GitHub Actions build workflow refreshes the branch and instruction coverage badges plus the coverage report on main
     - GitHub Actions publish workflow creates development prereleases on manual dispatch and runs semantic-release every Monday at 03:00 Europe/Berlin for official stable releases
-    - GitHub Actions publish workflow stamps passbird.jar manifests through the explicit Gradle -PreleaseVersion input and verifies the manifest version before publishing release assets
+    - GitHub Actions publish workflow requires the current main commit's Build and Verify run to provide the non-expired release-jar artifact plus successful artifact smoke validation jobs, then stamps passbird.jar manifests through the explicit Gradle -PreleaseVersion input and verifies manifest version plus payload equivalence before publishing release assets
     - official stable releases use plain semantic versions and semantic-release publishes their GitHub tags and GitHub releases with the passbird.jar asset when commit history requires a release
     - manual development prereleases use the latest official stable version as their base and publish passbird.jar assets under GitHub prerelease tags prefixed with dev-
 agent_notes:

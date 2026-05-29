@@ -22,6 +22,8 @@ jobs:
   require-verified-main:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    outputs:
+      build-run-id: ${{ steps.require-build.outputs.build-run-id }}
     steps:
       - id: require-build
         uses: actions/github-script@v9
@@ -30,7 +32,14 @@ jobs:
             const workflowId = "build.yml";
             const branch = "main";
             const sha = context.sha;
-            const { data } = await github.rest.actions.listWorkflowRuns({
+            const requiredJobNames = [
+              "release-jar",
+              "artifact-smoke-test (Java 17)",
+              "artifact-smoke-test (Java 21)",
+              "artifact-smoke-test (Java 25)",
+            ];
+
+            const workflowRuns = await github.paginate(github.rest.actions.listWorkflowRuns, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: workflowId,
@@ -39,18 +48,62 @@ jobs:
               per_page: 50,
             });
 
-            const successfulRun = data.workflow_runs.find((run) =>
+            const candidateRuns = workflowRuns.filter((run) =>
               run.head_sha === sha && run.conclusion === "success"
             );
 
-            if (!successfulRun) {
+            if (candidateRuns.length === 0) {
               core.setFailed(
                 `No successful Build and Verify run found for ${sha} on ${branch}. Publish runs are gated on a green build workflow for the current main commit.`
               );
               return;
             }
 
-            core.notice(`Found successful Build and Verify run: ${successfulRun.html_url}`);
+            for (const run of candidateRuns) {
+              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: run.id,
+                per_page: 100,
+              });
+              const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: run.id,
+                per_page: 100,
+              });
+
+              const missingRequiredJobs = requiredJobNames.filter((jobName) =>
+                !jobs.some((job) =>
+                  job.name === jobName &&
+                  job.status === "completed" &&
+                  job.conclusion === "success"
+                )
+              );
+              const releaseJarArtifact = artifacts.find((artifact) =>
+                artifact.name === "release-jar" && !artifact.expired
+              );
+
+              if (missingRequiredJobs.length === 0 && releaseJarArtifact) {
+                core.setOutput("build-run-id", run.id.toString());
+                core.notice(`Found verified Build and Verify run: ${run.html_url}`);
+                core.notice(`Found non-expired release-jar artifact: ${releaseJarArtifact.archive_download_url}`);
+                return;
+              }
+
+              const reasons = [];
+              if (missingRequiredJobs.length > 0) {
+                reasons.push(`missing successful jobs: ${missingRequiredJobs.join(", ")}`);
+              }
+              if (!releaseJarArtifact) {
+                reasons.push("missing non-expired release-jar artifact");
+              }
+              core.notice(`Build and Verify run ${run.html_url} does not satisfy the publish artifact contract: ${reasons.join("; ")}.`);
+            }
+
+            core.setFailed(
+              `No Build and Verify run for ${sha} on ${branch} provides the required release-jar artifact and successful artifact smoke validation jobs.`
+            );
 
   publish-stable:
     needs: [ require-verified-main ]
@@ -68,6 +121,12 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: "26"
+      - name: download verified release jar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p verified-release-jar
+          gh run download "${{ needs.require-verified-main.outputs.build-run-id }}" --repo "$GITHUB_REPOSITORY" --name release-jar --dir verified-release-jar
       - name: run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -112,6 +171,12 @@ jobs:
             core.setOutput("base_version", baseVersion);
             core.setOutput("version", version);
             core.setOutput("tag_name", `dev-${version}`);
+      - name: download verified release jar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p verified-release-jar
+          gh run download "${{ needs.require-verified-main.outputs.build-run-id }}" --repo "$GITHUB_REPOSITORY" --name release-jar --dir verified-release-jar
       - uses: actions/setup-java@v5
         with:
           java-version: "25"
@@ -123,6 +188,8 @@ jobs:
         env:
           EXPECTED_VERSION: ${{ steps.compute-dev-version.outputs.version }}
         run: .github/scripts/verify-release-jar-manifest.sh build/libs/passbird.jar "$EXPECTED_VERSION"
+      - name: verify release jar payload
+        run: .github/scripts/verify-release-jar-payload.sh verified-release-jar/passbird.jar build/libs/passbird.jar
       - name: create GitHub prerelease
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

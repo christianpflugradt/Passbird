@@ -42,7 +42,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "./gradlew -PcreatedBy=\"GitHub Actions\" -PreleaseVersion=${nextRelease.version} jar && .github/scripts/verify-release-jar-manifest.sh build/libs/passbird.jar ${nextRelease.version}"
+        "prepareCmd": "./gradlew -PcreatedBy=\"GitHub Actions\" -PreleaseVersion=${nextRelease.version} jar && .github/scripts/verify-release-jar-manifest.sh build/libs/passbird.jar ${nextRelease.version} && .github/scripts/verify-release-jar-payload.sh verified-release-jar/passbird.jar build/libs/passbird.jar"
       }
     ],
     [
