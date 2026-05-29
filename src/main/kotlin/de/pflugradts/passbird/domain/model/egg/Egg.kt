@@ -70,6 +70,13 @@ class Egg private constructor(
         }
     }
 
+    fun copy() = Egg(
+        slot = slot,
+        eggId = createEggId(eggId.view()),
+        password = createPassword(password.view()),
+        proteins = proteins.map { protein -> protein.mapMutable { createProtein(it.viewType(), it.viewStructure()) } },
+    ).also { it.clearDomainEvents() }
+
     override fun equals(other: Any?) = (other as? Egg)?.let {
         it.viewEggId() == viewEggId() && it.associatedNest() == slot
     } ?: false

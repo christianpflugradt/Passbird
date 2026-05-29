@@ -18,7 +18,7 @@ fun fakeEggRepository(instance: EggRepository, withEggs: List<Egg> = emptyList()
     every { instance.discardFavorites(any<Slot>(), any()) } returns Unit
     every { instance.discardFavorites(any<Slot>()) } returns Unit
     every { instance.renameFavorites(any(), any(), any()) } returns Unit
-    every { instance.updateMemory(any()) } returns Unit
+    every { instance.updateMemory(any(), any(), any()) } returns Unit
     every { instance.sync() } answers {
         withSyncFailure?.let { failure(it) } ?: success(Unit)
     }

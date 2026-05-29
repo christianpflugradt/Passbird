@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-17
+last_reviewed: 2026-05-29
 architecture:
   style: onion
   enforcement:
@@ -66,6 +66,8 @@ runtime_design:
     - shared password-tree format helpers live under application.passwordtree so migration and backup orchestration can use them without depending on adapter internals
     - shared keystore format helpers live under application.keystore so launcher detection and migration-only adapters can classify passbird.sec without guessing from release history
     - password-tree restore and sync move eggs, favorites, memory, and nest shells as a single snapshot rather than repopulating nests through a service callback
+    - PasswordTreeSyncService mediates repository sync for domain services that must not depend on EggRepository directly
+    - password-tree mutations are staged against live aggregates but sync failure restores a deep last-synced snapshot before the command reports failure
     - ApplicationModule wires adapters, services, and handlers with Guice
     - PassbirdApplication enters the interactive command loop
   interaction_model:
@@ -73,7 +75,7 @@ runtime_design:
     - CommandFactory creates command objects
     - CommandBus dispatches to handlers
     - handlers call application and domain services
-    - event registries propagate side effects
+    - event registries propagate side effects after persistence succeeds for mutating password and nest operations
     - inactivity monitoring may request shutdown from a daemon timer, but PassbirdApplication serializes the resulting QuitCommand on the interactive execution path instead of letting the timer thread post directly to the command bus
 ports_and_adapters:
   - port: UserInterfaceAdapterPort

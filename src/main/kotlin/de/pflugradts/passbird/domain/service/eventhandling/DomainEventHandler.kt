@@ -2,8 +2,6 @@ package de.pflugradts.passbird.domain.service.eventhandling
 
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
-import de.pflugradts.passbird.domain.model.event.NestCreated
-import de.pflugradts.passbird.domain.model.event.NestDiscarded
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import jakarta.inject.Inject
 import jakarta.inject.Provider
@@ -16,16 +14,5 @@ class DomainEventHandler @Inject constructor(private val eggRepositoryProvider: 
     @Subscribe
     private fun handleEggDiscarded(eggDiscarded: EggDiscarded) {
         eggRepository.delete(eggDiscarded.egg)
-    }
-
-    @Subscribe
-    private fun handleNestCreated(@Suppress("UNUSED_PARAMETER") nestCreated: NestCreated) {
-        eggRepository.sync()
-    }
-
-    @Subscribe
-    private fun handleNestDiscarded(nestDiscarded: NestDiscarded) {
-        eggRepository.discardFavorites(nestDiscarded.nest.slot)
-        eggRepository.sync()
     }
 }

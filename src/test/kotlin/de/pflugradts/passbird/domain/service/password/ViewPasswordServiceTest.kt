@@ -372,7 +372,7 @@ class ViewPasswordServiceTest {
             every { eggRepository.findAll() } answers { listOf(egg).stream() }
             every { eggRepository.findAll(any<Slot>()) } answers { emptyList<Egg>().stream() }
             every { eggRepository.memory() } returns memory
-            every { eggRepository.updateMemory(any(), any()) } answers {
+            every { eggRepository.updateMemory(any(), any(), any()) } answers {
                 val updatedEgg = firstArg<Egg>()
                 memory.memorize(updatedEgg.viewEggId(), null)
             }

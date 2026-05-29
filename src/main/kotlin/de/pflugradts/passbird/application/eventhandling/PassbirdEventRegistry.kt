@@ -8,6 +8,8 @@ import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import java.util.ArrayDeque
+import java.util.Collections
+import java.util.IdentityHashMap
 import java.util.Queue
 
 @Singleton
@@ -15,7 +17,7 @@ class PassbirdEventRegistry @Inject constructor(
     eventHandlers: Set<EventHandler>,
     private val eventBus: EventBus = EventBus(),
 ) : EventRegistry {
-    private val aggregateRoots = mutableSetOf<AggregateRoot>()
+    private val aggregateRoots: MutableSet<AggregateRoot> = Collections.newSetFromMap(IdentityHashMap())
     private val domainEvents: Queue<DomainEvent> = ArrayDeque()
     private val abandonedAggregateRoots: Queue<AggregateRoot> = ArrayDeque()
 

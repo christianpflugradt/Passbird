@@ -101,7 +101,10 @@ class PasswordImportExportService @Inject constructor(
             imports.forEach { (nest, targetSlot, passwordInfos) ->
                 val deployedNest = nestService.atNestSlot(targetSlot)
                 if (deployedNest.isEmpty) {
-                    nestService.place(nest.viewNestId(), targetSlot)
+                    if (nestService.place(nest.viewNestId(), targetSlot).failure) {
+                        eventRegistry.clearEvents()
+                        return
+                    }
                 }
                 nestService.moveToNestAt(targetSlot)
                 passwordInfos.forEach { passwordInfo ->

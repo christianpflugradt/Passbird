@@ -6,6 +6,7 @@ import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.fakeDec
+import de.pflugradts.passbird.domain.model.shell.fakeEnc
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.createNestServiceSpyForTesting
@@ -20,7 +21,9 @@ import strikt.api.expectThat
 import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
+import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
+import java.io.IOException
 
 class NestingGroundTest {
 
@@ -61,6 +64,136 @@ class NestingGroundTest {
         verify { passwordTreeAdapterPort.sync(capture(eggsSlot)) }
         expectThat(eggsSlot.captured.get().toList()).containsExactlyInAnyOrder(givenEgg1, givenEgg2)
         expectThat(eggsSlot.captured.nests()[1]) isEqualTo nestShell
+    }
+
+    @Test
+    fun `should clear favorites for discarded nests when syncing`() {
+        // given
+        val eggsSlot = slot<EggStreamSupplier>()
+        nestService.place(shellOf("Nest"), Slot.S1)
+        nestService.moveToNestAt(Slot.S1)
+        nestingGround.putFavorite(Slot.S1, givenEgg1.viewEggId())
+
+        // when
+        nestService.discardNestAt(Slot.S1)
+        nestingGround.sync()
+
+        // then
+        verify { passwordTreeAdapterPort.sync(capture(eggsSlot)) }
+        expectThat(eggsSlot.captured.favorites()[Slot.S1].get()[Slot.S1].isEmpty).isTrue()
+    }
+
+    @Test
+    fun `should roll back added egg when sync fails`() {
+        // given
+        val failingNestingGround = failingNestingGround()
+        val newEgg = createEggForTesting(withEggIdShell = shellOf("new"))
+
+        // when
+        failingNestingGround.add(newEgg)
+        val actual = failingNestingGround.sync()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isNotNull()
+        expectThat(failingNestingGround.findForTesting(newEgg.viewEggId().fakeDec()).isEmpty).isTrue()
+    }
+
+    @Test
+    fun `should roll back password update when sync fails`() {
+        // given
+        val failingNestingGround = failingNestingGround()
+        val updatedPassword = shellOf("updated")
+        val originalPassword = givenEgg1.viewPassword().fakeDec()
+        val egg = failingNestingGround.findForTesting(givenEgg1.viewEggId().fakeDec()).get()
+
+        // when
+        egg.updatePassword(updatedPassword.fakeEnc())
+        val actual = failingNestingGround.sync()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(failingNestingGround.findForTesting(givenEgg1.viewEggId().fakeDec()).get().viewPassword().fakeDec()) isEqualTo
+            originalPassword
+    }
+
+    @Test
+    fun `should roll back protein update when sync fails`() {
+        // given
+        val failingNestingGround = failingNestingGround()
+        val egg = failingNestingGround.findForTesting(givenEgg1.viewEggId().fakeDec()).get()
+
+        // when
+        egg.updateProtein(Slot.S1, shellOf("type").fakeEnc(), shellOf("structure").fakeEnc())
+        val actual = failingNestingGround.sync()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(failingNestingGround.findForTesting(givenEgg1.viewEggId().fakeDec()).get().proteins[Slot.S1.index()].isEmpty).isTrue()
+    }
+
+    @Test
+    fun `should roll back rename when sync fails`() {
+        // given
+        val failingNestingGround = failingNestingGround()
+        val oldEggId = givenEgg1.viewEggId().fakeDec()
+        val newEggId = shellOf("Renamed")
+        val egg = failingNestingGround.findForTesting(oldEggId).get()
+
+        // when
+        egg.rename(newEggId.fakeEnc())
+        val actual = failingNestingGround.sync()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(failingNestingGround.findForTesting(oldEggId).isPresent).isTrue()
+        expectThat(failingNestingGround.findForTesting(newEggId).isEmpty).isTrue()
+    }
+
+    @Test
+    fun `should roll back move when sync fails`() {
+        // given
+        val failingNestingGround = failingNestingGround()
+        val egg = failingNestingGround.findForTesting(givenEgg1.viewEggId().fakeDec()).get()
+
+        // when
+        egg.moveToNestAt(Slot.S2)
+        val actual = failingNestingGround.sync()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(failingNestingGround.findForTesting(givenEgg1.viewEggId().fakeDec()).get().associatedNest()) isEqualTo Slot.DEFAULT
+    }
+
+    @Test
+    fun `should roll back discard when sync fails`() {
+        // given
+        val failingNestingGround = failingNestingGround()
+        val originalPassword = givenEgg1.viewPassword().fakeDec()
+        val egg = failingNestingGround.findForTesting(givenEgg1.viewEggId().fakeDec()).get()
+
+        // when
+        egg.discard()
+        val actual = failingNestingGround.sync()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(failingNestingGround.findForTesting(givenEgg1.viewEggId().fakeDec()).get().viewPassword().fakeDec()) isEqualTo
+            originalPassword
+    }
+
+    @Test
+    fun `should roll back favorite update when sync fails`() {
+        // given
+        val failingNestingGround = failingNestingGround()
+
+        // when
+        failingNestingGround.putFavorite(Slot.S1, givenEgg1.viewEggId())
+        val actual = failingNestingGround.sync()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(failingNestingGround.favorites()[Slot.S1].isEmpty).isTrue()
     }
 
     @Test
@@ -169,4 +302,11 @@ class NestingGroundTest {
             expectThat(actualSecondEgg.get()) isEqualTo egg2 isNotEqualTo egg1
         }
     }
+
+    private fun failingNestingGround() = NestingGround(
+        eggIdMemoryEnabled = false,
+        passwordTreeAdapterPort = fakePasswordTreeAdapterPort(givenEggs, withSyncFailure = IOException("disk full")),
+        nestStateView = nestService,
+        eventRegistry = eventRegistry,
+    )
 }

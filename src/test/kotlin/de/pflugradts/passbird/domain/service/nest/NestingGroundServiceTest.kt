@@ -1,5 +1,7 @@
 package de.pflugradts.passbird.domain.service.nest
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -8,6 +10,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
+import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeSyncService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -17,7 +20,9 @@ import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isNotEqualTo
+import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
+import java.io.IOException
 import java.util.stream.Stream
 
 class NestingGroundServiceTest {
@@ -29,13 +34,16 @@ class NestingGroundServiceTest {
     private val passwordTreeAdapterPort = mockk<PasswordTreeAdapterPort>(relaxed = true).also {
         every { it.restore() } returns EggStreamSupplier({ Stream.empty() }, nests = restoredNests)
     }
+    private val passwordTreeSyncService = mockk<PasswordTreeSyncService>(relaxed = true).also {
+        every { it.sync() } returns success(Unit)
+    }
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
-    private val nestingGroundService = NestingGroundService(passwordTreeAdapterPort, eventRegistry)
+    private val nestingGroundService = NestingGroundService(passwordTreeAdapterPort, passwordTreeSyncService, eventRegistry)
 
     @Test
     fun `should have 9 empty nest slots upon initialisation`() {
         // given / when
-        val actual = NestingGroundService(mockk(relaxed = true), eventRegistry).populateAndList(emptyList())
+        val actual = NestingGroundService(mockk(relaxed = true), passwordTreeSyncService, eventRegistry).populateAndList(emptyList())
 
         // then
         expectThat(actual) hasSize CAPACITY
@@ -54,7 +62,7 @@ class NestingGroundServiceTest {
         }
         intArrayOf(0, 2, 4, 5, 6, 8).forEach { expectThat(actual[it].isPresent).isFalse() }
         verify(exactly = 1) { passwordTreeAdapterPort.restore() }
-        verify(exactly = 0) { passwordTreeAdapterPort.sync(any()) }
+        verify(exactly = 0) { passwordTreeSyncService.sync() }
     }
 
     @Test
@@ -152,6 +160,40 @@ class NestingGroundServiceTest {
         expectThat(actual.isPresent).isTrue()
         expectThat(actual.get().viewNestId()) isEqualTo nestShell
         expectThat(actual.get().slot) isEqualTo Slot.S5
+    }
+
+    @Test
+    fun `should roll back deployed nest when sync fails`() {
+        // given
+        every { passwordTreeSyncService.sync() } returns failure(IOException("disk full"))
+
+        // when
+        val actual = nestingGroundService.place(shellOf("Nest"), Slot.S5)
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isNotNull()
+        expectThat(nestingGroundService.atNestSlot(Slot.S5).isEmpty).isTrue()
+    }
+
+    @Test
+    fun `should roll back discarded nest when sync fails`() {
+        // given
+        val nestShell = shellOf("Nest")
+        nestingGroundService.populate(
+            listOf(
+                emptyShell(), emptyShell(), emptyShell(), emptyShell(), nestShell,
+                emptyShell(), emptyShell(), emptyShell(), emptyShell(),
+            ),
+        )
+        every { passwordTreeSyncService.sync() } returns failure(IOException("disk full"))
+
+        // when
+        val actual = nestingGroundService.discardNestAt(Slot.S5)
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(nestingGroundService.atNestSlot(Slot.S5).get().viewNestId()) isEqualTo nestShell
     }
 
     @Test

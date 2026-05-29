@@ -19,7 +19,7 @@ class MovePasswordService @Inject constructor(
         if (eggExists(eggIdShell, targetSlot)) {
             throw EggIdAlreadyExistsException(eggIdShell)
         } else {
-            find(eggIdShell).ifPresentOrElse(
+            findWithoutUpdatingMemory(eggIdShell).ifPresentOrElse(
                 {
                     eggRepository.discardFavorites(it.associatedNest(), it.viewEggId())
                     it.moveToNestAt(targetSlot)

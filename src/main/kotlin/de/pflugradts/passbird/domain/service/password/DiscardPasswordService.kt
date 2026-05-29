@@ -15,7 +15,7 @@ class DiscardPasswordService @Inject constructor(
     eventRegistry: EventRegistry,
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
 
-    fun discardEgg(eggIdShell: Shell): TryResult<Unit> = find(eggIdShell)
+    fun discardEgg(eggIdShell: Shell): TryResult<Unit> = findWithoutUpdatingMemory(eggIdShell)
         .ifPresentOrElse(
             {
                 eggRepository.discardFavorites(it.associatedNest(), it.viewEggId())
@@ -25,7 +25,7 @@ class DiscardPasswordService @Inject constructor(
         )
         .let { processEventsAndSync() }
 
-    fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit> = find(eggIdShell)
+    fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit> = findWithoutUpdatingMemory(eggIdShell)
         .ifPresentOrElse({ it.discardProtein(slot)}, { eventRegistry.register(EggNotFound(eggIdShell)) })
         .let { processEventsAndSync() }
 }

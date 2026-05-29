@@ -34,7 +34,9 @@ class AddNestCommandHandler @Inject constructor(
             CommandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
         } else {
-            nestService.place(input.shell, addNestCommand.slot)
+            if (nestService.place(input.shell, addNestCommand.slot).failure) {
+                CommandExecutionTracker.markFailure()
+            }
         }
         input.invalidate()
         userInterfaceAdapterPort.sendLineBreak()

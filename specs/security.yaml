@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-25
+last_reviewed: 2026-05-29
 security_posture:
   classification: high_sensitivity_local_secret_manager
   posture:
@@ -73,6 +73,10 @@ current_security_relevant_implementation:
       - keeps the former PBKDF2WithHmacSHA256 static-salt 100-iteration derivation only as a legacy migration path for pre-migration password trees
   password_tree_integrity:
     files:
+      - src/main/kotlin/de/pflugradts/passbird/domain/service/password/tree/NestingGround.kt
+      - src/main/kotlin/de/pflugradts/passbird/domain/service/password/tree/PasswordTreeSyncService.kt
+      - src/main/kotlin/de/pflugradts/passbird/domain/service/password/CommonPasswordServiceCapabilities.kt
+      - src/main/kotlin/de/pflugradts/passbird/domain/service/nest/NestingGroundService.kt
       - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeReader.kt
       - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree/PasswordTreeWriter.kt
       - src/main/kotlin/de/pflugradts/passbird/application/passwordtree
@@ -80,7 +84,8 @@ current_security_relevant_implementation:
       - stores the current password tree as a versioned outer file envelope wrapped around the AES-GCM-encrypted binary payload
       - verifies a built-in file signature marker and checksum across the full plaintext payload on restore
       - treats password tree decrypt or read failures as fatal instead of falling back to an empty restore state
-      - only publishes mutating password-operation success events after password tree sync succeeds
+      - only publishes mutating password and nest success events after password tree sync succeeds
+      - failed password-tree sync restores the live session to the last restored or successfully synced Egg, Favorite, Memory, and Nest snapshot before reporting failure
       - can exit immediately when verification is configured as critical
       - stores eggs, nests, per-nest Favorite slots, and optionally persisted memory in a custom binary layout before encryption
       - detects both legacy pre-envelope password tree files and legacy current-format trees that require a Favorites migration before main startup

@@ -45,7 +45,9 @@ class DiscardNestCommandHandler @Inject constructor(
             nestService.moveToNestAt(discardNestCommand.slot)
             val eggIds = passwordService.findAllEggIds().toList()
             if (eggIds.isEmpty()) {
-                nestService.discardNestAt(discardNestCommand.slot)
+                if (nestService.discardNestAt(discardNestCommand.slot).failure) {
+                    CommandExecutionTracker.markFailure()
+                }
                 return
             }
             discardNestWithEggs(discardNestCommand.slot, eggIds)
@@ -65,8 +67,13 @@ class DiscardNestCommandHandler @Inject constructor(
             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted.")))
             return
         }
-        eggIds.forEach { eggId -> passwordService.moveEgg(eggId, targetNestSlot) }
-        nestService.discardNestAt(discardNestSlot)
+        if (eggIds.any { eggId -> passwordService.moveEgg(eggId, targetNestSlot).failure }) {
+            CommandExecutionTracker.markFailure()
+            return
+        }
+        if (nestService.discardNestAt(discardNestSlot).failure) {
+            CommandExecutionTracker.markFailure()
+        }
     }
 
     private fun receiveTargetNestSlot(eggIds: List<Shell>): Slot? {

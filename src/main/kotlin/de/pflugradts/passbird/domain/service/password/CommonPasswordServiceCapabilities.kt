@@ -32,12 +32,14 @@ abstract class CommonPasswordServiceCapabilities(
         entry.map { decrypted(it) == decrypted(egg.viewEggId()) }.orElse(false)
     }?.get()
 
-    private fun updateMemory(egg: Egg) = eggRepository.updateMemory(egg, eggRepository.memory().findDuplicate(egg))
+    fun updateMemory(egg: Egg, sync: Boolean = true) = eggRepository.updateMemory(egg, eggRepository.memory().findDuplicate(egg), sync)
 
     fun encrypted(shell: Shell) = cryptoProvider.encrypt(shell)
     fun decrypted(encryptedShell: EncryptedShell) = cryptoProvider.decrypt(encryptedShell)
 
-    fun processEventsAndSync(): TryResult<Unit> = eggRepository.sync().onSuccess { eventRegistry.processEvents() }
+    fun processEventsAndSync(): TryResult<Unit> = eggRepository.sync()
+        .onSuccess { eventRegistry.processEvents() }
+        .onFailure { eventRegistry.clearEvents() }
     fun registerEggNotFound(eggIdShell: Shell) {
         eventRegistry.register(EggNotFound(eggIdShell))
         eventRegistry.processEvents()

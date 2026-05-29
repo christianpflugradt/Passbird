@@ -13,7 +13,9 @@ import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
+import de.pflugradts.passbird.domain.service.password.tree.NestingGround
 import de.pflugradts.passbird.domain.service.password.tree.fakeEggRepository
+import de.pflugradts.passbird.domain.service.password.tree.fakePasswordTreeAdapterPort
 import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.slot
@@ -140,12 +142,19 @@ class PutPasswordServiceTest {
         val existingEggId = shellOf("EggId")
         val newPassword = shellOf("Password")
         val matchingEgg = createEggForTesting(withEggIdShell = existingEggId)
-        fakeCryptoProvider(instance = cryptoProvider)
-        fakeEggRepository(
-            instance = eggRepository,
+        val originalPassword = matchingEgg.viewPassword().fakeDec()
+        val passwordTreeAdapterPort = fakePasswordTreeAdapterPort(
             withEggs = listOf(matchingEgg),
             withSyncFailure = IOException("disk full"),
         )
+        val failingEggRepository = NestingGround(
+            eggIdMemoryEnabled = false,
+            passwordTreeAdapterPort = passwordTreeAdapterPort,
+            nestStateView = nestService,
+            eventRegistry = eventRegistry,
+        )
+        val passwordService = PutPasswordService(cryptoProvider, failingEggRepository, eventRegistry, nestService)
+        fakeCryptoProvider(instance = cryptoProvider)
 
         // when
         val actual = passwordService.putEgg(existingEggId, newPassword)
@@ -153,9 +162,10 @@ class PutPasswordServiceTest {
         // then
         expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isNotNull().isA<IOException>()
-        verify(exactly = 1) { eggRepository.sync() }
+        verify(exactly = 1) { passwordTreeAdapterPort.sync(any()) }
         verify(exactly = 0) { eventRegistry.processEvents() }
-        expectThat(passwordService.find(eggIdShell = existingEggId).orNull()?.viewPassword()?.fakeDec()) isEqualTo newPassword
+        verify(atLeast = 1) { eventRegistry.clearEvents() }
+        expectThat(passwordService.find(eggIdShell = existingEggId).orNull()?.viewPassword()?.fakeDec()) isEqualTo originalPassword
     }
 
     @Test
