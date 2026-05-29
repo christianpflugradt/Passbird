@@ -3,6 +3,8 @@ package de.pflugradts.passbird.application.exchange
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.passbird.application.PasswordInfo
+import de.pflugradts.passbird.application.failure.ImportFailure
+import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.nest.Nest
@@ -95,6 +97,10 @@ class PasswordImportExportService @Inject constructor(
         if (imports.isEmpty()) {
             return
         }
+        if (imports.any { (nest, targetSlot, _) -> nestIdentityConflicts(nest, targetSlot) }) {
+            reportFailure(ImportFailure(IllegalStateException("Imported NestId does not match occupied target slot")))
+            return
+        }
         val currentNest = nestService.currentNest()
         var importedEggCount = 0
         try {
@@ -124,6 +130,10 @@ class PasswordImportExportService @Inject constructor(
         eventRegistry.register(EggsImported(importedEggCount))
         eventRegistry.processEvents()
     }
+
+    private fun nestIdentityConflicts(nest: Nest, targetSlot: Slot) = nestService.atNestSlot(targetSlot)
+        .map { deployedNest -> deployedNest.viewNestId() != nest.viewNestId() }
+        .orElse(false)
 
     private fun importProteins(passwordInfo: PasswordInfo): Boolean {
         passwordInfo.second.forEachIndexed { index, shellPair ->

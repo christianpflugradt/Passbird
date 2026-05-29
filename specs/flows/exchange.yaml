@@ -90,6 +90,7 @@ flows:
     exact_failure_output:
       - if previewing the import file fails before the import starts, the import handler prints no Operation aborted. message
       - if import parsing or reading fails with a generic import failure, Passbird prints Password Tree could not be imported. to standard error
+      - if a full import targets an occupied Nest Slot whose local NestId differs from the exported NestId, Passbird treats it as a generic import failure before writing any imported Eggs
       - if placing a missing target Nest or persisting an imported egg or protein fails after import starts, Passbird stops importing remaining entries, preserves the existing password-tree sync failure output, and does not emit the final success summary
       - missing, duplicate, or out-of-range exportedNest.slot metadata, or duplicate EggIds within one exported Nest, is treated as a generic import failure rather than being coerced to another Nest
       - if import parsing fails because an eggId contains digits or special characters, Passbird prints Password Tree could not be imported because at least one eggId contains digits or special characters. Please correct invalid eggIds and try again. Erroneous eggId: <EggId> to standard error

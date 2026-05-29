@@ -1,8 +1,10 @@
 package de.pflugradts.passbird.application.exchange
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.application.ExchangeAdapterPort
+import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.PasswordInfoMap
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
 import de.pflugradts.passbird.application.mainMocked
@@ -107,9 +109,11 @@ class PasswordImportExportServiceTest {
         // given
         val givenCurrentNestSlot = S2
         val eggs = testData()
-        fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory, withEggs = eggs)
+        val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
+        every { exchangeAdapterPort.receive() } returns success(importDataMatchingExistingNests(eggs))
+        every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
         fakePasswordService(instance = passwordService)
-        nestService.place(shellOf("n2"), S2)
+        nestService.place(shellOf(S2.name), S2)
         nestService.moveToNestAt(givenCurrentNestSlot)
         val eggIdSlot = mutableListOf<Shell>()
         val passwordSlot = mutableListOf<Shell>()
@@ -133,6 +137,36 @@ class PasswordImportExportServiceTest {
         verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(eggCountSlot.isCaptured)
         expectThat(eggCountSlot.captured.count) isEqualTo testData().size
+    }
+
+    @Test
+    fun `should not import passwords when a full import target slot contains a different nest`() {
+        // given
+        val givenCurrentNestSlot = S2
+        val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
+        every { exchangeAdapterPort.receive() } returns success(
+            linkedMapOf(
+                createNest(shellOf("imported"), S2) to listOf(
+                    Pair(ShellPair(shellOf("EggId"), shellOf("Password")), emptyList()),
+                ),
+            ),
+        )
+        every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
+        nestService.place(shellOf("local"), S2)
+        nestService.moveToNestAt(givenCurrentNestSlot)
+        val captureSystemErr = captureSystemErr()
+
+        // when
+        captureSystemErr.during {
+            importExportServiceSupplier.get().importEggs()
+        }
+
+        // then
+        verify { passwordService wasNot Called }
+        verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
+        verify(exactly = 0) { eventRegistry.processEvents() }
+        expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
+        expectThat(captureSystemErr.capture) isEqualTo "Password Tree could not be imported.\n"
     }
 
     @Test
@@ -401,6 +435,17 @@ private fun proteinShellPairs(vararg proteins: Pair<Slot, ShellPair>) = MutableL
 }.apply {
     proteins.forEach { (slot, shells) -> this[slot.index()] = shells }
 }
+
+private fun importDataMatchingExistingNests(eggs: List<Egg>): PasswordInfoMap = eggs.groupBy { it.associatedNest() }
+    .mapKeys { (slot, _) -> createNest(shellOf(if (slot == DEFAULT) "Default" else slot.name), slot) }
+    .mapValues { (_, eggs) ->
+        eggs.map {
+            PasswordInfo(
+                first = ShellPair(it.viewEggId().fakeDec(), it.viewPassword().fakeDec()),
+                second = emptyList(),
+            )
+        }
+    }
 
 private fun testData() = listOf(
     createEggForTesting(withEggIdShell = shellOf("EggId1"), withPasswordShell = shellOf("Password1"), withSlot = DEFAULT),
