@@ -45,7 +45,6 @@ val guiceVersion = "7.0.0"
 val jacksonVersion = "2.21.3"
 
 val archunitVersion = "1.4.2"
-val awaitilityVersion = "4.3.0"
 val junitPlatformVersion = "6.1.0"
 val kotestPropertyVersion = "6.1.11"
 val mockkVersion = "1.14.6"
@@ -72,7 +71,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testImplementation("io.kotest:kotest-property:$kotestPropertyVersion")
 
-    testImplementation("org.awaitility:awaitility:$awaitilityVersion")
     testImplementation("com.tngtech.archunit:archunit:$archunitVersion")
 }
 

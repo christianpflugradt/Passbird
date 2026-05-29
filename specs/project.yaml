@@ -25,10 +25,9 @@ technical_profile:
   shell_bootstrap: source ~/.zprofile && source ~/.zshrc
   test_stack:
     - JUnit 5
-    - Kotest Property
+    - Kotest Property and assertions
     - MockK
     - Strikt
-    - Awaitility
     - ArchUnit
   build_features:
     - detekt
