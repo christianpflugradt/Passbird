@@ -82,6 +82,7 @@ ci_landscape:
       - the GitHub Pages site builds from a temporary Jekyll source assembled in the workflow from repository documentation plus workflow-owned Pages config under .github/pages so the product root stays free of Pages-only files
       - the build workflow publishes the GitHub Pages site for coverage assets and refreshes the branch-coverage badge, instruction-coverage badge, and report on main
       - publish workflow creates manual GitHub prereleases from the latest official stable base version and runs semantic-release only on the Monday 03:00 Europe/Berlin schedule, but only after the current main commit already has a successful Build and Verify workflow run
+      - manual publish runs compute the development release version before building passbird.jar, scheduled stable publish runs build passbird.jar during semantic-release prepare with the stable nextRelease.version, and both paths verify the jar manifest before release publication
       - scheduled stable publish runs are expected to succeed even when no release is due, while manual publish runs are expected to produce a new development prerelease
 github_cli_usage:
   when_remote_state_matters:
@@ -168,6 +169,7 @@ recommended_validation_by_change_type:
   ci_or_release_workflow:
     run:
       - ./gradlew jar
+      - when release jar manifest stamping changes, build with an explicit -PreleaseVersion value and run .github/scripts/verify-release-jar-manifest.sh against build/libs/passbird.jar
       - review workflow and release config for consistency
       - inspect relevant GitHub Actions runs or workflow metadata with gh when the question depends on GitHub-side state
       - run semantic-release in dry-run mode when credentials and tags are available for scheduled stable-release behavior
@@ -191,10 +193,12 @@ release_and_history_notes:
   automation:
     - semantic-release now publishes scheduled stable releases on GitHub rather than GitLab
     - manual publish runs create GitHub prereleases whose tags are prefixed with dev- while their visible versions remain updater-compatible
+    - release jars are stamped through the explicit Gradle -PreleaseVersion input; development jars use the unprefixed dev version shown in the prerelease title and stable jars use the semantic-release nextRelease.version
     - release assets are expected to include passbird.jar for updater compatibility on both stable and development channels
     - publish runs stay gated on a fully successful Build and Verify workflow for the same main commit, which now includes jar-level smoke validation of the releasable artifact
   release_guardrail:
     - if a change impacts persistence format or migration behavior, document it before release
+    - publish workflow release paths must fail before creating or publishing a GitHub release when passbird.jar has a missing, unspecified, or mismatched Implementation-Version manifest value
     - agents should not push partial or unreleasable states simply to satisfy the default commit-and-push rule
 escalation_rules:
   - escalate when a change has hidden compatibility risk for stored data

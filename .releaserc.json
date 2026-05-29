@@ -40,6 +40,12 @@
       }
     ],
     [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "./gradlew -PcreatedBy=\"GitHub Actions\" -PreleaseVersion=${nextRelease.version} jar && .github/scripts/verify-release-jar-manifest.sh build/libs/passbird.jar ${nextRelease.version}"
+      }
+    ],
+    [
       "@semantic-release/github",
       {
         "assets": [

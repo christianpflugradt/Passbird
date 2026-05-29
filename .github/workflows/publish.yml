@@ -65,15 +65,13 @@ jobs:
           java-version: "25"
           distribution: "temurin"
       - uses: gradle/actions/setup-gradle@v6
-      - name: build release jar
-        run: ./gradlew -PcreatedBy="GitHub Actions" jar
       - uses: actions/setup-node@v6
         with:
           node-version: "26"
       - name: run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx --yes --package semantic-release@24.2.5 --package conventional-changelog-conventionalcommits@9.0.0 semantic-release
+        run: npx --yes --package semantic-release@24.2.5 --package conventional-changelog-conventionalcommits@9.0.0 --package @semantic-release/exec@7.1.0 semantic-release
   publish-dev:
     needs: [ require-verified-main ]
     if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
@@ -82,13 +80,6 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v5
-        with:
-          java-version: "25"
-          distribution: "temurin"
-      - uses: gradle/actions/setup-gradle@v6
-      - name: build release jar
-        run: ./gradlew -PcreatedBy="GitHub Actions" jar
       - id: compute-dev-version
         uses: actions/github-script@v9
         with:
@@ -121,6 +112,17 @@ jobs:
             core.setOutput("base_version", baseVersion);
             core.setOutput("version", version);
             core.setOutput("tag_name", `dev-${version}`);
+      - uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+      - uses: gradle/actions/setup-gradle@v6
+      - name: build release jar
+        run: ./gradlew -PcreatedBy="GitHub Actions" -PreleaseVersion="${{ steps.compute-dev-version.outputs.version }}" jar
+      - name: verify release jar manifest
+        env:
+          EXPECTED_VERSION: ${{ steps.compute-dev-version.outputs.version }}
+        run: .github/scripts/verify-release-jar-manifest.sh build/libs/passbird.jar "$EXPECTED_VERSION"
       - name: create GitHub prerelease
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

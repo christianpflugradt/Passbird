@@ -77,6 +77,7 @@ dependencies {
 java.sourceCompatibility = JavaVersion.VERSION_17
 java.targetCompatibility = JavaVersion.VERSION_17
 group = "de.pflugradts"
+version = (project.findProperty("releaseVersion") as? String)?.trim()?.takeIf { it.isNotEmpty() } ?: "unspecified"
 
 tasks.withType<JavaCompile>().configureEach {
     options.release.set(17)
@@ -84,6 +85,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.withType<Jar> {
     archiveBaseName.set("passbird")
+    archiveVersion.set("")
     manifest {
         attributes["Manifest-Version"] = "1.0"
         attributes["Build-Date"] = SimpleDateFormat("yyyy-MM-dd").format(Date())
