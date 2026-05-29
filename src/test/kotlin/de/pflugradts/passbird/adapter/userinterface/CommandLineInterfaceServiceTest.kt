@@ -251,6 +251,40 @@ class CommandLineInterfaceServiceTest {
         }
 
         @Test
+        fun `should abort secure input before reading when inactivity termination is already requested`() {
+            // given
+            val inactivityTerminationSignal = InactivityTerminationSignal()
+            val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration, inactivityTerminationSignal)
+            inactivityTerminationSignal.request()
+            fakeSystemOperation(instance = systemOperation, withConsoleEnabled = true)
+            fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
+
+            // when / then
+            assertThrows<InactivityTerminationRequestedException> { commandLineInterfaceService.receiveSecurely() }
+            verify(exactly = 0) { systemOperation.readPasswordFromConsole() }
+        }
+
+        @Test
+        fun `should keep waiting for secure input while inactivity termination is not requested`() {
+            // given
+            val inactivityTerminationSignal = InactivityTerminationSignal()
+            val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration, inactivityTerminationSignal)
+            fakeSystemOperation(instance = systemOperation, withConsoleEnabled = true)
+            fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
+            every { systemOperation.readPasswordFromConsole() } answers {
+                Thread.sleep(100)
+                "secret".toCharArray()
+            }
+
+            // when
+            val actual = commandLineInterfaceService.receiveSecurely()
+
+            // then
+            expectThat(actual.shell.asString()) isEqualTo "secret"
+            verify(exactly = 1) { systemOperation.readPasswordFromConsole() }
+        }
+
+        @Test
         fun `should receive secure input as plain if secure input is disabled`() {
             // given
             val givenInput = "hello world"
