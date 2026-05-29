@@ -42,6 +42,11 @@ current_security_relevant_implementation:
       - fails closed when secure input is enabled but no console is available instead of falling back to echoed stdin
       - invalidates secure input buffers after converting them for keystore access
       - treats empty and incorrect passwords as unsuccessful attempts
+  terminal_input:
+    file: src/main/kotlin/de/pflugradts/passbird/adapter/userinterface/CommandLineInterfaceService.kt
+    facts:
+      - visible and secure terminal reads poll the inactivity termination signal while waiting for input
+      - secure terminal reads preserve the fail-closed no-console rule instead of falling back to visible input
   keystore:
     file: src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
     facts:

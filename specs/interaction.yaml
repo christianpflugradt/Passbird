@@ -18,6 +18,7 @@ input_semantics:
     - if visible stdin reaches EOF before any character is read, receive terminates the interactive session instead of fabricating input
   secure_input:
     - if adapter.userInterface.secureInput is enabled and a console is available, receiveSecurely reads characters through the console password reader instead of standard line input
+    - receiveSecurely observes inactivity termination while waiting for console password input and aborts the current flow when shutdown is requested
     - if secure input is disabled, receiveSecurely falls back to the same plain line reader used by receive
     - if secure input is enabled but no console is available, receiveSecurely aborts the current secure-entry flow instead of falling back to visible line input
   affirmations:

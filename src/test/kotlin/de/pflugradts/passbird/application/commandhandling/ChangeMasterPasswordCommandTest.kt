@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.commandhandling
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.application.InactivityTerminationRequestedException
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
@@ -24,6 +25,7 @@ import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotEqualTo
@@ -88,6 +90,24 @@ class ChangeMasterPasswordCommandTest {
             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             userInterfaceAdapterPort.sendLineBreak()
         }
+    }
+
+    @Test
+    fun `should propagate inactivity termination during new password input`() {
+        // given
+        val key = shellOf("existing-key")
+        val reference = key.copy()
+        every { keyStoreAuthenticationService.authenticate(1, "Enter current key: ") } returns success(key)
+        every {
+            userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter new key: ")))
+        } throws InactivityTerminationRequestedException()
+
+        // when / then
+        assertThrows<InactivityTerminationRequestedException> {
+            inputHandler.handleInput(inputOf(shellOf("k")))
+        }
+        verify(exactly = 0) { keyStoreAdapterPort.storeExistingKey(any(), any(), any()) }
+        expectThat(key) isNotEqualTo reference
     }
 
     @Test

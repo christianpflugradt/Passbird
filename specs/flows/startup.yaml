@@ -60,7 +60,7 @@ flows:
       - when enabled, Passbird starts a daemon timer at boot that checks inactivity every 10 seconds
       - the inactivity threshold is exceeded only when elapsed idle time is strictly greater than application.inactivityLimit.limitInMinutes multiplied by 60 seconds
       - each received non-interrupt command input refreshes the last-interaction timestamp before the command handler runs
-      - when inactivity is detected while Passbird is blocked in terminal input, the timer requests shutdown and the interactive execution path performs the actual quit handling once control returns from the input adapter
+      - when inactivity is detected while Passbird is blocked in visible or secure terminal input, the timer requests shutdown and the interactive execution path performs the actual quit handling once control returns from the input adapter
     user_quit_command:
       accepted_command_shape:
         - q

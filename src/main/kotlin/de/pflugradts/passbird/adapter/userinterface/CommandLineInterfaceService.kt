@@ -15,6 +15,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -28,8 +29,8 @@ class CommandLineInterfaceService @Inject constructor(
     private val configuration: ReadableConfiguration,
     private val inactivityTerminationSignal: InactivityTerminationSignal,
 ) : UserInterfaceAdapterPort {
-    private val stdinReaderExecutor = Executors.newSingleThreadExecutor { runnable ->
-        Thread(runnable, "passbird-stdin-reader").apply { isDaemon = true }
+    private val inputReaderExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "passbird-input-reader").apply { isDaemon = true }
     }
 
     constructor(
@@ -58,11 +59,20 @@ class CommandLineInterfaceService @Inject constructor(
     private fun isCarriageReturn(chr: Char) = chr == '\r'
     private fun isEndOfInput(chr: Char) = chr == STDIN_EOF
 
-    private fun readCharFromVisibleStdin(): Char {
-        val readTask = stdinReaderExecutor.submit<Char> { runCatching(::stdin).getOrDefault(STDIN_EOF) }
+    private fun readCharFromVisibleStdin(): Char = readWithInactivityCheck { runCatching(::stdin).getOrDefault(STDIN_EOF) }
+
+    private fun readPasswordFromConsole(): CharArray = readWithInactivityCheck { systemOperation.readPasswordFromConsole() }
+
+    private fun <T> readWithInactivityCheck(read: () -> T): T {
+        if (inactivityTerminationSignal.isRequested()) {
+            throw InactivityTerminationRequestedException()
+        }
+        val readTask = inputReaderExecutor.submit<T> { read() }
         while (true) {
             try {
                 return readTask.get(INPUT_POLL_INTERVAL_IN_MILLIS, TimeUnit.MILLISECONDS)
+            } catch (ex: ExecutionException) {
+                throw ex.cause ?: ex
             } catch (_: TimeoutException) {
                 if (inactivityTerminationSignal.isRequested()) {
                     readTask.cancel(true)
@@ -79,7 +89,7 @@ class CommandLineInterfaceService @Inject constructor(
         sendWithoutLineBreak(output)
         return when {
             !configuration.adapter.userInterface.secureInput -> receivePlain()
-            systemOperation.isConsoleAvailable -> inputOf(plainShellOf(systemOperation.readPasswordFromConsole()).toShell())
+            systemOperation.isConsoleAvailable -> inputOf(plainShellOf(readPasswordFromConsole()).toShell())
             else -> throw SecureInputUnavailableException()
         }
     }
