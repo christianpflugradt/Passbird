@@ -11,8 +11,8 @@ import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -40,15 +40,20 @@ class ViewCommandTest {
             instance = passwordService,
             withEggs = listOf(createEggForTesting(withEggIdShell = shellOf(eggId), withPasswordShell = shellOf(password))),
         )
-        val outputSlot = slot<Output>()
+        val outputs = mutableListOf<Output>()
+        every { userInterfaceAdapterPort.send(capture(outputs)) } answers {
+            outputs.last().shell.takeIf { it.isNotEmpty }?.let {
+                expectThat(it.asString()) isEqualTo password
+            }
+        }
 
         // when
         expectThat(command) isEqualTo reference
         inputHandler.handleInput(inputOf(command))
 
         // then
-        verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell.asString()) isEqualTo password
+        verify(exactly = 1) { userInterfaceAdapterPort.send(any()) }
+        expectThat(outputs.first { it.shell.isNotEmpty }.shell) isNotEqualTo shellOf(password)
         expectThat(command) isNotEqualTo reference
     }
 

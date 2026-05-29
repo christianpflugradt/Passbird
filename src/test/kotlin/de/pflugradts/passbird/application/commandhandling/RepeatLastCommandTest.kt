@@ -19,6 +19,7 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_A
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import jakarta.inject.Provider
@@ -114,6 +115,10 @@ class RepeatLastCommandTest {
             withMemory = memory,
         )
         val outputs = mutableListOf<Output>()
+        val renderedSecrets = mutableListOf<String>()
+        every { userInterfaceAdapterPort.send(capture(outputs)) } answers {
+            renderedSecrets += outputs.last().shell.asString()
+        }
         val delegatingInputHandler = DelegatingInputHandler()
         val commandExecutionTracker = CommandExecutionTracker()
         inputHandler = createInputHandlerFor(
@@ -143,8 +148,8 @@ class RepeatLastCommandTest {
         memory[DEFAULT] = "calendar"
         inputHandler.handleInput(inputOf(shellOf(".")))
 
-        verify(exactly = 2) { userInterfaceAdapterPort.send(capture(outputs)) }
-        expectThat(outputs.map { it.shell.asString() }).containsExactly("secret-one", "secret-two")
+        verify(exactly = 2) { userInterfaceAdapterPort.send(any()) }
+        expectThat(renderedSecrets).containsExactly("secret-one", "secret-two")
     }
 
     @Test

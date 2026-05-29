@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNotEqualTo
 
 @Tag(INTEGRATION)
 class GetFavoriteCommandTest {
@@ -46,11 +47,15 @@ class GetFavoriteCommandTest {
     fun `should handle get favorite command`() {
         fakePasswordService(instance = passwordService, withFavorites = mapOf(S1 to "eggid1"))
         val outputSlot = slot<Output>()
+        every { clipboardAdapterPort.post(capture(outputSlot)) } answers {
+            expectThat(outputSlot.captured.shell) isEqualTo shellOf("eggid1")
+            success(Unit)
+        }
 
         inputHandler.handleInput(inputOf(shellOf("f1")))
 
-        verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell) isEqualTo shellOf("eggid1")
+        verify { clipboardAdapterPort.post(any()) }
+        expectThat(outputSlot.captured.shell) isNotEqualTo shellOf("eggid1")
         verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(shellOf("EggId copied to clipboard."))) }
     }
 
@@ -69,11 +74,15 @@ class GetFavoriteCommandTest {
         fakePasswordService(instance = passwordService, withFavorites = mapOf(S1 to "eggid1"))
         every { clipboardAdapterPort.post(any()) } returns failure(IllegalStateException("clipboard unavailable"))
         val outputSlot = slot<Output>()
+        every { clipboardAdapterPort.post(capture(outputSlot)) } answers {
+            expectThat(outputSlot.captured.shell) isEqualTo shellOf("eggid1")
+            failure(IllegalStateException("clipboard unavailable"))
+        }
 
         inputHandler.handleInput(inputOf(shellOf("f1")))
 
-        verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell) isEqualTo shellOf("eggid1")
+        verify { clipboardAdapterPort.post(any()) }
+        expectThat(outputSlot.captured.shell) isNotEqualTo shellOf("eggid1")
         verify(exactly = 0) { userInterfaceAdapterPort.send(outputOf(shellOf("EggId copied to clipboard."))) }
     }
 }

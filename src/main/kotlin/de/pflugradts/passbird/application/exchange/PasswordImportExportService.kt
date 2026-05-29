@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.exchange
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.passbird.application.PasswordInfo
+import de.pflugradts.passbird.application.PasswordInfoMap
 import de.pflugradts.passbird.application.failure.ImportFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.domain.model.event.EggsExported
@@ -59,27 +60,42 @@ class PasswordImportExportService @Inject constructor(
         val currentNest = nestService.currentNest()
         val eggsByNest = mutableMapOf<Nest, List<PasswordInfo>>()
         try {
-            nestService.all(includeDefault = true)
-                .filter { it.isPresent }
-                .map { it.get() }
-                .filter { it.slot in slots }
-                .forEach { nest ->
-                    nestService.moveToNestAt(nest.slot)
-                    eggsByNest[nest] = passwordService.findAllEggIds()
-                        .map { eggId ->
-                            PasswordInfo(
-                                first = ShellPair(eggId, passwordService.viewPassword(eggId).get()),
-                                second = passwordService.viewProteinTypes(eggId).toShellList()
-                                    .zip(passwordService.viewProteinStructures(eggId).toShellList()),
-                            )
-                        }.toList()
-                }
+            try {
+                nestService.all(includeDefault = true)
+                    .filter { it.isPresent }
+                    .map { it.get() }
+                    .filter { it.slot in slots }
+                    .forEach { nest ->
+                        nestService.moveToNestAt(nest.slot)
+                        eggsByNest[nest] = passwordService.findAllEggIds()
+                            .map { eggId ->
+                                PasswordInfo(
+                                    first = ShellPair(eggId, passwordService.viewPassword(eggId).get()),
+                                    second = passwordService.viewProteinTypes(eggId).toShellList()
+                                        .zip(passwordService.viewProteinStructures(eggId).toShellList()),
+                                )
+                            }.toList()
+                    }
+            } finally {
+                nestService.moveToNestAt(currentNest.slot)
+            }
+            exchangeFactory.createPasswordExchange().send(eggsByNest).onSuccess {
+                eventRegistry.register(EggsExported(eggsByNest.values.sumOf { it.size }))
+                eventRegistry.processEvents()
+            }
         } finally {
-            nestService.moveToNestAt(currentNest.slot)
+            eggsByNest.scrambleShells()
         }
-        exchangeFactory.createPasswordExchange().send(eggsByNest).onSuccess {
-            eventRegistry.register(EggsExported(eggsByNest.values.sumOf { it.size }))
-            eventRegistry.processEvents()
+    }
+
+    private fun PasswordInfoMap.scrambleShells() {
+        values.flatten().forEach {
+            it.first.first.scramble()
+            it.first.second.scramble()
+            it.second.forEach { protein ->
+                protein.first.scramble()
+                protein.second.scramble()
+            }
         }
     }
 

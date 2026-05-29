@@ -20,9 +20,13 @@ class ViewProteinTypesCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleViewProteinTypesCommand(viewProteinTypesCommand: ViewProteinTypesCommand) {
-        passwordService.viewProteinTypes(viewProteinTypesCommand.argument).orNull()?.also {
-            userInterfaceAdapterPort.send(*outputsOfHeader())
-            it.forEachIndexed { index, proteinType -> userInterfaceAdapterPort.send(*outputsOf(index, proteinType)) }
+        passwordService.viewProteinTypes(viewProteinTypesCommand.argument).orNull()?.also { proteinTypes ->
+            try {
+                userInterfaceAdapterPort.send(*outputsOfHeader())
+                proteinTypes.forEachIndexed { index, proteinType -> userInterfaceAdapterPort.send(*outputsOf(index, proteinType)) }
+            } finally {
+                proteinTypes.forEach { it.ifPresent(Shell::scramble) }
+            }
         } ?: commandExecutionTracker.markFailure()
         viewProteinTypesCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

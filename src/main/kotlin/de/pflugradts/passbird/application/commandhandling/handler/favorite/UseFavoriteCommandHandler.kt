@@ -6,6 +6,7 @@ import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracke
 import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.application.commandhandling.command.UseFavoriteCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.useScrambled
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -21,9 +22,11 @@ class UseFavoriteCommandHandler @Inject constructor(
     @Subscribe
     private fun handleUseFavoriteCommand(useFavoriteCommand: UseFavoriteCommand) {
         passwordService.viewFavoriteEntry(useFavoriteCommand.slot).ifPresentOrElse(
-            block = {
-                inputHandler.handleInput(inputOf(useFavoriteCommand.argument + it))
-                commandExecutionTracker.mark(commandExecutionTracker.lastCompletedOutcome())
+            block = { favorite ->
+                favorite.useScrambled {
+                    inputHandler.handleInput(inputOf(useFavoriteCommand.argument + it))
+                    commandExecutionTracker.mark(commandExecutionTracker.lastCompletedOutcome())
+                }
             },
             other = {
                 commandExecutionTracker.markFailure()

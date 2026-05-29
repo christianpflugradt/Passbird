@@ -39,6 +39,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNotEqualTo
 import java.util.stream.Stream
 
 @Tag(INTEGRATION)
@@ -64,13 +65,17 @@ class GetMemoryCommandTest {
         val command = shellOf("m${slot.index()}")
         fakePasswordService(instance = passwordService, withMemory = testMemoryData())
         val outputSlot = slot<Output>()
+        every { clipboardAdapterPort.post(capture(outputSlot)) } answers {
+            expectThat(outputSlot.captured.shell) isEqualTo shellOf(testMemoryData()[slot].orEmpty())
+            success(Unit)
+        }
 
         // when
         inputHandler.handleInput(inputOf(command))
 
         // then
-        verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell) isEqualTo shellOf(testMemoryData()[slot].orEmpty())
+        verify { clipboardAdapterPort.post(any()) }
+        expectThat(outputSlot.captured.shell) isNotEqualTo shellOf(testMemoryData()[slot].orEmpty())
         verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(shellOf("EggId copied to clipboard."))) }
     }
 
@@ -96,13 +101,17 @@ class GetMemoryCommandTest {
         fakePasswordService(instance = passwordService, withMemory = testMemoryData())
         every { clipboardAdapterPort.post(any()) } returns failure(IllegalStateException("clipboard unavailable"))
         val outputSlot = slot<Output>()
+        every { clipboardAdapterPort.post(capture(outputSlot)) } answers {
+            expectThat(outputSlot.captured.shell) isEqualTo shellOf("eggid0")
+            failure(IllegalStateException("clipboard unavailable"))
+        }
 
         // when
         inputHandler.handleInput(inputOf(command))
 
         // then
-        verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell) isEqualTo shellOf("eggid0")
+        verify { clipboardAdapterPort.post(any()) }
+        expectThat(outputSlot.captured.shell) isNotEqualTo shellOf("eggid0")
         verify(exactly = 0) { userInterfaceAdapterPort.send(outputOf(shellOf("EggId copied to clipboard."))) }
     }
 

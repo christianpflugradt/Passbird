@@ -6,6 +6,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.GetProteinCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.useScrambled
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
@@ -20,7 +21,7 @@ class GetProteinCommandHandler @Inject constructor(
 ) : CommandHandler {
     @Subscribe
     private fun handleGetProteinCommand(getProteinCommand: GetProteinCommand) {
-        passwordService.viewProteinStructure(getProteinCommand.argument, getProteinCommand.slot).orNull()?.also {
+        passwordService.viewProteinStructure(getProteinCommand.argument, getProteinCommand.slot).orNull()?.useScrambled {
             if (it.isNotEmpty) {
                 val clipboardResult = clipboardAdapterPort.post(outputOf(it))
                 if (clipboardResult.failure) {

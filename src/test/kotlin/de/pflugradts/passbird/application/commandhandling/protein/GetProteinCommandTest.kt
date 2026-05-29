@@ -65,14 +65,18 @@ class GetProteinCommandTest {
             ),
         )
         val outputSlot = slot<Output>()
+        every { clipboardAdapterPort.post(capture(outputSlot)) } answers {
+            expectThat(outputSlot.captured.shell) isEqualTo expectedStructure
+            success(Unit)
+        }
 
         // when
         expectThat(command) isEqualTo reference
         inputHandler.handleInput(inputOf(command))
 
         // then
-        verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell) isEqualTo expectedStructure
+        verify { clipboardAdapterPort.post(any()) }
+        expectThat(outputSlot.captured.shell) isNotEqualTo expectedStructure
         verify(exactly = 1) { userInterfaceAdapterPort.send(any()) }
         expectThat(command) isNotEqualTo reference
     }
@@ -146,14 +150,18 @@ class GetProteinCommandTest {
         )
         every { clipboardAdapterPort.post(any()) } returns failure(IllegalStateException("clipboard unavailable"))
         val outputSlot = slot<Output>()
+        every { clipboardAdapterPort.post(capture(outputSlot)) } answers {
+            expectThat(outputSlot.captured.shell) isEqualTo expectedStructure
+            failure(IllegalStateException("clipboard unavailable"))
+        }
 
         // when
         expectThat(command) isEqualTo reference
         inputHandler.handleInput(inputOf(command))
 
         // then
-        verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell) isEqualTo expectedStructure
+        verify { clipboardAdapterPort.post(any()) }
+        expectThat(outputSlot.captured.shell) isNotEqualTo expectedStructure
         verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
         expectThat(command) isNotEqualTo reference
     }

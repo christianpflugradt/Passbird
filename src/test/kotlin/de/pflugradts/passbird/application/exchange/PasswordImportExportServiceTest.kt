@@ -41,6 +41,7 @@ import strikt.assertions.hasSize
 import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
+import strikt.assertions.isNotEqualTo
 import strikt.assertions.map
 import java.util.function.Supplier
 
@@ -342,15 +343,18 @@ class PasswordImportExportServiceTest {
         nestService.moveToNestAt(givenCurrentNestSlot)
         val exportNestSlot = slot<PasswordInfoMap>()
         val eggCountSlot = slot<EggsExported>()
+        every { exchangeAdapterPort.send(capture(exportNestSlot)) } answers {
+            expectThatActualBytePairsMatchExpected(exportNestSlot.captured, eggs)
+            success(Unit)
+        }
 
         // when
         importExportServiceSupplier.get().exportEggs()
 
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
-        verify { exchangeAdapterPort.send(capture(exportNestSlot)) }
+        verify { exchangeAdapterPort.send(any()) }
         val actual = exportNestSlot.captured
-        expectThatActualBytePairsMatchExpected(actual, eggs)
         expectThat(actual) hasSize 3 containsKey DEFAULT.toNest() containsKey S2.toNest() containsKey S9.toNest()
         expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
         verify { eventRegistry.register(capture(eggCountSlot)) }
@@ -382,6 +386,31 @@ class PasswordImportExportServiceTest {
         expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
         verify { eventRegistry.register(capture(eggCountSlot)) }
         expectThat(eggCountSlot.captured.count) isEqualTo 4
+    }
+
+    @Test
+    fun `should scramble exported shells after exchange completes`() {
+        // given
+        val exportedEgg = createEggForTesting(
+            withEggIdShell = shellOf("EggId"),
+            withPasswordShell = shellOf("Password"),
+            withProteins = mapOf(S3 to ShellPair(shellOf("ProteinType"), shellOf("ProteinStructure"))),
+        )
+        val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
+        val exportNestSlot = slot<PasswordInfoMap>()
+        every { exchangeAdapterPort.send(capture(exportNestSlot)) } returns success(Unit)
+        every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
+        fakePasswordService(instance = passwordService, withEggs = listOf(exportedEgg), withNestService = nestService)
+
+        // when
+        importExportServiceSupplier.get().exportEggs(setOf(DEFAULT))
+
+        // then
+        val exportedPasswordInfo = exportNestSlot.captured.values.single().single()
+        expectThat(exportedPasswordInfo.first.first) isNotEqualTo shellOf("EggId")
+        expectThat(exportedPasswordInfo.first.second) isNotEqualTo shellOf("Password")
+        expectThat(exportedPasswordInfo.second[S3.index()].first) isNotEqualTo shellOf("ProteinType")
+        expectThat(exportedPasswordInfo.second[S3.index()].second) isNotEqualTo shellOf("ProteinStructure")
     }
 
     @Test

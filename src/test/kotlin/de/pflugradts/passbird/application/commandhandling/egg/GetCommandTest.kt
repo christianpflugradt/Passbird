@@ -54,14 +54,18 @@ class GetCommandTest {
             withEggs = listOf(createEggForTesting(withEggIdShell = shellOf(args), withPasswordShell = expectedPassword)),
         )
         val outputSlot = slot<Output>()
+        every { clipboardAdapterPort.post(capture(outputSlot)) } answers {
+            expectThat(outputSlot.captured.shell) isEqualTo expectedPassword
+            success(Unit)
+        }
 
         // when
         expectThat(command) isEqualTo reference
         inputHandler.handleInput(inputOf(command))
 
         // then
-        verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell) isEqualTo expectedPassword
+        verify { clipboardAdapterPort.post(any()) }
+        expectThat(outputSlot.captured.shell) isNotEqualTo expectedPassword
         verify(exactly = 1) { userInterfaceAdapterPort.send(any()) }
         expectThat(command) isNotEqualTo reference
     }
@@ -100,14 +104,18 @@ class GetCommandTest {
         )
         every { clipboardAdapterPort.post(any()) } returns failure(IllegalStateException("clipboard unavailable"))
         val outputSlot = slot<Output>()
+        every { clipboardAdapterPort.post(capture(outputSlot)) } answers {
+            expectThat(outputSlot.captured.shell) isEqualTo expectedPassword
+            failure(IllegalStateException("clipboard unavailable"))
+        }
 
         // when
         expectThat(command) isEqualTo reference
         inputHandler.handleInput(inputOf(command))
 
         // then
-        verify { clipboardAdapterPort.post(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell) isEqualTo expectedPassword
+        verify { clipboardAdapterPort.post(any()) }
+        expectThat(outputSlot.captured.shell) isNotEqualTo expectedPassword
         verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
         expectThat(command) isNotEqualTo reference
     }

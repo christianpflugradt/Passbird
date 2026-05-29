@@ -89,6 +89,13 @@ current_security_relevant_implementation:
       - can exit immediately when verification is configured as critical
       - stores eggs, nests, per-nest Favorite slots, and optionally persisted memory in a custom binary layout before encryption
       - detects both legacy pre-envelope password tree files and legacy current-format trees that require a Favorites migration before main startup
+  secret_output_paths:
+    files:
+      - src/main/kotlin/de/pflugradts/passbird/application/commandhandling/handler
+      - src/main/kotlin/de/pflugradts/passbird/application/exchange/PasswordImportExportService.kt
+    facts:
+      - command handlers that copy, render, or delegate decrypted password, protein, Favorite, or memory Shell values scramble those temporary Shells after the sink operation completes
+      - export collection keeps decrypted Shell values alive only until the exchange adapter send operation returns, then scrambles the exported EggId, password, and protein Shell values before the command completes
   build_supply_chain:
     files:
       - gradle/verification-metadata.xml

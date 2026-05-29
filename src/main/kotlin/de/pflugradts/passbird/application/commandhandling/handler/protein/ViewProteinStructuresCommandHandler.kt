@@ -24,15 +24,27 @@ class ViewProteinStructuresCommandHandler @Inject constructor(
     @Subscribe
     private fun handleViewProteinStructuresCommand(viewProteinStructuresCommand: ViewProteinStructuresCommand) {
         passwordService.viewProteinTypes(viewProteinStructuresCommand.argument).orNull()?.also { types ->
-            passwordService.viewProteinStructures(viewProteinStructuresCommand.argument).orNull()?.also { structures ->
-                userInterfaceAdapterPort.send(*outputsOfHeader())
-                types.zip(structures).forEachIndexed { index, proteinPair ->
-                    userInterfaceAdapterPort.send(*outputsOf(index, proteinPair.toShellPairOption()))
-                }
-            } ?: commandExecutionTracker.markFailure()
+            try {
+                passwordService.viewProteinStructures(viewProteinStructuresCommand.argument).orNull()?.also { structures ->
+                    try {
+                        userInterfaceAdapterPort.send(*outputsOfHeader())
+                        types.zip(structures).forEachIndexed { index, proteinPair ->
+                            userInterfaceAdapterPort.send(*outputsOf(index, proteinPair.toShellPairOption()))
+                        }
+                    } finally {
+                        structures.scramblePresentShells()
+                    }
+                } ?: commandExecutionTracker.markFailure()
+            } finally {
+                types.scramblePresentShells()
+            }
         } ?: commandExecutionTracker.markFailure()
         viewProteinStructuresCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
+    }
+
+    private fun List<Option<Shell>>.scramblePresentShells() {
+        forEach { it.ifPresent(Shell::scramble) }
     }
 
     private fun outputsOfHeader(): Array<Output> = with(canPrintInfo) {
