@@ -37,14 +37,16 @@ class ImportCommandTest {
     private val configuration = mockk<Configuration>()
     private val nestService = createNestServiceForTesting()
     private val passwordService = mockk<PasswordService>()
+    private val commandExecutionTracker = CommandExecutionTracker()
     private val importCommandHandler = ImportCommandHandler(
         configuration,
         importExportService,
         nestService,
         passwordService,
         userInterfaceAdapterPort,
+        commandExecutionTracker,
     )
-    private val inputHandler = createInputHandlerFor(importCommandHandler)
+    private val inputHandler = createInputHandlerFor(importCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle import command`() {

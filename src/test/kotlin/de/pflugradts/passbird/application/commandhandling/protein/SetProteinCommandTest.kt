@@ -4,6 +4,7 @@ import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.protein.SetProteinCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -36,8 +37,10 @@ class SetProteinCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val configuration = mockk<Configuration>()
     private val passwordService = mockk<PasswordService>()
-    private val setProteinCommandHandler = SetProteinCommandHandler(configuration, passwordService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(setProteinCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val setProteinCommandHandler =
+        SetProteinCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(setProteinCommandHandler, commandExecutionTracker)
 
     @ParameterizedTest
     @EnumSource(value = Slot::class)

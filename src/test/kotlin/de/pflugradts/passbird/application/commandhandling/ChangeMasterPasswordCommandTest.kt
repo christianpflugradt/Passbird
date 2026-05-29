@@ -41,12 +41,14 @@ class ChangeMasterPasswordCommandTest {
     private val keyStoreAdapterPort = mockk<KeyStoreAdapterPort>()
     private val keyStoreAuthenticationService = mockk<KeyStoreAuthenticationService>()
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
+    private val commandExecutionTracker = CommandExecutionTracker()
     private val changeMasterPasswordCommandHandler = ChangeMasterPasswordCommandHandler(
         keyStoreAdapterPort = keyStoreAdapterPort,
         keyStoreAuthenticationService = keyStoreAuthenticationService,
         userInterfaceAdapterPort = userInterfaceAdapterPort,
+        commandExecutionTracker = commandExecutionTracker,
     )
-    private val inputHandler = createInputHandlerFor(changeMasterPasswordCommandHandler)
+    private val inputHandler = createInputHandlerFor(changeMasterPasswordCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should abort master password change when current password authentication fails`() {

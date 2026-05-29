@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.favorite
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.favorite.DiscardFavoriteCommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -18,8 +19,10 @@ import org.junit.jupiter.api.Test
 class DiscardFavoriteCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val passwordService = mockk<PasswordService>()
-    private val discardFavoriteCommandHandler = DiscardFavoriteCommandHandler(passwordService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(discardFavoriteCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val discardFavoriteCommandHandler =
+        DiscardFavoriteCommandHandler(passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(discardFavoriteCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle discard favorite command`() {

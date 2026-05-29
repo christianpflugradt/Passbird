@@ -22,6 +22,7 @@ class MoveToNestCommandHandler @Inject constructor(
     private val nestService: NestService,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleMoveToNestCommand(moveToNestCommand: MoveToNestCommand) {
@@ -31,29 +32,29 @@ class MoveToNestCommandHandler @Inject constructor(
             val input = userInterfaceAdapterPort.receive(outputOf(shellOf("\nEnter Nest you want to move Egg to: ")))
             val nestSlot = input.shell.asString().toTargetNestSlot()
             if (nestSlot == null) {
-                CommandExecutionTracker.markAborted()
+                commandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             } else if (nestSlot === nestService.currentNest().slot) {
-                CommandExecutionTracker.markAborted()
+                commandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(
                     outputOf(shellOf("Egg is already in the specified Nest - Operation aborted."), OPERATION_ABORTED),
                 )
             } else if (nestService.atNestSlot(nestSlot).isEmpty) {
-                CommandExecutionTracker.markAborted()
+                commandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted."), OPERATION_ABORTED))
             } else if (passwordService.eggExists(moveToNestCommand.argument, nestSlot)) {
-                CommandExecutionTracker.markAborted()
+                commandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(
                     outputOf(shellOf("Egg with same EggId already exists in target Nest - Operation aborted."), OPERATION_ABORTED),
                 )
             } else {
                 if (passwordService.moveEgg(moveToNestCommand.argument, nestSlot).failure) {
-                    CommandExecutionTracker.markFailure()
+                    commandExecutionTracker.markFailure()
                 }
             }
             input.invalidate()
         } else {
-            CommandExecutionTracker.markFailure()
+            commandExecutionTracker.markFailure()
         }
         moveToNestCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

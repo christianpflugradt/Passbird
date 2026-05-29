@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.nest
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
@@ -29,8 +30,9 @@ class AddNestCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val nestService = createNestServiceForTesting()
-    private val addNestCommandHandler = AddNestCommandHandler(nestService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(addNestCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val addNestCommandHandler = AddNestCommandHandler(nestService, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(addNestCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle add nest command`() {

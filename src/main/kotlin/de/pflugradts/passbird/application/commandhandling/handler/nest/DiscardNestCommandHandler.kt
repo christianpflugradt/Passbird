@@ -20,6 +20,7 @@ class DiscardNestCommandHandler @Inject constructor(
     private val nestService: NestService,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
 
     @Subscribe
@@ -46,7 +47,7 @@ class DiscardNestCommandHandler @Inject constructor(
             val eggIds = passwordService.findAllEggIds().toList()
             if (eggIds.isEmpty()) {
                 if (nestService.discardNestAt(discardNestCommand.slot).failure) {
-                    CommandExecutionTracker.markFailure()
+                    commandExecutionTracker.markFailure()
                 }
                 return
             }
@@ -60,7 +61,7 @@ class DiscardNestCommandHandler @Inject constructor(
         val targetNestSlot = receiveTargetNestSlot(eggIds) ?: return
         val overlaps = overlappingEggIds(discardNestSlot, targetNestSlot, eggIds)
         if (overlaps.isNotEmpty()) {
-            CommandExecutionTracker.markAborted()
+            commandExecutionTracker.markAborted()
             val overlapsMessage = "The following EggIds exist in both Nests. " +
                 "Please move them manually before discarding the Nest: ${System.lineSeparator()}- " + joinToString(overlaps)
             userInterfaceAdapterPort.send(outputOf(shellOf(overlapsMessage)))
@@ -68,11 +69,11 @@ class DiscardNestCommandHandler @Inject constructor(
             return
         }
         if (eggIds.any { eggId -> passwordService.moveEgg(eggId, targetNestSlot).failure }) {
-            CommandExecutionTracker.markFailure()
+            commandExecutionTracker.markFailure()
             return
         }
         if (nestService.discardNestAt(discardNestSlot).failure) {
-            CommandExecutionTracker.markFailure()
+            commandExecutionTracker.markFailure()
         }
     }
 
@@ -82,13 +83,13 @@ class DiscardNestCommandHandler @Inject constructor(
         val input = userInterfaceAdapterPort.receive(outputOf(shellOf(prompt)))
         val nestSlot = input.shell.asString()
         if (nestSlot.length != 1 || !nestSlot[0].isDigit()) {
-            CommandExecutionTracker.markAborted()
+            commandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             return null
         }
         val targetNestOption = nestService.atNestSlot(slotAt(nestSlot))
         if (targetNestOption.isEmpty) {
-            CommandExecutionTracker.markAborted()
+            commandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Nest Slot $nestSlot is empty - Operation aborted."), OPERATION_ABORTED))
             return null
         }
@@ -108,7 +109,7 @@ class DiscardNestCommandHandler @Inject constructor(
     private fun joinToString(shells: List<Shell>) = shells.joinToString(separator = "${System.lineSeparator()}- ") { id -> id.asString() }
 
     private fun sendAbortMessage(message: String) {
-        CommandExecutionTracker.markAborted()
+        commandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf(message), OPERATION_ABORTED))
     }
 }

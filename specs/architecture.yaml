@@ -9,6 +9,7 @@ architecture:
       - package placement assertions
       - naming constraints
       - event-handler constraints
+      - command outcome state constraints
 layers:
   - name: domain_model
     package: de.pflugradts.passbird.domain.model
@@ -56,6 +57,7 @@ structural_rules:
   - use jakarta.inject annotations instead of Guice-specific Inject, Singleton, or Named annotations across the codebase
   - domain packages must not depend on com.google.inject
   - runtime context such as home directory and initial slot must flow through RunContext bindings, not global singleton state
+  - command execution outcome state must flow through injected session graph collaborators, not process-global or ThreadLocal state
 runtime_design:
   boot_sequence:
     - Main.kt validates the home directory argument and constructs the RunContext
@@ -74,6 +76,7 @@ runtime_design:
     - user input is parsed into command types
     - CommandFactory creates command objects
     - CommandBus dispatches to handlers
+    - CommandExecutionTracker tracks command outcomes as an injected application collaborator shared by the interactive session graph
     - handlers call application and domain services
     - event registries propagate side effects after persistence succeeds for mutating password and nest operations
     - inactivity monitoring may request shutdown from a daemon timer, but PassbirdApplication serializes the resulting QuitCommand on the interactive execution path instead of letting the timer thread post directly to the command bus

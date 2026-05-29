@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.egg
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.egg.SetCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -35,8 +36,10 @@ class SetCommandTest {
     private val configuration = mockk<Configuration>()
     private val passwordService = mockk<PasswordService>()
     private val passwordProvider = mockk<PasswordProvider>()
-    private val setCommandHandler = SetCommandHandler(configuration, passwordService, passwordProvider, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(setCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val setCommandHandler =
+        SetCommandHandler(configuration, passwordService, passwordProvider, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(setCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle set command`() {

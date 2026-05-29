@@ -16,16 +16,17 @@ class UseMemoryCommandHandler @Inject constructor(
     private val inputHandler: InputHandler,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleUseMemoryCommand(useMemoryCommand: UseMemoryCommand) {
         passwordService.viewMemoryEntry(useMemoryCommand.slot).ifPresentOrElse(
             block = {
                 inputHandler.handleInput(inputOf(useMemoryCommand.argument + it))
-                CommandExecutionTracker.mark(CommandExecutionTracker.lastCompletedOutcome())
+                commandExecutionTracker.mark(commandExecutionTracker.lastCompletedOutcome())
             },
             other = {
-                CommandExecutionTracker.markFailure()
+                commandExecutionTracker.markFailure()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Memory entry at slot ${useMemoryCommand.slot.index()} does not exist.")))
             },
         )

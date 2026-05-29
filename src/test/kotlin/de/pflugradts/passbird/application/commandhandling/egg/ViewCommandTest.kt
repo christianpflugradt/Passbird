@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.egg
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
@@ -24,8 +25,9 @@ class ViewCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val passwordService = mockk<PasswordService>()
-    private val viewCommandHandler = ViewCommandHandler(passwordService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(viewCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val viewCommandHandler = ViewCommandHandler(passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(viewCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle view command`() {

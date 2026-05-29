@@ -15,6 +15,7 @@ class GetMemoryCommandHandler @Inject constructor(
     private val passwordService: PasswordService,
     private val clipboardAdapterPort: ClipboardAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleGetMemoryCommand(getMemoryCommand: GetMemoryCommand) {
@@ -22,14 +23,14 @@ class GetMemoryCommandHandler @Inject constructor(
             block = {
                 val clipboardResult = clipboardAdapterPort.post(outputOf(it))
                 if (clipboardResult.failure) {
-                    CommandExecutionTracker.markFailure()
+                    commandExecutionTracker.markFailure()
                 }
                 clipboardResult.onSuccess {
                     userInterfaceAdapterPort.send(outputOf(shellOf("EggId copied to clipboard.")))
                 }
             },
             other = {
-                CommandExecutionTracker.markFailure()
+                commandExecutionTracker.markFailure()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Memory entry at slot ${getMemoryCommand.slot.index()} does not exist.")))
             },
         )

@@ -1,32 +1,33 @@
 package de.pflugradts.passbird.application.commandhandling
 
-object CommandExecutionTracker {
-    private val executionOutcomes = ThreadLocal.withInitial { ArrayDeque<CommandExecutionOutcome?>() }
-    private val lastCompletedOutcome = ThreadLocal.withInitial<CommandExecutionOutcome?> { null }
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
+
+@Singleton
+class CommandExecutionTracker @Inject constructor() {
+    private val executionOutcomes = ArrayDeque<CommandExecutionOutcome?>()
+    private var lastCompletedOutcome: CommandExecutionOutcome? = null
 
     fun begin() {
-        executionOutcomes.get().addLast(null)
+        executionOutcomes.addLast(null)
     }
 
     fun finish(defaultOutcome: CommandExecutionOutcome): CommandExecutionOutcome {
-        val outcomes = executionOutcomes.get()
-        val outcome = if (outcomes.isEmpty()) {
+        val outcome = if (executionOutcomes.isEmpty()) {
             defaultOutcome
         } else {
-            outcomes.removeLast() ?: defaultOutcome
+            executionOutcomes.removeLast() ?: defaultOutcome
         }
-        lastCompletedOutcome.set(outcome)
+        lastCompletedOutcome = outcome
         return outcome
     }
 
-    fun lastCompletedOutcome() = lastCompletedOutcome.get() ?: CommandExecutionOutcome.FAILURE
+    fun lastCompletedOutcome() = lastCompletedOutcome ?: CommandExecutionOutcome.FAILURE
 
     fun mark(outcome: CommandExecutionOutcome) {
-        executionOutcomes.get().also {
-            if (it.isNotEmpty()) {
-                it.removeLast()
-                it.addLast(outcome)
-            }
+        if (executionOutcomes.isNotEmpty()) {
+            executionOutcomes.removeLast()
+            executionOutcomes.addLast(outcome)
         }
     }
 

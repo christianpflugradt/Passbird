@@ -24,6 +24,7 @@ class ImportCommandHandler@Inject constructor(
     private val nestService: NestService,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleImportCommand(importCommand: ImportCommand) {
@@ -36,11 +37,11 @@ class ImportCommandHandler@Inject constructor(
             }
 
             ImportCommandConfirmation.ABORTED -> {
-                CommandExecutionTracker.markAborted()
+                commandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             }
 
-            ImportCommandConfirmation.FAILED -> CommandExecutionTracker.markFailure()
+            ImportCommandConfirmation.FAILED -> commandExecutionTracker.markFailure()
         }
         userInterfaceAdapterPort.sendLineBreak()
     }

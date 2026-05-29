@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.commandhandling.egg
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.egg.CustomSetCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -32,8 +33,10 @@ class CustomSetCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val configuration = mockk<Configuration>()
     private val passwordService = mockk<PasswordService>()
-    private val customSetCommandHandler = CustomSetCommandHandler(configuration, passwordService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(customSetCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val customSetCommandHandler =
+        CustomSetCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(customSetCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle custom set command`() {

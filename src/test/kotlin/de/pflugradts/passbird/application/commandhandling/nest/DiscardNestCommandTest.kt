@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.nest
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
@@ -32,8 +33,10 @@ class DiscardNestCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val nestService = createNestServiceForTesting()
     private val passwordService = mockk<PasswordService>()
-    private val discardNestCommandHandler = DiscardNestCommandHandler(nestService, passwordService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(discardNestCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val discardNestCommandHandler =
+        DiscardNestCommandHandler(nestService, passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(discardNestCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle discard nest command`() {

@@ -16,6 +16,7 @@ class GetProteinCommandHandler @Inject constructor(
     private val passwordService: PasswordService,
     private val clipboardAdapterPort: ClipboardAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleGetProteinCommand(getProteinCommand: GetProteinCommand) {
@@ -23,17 +24,17 @@ class GetProteinCommandHandler @Inject constructor(
             if (it.isNotEmpty) {
                 val clipboardResult = clipboardAdapterPort.post(outputOf(it))
                 if (clipboardResult.failure) {
-                    CommandExecutionTracker.markFailure()
+                    commandExecutionTracker.markFailure()
                 }
                 clipboardResult.onSuccess {
                     userInterfaceAdapterPort.send(outputOf(shellOf("Protein copied to clipboard.")))
                 }
             } else {
-                CommandExecutionTracker.markAborted()
+                commandExecutionTracker.markAborted()
                 val msg = "Specified Protein Structure is empty - Operation aborted."
                 userInterfaceAdapterPort.send(outputOf(shellOf(msg), OutputFormatting.OPERATION_ABORTED))
             }
-        } ?: CommandExecutionTracker.markFailure()
+        } ?: commandExecutionTracker.markFailure()
         getProteinCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }

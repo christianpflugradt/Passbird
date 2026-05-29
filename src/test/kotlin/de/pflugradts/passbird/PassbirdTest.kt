@@ -88,6 +88,13 @@ class PassbirdTest {
         fun `no classes should depend on guice named annotation`() {
             noClasses().should().dependOnClassesThat().haveFullyQualifiedName("com.google.inject.name.Named").check(allClasses)
         }
+
+        @Test
+        fun `command handling should not depend on thread local state`() {
+            noClasses().that().resideInAPackage(path(APPLICATION_ROOT, "commandhandling"))
+                .should().dependOnClassesThat().haveFullyQualifiedName("java.lang.ThreadLocal")
+                .check(classes)
+        }
     }
 
     @Nested

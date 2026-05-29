@@ -22,6 +22,7 @@ class SetCommandHandler @Inject constructor(
     private val passwordService: PasswordService,
     private val passwordProvider: PasswordProvider,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
 
     private val customPasswordConfigurations: List<ReadableConfiguration.CustomPasswordConfiguration>
@@ -30,7 +31,7 @@ class SetCommandHandler @Inject constructor(
     @Subscribe
     private fun handleSetCommand(setCommand: SetCommand) {
         if (setCommand.slot != DEFAULT && customPasswordConfigurations.size < setCommand.slot.index()) {
-            CommandExecutionTracker.markAborted()
+            commandExecutionTracker.markAborted()
             val msg = "Specified configuration does not exist - Operation aborted."
             userInterfaceAdapterPort.send(outputOf(shellOf(msg), OPERATION_ABORTED))
         } else {
@@ -40,21 +41,21 @@ class SetCommandHandler @Inject constructor(
                 customPasswordConfigurations[setCommand.slot.index() - 1].toPasswordRequirements()
             }
             if (!passwordRequirements.isValid()) {
-                CommandExecutionTracker.markAborted()
+                commandExecutionTracker.markAborted()
                 val msg = "Specified configuration is invalid - Operation aborted."
                 userInterfaceAdapterPort.send(outputOf(shellOf(msg), OPERATION_ABORTED))
             } else if (commandConfirmed(setCommand)) {
                 try {
                     passwordService.challengeEggId(setCommand.argument)
                     if (passwordService.putEgg(setCommand.argument, passwordProvider.createNewPassword(passwordRequirements)).failure) {
-                        CommandExecutionTracker.markFailure()
+                        commandExecutionTracker.markFailure()
                     }
                 } catch (ex: InvalidEggIdException) {
-                    CommandExecutionTracker.markAborted()
+                    commandExecutionTracker.markAborted()
                     userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
                 }
             } else {
-                CommandExecutionTracker.markAborted()
+                commandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             }
         }

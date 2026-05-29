@@ -21,13 +21,14 @@ class SetProteinCommandHandler @Inject constructor(
     private val configuration: ReadableConfiguration,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleSetProteinCommand(setProteinCommand: SetProteinCommand) {
         val eggIdShell = setProteinCommand.argument
         val slot = setProteinCommand.slot
         if (!passwordService.eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
-            CommandExecutionTracker.markFailure()
+            commandExecutionTracker.markFailure()
             finish(setProteinCommand)
             return
         }
@@ -56,7 +57,7 @@ class SetProteinCommandHandler @Inject constructor(
                 structureShell = structureInput.shell,
             ).failure
         ) {
-            CommandExecutionTracker.markFailure()
+            commandExecutionTracker.markFailure()
         }
         finish(setProteinCommand)
     }
@@ -103,7 +104,7 @@ class SetProteinCommandHandler @Inject constructor(
     }.takeIf { it.isNotEmpty }
 
     private fun abort(setProteinCommand: SetProteinCommand) {
-        CommandExecutionTracker.markAborted()
+        commandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
         finish(setProteinCommand)
     }

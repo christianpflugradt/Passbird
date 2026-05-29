@@ -15,6 +15,7 @@ class GetCommandHandler @Inject constructor(
     private val passwordService: PasswordService,
     private val clipboardAdapterPort: ClipboardAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleGetCommand(getCommand: GetCommand) {
@@ -22,14 +23,14 @@ class GetCommandHandler @Inject constructor(
             block = {
                 val clipboardResult = clipboardAdapterPort.post(outputOf(it))
                 if (clipboardResult.failure) {
-                    CommandExecutionTracker.markFailure()
+                    commandExecutionTracker.markFailure()
                 }
                 clipboardResult.onSuccess {
                     userInterfaceAdapterPort.send(outputOf(shellOf("Password copied to clipboard.")))
                 }
             },
             other = {
-                CommandExecutionTracker.markFailure()
+                commandExecutionTracker.markFailure()
             },
         )
         getCommand.invalidateInput()

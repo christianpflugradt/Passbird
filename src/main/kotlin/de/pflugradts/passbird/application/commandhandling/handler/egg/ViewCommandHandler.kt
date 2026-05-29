@@ -12,12 +12,13 @@ import jakarta.inject.Inject
 class ViewCommandHandler @Inject constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleViewCommand(viewCommand: ViewCommand) {
         passwordService.viewPassword(viewCommand.argument).ifPresentOrElse(
             block = { userInterfaceAdapterPort.send(outputOf(it)) },
-            other = { CommandExecutionTracker.markFailure() },
+            other = { commandExecutionTracker.markFailure() },
         )
         viewCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

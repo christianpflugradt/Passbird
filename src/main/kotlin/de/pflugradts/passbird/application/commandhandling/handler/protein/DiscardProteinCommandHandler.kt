@@ -17,6 +17,7 @@ class DiscardProteinCommandHandler @Inject constructor(
     private val configuration: ReadableConfiguration,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleDiscardProteinCommand(discardProteinCommand: DiscardProteinCommand) {
@@ -26,14 +27,14 @@ class DiscardProteinCommandHandler @Inject constructor(
             if (passwordService.eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
                 if (!passwordService.proteinExists(eggIdShell, slot) || commandConfirmed(discardProteinCommand)) {
                     if (passwordService.discardProtein(eggIdShell, slot).failure) {
-                        CommandExecutionTracker.markFailure()
+                        commandExecutionTracker.markFailure()
                     }
                 } else {
-                    CommandExecutionTracker.markAborted()
+                    commandExecutionTracker.markAborted()
                     userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
                 }
             } else {
-                CommandExecutionTracker.markFailure()
+                commandExecutionTracker.markFailure()
             }
         }
         discardProteinCommand.invalidateInput()

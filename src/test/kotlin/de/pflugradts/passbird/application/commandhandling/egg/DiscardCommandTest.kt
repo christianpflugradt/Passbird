@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.egg
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.egg.DiscardCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -27,8 +28,10 @@ class DiscardCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val configuration = mockk<Configuration>()
     private val passwordService = mockk<PasswordService>()
-    private val discardCommandHandler = DiscardCommandHandler(configuration, passwordService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(discardCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val discardCommandHandler =
+        DiscardCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(discardCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle discard command`() {

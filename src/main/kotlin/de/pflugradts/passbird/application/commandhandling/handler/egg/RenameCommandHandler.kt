@@ -16,27 +16,28 @@ import jakarta.inject.Inject
 class RenameCommandHandler @Inject constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleRenameCommand(renameCommand: RenameCommand) {
         if (passwordService.eggExists(renameCommand.argument, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             val secureInput = userInterfaceAdapterPort.receive(outputOf(shellOf("Enter new EggId or nothing to abort: ")))
             if (secureInput.isEmpty) {
-                CommandExecutionTracker.markAborted()
+                commandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
             } else {
                 try {
                     if (passwordService.renameEgg(renameCommand.argument, secureInput.shell).failure) {
-                        CommandExecutionTracker.markFailure()
+                        commandExecutionTracker.markFailure()
                     }
                 } catch (ex: EggIdException) {
-                    CommandExecutionTracker.markAborted()
+                    commandExecutionTracker.markAborted()
                     userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
                 }
             }
             secureInput.invalidate()
         } else {
-            CommandExecutionTracker.markFailure()
+            commandExecutionTracker.markFailure()
         }
         userInterfaceAdapterPort.sendLineBreak()
         renameCommand.invalidateInput()

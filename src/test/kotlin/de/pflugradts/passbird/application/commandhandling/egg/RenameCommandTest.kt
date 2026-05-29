@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.egg
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.egg.RenameCommandHandler
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
@@ -27,8 +28,9 @@ internal class RenameCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val passwordService = mockk<PasswordService>()
-    private val renameCommandHandler = RenameCommandHandler(passwordService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(renameCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val renameCommandHandler = RenameCommandHandler(passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(renameCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle rename command`() {

@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.nest
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNestCommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -24,8 +25,9 @@ class SwitchNestCommandTest {
 
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val nestService = createNestServiceForTesting()
-    private val switchNestCommandHandler = SwitchNestCommandHandler(nestService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(switchNestCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val switchNestCommandHandler = SwitchNestCommandHandler(nestService, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(switchNestCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle switch nest command`() {

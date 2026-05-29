@@ -5,6 +5,7 @@ import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.favorite.GetFavoriteCommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -31,8 +32,10 @@ class GetFavoriteCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val clipboardAdapterPort = mockk<ClipboardAdapterPort>(relaxed = true)
     private val passwordService = mockk<PasswordService>()
-    private val getFavoriteCommandHandler = GetFavoriteCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(getFavoriteCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val getFavoriteCommandHandler =
+        GetFavoriteCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(getFavoriteCommandHandler, commandExecutionTracker)
 
     @BeforeEach
     fun setup() {

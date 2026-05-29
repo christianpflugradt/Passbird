@@ -16,16 +16,17 @@ class UseFavoriteCommandHandler @Inject constructor(
     private val inputHandler: InputHandler,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleUseFavoriteCommand(useFavoriteCommand: UseFavoriteCommand) {
         passwordService.viewFavoriteEntry(useFavoriteCommand.slot).ifPresentOrElse(
             block = {
                 inputHandler.handleInput(inputOf(useFavoriteCommand.argument + it))
-                CommandExecutionTracker.mark(CommandExecutionTracker.lastCompletedOutcome())
+                commandExecutionTracker.mark(commandExecutionTracker.lastCompletedOutcome())
             },
             other = {
-                CommandExecutionTracker.markFailure()
+                commandExecutionTracker.markFailure()
                 userInterfaceAdapterPort.send(
                     outputOf(shellOf("Favorite entry at slot ${useFavoriteCommand.slot.index()} does not exist.")),
                 )

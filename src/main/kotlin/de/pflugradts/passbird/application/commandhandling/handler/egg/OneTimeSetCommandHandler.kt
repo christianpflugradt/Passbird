@@ -21,6 +21,7 @@ class OneTimeSetCommandHandler @Inject constructor(
     private val passwordService: PasswordService,
     private val passwordProvider: PasswordProvider,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleOneTimeSetCommand(oneTimeSetCommand: OneTimeSetCommand) {
@@ -29,12 +30,12 @@ class OneTimeSetCommandHandler @Inject constructor(
             val passwordLengthInput = receivePasswordLength()
             when {
                 passwordLengthInput.isAborted -> {
-                    CommandExecutionTracker.markAborted()
+                    commandExecutionTracker.markAborted()
                     userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
                 }
 
                 passwordLengthInput.value == null -> {
-                    CommandExecutionTracker.markAborted()
+                    commandExecutionTracker.markAborted()
                     userInterfaceAdapterPort.send(
                         outputOf(shellOf("Specified configuration is invalid - Operation aborted."), OPERATION_ABORTED),
                     )
@@ -44,7 +45,7 @@ class OneTimeSetCommandHandler @Inject constructor(
                     val passwordRequirements = receivePasswordRequirements(passwordLengthInput.value)
                     when {
                         !passwordRequirements.isValid() -> {
-                            CommandExecutionTracker.markAborted()
+                            commandExecutionTracker.markAborted()
                             userInterfaceAdapterPort.send(
                                 outputOf(shellOf("Specified configuration is invalid - Operation aborted."), OPERATION_ABORTED),
                             )
@@ -56,19 +57,19 @@ class OneTimeSetCommandHandler @Inject constructor(
                                     passwordProvider.createNewPassword(passwordRequirements),
                                 ).failure
                             ) {
-                                CommandExecutionTracker.markFailure()
+                                commandExecutionTracker.markFailure()
                             }
                         }
 
                         else -> {
-                            CommandExecutionTracker.markAborted()
+                            commandExecutionTracker.markAborted()
                             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
                         }
                     }
                 }
             }
         } catch (ex: InvalidEggIdException) {
-            CommandExecutionTracker.markAborted()
+            commandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
         }
         oneTimeSetCommand.invalidateInput()

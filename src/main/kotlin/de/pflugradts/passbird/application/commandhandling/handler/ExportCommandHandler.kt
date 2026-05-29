@@ -20,6 +20,7 @@ class ExportCommandHandler @Inject constructor(
     private val importExportService: ImportExportService,
     private val nestService: NestService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleExportCommand(exportCommand: ExportCommand) {
@@ -74,7 +75,7 @@ class ExportCommandHandler @Inject constructor(
         ?.takeIf { selectedSlots -> selectedSlots.all(availableNestSlots::contains) }
 
     private fun sendAbortMessage() {
-        CommandExecutionTracker.markAborted()
+        commandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
     }
 }

@@ -19,32 +19,33 @@ class CommandInputHandler @Inject constructor(
     private val commandBus: CommandBus,
     private val commandFactory: CommandFactory,
     private val rememberedCommandMemory: RememberedCommandMemory,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : InputHandler {
     override fun handleInput(input: Input) {
         val originalInput = input.shell.copy()
-        CommandExecutionTracker.begin()
+        commandExecutionTracker.begin()
         val command = tryCatching {
             commandFactory.construct(resolveCommandTypeFrom(input.command), input)
         }.onFailure {
-            CommandExecutionTracker.markFailure()
+            commandExecutionTracker.markFailure()
             reportFailure(CommandFailure(it))
         }.getOrNull()
 
         val outcome = if (command == null) {
-            CommandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
+            commandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
         } else {
             tryCatching {
                 commandBus.post(command)
-                CommandExecutionTracker.finish(command.defaultOutcome())
+                commandExecutionTracker.finish(command.defaultOutcome())
             }.onFailure { ex ->
                 if (ex is InactivityTerminationRequestedException || ex is StdinTerminationRequestedException) {
-                    CommandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
+                    commandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
                     originalInput.scramble()
                     throw ex
                 }
-                CommandExecutionTracker.markFailure()
+                commandExecutionTracker.markFailure()
                 reportFailure(CommandFailure(ex))
-            }.getOrNull() ?: CommandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
+            }.getOrNull() ?: commandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
         }
 
         if (outcome == CommandExecutionOutcome.SUCCESS && command !is RepeatLastCommand) {

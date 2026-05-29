@@ -5,6 +5,7 @@ import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.protein.GetProteinCommandHandler
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
@@ -36,8 +37,10 @@ class GetProteinCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val clipboardAdapterPort = mockk<ClipboardAdapterPort>(relaxed = true)
     private val passwordService = mockk<PasswordService>()
-    private val getProteinCommandHandler = GetProteinCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(getProteinCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val getProteinCommandHandler =
+        GetProteinCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(getProteinCommandHandler, commandExecutionTracker)
 
     @BeforeEach
     fun setup() {

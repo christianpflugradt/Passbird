@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.protein
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.protein.DiscardProteinCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -28,8 +29,10 @@ class DiscardProteinCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val configuration = mockk<Configuration>()
     private val passwordService = mockk<PasswordService>()
-    private val discardProteinCommandHandler = DiscardProteinCommandHandler(configuration, passwordService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(discardProteinCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val discardProteinCommandHandler =
+        DiscardProteinCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(discardProteinCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle discard protein command`() {

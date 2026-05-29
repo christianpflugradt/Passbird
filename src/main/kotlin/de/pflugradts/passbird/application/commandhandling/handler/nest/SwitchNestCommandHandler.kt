@@ -14,6 +14,7 @@ import jakarta.inject.Inject
 class SwitchNestCommandHandler @Inject constructor(
     private val nestService: NestService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleSwitchNestCommand(switchNestCommand: SwitchNestCommand) {
@@ -24,7 +25,7 @@ class SwitchNestCommandHandler @Inject constructor(
         } else if (nestService.atNestSlot(switchNestCommand.slot).isPresent) {
             nestService.moveToNestAt(switchNestCommand.slot)
         } else {
-            CommandExecutionTracker.markAborted()
+            commandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted."), OPERATION_ABORTED))
         }
         userInterfaceAdapterPort.sendLineBreak()

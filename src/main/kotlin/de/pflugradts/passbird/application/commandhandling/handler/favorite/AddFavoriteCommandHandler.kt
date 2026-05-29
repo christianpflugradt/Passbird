@@ -11,11 +11,12 @@ import jakarta.inject.Inject
 class AddFavoriteCommandHandler @Inject constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleAddFavoriteCommand(addFavoriteCommand: AddFavoriteCommand) {
         if (passwordService.putFavorite(addFavoriteCommand.slot, addFavoriteCommand.argument).failure) {
-            CommandExecutionTracker.markFailure()
+            commandExecutionTracker.markFailure()
         }
         addFavoriteCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

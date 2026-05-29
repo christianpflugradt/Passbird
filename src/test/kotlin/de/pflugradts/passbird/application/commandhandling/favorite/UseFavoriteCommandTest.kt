@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.commandhandling.favorite
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.favorite.UseFavoriteCommandHandler
@@ -22,8 +23,10 @@ class UseFavoriteCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val passwordService = mockk<PasswordService>()
     private val mockedInputHandler = mockk<InputHandler>()
-    private val useFavoriteCommandHandler = UseFavoriteCommandHandler(mockedInputHandler, passwordService, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(useFavoriteCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val useFavoriteCommandHandler =
+        UseFavoriteCommandHandler(mockedInputHandler, passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(useFavoriteCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle use favorite command`() {

@@ -5,6 +5,7 @@ import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.egg.GetCommandHandler
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
@@ -31,8 +32,10 @@ class GetCommandTest {
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val clipboardAdapterPort = mockk<ClipboardAdapterPort>(relaxed = true)
     private val passwordService = mockk<PasswordService>()
-    private val getCommandHandler = GetCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort)
-    private val inputHandler = createInputHandlerFor(getCommandHandler)
+    private val commandExecutionTracker = CommandExecutionTracker()
+    private val getCommandHandler =
+        GetCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort, commandExecutionTracker)
+    private val inputHandler = createInputHandlerFor(getCommandHandler, commandExecutionTracker)
 
     @BeforeEach
     fun setup() {

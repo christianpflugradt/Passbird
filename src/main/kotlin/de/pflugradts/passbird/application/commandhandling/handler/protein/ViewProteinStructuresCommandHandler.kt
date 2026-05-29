@@ -19,6 +19,7 @@ class ViewProteinStructuresCommandHandler @Inject constructor(
     private val canPrintInfo: CanPrintInfo,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleViewProteinStructuresCommand(viewProteinStructuresCommand: ViewProteinStructuresCommand) {
@@ -28,8 +29,8 @@ class ViewProteinStructuresCommandHandler @Inject constructor(
                 types.zip(structures).forEachIndexed { index, proteinPair ->
                     userInterfaceAdapterPort.send(*outputsOf(index, proteinPair.toShellPairOption()))
                 }
-            } ?: CommandExecutionTracker.markFailure()
-        } ?: CommandExecutionTracker.markFailure()
+            } ?: commandExecutionTracker.markFailure()
+        } ?: commandExecutionTracker.markFailure()
         viewProteinStructuresCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }

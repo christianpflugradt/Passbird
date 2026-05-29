@@ -15,11 +15,12 @@ import jakarta.inject.Inject
 class AddNestCommandHandler @Inject constructor(
     private val nestService: NestService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleAddNestCommand(addNestCommand: AddNestCommand) {
         if (addNestCommand.slot == DEFAULT) {
-            CommandExecutionTracker.markAborted()
+            commandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Default Nest cannot be replaced - Operation aborted."), OPERATION_ABORTED))
             return
         }
@@ -31,11 +32,11 @@ class AddNestCommandHandler @Inject constructor(
         }
         val input = userInterfaceAdapterPort.receive(outputOf(shellOf(prompt)))
         if (input.isEmpty) {
-            CommandExecutionTracker.markAborted()
+            commandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
         } else {
             if (nestService.place(input.shell, addNestCommand.slot).failure) {
-                CommandExecutionTracker.markFailure()
+                commandExecutionTracker.markFailure()
             }
         }
         input.invalidate()

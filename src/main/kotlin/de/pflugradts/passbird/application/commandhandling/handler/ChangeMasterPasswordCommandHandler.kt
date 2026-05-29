@@ -22,6 +22,7 @@ class ChangeMasterPasswordCommandHandler @Inject constructor(
     private val keyStoreAdapterPort: KeyStoreAdapterPort,
     private val keyStoreAuthenticationService: KeyStoreAuthenticationService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleChangeMasterPasswordCommand(@Suppress("UNUSED_PARAMETER") changeMasterPasswordCommand: ChangeMasterPasswordCommand) {
@@ -49,7 +50,7 @@ class ChangeMasterPasswordCommandHandler @Inject constructor(
                 keyStoreAdapterPort.storeExistingKey(key, newPassword, keyStoreAuthenticationService.keyStorePath())
             }
             if (storeResult.failure) {
-                CommandExecutionTracker.markFailure()
+                commandExecutionTracker.markFailure()
                 reportFailure(CommandFailure(storeResult.exceptionOrNull()!!))
                 abort("Operation aborted.")
                 return
@@ -95,7 +96,7 @@ class ChangeMasterPasswordCommandHandler @Inject constructor(
     }
 
     private fun abort(message: String) {
-        CommandExecutionTracker.markAborted()
+        commandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf(message), OPERATION_ABORTED))
         userInterfaceAdapterPort.sendLineBreak()
     }

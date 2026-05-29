@@ -20,13 +20,14 @@ class CustomSetCommandHandler @Inject constructor(
     private val configuration: ReadableConfiguration,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleCustomSetCommand(customSetCommand: CustomSetCommand) {
         if (commandConfirmed(customSetCommand)) {
             processConfirmedCustomSetCommand(customSetCommand)
         } else {
-            CommandExecutionTracker.markAborted()
+            commandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
         }
         customSetCommand.invalidateInput()
@@ -39,17 +40,17 @@ class CustomSetCommandHandler @Inject constructor(
             receiveCustomPassword()?.let { secureInput ->
                 try {
                     if (secureInput.isEmpty) {
-                        CommandExecutionTracker.markAborted()
+                        commandExecutionTracker.markAborted()
                         userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
                     } else if (passwordService.putEgg(customSetCommand.argument, secureInput.shell).failure) {
-                        CommandExecutionTracker.markFailure()
+                        commandExecutionTracker.markFailure()
                     }
                 } finally {
                     secureInput.invalidate()
                 }
             }
         } catch (ex: InvalidEggIdException) {
-            CommandExecutionTracker.markAborted()
+            commandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
         }
     }
@@ -57,7 +58,7 @@ class CustomSetCommandHandler @Inject constructor(
     private fun receiveCustomPassword(): Input? = try {
         userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter custom Password: ")))
     } catch (_: SecureInputUnavailableException) {
-        CommandExecutionTracker.markAborted()
+        commandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
         null
     }

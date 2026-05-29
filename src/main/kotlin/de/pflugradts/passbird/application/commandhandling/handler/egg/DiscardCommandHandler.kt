@@ -16,20 +16,21 @@ class DiscardCommandHandler @Inject constructor(
     private val configuration: ReadableConfiguration,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleDiscardCommand(discardCommand: DiscardCommand) {
         if (passwordService.viewPassword(discardCommand.argument).isPresent) {
             if (commandConfirmed()) {
                 if (passwordService.discardEgg(discardCommand.argument).failure) {
-                    CommandExecutionTracker.markFailure()
+                    commandExecutionTracker.markFailure()
                 }
             } else {
-                CommandExecutionTracker.markAborted()
+                commandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             }
         } else {
-            CommandExecutionTracker.markFailure()
+            commandExecutionTracker.markFailure()
         }
         discardCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

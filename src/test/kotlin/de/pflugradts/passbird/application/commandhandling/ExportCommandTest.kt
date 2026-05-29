@@ -26,13 +26,15 @@ class ExportCommandTest {
     private val importExportService = mockk<ImportExportService>(relaxed = true)
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val nestService = createNestServiceForTesting()
+    private val commandExecutionTracker = CommandExecutionTracker()
     private val exportCommandHandler = ExportCommandHandler(
         CanListAvailableNests(nestService),
         importExportService,
         nestService,
         userInterfaceAdapterPort,
+        commandExecutionTracker,
     )
-    private val inputHandler = createInputHandlerFor(exportCommandHandler)
+    private val inputHandler = createInputHandlerFor(exportCommandHandler, commandExecutionTracker)
 
     @Test
     fun `should handle export command`() {

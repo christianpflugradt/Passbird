@@ -37,13 +37,20 @@ class RepeatLastCommandTest {
 
     @Test
     fun `should report that there is no previous command to repeat`() {
+        val commandExecutionTracker = CommandExecutionTracker()
         inputHandler = createInputHandlerFor(
             CommandHandlerBus(
                 setOf(
-                    RepeatLastCommandHandler(inputHandlerProvider(), rememberedCommandMemory, userInterfaceAdapterPort),
+                    RepeatLastCommandHandler(
+                        inputHandlerProvider(),
+                        rememberedCommandMemory,
+                        userInterfaceAdapterPort,
+                        commandExecutionTracker,
+                    ),
                 ),
             ),
             rememberedCommandMemory,
+            commandExecutionTracker,
         )
 
         inputHandler.handleInput(inputOf(shellOf(".")))
@@ -69,14 +76,21 @@ class RepeatLastCommandTest {
             withNestService = nestService,
         )
         val outputs = mutableListOf<Output>()
+        val commandExecutionTracker = CommandExecutionTracker()
         inputHandler = createInputHandlerFor(
             CommandHandlerBus(
                 setOf(
                     ListCommandHandler(nestService, passwordService, userInterfaceAdapterPort),
-                    RepeatLastCommandHandler(inputHandlerProvider(), rememberedCommandMemory, userInterfaceAdapterPort),
+                    RepeatLastCommandHandler(
+                        inputHandlerProvider(),
+                        rememberedCommandMemory,
+                        userInterfaceAdapterPort,
+                        commandExecutionTracker,
+                    ),
                 ),
             ),
             rememberedCommandMemory,
+            commandExecutionTracker,
         )
 
         inputHandler.handleInput(inputOf(shellOf("lmiro")))
@@ -101,15 +115,27 @@ class RepeatLastCommandTest {
         )
         val outputs = mutableListOf<Output>()
         val delegatingInputHandler = DelegatingInputHandler()
+        val commandExecutionTracker = CommandExecutionTracker()
         inputHandler = createInputHandlerFor(
             CommandHandlerBus(
                 setOf(
-                    RepeatLastCommandHandler(inputHandlerProvider(), rememberedCommandMemory, userInterfaceAdapterPort),
-                    UseMemoryCommandHandler(delegatingInputHandler, passwordService, userInterfaceAdapterPort),
-                    ViewCommandHandler(passwordService, userInterfaceAdapterPort),
+                    RepeatLastCommandHandler(
+                        inputHandlerProvider(),
+                        rememberedCommandMemory,
+                        userInterfaceAdapterPort,
+                        commandExecutionTracker,
+                    ),
+                    UseMemoryCommandHandler(
+                        delegatingInputHandler,
+                        passwordService,
+                        userInterfaceAdapterPort,
+                        commandExecutionTracker,
+                    ),
+                    ViewCommandHandler(passwordService, userInterfaceAdapterPort, commandExecutionTracker),
                 ),
             ),
             rememberedCommandMemory,
+            commandExecutionTracker,
         )
         delegatingInputHandler.delegate = inputHandler
 
@@ -131,20 +157,23 @@ class RepeatLastCommandTest {
             instance = addNestUserInterfaceAdapterPort,
             withTheseInputs = listOf(Input.emptyInput()),
         )
+        val commandExecutionTracker = CommandExecutionTracker()
         addNestInputHandler = createInputHandlerFor(
             CommandHandlerBus(
                 setOf(
-                    AddNestCommandHandler(nestService, addNestUserInterfaceAdapterPort),
+                    AddNestCommandHandler(nestService, addNestUserInterfaceAdapterPort, commandExecutionTracker),
                     RepeatLastCommandHandler(
                         object : Provider<InputHandler> {
                             override fun get() = addNestInputHandler
                         },
                         addNestRememberedCommandMemory,
                         addNestUserInterfaceAdapterPort,
+                        commandExecutionTracker,
                     ),
                 ),
             ),
             addNestRememberedCommandMemory,
+            commandExecutionTracker,
         )
         val outputs = mutableListOf<Output>()
 

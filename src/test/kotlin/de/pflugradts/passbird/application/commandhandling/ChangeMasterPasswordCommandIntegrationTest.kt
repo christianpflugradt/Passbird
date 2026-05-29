@@ -76,12 +76,15 @@ class ChangeMasterPasswordCommandIntegrationTest {
             userInterfaceAdapterPort = userInterfaceAdapterPort,
             systemOperation = systemOperation,
         )
+        val commandExecutionTracker = CommandExecutionTracker()
         val inputHandler = createInputHandlerFor(
             ChangeMasterPasswordCommandHandler(
                 keyStoreAdapterPort = keyStoreService,
                 keyStoreAuthenticationService = authenticationService,
                 userInterfaceAdapterPort = userInterfaceAdapterPort,
+                commandExecutionTracker = commandExecutionTracker,
             ),
+            commandExecutionTracker,
         )
         val originalSecret = plainShellOf(oldPassword.toCharArray()).let { password ->
             keyStoreService.storeKey(password, keyStoreFile)

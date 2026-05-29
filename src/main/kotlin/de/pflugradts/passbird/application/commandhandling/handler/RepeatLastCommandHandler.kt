@@ -17,12 +17,13 @@ class RepeatLastCommandHandler @Inject constructor(
     private val inputHandlerProvider: Provider<InputHandler>,
     private val rememberedCommandMemory: RememberedCommandMemory,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleRepeatLastCommand(@Suppress("UNUSED_PARAMETER") repeatLastCommand: RepeatLastCommand) {
         val rememberedCommand = rememberedCommandMemory.view()
         if (rememberedCommand == null) {
-            CommandExecutionTracker.markFailure()
+            commandExecutionTracker.markFailure()
             userInterfaceAdapterPort.send(
                 outputOf(shellOf("No previous command is available to repeat."), OPERATION_ABORTED),
             )
@@ -30,6 +31,6 @@ class RepeatLastCommandHandler @Inject constructor(
             return
         }
         inputHandlerProvider.get().handleInput(inputOf(rememberedCommand))
-        CommandExecutionTracker.mark(CommandExecutionTracker.lastCompletedOutcome())
+        commandExecutionTracker.mark(commandExecutionTracker.lastCompletedOutcome())
     }
 }

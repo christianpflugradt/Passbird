@@ -11,11 +11,12 @@ import jakarta.inject.Inject
 class DiscardFavoriteCommandHandler @Inject constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleDiscardFavoriteCommand(discardFavoriteCommand: DiscardFavoriteCommand) {
         if (passwordService.discardFavorite(discardFavoriteCommand.slot).failure) {
-            CommandExecutionTracker.markFailure()
+            commandExecutionTracker.markFailure()
         }
         userInterfaceAdapterPort.sendLineBreak()
     }

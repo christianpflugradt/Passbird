@@ -16,13 +16,14 @@ class ViewProteinTypesCommandHandler @Inject constructor(
     private val canPrintInfo: CanPrintInfo,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
     @Subscribe
     private fun handleViewProteinTypesCommand(viewProteinTypesCommand: ViewProteinTypesCommand) {
         passwordService.viewProteinTypes(viewProteinTypesCommand.argument).orNull()?.also {
             userInterfaceAdapterPort.send(*outputsOfHeader())
             it.forEachIndexed { index, proteinType -> userInterfaceAdapterPort.send(*outputsOf(index, proteinType)) }
-        } ?: CommandExecutionTracker.markFailure()
+        } ?: commandExecutionTracker.markFailure()
         viewProteinTypesCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }

@@ -21,6 +21,14 @@ private val commandFactory = CommandFactory(
 fun createInputHandlerFor(
     commandBus: CommandBus,
     rememberedCommandMemory: RememberedCommandMemory = RememberedCommandMemory(),
-): InputHandler = CommandInputHandler(commandBus, commandFactory, rememberedCommandMemory)
-fun createInputHandlerFor(commandHandler: CommandHandler): InputHandler =
-    CommandInputHandler(CommandHandlerBus(setOf(commandHandler)), commandFactory, RememberedCommandMemory())
+    commandExecutionTracker: CommandExecutionTracker = CommandExecutionTracker(),
+): InputHandler = CommandInputHandler(commandBus, commandFactory, rememberedCommandMemory, commandExecutionTracker)
+fun createInputHandlerFor(
+    commandHandler: CommandHandler,
+    commandExecutionTracker: CommandExecutionTracker = CommandExecutionTracker(),
+): InputHandler = CommandInputHandler(
+    CommandHandlerBus(setOf(commandHandler)),
+    commandFactory,
+    RememberedCommandMemory(),
+    commandExecutionTracker,
+)
