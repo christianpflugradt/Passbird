@@ -26,7 +26,7 @@ class ViewNestCommandHandler @Inject constructor(
                 outBold("\n\tn"), out(" (view)               Displays the current Nest, available Nests, and related commands."),
                 outBold("\n\tn0"), out(" (switch)            Switches to the default Nest."),
                 outBold("\n\tn[1-9]"), out(" (switch)        Switches to the Nest in the specified Nest Slot (1–9)."),
-                outBold("\n\tn[0-9][EggId]"), out(" (assign) Assigns the specified EggId to the Nest in the given Nest Slot."),
+                outBold("\n\tn[EggId]"), out(" (assign) Assigns the specified EggId to a Nest selected interactively."),
                 outBold("\n\tn+[1-9]"), out(" (create)       Creates a new Nest in the specified Nest Slot."),
                 outBold("\n\tn-[1-9]"), out(" (discard)      Deletes the Nest in the specified Nest Slot."),
                 out("\n"),

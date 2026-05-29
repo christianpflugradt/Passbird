@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-25
+last_reviewed: 2026-05-29
 product_shape:
   audience:
     - individual users who want an offline terminal password manager
@@ -201,11 +201,6 @@ capabilities:
       - m[0-9]
       - m[0-9][Command...]
 known_surface_drifts:
-  - area: nest_assignment
-    current_help_output_shape: n[0-9][EggId]
-    actual_accepted_shape: n[EggId]
-    actual_follow_up_behavior:
-      - after the EggId is entered, Passbird prompts for the target Nest slot interactively
   - area: protein_info_discoverability
     top_level_help_advertised_shape: p?
     actual_additional_accepted_shape: p

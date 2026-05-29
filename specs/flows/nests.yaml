@@ -18,7 +18,7 @@ flows:
         - the Available Nests section always includes the default nest line as 0: Default
         - each deployed custom Nest is listed on its own line as <slot>: <NestId>
         - if no custom Nests exist, the Available Nests section appends the hint (use the n+ command to create custom Nests)
-        - the Available Nest commands section lists n, n0, n[1-9], n[0-9][EggId], n+[1-9], and n-[1-9]
+        - the Available Nest commands section lists n, n0, n[1-9], n[EggId], n+[1-9], and n-[1-9]
       switch_command:
         - n0 switches to the default Nest
         - n[1-9] switches to the Nest in the specified slot if that Nest exists

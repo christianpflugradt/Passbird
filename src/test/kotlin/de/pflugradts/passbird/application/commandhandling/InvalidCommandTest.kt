@@ -143,6 +143,7 @@ class InvalidCommandTest {
         @ValueSource(
             strings = [
                 "n*1eggId",
+                "n1eggId",
                 "n+1eggId",
                 "n-1eggId",
                 "n()eggId",

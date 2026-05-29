@@ -312,7 +312,7 @@ Nests are an advanced feature in Passbird, allowing you to organize passwords in
     n (view)               Displays the current Nest, available Nests, and related commands.
     n0 (switch)            Switches to the default Nest.
     n[1-9] (switch)        Switches to the Nest in the specified Nest Slot (1–9).
-    n[0-9][EggId] (assign) Assigns the specified EggId to the Nest in the given Nest Slot.
+    n[EggId] (assign) Assigns the specified EggId to a Nest selected interactively.
     n+[1-9] (create)       Creates a new Nest in the specified Nest Slot.
     n-[1-9] (discard)      Deletes the Nest in the specified Nest Slot.
 
