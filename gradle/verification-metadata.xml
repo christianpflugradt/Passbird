@@ -81,6 +81,7 @@
          <trusted-key id="51343444EB1F7563B0C34F6AA141A874C360D694" group="io.strikt"/>
          <trusted-key id="517B94F8D0A46317A28D8AB30DA8A5EC02D11EAD" group="net.sf.jopt-simple" name="jopt-simple" version="4.9"/>
          <trusted-key id="56CEE778E1531BD70ECB0F47BEC27E87C49F2E2B" group="^com[.]google[.]inject($|([.].*))" regex="true"/>
+         <trusted-key id="5CBA19E56141E78D54BF716F08A4A4958D61FC3D" group="io.kotest"/>
          <trusted-key id="5D283C23D9D9DC2D9C2130E6AADF2C18DCF95764">
             <trusting group="com.github.package-url"/>
             <trusting group="us.springett"/>
@@ -133,6 +134,7 @@
             <trusting group="commons-io"/>
             <trusting group="org.apache.commons"/>
          </trusted-key>
+         <trusted-key id="FA7929F83AD44C4590F6CC6815C71C0A4E0B8EDD" group="net.java.dev.jna"/>
          <trusted-key id="FB35C8D02B4724DADA23DE0AFD116C1969FCCFF3" group="org.json" name="json" version="20251224"/>
          <trusted-key id="FF6E2C001948C5F2F38B0CC385911F425EC61B51">
             <trusting group="junit"/>
