@@ -10,6 +10,7 @@ architecture:
       - naming constraints
       - event-handler constraints
       - command outcome state constraints
+      - main module multibinder completeness checks
 layers:
   - name: domain_model
     package: de.pflugradts.passbird.domain.model
