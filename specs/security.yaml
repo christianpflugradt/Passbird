@@ -53,7 +53,7 @@ current_security_relevant_implementation:
   keystore:
     file: src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
     facts:
-      - uses PKCS12 via SystemOperation for the current runtime keystore format
+      - uses PKCS12 via adapter.keystore.KeyStoreFactory for the current runtime keystore format
       - stores a generated AES secret key under alias PwMan3Secret
       - can re-protect the existing AES secret under a new master password without regenerating the secret
       - keeps legacy JCEKS read compatibility limited to the migration boot path instead of the normal runtime path
@@ -138,6 +138,9 @@ requires_explicit_human_review:
 security_sensitive_files:
   - src/main/kotlin/de/pflugradts/passbird/application/util/SystemOperation.kt
   - src/main/kotlin/de/pflugradts/passbird/application/configuration/ConfigurationSyncService.kt
+  - src/main/kotlin/de/pflugradts/passbird/adapter/clipboard/ClipboardGateway.kt
+  - src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreFactory.kt
+  - src/main/kotlin/de/pflugradts/passbird/adapter/userinterface/TerminalInputGateway.kt
   - src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
   - src/main/kotlin/de/pflugradts/passbird/application/keystore
   - src/main/kotlin/de/pflugradts/passbird/application/passwordtree

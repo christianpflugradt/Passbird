@@ -8,8 +8,6 @@ import de.pflugradts.passbird.application.StdinTerminationRequestedException
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.process.inactivity.InactivityTerminationSignal
-import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.emptyOutput
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -39,14 +37,16 @@ import java.util.stream.Stream
 
 class CommandLineInterfaceServiceTest {
 
-    private val systemOperation = mockk<SystemOperation>()
+    private val terminalInputGateway = mockk<TerminalInputGateway>()
     private val configuration = mockk<Configuration>()
-    private val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration)
+    private val commandLineInterfaceService = CommandLineInterfaceService(terminalInputGateway, configuration)
 
     @BeforeEach
     fun setup() {
         fakeConfiguration(instance = configuration)
-        fakeSystemOperation(instance = systemOperation)
+        every { terminalInputGateway.isConsoleAvailable } returns true
+        every { terminalInputGateway.readCharFromStdin() } answers { System.`in`.read().toChar() }
+        every { terminalInputGateway.readPasswordFromConsole() } returns CharArray(0)
     }
 
     @Nested
@@ -149,7 +149,7 @@ class CommandLineInterfaceServiceTest {
             // given
             val nextPromptInputRead = CountDownLatch(1)
             var readCount = 0
-            every { systemOperation.readCharFromStdin() } answers {
+            every { terminalInputGateway.readCharFromStdin() } answers {
                 when (++readCount) {
                     1 -> 'c'
 
@@ -168,15 +168,16 @@ class CommandLineInterfaceServiceTest {
             // then
             expectThat(actual.shell.asString()) isEqualTo "c"
             expectThat(nextPromptInputRead.await(100, TimeUnit.MILLISECONDS)).isFalse()
-            verify(exactly = 2) { systemOperation.readCharFromStdin() }
+            verify(exactly = 2) { terminalInputGateway.readCharFromStdin() }
         }
 
         @Test
         fun `should abort input when inactivity termination is requested`() {
             // given
             val inactivityTerminationSignal = InactivityTerminationSignal()
-            val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration, inactivityTerminationSignal)
-            every { systemOperation.readCharFromStdin() } answers {
+            val commandLineInterfaceService =
+                CommandLineInterfaceService(terminalInputGateway, configuration, inactivityTerminationSignal)
+            every { terminalInputGateway.readCharFromStdin() } answers {
                 inactivityTerminationSignal.request()
                 Thread.sleep(100)
                 Char.MAX_VALUE
@@ -189,7 +190,7 @@ class CommandLineInterfaceServiceTest {
         @Test
         fun `should abort input when stdin is exhausted before any character is read`() {
             // given
-            every { systemOperation.readCharFromStdin() } returns Char.MAX_VALUE
+            every { terminalInputGateway.readCharFromStdin() } returns Char.MAX_VALUE
 
             // when / then
             assertThrows<StdinTerminationRequestedException> { commandLineInterfaceService.receive() }
@@ -198,7 +199,7 @@ class CommandLineInterfaceServiceTest {
         @Test
         fun `should abort input when stdin read fails`() {
             // given
-            every { systemOperation.readCharFromStdin() } throws IOException()
+            every { terminalInputGateway.readCharFromStdin() } throws IOException()
 
             // when / then
             assertThrows<StdinTerminationRequestedException> { commandLineInterfaceService.receive() }
@@ -208,7 +209,7 @@ class CommandLineInterfaceServiceTest {
         fun `should return buffered input when stdin is exhausted without a trailing newline`() {
             // given
             val stdin = listOf('q', Char.MAX_VALUE).iterator()
-            every { systemOperation.readCharFromStdin() } answers { stdin.next() }
+            every { terminalInputGateway.readCharFromStdin() } answers { stdin.next() }
 
             // when
             val actual = commandLineInterfaceService.receive()
@@ -224,14 +225,14 @@ class CommandLineInterfaceServiceTest {
         fun `should receive input securely`() {
             // given
             val givenInput = "hello world"
-            fakeSystemOperation(instance = systemOperation, withPasswordFromConsole = givenInput.toCharArray())
+            every { terminalInputGateway.readPasswordFromConsole() } returns givenInput.toCharArray()
             fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
 
             // when
             val actual = commandLineInterfaceService.receiveSecurely()
 
             // then
-            verify(exactly = 1) { systemOperation.readPasswordFromConsole() }
+            verify(exactly = 1) { terminalInputGateway.readPasswordFromConsole() }
             expectThat(actual.shell.asString()) isEqualTo givenInput
         }
 
@@ -240,7 +241,7 @@ class CommandLineInterfaceServiceTest {
             // given
             val givenInput = "hello world"
             val consoleInput = givenInput.toCharArray()
-            fakeSystemOperation(instance = systemOperation, withPasswordFromConsole = consoleInput)
+            every { terminalInputGateway.readPasswordFromConsole() } returns consoleInput
             fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
 
             // when
@@ -255,7 +256,7 @@ class CommandLineInterfaceServiceTest {
         fun `should receive input securely when sending output`() {
             // given
             val givenMessage = "hello world"
-            fakeSystemOperation(instance = systemOperation, withPasswordFromConsole = "smth".toCharArray())
+            every { terminalInputGateway.readPasswordFromConsole() } returns "smth".toCharArray()
             fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
             val captureSystemOut = captureSystemOut()
 
@@ -263,7 +264,7 @@ class CommandLineInterfaceServiceTest {
             captureSystemOut.during { commandLineInterfaceService.receiveSecurely(outputOf(shellOf(givenMessage))) }
 
             // then
-            verify(exactly = 1) { systemOperation.readPasswordFromConsole() }
+            verify(exactly = 1) { terminalInputGateway.readPasswordFromConsole() }
             expectThat(captureSystemOut.capture) isEqualTo givenMessage
         }
 
@@ -271,10 +272,11 @@ class CommandLineInterfaceServiceTest {
         fun `should abort secure input when inactivity termination is requested`() {
             // given
             val inactivityTerminationSignal = InactivityTerminationSignal()
-            val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration, inactivityTerminationSignal)
-            fakeSystemOperation(instance = systemOperation, withConsoleEnabled = true)
+            val commandLineInterfaceService =
+                CommandLineInterfaceService(terminalInputGateway, configuration, inactivityTerminationSignal)
+            every { terminalInputGateway.isConsoleAvailable } returns true
             fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
-            every { systemOperation.readPasswordFromConsole() } answers {
+            every { terminalInputGateway.readPasswordFromConsole() } answers {
                 inactivityTerminationSignal.request()
                 Thread.sleep(100)
                 "secret".toCharArray()
@@ -282,31 +284,33 @@ class CommandLineInterfaceServiceTest {
 
             // when / then
             assertThrows<InactivityTerminationRequestedException> { commandLineInterfaceService.receiveSecurely() }
-            verify(exactly = 1) { systemOperation.readPasswordFromConsole() }
+            verify(exactly = 1) { terminalInputGateway.readPasswordFromConsole() }
         }
 
         @Test
         fun `should abort secure input before reading when inactivity termination is already requested`() {
             // given
             val inactivityTerminationSignal = InactivityTerminationSignal()
-            val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration, inactivityTerminationSignal)
+            val commandLineInterfaceService =
+                CommandLineInterfaceService(terminalInputGateway, configuration, inactivityTerminationSignal)
             inactivityTerminationSignal.request()
-            fakeSystemOperation(instance = systemOperation, withConsoleEnabled = true)
+            every { terminalInputGateway.isConsoleAvailable } returns true
             fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
 
             // when / then
             assertThrows<InactivityTerminationRequestedException> { commandLineInterfaceService.receiveSecurely() }
-            verify(exactly = 0) { systemOperation.readPasswordFromConsole() }
+            verify(exactly = 0) { terminalInputGateway.readPasswordFromConsole() }
         }
 
         @Test
         fun `should keep waiting for secure input while inactivity termination is not requested`() {
             // given
             val inactivityTerminationSignal = InactivityTerminationSignal()
-            val commandLineInterfaceService = CommandLineInterfaceService(systemOperation, configuration, inactivityTerminationSignal)
-            fakeSystemOperation(instance = systemOperation, withConsoleEnabled = true)
+            val commandLineInterfaceService =
+                CommandLineInterfaceService(terminalInputGateway, configuration, inactivityTerminationSignal)
+            every { terminalInputGateway.isConsoleAvailable } returns true
             fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
-            every { systemOperation.readPasswordFromConsole() } answers {
+            every { terminalInputGateway.readPasswordFromConsole() } answers {
                 Thread.sleep(100)
                 "secret".toCharArray()
             }
@@ -316,7 +320,7 @@ class CommandLineInterfaceServiceTest {
 
             // then
             expectThat(actual.shell.asString()) isEqualTo "secret"
-            verify(exactly = 1) { systemOperation.readPasswordFromConsole() }
+            verify(exactly = 1) { terminalInputGateway.readPasswordFromConsole() }
         }
 
         @Test
@@ -329,28 +333,28 @@ class CommandLineInterfaceServiceTest {
             val actual = mockSystemInWith("$givenInput\n") { commandLineInterfaceService.receiveSecurely() }
 
             // then
-            verify(exactly = 0) { systemOperation.readPasswordFromConsole() }
+            verify(exactly = 0) { terminalInputGateway.readPasswordFromConsole() }
             expectThat(actual.shell.asString()) isEqualTo givenInput
         }
 
         @Test
         fun `should abort secure input if console is unavailable`() {
             // given
-            fakeSystemOperation(instance = systemOperation, withConsoleEnabled = false)
+            every { terminalInputGateway.isConsoleAvailable } returns false
             fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
 
             // when
             assertThrows<SecureInputUnavailableException> { commandLineInterfaceService.receiveSecurely() }
 
             // then
-            verify(exactly = 0) { systemOperation.readPasswordFromConsole() }
+            verify(exactly = 0) { terminalInputGateway.readPasswordFromConsole() }
         }
 
         @Test
         fun `should abort secure input after sending output if console is unavailable`() {
             // given
             val givenMessage = "hello world"
-            fakeSystemOperation(instance = systemOperation, withConsoleEnabled = false)
+            every { terminalInputGateway.isConsoleAvailable } returns false
             fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
             val captureSystemOut = captureSystemOut()
 
@@ -362,7 +366,7 @@ class CommandLineInterfaceServiceTest {
             }
 
             // then
-            verify(exactly = 0) { systemOperation.readPasswordFromConsole() }
+            verify(exactly = 0) { terminalInputGateway.readPasswordFromConsole() }
             expectThat(captureSystemOut.capture) isEqualTo givenMessage
         }
     }

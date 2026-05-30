@@ -19,6 +19,7 @@ import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods
 import com.tngtech.archunit.library.Architectures.onionArchitecture
 import de.pflugradts.kotlinextensions.UtilityArchitectureHelper
 import de.pflugradts.kotlinextensions.UtilityOptionalFixture
+import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.ddd.AggregateRoot
 import de.pflugradts.passbird.domain.model.ddd.DomainEntity
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
@@ -31,6 +32,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.contains
+import strikt.assertions.isEqualTo
+import java.lang.reflect.Modifier
 
 private const val ROOT = "de.pflugradts"
 private const val PASSBIRD_ROOT = "$ROOT.passbird"
@@ -117,6 +120,65 @@ class PassbirdTest {
         fun `command handling should not depend on thread local state`() {
             noClasses().that().resideInAPackage(path(APPLICATION_ROOT, "commandhandling"))
                 .should().dependOnClassesThat().haveFullyQualifiedName("java.lang.ThreadLocal")
+                .check(passbirdClasses)
+        }
+
+        @Test
+        fun `system operation should expose only allowlisted file and runtime effects`() {
+            val publicMethodNames = SystemOperation::class.java.declaredMethods
+                .filter { Modifier.isPublic(it.modifiers) && !it.isSynthetic }
+                .map { it.name.substringBefore("-") }
+                .toSet()
+
+            expectThat(publicMethodNames) isEqualTo setOf(
+                "copyTo",
+                "createDirectory",
+                "delete",
+                "exists",
+                "exit",
+                "getClock",
+                "getFileNames",
+                "getPath",
+                "isDirectory",
+                "newInputStream",
+                "newOutputStream",
+                "readBytesFromFile",
+                "resolvePath",
+                "writeBytesToSensitiveFile",
+                "writeStringToSensitiveFile",
+                "writeToSensitiveFile",
+            )
+        }
+
+        @Test
+        fun `clipboard platform access should stay in clipboard adapter`() {
+            noClasses().that().resideOutsideOfPackage(path(ADAPTER_ROOT, CLIPBOARD_ADAPTER))
+                .should().dependOnClassesThat().resideInAPackage("java.awt..")
+                .check(passbirdClasses)
+        }
+
+        @Test
+        fun `terminal input access should stay in userinterface adapter`() {
+            noClasses().that().resideOutsideOfPackage(path(ADAPTER_ROOT, USERINTERFACE_ADAPTER))
+                .should().accessField(System::class.java, "in")
+                .check(passbirdClasses)
+
+            noClasses().that().resideOutsideOfPackage(path(ADAPTER_ROOT, USERINTERFACE_ADAPTER))
+                .should().callMethod(System::class.java, "console")
+                .check(passbirdClasses)
+        }
+
+        @Test
+        fun `keystore construction should stay in keystore adapter`() {
+            noClasses().that().resideOutsideOfPackage(path(ADAPTER_ROOT, KEYSTORE_ADAPTER))
+                .should().dependOnClassesThat().haveFullyQualifiedName("java.security.KeyStore")
+                .check(passbirdClasses)
+        }
+
+        @Test
+        fun `process exit should stay in system operation`() {
+            noClasses().that(areNotSystemOperation())
+                .should().callMethod(System::class.java, "exit", Int::class.javaPrimitiveType)
                 .check(passbirdClasses)
         }
     }
@@ -285,6 +347,10 @@ private fun noClassesMayHaveNameEndingWithHelper(): ArchRule = noClasses().shoul
 
 private fun areNotTheOptionalBridge() = object : DescribedPredicate<JavaClass>("are not the Optional to Option bridge") {
     override fun test(javaClass: JavaClass) = javaClass.name != OPTIONAL_BRIDGE
+}
+
+private fun areNotSystemOperation() = object : DescribedPredicate<JavaClass>("are not SystemOperation") {
+    override fun test(javaClass: JavaClass) = javaClass.name != "$APPLICATION_ROOT.util.SystemOperation"
 }
 
 private fun areNotKotlinLambdas() = object : DescribedPredicate<JavaMethod>("not a Kotlin lambda") {

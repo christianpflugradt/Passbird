@@ -4,8 +4,6 @@ import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.application.FileName
 import de.pflugradts.passbird.application.toFileName
-import java.awt.Toolkit
-import java.awt.datatransfer.StringSelection
 import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Files
@@ -16,13 +14,10 @@ import java.nio.file.attribute.PosixFileAttributeView
 import java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE
 import java.nio.file.attribute.PosixFilePermission.OWNER_READ
 import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
-import java.security.KeyStore
 import java.time.Clock
 import kotlin.io.path.name
 import kotlin.system.exitProcess
 
-private const val JCEKS_KEYSTORE = "JCEKS"
-private const val PKCS12_KEYSTORE = "PKCS12"
 const val FAILURE_EXIT_STATUS = 1
 const val SUCCESS_EXIT_STATUS = 0
 private val PRIVATE_DIRECTORY_PERMISSIONS = setOf(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE)
@@ -30,14 +25,7 @@ private val PRIVATE_FILE_PERMISSIONS = setOf(OWNER_READ, OWNER_WRITE)
 
 class SystemOperation {
     val clock = Clock.systemUTC()
-    val isConsoleAvailable: Boolean get() = System.console() != null
-    val jceksInstance: KeyStore get() = KeyStore.getInstance(JCEKS_KEYSTORE)
-    val pkcs12Instance: KeyStore get() = KeyStore.getInstance(PKCS12_KEYSTORE)
 
-    fun availableInputBytes(): Int = System.`in`.available()
-    fun readCharFromStdin(): Char = System.`in`.read().toChar()
-    fun readPasswordFromConsole(): CharArray = System.console().readPassword()
-    fun sleepMilliseconds(milliseconds: Long) = Thread.sleep(milliseconds)
     fun getFileNames(directory: Directory): List<FileName> = Files.list(getPath(directory)).map { it.name.toFileName() }.toList()
     fun getPath(directory: Directory): Path = Paths.get(directory.value)
     fun resolvePath(directory: Directory, fileName: FileName): Path = getPath(directory).resolve(fileName.value)
@@ -80,7 +68,6 @@ class SystemOperation {
         outputStream.write(content.toByteArray())
     }
     fun readBytesFromFile(path: Path): ByteArray = Files.readAllBytes(path)
-    fun copyToClipboard(text: String) = StringSelection(text).let { Toolkit.getDefaultToolkit().systemClipboard.setContents(it, it) }
     fun exit(status: Int = SUCCESS_EXIT_STATUS): Unit = exitProcess(status)
 
     private fun applyPosixPermissionsIfSupported(path: Path, permissions: Set<java.nio.file.attribute.PosixFilePermission>) {

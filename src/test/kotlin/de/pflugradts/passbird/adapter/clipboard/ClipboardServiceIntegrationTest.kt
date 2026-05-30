@@ -3,7 +3,6 @@ package de.pflugradts.passbird.adapter.clipboard
 import de.pflugradts.passbird.NON_HEADLESS
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
-import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.kotest.assertions.nondeterministic.eventually
@@ -21,9 +20,8 @@ import kotlin.time.Duration.Companion.seconds
 @Tag(NON_HEADLESS)
 class ClipboardServiceIntegrationTest {
 
-    private val systemOperation = SystemOperation()
     private val configuration = mockk<Configuration>()
-    private val clipboardService = ClipboardService(systemOperation, configuration)
+    private val clipboardService = ClipboardService(ClipboardGateway(), configuration)
 
     @Test
     fun `should copy message to clipboard`() {

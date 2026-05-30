@@ -5,7 +5,6 @@ import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.failure.ClipboardFailure
 import de.pflugradts.passbird.application.failure.reportFailure
-import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.transfer.Output
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -14,7 +13,7 @@ private const val MILLI_SECONDS = 1000L
 
 @Singleton
 class ClipboardService @Inject constructor(
-    private val systemOperation: SystemOperation,
+    private val clipboardGateway: ClipboardGateway,
     private val configuration: ReadableConfiguration,
 ) : ClipboardAdapterPort {
     private val cleanerLock = Any()
@@ -22,7 +21,7 @@ class ClipboardService @Inject constructor(
 
     override fun post(output: Output) = tryCatching {
         synchronized(cleanerLock) {
-            systemOperation.copyToClipboard(output.shell.asString())
+            clipboardGateway.copy(output.shell.asString())
             cleanerGeneration += 1
             cleanerGeneration
         }
@@ -38,7 +37,7 @@ class ClipboardService @Inject constructor(
                 sleep().onSuccess {
                     synchronized(cleanerLock) {
                         if (cleanerGeneration == generation) {
-                            tryCatching { systemOperation.copyToClipboard("") }
+                            tryCatching { clipboardGateway.copy("") }
                         }
                     }
                 }

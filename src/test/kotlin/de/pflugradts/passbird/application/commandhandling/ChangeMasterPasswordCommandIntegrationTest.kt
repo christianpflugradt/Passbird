@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.adapter.keystore.KeyStoreFactory
 import de.pflugradts.passbird.adapter.keystore.KeyStoreService
 import de.pflugradts.passbird.application.commandhandling.handler.ChangeMasterPasswordCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
@@ -40,7 +41,7 @@ class ChangeMasterPasswordCommandIntegrationTest {
 
     private val userInterfaceAdapterPort = mockk<de.pflugradts.passbird.application.UserInterfaceAdapterPort>()
     private val systemOperation = SystemOperation()
-    private val keyStoreService = KeyStoreService(systemOperation)
+    private val keyStoreService = KeyStoreService(systemOperation, KeyStoreFactory())
     private lateinit var tempDirectory: String
     private lateinit var keyStoreFile: Path
     private lateinit var passwordTreeFile: Path

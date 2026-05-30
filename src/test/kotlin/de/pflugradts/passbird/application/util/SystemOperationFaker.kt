@@ -9,33 +9,22 @@ import java.io.IOException
 import java.io.OutputStream
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.security.KeyStoreException
 import java.time.Clock
 
 fun fakeSystemOperation(
     instance: SystemOperation,
     withClock: Clock = Clock.systemUTC(),
-    withConsoleEnabled: Boolean = true,
-    withPasswordFromConsole: CharArray = CharArray(0),
-    withKeyStoreUnavailable: Boolean = false,
     withPaths: List<Pair<String, Path>> = emptyList(),
     withDirectoryResolvingToFileName: Triple<Directory, FileName, Path>? = null,
     withIoException: Boolean = false,
 ) {
     every { instance.clock } returns withClock
-    every { instance.availableInputBytes() } answers { System.`in`.available() }
-    every { instance.readCharFromStdin() } answers { System.`in`.read().toChar() }
     every { instance.newInputStream(any()) } returns mockk()
     every { instance.newOutputStream(any()) } returns mockk()
     every { instance.writeToSensitiveFile(any(), any()) } answers {
         secondArg<(OutputStream) -> Unit>().invoke(mockk<OutputStream>(relaxed = true))
         Paths.get("")
     }
-    every { instance.isConsoleAvailable } returns withConsoleEnabled
-    every { instance.readPasswordFromConsole() } returns withPasswordFromConsole
-    every { instance.sleepMilliseconds(any()) } returns Unit
-    if (withKeyStoreUnavailable) every { instance.jceksInstance } throws KeyStoreException()
-    if (withKeyStoreUnavailable) every { instance.pkcs12Instance } throws KeyStoreException()
     withPaths.forEach { every { instance.getPath(it.first.toDirectory()) } returns it.second }
     withDirectoryResolvingToFileName?.run { every { instance.resolvePath(first, second) } returns third }
     every { instance.exit(any()) } returns Unit

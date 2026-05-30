@@ -35,7 +35,7 @@ class KeyStoreServiceIntegrationTest {
 
     @BeforeEach
     fun setup() {
-        keyStoreService = KeyStoreService(SystemOperation())
+        keyStoreService = KeyStoreService(SystemOperation(), KeyStoreFactory())
         tempKeyStoreDirectory = UUID.randomUUID().toString()
         keyStoreFile = tempKeyStoreDirectory + File.separator + ReadableConfiguration.KEYSTORE_FILENAME
         expectThat(File(tempKeyStoreDirectory!!).mkdir()).isTrue()

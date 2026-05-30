@@ -5,6 +5,7 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -18,7 +19,8 @@ import java.security.KeyStoreException
 class KeyStoreServiceTest {
 
     private val systemOperation = mockk<SystemOperation>()
-    private val keyStoreService = KeyStoreService(systemOperation)
+    private val keyStoreFactory = mockk<KeyStoreFactory>()
+    private val keyStoreService = KeyStoreService(systemOperation, keyStoreFactory)
 
     @Test
     fun `should store key and fail on invalid path`() {
@@ -68,10 +70,8 @@ class KeyStoreServiceTest {
     fun `should store key and fail on key store unavailable`() {
         // given
         val password = plainShellOf("Password".toCharArray())
-        fakeSystemOperation(
-            instance = systemOperation,
-            withKeyStoreUnavailable = true,
-        )
+        fakeSystemOperation(instance = systemOperation)
+        every { keyStoreFactory.pkcs12Instance } throws KeyStoreException()
 
         // when
         val actual = tryCatching { keyStoreService.storeKey(password, Paths.get("")) }
@@ -87,10 +87,8 @@ class KeyStoreServiceTest {
         // given
         val password = plainShellOf("Password".toCharArray())
         val key = shellOf("existing-key")
-        fakeSystemOperation(
-            instance = systemOperation,
-            withKeyStoreUnavailable = true,
-        )
+        fakeSystemOperation(instance = systemOperation)
+        every { keyStoreFactory.pkcs12Instance } throws KeyStoreException()
 
         // when
         val actual = tryCatching { keyStoreService.storeExistingKey(key, password, Paths.get("")) }
@@ -106,10 +104,8 @@ class KeyStoreServiceTest {
     fun `should load key and fail on key store unavailable`() {
         // given
         val password = plainShellOf("Password".toCharArray())
-        fakeSystemOperation(
-            instance = systemOperation,
-            withKeyStoreUnavailable = true,
-        )
+        fakeSystemOperation(instance = systemOperation)
+        every { keyStoreFactory.pkcs12Instance } throws KeyStoreException()
 
         // when
         val actual = keyStoreService.loadKey(password, Paths.get(""))

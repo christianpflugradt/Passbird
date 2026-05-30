@@ -6,7 +6,6 @@ import de.pflugradts.passbird.application.StdinTerminationRequestedException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.process.inactivity.InactivityTerminationSignal
-import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
@@ -25,7 +24,7 @@ private val STDIN_EOF = Char.MAX_VALUE
 
 @Singleton
 class CommandLineInterfaceService @Inject constructor(
-    private val systemOperation: SystemOperation,
+    private val terminalInputGateway: TerminalInputGateway,
     private val configuration: ReadableConfiguration,
     private val inactivityTerminationSignal: InactivityTerminationSignal,
 ) : UserInterfaceAdapterPort {
@@ -34,9 +33,9 @@ class CommandLineInterfaceService @Inject constructor(
     }
 
     constructor(
-        systemOperation: SystemOperation,
+        terminalInputGateway: TerminalInputGateway,
         configuration: ReadableConfiguration,
-    ) : this(systemOperation, configuration, InactivityTerminationSignal())
+    ) : this(terminalInputGateway, configuration, InactivityTerminationSignal())
 
     override fun receive(vararg output: Output) = output.forEach { sendWithoutLineBreak(it) }.run { receivePlain() }
 
@@ -54,14 +53,14 @@ class CommandLineInterfaceService @Inject constructor(
         }
     }
 
-    private fun stdin(): Char = systemOperation.readCharFromStdin()
+    private fun stdin(): Char = terminalInputGateway.readCharFromStdin()
     private fun isLinebreak(chr: Char) = chr == '\n'
     private fun isCarriageReturn(chr: Char) = chr == '\r'
     private fun isEndOfInput(chr: Char) = chr == STDIN_EOF
 
     private fun readCharFromVisibleStdin(): Char = readWithInactivityCheck { runCatching(::stdin).getOrDefault(STDIN_EOF) }
 
-    private fun readPasswordFromConsole(): CharArray = readWithInactivityCheck { systemOperation.readPasswordFromConsole() }
+    private fun readPasswordFromConsole(): CharArray = readWithInactivityCheck { terminalInputGateway.readPasswordFromConsole() }
 
     private fun <T> readWithInactivityCheck(read: () -> T): T {
         if (inactivityTerminationSignal.isRequested()) {
@@ -89,7 +88,7 @@ class CommandLineInterfaceService @Inject constructor(
         sendWithoutLineBreak(output)
         return when {
             !configuration.adapter.userInterface.secureInput -> receivePlain()
-            systemOperation.isConsoleAvailable -> readPasswordFromConsole().toInput()
+            terminalInputGateway.isConsoleAvailable -> readPasswordFromConsole().toInput()
             else -> throw SecureInputUnavailableException()
         }
     }

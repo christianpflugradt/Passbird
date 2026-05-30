@@ -3,7 +3,6 @@ package de.pflugradts.passbird.adapter.clipboard
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
-import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import io.kotest.assertions.nondeterministic.eventually
@@ -19,13 +18,13 @@ import kotlin.time.Duration.Companion.seconds
 
 class ClipboardServiceTest {
 
-    private val systemOperation = mockk<SystemOperation>()
+    private val clipboardGateway = mockk<ClipboardGateway>()
     private val configuration = mockk<Configuration>()
-    private val clipboardService = ClipboardService(systemOperation, configuration)
+    private val clipboardService = ClipboardService(clipboardGateway, configuration)
 
     @BeforeEach
     fun setup() {
-        every { systemOperation.copyToClipboard(any()) } returns Unit
+        every { clipboardGateway.copy(any()) } returns Unit
     }
 
     @Test
@@ -39,7 +38,7 @@ class ClipboardServiceTest {
 
         // then
         expectThat(actual.success) isEqualTo true
-        verify(exactly = 1) { systemOperation.copyToClipboard(message) }
+        verify(exactly = 1) { clipboardGateway.copy(message) }
     }
 
     @Test
@@ -48,7 +47,7 @@ class ClipboardServiceTest {
         val message = "write this to clipboard"
         val error = "clipboard unavailable"
         fakeConfiguration(instance = configuration)
-        every { systemOperation.copyToClipboard(message) } throws IllegalStateException(error)
+        every { clipboardGateway.copy(message) } throws IllegalStateException(error)
         val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
 
         // when
@@ -78,9 +77,9 @@ class ClipboardServiceTest {
             clipboardService.post(outputOf(shellOf(message)))
 
             // then
-            verify(exactly = 1) { systemOperation.copyToClipboard(message) }
+            verify(exactly = 1) { clipboardGateway.copy(message) }
             eventually(2.seconds) {
-                verify(exactly = 1) { systemOperation.copyToClipboard("") }
+                verify(exactly = 1) { clipboardGateway.copy("") }
             }
         }
     }
@@ -106,11 +105,11 @@ class ClipboardServiceTest {
             Thread.sleep(almostASecond.toLong())
 
             // then
-            verify(exactly = 1) { systemOperation.copyToClipboard(message) }
-            verify(exactly = 0) { systemOperation.copyToClipboard("") }
-            verify(exactly = 1) { systemOperation.copyToClipboard(anotherMessage) }
+            verify(exactly = 1) { clipboardGateway.copy(message) }
+            verify(exactly = 0) { clipboardGateway.copy("") }
+            verify(exactly = 1) { clipboardGateway.copy(anotherMessage) }
             eventually(2.seconds) {
-                verify(exactly = 1) { systemOperation.copyToClipboard("") }
+                verify(exactly = 1) { clipboardGateway.copy("") }
             }
         }
     }

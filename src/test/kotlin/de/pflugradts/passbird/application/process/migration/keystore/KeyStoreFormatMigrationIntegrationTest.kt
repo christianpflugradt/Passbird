@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.process.migration.keystore
 
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.adapter.keystore.JceksKeyStoreService
+import de.pflugradts.passbird.adapter.keystore.KeyStoreFactory
 import de.pflugradts.passbird.adapter.keystore.KeyStoreService
 import de.pflugradts.passbird.adapter.keystore.MigrationKeyStoreService
 import de.pflugradts.passbird.adapter.passwordtree.PasswordTreeReader
@@ -102,8 +103,8 @@ class KeyStoreFormatMigrationIntegrationTest {
 
     private fun createMigrationFixture(password: String): MigrationFixture {
         val migrationKeyStoreService = MigrationKeyStoreService(
-            currentKeyStoreService = KeyStoreService(systemOperation),
-            jceksKeyStoreService = JceksKeyStoreService(systemOperation),
+            currentKeyStoreService = KeyStoreService(systemOperation, KeyStoreFactory()),
+            jceksKeyStoreService = JceksKeyStoreService(systemOperation, KeyStoreFactory()),
             keyStoreFormatDetector = keyStoreFormatDetector,
             systemOperation = systemOperation,
         )
@@ -166,7 +167,8 @@ class KeyStoreFormatMigrationIntegrationTest {
         ).restore()
 
         expectThat(keyStoreFormatDetector.detect(Files.readAllBytes(keyStoreFile))) isEqualTo KeyStoreFormat.PKCS12
-        expectThat(KeyStoreService(systemOperation).loadKey(createPlainShell(password), keyStoreFile).success).isTrue()
+        expectThat(KeyStoreService(systemOperation, KeyStoreFactory()).loadKey(createPlainShell(password), keyStoreFile).success)
+            .isTrue()
         expectThat(migrationFixture.keyStoreMigrationDetector.detect().required) isEqualTo false
         expectThat(migrationFixture.passwordTreeMigrationDetector.detect().required) isEqualTo false
         expectThat(passwordTreeEnvelope.isCurrent(Files.readAllBytes(passwordTreeFile))).isTrue()
@@ -183,7 +185,7 @@ class KeyStoreFormatMigrationIntegrationTest {
     }
 
     private fun writeLegacyKeyStore(password: String) {
-        JceksKeyStoreService(systemOperation).storeExistingKey(
+        JceksKeyStoreService(systemOperation, KeyStoreFactory()).storeExistingKey(
             createTestKeyShell(),
             createPlainShell(password),
             keyStoreFile,

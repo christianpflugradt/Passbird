@@ -7,14 +7,21 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import jakarta.inject.Inject
 import java.nio.file.Path
 
-class JceksKeyStoreService @Inject constructor(private val systemOperation: SystemOperation) : KeyStoreAdapterPort {
+class JceksKeyStoreService @Inject constructor(
+    private val systemOperation: SystemOperation,
+    private val keyStoreFactory: KeyStoreFactory,
+) : KeyStoreAdapterPort {
     private val keyStorePersistence = KeyStorePersistence(systemOperation)
 
-    override fun loadKey(password: PlainShell, path: Path) = keyStorePersistence.loadKey({ systemOperation.jceksInstance }, password, path)
+    override fun loadKey(password: PlainShell, path: Path) = keyStorePersistence.loadKey(
+        { keyStoreFactory.jceksInstance },
+        password,
+        path,
+    )
 
     override fun storeKey(password: PlainShell, path: Path) =
-        keyStorePersistence.storeKey({ systemOperation.jceksInstance }, password, path)
+        keyStorePersistence.storeKey({ keyStoreFactory.jceksInstance }, password, path)
 
     override fun storeExistingKey(key: Shell, password: PlainShell, path: Path) =
-        keyStorePersistence.storeExistingKey({ systemOperation.jceksInstance }, key, password, path)
+        keyStorePersistence.storeExistingKey({ keyStoreFactory.jceksInstance }, key, password, path)
 }

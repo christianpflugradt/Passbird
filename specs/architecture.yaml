@@ -61,6 +61,7 @@ structural_rules:
   - domain packages must not depend on com.google.inject
   - runtime context such as home directory and initial slot must flow through RunContext bindings, not global singleton state
   - command execution outcome state must flow through injected session graph collaborators, not process-global or ThreadLocal state
+  - SystemOperation is limited to allowlisted file-persistence primitives, clock access, and process exit; clipboard, terminal input, and keystore construction must stay in their adapter packages and are guarded by architecture tests
 runtime_design:
   boot_sequence:
     - Main.kt validates the home directory argument and constructs the RunContext
@@ -94,7 +95,7 @@ ports_and_adapters:
     concern: clipboard copy and reset behavior
   - port: KeyStoreAdapterPort
     implementation: adapter.keystore.KeyStoreService
-    concern: load and store secret material in PKCS12, while migration boot may bind compatibility adapters for legacy JCEKS reads
+    concern: load and store secret material in PKCS12, while migration boot may bind compatibility adapters for legacy JCEKS reads; JVM keystore construction stays inside adapter.keystore
   - port: PasswordTreeAdapterPort
     implementation: adapter.passwordtree.PasswordTreeFacade
     concern: encrypted persistence of eggs, favorites, memory, and nests as one snapshot
