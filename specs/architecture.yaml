@@ -6,6 +6,7 @@ architecture:
     file: src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt
     mechanisms:
       - ArchUnit onion architecture rules
+      - repository-wide production package import coverage
       - package placement assertions
       - naming constraints
       - event-handler constraints
@@ -54,7 +55,8 @@ structural_rules:
   - no class names may end with Helper
   - event handlers must not expose public methods
   - handler methods for events must be annotated with Subscribe
-  - do not introduce java.util.Optional; the codebase uses custom Option and TryResult types
+  - repository-wide production import coverage must include every package under de.pflugradts that is included in the jar
+  - do not introduce java.util.Optional outside the explicit Optional.toOption bridge in de.pflugradts.kotlinextensions.OptionKt; the codebase uses custom Option and TryResult types
   - use jakarta.inject annotations instead of Guice-specific Inject, Singleton, or Named annotations across the codebase
   - domain packages must not depend on com.google.inject
   - runtime context such as home directory and initial slot must flow through RunContext bindings, not global singleton state

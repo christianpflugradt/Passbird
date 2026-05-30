@@ -11,11 +11,14 @@ import com.tngtech.archunit.core.domain.JavaMethod
 import com.tngtech.archunit.core.domain.JavaModifier
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.core.importer.ImportOption.DoNotIncludeTests
+import com.tngtech.archunit.lang.ArchRule
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods
 import com.tngtech.archunit.library.Architectures.onionArchitecture
+import de.pflugradts.kotlinextensions.UtilityArchitectureHelper
+import de.pflugradts.kotlinextensions.UtilityOptionalFixture
 import de.pflugradts.passbird.domain.model.ddd.AggregateRoot
 import de.pflugradts.passbird.domain.model.ddd.DomainEntity
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
@@ -25,11 +28,17 @@ import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import strikt.api.expectThat
+import strikt.assertions.contains
 
-private const val ROOT = "de.pflugradts.passbird"
-private const val ADAPTER_ROOT = "$ROOT.adapter"
-private const val APPLICATION_ROOT = "$ROOT.application"
-private const val DOMAIN_ROOT = "$ROOT.domain"
+private const val ROOT = "de.pflugradts"
+private const val PASSBIRD_ROOT = "$ROOT.passbird"
+private const val KOTLIN_EXTENSIONS_ROOT = "$ROOT.kotlinextensions"
+private const val OPTIONAL_BRIDGE = "$KOTLIN_EXTENSIONS_ROOT.OptionKt"
+private const val ADAPTER_ROOT = "$PASSBIRD_ROOT.adapter"
+private const val APPLICATION_ROOT = "$PASSBIRD_ROOT.application"
+private const val DOMAIN_ROOT = "$PASSBIRD_ROOT.domain"
 private const val DOMAIN_MODELS = "$DOMAIN_ROOT.model"
 private const val DOMAIN_SERVICES = "$DOMAIN_ROOT.service"
 private const val CLIPBOARD_ADAPTER = "clipboard"
@@ -40,7 +49,8 @@ private const val USERINTERFACE_ADAPTER = "userinterface"
 
 @Tag(ARCHITECTURE)
 class PassbirdTest {
-    private var classes = ClassFileImporter().withImportOption(DoNotIncludeTests()).importPackages(ROOT)
+    private var productionClasses = ClassFileImporter().withImportOption(DoNotIncludeTests()).importPackages(ROOT)
+    private var passbirdClasses = ClassFileImporter().withImportOption(DoNotIncludeTests()).importPackages(PASSBIRD_ROOT)
     private var allClasses = ClassFileImporter().importPackages(ROOT)
     private fun path(vararg segments: String) = "${segments.joinToString(".")}.."
 
@@ -56,22 +66,36 @@ class PassbirdTest {
             .adapter(PASSWORDTREE_ADAPTER, path(ADAPTER_ROOT, PASSWORDTREE_ADAPTER))
             .adapter(USERINTERFACE_ADAPTER, path(ADAPTER_ROOT, USERINTERFACE_ADAPTER))
             .ignoreDependency(assignableTo(AbstractModule::class.java), alwaysTrue()) // exclude guice modules
-            .check(classes)
+            .check(passbirdClasses)
     }
 
     @Nested
     inner class UndesiredClassesTest {
 
         @Test
-        fun `no classes should depend on Optional`() {
-            noClasses().should().dependOnClassesThat().haveFullyQualifiedName("java.util.Optional").check(classes)
+        fun `production imports should include kotlin extensions package`() {
+            expectThat(productionClasses.map { it.packageName }.toSet()).contains(KOTLIN_EXTENSIONS_ROOT)
+        }
+
+        @Test
+        fun `no production classes except option bridge should depend on Optional`() {
+            noProductionClassesExceptOptionBridgeShouldDependOnOptional().check(productionClasses)
+        }
+
+        @Test
+        fun `optional dependency guardrail catches utility package additions`() {
+            val utilityClasses = ClassFileImporter().importClasses(UtilityOptionalFixture::class.java)
+
+            assertThrows<AssertionError> {
+                noProductionClassesExceptOptionBridgeShouldDependOnOptional().check(utilityClasses)
+            }
         }
 
         @Test
         fun `domain classes should not depend on guice`() {
             noClasses().that().resideInAPackage(path(DOMAIN_ROOT))
                 .should().dependOnClassesThat().resideInAPackage("com.google.inject..")
-                .check(classes)
+                .check(passbirdClasses)
         }
 
         @Test
@@ -93,7 +117,7 @@ class PassbirdTest {
         fun `command handling should not depend on thread local state`() {
             noClasses().that().resideInAPackage(path(APPLICATION_ROOT, "commandhandling"))
                 .should().dependOnClassesThat().haveFullyQualifiedName("java.lang.ThreadLocal")
-                .check(classes)
+                .check(passbirdClasses)
         }
     }
 
@@ -103,7 +127,7 @@ class PassbirdTest {
         fun `no functions outside of main should use main functions`() {
             methods().that().haveNameMatching("^main.*")
                 .should().onlyBeCalled().byClassesThat().haveNameMatching(".*MainKt$")
-                .check(classes)
+                .check(passbirdClasses)
         }
     }
 
@@ -115,12 +139,12 @@ class PassbirdTest {
                 .areAssignableTo(JavaClass.Predicates.INTERFACES.and(simpleNameEndingWith("AdapterPort")))
                 .and().areNotInterfaces()
                 .should().resideInAPackage(path(ADAPTER_ROOT))
-                .check(classes)
+                .check(passbirdClasses)
         }
 
         @Test
         fun `no classes should be in adapter package`() {
-            noClasses().should().resideInAPackage(ADAPTER_ROOT).check(classes)
+            noClasses().should().resideInAPackage(ADAPTER_ROOT).check(passbirdClasses)
         }
     }
 
@@ -132,14 +156,14 @@ class PassbirdTest {
                 .or().haveFullyQualifiedName("$ADAPTER_ROOT.passwordtree.PasswordTreeReader")
                 .or().haveFullyQualifiedName("$ADAPTER_ROOT.passwordtree.PasswordTreeWriter")
                 .should().dependOnClassesThat().haveFullyQualifiedName("$DOMAIN_SERVICES.nest.NestService")
-                .check(classes)
+                .check(passbirdClasses)
         }
 
         @Test
         fun `nest service should not depend on egg repository`() {
             noClasses().that().haveFullyQualifiedName("$DOMAIN_SERVICES.nest.NestingGroundService")
                 .should().dependOnClassesThat().haveFullyQualifiedName("$DOMAIN_SERVICES.password.tree.EggRepository")
-                .check(classes)
+                .check(passbirdClasses)
         }
     }
 
@@ -149,7 +173,7 @@ class PassbirdTest {
         fun `repositories should only be accessed from domain services`() {
             classes().that().areAssignableTo(Repository::class.java)
                 .should().onlyBeAccessed().byClassesThat().resideInAPackage(path(DOMAIN_SERVICES))
-                .check(classes)
+                .check(passbirdClasses)
         }
     }
 
@@ -159,48 +183,48 @@ class PassbirdTest {
         fun `ddd package should only contain interfaces and abstract classes`() {
             classes().that().resideInAPackage(path(DOMAIN_MODELS, "ddd"))
                 .should().beInterfaces().orShould().haveModifier(JavaModifier.ABSTRACT)
-                .check(classes)
+                .check(passbirdClasses)
         }
 
         @Test
         fun `aggregate roots should reside in domain model package`() {
             classes().that().areAssignableTo(AggregateRoot::class.java).and().areNotInterfaces()
                 .should().resideInAPackage(path(DOMAIN_MODELS))
-                .check(classes)
+                .check(passbirdClasses)
         }
 
         @Test
         fun `domain entities should reside in domain model package`() {
             classes().that().areAssignableTo(DomainEntity::class.java).and().areNotInterfaces()
                 .should().resideInAPackage(path(DOMAIN_MODELS))
-                .check(classes)
+                .check(passbirdClasses)
         }
 
         @Test
         fun `value objects should reside in domain model package`() {
             classes().that().areAssignableTo(ValueObject::class.java).and().areNotInterfaces()
                 .should().resideInAPackage(path(DOMAIN_MODELS))
-                .check(classes)
+                .check(passbirdClasses)
         }
 
         @Test
         fun `repositories should reside in domain model package`() {
             classes().that().areAssignableTo(Repository::class.java).and().areNotInterfaces()
                 .should().resideInAPackage(path(DOMAIN_SERVICES))
-                .check(classes)
+                .check(passbirdClasses)
         }
 
         @Test
         fun `domain events should reside in domain model event package`() {
             classes().that().areAssignableTo(DomainEvent::class.java).and().areNotInterfaces()
                 .should().resideInAPackage(path(DOMAIN_MODELS, "event"))
-                .check(classes)
+                .check(passbirdClasses)
         }
 
         @Test
         fun `no classes should be in domain package`() {
             noClasses().should().resideInAPackage(DOMAIN_ROOT)
-                .check(classes)
+                .check(passbirdClasses)
         }
     }
 
@@ -208,7 +232,9 @@ class PassbirdTest {
     inner class EventHandlerTest {
         @Test
         fun `event handlers should not have public methods`() {
-            noMethods().that().areDeclaredInClassesThat().areAssignableTo(EventHandler::class.java).should().bePublic().check(classes)
+            noMethods().that().areDeclaredInClassesThat().areAssignableTo(
+                EventHandler::class.java,
+            ).should().bePublic().check(passbirdClasses)
         }
 
         @Test
@@ -217,7 +243,7 @@ class PassbirdTest {
                 .and().haveNameMatching("^handle.*")
                 .and(areNotKotlinLambdas())
                 .should().beAnnotatedWith(Subscribe::class.java)
-                .check(classes)
+                .check(passbirdClasses)
         }
 
         @Test
@@ -225,7 +251,7 @@ class PassbirdTest {
             noMethods().that().areDeclaredInClassesThat().areNotAssignableTo(EventHandler::class.java)
                 .or().haveNameNotMatching("^handle.*")
                 .should().beAnnotatedWith(Subscribe::class.java)
-                .check(classes)
+                .check(passbirdClasses)
         }
     }
 
@@ -233,14 +259,32 @@ class PassbirdTest {
     inner class NamingTest {
         @Test
         fun `no classes may have name ending with impl`() {
-            noClasses().should().haveSimpleNameEndingWith("Impl").check(classes)
+            noClassesMayHaveNameEndingWithImpl().check(productionClasses)
         }
 
         @Test
         fun `no classes may have name ending with helper`() {
-            noClasses().should().haveSimpleNameEndingWith("Helper").check(classes)
+            noClassesMayHaveNameEndingWithHelper().check(productionClasses)
+        }
+
+        @Test
+        fun `naming guardrail catches utility package helper names`() {
+            val utilityClasses = ClassFileImporter().importClasses(UtilityArchitectureHelper::class.java)
+
+            assertThrows<AssertionError> { noClassesMayHaveNameEndingWithHelper().check(utilityClasses) }
         }
     }
+}
+
+private fun noProductionClassesExceptOptionBridgeShouldDependOnOptional(): ArchRule = noClasses().that(areNotTheOptionalBridge())
+    .should().dependOnClassesThat().haveFullyQualifiedName("java.util.Optional")
+
+private fun noClassesMayHaveNameEndingWithImpl(): ArchRule = noClasses().should().haveSimpleNameEndingWith("Impl")
+
+private fun noClassesMayHaveNameEndingWithHelper(): ArchRule = noClasses().should().haveSimpleNameEndingWith("Helper")
+
+private fun areNotTheOptionalBridge() = object : DescribedPredicate<JavaClass>("are not the Optional to Option bridge") {
+    override fun test(javaClass: JavaClass) = javaClass.name != OPTIONAL_BRIDGE
 }
 
 private fun areNotKotlinLambdas() = object : DescribedPredicate<JavaMethod>("not a Kotlin lambda") {
