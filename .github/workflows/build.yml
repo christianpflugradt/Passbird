@@ -127,13 +127,17 @@ jobs:
       - name: run unit tests
         run: ./gradlew test
       - uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: unit-test-report
           path: build/reports/tests/test/*
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: unit-test-execution-data
           path: build/jacoco/test.exec
+          if-no-files-found: ignore
 
   integration-tests:
     runs-on: ubuntu-latest
@@ -152,13 +156,17 @@ jobs:
       - name: run integration tests
         run: ./gradlew integration
       - uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: integration-test-report
           path: build/reports/tests/integration/*
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: integration-test-execution-data
           path: build/jacoco/integration.exec
+          if-no-files-found: ignore
 
   property-tests:
     runs-on: ubuntu-latest
@@ -177,13 +185,17 @@ jobs:
       - name: run property tests
         run: ./gradlew property
       - uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: property-test-report
           path: build/reports/tests/property/*
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: property-test-execution-data
           path: build/jacoco/property.exec
+          if-no-files-found: ignore
   mutation-tests:
     runs-on: ubuntu-latest
     needs: [ compile ]
@@ -279,9 +291,11 @@ jobs:
       - name: run architecture tests
         run: ./gradlew architecture
       - uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: architecture-test-report
           path: build/reports/tests/architecture/*
+          if-no-files-found: ignore
 
   test-coverage-verification:
     runs-on: ubuntu-latest
