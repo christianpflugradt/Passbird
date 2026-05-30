@@ -23,6 +23,8 @@ import kotlin.system.exitProcess
 
 private const val JCEKS_KEYSTORE = "JCEKS"
 private const val PKCS12_KEYSTORE = "PKCS12"
+const val FAILURE_EXIT_STATUS = 1
+const val SUCCESS_EXIT_STATUS = 0
 private val PRIVATE_DIRECTORY_PERMISSIONS = setOf(OWNER_READ, OWNER_WRITE, OWNER_EXECUTE)
 private val PRIVATE_FILE_PERMISSIONS = setOf(OWNER_READ, OWNER_WRITE)
 
@@ -79,7 +81,7 @@ class SystemOperation {
     }
     fun readBytesFromFile(path: Path): ByteArray = Files.readAllBytes(path)
     fun copyToClipboard(text: String) = StringSelection(text).let { Toolkit.getDefaultToolkit().systemClipboard.setContents(it, it) }
-    fun exit(): Unit = exitProcess(0)
+    fun exit(status: Int = SUCCESS_EXIT_STATUS): Unit = exitProcess(status)
 
     private fun applyPosixPermissionsIfSupported(path: Path, permissions: Set<java.nio.file.attribute.PosixFilePermission>) {
         runCatching {

@@ -7,6 +7,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Co
 import de.pflugradts.passbird.application.failure.ConfigurationFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
+import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
 import jakarta.inject.Inject
 
@@ -30,7 +31,7 @@ class ConfigurationFactory @Inject constructor(
     }.let { result ->
         result.exceptionOrNull()?.let {
             reportFailure(ConfigurationFailure(it))
-            systemOperation.exit()
+            systemOperation.exit(FAILURE_EXIT_STATUS)
             throw it
         }
         result.getOrNull()!!

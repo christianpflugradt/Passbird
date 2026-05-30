@@ -6,6 +6,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.failure.ChecksumFailure
 import de.pflugradts.passbird.application.failure.SignatureCheckFailure
 import de.pflugradts.passbird.application.failure.reportFailure
+import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.readBytes
@@ -73,7 +74,7 @@ class PasswordTreePayloadReader @Inject constructor(
         if (!expectedSignature.contentEquals(actualSignature)) {
             val critical = configuration.adapter.passwordTree.verifySignature
             reportFailure(SignatureCheckFailure(shellOf(actualSignature), critical))
-            if (critical) systemOperation.exit()
+            if (critical) systemOperation.exit(FAILURE_EXIT_STATUS)
         }
     }
 
@@ -88,7 +89,7 @@ class PasswordTreePayloadReader @Inject constructor(
         if (expectedChecksum != actualCheckSum) {
             val critical = configuration.adapter.passwordTree.verifyChecksum
             reportFailure(ChecksumFailure(actualCheckSum, expectedChecksum, critical))
-            if (critical) systemOperation.exit()
+            if (critical) systemOperation.exit(FAILURE_EXIT_STATUS)
         }
     }
 

@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.security
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.kotlinextensions.tryCatching
+import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
 import io.mockk.every
 import io.mockk.mockk
@@ -36,11 +37,12 @@ class CryptoProviderFactoryTest {
     fun `should terminate application after failed authentication`() {
         // given
         every { keyStoreAuthenticationService.authenticate(any(), any()) } returns failure(ex = RuntimeException())
+        every { systemOperation.exit(any()) } returns Unit
 
         // when
         tryCatching { cryptoProviderFactory.createCryptoProvider() }
 
         // then
-        verify(exactly = 1) { systemOperation.exit() }
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
     }
 }

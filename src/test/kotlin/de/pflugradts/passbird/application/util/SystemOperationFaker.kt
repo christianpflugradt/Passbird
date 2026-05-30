@@ -38,7 +38,7 @@ fun fakeSystemOperation(
     if (withKeyStoreUnavailable) every { instance.pkcs12Instance } throws KeyStoreException()
     withPaths.forEach { every { instance.getPath(it.first.toDirectory()) } returns it.second }
     withDirectoryResolvingToFileName?.run { every { instance.resolvePath(first, second) } returns third }
-    every { instance.exit() } returns Unit
+    every { instance.exit(any()) } returns Unit
     if (withIoException) every { instance.resolvePath(any(Directory::class), any(FileName::class)) } throws IOException()
     if (withIoException) every { instance.resolvePath(any(Directory::class), any(Directory::class)) } throws IOException()
     if (withIoException) every { instance.writeToSensitiveFile(any(), any()) } throws IOException()

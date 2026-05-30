@@ -12,6 +12,7 @@ import de.pflugradts.passbird.application.process.migration.PendingMigration
 import de.pflugradts.passbird.application.process.migration.PreLaunchMigrationDetector
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
+import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
@@ -55,7 +56,7 @@ class PasswordTreeFavoritesMigration @Inject constructor(
             }
             .onFailure {
                 reportFailure(LoginFailure(3))
-                systemOperation.exit()
+                systemOperation.exit(FAILURE_EXIT_STATUS)
             }
             .getOrNull()
     }

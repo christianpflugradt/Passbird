@@ -6,6 +6,7 @@ import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
 import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import de.pflugradts.passbird.domain.model.slot.Slot
@@ -73,7 +74,7 @@ class ReadableConfigurationTest {
 
     @Test
     fun `should terminate instead of loading template when configuration contains unsupported properties`() {
-        every { systemOperation.exit() } returns Unit
+        every { systemOperation.exit(any()) } returns Unit
         File(configurationFile).writeText(
             """
             application:
@@ -88,6 +89,6 @@ class ReadableConfigurationTest {
 
         expectThat(actual.failure).isTrue()
         expectThat(captureSystemErr.capture) contains "Configuration contains unrecognized property and will not be used."
-        verify(exactly = 1) { systemOperation.exit() }
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
     }
 }

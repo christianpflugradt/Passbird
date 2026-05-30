@@ -35,6 +35,7 @@ current_security_relevant_implementation:
     facts:
       - delegates keystore password prompting and verification to KeyStoreAuthenticationService
       - allows three authentication attempts before exit
+      - failed startup authentication exits with a non-zero process status after reporting the login failure
   keystore_authentication:
     file: src/main/kotlin/de/pflugradts/passbird/application/security/KeyStoreAuthenticationService.kt
     facts:
@@ -92,7 +93,7 @@ current_security_relevant_implementation:
       - treats password tree decrypt or read failures as fatal instead of falling back to an empty restore state
       - only publishes mutating password and nest success events after password tree sync succeeds
       - failed password-tree sync restores the live session to the last restored or successfully synced Egg, Favorite, Memory, and Nest snapshot before reporting failure
-      - can exit immediately when verification is configured as critical
+      - can exit immediately with a non-zero process status when verification is configured as critical
       - stores eggs, nests, per-nest Favorite slots, and optionally persisted memory in a custom binary layout before encryption
       - detects both legacy pre-envelope password tree files and legacy current-format trees that require a Favorites migration before main startup
   secret_output_paths:

@@ -23,7 +23,7 @@ fun mockMain(
         mockkStatic(::mainHasValidHomeDirectory)
         every { mainHasValidHomeDirectory(any()) } returns true
     }
-    every { systemOperationMock.exit() } returns Unit
+    every { systemOperationMock.exit(any()) } returns Unit
 }
 
 fun unmockMain(withMockedFileCheck: Boolean = true) {

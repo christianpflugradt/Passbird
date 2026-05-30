@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-25
+last_reviewed: 2026-05-30
 configuration_surface:
   source_of_truth_files:
     - passbird.yml
@@ -36,8 +36,8 @@ configuration_surface:
     - domain.protein.promptForProteinStructureInputToggle defaults to false
   loading_behavior:
     - if passbird.yml does not exist in the run home directory, Passbird loads a template configuration instead of reporting a load failure
-    - if passbird.yml exists and contains an unrecognized property, Passbird reports that the configuration contains an unrecognized property, exits, and does not fall back to template mode
-    - if passbird.yml exists and cannot otherwise be parsed or loaded, Passbird reports Configuration could not be loaded: <ExceptionMessage> and exits
+    - if passbird.yml exists and contains an unrecognized property, Passbird reports that the configuration contains an unrecognized property, exits with a non-zero process status, and does not fall back to template mode
+    - if passbird.yml exists and cannot otherwise be parsed or loaded, Passbird reports Configuration could not be loaded: <ExceptionMessage> and exits with a non-zero process status
   setup_materialization_rules:
     - when setup persists a new configuration for chosen directory <D>, it writes passbird.yml to <D>/passbird.yml
     - when setup persists a new configuration for chosen directory <D>, application.backup.location is rewritten to <D>/backups
@@ -146,13 +146,13 @@ areas:
       - changes whether signature and checksum mismatches only warn or also terminate the current restore path
     behavioral_contract:
       - if passbird.tree is missing at the configured location, Passbird restores an empty password tree instead of treating this as a decrypt failure
-      - if passbird.tree exists but cannot be decrypted or unwrapped, Passbird reports the decrypt failure for passbird.tree and exits instead of falling back to an empty tree
-      - if verifySignature is true and the stored signature is invalid, Passbird reports the signature failure and exits during restore
+      - if passbird.tree exists but cannot be decrypted or unwrapped, Passbird reports the decrypt failure for passbird.tree and exits with a non-zero process status instead of falling back to an empty tree
+      - if verifySignature is true and the stored signature is invalid, Passbird reports the signature failure and exits with a non-zero process status during restore
       - if verifySignature is false and the stored signature is invalid, Passbird still reports the signature failure but continues restoring the tree
-      - if verifyChecksum is true and the stored checksum is invalid, Passbird reports the checksum failure and exits during restore
+      - if verifyChecksum is true and the stored checksum is invalid, Passbird reports the checksum failure and exits with a non-zero process status during restore
       - if verifyChecksum is false and the stored checksum is invalid, Passbird still reports the checksum failure but continues restoring the tree
 configuration_rules:
-  - invalid configuration files must abort startup after reporting the load failure
+  - invalid configuration files must abort startup with a non-zero process status after reporting the load failure
   - missing configuration and invalid configuration are different product states and must not be treated the same
   - setup must consume the directory the user entered and must not silently fall back to another directory
   - setup must not continue to keystore creation if writing passbird.yml fails

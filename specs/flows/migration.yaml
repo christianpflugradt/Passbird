@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-25
+last_reviewed: 2026-05-30
 flow_family: migration
 applies_interaction_rules_from: specs/interaction.yaml
 flows:
@@ -31,7 +31,7 @@ flows:
       - each authenticated migration requests credentials through the shared migration authentication service
       - if no credentials are cached yet, Passbird allows up to 3 attempts with the same Enter key: prompt
       - failed attempts repeat the same prompt until authentication succeeds or 3 attempts have been consumed
-      - if authentication still fails after 3 attempts, Passbird reports Login failed. Shutting down after 3 unsuccessful attempts. and exits
+      - if authentication still fails after 3 attempts, Passbird reports Login failed. Shutting down after 3 unsuccessful attempts. and exits with a non-zero process status
       - after the first successful migration authentication in a run, Passbird caches the resulting credentials for reuse
       - later authenticated migrations in the same migration run reuse those cached credentials without prompting again
       - when multiple authenticated migrations are pending together, the user is prompted only once for the whole migration session

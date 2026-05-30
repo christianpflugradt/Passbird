@@ -13,6 +13,7 @@ import de.pflugradts.passbird.application.passwordtree.checksum
 import de.pflugradts.passbird.application.passwordtree.checksumBytes
 import de.pflugradts.passbird.application.passwordtree.signature
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
+import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
@@ -95,7 +96,7 @@ class PasswordTreeFacadeTest {
     @BeforeEach
     fun setup() {
         fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory)
-        every { systemOperation.exit() } returns Unit
+        every { systemOperation.exit(any()) } returns Unit
     }
 
     @AfterEach
@@ -202,7 +203,7 @@ class PasswordTreeFacadeTest {
         // then
         expectThat(actual.get().count()) isEqualTo 0
         expectThat(captureSystemErr.capture).isEqualTo("")
-        verify(exactly = 0) { systemOperation.exit() }
+        verify(exactly = 0) { systemOperation.exit(any()) }
     }
 
     @Test
@@ -220,7 +221,7 @@ class PasswordTreeFacadeTest {
         expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isA<IllegalStateException>()
         expectThat(captureSystemErr.capture) contains "Password Tree at 'passbird.tree' could not be decrypted:"
-        verify(exactly = 1) { systemOperation.exit() }
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
     }
 
     @Test
@@ -265,7 +266,7 @@ class PasswordTreeFacadeTest {
     @Test
     fun `should shut down on decrypt failure instead of falling back to empty tree`() {
         // given
-        every { systemOperation.exit() } returns Unit
+        every { systemOperation.exit(any()) } returns Unit
         File(passwordTreeFilename).writeText("not an encrypted password tree")
         expectThat(File(passwordTreeFilename)).exists()
         val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
@@ -279,7 +280,7 @@ class PasswordTreeFacadeTest {
         expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isA<Exception>()
         expectThat(captureSystemErr.capture) contains "Password Tree at 'passbird.tree' could not be decrypted:"
-        verify(exactly = 1) { systemOperation.exit() }
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
     }
 
     @Nested
@@ -290,7 +291,7 @@ class PasswordTreeFacadeTest {
             // given
             val eggs = someEggs()
             val manipulatedSignature = signature().reversedArray()
-            every { systemOperation.exit() } returns Unit
+            every { systemOperation.exit(any()) } returns Unit
             fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifySignature = true)
 
             mockkStatic(::signature)
@@ -310,7 +311,7 @@ class PasswordTreeFacadeTest {
             // then
             expectThat(actual) contains "Signature of Password Tree could not be verified."
             expectThat(actual) contains "Shutting down due to signature failure."
-            verify(exactly = 1) { systemOperation.exit() }
+            verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
         }
 
         @Test
@@ -318,7 +319,7 @@ class PasswordTreeFacadeTest {
             // given
             val eggs = someEggs()
             val manipulatedSignature = signature().reversedArray()
-            every { systemOperation.exit() } returns Unit
+            every { systemOperation.exit(any()) } returns Unit
             fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifySignature = false)
 
             mockkStatic(::signature)
@@ -340,14 +341,14 @@ class PasswordTreeFacadeTest {
             expectThat(restored) isEqualTo eggs.size
             expectThat(actual) contains "Signature of Password Tree could not be verified."
             expectThat(actual.contains("Shutting down due to signature failure.")).isFalse()
-            verify(exactly = 0) { systemOperation.exit() }
+            verify(exactly = 0) { systemOperation.exit(any()) }
         }
 
         @Test
         fun `should shut down on invalid checksum with verifyChecksum set to true`() {
             // given
             val eggs = someEggs()
-            every { systemOperation.exit() } returns Unit
+            every { systemOperation.exit(any()) } returns Unit
             fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifyChecksum = true)
 
             mockkStatic(::checksum)
@@ -367,14 +368,14 @@ class PasswordTreeFacadeTest {
             // then
             expectThat(actual) contains "Checksum of Password Tree could not be verified."
             expectThat(actual) contains "Shutting down due to checksum failure."
-            verify(exactly = 1) { systemOperation.exit() }
+            verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
         }
 
         @Test
         fun `should report failure on invalid checksum with verifyChecksum set to false`() {
             // given
             val eggs = someEggs()
-            every { systemOperation.exit() } returns Unit
+            every { systemOperation.exit(any()) } returns Unit
             fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifyChecksum = false)
 
             mockkStatic(::checksum)
@@ -396,14 +397,14 @@ class PasswordTreeFacadeTest {
             expectThat(restored) isEqualTo eggs.size
             expectThat(actual) contains "Checksum of Password Tree could not be verified."
             expectThat(actual.contains("Shutting down due to checksum failure.")).isFalse()
-            verify(exactly = 0) { systemOperation.exit() }
+            verify(exactly = 0) { systemOperation.exit(any()) }
         }
 
         @Test
         fun `should shut down when the final password tree content byte is corrupted`() {
             // given
             val eggs = someEggs()
-            every { systemOperation.exit() } returns Unit
+            every { systemOperation.exit(any()) } returns Unit
             fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifyChecksum = true)
             passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream() }))
             expectThat(File(passwordTreeFilename)).exists()
@@ -423,7 +424,7 @@ class PasswordTreeFacadeTest {
             // then
             expectThat(actual) contains "Checksum of Password Tree could not be verified."
             expectThat(actual) contains "Shutting down due to checksum failure."
-            verify(exactly = 1) { systemOperation.exit() }
+            verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
         }
     }
 

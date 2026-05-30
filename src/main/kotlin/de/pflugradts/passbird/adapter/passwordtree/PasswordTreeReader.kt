@@ -9,6 +9,7 @@ import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
+import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
@@ -44,7 +45,7 @@ class PasswordTreeReader @Inject constructor(
 
     private fun abortRestore(ex: Exception): Nothing {
         reportFailure(DecryptPasswordTreeFailure(filePath, ex))
-        systemOperation.exit()
+        systemOperation.exit(FAILURE_EXIT_STATUS)
         throw ex
     }
 
