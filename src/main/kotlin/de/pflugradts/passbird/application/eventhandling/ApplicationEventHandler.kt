@@ -70,27 +70,31 @@ class ApplicationEventHandler @Inject constructor(
 
     @Subscribe
     private fun handleProteinCreated(proteinCreated: ProteinCreated) {
-        val msg = "Protein '${decrypt(proteinCreated.protein.viewType())}' for " +
-            "egg '${decrypt(proteinCreated.egg.viewEggId())}' successfully created."
+        val proteinType = decrypt(proteinCreated.protein.viewType())
+        val eggId = decrypt(proteinCreated.egg.viewEggId())
+        val msg = "Protein '$proteinType' for egg '$eggId' successfully created."
         send(msg)
     }
 
     @Subscribe
     private fun handleProteinUpdated(proteinUpdated: ProteinUpdated) {
-        val msg = if (decrypt(proteinUpdated.oldProtein.viewType()) == decrypt(proteinUpdated.newProtein.viewType())) {
-            "Protein '${decrypt(proteinUpdated.oldProtein.viewType())}' at slot ${proteinUpdated.slot.index()} for " +
-                "egg '${decrypt(proteinUpdated.egg.viewEggId())}' successfully updated."
+        val oldProteinType = decrypt(proteinUpdated.oldProtein.viewType())
+        val newProteinType = decrypt(proteinUpdated.newProtein.viewType())
+        val eggId = decrypt(proteinUpdated.egg.viewEggId())
+        val msg = if (oldProteinType == newProteinType) {
+            "Protein '$oldProteinType' at slot ${proteinUpdated.slot.index()} for egg '$eggId' successfully updated."
         } else {
-            "Protein for egg '${decrypt(proteinUpdated.egg.viewEggId())}' at slot ${proteinUpdated.slot.index()} successfully updated " +
-                "from '${decrypt(proteinUpdated.oldProtein.viewType())}' to '${decrypt(proteinUpdated.newProtein.viewType())}'."
+            "Protein for egg '$eggId' at slot ${proteinUpdated.slot.index()} successfully updated " +
+                "from '$oldProteinType' to '$newProteinType'."
         }
         send(msg)
     }
 
     @Subscribe
     private fun handleProteinDiscarded(proteinDiscarded: ProteinDiscarded) {
-        val msg = "Protein '${decrypt(proteinDiscarded.protein.viewType())}' of " +
-            "egg '${decrypt(proteinDiscarded.egg.viewEggId())}' successfully discarded."
+        val proteinType = decrypt(proteinDiscarded.protein.viewType())
+        val eggId = decrypt(proteinDiscarded.egg.viewEggId())
+        val msg = "Protein '$proteinType' of egg '$eggId' successfully discarded."
         send(msg)
     }
 
@@ -105,7 +109,14 @@ class ApplicationEventHandler @Inject constructor(
     }
 
     private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), EVENT_HANDLED))
-    private fun decrypt(encryptedShell: EncryptedShell) = cryptoProvider.decrypt(encryptedShell).asString()
+    private fun decrypt(encryptedShell: EncryptedShell): String {
+        val decryptedShell = cryptoProvider.decrypt(encryptedShell)
+        return try {
+            decryptedShell.asString()
+        } finally {
+            decryptedShell.scramble()
+        }
+    }
 }
 
 private fun nestSlotText(nestSlotIndex: Int) = if (nestSlotIndex in 1..9) "Nest at Slot $nestSlotIndex" else "Default Nest"

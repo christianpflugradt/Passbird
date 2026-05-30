@@ -25,28 +25,46 @@ class PasswordImportExportService @Inject constructor(
     private val nestService: NestService,
     private val eventRegistry: EventRegistry,
 ) : ImportExportService {
-    override fun peekImportEggIdShells(): TryResult<ShellMap> = receiveImportData().map(::toShellMap)
+    override fun peekImportEggIdShells(): TryResult<ShellMap> = receiveImportData().map { eggsByNest ->
+        try {
+            toShellMap(eggsByNest)
+        } finally {
+            eggsByNest.scrambleShells()
+        }
+    }
 
     override fun peekImportNests(): TryResult<List<ImportNestPreview>> = receiveImportData().map { eggsByNest ->
-        eggsByNest.entries.map { (nest, passwordInfos) ->
-            ImportNestPreview(
-                nestId = nest.viewNestId(),
-                slot = nest.slot,
-                eggIds = passwordInfos.map { passwordInfo -> passwordInfo.first.first },
-            )
+        try {
+            eggsByNest.entries.map { (nest, passwordInfos) ->
+                ImportNestPreview(
+                    nestId = nest.viewNestId(),
+                    slot = nest.slot,
+                    eggIds = passwordInfos.map { passwordInfo -> passwordInfo.first.first.copy() },
+                )
+            }
+        } finally {
+            eggsByNest.scrambleShells()
         }
     }
 
     override fun importEggs() {
         receiveImportData().onSuccess { eggsByNest ->
-            importEggs(eggsByNest)
+            try {
+                importEggs(eggsByNest)
+            } finally {
+                eggsByNest.scrambleShells()
+            }
         }
     }
 
     override fun importEggs(sourceSlot: Slot, targetSlot: Slot) {
         receiveImportData().onSuccess { eggsByNest ->
-            eggsByNest.entries.firstOrNull { (nest, _) -> nest.slot == sourceSlot }?.let { (nest, passwordInfos) ->
-                importEggs(listOf(Triple(nest, targetSlot, passwordInfos)))
+            try {
+                eggsByNest.entries.firstOrNull { (nest, _) -> nest.slot == sourceSlot }?.let { (nest, passwordInfos) ->
+                    importEggs(listOf(Triple(nest, targetSlot, passwordInfos)))
+                }
+            } finally {
+                eggsByNest.scrambleShells()
             }
         }
     }
@@ -102,7 +120,7 @@ class PasswordImportExportService @Inject constructor(
     private fun receiveImportData() = exchangeFactory.createPasswordExchange().receive()
 
     private fun toShellMap(eggsByNest: Map<Nest, List<PasswordInfo>>) = eggsByNest.entries.associate { (nest, passwordInfos) ->
-        nest.slot to passwordInfos.map { passwordInfo -> passwordInfo.first.first }
+        nest.slot to passwordInfos.map { passwordInfo -> passwordInfo.first.first.copy() }
     }
 
     private fun importEggs(eggsByNest: Map<Nest, List<PasswordInfo>>) {
@@ -130,7 +148,7 @@ class PasswordImportExportService @Inject constructor(
                 }
                 nestService.moveToNestAt(targetSlot)
                 passwordInfos.forEach { passwordInfo ->
-                    if (passwordService.putEgg(passwordInfo.first.first, passwordInfo.first.second).failure) {
+                    if (putEgg(passwordInfo.first.first, passwordInfo.first.second).failure) {
                         eventRegistry.clearEvents()
                         return
                     }
@@ -154,19 +172,42 @@ class PasswordImportExportService @Inject constructor(
     private fun importProteins(passwordInfo: PasswordInfo): Boolean {
         passwordInfo.second.forEachIndexed { index, shellPair ->
             if (shellPair.first.isNotEmpty && shellPair.second.isNotEmpty) {
-                if (passwordService.putProtein(
-                        eggIdShell = passwordInfo.first.first,
-                        slot = slotAt(index),
-                        typeShell = shellPair.first,
-                        structureShell = shellPair.second,
-                    ).failure
-                ) {
+                if (putProtein(passwordInfo.first.first, slotAt(index), shellPair.first, shellPair.second).failure) {
                     eventRegistry.clearEvents()
                     return false
                 }
             }
         }
         return true
+    }
+
+    private fun putEgg(eggIdShell: Shell, passwordShell: Shell): TryResult<Unit> {
+        val eggIdShellCopy = eggIdShell.copy()
+        val passwordShellCopy = passwordShell.copy()
+        return try {
+            passwordService.putEgg(eggIdShellCopy, passwordShellCopy)
+        } finally {
+            eggIdShellCopy.scramble()
+            passwordShellCopy.scramble()
+        }
+    }
+
+    private fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell): TryResult<Unit> {
+        val eggIdShellCopy = eggIdShell.copy()
+        val typeShellCopy = typeShell.copy()
+        val structureShellCopy = structureShell.copy()
+        return try {
+            passwordService.putProtein(
+                eggIdShell = eggIdShellCopy,
+                slot = slot,
+                typeShell = typeShellCopy,
+                structureShell = structureShellCopy,
+            )
+        } finally {
+            eggIdShellCopy.scramble()
+            typeShellCopy.scramble()
+            structureShellCopy.scramble()
+        }
     }
 
     private fun allNestSlots() = nestService.all(includeDefault = true)

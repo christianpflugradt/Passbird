@@ -2,6 +2,10 @@ package de.pflugradts.passbird.domain.model.shell
 
 import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.slot
+import io.mockk.unmockkObject
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -48,6 +52,26 @@ class PlainShellTest {
 
         // then
         expectThat(givenCharArray) isNotEqualTo referenceCharArray
+    }
+
+    @Test
+    fun `should clear intermediate bytes when converting to shell`() {
+        // given
+        val byteArraySlot = slot<ByteArray>()
+        mockkObject(Shell.Companion)
+
+        val actual = try {
+            every { Shell.shellOf(capture(byteArraySlot)) } answers { callOriginal() }
+
+            // when
+            plainShellOf('a', 'b', 'c').toShell()
+        } finally {
+            unmockkObject(Shell.Companion)
+        }
+
+        // then
+        expectThat(actual.asString()) isEqualTo "abc"
+        expectThat(byteArraySlot.captured.toList()) isEqualTo List(3) { 0.toByte() }
     }
 
     @Test

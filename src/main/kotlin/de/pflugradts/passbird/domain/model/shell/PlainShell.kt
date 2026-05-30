@@ -9,11 +9,16 @@ class PlainShell private constructor(private val content: CharArray) {
         content[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toChar()
     }
 
-    fun toShell(): Shell = shellOf(
-        ByteArray(content.size).also { byteArray ->
+    fun toShell(): Shell {
+        val byteArray = ByteArray(content.size)
+        return try {
             content.indices.forEach { index -> byteArray[index] = content[index].code.toByte() }
-        },
-    ).also { this.scramble() }
+            shellOf(byteArray)
+        } finally {
+            byteArray.fill(0)
+            this.scramble()
+        }
+    }
 
     fun toCharArray() = content.clone()
 

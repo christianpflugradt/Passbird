@@ -9,6 +9,8 @@ import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -40,24 +42,24 @@ class SetProteinCommandHandler @Inject constructor(
             abort(setProteinCommand)
             return
         }
-        val structureInput = try {
-            structureInputReceived(secureInputDetermined())
-        } catch (_: SecureInputUnavailableException) {
-            abort(setProteinCommand)
-            return
-        }
-        if (structureInput.isEmpty) {
-            abort(setProteinCommand)
-            return
-        }
-        if (passwordService.putProtein(
-                eggIdShell = eggIdShell,
-                slot = slot,
-                typeShell = typeInput.shell,
-                structureShell = structureInput.shell,
-            ).failure
-        ) {
-            commandExecutionTracker.markFailure()
+        try {
+            val structureInput = try {
+                structureInputReceived(secureInputDetermined())
+            } catch (_: SecureInputUnavailableException) {
+                abort(setProteinCommand)
+                return
+            }
+            try {
+                if (structureInput.isEmpty) {
+                    abort(setProteinCommand)
+                    return
+                }
+                putProtein(eggIdShell, slot, typeInput, structureInput)
+            } finally {
+                structureInput.invalidate()
+            }
+        } finally {
+            typeInput.invalidate()
         }
         finish(setProteinCommand)
     }
@@ -91,17 +93,46 @@ class SetProteinCommandHandler @Inject constructor(
             }
         }
 
-    private fun receiveTypeInput(setProteinCommand: SetProteinCommand) = passwordService.viewProteinType(
-        setProteinCommand.argument,
-        setProteinCommand.slot,
-    ).get().let { type ->
-        val typeMsg = if (type.isEmpty) {
-            "Enter Protein Type or just press enter to abort: "
-        } else {
-            "Enter new Protein Type to replace '${type.asString()}' or just press enter to keep it: "
+    private fun receiveTypeInput(setProteinCommand: SetProteinCommand): Input? {
+        val currentType = passwordService.viewProteinType(
+            setProteinCommand.argument,
+            setProteinCommand.slot,
+        ).get()
+        var selectedInput: Input? = null
+        return try {
+            val typeMsg = if (currentType.isEmpty) {
+                "Enter Protein Type or just press enter to abort: "
+            } else {
+                "Enter new Protein Type to replace '${currentType.asString()}' or just press enter to keep it: "
+            }
+            selectedInput =
+                userInterfaceAdapterPort.receive(outputOf(shellOf(typeMsg))).let { if (it.isEmpty) inputOf(currentType) else it }
+            selectedInput.takeIf { it.isNotEmpty }
+        } finally {
+            if (selectedInput?.shell !== currentType) {
+                currentType.scramble()
+            }
         }
-        userInterfaceAdapterPort.receive(outputOf(shellOf(typeMsg))).let { if (it.isEmpty) inputOf(type) else it }
-    }.takeIf { it.isNotEmpty }
+    }
+
+    private fun putProtein(eggIdShell: Shell, slot: Slot, typeInput: Input, structureInput: Input) {
+        val typeShell = typeInput.shell.copy()
+        val structureShell = structureInput.shell.copy()
+        try {
+            if (passwordService.putProtein(
+                    eggIdShell = eggIdShell,
+                    slot = slot,
+                    typeShell = typeShell,
+                    structureShell = structureShell,
+                ).failure
+            ) {
+                commandExecutionTracker.markFailure()
+            }
+        } finally {
+            typeShell.scramble()
+            structureShell.scramble()
+        }
+    }
 
     private fun abort(setProteinCommand: SetProteinCommand) {
         commandExecutionTracker.markAborted()

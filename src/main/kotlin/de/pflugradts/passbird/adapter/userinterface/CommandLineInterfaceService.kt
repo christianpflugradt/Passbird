@@ -89,7 +89,7 @@ class CommandLineInterfaceService @Inject constructor(
         sendWithoutLineBreak(output)
         return when {
             !configuration.adapter.userInterface.secureInput -> receivePlain()
-            systemOperation.isConsoleAvailable -> inputOf(plainShellOf(readPasswordFromConsole()).toShell())
+            systemOperation.isConsoleAvailable -> readPasswordFromConsole().toInput()
             else -> throw SecureInputUnavailableException()
         }
     }
@@ -97,9 +97,20 @@ class CommandLineInterfaceService @Inject constructor(
     override fun send(vararg output: Output) = output.forEach { sendWithoutLineBreak(it) }.also { sendChar('\n') }
     private fun sendWithoutLineBreak(vararg output: Output) = output.forEach {
         it.formatting?.also { formatting -> if (escapeCodesEnabled) beginEscape(formatting) }
-        shellOf(it.shell.toByteArray()).forEach { char -> sendChar(Char(char.toUShort())) }
+        val renderedShell = it.shell.copy()
+        try {
+            renderedShell.forEach { char -> sendChar(Char(char.toUShort())) }
+        } finally {
+            renderedShell.scramble()
+        }
         it.formatting?.also { if (escapeCodesEnabled) endEscape() }
         it.formatting?.let { formatting -> if (formatting == OutputFormatting.OPERATION_ABORTED) warningSound() }
+    }
+
+    private fun CharArray.toInput(): Input = try {
+        inputOf(plainShellOf(this).toShell())
+    } finally {
+        fill(Char.MIN_VALUE)
     }
 
     private fun sendChar(chr: Char) = print(chr)

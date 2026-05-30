@@ -21,6 +21,7 @@ import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
@@ -66,9 +67,34 @@ class SetProteinCommandTest {
 
         // then
         verify(exactly = 1) {
-            passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+            passwordService.putProtein(eq(shellOf(args)), slot, any(), any())
         }
         expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should scramble protein inputs after storing protein`() {
+        // given
+        val args = "EggId"
+        val slot = DEFAULT
+        val shell = shellOf("p+${slot.index()}$args")
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
+        val typeShell = spyk(shellOf("url"))
+        val structureShell = spyk(shellOf("example.com"))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(typeShell)),
+            withTheseSecureInputs = listOf(inputOf(structureShell)),
+        )
+
+        // when
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) { typeShell.scramble() }
+        verify(exactly = 1) { structureShell.scramble() }
     }
 
     @Test
@@ -97,9 +123,35 @@ class SetProteinCommandTest {
 
         // then
         verify(exactly = 1) {
-            passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+            passwordService.putProtein(eq(shellOf(args)), slot, any(), any())
         }
         expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should scramble protein inputs when storing protein fails`() {
+        // given
+        val args = "EggId"
+        val slot = DEFAULT
+        val shell = shellOf("p+${slot.index()}$args")
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
+        val typeShell = spyk(shellOf("url"))
+        val structureShell = spyk(shellOf("example.com"))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(typeShell)),
+            withTheseSecureInputs = listOf(inputOf(structureShell)),
+        )
+        every { passwordService.putProtein(any(), any(), any(), any()) } returns failure(RuntimeException())
+
+        // when
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) { typeShell.scramble() }
+        verify(exactly = 1) { structureShell.scramble() }
     }
 
     @Test
@@ -146,7 +198,7 @@ class SetProteinCommandTest {
 
         // then
         verify(exactly = 1) {
-            passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+            passwordService.putProtein(eq(shellOf(args)), slot, any(), any())
         }
         expectThat(shell) isNotEqualTo reference
     }
@@ -160,11 +212,12 @@ class SetProteinCommandTest {
         val reference = shell.copy()
         val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
         val givenType = "url"
+        val typeShell = spyk(shellOf(givenType))
         fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
         fakeConfiguration(instance = configuration)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseInputs = listOf(inputOf(shellOf(givenType))),
+            withTheseInputs = listOf(inputOf(typeShell)),
         )
         every { userInterfaceAdapterPort.receiveSecurely(any()) } throws SecureInputUnavailableException()
 
@@ -175,6 +228,7 @@ class SetProteinCommandTest {
         // then
         verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
         verify(exactly = 0) { passwordService.putProtein(eq(shellOf(args)), slot, any(), any()) }
+        verify(exactly = 1) { typeShell.scramble() }
         expectThat(shell) isNotEqualTo reference
     }
 
@@ -205,7 +259,7 @@ class SetProteinCommandTest {
 
             // then
             verify(exactly = 1) {
-                passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+                passwordService.putProtein(eq(shellOf(args)), slot, any(), any())
             }
             expectThat(shell) isNotEqualTo reference
         }
@@ -238,7 +292,7 @@ class SetProteinCommandTest {
 
             // then
             verify(exactly = 1) {
-                passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+                passwordService.putProtein(eq(shellOf(args)), slot, any(), any())
             }
             expectThat(shell) isNotEqualTo reference
         }
@@ -301,7 +355,7 @@ class SetProteinCommandTest {
 
             // then
             verify(exactly = 1) {
-                passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+                passwordService.putProtein(eq(shellOf(args)), slot, any(), any())
             }
             expectThat(shell) isNotEqualTo reference
         }
@@ -336,7 +390,7 @@ class SetProteinCommandTest {
 
             // then
             verify(exactly = 1) {
-                passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+                passwordService.putProtein(eq(shellOf(args)), slot, any(), any())
             }
             expectThat(shell) isNotEqualTo reference
         }
@@ -371,7 +425,7 @@ class SetProteinCommandTest {
 
             // then
             verify(exactly = 1) {
-                passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+                passwordService.putProtein(eq(shellOf(args)), slot, any(), any())
             }
             expectThat(shell) isNotEqualTo reference
         }
@@ -405,7 +459,7 @@ class SetProteinCommandTest {
 
             // then
             verify(exactly = 1) {
-                passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+                passwordService.putProtein(eq(shellOf(args)), slot, any(), any())
             }
             expectThat(shell) isNotEqualTo reference
         }
@@ -496,7 +550,7 @@ class SetProteinCommandTest {
 
             // then
             verify(exactly = 1) {
-                passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenPreviousType)), eq(shellOf(givenStructure)))
+                passwordService.putProtein(eq(shellOf(args)), slot, any(), any())
             }
             expectThat(shell) isNotEqualTo reference
         }
@@ -560,7 +614,7 @@ class SetProteinCommandTest {
 
             // then
             verify(exactly = 1) {
-                passwordService.putProtein(eq(shellOf(args)), slot, eq(shellOf(givenType)), eq(shellOf(givenStructure)))
+                passwordService.putProtein(eq(shellOf(args)), slot, any(), any())
             }
             expectThat(shell) isNotEqualTo reference
         }

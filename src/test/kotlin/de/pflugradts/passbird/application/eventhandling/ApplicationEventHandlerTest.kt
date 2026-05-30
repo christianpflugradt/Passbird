@@ -26,8 +26,10 @@ import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -47,8 +49,8 @@ class ApplicationEventHandlerTest {
     @MethodSource("provideEggEvents")
     fun `should process egg events`(domainEvent: DomainEvent) {
         // given
-        val expectedEggIdShell = shellOf("expected eggId")
-        every { cryptoProvider.decrypt(any(EncryptedShell::class)) } answers { expectedEggIdShell }
+        val expectedEggId = "expected eggId"
+        every { cryptoProvider.decrypt(any(EncryptedShell::class)) } answers { shellOf(expectedEggId) }
         fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
         val outputSlot = slot<Output>()
 
@@ -58,7 +60,22 @@ class ApplicationEventHandlerTest {
 
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
-        expectThat(outputSlot.captured.shell.asString()) contains expectedEggIdShell.asString()
+        expectThat(outputSlot.captured.shell.asString()) contains expectedEggId
+    }
+
+    @Test
+    fun `should scramble decrypted shell after event output is prepared`() {
+        // given
+        val decryptedEggIdShell = spyk(shellOf("expected eggId"))
+        every { cryptoProvider.decrypt(any(EncryptedShell::class)) } returns decryptedEggIdShell
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
+
+        // when
+        passbirdEventRegistry.register(EggCreated(createEggForTesting()))
+        passbirdEventRegistry.processEvents()
+
+        // then
+        verify(exactly = 1) { decryptedEggIdShell.scramble() }
     }
 
     @ParameterizedTest

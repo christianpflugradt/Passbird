@@ -37,6 +37,7 @@ import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -114,6 +115,38 @@ class PasswordImportExportServiceTest {
     }
 
     @Test
+    fun `should scramble parsed import shells after peeking egg ids`() {
+        // given
+        val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
+        val eggId = spyk(shellOf("EggId"))
+        val password = spyk(shellOf("Password"))
+        val proteinType = spyk(shellOf("ProteinType"))
+        val proteinStructure = spyk(shellOf("ProteinStructure"))
+        every { exchangeAdapterPort.receive() } returns success(
+            mapOf(
+                nestService.currentNest() to listOf(
+                    Pair(
+                        ShellPair(eggId, password),
+                        proteinShellPairs(S3 to ShellPair(proteinType, proteinStructure)),
+                    ),
+                ),
+            ),
+        )
+        every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
+
+        // when
+        val actual = importExportServiceSupplier.get().peekImportEggIdShells()
+
+        // then
+        expectThat(actual.failure).isFalse()
+        expectThat(actual.getOrNull()!![DEFAULT]!!.single()) isEqualTo shellOf("EggId")
+        verify(exactly = 1) { eggId.scramble() }
+        verify(exactly = 1) { password.scramble() }
+        verify(exactly = 1) { proteinType.scramble() }
+        verify(exactly = 1) { proteinStructure.scramble() }
+    }
+
+    @Test
     fun `should import passwords across multiple nests`() {
         // given
         val givenCurrentNestSlot = S2
@@ -124,28 +157,57 @@ class PasswordImportExportServiceTest {
         fakePasswordService(instance = passwordService)
         nestService.place(shellOf(S2.name), S2)
         nestService.moveToNestAt(givenCurrentNestSlot)
-        val eggIdSlot = mutableListOf<Shell>()
-        val passwordSlot = mutableListOf<Shell>()
+        val putEggCalls = mutableListOf<PutEggCall>()
+        passwordService.capturePutEggCalls(putEggCalls)
         val eggCountSlot = slot<EggsImported>()
 
         // when
         importExportServiceSupplier.get().importEggs()
 
         // then
-        verify { passwordService.putEgg(capture(eggIdSlot), capture(passwordSlot)) }
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
         verify(exactly = 1) { nestService.place(shellOf(S9.name), S9) }
-        expectThat(eggIdSlot) hasSize eggs.size
-        expectThat(passwordSlot) hasSize eggs.size
+        expectThat(putEggCalls) hasSize eggs.size
         eggs.indices.forEach { i ->
-            expectThat(eggIdSlot[i]) isEqualTo eggs[i].viewEggId().fakeDec()
-            expectThat(passwordSlot[i]) isEqualTo eggs[i].viewPassword().fakeDec()
+            expectThat(putEggCalls[i].eggIdShell) isEqualTo eggs[i].viewEggId().fakeDec()
+            expectThat(putEggCalls[i].passwordShell) isEqualTo eggs[i].viewPassword().fakeDec()
         }
         expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
         verify { eventRegistry.register(capture(eggCountSlot)) }
         verify(exactly = 1) { eventRegistry.processEvents() }
         expectThat(eggCountSlot.isCaptured)
         expectThat(eggCountSlot.captured.count) isEqualTo testData().size
+    }
+
+    @Test
+    fun `should scramble parsed import shells after importing`() {
+        // given
+        val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
+        val eggId = spyk(shellOf("EggId"))
+        val password = spyk(shellOf("Password"))
+        val proteinType = spyk(shellOf("ProteinType"))
+        val proteinStructure = spyk(shellOf("ProteinStructure"))
+        every { exchangeAdapterPort.receive() } returns success(
+            mapOf(
+                nestService.currentNest() to listOf(
+                    Pair(
+                        ShellPair(eggId, password),
+                        proteinShellPairs(S3 to ShellPair(proteinType, proteinStructure)),
+                    ),
+                ),
+            ),
+        )
+        every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
+        fakePasswordService(instance = passwordService)
+
+        // when
+        importExportServiceSupplier.get().importEggs()
+
+        // then
+        verify(exactly = 1) { eggId.scramble() }
+        verify(exactly = 1) { password.scramble() }
+        verify(exactly = 1) { proteinType.scramble() }
+        verify(exactly = 1) { proteinStructure.scramble() }
     }
 
     @Test
@@ -199,16 +261,20 @@ class PasswordImportExportServiceTest {
         )
         every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
         fakePasswordService(instance = passwordService)
+        val putEggCalls = mutableListOf<PutEggCall>()
+        val putProteinCalls = mutableListOf<PutProteinCall>()
+        passwordService.capturePutEggCalls(putEggCalls)
+        passwordService.capturePutProteinCalls(putProteinCalls)
 
         // when
         importExportServiceSupplier.get().importEggs()
 
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
-        verify(exactly = 1) { passwordService.putEgg(givenEggId, givenPassword) }
-        verify(exactly = 1) { passwordService.putProtein(givenEggId, Slot.S3, shellOf("type3"), shellOf("structure3")) }
-        verify(exactly = 1) { passwordService.putProtein(givenEggId, S9, shellOf("type9"), shellOf("structure9")) }
-        verify(exactly = 2) { passwordService.putProtein(any(), any(), any(), any()) }
+        expectThat(putEggCalls.single()) isEqualTo PutEggCall(shellOf("EggId"), shellOf("Password"))
+        expectThat(putProteinCalls) hasSize 2
+        expectThat(putProteinCalls[0]) isEqualTo PutProteinCall(shellOf("EggId"), Slot.S3, shellOf("type3"), shellOf("structure3"))
+        expectThat(putProteinCalls[1]) isEqualTo PutProteinCall(shellOf("EggId"), S9, shellOf("type9"), shellOf("structure9"))
     }
 
     @Test
@@ -233,14 +299,18 @@ class PasswordImportExportServiceTest {
         fakePasswordService(instance = passwordService)
         nestService.place(shellOf("current"), S3)
         nestService.moveToNestAt(S3)
+        val putEggCalls = mutableListOf<PutEggCall>()
+        val putProteinCalls = mutableListOf<PutProteinCall>()
+        passwordService.capturePutEggCalls(putEggCalls)
+        passwordService.capturePutProteinCalls(putProteinCalls)
         val importedCount = slot<EggsImported>()
 
         // when
         importExportServiceSupplier.get().importEggs(S2, S9)
 
         // then
-        verify(exactly = 1) { passwordService.putEgg(givenEggId, givenPassword) }
-        verify(exactly = 1) { passwordService.putProtein(givenEggId, S3, shellOf("type3"), shellOf("structure3")) }
+        expectThat(putEggCalls.single()) isEqualTo PutEggCall(shellOf("EggId"), shellOf("Password"))
+        expectThat(putProteinCalls.single()) isEqualTo PutProteinCall(shellOf("EggId"), S3, shellOf("type3"), shellOf("structure3"))
         expectThat(nestService.atNestSlot(S9).get().viewNestId().asString()) isEqualTo "work"
         expectThat(nestService.currentNest().slot) isEqualTo S3
         verify { eventRegistry.register(capture(importedCount)) }
@@ -344,14 +414,16 @@ class PasswordImportExportServiceTest {
         )
         every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
         fakePasswordService(instance = passwordService)
-        every { passwordService.putEgg(firstEggId, firstPassword) } returns failure(IllegalStateException("disk full"))
+        val putEggCalls = mutableListOf<PutEggCall>()
+        passwordService.capturePutEggCalls(putEggCalls) {
+            it == PutEggCall(shellOf("EggId1"), shellOf("Password1"))
+        }
 
         // when
         importExportServiceSupplier.get().importEggs()
 
         // then
-        verify(exactly = 1) { passwordService.putEgg(firstEggId, firstPassword) }
-        verify(exactly = 0) { passwordService.putEgg(secondEggId, secondPassword) }
+        expectThat(putEggCalls.single()) isEqualTo PutEggCall(shellOf("EggId1"), shellOf("Password1"))
         verify(exactly = 0) { passwordService.putProtein(any(), any(), any(), any()) }
         verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
         verify(exactly = 0) { eventRegistry.processEvents() }
@@ -379,17 +451,19 @@ class PasswordImportExportServiceTest {
         )
         every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
         fakePasswordService(instance = passwordService)
-        every {
-            passwordService.putProtein(firstEggId, S3, shellOf("type3"), shellOf("structure3"))
-        } returns failure(IllegalStateException("disk full"))
+        val putEggCalls = mutableListOf<PutEggCall>()
+        val putProteinCalls = mutableListOf<PutProteinCall>()
+        passwordService.capturePutEggCalls(putEggCalls)
+        passwordService.capturePutProteinCalls(putProteinCalls) {
+            it == PutProteinCall(shellOf("EggId1"), S3, shellOf("type3"), shellOf("structure3"))
+        }
 
         // when
         importExportServiceSupplier.get().importEggs()
 
         // then
-        verify(exactly = 1) { passwordService.putEgg(firstEggId, firstPassword) }
-        verify(exactly = 1) { passwordService.putProtein(firstEggId, S3, shellOf("type3"), shellOf("structure3")) }
-        verify(exactly = 0) { passwordService.putEgg(secondEggId, secondPassword) }
+        expectThat(putEggCalls.single()) isEqualTo PutEggCall(shellOf("EggId1"), shellOf("Password1"))
+        expectThat(putProteinCalls.single()) isEqualTo PutProteinCall(shellOf("EggId1"), S3, shellOf("type3"), shellOf("structure3"))
         verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
         verify(exactly = 0) { eventRegistry.processEvents() }
         verify(exactly = 1) { eventRegistry.clearEvents() }
@@ -520,6 +594,31 @@ private fun expectThatActualBytePairsMatchExpected(actual: PasswordInfoMap, expe
             expectThat(it.first.first) isEqualTo expected[index].viewEggId().fakeDec()
             expectThat(it.first.second) isEqualTo expected[index++].viewPassword().fakeDec()
         }
+    }
+}
+
+private data class PutEggCall(val eggIdShell: Shell, val passwordShell: Shell)
+
+private data class PutProteinCall(val eggIdShell: Shell, val slot: Slot, val typeShell: Shell, val structureShell: Shell)
+
+private fun PasswordService.capturePutEggCalls(calls: MutableList<PutEggCall>, fails: (PutEggCall) -> Boolean = { false }) {
+    every { putEgg(any(), any()) } answers {
+        val call = PutEggCall(firstArg<Shell>().copy(), secondArg<Shell>().copy())
+        calls.add(call)
+        if (fails(call)) failure(IllegalStateException("disk full")) else success(Unit)
+    }
+}
+
+private fun PasswordService.capturePutProteinCalls(calls: MutableList<PutProteinCall>, fails: (PutProteinCall) -> Boolean = { false }) {
+    every { putProtein(any(), any(), any(), any()) } answers {
+        val call = PutProteinCall(
+            eggIdShell = firstArg<Shell>().copy(),
+            slot = secondArg(),
+            typeShell = thirdArg<Shell>().copy(),
+            structureShell = lastArg<Shell>().copy(),
+        )
+        calls.add(call)
+        if (fails(call)) failure(IllegalStateException("disk full")) else success(Unit)
     }
 }
 

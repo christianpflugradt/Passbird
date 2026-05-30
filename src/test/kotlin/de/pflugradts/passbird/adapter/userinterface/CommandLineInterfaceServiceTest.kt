@@ -17,6 +17,7 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -75,6 +76,24 @@ class CommandLineInterfaceServiceTest {
 
             // then
             expectThat(captureSystemOut.capture) isEqualTo expectedMessage
+        }
+
+        @Test
+        fun `should scramble copied output shell after sending`() {
+            // given
+            val givenMessage = "hello world"
+            val outputShell = spyk(shellOf(givenMessage))
+            val renderedShell = spyk(shellOf(givenMessage))
+            every { outputShell.copy() } returns renderedShell
+            val captureSystemOut = captureSystemOut()
+
+            // when
+            captureSystemOut.during { commandLineInterfaceService.send(outputOf(outputShell)) }
+
+            // then
+            expectThat(captureSystemOut.capture) isEqualTo givenMessage + System.lineSeparator()
+            expectThat(outputShell) isEqualTo shellOf(givenMessage)
+            verify(exactly = 1) { renderedShell.scramble() }
         }
     }
 
@@ -214,6 +233,22 @@ class CommandLineInterfaceServiceTest {
             // then
             verify(exactly = 1) { systemOperation.readPasswordFromConsole() }
             expectThat(actual.shell.asString()) isEqualTo givenInput
+        }
+
+        @Test
+        fun `should clear original console char array after secure input conversion`() {
+            // given
+            val givenInput = "hello world"
+            val consoleInput = givenInput.toCharArray()
+            fakeSystemOperation(instance = systemOperation, withPasswordFromConsole = consoleInput)
+            fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
+
+            // when
+            val actual = commandLineInterfaceService.receiveSecurely()
+
+            // then
+            expectThat(actual.shell.asString()) isEqualTo givenInput
+            expectThat(consoleInput.toList()) isEqualTo List(givenInput.length) { Char.MIN_VALUE }
         }
 
         @Test
