@@ -96,6 +96,7 @@ areas:
       - for configuration and keystore backups, Passbird creates a new backup only when the current file bytes differ from the latest backup bytes
       - for password-tree backups, Passbird compares decrypted current-format content so encryption randomness alone does not create a new backup
       - if password-tree backup is enabled and passbird.tree is missing at shutdown, Passbird first syncs the current password-tree snapshot so backup comparison has a concrete file to evaluate
+      - if passbird.tree exists but cannot be decrypted as current password-tree data at shutdown, Passbird does not create a password-tree backup and does not delete existing password-tree backups for that run
       - if the password tree content has not changed, Passbird keeps the existing backups unchanged even at the retention limit
       - when multiple changed backups for the same file are created within one timestamp second, Passbird appends collision suffixes so the snapshots remain distinct backups
       - when a new distinct backup is created above the retention limit, Passbird removes the oldest matching backups and keeps only the newest retained set

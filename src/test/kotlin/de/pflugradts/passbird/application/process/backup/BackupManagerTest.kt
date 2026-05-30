@@ -286,6 +286,28 @@ class BackupManagerTest {
     }
 
     @Test
+    fun `should keep valid backups when current password tree is zero-byte at the retention limit`() {
+        // given
+        every { treeBackupSettings.enabled } returns true
+        every { treeBackupSettings.numberOfBackups } returns 2
+        updatePasswordTreeFileContent("first")
+        backupManager.run()
+        wait1Sec()
+        updatePasswordTreeFileContent("second")
+        backupManager.run()
+        val backupsBefore = backupFiles(PASSWORD_TREE_FILENAME).sorted()
+        Files.write(Paths.get("$tempWorkingDirectory/$PASSWORD_TREE_FILENAME"), ByteArray(0))
+
+        // when
+        backupManager.run()
+
+        // then
+        expectThat(backupsBefore) hasSize 2
+        expectThat(backupFiles(PASSWORD_TREE_FILENAME).sorted()) isEqualTo backupsBefore
+        expectThat(backupContents()) isEqualTo listOf("first", "second")
+    }
+
+    @Test
     fun `should not create another backup if configuration file has not changed`() {
         // given
         every { treeBackupSettings.enabled } returns false

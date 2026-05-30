@@ -1,6 +1,8 @@
 package de.pflugradts.passbird.application.process.backup
 
+import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.Directory
+import de.pflugradts.passbird.application.FileName
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
@@ -13,7 +15,6 @@ import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell
-import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 import jakarta.inject.Inject
@@ -51,14 +52,10 @@ class BackupManager @Inject constructor(
                 val backups = systemOperation.getFileNames(backupDirectory).filter {
                     it.value.matches("${fileName.stem()}_$BACKUP_TIMESTAMP_PATTERN\\.${fileName.extension()}".toRegex())
                 }.sortedBy { it.value }
-                val backupWasCreated = if (backups.isNotEmpty()) {
-                    val lastBackup = systemOperation.resolvePath(backupDirectory, backups.last())
-                    if (backupContentHasChanged(current, lastBackup, fileName)) {
-                        backup(directory, fileName, backupDirectory)
-                        true
-                    } else {
-                        false
-                    }
+                val backupWasCreated = if (fileName == PASSWORD_TREE_FILENAME) {
+                    backupPasswordTreeIfChanged(current, directory, fileName, backupDirectory, backups)
+                } else if (backups.isNotEmpty()) {
+                    backupIfFileContentHasChanged(current, directory, fileName, backupDirectory, backups)
                 } else {
                     backup(directory, fileName, backupDirectory)
                     true
@@ -81,37 +78,64 @@ class BackupManager @Inject constructor(
     private fun numberOfBackups(settings: ReadableConfiguration.BackupSettings) =
         settings.numberOfBackups ?: configuration.application.backup.numberOfBackups
 
-    private fun backupContentHasChanged(current: Path, lastBackup: Path, fileName: String) = if (fileName == PASSWORD_TREE_FILENAME) {
-        backupContentHasChanged(current, lastBackup)
-    } else {
+    private fun fileContentHasChanged(current: Path, lastBackup: Path) =
         !systemOperation.readBytesFromFile(current).contentEquals(systemOperation.readBytesFromFile(lastBackup))
+
+    private fun backupIfFileContentHasChanged(
+        current: Path,
+        directory: Directory,
+        fileName: String,
+        backupDirectory: Directory,
+        backups: List<FileName>,
+    ): Boolean {
+        val lastBackup = systemOperation.resolvePath(backupDirectory, backups.last())
+        return if (fileContentHasChanged(current, lastBackup)) {
+            backup(directory, fileName, backupDirectory)
+            true
+        } else {
+            false
+        }
     }
 
-    private fun backupContentHasChanged(current: Path, lastBackup: Path): Boolean {
-        val currentShell = readComparablePasswordTreeShellOrNull(current)
+    private fun backupPasswordTreeIfChanged(
+        current: Path,
+        directory: Directory,
+        fileName: String,
+        backupDirectory: Directory,
+        backups: List<FileName>,
+    ): Boolean {
+        val currentShell = readComparablePasswordTreeShellOrNull(current) ?: return false
         return try {
-            val lastBackupShell = readComparablePasswordTreeShellOrNull(lastBackup)
-            try {
-                currentShell == null || lastBackupShell == null || currentShell != lastBackupShell
-            } finally {
-                lastBackupShell?.scramble()
+            if (backups.isEmpty()) {
+                backup(directory, fileName, backupDirectory)
+                true
+            } else {
+                val lastBackup = systemOperation.resolvePath(backupDirectory, backups.last())
+                val lastBackupShell = readComparablePasswordTreeShellOrNull(lastBackup)
+                try {
+                    if (lastBackupShell == null || currentShell != lastBackupShell) {
+                        backup(directory, fileName, backupDirectory)
+                        true
+                    } else {
+                        false
+                    }
+                } finally {
+                    lastBackupShell?.scramble()
+                }
             }
         } finally {
-            currentShell?.scramble()
+            currentShell.scramble()
         }
     }
 
-    private fun readComparablePasswordTreeShellOrNull(path: Path): Shell? = systemOperation.readBytesFromFile(path).let {
-        when {
-            it.isEmpty() -> emptyShell()
-
-            passwordTreeEnvelope.isCurrent(it) -> cryptoProvider.decrypt(
+    private fun readComparablePasswordTreeShellOrNull(path: Path): Shell? = tryCatching {
+        systemOperation.readBytesFromFile(path).let {
+            if (!passwordTreeEnvelope.isCurrent(it)) return@tryCatching null
+            cryptoProvider.decrypt(
                 encryptedShellOf(passwordTreeEnvelope.unwrap(it)),
             )
-
-            else -> null
         }
-    }
+    }.getOrNull()
 
     private fun backup(directory: Directory, fileName: String, backupDirectory: Directory) {
         val timestamp = LocalDateTime.now(systemOperation.clock).format(backupTimestampFormatter)

@@ -71,6 +71,7 @@ current_security_relevant_implementation:
       - uses deterministic backup filename collision suffixes so multiple changed same-file backups created within one timestamp second do not overwrite each other
       - compares decrypted password tree content as temporary Shell values and scrambles them after comparison so AES-GCM IV changes alone do not consume backup slots
       - when password-tree backup is enabled but passbird.tree is missing, materializes the current password-tree snapshot before running backup comparison and retention logic
+      - when passbird.tree exists but cannot be decrypted as current password-tree data, skips password-tree backup creation and retention deletion for that shutdown backup run
       - treats a latest password-tree backup from a legacy tree format as changed and creates one fresh current-format backup instead of aborting session shutdown
   cipher:
     file: src/main/kotlin/de/pflugradts/passbird/application/security/AesGcmCipher.kt
