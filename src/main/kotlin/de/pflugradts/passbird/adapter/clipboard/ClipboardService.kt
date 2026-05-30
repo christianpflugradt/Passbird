@@ -26,16 +26,21 @@ class ClipboardService constructor(
     private fun scheduleCleaner(generation: Long) {
         if (isResetEnabled) {
             Thread {
-                sleep().onSuccess {
-                    synchronized(cleanerLock) {
-                        if (cleanerGeneration == generation) {
-                            tryCatching { clipboardGateway.copy("") }
-                        }
-                    }
-                }
+                sleep()
+                    .onSuccess { clearClipboard(generation) }
+                    .onFailure { reportFailure(ClipboardFailure(it)) }
             }.start()
         }
     }
+
+    private fun clearClipboard(generation: Long) {
+        synchronized(cleanerLock) {
+            if (cleanerGeneration == generation) {
+                tryCatching { clipboardGateway.copy("") }.onFailure { reportFailure(ClipboardFailure(it)) }
+            }
+        }
+    }
+
     private fun sleep() = tryCatching { Thread.sleep(delaySeconds * MILLI_SECONDS) }
     private val isResetEnabled: Boolean get() = configuration.adapter.clipboard.reset.enabled
     private val delaySeconds: Int get() = configuration.adapter.clipboard.reset.delaySeconds

@@ -107,6 +107,8 @@ areas:
       - adapter.clipboard.reset.delaySeconds
     visible_effects:
       - when enabled, clipboard copies are cleared automatically after the configured delay
+      - adapter.clipboard.reset.delaySeconds must be zero or positive for automatic clearing to be schedulable
+      - if the reset delay cannot be scheduled or the automatic clear operation fails, Passbird reports the clipboard failure through stderr
       - posting a newer clipboard value resets the pending clear timer so only the latest generation is cleared
       - when disabled, clipboard content is not auto-cleared by Passbird
   - name: terminal_behavior

@@ -50,6 +50,12 @@ current_security_relevant_implementation:
       - secure terminal reads preserve the fail-closed no-console rule instead of falling back to visible input
       - secure terminal reads clear the original console CharArray after converting it into Passbird's Shell representation
       - terminal output rendering uses a copied Shell for emission and scrambles that copy after rendering
+  clipboard:
+    file: src/main/kotlin/de/pflugradts/passbird/adapter/clipboard/ClipboardService.kt
+    facts:
+      - initial clipboard copy failures are reported through stderr and cause the clipboard adapter result to fail
+      - when clipboard reset is enabled, reset scheduling failures and failed automatic clear attempts are reported through stderr
+      - posting a newer clipboard value supersedes older pending clear attempts so only the latest copied value is cleared
   keystore:
     file: src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
     facts:

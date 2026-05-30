@@ -113,4 +113,58 @@ class ClipboardServiceTest {
             }
         }
     }
+
+    @Test
+    fun `should report error when delayed clipboard clear fails`() {
+        // given
+        val message = "write this to clipboard"
+        val error = "clipboard clear unavailable"
+        fakeConfiguration(
+            instance = configuration,
+            withClipboardResetEnabled = true,
+            withClipboardResetDelaySeconds = 0,
+        )
+        every { clipboardGateway.copy("") } throws IllegalStateException(error)
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+        val expectedError = "Clipboard could not be updated. Please check your Java version. Exception: $error\n"
+
+        // when
+        captureSystemErr.during {
+            clipboardService.post(outputOf(shellOf(message)))
+            waitForError(captureSystemErr, expectedError)
+        }
+
+        // then
+        expectThat(captureSystemErr.capture) isEqualTo expectedError
+    }
+
+    @Test
+    fun `should report error when clipboard reset delay is invalid`() {
+        // given
+        val message = "write this to clipboard"
+        fakeConfiguration(
+            instance = configuration,
+            withClipboardResetEnabled = true,
+            withClipboardResetDelaySeconds = -1,
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+        val expectedError = "Clipboard could not be updated. Please check your Java version. Exception: timeout value is negative\n"
+
+        // when
+        captureSystemErr.during {
+            clipboardService.post(outputOf(shellOf(message)))
+            waitForError(captureSystemErr, expectedError)
+        }
+
+        // then
+        verify(exactly = 0) { clipboardGateway.copy("") }
+        expectThat(captureSystemErr.capture) isEqualTo expectedError
+    }
+
+    private fun waitForError(captureSystemErr: CapturedOutputPrintStream, expectedError: String) {
+        val deadline = System.nanoTime() + 2.seconds.inWholeNanoseconds
+        while (captureSystemErr.capture != expectedError && System.nanoTime() < deadline) {
+            Thread.sleep(10)
+        }
+    }
 }

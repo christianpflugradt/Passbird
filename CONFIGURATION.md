@@ -27,7 +27,7 @@ Passbird stores sensitive local files such as the keystore, password tree, expor
 | `application.password.promptOnRemoval`                | Requires confirmation before deleting or updating passwords.                                     | true                 |
 | `application.password.customPasswordConfigurations`   | Allows defining custom password configurations for specific use cases (see [README](README.md)). | *(unset)*            |
 | `adapter.clipboard.reset.enabled`                     | Enables or disables automatic clearing of the clipboard after copying a password.                | true                 |
-| `adapter.clipboard.reset.delaySeconds`                | Specifies the seconds to wait before clearing the clipboard after copying a password.            | 10                   |
+| `adapter.clipboard.reset.delaySeconds`                | Specifies the non-negative seconds to wait before clearing the clipboard after copying a password. | 10                   |
 | `adapter.keyStore.location`                           | Specifies the directory where the keystore file is located. Prefer a private directory.          | *(set during setup)* |
 | `adapter.passwordTree.location`                       | Specifies the directory where the password tree file is located. Prefer a private directory.     | *(set during setup)* |
 | `adapter.passwordTree.verifyChecksum`                 | Verifies the checksum of the password tree file to ensure its integrity.                         | true                 |
