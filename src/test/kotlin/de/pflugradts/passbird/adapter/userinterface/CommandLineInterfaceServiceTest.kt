@@ -362,6 +362,10 @@ class CommandLineInterfaceServiceTest {
         @ValueSource(
             strings = [
                 "cc",
+                "c1",
+                "c!",
+                "c ",
+                "c\t",
                 "d",
                 "",
             ],
@@ -412,6 +416,10 @@ class CommandLineInterfaceServiceTest {
             strings = [
                 "n",
                 "Yes",
+                "y1",
+                "Y!",
+                "y ",
+                "Y\t",
                 "",
             ],
         )

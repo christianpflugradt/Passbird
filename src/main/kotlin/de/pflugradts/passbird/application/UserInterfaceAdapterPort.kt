@@ -11,9 +11,11 @@ interface UserInterfaceAdapterPort {
     fun receiveSecurely(): Input = receiveSecurely(emptyOutput())
     fun send(vararg output: Output)
     fun sendLineBreak() = send(emptyOutput())
-    fun receiveConfirmation(output: Output) = receive(output).run { !isEmpty && data.isEmpty && command.firstByte == 'c'.code.toByte() }
+    fun receiveConfirmation(output: Output) =
+        receive(output).run { !isEmpty && data.isEmpty && command.size == 1 && command.firstByte == 'c'.code.toByte() }
+
     fun receiveYes(output: Output) = receive(output).run {
-        !isEmpty && data.isEmpty &&
+        !isEmpty && data.isEmpty && command.size == 1 &&
             (command.firstByte == 'Y'.code.toByte() || command.firstByte == 'y'.code.toByte())
     }
     fun warningSound()
