@@ -49,7 +49,7 @@ case "$area" in
     hotspots=(src/main/kotlin/de/pflugradts/passbird/application/security src/main/kotlin/de/pflugradts/passbird/adapter/keystore src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree src/main/kotlin/de/pflugradts/passbird/adapter/exchange src/main/kotlin/de/pflugradts/passbird/adapter/userinterface CONFIGURATION.md README.md)
     ;;
   architecture)
-    hotspots=(src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationModule.kt src/main/kotlin/de/pflugradts/passbird/application/commandhandling src/main/kotlin/de/pflugradts/passbird/domain src/main/kotlin/de/pflugradts/passbird/adapter)
+    hotspots=(src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationGraph.kt src/main/kotlin/de/pflugradts/passbird/application/commandhandling src/main/kotlin/de/pflugradts/passbird/domain src/main/kotlin/de/pflugradts/passbird/adapter)
     ;;
   integrity)
     hotspots=(src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree src/main/kotlin/de/pflugradts/passbird/adapter/exchange src/main/kotlin/de/pflugradts/passbird/application/configuration src/main/kotlin/de/pflugradts/passbird/application/process/backup CONFIGURATION.md README.md)
@@ -104,4 +104,3 @@ if [[ "$area" == "delivery" ]]; then
     print -u2 -- "Could not list recent workflow runs."
   fi
 fi
-
