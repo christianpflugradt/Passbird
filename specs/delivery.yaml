@@ -1,5 +1,27 @@
 schema_version: 1
 last_reviewed: 2026-05-30
+agent_internal_scripts:
+  location: .agent/scripts
+  purpose:
+    - keep deterministic multi-step agent workflows out of manual command choreography
+    - make fresh-context agents discover and reuse the same local task helpers
+  scripts:
+    - name: agent-context.sh
+      use_for: printing the spec files required for a task route
+    - name: agent-pick-issue.sh
+      use_for: selecting the eligible GitHub issue for the issue task
+    - name: agent-validate.sh
+      use_for: previewing or running the validation sequence for a known change type
+    - name: agent-ship.sh
+      use_for: formatting, staging exact paths, committing, rebase-pulling, and pushing releasable work
+    - name: agent-review-preflight.sh
+      use_for: gathering deterministic review-area context and GitHub triage state
+    - name: agent-review-finding.sh
+      use_for: creating or updating GitHub issues for actionable review findings
+    - name: check-agent-specs.sh
+      use_for: checking that agent instructions, specs, hooks, and helper scripts are wired consistently
+    - name: agent-release-artifact-check.sh
+      use_for: running the release jar manifest and payload verification sequence
 quality_gates:
   formatting_and_style:
     - run ./gradlew ktlintFormat before staging, committing, or pushing to auto-resolve formatting issues when possible
@@ -109,9 +131,9 @@ change_rules:
   - update README for user-visible command, workflow, or migration changes
   - update CONFIGURATION.md for any configuration-schema or default-value change
   - update specs docs whenever agent-facing guidance would otherwise become stale
+  - update AGENTS.md and matching specs when adding, renaming, or changing deterministic helper workflows under .agent/scripts
   - preserve backward compatibility unless the maintainer explicitly chooses a breaking change
-  - run ./gradlew ktlintFormat before staging, committing, or pushing to auto-resolve formatting issues when possible
-  - commit and, before pushing, run git pull -r on the current branch, then push immediately after a task is complete and releasable
+  - use .agent/scripts/agent-ship.sh for the deterministic format, stage, commit, pull --rebase, and push sequence when shipping completed releasable work
   - delay commit and push only when maintainer input is still required or the current state is incomplete or not ready to release
 commit_messages:
   standard: conventional_commits
@@ -159,18 +181,24 @@ recommended_validation_by_change_type:
   docs_only:
     run:
       - review changed files for consistency
+      - .agent/scripts/check-agent-specs.sh when agent instructions, specs, hooks, or helper scripts changed
   kotlin_code_non_structural:
     run:
+      - .agent/scripts/agent-validate.sh kotlin_code_non_structural -- focused Gradle args chosen by the agent
       - run only the focused tests for the changed code or newly added tests
   architecture_or_wiring:
     run:
+      - .agent/scripts/agent-validate.sh architecture_or_wiring -- focused Gradle args chosen by the agent
       - run only the focused tests for the changed code or newly added tests
       - ./gradlew architecture
   config_or_user_workflow:
     run:
+      - .agent/scripts/agent-validate.sh config_or_user_workflow -- focused Gradle args chosen by the agent
       - run only the focused unit, property, and integration tests that cover the changed workflow
   ci_or_release_workflow:
     run:
+      - .agent/scripts/agent-validate.sh ci_or_release_workflow for ordinary CI workflow changes
+      - .agent/scripts/agent-release-artifact-check.sh when release jar manifest stamping or artifact payload binding changes
       - ./gradlew jar
       - when release jar manifest stamping changes, build with an explicit -PreleaseVersion value and run .github/scripts/verify-release-jar-manifest.sh against build/libs/passbird.jar
       - when publish artifact binding changes, compare the rebuilt release jar with the verified release-jar artifact using .github/scripts/verify-release-jar-payload.sh
@@ -179,11 +207,13 @@ recommended_validation_by_change_type:
       - run semantic-release in dry-run mode when credentials and tags are available for scheduled stable-release behavior
   security_or_persistence:
     run:
+      - .agent/scripts/agent-validate.sh security_or_persistence -- focused Gradle args chosen by the agent
       - run the focused persistence or workflow tests you changed or added
       - ./gradlew architecture
       - review CI OWASP coverage instead of running dependency-check locally
   jar_or_terminal_smoke:
     run:
+      - .agent/scripts/agent-validate.sh jar_or_terminal_smoke
       - ./gradlew jar
       - ./smoke-test/run.sh
     notes:

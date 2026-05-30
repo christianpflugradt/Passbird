@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-23
+last_reviewed: 2026-05-30
 review_commands:
   syntax: review <area>
   supported_areas:
@@ -13,6 +13,7 @@ review_commands:
     - inspect the full workspace for supporting or conflicting evidence
     - do not limit the review to touched files, recent commits, or release notes
 review_process:
+  - use .agent/scripts/agent-review-preflight.sh for the selected area before drawing conclusions
   - identify the highest-risk files and workflows for the selected area before forming conclusions
   - trace cross-file and cross-layer consequences, especially when a local change could weaken a broader guarantee
   - inspect relevant GitHub context with gh when remote state can change the conclusion, especially existing issues and GitHub Actions workflow, run, job, or log state
@@ -50,6 +51,7 @@ github_issue_tracking:
     path: .github/ISSUE_TEMPLATE/review_finding.md
     name: Review Finding
   rules:
+    - use .agent/scripts/agent-review-finding.sh to create or update review-finding issues when its required fields are available
     - create or update a GitHub issue for every unique actionable finding
     - search open and recently closed issues before creating a new review-finding issue
     - reopen or comment on an existing issue instead of creating a duplicate when the finding is already tracked

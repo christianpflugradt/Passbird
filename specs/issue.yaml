@@ -1,11 +1,11 @@
 schema_version: 1
-last_reviewed: 2026-05-26
+last_reviewed: 2026-05-30
 issue_task:
   syntax: issue
   purpose:
     - resolve one existing open GitHub issue end-to-end
   selection_rules:
-    - inspect the live open issue list with gh before choosing work
+    - use .agent/scripts/agent-pick-issue.sh to inspect the live open issue list and choose work
     - ignore issue #22 (Dependency Dashboard); it is a standing automation tracker and must never be selected
     - if one or more remaining open issues are labeled bug and it is simple to determine which one is oldest, choose the oldest open bug
     - if no remaining open bug issues exist and it is simple to determine which remaining open issue is oldest, choose the oldest open issue
@@ -29,6 +29,7 @@ issue_task:
       - reading issue bodies, labels, comments, and linked context
       - commenting on or closing the resolved issue
     preferred_commands:
+      - .agent/scripts/agent-pick-issue.sh
       - gh issue list
       - gh issue view
       - gh issue comment

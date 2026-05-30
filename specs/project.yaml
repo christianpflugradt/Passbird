@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-29
+last_reviewed: 2026-05-30
 project:
   name: Passbird
   synopsis: >
@@ -68,6 +68,8 @@ repository_layout:
     role: jar-level smoke verification assets used by the local pre-commit hook and GitHub-side artifact validation
   - path: .github/workflows
     role: GitHub CI, security checks, and release automation
+  - path: .agent/scripts
+    role: deterministic internal helper workflows for agents, covering spec context loading, issue selection, validation, shipping, review preflight, review-finding issue creation, agent-spec consistency checks, and release artifact verification
   - path: .github/pages
     role: GitHub Pages configuration and layouts used when publishing the repository documentation and coverage site
 key_entrypoints:
@@ -129,6 +131,7 @@ agent_notes:
   - do not add code comments unless the maintainer explicitly asks for them or an existing project convention clearly requires them; never leave design commentary, temporary notes, versioned implementation notes, or other agent-style annotations
   - treat all password-manager wording as maintainer-owned copy; do not change user-visible text without approval for the exact wording
   - use GitHub CLI for GitHub-hosted repository work when local files are not enough; inspect Actions runs or workflow state, issues, pull requests, releases, and repository metadata with gh, preferring rtk gh when the needed subcommand is supported there
+  - use deterministic helper workflows under .agent/scripts instead of manually composing the same multi-step shell, GitHub, Gradle, or release-check operations
   - do not create or switch to a new git branch unless the maintainer explicitly approves that branch action
   - before pushing committed work, run git pull -r on the current branch to integrate remote updates without a merge commit
   - do not run OWASP dependency-check locally for routine verification; use the GitHub Actions workflows unless the maintainer explicitly asks for a local run

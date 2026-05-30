@@ -24,6 +24,7 @@ This repository keeps its agent-facing product specifications, design rules, and
 - Before changing any user-visible text shown by the password manager, get maintainer approval for the exact wording. Do not introduce wording changes without approval.
 - Before running shell commands, source `~/.zprofile` and `~/.zshrc` so repo-local tooling such as `rtk`, `gh`, and SDKMAN-managed runtimes are available.
 - After sourcing the shell environment, prefer the local `rtk` wrapper for shell commands; otherwise use direct commands.
+- Use deterministic helper workflows under `.agent/scripts` instead of manually composing the same multi-step operations. Prefer `.agent/scripts/agent-context.sh`, `.agent/scripts/agent-pick-issue.sh`, `.agent/scripts/agent-validate.sh`, `.agent/scripts/agent-ship.sh`, `.agent/scripts/agent-review-preflight.sh`, `.agent/scripts/agent-review-finding.sh`, `.agent/scripts/check-agent-specs.sh`, and `.agent/scripts/agent-release-artifact-check.sh` when their purpose matches the task.
 - For GitHub-hosted repository work where local files are not enough, use GitHub CLI rather than browser-only workflows. Inspect workflow registration, runs, jobs, and logs with `gh`; inspect and update issues, pull requests, releases, and repository metadata with `gh`. Prefer `rtk gh` for supported subcommands and otherwise use direct `gh` commands after sourcing the shell environment.
 - Do not create or switch to a new git branch unless the maintainer explicitly approves that branch action.
 - Before staging, committing, or pushing, run `./gradlew ktlintFormat` to auto-resolve formatting issues when possible.
@@ -36,7 +37,7 @@ This repository keeps its agent-facing product specifications, design rules, and
 
 - Use `issue` to resolve one open GitHub issue end-to-end.
 - Read `specs/issue.yaml` before performing this task.
-- Use the live open issue list to choose work.
+- Use `.agent/scripts/agent-pick-issue.sh` to choose from the live open issue list.
 - Ignore issue `#22` (`Dependency Dashboard`); it is a standing automation tracker and must never be selected for the `issue` task.
 - If one or more remaining open issues are labeled `bug` and it is simple to determine which one is oldest, resolve the oldest open `bug` issue.
 - If no remaining open `bug` issues exist and it is simple to determine which remaining open issue is oldest, resolve the oldest open issue.
@@ -50,10 +51,12 @@ This repository keeps its agent-facing product specifications, design rules, and
 - Use `review <area>` for standing workspace reviews.
 - Supported review areas are `security`, `architecture`, `integrity`, `behavior`, and `delivery`.
 - Read `specs/review.yaml` before performing one of these reviews.
+- Use `.agent/scripts/agent-review-preflight.sh <area>` before drawing conclusions.
 - Reviews use the current task, diff, or concern as the trigger, but they must assess the full workspace rather than only the touched files.
 - Review findings must be reported as `P0` to `P3`, ordered by severity, and every finding must include a proposed fix.
 - Before concluding a review, inspect relevant GitHub context with `gh` when it can change the conclusion or fix, especially existing issues and GitHub Actions workflow or run state.
 - Turn every unique actionable finding into a GitHub issue using `.github/ISSUE_TEMPLATE/review_finding.md`. Create or update the issue through `gh`, avoid duplicates when an existing issue already captures the finding, and include the resulting issue reference in the review report.
+- Use `.agent/scripts/agent-review-finding.sh` to create or update review-finding issues.
 - Populate each review-finding issue with enough context for another agent to continue without re-discovery: review area and trigger, priority, evidence with file or workflow references, impact, proposed fix, acceptance criteria, and handoff notes.
 - If no actionable findings are discovered for the selected area, say so explicitly.
 
@@ -70,6 +73,7 @@ This repository keeps its agent-facing product specifications, design rules, and
 Use `specs/delivery.yaml` to choose the right checks. At minimum:
 
 - run only the focused tests that cover the code you changed or the tests you added
+- use `.agent/scripts/agent-validate.sh` for deterministic validation sequences
 - run `./gradlew architecture` only for structural or wiring changes that are not already otherwise covered
 - rely on the local `pre-commit` hook for `./gradlew --no-build-cache clean jar`, `./smoke-test/run.sh`, `ktlintCheck`, `detekt`, `checkLicense`, `jacocoTestCoverageVerification`, and `allTests`
 - rely on GitHub Actions for OWASP dependency scanning unless the maintainer explicitly requests a local run
