@@ -25,13 +25,20 @@ class PasswordTreeFavoritesMigrationService @Inject constructor(
     fun migrate(keyShell: Shell) {
         try {
             val cryptoProvider = AesGcmCipher(keyShell)
-            val snapshot = systemOperation.readBytesFromFile(filePath)
+            val decryptedShell = systemOperation.readBytesFromFile(filePath)
                 .let(passwordTreeEnvelope::unwrapLegacyCurrent)
                 .let { cryptoProvider.decrypt(encryptedShellOf(it)) }
-                .let(legacyPasswordTreePayloadReader::read)
-            val migratedBytes = passwordTreeEnvelope.wrap(
-                cryptoProvider.encrypt(passwordTreePayloadWriter.write(snapshot)).toByteArray(),
-            )
+            val snapshot = try {
+                legacyPasswordTreePayloadReader.read(decryptedShell)
+            } finally {
+                decryptedShell.scramble()
+            }
+            val payloadShell = passwordTreePayloadWriter.write(snapshot)
+            val migratedBytes = try {
+                passwordTreeEnvelope.wrap(cryptoProvider.encrypt(payloadShell).toByteArray())
+            } finally {
+                payloadShell.scramble()
+            }
             systemOperation.writeBytesToSensitiveFile(filePath, migratedBytes)
         } finally {
             keyShell.scramble()

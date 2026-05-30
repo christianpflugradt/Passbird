@@ -41,7 +41,11 @@ class PasswordTreeWriter @Inject constructor(
     }
 
     private fun writeToDisk(shell: Shell) = tryCatching {
-        systemOperation.writeBytesToSensitiveFile(filePath, passwordTreeEnvelope.wrap(cryptoProvider.encrypt(shell).toByteArray()))
+        try {
+            systemOperation.writeBytesToSensitiveFile(filePath, passwordTreeEnvelope.wrap(cryptoProvider.encrypt(shell).toByteArray()))
+        } finally {
+            shell.scramble()
+        }
         Unit
     }.onFailure { reportFailure(WritePasswordTreeFailure(filePath, it)) }
 

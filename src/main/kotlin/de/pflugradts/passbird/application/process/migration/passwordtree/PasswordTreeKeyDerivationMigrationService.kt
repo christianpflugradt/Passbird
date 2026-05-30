@@ -16,6 +16,7 @@ import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.egg.EggIdMemory
 import de.pflugradts.passbird.domain.model.egg.MemoryMap
+import de.pflugradts.passbird.domain.model.egg.Protein
 import de.pflugradts.passbird.domain.model.egg.Protein.Companion.createProtein
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
@@ -38,13 +39,20 @@ class PasswordTreeKeyDerivationMigrationService @Inject constructor(
         try {
             val legacyProvider = createLegacyAesGcmCipher(keyShell)
             val currentProvider = AesGcmCipher(keyShell)
-            val snapshot = systemOperation.readBytesFromFile(filePath)
+            val decryptedShell = systemOperation.readBytesFromFile(filePath)
                 .let { legacyProvider.decrypt(encryptedShellOf(it)) }
-                .let(legacyPasswordTreePayloadReader::read)
+            val snapshot = try {
+                legacyPasswordTreePayloadReader.read(decryptedShell)
+            } finally {
+                decryptedShell.scramble()
+            }
             val migratedSnapshot = snapshot.migrate(legacyProvider, currentProvider)
-            val migratedBytes = passwordTreeEnvelope.wrap(
-                currentProvider.encrypt(passwordTreePayloadWriter.write(migratedSnapshot)).toByteArray(),
-            )
+            val payloadShell = passwordTreePayloadWriter.write(migratedSnapshot)
+            val migratedBytes = try {
+                passwordTreeEnvelope.wrap(currentProvider.encrypt(payloadShell).toByteArray())
+            } finally {
+                payloadShell.scramble()
+            }
             systemOperation.writeBytesToSensitiveFile(filePath, migratedBytes)
         } finally {
             keyShell.scramble()
@@ -54,26 +62,47 @@ class PasswordTreeKeyDerivationMigrationService @Inject constructor(
     private fun PasswordTreeSnapshot.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider) = PasswordTreeSnapshot(
         eggs = eggs.map { it.migrate(legacyProvider, currentProvider) },
         memory = memory.migrate(legacyProvider, currentProvider),
-        nests = nests.map(Shell::copy),
-    )
-
-    private fun Egg.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider) = createEgg(
-        slot = associatedNest(),
-        eggIdShell = viewEggId().migrate(legacyProvider, currentProvider),
-        passwordShell = viewPassword().migrate(legacyProvider, currentProvider),
-        proteins = proteins.map { proteinOption ->
-            if (proteinOption.isPresent) {
-                mutableOptionOf(
-                    createProtein(
-                        proteinOption.get().viewType().migrate(legacyProvider, currentProvider),
-                        proteinOption.get().viewStructure().migrate(legacyProvider, currentProvider),
-                    ),
-                )
-            } else {
-                mutableOptionOf()
+        nests = nests.map {
+            try {
+                it.copy()
+            } finally {
+                it.scramble()
             }
         },
     )
+
+    private fun Egg.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider): Egg {
+        val migratedEggId = viewEggId().migrate(legacyProvider, currentProvider)
+        val migratedPassword = viewPassword().migrate(legacyProvider, currentProvider)
+        try {
+            return createEgg(
+                slot = associatedNest(),
+                eggIdShell = migratedEggId,
+                passwordShell = migratedPassword,
+                proteins = proteins.map { proteinOption ->
+                    if (proteinOption.isPresent) {
+                        proteinOption.get().migrate(legacyProvider, currentProvider)
+                    } else {
+                        mutableOptionOf()
+                    }
+                },
+            )
+        } finally {
+            migratedEggId.scramble()
+            migratedPassword.scramble()
+        }
+    }
+
+    private fun Protein.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider) = run {
+        val migratedType = viewType().migrate(legacyProvider, currentProvider)
+        val migratedStructure = viewStructure().migrate(legacyProvider, currentProvider)
+        try {
+            mutableOptionOf(createProtein(migratedType, migratedStructure))
+        } finally {
+            migratedType.scramble()
+            migratedStructure.scramble()
+        }
+    }
 
     private fun MemoryMap.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider) = emptyMemory().apply {
         slotIterator().forEach { nestSlot ->
@@ -88,8 +117,18 @@ class PasswordTreeKeyDerivationMigrationService @Inject constructor(
         }
     }
 
-    private fun EncryptedShell.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider) =
-        currentProvider.encrypt(legacyProvider.decrypt(this))
+    private fun EncryptedShell.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider): EncryptedShell {
+        try {
+            val shell = legacyProvider.decrypt(this)
+            try {
+                return currentProvider.encrypt(shell)
+            } finally {
+                shell.scramble()
+            }
+        } finally {
+            scramble()
+        }
+    }
 
     private val filePath get() = systemOperation.resolvePath(
         configuration.adapter.passwordTree.location.toDirectory(),

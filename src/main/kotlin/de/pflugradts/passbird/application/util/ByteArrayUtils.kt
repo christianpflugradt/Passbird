@@ -1,8 +1,11 @@
 package de.pflugradts.passbird.application.util
 
 import java.nio.ByteBuffer
+import java.security.SecureRandom
 import java.util.Arrays
 import kotlin.math.min
+
+private val SECURE_RANDOM = SecureRandom()
 
 private fun Int.asByteArray() = ByteBuffer.allocate(Integer.BYTES).putInt(this).array()
 private fun ByteArray.asInt() = ByteBuffer.wrap(this).getInt()
@@ -13,3 +16,4 @@ fun copyBytes(source: ByteArray, target: ByteArray, offset: Int, size: Int = min
     System.arraycopy(source, 0, target, offset, size)
     return size
 }
+fun ByteArray.scramble() = SECURE_RANDOM.nextBytes(this)

@@ -15,11 +15,15 @@ import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.security.createTestKeyShell
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -27,6 +31,7 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
 import java.io.File
 import java.nio.file.Files
@@ -85,6 +90,33 @@ class PasswordTreeFavoritesMigrationServiceTest {
         expectThat(restored.favorites()[Slot.DEFAULT].get().any { it.isPresent }).isEqualTo(false)
         expectThat(restored.nests()[Slot.S1.index() - 1].asString()) isEqualTo "work"
         expectThat(restored.nests()[Slot.S3.index() - 1].asString()) isEqualTo "finance"
+    }
+
+    @Test
+    fun `should scramble decrypted and written payload shells during migration`() {
+        writeLegacyCurrentPasswordTree(PasswordTreeSnapshot())
+        val legacyPasswordTreePayloadReader = mockk<LegacyPasswordTreePayloadReader>()
+        val passwordTreePayloadWriter = mockk<PasswordTreePayloadWriter>()
+        val payloadShell = spyk(shellOf("current payload"))
+        lateinit var decryptedPayloadShell: Shell
+        var decryptedPayloadBytes = emptyList<Byte>()
+        every { legacyPasswordTreePayloadReader.read(any()) } answers {
+            decryptedPayloadShell = firstArg()
+            decryptedPayloadBytes = decryptedPayloadShell.toByteArray().toList()
+            PasswordTreeSnapshot()
+        }
+        every { passwordTreePayloadWriter.write(any()) } returns payloadShell
+
+        PasswordTreeFavoritesMigrationService(
+            configuration = configuration,
+            legacyPasswordTreePayloadReader = legacyPasswordTreePayloadReader,
+            passwordTreeEnvelope = passwordTreeEnvelope,
+            passwordTreePayloadWriter = passwordTreePayloadWriter,
+            systemOperation = systemOperation,
+        ).migrate(createTestKeyShell())
+
+        expectThat(decryptedPayloadShell.toByteArray().toList()) isNotEqualTo decryptedPayloadBytes
+        verify(exactly = 1) { payloadShell.scramble() }
     }
 
     private fun createLegacySnapshot(): PasswordTreeSnapshot {
