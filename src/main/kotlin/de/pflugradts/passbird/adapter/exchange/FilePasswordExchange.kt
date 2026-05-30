@@ -11,6 +11,7 @@ import de.pflugradts.passbird.application.failure.ImportFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.egg.requireValidEggId
 import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
@@ -63,13 +64,21 @@ class FilePasswordExchange constructor(
     }
     private fun List<ExportedEgg>.toValidatedPasswordInfos(): List<PasswordInfo> {
         val eggIds = mutableSetOf<String>()
+        forEach {
+            it.validateEggId(eggIds)
+        }
         return map {
-            require(eggIds.add(it.eggId)) { "Duplicate eggId in import file" }
             PasswordInfo(
                 first = ShellPair(shellOf(it.eggId), shellOf(it.password)),
                 second = it.proteins.toShellPairsBySlot(),
             )
         }
+    }
+    private fun ExportedEgg.validateEggId(eggIds: MutableSet<String>) {
+        val eggIdShell = shellOf(eggId)
+        requireValidEggId(eggIdShell)
+        eggIdShell.scramble()
+        require(eggIds.add(eggId)) { "Duplicate eggId in import file" }
     }
     private fun ExportedNest.toValidatedSlot(): Slot {
         val slot = requireNotNull(slot) { "Missing nest slot in import file" }

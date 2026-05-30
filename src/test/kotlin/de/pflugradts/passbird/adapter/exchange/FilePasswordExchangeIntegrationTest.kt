@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.adapter.exchange
 
+import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.PasswordInfo
@@ -7,6 +8,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
+import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -18,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import strikt.api.expectThat
+import strikt.assertions.contains
 import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.containsKey
 import strikt.assertions.hasSize
@@ -524,6 +527,42 @@ class FilePasswordExchangeIntegrationTest {
         // then
         expectThat(actual.failure).isTrue()
         expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["", "1EggId", "EggId!"])
+    fun `should fail receive when an egg id is invalid`(givenEggId: String) {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "$givenEggId",
+                      "password": "Password1",
+                      "proteins": []
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+        val captureSystemErr = captureSystemErr()
+
+        // when
+        val actual = captureSystemErr.during { filePasswordExchange.receive() }
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isA<InvalidEggIdException>()
+        expectThat(captureSystemErr.capture) contains "Erroneous eggId: $givenEggId"
     }
 
     @Test

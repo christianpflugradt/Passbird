@@ -5,17 +5,15 @@ import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.kotlinextensions.toOption
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.EggIdMemory
-import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
+import de.pflugradts.passbird.domain.model.egg.requireValidEggId
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
-import de.pflugradts.passbird.domain.model.shell.PlainValue.Companion.plainValueOf
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
-import java.util.function.Predicate
 import java.util.stream.Stream
 
 abstract class CommonPasswordServiceCapabilities(
@@ -70,16 +68,7 @@ abstract class CommonPasswordServiceCapabilities(
         eventRegistry.processEvents()
     }
 
-    fun challengeEggId(shell: Shell) {
-        if (shell.isEmpty || plainValueOf(shell.getByte(0)).isDigit || anyMatch(shell.copy()) { plainValueOf(it).isSymbol }) {
-            throw InvalidEggIdException(shell)
-        }
-    }
-    private fun anyMatch(shell: Shell, predicate: Predicate<Byte>): Boolean {
-        val result = shell.stream().anyMatch(predicate)
-        shell.scramble()
-        return result
-    }
+    fun challengeEggId(shell: Shell) = requireValidEggId(shell)
 
     fun eggExists(eggIdShell: Shell, slot: Slot) = find(eggIdShell, slot).isPresent
     fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction) = find(eggIdShell).let {

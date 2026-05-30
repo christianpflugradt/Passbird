@@ -217,7 +217,7 @@ private fun plainPasswordInfoLists(): Arb<List<PlainPasswordInfoData>> = Arb.lis
 }
 
 private fun plainPasswordInfoData(): Arb<PlainPasswordInfoData> = Arb.bind(
-    textValues(),
+    eggIdValues(),
     textValues(),
     proteinEntries(),
 ) { eggId, password, proteins ->
@@ -244,6 +244,11 @@ private fun nonBlankTextValues(): Arb<String> = Arb.bind(
 ) { prefix, marker -> prefix + marker }
 
 private fun nonEmptyTextValues(): Arb<String> = Arb.string(1..16, ALLOWED_TEXT_CHARACTERS)
+
+private fun eggIdValues(): Arb<String> = Arb.bind(
+    Arb.element(EGG_ID_FIRST_CHARACTERS.toList()),
+    Arb.string(0..15, EGG_ID_REMAINING_CHARACTERS),
+) { first, remaining -> "$first$remaining" }
 
 private fun PlainEggData.toEgg(cryptoProvider: CryptoProvider): Egg = createEgg(
     slot = nestSlot,
@@ -291,6 +296,8 @@ private fun PlainPasswordInfoData.toPasswordInfo() = (shellOf(eggId) to shellOf(
 
 private val ALLOWED_TEXT_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !@#\$%^&*()_-+=[]{}:;,.?/|~\t\n"
 private val NON_BLANK_TEXT_CHARACTERS = ALLOWED_TEXT_CHARACTERS.filterNot(Char::isWhitespace)
+private val EGG_ID_FIRST_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+private val EGG_ID_REMAINING_CHARACTERS = EGG_ID_FIRST_CHARACTERS + "0123456789"
 private val nonDefaultSlotEntries = Slot.entries.filterNot { it == Slot.DEFAULT }
 private val allFavoriteCells = Slot.entries.flatMap { nestSlot ->
     Slot.entries.map { favoriteSlot -> FavoriteCell(nestSlot, favoriteSlot) }

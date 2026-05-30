@@ -397,6 +397,67 @@ class PasswordImportExportServiceTest {
     }
 
     @Test
+    fun `should reject invalid egg id before preview or import mutation`() {
+        // given
+        val tempExchangeDirectory = Files.createTempDirectory("passbird-import-invalid-egg-id")
+        writeExchangeFile(
+            tempExchangeDirectory.toString(),
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "ValidEgg",
+                      "password": "Password1",
+                      "proteins": []
+                    },
+                    {
+                      "eggId": "Invalid!",
+                      "password": "Password2",
+                      "proteins": []
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+        val importExportService = PasswordImportExportService(
+            object : ExchangeFactory {
+                override fun createPasswordExchange() = FilePasswordExchange(
+                    SystemOperation(),
+                    PassbirdRunContext(tempExchangeDirectory.toString().toDirectory(), DEFAULT),
+                )
+            },
+            passwordService,
+            nestService,
+            eventRegistry,
+        )
+
+        try {
+            // when
+            val fullPreview = captureSystemErr().during { importExportService.peekImportEggIdShells() }
+            val selectivePreview = captureSystemErr().during { importExportService.peekImportNests() }
+            captureSystemErr().during { importExportService.importEggs() }
+            captureSystemErr().during { importExportService.importEggs(DEFAULT, DEFAULT) }
+
+            // then
+            expectThat(fullPreview.failure).isTrue()
+            expectThat(selectivePreview.failure).isTrue()
+            verify { passwordService wasNot Called }
+            verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
+            verify(exactly = 0) { eventRegistry.processEvents() }
+        } finally {
+            File(tempExchangeDirectory.toString()).deleteRecursively()
+        }
+    }
+
+    @Test
     fun `should stop importing and suppress success events when putting an egg fails`() {
         // given
         val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
