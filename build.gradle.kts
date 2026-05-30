@@ -69,6 +69,7 @@ dependencies {
     testImplementation("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("io.kotest:kotest-property:$kotestPropertyVersion")
 
     testImplementation("com.tngtech.archunit:archunit:$archunitVersion")
