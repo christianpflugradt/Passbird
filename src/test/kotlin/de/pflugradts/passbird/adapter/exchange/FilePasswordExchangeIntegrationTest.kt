@@ -177,6 +177,44 @@ class FilePasswordExchangeIntegrationTest {
     }
 
     @Test
+    fun `should fail receive when protein slot value is missing`() {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": [
+                        {
+                          "proteinType": "type0",
+                          "proteinStructure": "structure0"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        // when
+        val actual = filePasswordExchange.receive()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
+    }
+
+    @Test
     fun `should fail receive when egg ids are duplicated within one nest`() {
         // given
         writeExchangeFile(

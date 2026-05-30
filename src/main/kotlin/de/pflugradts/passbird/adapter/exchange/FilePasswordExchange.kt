@@ -94,13 +94,14 @@ class FilePasswordExchange @Inject constructor(
     private fun List<ExportedProtein>.toShellPairsBySlot(): List<ShellPair> {
         val proteinsBySlot = mutableMapOf<Int, ShellPair>()
         forEach { protein ->
-            require(protein.slot in Slot.entries.indices) { "Invalid protein slot ${protein.slot}" }
+            val slot = requireNotNull(protein.slot) { "Missing protein slot in import file" }
+            require(slot in Slot.entries.indices) { "Invalid protein slot $slot" }
             require(
                 proteinsBySlot.putIfAbsent(
-                    protein.slot,
+                    slot,
                     ShellPair(shellOf(protein.proteinType), shellOf(protein.proteinStructure)),
                 ) == null,
-            ) { "Duplicate protein slot ${protein.slot}" }
+            ) { "Duplicate protein slot $slot" }
         }
         return Slot.entries.indices.map { slot ->
             proteinsBySlot[slot] ?: ShellPair(emptyShell(), emptyShell())
@@ -108,7 +109,7 @@ class FilePasswordExchange @Inject constructor(
     }
 }
 
-private class ExportedProtein(var proteinType: String = "", var proteinStructure: String = "", var slot: Int = 0)
+private class ExportedProtein(var proteinType: String = "", var proteinStructure: String = "", var slot: Int? = null)
 private class ExportedEgg(var eggId: String = "", var password: String = "", var proteins: List<ExportedProtein> = emptyList())
 private class ExportedNest(var nestId: String = "", var slot: Int? = null)
 private class EggsPerNest(var exportedNest: ExportedNest = ExportedNest(), var exportedEggs: List<ExportedEgg> = emptyList())
