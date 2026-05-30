@@ -74,6 +74,7 @@ current_security_relevant_implementation:
       - uses AES/GCM/NoPadding
       - uses a 12-byte IV generated from SecureRandom
       - uses the loaded keystore secret bytes directly as the AES key material for the current password tree format
+      - scrambles transient cipher input byte clones and Cipher.doFinal output arrays after copying them into the returned Shell representation
       - scrambles temporary current-format key bytes and legacy-derived key bytes after creating SecretKeySpecs
       - keeps the former PBKDF2WithHmacSHA256 static-salt 100-iteration derivation only as a legacy migration path for pre-migration password trees
   password_tree_integrity:

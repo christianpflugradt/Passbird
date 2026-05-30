@@ -37,9 +37,13 @@ class AesGcmCipher internal constructor(private val secretKeySpec: SecretKeySpec
 
     private fun requestSecureIv(): Shell = ByteArray(IV_SIZE).apply { secureRandom.nextBytes(this) }.toShell()
 
-    private fun cipherize(mode: Int, shell: Shell, iv: ByteArray) = Cipher.getInstance(TRANSFORMATION)
-        .apply { init(mode, secretKeySpec, GCMParameterSpec(TAG_LENGTH_BIT, iv)) }
-        .doFinal(shell.toByteArray()).toShell()
+    private fun cipherize(mode: Int, shell: Shell, iv: ByteArray) = withCipherInputBytes(shell) { input ->
+        withCipherOutputBytes(
+            Cipher.getInstance(TRANSFORMATION)
+                .apply { init(mode, secretKeySpec, GCMParameterSpec(TAG_LENGTH_BIT, iv)) }
+                .doFinal(input),
+        ) { it.toShell() }
+    }
 
     private fun ByteArray.toShell() = shellOf(this)
 
@@ -49,6 +53,10 @@ class AesGcmCipher internal constructor(private val secretKeySpec: SecretKeySpec
 }
 
 internal fun createLegacyAesGcmCipher(keyShell: Shell) = AesGcmCipher(createLegacySecretKeySpec(keyShell))
+
+internal inline fun <T> withCipherInputBytes(shell: Shell, block: (ByteArray) -> T) = withScrambledBytes(shell.toByteArray(), block)
+
+internal inline fun <T> withCipherOutputBytes(bytes: ByteArray, block: (ByteArray) -> T) = withScrambledBytes(bytes, block)
 
 private fun createCurrentSecretKeySpec(keyShell: Shell) = withCurrentKeyBytes(keyShell) {
     SecretKeySpec(it, ENCRYPTION_ALGORITHM)

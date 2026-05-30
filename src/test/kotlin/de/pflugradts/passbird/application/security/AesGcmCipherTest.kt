@@ -31,6 +31,35 @@ class AesGcmCipherTest {
     }
 
     @Test
+    fun `should scramble temporary cipher input bytes after use`() {
+        val shell = shellOf("passbird")
+        val originalShellBytes = shell.toByteArray().toList()
+        lateinit var cipherInputBytes: ByteArray
+
+        val actual = withCipherInputBytes(shell) {
+            cipherInputBytes = it
+            it.toList()
+        }
+
+        expectThat(actual) isEqualTo originalShellBytes
+        expectThat(cipherInputBytes.toList()) isNotEqualTo originalShellBytes
+        expectThat(shell.toByteArray().toList()) isEqualTo originalShellBytes
+    }
+
+    @Test
+    fun `should scramble temporary cipher output bytes after use`() {
+        val cipherOutputBytes = shellOf("decrypted").toByteArray()
+        val originalCipherOutputBytes = cipherOutputBytes.toList()
+
+        val actual = withCipherOutputBytes(cipherOutputBytes) {
+            shellOf(it)
+        }
+
+        expectThat(actual) isEqualTo shellOf("decrypted")
+        expectThat(cipherOutputBytes.toList()) isNotEqualTo originalCipherOutputBytes
+    }
+
+    @Test
     fun `should scramble temporary current key bytes after use`() {
         val keyShell = createTestKeyShell()
         val originalKeyBytes = keyShell.toByteArray().toList()
