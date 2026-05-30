@@ -27,10 +27,35 @@ abstract class CommonPasswordServiceCapabilities(
     fun find(eggIdShell: Shell): Option<Egg> = eggRepository.findAll().findDecrypted(eggIdShell).apply { ifPresent { updateMemory(it) } }
     fun findWithoutUpdatingMemory(eggIdShell: Shell): Option<Egg> = eggRepository.findAll().findDecrypted(eggIdShell)
 
-    private fun Stream<Egg>.findDecrypted(eggIdShell: Shell) = filter { decrypted(it.viewEggId()) == eggIdShell }.findAny().toOption()
-    private fun EggIdMemory.findDuplicate(egg: Egg) = find { entry ->
-        entry.map { decrypted(it) == decrypted(egg.viewEggId()) }.orElse(false)
-    }?.get()
+    private fun Stream<Egg>.findDecrypted(eggIdShell: Shell) = filter {
+        decryptedMatches(it.viewEggId(), eggIdShell)
+    }.findAny().toOption()
+    private fun EggIdMemory.findDuplicate(egg: Egg): EncryptedShell? {
+        val eggId = egg.viewEggId()
+        return find { entry ->
+            entry.map { decryptedMatches(it, eggId) }.orElse(false)
+        }?.get()
+    }
+
+    private fun decryptedMatches(encryptedShell: EncryptedShell, shell: Shell): Boolean {
+        val decryptedShell = decrypted(encryptedShell)
+        return try {
+            decryptedShell == shell
+        } finally {
+            decryptedShell.scramble()
+        }
+    }
+
+    private fun decryptedMatches(firstEncryptedShell: EncryptedShell, secondEncryptedShell: EncryptedShell): Boolean {
+        val firstShell = decrypted(firstEncryptedShell)
+        val secondShell = decrypted(secondEncryptedShell)
+        return try {
+            firstShell == secondShell
+        } finally {
+            firstShell.scramble()
+            secondShell.scramble()
+        }
+    }
 
     fun updateMemory(egg: Egg, sync: Boolean = true) = eggRepository.updateMemory(egg, eggRepository.memory().findDuplicate(egg), sync)
 

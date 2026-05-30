@@ -18,6 +18,7 @@ import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -88,6 +89,54 @@ class ViewPasswordServiceTest {
         verify { eventRegistry wasNot Called }
         expectThat(actual.isPresent).isTrue()
         expectThat(actual.get()) isEqualTo expectedPassword
+    }
+
+    @Test
+    fun `should scramble decrypted eggId shell after lookup comparison`() {
+        // given
+        val givenEggId = shellOf("EggId")
+        val decryptedEggId = spyk(shellOf("EggId"))
+        val matchingEgg = createEggForTesting(withEggIdShell = givenEggId)
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
+        every { cryptoProvider.decrypt(any<EncryptedShell>()) } returns decryptedEggId
+
+        // when
+        val actual = passwordService.eggExists(givenEggId, EggNotExistsAction.DO_NOTHING)
+
+        // then
+        expectThat(actual).isTrue()
+        verify(exactly = 1) { decryptedEggId.scramble() }
+    }
+
+    @Test
+    fun `should scramble decrypted eggId shells after memory duplicate comparison`() {
+        // given
+        val givenEggId = shellOf("memEgg")
+        val expectedPassword = shellOf("Password")
+        val matchingEgg = createEggForTesting(withEggIdShell = givenEggId, withPasswordShell = expectedPassword)
+        val lookupComparison = spyk(shellOf("memEgg"))
+        val memoryComparison = spyk(shellOf("memEgg"))
+        val currentEggComparison = spyk(shellOf("memEgg"))
+        every { cryptoProvider.decrypt(any<EncryptedShell>()) } returnsMany listOf(
+            lookupComparison,
+            memoryComparison,
+            currentEggComparison,
+            expectedPassword,
+        )
+        val memory = EggIdMemory().apply { memorize(matchingEgg.viewEggId(), null) }
+        every { eggRepository.findAll() } returns listOf(matchingEgg).stream()
+        every { eggRepository.memory() } returns memory
+        every { eggRepository.updateMemory(any(), any(), any()) } returns Unit
+
+        // when
+        val actual = passwordService.viewPassword(givenEggId)
+
+        // then
+        expectThat(actual.isPresent).isTrue()
+        expectThat(actual.get()) isEqualTo expectedPassword
+        verify(exactly = 1) { lookupComparison.scramble() }
+        verify(exactly = 1) { memoryComparison.scramble() }
+        verify(exactly = 1) { currentEggComparison.scramble() }
     }
 
     @Test

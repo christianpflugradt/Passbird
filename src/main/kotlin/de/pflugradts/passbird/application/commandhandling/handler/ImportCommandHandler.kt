@@ -7,6 +7,8 @@ import de.pflugradts.passbird.application.commandhandling.command.ImportCommand
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.exchange.ImportNestPreview
+import de.pflugradts.passbird.application.exchange.ShellMap
+import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
@@ -55,13 +57,17 @@ class ImportCommandHandler@Inject constructor(
             if (importedEggIds.failure) {
                 return ImportCommandConfirmation.FAILED
             }
-            val overlaps = importedEggIds.getOrNull()!!
-                .map { (nestSlot, eggIdShell) -> eggIdShell.map { Triple(nestSlot, it, passwordService.eggExists(it, nestSlot)) } }
-                .flatten()
-                .filter { it.third }
-                .map { Pair(it.first, it.second) }
-            if (overlaps.isNotEmpty()) {
-                return confirmImport(overlaps)
+            return importedEggIds.getOrNull()!!.useScrambled {
+                val overlaps = it
+                    .map { (nestSlot, eggIdShell) -> eggIdShell.map { Triple(nestSlot, it, passwordService.eggExists(it, nestSlot)) } }
+                    .flatten()
+                    .filter { it.third }
+                    .map { Pair(it.first, it.second) }
+                if (overlaps.isNotEmpty()) {
+                    confirmImport(overlaps)
+                } else {
+                    ImportCommandConfirmation.CONFIRMED
+                }
             }
         }
         return ImportCommandConfirmation.CONFIRMED
@@ -75,29 +81,31 @@ class ImportCommandHandler@Inject constructor(
         }
         val previews = importedNests.getOrNull()!!.takeIf(List<ImportNestPreview>::isNotEmpty)
             ?: return ImportCommandConfirmation.ABORTED
-        userInterfaceAdapterPort.send(outputOf(shellOf("\nAvailable Nests in import file:\n"), HIGHLIGHT))
-        userInterfaceAdapterPort.send(outputOf(shellOf(previews.joinToString("\n") { "\t${it.slot.index()}: ${it.nestId.asString()}" })))
-        val sourceSlot = receiveSourceSlot(previews) ?: return ImportCommandConfirmation.ABORTED
-        val targetSlot = receiveTargetSlot() ?: return ImportCommandConfirmation.ABORTED
-        val preview = previews.first { it.slot == sourceSlot }
-        if (targetSlot == DEFAULT && sourceSlot != DEFAULT) {
-            return ImportCommandConfirmation.ABORTED
-        }
-        val targetNest = nestService.atNestSlot(targetSlot)
-        if (targetNest.isPresent && targetNest.get().viewNestId() != preview.nestId) {
-            return ImportCommandConfirmation.ABORTED
-        }
-        val overlaps = preview.eggIds
-            .filter { eggId -> passwordService.eggExists(eggId, targetSlot) }
-            .map { eggId -> Pair(targetSlot, eggId) }
-        if (overlaps.isNotEmpty()) {
-            val confirmation = confirmImport(overlaps)
-            if (confirmation != ImportCommandConfirmation.CONFIRMED) {
-                return confirmation
+        return previews.useScrambled {
+            userInterfaceAdapterPort.send(outputOf(shellOf("\nAvailable Nests in import file:\n"), HIGHLIGHT))
+            userInterfaceAdapterPort.send(outputOf(shellOf(it.joinToString("\n") { "\t${it.slot.index()}: ${it.nestId.asString()}" })))
+            val sourceSlot = receiveSourceSlot(it) ?: return@useScrambled ImportCommandConfirmation.ABORTED
+            val targetSlot = receiveTargetSlot() ?: return@useScrambled ImportCommandConfirmation.ABORTED
+            val preview = it.first { it.slot == sourceSlot }
+            if (targetSlot == DEFAULT && sourceSlot != DEFAULT) {
+                return@useScrambled ImportCommandConfirmation.ABORTED
             }
+            val targetNest = nestService.atNestSlot(targetSlot)
+            if (targetNest.isPresent && targetNest.get().viewNestId() != preview.nestId) {
+                return@useScrambled ImportCommandConfirmation.ABORTED
+            }
+            val overlaps = preview.eggIds
+                .filter { eggId -> passwordService.eggExists(eggId, targetSlot) }
+                .map { eggId -> Pair(targetSlot, eggId) }
+            if (overlaps.isNotEmpty()) {
+                val confirmation = confirmImport(overlaps)
+                if (confirmation != ImportCommandConfirmation.CONFIRMED) {
+                    return@useScrambled confirmation
+                }
+            }
+            selectedNest = SelectedNest(sourceSlot, targetSlot)
+            ImportCommandConfirmation.CONFIRMED
         }
-        selectedNest = SelectedNest(sourceSlot, targetSlot)
-        return ImportCommandConfirmation.CONFIRMED
     }
 
     private fun receiveSourceSlot(previews: List<ImportNestPreview>) = receiveNestSlot(
@@ -117,7 +125,7 @@ class ImportCommandHandler@Inject constructor(
         ?.let(::slotAt)
         ?.takeIf(availableSlots::contains)
 
-    private fun confirmImport(overlaps: List<Pair<Slot, de.pflugradts.passbird.domain.model.shell.Shell>>) = if (
+    private fun confirmImport(overlaps: List<Pair<Slot, Shell>>) = if (
         userInterfaceAdapterPort.receiveConfirmation(
             outputOf(
                 shellOf(
@@ -139,3 +147,20 @@ class ImportCommandHandler@Inject constructor(
 private enum class ImportCommandConfirmation { CONFIRMED, ABORTED, FAILED }
 
 private data class SelectedNest(val slot: Slot, val targetSlot: Slot)
+
+private inline fun <T> ShellMap.useScrambled(block: (ShellMap) -> T): T = try {
+    block(this)
+} finally {
+    values.flatten().scrambleShells()
+}
+
+private inline fun <T> List<ImportNestPreview>.useScrambled(block: (List<ImportNestPreview>) -> T): T = try {
+    block(this)
+} finally {
+    forEach {
+        it.nestId.scramble()
+        it.eggIds.scrambleShells()
+    }
+}
+
+private fun Iterable<Shell>.scrambleShells() = forEach(Shell::scramble)

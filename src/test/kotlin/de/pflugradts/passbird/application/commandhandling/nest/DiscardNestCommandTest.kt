@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.nest
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
@@ -16,8 +17,10 @@ import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -168,8 +171,38 @@ class DiscardNestCommandTest {
         nestService.moveToNestAt(targetNestSlot)
 
         // then
-        verify(exactly = 1) { passwordService.moveEgg(eggId1, targetNestSlot) }
-        verify(exactly = 1) { passwordService.moveEgg(eggId2, targetNestSlot) }
+        verify(exactly = 2) { passwordService.moveEgg(any(), targetNestSlot) }
+        expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isTrue()
+    }
+
+    @Test
+    fun `should scramble source and target eggId shells after moving eggs out of discarded nest`() {
+        // given
+        val nestSlotIndex = 1
+        val givenInput = shellOf("n-$nestSlotIndex")
+        val nestSlotFromInput = slotAt(nestSlotIndex)
+        val targetNestSlot = S5
+        val sourceEggId = spyk(shellOf("SourceEgg"))
+        val targetEggId = spyk(shellOf("TargetEgg"))
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf("${targetNestSlot.index()}"))),
+        )
+        nestService.place(shellOf("discardnest"), nestSlotFromInput)
+        nestService.place(shellOf("keepnest"), targetNestSlot)
+        every { passwordService.findAllEggIds() } returnsMany listOf(
+            listOf(sourceEggId).stream(),
+            listOf(targetEggId).stream(),
+        )
+        every { passwordService.moveEgg(sourceEggId, targetNestSlot) } returns success(Unit)
+
+        // when
+        inputHandler.handleInput(inputOf(givenInput))
+
+        // then
+        verify(exactly = 1) { passwordService.moveEgg(sourceEggId, targetNestSlot) }
+        verify(exactly = 1) { sourceEggId.scramble() }
+        verify(exactly = 1) { targetEggId.scramble() }
         expectThat(nestService.atNestSlot(nestSlotFromInput).isEmpty).isTrue()
     }
 

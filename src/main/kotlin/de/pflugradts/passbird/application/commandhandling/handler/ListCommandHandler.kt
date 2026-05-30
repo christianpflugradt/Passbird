@@ -22,11 +22,20 @@ class ListCommandHandler @Inject constructor(
         val output = if (listCommand.showAll) {
             groupByNest(listCommand.argument)
         } else {
-            join(filter(passwordService.findAllEggIds().toList(), listCommand.argument))
+            listCurrentNest(listCommand.argument)
         }
         userInterfaceAdapterPort.send(outputOf(output))
         listCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
+    }
+
+    private fun listCurrentNest(filter: Shell): Shell {
+        val eggIds = passwordService.findAllEggIds().toList()
+        return try {
+            join(filter(eggIds, filter))
+        } finally {
+            eggIds.scrambleShells()
+        }
     }
 
     private fun join(eggIdShellList: List<Shell>) = if (eggIdShellList.isEmpty()) {
@@ -35,23 +44,32 @@ class ListCommandHandler @Inject constructor(
         shellOf(eggIdShellList.joinToString(", ") { it.asString() })
     }
 
-    private fun groupByNest(filter: Shell): Shell = nestService.all(includeDefault = true)
-        .filter { it.isPresent }
-        .map { it.get() }
-        .map { nest -> nest to filter(passwordService.findAllEggIds(nest.slot).toList(), filter) }
-        .filter { it.second.isNotEmpty() }
-        .toList()
-        .let {
-            if (it.isEmpty()) {
+    private fun groupByNest(filter: Shell): Shell {
+        val eggIdShells = mutableListOf<Shell>()
+        return try {
+            val eggIdsByNest = nestService.all(includeDefault = true)
+                .filter { it.isPresent }
+                .map { it.get() }
+                .map { nest ->
+                    val eggIds = passwordService.findAllEggIds(nest.slot).toList()
+                    eggIdShells += eggIds
+                    nest to filter(eggIds, filter)
+                }
+                .filter { it.second.isNotEmpty() }
+                .toList()
+            if (eggIdsByNest.isEmpty()) {
                 shellOf("Nest is empty")
             } else {
                 shellOf(
-                    it.joinToString("\n") { (nest, eggIds) ->
+                    eggIdsByNest.joinToString("\n") { (nest, eggIds) ->
                         "${nest.label()}\n\t${eggIds.joinToString(", ") { eggId -> eggId.asString() }}"
                     },
                 )
             }
+        } finally {
+            eggIdShells.scrambleShells()
         }
+    }
 
     private fun filter(eggIds: List<Shell>, filter: Shell) = if (filter.isEmpty) {
         eggIds
@@ -60,6 +78,8 @@ class ListCommandHandler @Inject constructor(
         eggIds.filter { it.asString().contains(searchTerm, ignoreCase = true) }
     }
 }
+
+private fun Iterable<Shell>.scrambleShells() = forEach(Shell::scramble)
 
 private fun Nest.label() = if (slot == Slot.DEFAULT) {
     "0: ${viewNestId().asString()}"

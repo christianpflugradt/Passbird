@@ -45,13 +45,17 @@ class DiscardNestCommandHandler @Inject constructor(
         try {
             nestService.moveToNestAt(discardNestCommand.slot)
             val eggIds = passwordService.findAllEggIds().toList()
-            if (eggIds.isEmpty()) {
-                if (nestService.discardNestAt(discardNestCommand.slot).failure) {
-                    commandExecutionTracker.markFailure()
+            try {
+                if (eggIds.isEmpty()) {
+                    if (nestService.discardNestAt(discardNestCommand.slot).failure) {
+                        commandExecutionTracker.markFailure()
+                    }
+                    return
                 }
-                return
+                discardNestWithEggs(discardNestCommand.slot, eggIds)
+            } finally {
+                eggIds.scrambleShells()
             }
-            discardNestWithEggs(discardNestCommand.slot, eggIds)
         } finally {
             nestService.moveToNestAt(if (discardNestCommand.slot == currentNest.slot) DEFAULT else currentNest.slot)
         }
@@ -98,10 +102,12 @@ class DiscardNestCommandHandler @Inject constructor(
 
     private fun overlappingEggIds(discardNestSlot: Slot, targetNestSlot: Slot, eggIds: List<Shell>): List<Shell> {
         nestService.moveToNestAt(targetNestSlot)
+        val otherEggIds = mutableListOf<Shell>()
         return try {
-            val otherEggIds = passwordService.findAllEggIds().toList()
+            otherEggIds += passwordService.findAllEggIds().toList()
             eggIds.filter(otherEggIds::contains)
         } finally {
+            otherEggIds.scrambleShells()
             nestService.moveToNestAt(discardNestSlot)
         }
     }
@@ -113,3 +119,5 @@ class DiscardNestCommandHandler @Inject constructor(
         userInterfaceAdapterPort.send(outputOf(shellOf(message), OPERATION_ABORTED))
     }
 }
+
+private fun Iterable<Shell>.scrambleShells() = forEach(Shell::scramble)

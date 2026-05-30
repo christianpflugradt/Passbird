@@ -9,5 +9,5 @@ import io.mockk.every
 
 fun fakeCryptoProvider(instance: CryptoProvider) {
     every { instance.encrypt(any<Shell>()) } answers { firstArg<Shell>().fakeEnc() }
-    every { instance.decrypt(any<EncryptedShell>()) } answers { firstArg<EncryptedShell>().fakeDec() }
+    every { instance.decrypt(any<EncryptedShell>()) } answers { firstArg<EncryptedShell>().fakeDec().copy() }
 }
