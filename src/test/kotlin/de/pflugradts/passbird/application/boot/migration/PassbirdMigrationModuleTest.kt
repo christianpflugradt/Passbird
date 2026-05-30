@@ -7,7 +7,11 @@ import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
+import de.pflugradts.passbird.application.boot.expectedMultibinderClasses
+import de.pflugradts.passbird.application.boot.implementationClasses
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.process.migration.AuthenticatedMigrationDetector
+import de.pflugradts.passbird.application.process.migration.Migration
 import de.pflugradts.passbird.application.process.migration.MigrationRequest
 import de.pflugradts.passbird.application.process.migration.PendingMigration
 import de.pflugradts.passbird.application.toDirectory
@@ -37,6 +41,10 @@ class PassbirdMigrationModuleTest {
         expectThat(actual.configuration).isA<ReadableConfiguration>()
         expectThat(actual.runContext) isSameInstanceAs runContext
         expectThat(actual.migrationRequest) isEqualTo migrationRequest
+        expectThat(actual.authenticatedMigrationDetectors.implementationClasses()) isEqualTo expectedMultibinderClasses(
+            AuthenticatedMigrationDetector::class.java,
+        )
+        expectThat(actual.migrations.implementationClasses()) isEqualTo expectedMultibinderClasses(Migration::class.java)
     }
 
     private class PassbirdTestMigration @Inject constructor(
@@ -46,5 +54,7 @@ class PassbirdMigrationModuleTest {
         val userInterfaceAdapterPort: UserInterfaceAdapterPort,
         val configuration: ReadableConfiguration,
         val migrationRequest: MigrationRequest,
+        val authenticatedMigrationDetectors: Set<AuthenticatedMigrationDetector>,
+        val migrations: Set<Migration>,
     )
 }
