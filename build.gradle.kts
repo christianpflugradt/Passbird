@@ -47,7 +47,7 @@ val jacksonVersion = "2.21.3"
 val archunitVersion = "1.4.2"
 val junitPlatformVersion = "6.1.0"
 val kotestPropertyVersion = "6.1.11"
-val mockkVersion = "1.14.6"
+val mockkVersion = "1.14.11"
 val pitestCoreVersion = "1.22.1"
 val pitestJunit5Version = "1.2.3"
 val striktVersion = "0.35.1"
@@ -69,6 +69,7 @@ dependencies {
     testImplementation("org.junit.platform:junit-platform-launcher")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("io.kotest:kotest-property:$kotestPropertyVersion")
 
     testImplementation("com.tngtech.archunit:archunit:$archunitVersion")
