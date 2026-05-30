@@ -101,15 +101,15 @@ class PlainShellTest {
     @Test
     fun `should scramble plainShell`() {
         // given
-        val givenCharArray = charArrayOf('a', 'b', 'c')
-        val referenceCharArray = charArrayOf('a', 'b', 'c')
+        val plainShell = plainShellOf('a')
+        val referencePlainShell = plainShellOf('a')
 
         // when
-        expectThat(givenCharArray) isEqualTo referenceCharArray
-        plainShellOf(givenCharArray).scramble()
+        expectThat(plainShell) isEqualTo referencePlainShell
+        plainShell.scramble()
 
         // then
-        expectThat(givenCharArray) isNotEqualTo referenceCharArray
+        expectThat(plainShell) isNotEqualTo referencePlainShell
     }
 
     @Nested

@@ -14,6 +14,7 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isGreaterThanOrEqualTo
 import strikt.assertions.isLessThanOrEqualTo
+import strikt.assertions.isNotEqualTo
 import strikt.assertions.isNotSameInstanceAs
 import strikt.assertions.isTrue
 import java.util.Collections
@@ -120,6 +121,21 @@ class ShellTest {
         expectThat(shell.size) isEqualTo size
         shell.forEach {
             expectThat(it) isGreaterThanOrEqualTo minAsciiValue.toByte() isLessThanOrEqualTo maxAsciiValue.toByte()
+        }
+    }
+
+    @Test
+    fun `should change shell bytes when scrambling`() {
+        // given
+        val shell = shellOf("c")
+        val reference = shell.toByteArray()
+
+        // when
+        shell.scramble()
+
+        // then
+        reference.indices.forEach {
+            expectThat(shell.getByte(it)) isNotEqualTo reference[it]
         }
     }
 

@@ -6,8 +6,16 @@ import java.security.SecureRandom
 class PlainShell private constructor(private val content: CharArray) {
 
     fun scramble() = content.indices.forEach {
-        content[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toChar()
+        content[it] = randomAsciiCharExcept(content[it])
     }
+
+    private fun randomAsciiCharExcept(char: Char): Char {
+        var randomChar = randomAsciiChar()
+        while (randomChar == char) randomChar = randomAsciiChar()
+        return randomChar
+    }
+
+    private fun randomAsciiChar() = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toChar()
 
     fun toShell(): Shell {
         val byteArray = ByteArray(content.size)

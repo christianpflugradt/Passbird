@@ -48,8 +48,16 @@ class Shell private constructor(
     }
 
     fun scramble() = content.indices.forEach {
-        content[it] = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toByte()
+        content[it] = randomAsciiByteExcept(content[it])
     }
+
+    private fun randomAsciiByteExcept(byte: Byte): Byte {
+        var randomByte = randomAsciiByte()
+        while (randomByte == byte) randomByte = randomAsciiByte()
+        return randomByte
+    }
+
+    private fun randomAsciiByte() = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toByte()
 
     class ShellIterator(private val byteArray: ByteArray) : Iterator<Byte> {
         private var index = 0
