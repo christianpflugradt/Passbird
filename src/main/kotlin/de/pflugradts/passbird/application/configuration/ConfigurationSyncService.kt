@@ -14,8 +14,17 @@ class ConfigurationSyncService constructor(
     private val updatableConfiguration: UpdatableConfiguration,
     private val systemOperation: SystemOperation,
 ) : ConfigurationSync {
-    override fun sync(directory: Directory): TryResult<Unit> = tryCatching {
+    override fun sync(directory: Directory): TryResult<Unit> = writeConfiguration(directory) {
         updatableConfiguration.updateDirectory(directory)
+    }
+
+    override fun syncKeyStoreLocation(configurationDirectory: Directory, keyStoreDirectory: Directory): TryResult<Unit> =
+        writeConfiguration(configurationDirectory) {
+            updatableConfiguration.updateKeyStoreDirectory(keyStoreDirectory)
+        }
+
+    private fun writeConfiguration(directory: Directory, updateConfiguration: () -> Unit): TryResult<Unit> = tryCatching {
+        updateConfiguration()
         YAMLMapper.builder()
             .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
             .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)

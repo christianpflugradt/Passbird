@@ -44,6 +44,7 @@ configuration_surface:
     - when setup persists a new configuration for chosen directory <D>, adapter.keyStore.location is rewritten to <D>
     - when setup persists a new configuration for chosen directory <D>, adapter.passwordTree.location is rewritten to <D>
     - when setup creates a keystore in chosen directory <D>, the created file path is <D>/passbird.sec
+    - when setup repairs a missing keystore in chosen directory <D>, the active passbird.yml is rewritten so adapter.keyStore.location is <D> while other storage directories are preserved
 areas:
   - name: startup_and_exchange
     keys:

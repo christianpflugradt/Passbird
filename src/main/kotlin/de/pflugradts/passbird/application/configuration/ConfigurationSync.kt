@@ -5,4 +5,5 @@ import de.pflugradts.passbird.application.Directory
 
 interface ConfigurationSync {
     fun sync(directory: Directory): TryResult<Unit>
+    fun syncKeyStoreLocation(configurationDirectory: Directory, keyStoreDirectory: Directory): TryResult<Unit>
 }

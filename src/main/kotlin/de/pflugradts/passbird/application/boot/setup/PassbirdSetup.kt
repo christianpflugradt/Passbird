@@ -15,6 +15,7 @@ import java.nio.file.Paths
 class PassbirdSetup constructor(
     private val setupGuide: SetupGuide,
     private val configurationSync: ConfigurationSync,
+    private val configurationDirectory: Directory,
     private val configuration: ReadableConfiguration,
     private val keyStoreAdapterPort: KeyStoreAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -48,12 +49,18 @@ class PassbirdSetup constructor(
         }
         setupGuide.sendCreateKeyStoreInformation()
         createKeyStore(directory, receiveMasterPassword())
+        setupGuide.sendCreateKeyStoreSucceeded()
         setupGuide.sendRestart()
     }
     private fun configKeyStoreRoute() {
         setupGuide.sendInputPath("keystore")
         setupGuide.sendCreateKeyStoreInformation()
-        createKeyStore(receiveValidDirectory(), receiveMasterPassword())
+        val directory = receiveValidDirectory()
+        createKeyStore(directory, receiveMasterPassword())
+        if (configurationSync.syncKeyStoreLocation(configurationDirectory, directory).failure) {
+            return
+        }
+        setupGuide.sendCreateKeyStoreSucceeded()
         setupGuide.sendRestart()
     }
     private fun createConfiguration(directory: Directory) = configurationSync.sync(directory)
@@ -85,7 +92,6 @@ class PassbirdSetup constructor(
             password,
             Paths.get(directory.value).resolve(ReadableConfiguration.KEYSTORE_FILENAME),
         )
-        setupGuide.sendCreateKeyStoreSucceeded()
     }
     private fun receiveValidDirectory(): Directory {
         var directory = Directory(userInterfaceAdapterPort.receive(outputOf(shellOf("your input: "))).shell.asString())

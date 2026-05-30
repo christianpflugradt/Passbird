@@ -41,9 +41,11 @@ class PassbirdSetupTest {
     private val configuration = mockk<Configuration>(relaxed = true)
     private val keyStoreAdapterPort = mockk<KeyStoreAdapterPort>()
     private val systemOperation = mockk<SystemOperation>()
+    private val activeConfigurationDirectory = "home".toDirectory()
     private val passbirdSetup = PassbirdSetup(
         setupGuide = setupGuide,
         configurationSync = configurationSync,
+        configurationDirectory = activeConfigurationDirectory,
         configuration = configuration,
         keyStoreAdapterPort = keyStoreAdapterPort,
         userInterfaceAdapterPort = userInterfaceAdapterPort,
@@ -89,6 +91,7 @@ class PassbirdSetupTest {
         expectThat(pathSlot.captured.parent.name) isEqualTo configurationDirectory
         expectThat(password1.shell.asString()) isNotEqualTo "p4s5w0rD"
         expectThat(password2.shell.asString()) isNotEqualTo "p4s5w0rD"
+        verify(exactly = 1) { setupGuide.sendCreateKeyStoreSucceeded() }
         verify(exactly = 1) { setupGuide.sendRestart() }
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
@@ -168,6 +171,9 @@ class PassbirdSetupTest {
         every { systemOperation.exists(VALID_DIRECTORY.toDirectory()) } returns true
         every { systemOperation.isDirectory(VALID_DIRECTORY.toDirectory()) } returns true
         every { keyStoreAdapterPort.storeKey(eq(password1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
+        every {
+            configurationSync.syncKeyStoreLocation(activeConfigurationDirectory, VALID_DIRECTORY.toDirectory())
+        } returns success(Unit)
 
         // when
         passbirdSetup.boot()
@@ -182,10 +188,55 @@ class PassbirdSetupTest {
         expectThat(pathSlot.captured.parent.name) isEqualTo VALID_DIRECTORY
         expectThat(password1.shell.asString()) isNotEqualTo "p4s5w0rD"
         expectThat(password2.shell.asString()) isNotEqualTo "p4s5w0rD"
+        verify(exactly = 1) {
+            configurationSync.syncKeyStoreLocation(activeConfigurationDirectory, VALID_DIRECTORY.toDirectory())
+        }
+        verify(exactly = 1) { setupGuide.sendCreateKeyStoreSucceeded() }
         verify(exactly = 1) { setupGuide.sendRestart() }
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
-        verify { configurationSync wasNot Called }
+    }
+
+    @Test
+    fun `should abort config key store route after failed repaired location sync`() {
+        // given
+        val configurationDirectory = "configured"
+        val chosenDirectory = fakeInput(VALID_DIRECTORY)
+        val password1 = fakeInput("p4s5w0rD")
+        val password2 = fakeInput("p4s5w0rD")
+        val pathSlot = slot<Path>()
+        fakeConfiguration(instance = configuration, withKeyStoreLocation = configurationDirectory)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(chosenDirectory),
+            withTheseSecureInputs = listOf(password1, password2),
+            withReceiveConfirmation = true,
+        )
+        fakeSystemOperation(instance = systemOperation)
+        every { systemOperation.exists(VALID_DIRECTORY.toDirectory()) } returns true
+        every { systemOperation.isDirectory(VALID_DIRECTORY.toDirectory()) } returns true
+        every { keyStoreAdapterPort.storeKey(eq(password1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
+        every {
+            configurationSync.syncKeyStoreLocation(activeConfigurationDirectory, VALID_DIRECTORY.toDirectory())
+        } returns failure(IllegalStateException("disk full"))
+
+        // when
+        passbirdSetup.boot()
+
+        // then
+        verify(exactly = 1) { setupGuide.sendWelcome() }
+        verify(exactly = 1) { setupGuide.sendConfigKeyStoreRouteInformation(configurationDirectory) }
+        verify(exactly = 1) { setupGuide.sendInputPath("keystore") }
+        verify(exactly = 1) { setupGuide.sendCreateKeyStoreInformation() }
+        expectThat(pathSlot.captured.fileName.name) isEqualTo ReadableConfiguration.KEYSTORE_FILENAME
+        expectThat(pathSlot.captured.parent.name) isEqualTo VALID_DIRECTORY
+        verify(exactly = 1) {
+            configurationSync.syncKeyStoreLocation(activeConfigurationDirectory, VALID_DIRECTORY.toDirectory())
+        }
+        verify(exactly = 0) { setupGuide.sendCreateKeyStoreSucceeded() }
+        verify(exactly = 0) { setupGuide.sendRestart() }
+        verify(exactly = 1) { setupGuide.sendGoodbye() }
+        verify(exactly = 1) { systemOperation.exit() }
     }
 
     @Test
@@ -262,6 +313,9 @@ class PassbirdSetupTest {
         every { systemOperation.exists(nonexistentConfigurationDirectory.shell.asString().toDirectory()) } returns false
         every { systemOperation.isDirectory(nonexistentConfigurationDirectory.shell.asString().toDirectory()) } returns true
         every { keyStoreAdapterPort.storeKey(eq(password1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
+        every {
+            configurationSync.syncKeyStoreLocation(activeConfigurationDirectory, VALID_DIRECTORY.toDirectory())
+        } returns success(Unit)
 
         // when
         passbirdSetup.boot()
@@ -306,6 +360,9 @@ class PassbirdSetupTest {
         every { systemOperation.exists(VALID_DIRECTORY.toDirectory()) } returns true
         every { systemOperation.isDirectory(VALID_DIRECTORY.toDirectory()) } returns true
         every { keyStoreAdapterPort.storeKey(eq(passwordMatched1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
+        every {
+            configurationSync.syncKeyStoreLocation(activeConfigurationDirectory, VALID_DIRECTORY.toDirectory())
+        } returns success(Unit)
 
         // when
         passbirdSetup.boot()
@@ -322,10 +379,13 @@ class PassbirdSetupTest {
         expectThat(passwordMismatch2.shell.asString()) isNotEqualTo "guessword"
         expectThat(passwordMatched1.shell.asString()) isNotEqualTo "p4s5w0rD"
         expectThat(passwordMatched2.shell.asString()) isNotEqualTo "p4s5w0rD"
+        verify(exactly = 1) {
+            configurationSync.syncKeyStoreLocation(activeConfigurationDirectory, VALID_DIRECTORY.toDirectory())
+        }
+        verify(exactly = 1) { setupGuide.sendCreateKeyStoreSucceeded() }
         verify(exactly = 1) { setupGuide.sendRestart() }
         verify(exactly = 1) { setupGuide.sendGoodbye() }
         verify(exactly = 1) { systemOperation.exit() }
-        verify { configurationSync wasNot Called }
     }
 
     @Test
@@ -354,6 +414,9 @@ class PassbirdSetupTest {
         every { systemOperation.exists(VALID_DIRECTORY.toDirectory()) } returns true
         every { systemOperation.isDirectory(VALID_DIRECTORY.toDirectory()) } returns true
         every { keyStoreAdapterPort.storeKey(eq(passwordMatched1.shell.toPlainShell()), capture(pathSlot)) } returns Unit
+        every {
+            configurationSync.syncKeyStoreLocation(activeConfigurationDirectory, VALID_DIRECTORY.toDirectory())
+        } returns success(Unit)
 
         // when
         passbirdSetup.boot()

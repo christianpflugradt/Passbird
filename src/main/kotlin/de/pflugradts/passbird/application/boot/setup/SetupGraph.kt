@@ -32,6 +32,7 @@ class SetupGraph(val runContext: RunContext) {
         PassbirdSetup(
             setupGuide = setupGuide,
             configurationSync = configurationSync,
+            configurationDirectory = runContext.homeDirectory,
             configuration = configuration,
             keyStoreAdapterPort = keyStoreAdapterPort,
             userInterfaceAdapterPort = userInterfaceAdapterPort,

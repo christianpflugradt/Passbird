@@ -125,6 +125,8 @@ flows:
         - setup exits the process after Goodbye!
     side_effects:
       - passbird.sec is written to <chosen-directory>/passbird.sec
+      - for the missing-keystore route, the active passbird.yml is rewritten so adapter.keyStore.location points to the chosen directory
+      - for the missing-keystore route, success and restart guidance are printed only after passbird.sec is created and the active passbird.yml rewrite succeeds
 known_visible_drifts:
   - area: configuration_template_write_failure_wording
     current_stderr_shape: Configuration could not be loaded: <message>

@@ -25,6 +25,10 @@ data class Configuration(
         adapter.passwordTree.location = directory.value
     }
 
+    override fun updateKeyStoreDirectory(directory: Directory) {
+        adapter.keyStore.location = directory.value
+    }
+
     data class Application(
         override val backup: Backup = Backup(),
         override val exchange: Exchange = Exchange(),
