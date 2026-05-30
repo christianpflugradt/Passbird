@@ -1,8 +1,5 @@
 package de.pflugradts.passbird.application
 
-import com.google.inject.Module
-import de.pflugradts.passbird.application.boot.bootModule
-import de.pflugradts.passbird.application.boot.launcher.LauncherModule
 import de.pflugradts.passbird.application.util.SystemOperation
 import io.mockk.CapturingSlot
 import io.mockk.every
@@ -10,30 +7,28 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 
+private const val MAIN_KT = "de.pflugradts.passbird.application.MainKt"
+
 fun mockMain(
-    moduleSlot: CapturingSlot<Module>? = null,
+    runContextSlot: CapturingSlot<RunContext>? = null,
     systemOperationMock: SystemOperation = mockk<SystemOperation>(),
     withMockedFileCheck: Boolean = true,
 ) {
-    mockkStatic(::bootModule)
-    every { bootModule(if (moduleSlot != null) capture(moduleSlot) else any(LauncherModule::class)) } returns Unit
-    mockkStatic(::mainGetSystemOperation)
+    mockkStatic(MAIN_KT)
+    every { mainBootLauncher(if (runContextSlot != null) capture(runContextSlot) else any()) } returns Unit
     every { mainGetSystemOperation() } returns systemOperationMock
     if (withMockedFileCheck) {
-        mockkStatic(::mainHasValidHomeDirectory)
         every { mainHasValidHomeDirectory(any()) } returns true
     }
     every { systemOperationMock.exit(any()) } returns Unit
 }
 
-fun unmockMain(withMockedFileCheck: Boolean = true) {
-    unmockkStatic(::bootModule)
-    unmockkStatic(::mainGetSystemOperation)
-    if (withMockedFileCheck) unmockkStatic(::mainHasValidHomeDirectory)
+fun unmockMain() {
+    unmockkStatic(MAIN_KT)
 }
 
 fun mainMocked(args: Array<String>, withMockedFileCheck: Boolean = true) {
     mockMain(withMockedFileCheck = withMockedFileCheck)
     main(args)
-    unmockMain(withMockedFileCheck)
+    unmockMain()
 }

@@ -22,7 +22,7 @@ current_security_relevant_implementation:
   migration_boot_path:
     files:
       - src/main/kotlin/de/pflugradts/passbird/application/boot/launcher/PassbirdLauncher.kt
-      - src/main/kotlin/de/pflugradts/passbird/application/boot/migration/MigrationModule.kt
+      - src/main/kotlin/de/pflugradts/passbird/application/boot/migration/MigrationGraph.kt
       - src/main/kotlin/de/pflugradts/passbird/application/boot/migration/PassbirdMigration.kt
       - src/main/kotlin/de/pflugradts/passbird/application/process/migration/MigrationProcessing.kt
     facts:

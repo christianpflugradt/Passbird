@@ -41,7 +41,6 @@ detekt {
 }
 
 val guavaVersion = "33.6.0-jre"
-val guiceVersion = "7.0.0"
 val jacksonVersion = "2.21.3"
 
 val archunitVersion = "1.4.2"
@@ -57,8 +56,6 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
 
-    implementation("com.google.inject:guice:$guiceVersion")
-    implementation("com.google.inject.extensions:guice-assistedinject:$guiceVersion")
     implementation("com.google.guava:guava:$guavaVersion")
 
     testImplementation("io.strikt:strikt-core:$striktVersion")

@@ -3,11 +3,11 @@ package de.pflugradts.passbird.application.boot.launcher
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
-import de.pflugradts.passbird.application.boot.bootModule
-import de.pflugradts.passbird.application.boot.main.ApplicationModule
-import de.pflugradts.passbird.application.boot.migration.MigrationModule
-import de.pflugradts.passbird.application.boot.setup.SetupModule
+import de.pflugradts.passbird.application.boot.main.ApplicationGraph
+import de.pflugradts.passbird.application.boot.migration.MigrationGraph
+import de.pflugradts.passbird.application.boot.setup.SetupGraph
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
+import de.pflugradts.passbird.application.process.migration.MigrationRequest
 import de.pflugradts.passbird.application.process.migration.PreLaunchMigrationLocator
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
@@ -21,7 +21,6 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ERROR_MESSA
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
-import jakarta.inject.Inject
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -33,12 +32,17 @@ ${'\t'}You may obtain a copy of the License at https://www.apache.org/licenses/L
 """
 private const val SLOGAN = "\tguarding your digital nest with secure feathers"
 
-class PassbirdLauncher @Inject constructor(
+class PassbirdLauncher(
     private val configuration: ReadableConfiguration,
     private val preLaunchMigrationLocator: PreLaunchMigrationLocator,
     private val runContext: RunContext,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val systemOperation: SystemOperation,
+    private val setupBoot: (RunContext) -> Unit = { SetupGraph(it).bootable.boot() },
+    private val migrationBoot: (RunContext, MigrationRequest) -> Unit = { context, request ->
+        MigrationGraph(context, request).bootable.boot()
+    },
+    private val applicationBoot: (RunContext) -> Unit = { ApplicationGraph(it).bootable.boot() },
 ) : Bootable {
 
     private val keyStoreLocation get() = configuration.adapter.keyStore.location
@@ -47,15 +51,13 @@ class PassbirdLauncher @Inject constructor(
     override fun boot() {
         sendLicenseNotice()
         sendBanner()
-        bootModule(
-            if (!keystoreExists()) {
-                SetupModule(runContext)
-            } else {
-                preLaunchMigrationLocator.detect().let { migrationRequest ->
-                    if (migrationRequest.required) MigrationModule(runContext, migrationRequest) else ApplicationModule(runContext)
-                }
-            },
-        )
+        if (!keystoreExists()) {
+            setupBoot(runContext)
+        } else {
+            preLaunchMigrationLocator.detect().let { migrationRequest ->
+                if (migrationRequest.required) migrationBoot(runContext, migrationRequest) else applicationBoot(runContext)
+            }
+        }
     }
 
     private fun keystoreExists() = keyStoreLocation.isNotEmpty() &&

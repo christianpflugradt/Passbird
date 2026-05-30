@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.domain.service.password.tree
-
 import de.pflugradts.kotlinextensions.MutableOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
 import de.pflugradts.kotlinextensions.TryResult
@@ -13,14 +12,8 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestStateView
-import jakarta.inject.Inject
-import jakarta.inject.Named
-import jakarta.inject.Singleton
 import java.util.function.Predicate
-
-@Singleton
-class NestingGround @Inject constructor(
-    @param:Named("EggIdMemoryEnabled")
+class NestingGround constructor(
     private val eggIdMemoryEnabled: Boolean,
     private val passwordTreeAdapterPort: PasswordTreeAdapterPort,
     private val nestStateView: NestStateView,
@@ -34,7 +27,6 @@ class NestingGround @Inject constructor(
     private val memory: MemoryMap get() = initializeIfEmpty().run { lazyMemory.get() }
     private val eggs: MutableList<Egg> get() = initializeIfEmpty().run { lazyEggs.get() }
     private val currentNestSlot get() = nestStateView.currentNestSlot()
-
     private fun initializeIfEmpty() {
         if (lazyEggs.isEmpty) {
             val initialState = passwordTreeAdapterPort.restore()
@@ -48,18 +40,15 @@ class NestingGround @Inject constructor(
             lastSyncedSnapshot = snapshot()
         }
     }
-
     override fun add(egg: Egg) {
         eventRegistry.register(egg)
         eggs.add(egg)
         updateMemory(egg, sync = false)
     }
-
     override fun delete(egg: Egg) {
         eggs.remove(egg)
         eventRegistry.deregister(egg)
     }
-
     override fun sync(): TryResult<Unit> {
         discardFavoritesForEmptyNests()
         val snapshot = snapshot()
@@ -67,12 +56,10 @@ class NestingGround @Inject constructor(
             .onSuccess { lastSyncedSnapshot = snapshot }
             .onFailure { restoreLastSyncedSnapshot() }
     }
-
     override fun findAll(slot: Slot) = createEggStreamSupplier(slot).get()
     override fun findAll() = createEggStreamSupplier(inNest(currentNestSlot)).get()
     private fun createEggStreamSupplier(slot: Slot) = createEggStreamSupplier(inNest(slot))
     private fun createEggStreamSupplier(predicate: Predicate<Egg>) = EggStreamSupplier({ eggs.stream().filter(predicate) })
-
     override fun favorites() = favorites[currentNestSlot].get().copy()
     override fun memory() = memory[currentNestSlot].get().copy()
     override fun putFavorite(slot: Slot, encryptedShell: EncryptedShell) {
@@ -96,7 +83,6 @@ class NestingGround @Inject constructor(
             if (sync) sync()
         }
     }
-
     private fun discardFavoritesForEmptyNests() {
         nestStateView.snapshot().forEachIndexed { index, shell ->
             if (shell.isEmpty) {
@@ -104,14 +90,12 @@ class NestingGround @Inject constructor(
             }
         }
     }
-
     private fun snapshot() = PasswordTreeState(
         eggs = eggs.map(Egg::copy),
         memory = memory.copyUsing(EggIdMemory::copy),
         favorites = favorites.copyUsing(EggIdFavorites::copy),
         nests = nestStateView.snapshot(),
     )
-
     private fun restoreLastSyncedSnapshot() {
         lastSyncedSnapshot?.let { snapshot ->
             eggs.forEach(eventRegistry::deregister)
@@ -123,9 +107,7 @@ class NestingGround @Inject constructor(
         }
     }
 }
-
 private fun inNest(slot: Slot) = Predicate<Egg> { it.associatedNest() == slot }
-
 private data class PasswordTreeState(
     val eggs: List<Egg>,
     val memory: MemoryMap,

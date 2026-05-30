@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.passwordtree
-
 import de.pflugradts.kotlinextensions.MutableOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -23,10 +22,8 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slots
 import de.pflugradts.passbird.domain.model.slot.Slots.Companion.slotIterator
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
-import jakarta.inject.Inject
 import java.util.ArrayDeque
-
-class LegacyPasswordTreePayloadReader @Inject constructor(
+class LegacyPasswordTreePayloadReader constructor(
     private val configuration: ReadableConfiguration,
     private val systemOperation: SystemOperation,
 ) {
@@ -67,7 +64,6 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
             byteArray.scramble()
         }
     }
-
     private fun verifySignature(bytes: ByteArray): Boolean {
         val expectedSignature = legacySignature()
         val actualSignature = readPayloadBytes(bytes, 0, signatureSize())
@@ -90,7 +86,6 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
             actualSignature.scramble()
         }
     }
-
     private fun verifyChecksum(bytes: ByteArray): Boolean {
         val contentSize = calcActualContentSize(bytes.size)
         val expectedChecksum = if (contentSize > 0) {
@@ -114,7 +109,6 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
         }
         return true
     }
-
     private fun retrieveNests(bytes: ByteArray, offset: Int): Pair<List<Shell>, Int> {
         var incrementedOffset = offset
         val nests = ArrayList<Shell>(Slot.CAPACITY)
@@ -125,11 +119,8 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
         }
         return Pair(nests, incrementedOffset)
     }
-
     private val eggIdMemoryEnabled get() = with(configuration.domain.eggIdMemory) { enabled && persisted }
-
     private fun calcActualContentSize(totalSize: Int) = totalSize - signatureSize() - checksumBytes()
-
     private fun ByteArray.asNestShell(offset: Int): Pair<Shell, Int> {
         val payloadEnd = payloadContentEnd(this)
         var incrementedOffset = offset
@@ -144,7 +135,6 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
         }
         return Pair(result, incrementedOffset - offset)
     }
-
     private fun ByteArray.asEgg(offset: Int): Pair<Egg, Int> {
         val payloadEnd = payloadContentEnd(this)
         var incrementedOffset = offset
@@ -180,7 +170,6 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
             passwordShell.scramble()
         }
     }
-
     private fun proteinOption(typeBytes: ByteArray, structureBytes: ByteArray): MutableOption<Protein> {
         if (typeBytes.isEmpty() || structureBytes.isEmpty()) {
             typeBytes.scramble()
@@ -196,7 +185,6 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
             structureShell.scramble()
         }
     }
-
     private fun isPlaceholder(byteArray: ByteArray): Boolean {
         val encryptedShell = byteArray.toEncryptedShellAndScramble()
         try {
@@ -205,7 +193,6 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
             encryptedShell.scramble()
         }
     }
-
     private fun ByteArray.asMemoryEntry(offset: Int): Pair<MutableOption<EncryptedShell>, Int> {
         val payloadEnd = payloadContentEnd(this)
         var incrementedOffset = offset
@@ -220,7 +207,6 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
         }
         return Pair(encryptedShellOption, incrementedOffset)
     }
-
     private fun retrieveMemory(byteArray: ByteArray, offset: Int): Pair<Int, MemoryMap> {
         var incrementedOffset = offset
         return Slots<EggIdMemory>().apply {
@@ -237,13 +223,11 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
             }
         }.let { Pair(incrementedOffset, it) }
     }
-
     private fun ByteArray.toShellAndScramble() = try {
         shellOf(this)
     } finally {
         scramble()
     }
-
     private fun ByteArray.toEncryptedShellAndScramble() = try {
         encryptedShellOf(this)
     } finally {

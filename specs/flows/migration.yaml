@@ -9,7 +9,7 @@ flows:
     user_experience:
       - migration is a boot-time reroute, not a command-loop feature
       - if the keystore does not exist or no pre-launch migration is required, Passbird does not enter the migration boot path
-      - if the keystore exists and pre-launch migration detection returns at least one pending migration, Passbird launches the dedicated migration boot path instead of the normal application module
+      - if the keystore exists and pre-launch migration detection returns at least one pending migration, Passbird launches the dedicated migration graph instead of the normal application graph
       - migration boot happens after the normal launcher license/banner output, not before it
       - the migration boot path never reaches the normal interactive command prompt in the same run
   - id: migration_consent

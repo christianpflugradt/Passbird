@@ -11,7 +11,7 @@ architecture:
       - naming constraints
       - event-handler constraints
       - command outcome state constraints
-      - boot module multibinder completeness checks
+      - boot graph registration completeness checks
 layers:
   - name: domain_model
     package: de.pflugradts.passbird.domain.model
@@ -57,31 +57,31 @@ structural_rules:
   - handler methods for events must be annotated with Subscribe
   - repository-wide production import coverage must include every package under de.pflugradts that is included in the jar
   - do not introduce java.util.Optional outside the explicit Optional.toOption bridge in de.pflugradts.kotlinextensions.OptionKt; the codebase uses custom Option and TryResult types
-  - use jakarta.inject annotations instead of Guice-specific Inject, Singleton, or Named annotations across the codebase
-  - domain packages must not depend on com.google.inject
-  - runtime context such as home directory and initial slot must flow through RunContext bindings, not global singleton state
-  - command execution outcome state must flow through injected session graph collaborators, not process-global or ThreadLocal state
+  - dependency wiring must stay in explicit Kotlin composition roots without Guice, jakarta.inject, or another runtime DI framework
+  - no production or test code may depend on com.google.inject or jakarta.inject
+  - runtime context such as home directory and initial slot must flow through RunContext values, not global singleton state
+  - command execution outcome state must flow through session graph collaborators, not process-global or ThreadLocal state
   - SystemOperation is limited to allowlisted file-persistence primitives, clock access, and process exit; clipboard, terminal input, and keystore construction must stay in their adapter packages and are guarded by architecture tests
 runtime_design:
   boot_sequence:
     - Main.kt validates the home directory argument and constructs the RunContext
-    - LauncherModule binds the RunContext and selects the launcher boot path
-    - Launcher, migration, or setup boot path is selected via boot modules that carry the same RunContext
+    - LauncherGraph constructs the launcher boot path with the RunContext
+    - launcher, migration, or setup boot path is selected through explicit graph factories that carry the same RunContext
     - pre-launch migration detectors may route startup into a dedicated migration boot path before the main application may continue
-    - migration boot may bind compatibility adapters that can read legacy persistence formats without widening the normal runtime path
+    - migration boot may construct compatibility adapters that can read legacy persistence formats without widening the normal runtime path
     - shared password-tree format helpers live under application.passwordtree so migration and backup orchestration can use them without depending on adapter internals
     - shared keystore format helpers live under application.keystore so launcher detection and migration-only adapters can classify passbird.sec without guessing from release history
     - password-tree restore and sync move eggs, favorites, memory, and nest shells as a single snapshot rather than repopulating nests through a service callback
     - PasswordTreeSyncService mediates repository sync for domain services that must not depend on EggRepository directly
     - password-tree mutations are staged against live aggregates but sync failure restores a deep last-synced snapshot before the command reports failure
-    - ApplicationModule wires adapters, services, and handlers with Guice
+    - ApplicationGraph wires adapters, services, and handlers explicitly
     - PassbirdApplication enters the interactive command loop
   interaction_model:
     - user input is parsed into command types
     - CommandFactory creates command objects
     - CommandBus dispatches to handlers
     - command dispatch propagates subscriber exceptions back to CommandInputHandler so failed handlers cannot complete as successful commands
-    - CommandExecutionTracker tracks command outcomes as an injected application collaborator shared by the interactive session graph
+    - CommandExecutionTracker tracks command outcomes as an application collaborator shared by the interactive session graph
     - handlers call application and domain services
     - event registries propagate side effects after persistence succeeds for mutating password and nest operations
     - domain-event dispatch propagates subscriber exceptions back to the originating processEvents caller and keeps queued domain events available when posting fails
@@ -95,7 +95,7 @@ ports_and_adapters:
     concern: clipboard copy and reset behavior
   - port: KeyStoreAdapterPort
     implementation: adapter.keystore.KeyStoreService
-    concern: load and store secret material in PKCS12, while migration boot may bind compatibility adapters for legacy JCEKS reads; JVM keystore construction stays inside adapter.keystore
+    concern: load and store secret material in PKCS12, while migration boot may construct compatibility adapters for legacy JCEKS reads; JVM keystore construction stays inside adapter.keystore
   - port: PasswordTreeAdapterPort
     implementation: adapter.passwordtree.PasswordTreeFacade
     concern: encrypted persistence of eggs, favorites, memory, and nests as one snapshot
@@ -108,7 +108,7 @@ important_extension_paths:
       - update command resolution in application.commandhandling.CommandType
       - add or extend a command class under application.commandhandling.command
       - wire a handler under application.commandhandling.handler
-      - register the handler in ApplicationModule multibinders
+      - register the handler in ApplicationGraph commandHandlers
       - add focused tests for parsing and handler behavior
       - update README and specs/domain.yaml if user-facing behavior changes
   - change: add a new configuration option
@@ -121,7 +121,7 @@ important_extension_paths:
     steps:
       - keep the port in the application or domain layer
       - implement the adapter under src/main/kotlin/de/pflugradts/passbird/adapter
-      - bind it in ApplicationModule
+      - construct it from the relevant boot graph
       - cover it with tests at the right level
   - change: modify password tree persistence
     steps:
@@ -131,7 +131,7 @@ important_extension_paths:
       - preserve or add explicit migration detection before the main boot path when the on-disk format changes
       - update migration docs if user data compatibility changes
 high_risk_files:
-  - src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationModule.kt
+  - src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationGraph.kt
   - src/main/kotlin/de/pflugradts/passbird/application/commandhandling
   - src/main/kotlin/de/pflugradts/passbird/application/passwordtree
   - src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree

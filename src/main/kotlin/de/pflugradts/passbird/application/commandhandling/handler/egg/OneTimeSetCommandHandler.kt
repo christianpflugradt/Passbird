@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.egg
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
@@ -14,9 +13,7 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_A
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.DO_NOTHING
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
-import jakarta.inject.Inject
-
-class OneTimeSetCommandHandler @Inject constructor(
+class OneTimeSetCommandHandler constructor(
     private val configuration: ReadableConfiguration,
     private val passwordService: PasswordService,
     private val passwordProvider: PasswordProvider,
@@ -75,7 +72,6 @@ class OneTimeSetCommandHandler @Inject constructor(
         oneTimeSetCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private fun receivePasswordLength() = userInterfaceAdapterPort.receive(
         outputOf(shellOf("Enter password length or just press enter to abort: ")),
     ).let {
@@ -88,7 +84,6 @@ class OneTimeSetCommandHandler @Inject constructor(
             it.invalidate()
         }
     }
-
     private fun receivePasswordRequirements(passwordLength: Int): PasswordRequirements {
         val hasNumbers = userInterfaceAdapterPort.receiveYes(outputOf(shellOf("Include numbers? Y/n ")))
         val hasLowercaseLetters = userInterfaceAdapterPort.receiveYes(outputOf(shellOf("Include lowercase letters? Y/n ")))
@@ -103,7 +98,6 @@ class OneTimeSetCommandHandler @Inject constructor(
             unusedSpecialCharacters = if (hasSpecialCharacters) receiveUnusedSpecialCharacters() else "",
         )
     }
-
     private fun receiveUnusedSpecialCharacters() = userInterfaceAdapterPort.receive(
         outputOf(shellOf("Enter unused special characters or just press enter to keep all: ")),
     ).let {
@@ -113,7 +107,6 @@ class OneTimeSetCommandHandler @Inject constructor(
             it.invalidate()
         }
     }
-
     private fun commandConfirmed(oneTimeSetCommand: OneTimeSetCommand) =
         if (configuration.application.password.promptOnRemoval && passwordService.eggExists(oneTimeSetCommand.argument, DO_NOTHING)) {
             userInterfaceAdapterPort
@@ -129,5 +122,4 @@ class OneTimeSetCommandHandler @Inject constructor(
             true
         }
 }
-
 private data class PasswordLengthInput(val value: Int?, val isAborted: Boolean)

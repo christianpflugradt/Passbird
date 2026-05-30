@@ -26,7 +26,7 @@ class UseMemoryCommandTest {
     private val mockedInputHandler = mockk<InputHandler>()
     private val commandExecutionTracker = CommandExecutionTracker()
     private val useMemoryCommandHandler =
-        UseMemoryCommandHandler(mockedInputHandler, passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+        UseMemoryCommandHandler({ mockedInputHandler }, passwordService, userInterfaceAdapterPort, commandExecutionTracker)
     private val inputHandler = createInputHandlerFor(useMemoryCommandHandler, commandExecutionTracker)
 
     @Test

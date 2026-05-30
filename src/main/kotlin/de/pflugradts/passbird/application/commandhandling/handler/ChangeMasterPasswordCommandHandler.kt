@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
@@ -16,9 +15,7 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.EVENT_HANDLED
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
-import jakarta.inject.Inject
-
-class ChangeMasterPasswordCommandHandler @Inject constructor(
+class ChangeMasterPasswordCommandHandler constructor(
     private val keyStoreAdapterPort: KeyStoreAdapterPort,
     private val keyStoreAuthenticationService: KeyStoreAuthenticationService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -61,7 +58,6 @@ class ChangeMasterPasswordCommandHandler @Inject constructor(
         userInterfaceAdapterPort.send(outputOf(shellOf("Keystore successfully updated."), EVENT_HANDLED))
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private fun receiveNewPassword(): PlainShell? {
         var input: Input? = null
         return try {
@@ -94,13 +90,11 @@ class ChangeMasterPasswordCommandHandler @Inject constructor(
             null
         }
     }
-
     private fun abort(message: String) {
         commandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf(message), OPERATION_ABORTED))
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private companion object {
         const val KEYSTORE_PREAMBLE =
             "Your Passbird Keystore will be secured by a master password. This master password gives access to all " +

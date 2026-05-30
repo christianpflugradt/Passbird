@@ -10,11 +10,9 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
-import jakarta.inject.Inject
-import jakarta.inject.Provider
 
-class RepeatLastCommandHandler @Inject constructor(
-    private val inputHandlerProvider: Provider<InputHandler>,
+class RepeatLastCommandHandler(
+    private val inputHandlerProvider: () -> InputHandler,
     private val rememberedCommandMemory: RememberedCommandMemory,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
@@ -30,7 +28,7 @@ class RepeatLastCommandHandler @Inject constructor(
             userInterfaceAdapterPort.sendLineBreak()
             return
         }
-        inputHandlerProvider.get().handleInput(inputOf(rememberedCommand))
+        inputHandlerProvider().handleInput(inputOf(rememberedCommand))
         commandExecutionTracker.mark(commandExecutionTracker.lastCompletedOutcome())
     }
 }

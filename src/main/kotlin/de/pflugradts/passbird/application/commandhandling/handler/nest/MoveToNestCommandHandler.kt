@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.nest
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
@@ -15,9 +14,7 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_A
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
-import jakarta.inject.Inject
-
-class MoveToNestCommandHandler @Inject constructor(
+class MoveToNestCommandHandler constructor(
     private val canListAvailableNests: CanListAvailableNests,
     private val nestService: NestService,
     private val passwordService: PasswordService,
@@ -59,6 +56,5 @@ class MoveToNestCommandHandler @Inject constructor(
         moveToNestCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private fun String.toTargetNestSlot(): Slot? = takeIf { it.length == 1 && it[0].isDigit() }?.let(::slotAt)
 }

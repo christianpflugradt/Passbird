@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.passwordtree
-
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.copyInt
@@ -10,9 +9,7 @@ import de.pflugradts.passbird.domain.model.egg.Protein
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
-import jakarta.inject.Inject
-
-class PasswordTreePayloadWriter @Inject constructor() {
+class PasswordTreePayloadWriter constructor() {
     fun write(snapshot: PasswordTreeSnapshot): Shell {
         val contentSize = calcRequiredContentSize(snapshot)
         val bytes = ByteArray(signatureSize() + contentSize + checksumBytes())
@@ -49,7 +46,6 @@ class PasswordTreePayloadWriter @Inject constructor() {
             bytes.scramble()
         }
     }
-
     private fun calcRequiredContentSize(snapshot: PasswordTreeSnapshot): Int {
         val memorySize = 100 * Integer.BYTES + snapshot.memory.fold(0) { acc, inner ->
             acc + inner.map { slots -> slots.sumOf { it.map(EncryptedShell::size).orElse(0) } }.orElse(0)
@@ -62,7 +58,6 @@ class PasswordTreePayloadWriter @Inject constructor() {
         val nestSize = snapshot.nests.size * intBytes() + snapshot.nests.filter { !it.isEmpty }.sumOf { it.size }
         return memorySize + favoriteSize + eggDataSize + eggMetaSize + nestSize
     }
-
     private fun Option<EncryptedShell>.encryptedShellAsByteArray() = if (isPresent) {
         val shellBytesSize = get().size
         val bytes = ByteArray(Integer.BYTES + shellBytesSize)
@@ -74,7 +69,6 @@ class PasswordTreePayloadWriter @Inject constructor() {
         copyInt(0, bytes, 0)
         bytes
     }
-
     private fun Shell.nestAsByteArray(): ByteArray {
         val nestBytesSize = size
         val bytes = ByteArray(Integer.BYTES + nestBytesSize)
@@ -82,7 +76,6 @@ class PasswordTreePayloadWriter @Inject constructor() {
         if (!isEmpty) toByteArray().copyToAndScramble(bytes, Integer.BYTES)
         return bytes
     }
-
     private fun Egg.eggAsByteArray(): ByteArray {
         val eggIdShell = viewEggId()
         val passwordShell = viewPassword()
@@ -124,7 +117,6 @@ class PasswordTreePayloadWriter @Inject constructor() {
             if (!completed) bytes.scramble()
         }
     }
-
     private fun Egg.serializedDataSize(): Int {
         val eggIdShell = viewEggId()
         val passwordShell = viewPassword()
@@ -137,7 +129,6 @@ class PasswordTreePayloadWriter @Inject constructor() {
             passwordShell.scramble()
         }
     }
-
     private fun Protein.serializedDataSize(): Int {
         val typeShell = viewType()
         val structureShell = viewStructure()
@@ -148,13 +139,11 @@ class PasswordTreePayloadWriter @Inject constructor() {
             structureShell.scramble()
         }
     }
-
     private fun ByteArray.copyToAndScramble(target: ByteArray, offset: Int) = try {
         copyBytes(this, target, offset, size)
     } finally {
         scramble()
     }
-
     private fun ByteArray.contentChecksum(contentSize: Int): Byte {
         val checksumSource = readBytes(this, signatureSize(), contentSize)
         try {

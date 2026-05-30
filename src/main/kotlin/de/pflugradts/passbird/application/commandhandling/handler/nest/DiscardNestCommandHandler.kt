@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.nest
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
@@ -14,15 +13,12 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import jakarta.inject.Inject
-
-class DiscardNestCommandHandler @Inject constructor(
+class DiscardNestCommandHandler constructor(
     private val nestService: NestService,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
-
     @Subscribe
     private fun handleDiscardNestCommand(discardNestCommand: DiscardNestCommand) {
         when {
@@ -39,7 +35,6 @@ class DiscardNestCommandHandler @Inject constructor(
         discardExistingNest(discardNestCommand)
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private fun discardExistingNest(discardNestCommand: DiscardNestCommand) {
         val currentNest = nestService.currentNest()
         try {
@@ -60,7 +55,6 @@ class DiscardNestCommandHandler @Inject constructor(
             nestService.moveToNestAt(if (discardNestCommand.slot == currentNest.slot) DEFAULT else currentNest.slot)
         }
     }
-
     private fun discardNestWithEggs(discardNestSlot: Slot, eggIds: List<Shell>) {
         val targetNestSlot = receiveTargetNestSlot(eggIds) ?: return
         val overlaps = overlappingEggIds(discardNestSlot, targetNestSlot, eggIds)
@@ -80,7 +74,6 @@ class DiscardNestCommandHandler @Inject constructor(
             commandExecutionTracker.markFailure()
         }
     }
-
     private fun receiveTargetNestSlot(eggIds: List<Shell>): Slot? {
         val prompt = "Nest '${nestService.currentNest().viewNestId().asString()}' contains ${eggIds.size} Eggs. " +
             "Specify a Nest Slot 0-9 to move them to or anything else to abort: "
@@ -99,7 +92,6 @@ class DiscardNestCommandHandler @Inject constructor(
         }
         return targetNestOption.get().slot
     }
-
     private fun overlappingEggIds(discardNestSlot: Slot, targetNestSlot: Slot, eggIds: List<Shell>): List<Shell> {
         nestService.moveToNestAt(targetNestSlot)
         val otherEggIds = mutableListOf<Shell>()
@@ -111,13 +103,10 @@ class DiscardNestCommandHandler @Inject constructor(
             nestService.moveToNestAt(discardNestSlot)
         }
     }
-
     private fun joinToString(shells: List<Shell>) = shells.joinToString(separator = "${System.lineSeparator()}- ") { id -> id.asString() }
-
     private fun sendAbortMessage(message: String) {
         commandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf(message), OPERATION_ABORTED))
     }
 }
-
 private fun Iterable<Shell>.scrambleShells() = forEach(Shell::scramble)

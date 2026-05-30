@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.configuration
-
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.RunContext
@@ -9,9 +8,7 @@ import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
-import jakarta.inject.Inject
-
-class ConfigurationFactory @Inject constructor(
+class ConfigurationFactory constructor(
     private val systemOperation: SystemOperation,
     private val runContext: RunContext,
 ) {
@@ -20,7 +17,6 @@ class ConfigurationFactory @Inject constructor(
     } else {
         configurationFromFile()
     }
-
     private fun configurationFromFile() = tryCatching {
         filePath.let {
             YAMLMapper().readValue(
@@ -36,7 +32,6 @@ class ConfigurationFactory @Inject constructor(
         }
         result.getOrNull()!!
     }
-
     private val filePath get() = systemOperation.resolvePath(
         runContext.homeDirectory,
         CONFIGURATION_FILENAME.toFileName(),

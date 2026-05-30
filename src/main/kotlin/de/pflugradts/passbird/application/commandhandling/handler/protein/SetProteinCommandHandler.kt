@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
@@ -17,9 +16,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
-import jakarta.inject.Inject
-
-class SetProteinCommandHandler @Inject constructor(
+class SetProteinCommandHandler constructor(
     private val configuration: ReadableConfiguration,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -63,7 +60,6 @@ class SetProteinCommandHandler @Inject constructor(
         }
         finish(setProteinCommand)
     }
-
     private fun commandConfirmed(setProteinCommand: SetProteinCommand) = if (configuration.application.password.promptOnRemoval &&
         passwordService.eggExists(setProteinCommand.argument, PasswordService.EggNotExistsAction.DO_NOTHING)
     ) {
@@ -73,7 +69,6 @@ class SetProteinCommandHandler @Inject constructor(
     } else {
         true
     }
-
     private fun secureInputDetermined(): Boolean {
         val secureInput = configuration.domain.protein.secureProteinStructureInput
         if (configuration.domain.protein.promptForProteinStructureInputToggle) {
@@ -84,7 +79,6 @@ class SetProteinCommandHandler @Inject constructor(
         }
         return secureInput
     }
-
     private fun structureInputReceived(secureInput: Boolean) =
         with(outputOf(shellOf("Enter Protein Structure or just press enter to abort: "))) {
             when (secureInput) {
@@ -92,7 +86,6 @@ class SetProteinCommandHandler @Inject constructor(
                 false -> userInterfaceAdapterPort.receive(this)
             }
         }
-
     private fun receiveTypeInput(setProteinCommand: SetProteinCommand): Input? {
         val currentType = passwordService.viewProteinType(
             setProteinCommand.argument,
@@ -114,7 +107,6 @@ class SetProteinCommandHandler @Inject constructor(
             }
         }
     }
-
     private fun putProtein(eggIdShell: Shell, slot: Slot, typeInput: Input, structureInput: Input) {
         val typeShell = typeInput.shell.copy()
         val structureShell = structureInput.shell.copy()
@@ -133,13 +125,11 @@ class SetProteinCommandHandler @Inject constructor(
             structureShell.scramble()
         }
     }
-
     private fun abort(setProteinCommand: SetProteinCommand) {
         commandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
         finish(setProteinCommand)
     }
-
     private fun finish(setProteinCommand: SetProteinCommand) {
         setProteinCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()

@@ -5,7 +5,7 @@ applies_interaction_rules_from: specs/interaction.yaml
 flows:
   - id: first_run_without_configuration
     trigger:
-      - setup module is booted with configuration.template = true
+      - setup graph is booted with configuration.template = true
       - at launcher level this corresponds to startup without a usable configured keystore location, which typically means no usable configuration was provided
     user_experience:
       opening_output:
@@ -37,7 +37,7 @@ flows:
       - may create passbird.yml and passbird.sec in user-chosen directories
   - id: missing_keystore_guidance
     trigger:
-      - setup module is booted with configuration.template = false
+      - setup graph is booted with configuration.template = false
       - launcher entered setup because no usable keystore could be resolved
       - the concrete launcher conditions are an empty keyStore.location or a missing passbird.sec at the configured location
     user_experience:

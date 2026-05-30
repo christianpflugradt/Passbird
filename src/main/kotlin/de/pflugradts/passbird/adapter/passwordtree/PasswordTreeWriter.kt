@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.adapter.passwordtree
-
 import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
@@ -16,16 +15,13 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
-import jakarta.inject.Inject
-
-class PasswordTreeWriter @Inject constructor(
+class PasswordTreeWriter constructor(
     private val systemOperation: SystemOperation,
     private val configuration: ReadableConfiguration,
     private val cryptoProvider: CryptoProvider,
     private val passwordTreeEnvelope: PasswordTreeEnvelope,
     private val passwordTreePayloadWriter: PasswordTreePayloadWriter,
 ) {
-
     fun sync(eggSupplier: EggStreamSupplier): TryResult<Unit> {
         val eggs = eggSupplier.get().toList()
         return writeToDisk(
@@ -39,7 +35,6 @@ class PasswordTreeWriter @Inject constructor(
             ),
         )
     }
-
     private fun writeToDisk(shell: Shell) = tryCatching {
         try {
             systemOperation.writeBytesToSensitiveFile(filePath, passwordTreeEnvelope.wrap(cryptoProvider.encrypt(shell).toByteArray()))
@@ -48,7 +43,6 @@ class PasswordTreeWriter @Inject constructor(
         }
         Unit
     }.onFailure { reportFailure(WritePasswordTreeFailure(filePath, it)) }
-
     private val filePath get() =
         systemOperation.resolvePath(configuration.adapter.passwordTree.location.toDirectory(), PASSWORD_TREE_FILENAME.toFileName())
 }

@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.process.migration.passwordtree
-
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
 import de.pflugradts.passbird.application.failure.LoginFailure
@@ -14,13 +13,8 @@ import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
 private const val PASSWORD_TREE_KEY_DERIVATION_MIGRATION_ID = "password-tree-key-derivation"
-
-@Singleton
-class PasswordTreeKeyDerivationMigrationDetector @Inject constructor(
+class PasswordTreeKeyDerivationMigrationDetector constructor(
     private val configuration: ReadableConfiguration,
     private val passwordTreeEnvelope: PasswordTreeEnvelope,
     private val systemOperation: SystemOperation,
@@ -30,27 +24,22 @@ class PasswordTreeKeyDerivationMigrationDetector @Inject constructor(
     } else {
         MigrationRequest.empty()
     }
-
     private fun migrationRequired() = systemOperation.exists(filePath) &&
         systemOperation.readBytesFromFile(filePath).let { bytes ->
             bytes.isNotEmpty() && !passwordTreeEnvelope.isCurrent(bytes) && !passwordTreeEnvelope.isLegacyCurrent(bytes)
         }
-
     private val filePath get() = systemOperation.resolvePath(
         configuration.adapter.passwordTree.location.toDirectory(),
         PASSWORD_TREE_FILENAME.toFileName(),
     )
 }
-
-@Singleton
-class PasswordTreeKeyDerivationMigration @Inject constructor(
+class PasswordTreeKeyDerivationMigration constructor(
     private val migrationAuthenticationService: MigrationAuthenticationService,
     private val passwordTreeKeyDerivationMigrationService: PasswordTreeKeyDerivationMigrationService,
     private val systemOperation: SystemOperation,
 ) : Migration {
     override val id = PASSWORD_TREE_KEY_DERIVATION_MIGRATION_ID
     override val order = 2
-
     override fun run() {
         migrationAuthenticationService.authenticate(maxAttempts = 3)
             .onSuccess { migrationCredentials ->

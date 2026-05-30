@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.boot.setup
-
 import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.SecureInputUnavailableException
@@ -12,10 +11,8 @@ import de.pflugradts.passbird.domain.model.shell.PlainShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import jakarta.inject.Inject
 import java.nio.file.Paths
-
-class PassbirdSetup @Inject constructor(
+class PassbirdSetup constructor(
     private val setupGuide: SetupGuide,
     private val configurationSync: ConfigurationSync,
     private val configuration: ReadableConfiguration,
@@ -42,9 +39,7 @@ class PassbirdSetup @Inject constructor(
         setupGuide.sendGoodbye()
         systemOperation.exit()
     }
-
     private fun continueRoute() = userInterfaceAdapterPort.receiveConfirmation(outputOf(shellOf("Your input: ")))
-
     private fun configTemplateRoute() {
         setupGuide.sendInputPath("configuration")
         val directory = receiveValidDirectory()
@@ -55,16 +50,13 @@ class PassbirdSetup @Inject constructor(
         createKeyStore(directory, receiveMasterPassword())
         setupGuide.sendRestart()
     }
-
     private fun configKeyStoreRoute() {
         setupGuide.sendInputPath("keystore")
         setupGuide.sendCreateKeyStoreInformation()
         createKeyStore(receiveValidDirectory(), receiveMasterPassword())
         setupGuide.sendRestart()
     }
-
     private fun createConfiguration(directory: Directory) = configurationSync.sync(directory)
-
     private fun receiveMasterPassword(): PlainShell {
         var input: Input? = null
         var inputRepeated: Input? = null
@@ -88,7 +80,6 @@ class PassbirdSetup @Inject constructor(
             setupGuide.sendNonMatchingInputs()
         }
     }
-
     private fun createKeyStore(directory: Directory, password: PlainShell) {
         keyStoreAdapterPort.storeKey(
             password,
@@ -96,7 +87,6 @@ class PassbirdSetup @Inject constructor(
         )
         setupGuide.sendCreateKeyStoreSucceeded()
     }
-
     private fun receiveValidDirectory(): Directory {
         var directory = Directory(userInterfaceAdapterPort.receive(outputOf(shellOf("your input: "))).shell.asString())
         while (!isValidDirectory(directory)) {
@@ -104,6 +94,5 @@ class PassbirdSetup @Inject constructor(
         }
         return directory
     }
-
     private fun isValidDirectory(directory: Directory) = systemOperation.exists(directory) && systemOperation.isDirectory(directory)
 }

@@ -1,17 +1,10 @@
 package de.pflugradts.passbird.application.commandhandling
-
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
-@Singleton
-class CommandExecutionTracker @Inject constructor() {
+class CommandExecutionTracker constructor() {
     private val executionOutcomes = ArrayDeque<CommandExecutionOutcome?>()
     private var lastCompletedOutcome: CommandExecutionOutcome? = null
-
     fun begin() {
         executionOutcomes.addLast(null)
     }
-
     fun finish(defaultOutcome: CommandExecutionOutcome): CommandExecutionOutcome {
         val outcome = if (executionOutcomes.isEmpty()) {
             defaultOutcome
@@ -21,16 +14,13 @@ class CommandExecutionTracker @Inject constructor() {
         lastCompletedOutcome = outcome
         return outcome
     }
-
     fun lastCompletedOutcome() = lastCompletedOutcome ?: CommandExecutionOutcome.FAILURE
-
     fun mark(outcome: CommandExecutionOutcome) {
         if (executionOutcomes.isNotEmpty()) {
             executionOutcomes.removeLast()
             executionOutcomes.addLast(outcome)
         }
     }
-
     fun markAborted() = mark(CommandExecutionOutcome.ABORTED)
     fun markFailure() = mark(CommandExecutionOutcome.FAILURE)
 }

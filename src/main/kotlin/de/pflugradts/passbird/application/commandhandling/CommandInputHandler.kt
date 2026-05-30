@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling
-
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.InactivityTerminationRequestedException
 import de.pflugradts.passbird.application.StdinTerminationRequestedException
@@ -11,11 +10,7 @@ import de.pflugradts.passbird.application.commandhandling.factory.CommandFactory
 import de.pflugradts.passbird.application.failure.CommandFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.domain.model.transfer.Input
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
-@Singleton
-class CommandInputHandler @Inject constructor(
+class CommandInputHandler constructor(
     private val commandBus: CommandBus,
     private val commandFactory: CommandFactory,
     private val rememberedCommandMemory: RememberedCommandMemory,
@@ -30,7 +25,6 @@ class CommandInputHandler @Inject constructor(
             commandExecutionTracker.markFailure()
             reportFailure(CommandFailure(it))
         }.getOrNull()
-
         val outcome = if (command == null) {
             commandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
         } else {
@@ -47,7 +41,6 @@ class CommandInputHandler @Inject constructor(
                 reportFailure(CommandFailure(ex))
             }.getOrNull() ?: commandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
         }
-
         if (outcome == CommandExecutionOutcome.SUCCESS && command !is RepeatLastCommand) {
             rememberedCommandMemory.remember(originalInput)
         } else {
@@ -55,7 +48,6 @@ class CommandInputHandler @Inject constructor(
         }
     }
 }
-
 private fun Command.defaultOutcome() = if (this is NullCommand) {
     CommandExecutionOutcome.FAILURE
 } else {

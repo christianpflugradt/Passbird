@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.egg
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
@@ -15,16 +14,13 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_A
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
-import jakarta.inject.Inject
-
-class SetCommandHandler @Inject constructor(
+class SetCommandHandler constructor(
     private val configuration: ReadableConfiguration,
     private val passwordService: PasswordService,
     private val passwordProvider: PasswordProvider,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
 ) : CommandHandler {
-
     private val customPasswordConfigurations: List<ReadableConfiguration.CustomPasswordConfiguration>
         get() = configuration.application.password.customPasswordConfigurations
 
@@ -62,7 +58,6 @@ class SetCommandHandler @Inject constructor(
         setCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private fun commandConfirmed(setCommand: SetCommand) = if (configuration.application.password.promptOnRemoval &&
         passwordService.eggExists(setCommand.argument, EggNotExistsAction.DO_NOTHING)
     ) {
@@ -73,7 +68,6 @@ class SetCommandHandler @Inject constructor(
         true
     }
 }
-
 private fun ReadableConfiguration.CustomPasswordConfiguration.toPasswordRequirements() = PasswordRequirements(
     length = length,
     hasNumbers = hasNumbers,

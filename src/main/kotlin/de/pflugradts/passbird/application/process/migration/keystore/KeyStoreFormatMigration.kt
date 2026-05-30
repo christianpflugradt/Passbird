@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.process.migration.keystore
-
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
 import de.pflugradts.passbird.application.failure.LoginFailure
@@ -15,13 +14,8 @@ import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
 private const val KEYSTORE_FORMAT_MIGRATION_ID = "keystore-format"
-
-@Singleton
-class KeyStoreFormatMigrationDetector @Inject constructor(
+class KeyStoreFormatMigrationDetector constructor(
     private val configuration: ReadableConfiguration,
     private val keyStoreFormatDetector: KeyStoreFormatDetector,
     private val systemOperation: SystemOperation,
@@ -31,25 +25,20 @@ class KeyStoreFormatMigrationDetector @Inject constructor(
     } else {
         MigrationRequest.empty()
     }
-
     private fun migrationRequired() = systemOperation.exists(filePath) &&
         keyStoreFormatDetector.detect(systemOperation.readBytesFromFile(filePath)) == KeyStoreFormat.JCEKS
-
     private val filePath get() = systemOperation.resolvePath(
         configuration.adapter.keyStore.location.toDirectory(),
         KEYSTORE_FILENAME.toFileName(),
     )
 }
-
-@Singleton
-class KeyStoreFormatMigration @Inject constructor(
+class KeyStoreFormatMigration constructor(
     private val keyStoreFormatMigrationService: KeyStoreFormatMigrationService,
     private val migrationAuthenticationService: MigrationAuthenticationService,
     private val systemOperation: SystemOperation,
 ) : Migration {
     override val id = KEYSTORE_FORMAT_MIGRATION_ID
     override val order = 1
-
     override fun run() {
         migrationAuthenticationService.authenticate(maxAttempts = 3)
             .onSuccess(keyStoreFormatMigrationService::migrate)

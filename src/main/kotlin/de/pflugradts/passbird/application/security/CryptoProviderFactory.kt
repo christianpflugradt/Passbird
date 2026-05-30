@@ -1,14 +1,9 @@
 package de.pflugradts.passbird.application.security
-
 import de.pflugradts.passbird.application.failure.LoginFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
-@Singleton
-class CryptoProviderFactory @Inject constructor(
+class CryptoProviderFactory constructor(
     private val keyStoreAuthenticationService: KeyStoreAuthenticationService,
     private val systemOperation: SystemOperation,
 ) {

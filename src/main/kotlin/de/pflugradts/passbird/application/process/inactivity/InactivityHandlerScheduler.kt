@@ -1,11 +1,8 @@
 package de.pflugradts.passbird.application.process.inactivity
-
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.process.Initializer
-import jakarta.inject.Inject
 import kotlin.concurrent.fixedRateTimer
-
-class InactivityHandlerScheduler @Inject constructor(
+class InactivityHandlerScheduler constructor(
     private val configuration: ReadableConfiguration,
     private val inactivityHandler: InactivityHandler,
 ) : Initializer {

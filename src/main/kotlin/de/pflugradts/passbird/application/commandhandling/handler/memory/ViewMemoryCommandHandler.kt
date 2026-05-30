@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.memory
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
@@ -9,9 +8,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import jakarta.inject.Inject
-
-class ViewMemoryCommandHandler @Inject constructor(
+class ViewMemoryCommandHandler constructor(
     private val canPrintInfo: CanPrintInfo,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,

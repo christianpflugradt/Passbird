@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
@@ -11,8 +10,6 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.ERROR_MESSAGE
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.SPECIAL
-import jakarta.inject.Inject
-
 private val GOODBYES = listOf(
     Triple(
         "Fly safe, my feathered friends,",
@@ -115,8 +112,7 @@ private val GOODBYES = listOf(
         "as the ancient secrets whispered by the wind.",
     ),
 )
-
-class QuitCommandHandler @Inject constructor(
+class QuitCommandHandler constructor(
     private val finalizers: Set<Finalizer>,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val systemOperation: SystemOperation,

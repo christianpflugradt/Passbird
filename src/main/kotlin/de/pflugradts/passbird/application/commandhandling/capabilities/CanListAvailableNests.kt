@@ -1,10 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.capabilities
-
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.DEFAULT
 import de.pflugradts.passbird.domain.service.nest.NestService
-import jakarta.inject.Inject
-
-class CanListAvailableNests @Inject constructor(private val nestService: NestService) {
+class CanListAvailableNests constructor(private val nestService: NestService) {
     fun hasCustomNests() = nestService.all().anyMatch { it.isPresent }
     fun getAvailableNests(includeCurrent: Boolean) =
         (if (includeCurrent || nestService.currentNest() != DEFAULT) "\t0: ${DEFAULT.viewNestId().asString()}\n" else "") +

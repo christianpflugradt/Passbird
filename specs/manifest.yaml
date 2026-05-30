@@ -118,7 +118,7 @@ sources_reviewed:
   code:
     - src/main/kotlin/de/pflugradts/passbird/application/Main.kt
     - src/main/kotlin/de/pflugradts/passbird/application/UserInterfaceAdapterPort.kt
-    - src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationModule.kt
+    - src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationGraph.kt
     - src/main/kotlin/de/pflugradts/passbird/application/boot/main/PassbirdApplication.kt
     - src/main/kotlin/de/pflugradts/passbird/application/boot/setup/SetupGuide.kt
     - src/main/kotlin/de/pflugradts/passbird/application/commandhandling/handler/ExportCommandHandler.kt

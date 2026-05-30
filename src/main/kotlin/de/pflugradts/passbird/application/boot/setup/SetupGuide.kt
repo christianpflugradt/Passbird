@@ -1,16 +1,12 @@
 package de.pflugradts.passbird.application.boot.setup
-
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import jakarta.inject.Inject
-
-class SetupGuide @Inject constructor(private val userInterfaceAdapterPort: UserInterfaceAdapterPort) {
+class SetupGuide constructor(private val userInterfaceAdapterPort: UserInterfaceAdapterPort) {
     fun sendWelcome() {
         send("Welcome to Passbird Setup!")
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     fun sendConfigTemplateRouteInformation() {
         send("You have landed here because you did not provide a configuration.")
         send("If you have a configuration file, then please start Passbird as follows:")
@@ -22,7 +18,6 @@ class SetupGuide @Inject constructor(private val userInterfaceAdapterPort: UserI
         userInterfaceAdapterPort.sendLineBreak()
         send("To (c)ontinue setup, press 'c'. To quit setup, press any other key")
     }
-
     fun sendConfigKeyStoreRouteInformation(location: String) {
         send("You have landed here because the keystore specified in your configuration does not exist.")
         send("Your configuration specifies the keystore to be in the following directory: $location")
@@ -30,11 +25,9 @@ class SetupGuide @Inject constructor(private val userInterfaceAdapterPort: UserI
         userInterfaceAdapterPort.sendLineBreak()
         send("To (c)ontinue setup, press 'c'. To quit setup, press any other key")
     }
-
     fun sendInputPath(fileDescription: String) {
         send("Please input an absolute path to a directory in which to create the '$fileDescription' file.")
     }
-
     fun sendCreateKeyStoreInformation() {
         userInterfaceAdapterPort.sendLineBreak()
         send("Your Passbird Keystore will be secured by a master password.")
@@ -47,22 +40,17 @@ class SetupGuide @Inject constructor(private val userInterfaceAdapterPort: UserI
         send("If your inputs do not match, you will have to repeat the procedure.")
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     fun sendCreateKeyStoreSucceeded() {
         send("Keystore has been created successfully!")
     }
-
     fun sendNonMatchingInputs() {
         send("Your inputs do not match, please repeat.")
     }
-
     fun sendRestart() {
         send("Now restart Passbird to use it.")
     }
-
     fun sendGoodbye() {
         send("Goodbye!")
     }
-
     private fun send(message: String) = userInterfaceAdapterPort.send(outputOf(shellOf(message)))
 }

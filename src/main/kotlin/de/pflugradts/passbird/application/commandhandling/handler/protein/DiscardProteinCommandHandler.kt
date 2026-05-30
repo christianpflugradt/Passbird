@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
@@ -11,9 +10,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
-import jakarta.inject.Inject
-
-class DiscardProteinCommandHandler @Inject constructor(
+class DiscardProteinCommandHandler constructor(
     private val configuration: ReadableConfiguration,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -40,7 +37,6 @@ class DiscardProteinCommandHandler @Inject constructor(
         discardProteinCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private fun commandConfirmed(discardProteinCommand: DiscardProteinCommand) = if (configuration.application.password.promptOnRemoval &&
         passwordService.eggExists(discardProteinCommand.argument, PasswordService.EggNotExistsAction.DO_NOTHING)
     ) {

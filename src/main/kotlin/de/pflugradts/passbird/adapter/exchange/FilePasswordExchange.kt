@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.adapter.exchange
-
 import com.fasterxml.jackson.databind.json.JsonMapper
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.ExchangeAdapterPort
@@ -18,15 +17,12 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
-import jakarta.inject.Inject
 import java.nio.file.Files
-
-class FilePasswordExchange @Inject constructor(
+class FilePasswordExchange constructor(
     private val systemOperation: SystemOperation,
     private val runContext: RunContext,
 ) : ExchangeAdapterPort {
     private val mapper = JsonMapper()
-
     override fun send(data: PasswordInfoMap) = tryCatching {
         systemOperation.writeToSensitiveFile(
             systemOperation.resolvePath(runContext.homeDirectory, EXCHANGE_FILENAME.toFileName()),
@@ -35,14 +31,12 @@ class FilePasswordExchange @Inject constructor(
         }
         Unit
     }.onFailure { reportFailure(ExportFailure(it)) }
-
     override fun receive() = tryCatching {
         mapper.readValue(
             Files.readString(systemOperation.resolvePath(runContext.homeDirectory, EXCHANGE_FILENAME.toFileName())),
             ExchangeWrapper::class.java,
         ).exportedContent.toPasswordInfoMap()
     }.onFailure { reportFailure(ImportFailure(it)) }
-
     private fun PasswordInfoMap.toSerializable() = entries.map { nest ->
         EggsPerNest(
             exportedNest = ExportedNest(nest.key.viewNestId().asString(), nest.key.slot.index()),
@@ -61,14 +55,12 @@ class FilePasswordExchange @Inject constructor(
             },
         )
     }
-
     private fun List<EggsPerNest>.toPasswordInfoMap() = associate { entry ->
         entry.exportedNest.toValidatedNest() to
             entry.exportedEggs.toValidatedPasswordInfos()
     }.also { passwordInfoMap ->
         require(passwordInfoMap.size == size) { "Duplicate nest slot in import file" }
     }
-
     private fun List<ExportedEgg>.toValidatedPasswordInfos(): List<PasswordInfo> {
         val eggIds = mutableSetOf<String>()
         return map {
@@ -79,18 +71,15 @@ class FilePasswordExchange @Inject constructor(
             )
         }
     }
-
     private fun ExportedNest.toValidatedSlot(): Slot {
         val slot = requireNotNull(slot) { "Missing nest slot in import file" }
         require(slot in Slot.entries.indices) { "Invalid nest slot $slot" }
         return Slot.entries[slot]
     }
-
     private fun ExportedNest.toValidatedNest(): Nest {
         require(nestId.isNotBlank()) { "Missing nestId in import file" }
         return createNest(shellOf(nestId), toValidatedSlot())
     }
-
     private fun List<ExportedProtein>.toShellPairsBySlot(): List<ShellPair> {
         val proteinsBySlot = mutableMapOf<Int, ShellPair>()
         forEach { protein ->
@@ -111,7 +100,6 @@ class FilePasswordExchange @Inject constructor(
         }
     }
 }
-
 private class ExportedProtein(var proteinType: String = "", var proteinStructure: String = "", var slot: Int? = null)
 private class ExportedEgg(var eggId: String = "", var password: String = "", var proteins: List<ExportedProtein> = emptyList())
 private class ExportedNest(var nestId: String = "", var slot: Int? = null)

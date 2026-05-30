@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.process.migration.passwordtree
-
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
 import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadReader
@@ -11,11 +10,7 @@ import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
-@Singleton
-class PasswordTreeFavoritesMigrationService @Inject constructor(
+class PasswordTreeFavoritesMigrationService constructor(
     private val configuration: ReadableConfiguration,
     private val legacyPasswordTreePayloadReader: LegacyPasswordTreePayloadReader,
     private val passwordTreeEnvelope: PasswordTreeEnvelope,
@@ -44,7 +39,6 @@ class PasswordTreeFavoritesMigrationService @Inject constructor(
             keyShell.scramble()
         }
     }
-
     private val filePath get() = systemOperation.resolvePath(
         configuration.adapter.passwordTree.location.toDirectory(),
         PASSWORD_TREE_FILENAME.toFileName(),

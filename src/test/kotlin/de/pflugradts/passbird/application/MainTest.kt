@@ -1,10 +1,6 @@
 package de.pflugradts.passbird.application
 
-import com.google.inject.Guice
-import com.google.inject.Module
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
-import de.pflugradts.passbird.application.boot.bootModule
-import de.pflugradts.passbird.application.boot.launcher.LauncherModule
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
@@ -34,16 +30,16 @@ import java.util.stream.Stream
 class MainTest {
 
     val systemOperation = mockk<SystemOperation>()
-    private val moduleSlot = slot<Module>()
+    private val runContextSlot = slot<RunContext>()
 
     @BeforeEach
     fun setup() {
-        mockMain(moduleSlot = moduleSlot, systemOperationMock = systemOperation, withMockedFileCheck = false)
+        mockMain(runContextSlot = runContextSlot, systemOperationMock = systemOperation, withMockedFileCheck = false)
     }
 
     @AfterEach
     fun cleanup() {
-        unmockMain(withMockedFileCheck = false)
+        unmockMain()
     }
 
     @Test
@@ -57,7 +53,7 @@ class MainTest {
         main(arrayOf(givenHome))
 
         // then
-        verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
+        verify(exactly = 1) { mainBootLauncher(any()) }
         expectThat(capturedRunContext().homeDirectory) isEqualTo givenHome.toDirectory()
         expectThat(capturedRunContext().initialSlot) isEqualTo DEFAULT
     }
@@ -124,7 +120,7 @@ class MainTest {
         main(arrayOf(givenHome, givenParam))
 
         // then
-        verify(exactly = 1) { bootModule(any(LauncherModule::class)) }
+        verify(exactly = 1) { mainBootLauncher(any()) }
         expectThat(capturedRunContext().initialSlot) isEqualTo expectedInitialSlot
     }
 
@@ -145,11 +141,11 @@ class MainTest {
         // then
         expectThat(captureSystemErr.capture) isEqualTo
             "Shutting down: Specified initial Nest Slot is not supported: $givenParam\n"
-        verify(exactly = 0) { bootModule(any(LauncherModule::class)) }
+        verify(exactly = 0) { mainBootLauncher(any()) }
         verify(exactly = 1) { systemOperation.exit() }
     }
 
-    private fun capturedRunContext() = Guice.createInjector(moduleSlot.captured).getInstance(RunContext::class.java)
+    private fun capturedRunContext() = runContextSlot.captured
 
     companion object {
         @JvmStatic

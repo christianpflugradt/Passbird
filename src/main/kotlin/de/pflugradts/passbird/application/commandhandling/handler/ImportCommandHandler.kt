@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
@@ -18,9 +17,7 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.HIGHLIGHT
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import jakarta.inject.Inject
-
-class ImportCommandHandler@Inject constructor(
+class ImportCommandHandler constructor(
     private val configuration: ReadableConfiguration,
     private val importExportService: ImportExportService,
     private val nestService: NestService,
@@ -47,9 +44,7 @@ class ImportCommandHandler@Inject constructor(
         }
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private var selectedNest: SelectedNest? = null
-
     private fun commandConfirmed(): ImportCommandConfirmation {
         selectedNest = null
         if (configuration.application.password.promptOnRemoval) {
@@ -72,7 +67,6 @@ class ImportCommandHandler@Inject constructor(
         }
         return ImportCommandConfirmation.CONFIRMED
     }
-
     private fun selectiveCommandConfirmed(): ImportCommandConfirmation {
         selectedNest = null
         val importedNests = importExportService.peekImportNests()
@@ -107,24 +101,20 @@ class ImportCommandHandler@Inject constructor(
             ImportCommandConfirmation.CONFIRMED
         }
     }
-
     private fun receiveSourceSlot(previews: List<ImportNestPreview>) = receiveNestSlot(
         prompt = "\nSpecify a Nest Slot 0-9 to import or anything else to abort: ",
         availableSlots = previews.map { it.slot }.toSet(),
     )
-
     private fun receiveTargetSlot() = receiveNestSlot(
         prompt = "Specify a target Nest Slot 0-9 or anything else to abort: ",
         availableSlots = Slot.entries.toSet(),
     )
-
     private fun receiveNestSlot(prompt: String, availableSlots: Set<Slot>) = userInterfaceAdapterPort.receive(
         outputOf(shellOf(prompt)),
     ).shell.asString()
         .takeIf { input -> input.length == 1 && input[0].isDigit() }
         ?.let(::slotAt)
         ?.takeIf(availableSlots::contains)
-
     private fun confirmImport(overlaps: List<Pair<Slot, Shell>>) = if (
         userInterfaceAdapterPort.receiveConfirmation(
             outputOf(
@@ -143,17 +133,13 @@ class ImportCommandHandler@Inject constructor(
         ImportCommandConfirmation.ABORTED
     }
 }
-
 private enum class ImportCommandConfirmation { CONFIRMED, ABORTED, FAILED }
-
 private data class SelectedNest(val slot: Slot, val targetSlot: Slot)
-
 private inline fun <T> ShellMap.useScrambled(block: (ShellMap) -> T): T = try {
     block(this)
 } finally {
     values.flatten().scrambleShells()
 }
-
 private inline fun <T> List<ImportNestPreview>.useScrambled(block: (List<ImportNestPreview>) -> T): T = try {
     block(this)
 } finally {
@@ -162,5 +148,4 @@ private inline fun <T> List<ImportNestPreview>.useScrambled(block: (List<ImportN
         it.eggIds.scrambleShells()
     }
 }
-
 private fun Iterable<Shell>.scrambleShells() = forEach(Shell::scramble)

@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.configuration
-
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
@@ -11,9 +10,7 @@ import de.pflugradts.passbird.application.failure.ConfigurationFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
-import jakarta.inject.Inject
-
-class ConfigurationSyncService @Inject constructor(
+class ConfigurationSyncService constructor(
     private val updatableConfiguration: UpdatableConfiguration,
     private val systemOperation: SystemOperation,
 ) : ConfigurationSync {

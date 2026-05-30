@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.process.migration.passwordtree
-
 import de.pflugradts.kotlinextensions.MutableOption.Companion.mutableOptionOf
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
@@ -24,11 +23,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.slot.Slots.Companion.slotIterator
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
-@Singleton
-class PasswordTreeKeyDerivationMigrationService @Inject constructor(
+class PasswordTreeKeyDerivationMigrationService constructor(
     private val configuration: ReadableConfiguration,
     private val passwordTreeEnvelope: PasswordTreeEnvelope,
     private val legacyPasswordTreePayloadReader: LegacyPasswordTreePayloadReader,
@@ -58,7 +53,6 @@ class PasswordTreeKeyDerivationMigrationService @Inject constructor(
             keyShell.scramble()
         }
     }
-
     private fun PasswordTreeSnapshot.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider) = PasswordTreeSnapshot(
         eggs = eggs.map { it.migrate(legacyProvider, currentProvider) },
         memory = memory.migrate(legacyProvider, currentProvider),
@@ -70,7 +64,6 @@ class PasswordTreeKeyDerivationMigrationService @Inject constructor(
             }
         },
     )
-
     private fun Egg.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider): Egg {
         val migratedEggId = viewEggId().migrate(legacyProvider, currentProvider)
         val migratedPassword = viewPassword().migrate(legacyProvider, currentProvider)
@@ -92,7 +85,6 @@ class PasswordTreeKeyDerivationMigrationService @Inject constructor(
             migratedPassword.scramble()
         }
     }
-
     private fun Protein.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider) = run {
         val migratedType = viewType().migrate(legacyProvider, currentProvider)
         val migratedStructure = viewStructure().migrate(legacyProvider, currentProvider)
@@ -103,7 +95,6 @@ class PasswordTreeKeyDerivationMigrationService @Inject constructor(
             migratedStructure.scramble()
         }
     }
-
     private fun MemoryMap.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider) = emptyMemory().apply {
         slotIterator().forEach { nestSlot ->
             this[nestSlot].set(
@@ -116,7 +107,6 @@ class PasswordTreeKeyDerivationMigrationService @Inject constructor(
             )
         }
     }
-
     private fun EncryptedShell.migrate(legacyProvider: CryptoProvider, currentProvider: CryptoProvider): EncryptedShell {
         try {
             val shell = legacyProvider.decrypt(this)
@@ -129,7 +119,6 @@ class PasswordTreeKeyDerivationMigrationService @Inject constructor(
             scramble()
         }
     }
-
     private val filePath get() = systemOperation.resolvePath(
         configuration.adapter.passwordTree.location.toDirectory(),
         PASSWORD_TREE_FILENAME.toFileName(),

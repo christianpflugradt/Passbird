@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.factory
-
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.commandhandling.CommandType
 import de.pflugradts.passbird.application.commandhandling.CommandVariant
@@ -21,11 +20,7 @@ import de.pflugradts.passbird.application.commandhandling.command.base.Command
 import de.pflugradts.passbird.application.failure.CommandFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.domain.model.transfer.Input
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
-@Singleton
-class CommandFactory @Inject constructor(
+class CommandFactory constructor(
     private val favoriteCommandFactory: FavoriteCommandFactory,
     private val listCommandFactory: ListCommandFactory,
     private val memoryCommandFactory: MemoryCommandFactory,
@@ -37,7 +32,6 @@ class CommandFactory @Inject constructor(
         ?: constructWithoutArguments(commandType, input)
         ?: constructViaSpecialFactory(commandType, input)
         ?: NullCommand()
-
     private fun constructDirectly(commandType: CommandType, input: Input) = when (commandType) {
         CommandType.CUSTOM_SET -> CustomSetCommand(input)
         CommandType.DISCARD -> DiscardCommand(input)
@@ -46,7 +40,6 @@ class CommandFactory @Inject constructor(
         CommandType.VIEW -> ViewCommand(input)
         else -> null
     }
-
     private fun constructWithoutArguments(commandType: CommandType, input: Input) = when (commandType) {
         CommandType.EXPORT -> constructWithOptionalStarVariant(input) { ExportCommand(it) }
         CommandType.HELP -> constructSafely(input) { HelpCommand() }
@@ -56,7 +49,6 @@ class CommandFactory @Inject constructor(
         CommandType.REPEAT -> constructSafely(input) { RepeatLastCommand() }
         else -> null
     }
-
     private fun constructViaSpecialFactory(commandType: CommandType, input: Input) = when (commandType) {
         CommandType.FAVORITE -> constructSafely(favoriteCommandFactory, input)
         CommandType.LIST -> constructSafely(listCommandFactory, input)
@@ -66,11 +58,9 @@ class CommandFactory @Inject constructor(
         CommandType.SET -> constructSafely(setCommandFactory, input)
         else -> null
     }
-
     private fun constructSafely(factory: SpecialCommandFactory, input: Input) = tryCatching { factory.constructFromInput(input) }
         .onFailure { reportFailure(CommandFailure(it)) }
         .getOrElse(NullCommand())
-
     private fun constructSafely(input: Input, supplier: () -> Command) = tryCatching {
         require(input.command.size == 1 && input.data.isEmpty) {
             "Parameter for command '${input.command.getChar(0)}' not supported: ${unsupportedParameter(input)}"
@@ -78,7 +68,6 @@ class CommandFactory @Inject constructor(
         supplier()
     }.onFailure { reportFailure(CommandFailure(it)) }
         .getOrElse(NullCommand())
-
     private fun constructWithOptionalStarVariant(input: Input, supplier: (Boolean) -> Command) = tryCatching {
         require(input.data.isEmpty) {
             "Parameter for command '${input.command.getChar(0)}' not supported: ${unsupportedParameter(input)}"
@@ -92,7 +81,6 @@ class CommandFactory @Inject constructor(
         supplier(input.command.size == 2)
     }.onFailure { reportFailure(CommandFailure(it)) }
         .getOrElse(NullCommand())
-
     private fun unsupportedParameter(input: Input) = buildString {
         append(input.command.slice(1).asString())
         append(input.data.asString())

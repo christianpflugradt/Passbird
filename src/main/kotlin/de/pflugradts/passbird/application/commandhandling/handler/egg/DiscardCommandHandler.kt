@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.egg
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
@@ -10,9 +9,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import jakarta.inject.Inject
-
-class DiscardCommandHandler @Inject constructor(
+class DiscardCommandHandler constructor(
     private val configuration: ReadableConfiguration,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -35,7 +32,6 @@ class DiscardCommandHandler @Inject constructor(
         discardCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private fun commandConfirmed() = if (configuration.application.password.promptOnRemoval) {
         userInterfaceAdapterPort
             .receiveConfirmation(

@@ -7,7 +7,7 @@ import java.lang.reflect.Modifier
 private const val ROOT = "de.pflugradts.passbird"
 private val productionClasses = ClassFileImporter().withImportOption(DoNotIncludeTests()).importPackages(ROOT)
 
-internal fun expectedMultibinderClasses(type: Class<*>, vararg excludedTypes: Class<*>) = productionClasses
+internal fun expectedGraphClasses(type: Class<*>, vararg excludedTypes: Class<*>) = productionClasses
     .map { Class.forName(it.name) }
     .filter { it.isConcreteImplementationOf(type) }
     .filterNot { candidate -> excludedTypes.any { it.isAssignableFrom(candidate) } }

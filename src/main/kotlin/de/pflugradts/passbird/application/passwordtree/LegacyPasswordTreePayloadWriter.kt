@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.passwordtree
-
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.copyInt
@@ -7,10 +6,8 @@ import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
-import jakarta.inject.Inject
 import java.util.Arrays
-
-class LegacyPasswordTreePayloadWriter @Inject constructor() {
+class LegacyPasswordTreePayloadWriter constructor() {
     fun write(snapshot: PasswordTreeSnapshot): Shell {
         val contentSize = calcRequiredContentSize(snapshot)
         val bytes = ByteArray(signatureSize() + contentSize + checksumBytes())
@@ -34,7 +31,6 @@ class LegacyPasswordTreePayloadWriter @Inject constructor() {
         copyBytes(checksumBytes, bytes, offset, checksumBytes())
         return shellOf(bytes)
     }
-
     private fun calcRequiredContentSize(snapshot: PasswordTreeSnapshot): Int {
         val memorySize = 100 * Integer.BYTES + snapshot.memory.fold(0) { acc, inner ->
             acc + inner.map { slots -> slots.sumOf { it.map(EncryptedShell::size).orElse(0) } }.orElse(0)
@@ -48,7 +44,6 @@ class LegacyPasswordTreePayloadWriter @Inject constructor() {
         val nestSize = snapshot.nests.size * intBytes() + snapshot.nests.filter { !it.isEmpty }.sumOf { it.size }
         return memorySize + eggDataSize + eggMetaSize + nestSize
     }
-
     private fun Option<EncryptedShell>.encryptedShellAsByteArray() = if (isPresent) {
         val shellBytesSize = get().size
         val bytes = ByteArray(Integer.BYTES + shellBytesSize)
@@ -60,7 +55,6 @@ class LegacyPasswordTreePayloadWriter @Inject constructor() {
         copyInt(0, bytes, 0)
         bytes
     }
-
     private fun Shell.nestAsByteArray(): ByteArray {
         val nestBytesSize = size
         val bytes = ByteArray(Integer.BYTES + nestBytesSize)
@@ -68,7 +62,6 @@ class LegacyPasswordTreePayloadWriter @Inject constructor() {
         if (!isEmpty) copyBytes(toByteArray(), bytes, Integer.BYTES, nestBytesSize)
         return bytes
     }
-
     private fun Egg.eggAsByteArray(): ByteArray {
         val eggIdSize = viewEggId().size
         val passwordSize = viewPassword().size

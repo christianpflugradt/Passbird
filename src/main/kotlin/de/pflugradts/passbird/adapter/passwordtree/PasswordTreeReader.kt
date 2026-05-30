@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.adapter.passwordtree
-
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
@@ -15,9 +14,7 @@ import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryp
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
-import jakarta.inject.Inject
-
-class PasswordTreeReader @Inject constructor(
+class PasswordTreeReader constructor(
     private val systemOperation: SystemOperation,
     private val configuration: ReadableConfiguration,
     private val cryptoProvider: CryptoProvider,
@@ -37,7 +34,6 @@ class PasswordTreeReader @Inject constructor(
             .getOrNull()!!
         return EggStreamSupplier({ snapshot.eggs.stream() }, snapshot.memory, snapshot.favorites, snapshot.nests)
     }
-
     private fun readFromDisk() = tryCatching {
         if (!systemOperation.exists(filePath)) {
             return@tryCatching emptyShell()
@@ -51,13 +47,11 @@ class PasswordTreeReader @Inject constructor(
     }
         .onFailure(::abortRestore)
         .getOrNull()!!
-
     private fun abortRestore(ex: Exception): Nothing {
         reportFailure(DecryptPasswordTreeFailure(filePath, ex))
         systemOperation.exit(FAILURE_EXIT_STATUS)
         throw ex
     }
-
     private val filePath get() =
         systemOperation.resolvePath(configuration.adapter.passwordTree.location.toDirectory(), PASSWORD_TREE_FILENAME.toFileName())
 }

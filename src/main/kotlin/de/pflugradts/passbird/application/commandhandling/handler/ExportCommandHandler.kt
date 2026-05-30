@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
@@ -13,9 +12,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.HIGHLIGHT
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.nest.NestService
-import jakarta.inject.Inject
-
-class ExportCommandHandler @Inject constructor(
+class ExportCommandHandler constructor(
     private val canListAvailableNests: CanListAvailableNests,
     private val importExportService: ImportExportService,
     private val nestService: NestService,
@@ -31,7 +28,6 @@ class ExportCommandHandler @Inject constructor(
         }
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private fun exportSelectedNests() {
         val availableNestSlots = availableNestSlots()
         userInterfaceAdapterPort.send(outputOf(shellOf("\nAvailable Nests:\n"), HIGHLIGHT))
@@ -48,13 +44,11 @@ class ExportCommandHandler @Inject constructor(
         }
         importExportService.exportEggs(exportedNestSlots)
     }
-
     private fun availableNestSlots() = nestService.all(includeDefault = true)
         .filter { it.isPresent }
         .map { it.get().slot }
         .toList()
         .toSet()
-
     private fun receiveSelectionMode() = userInterfaceAdapterPort.receive(
         outputOf(shellOf("\nInput 1 to export only selected Nests or 2 to export all Nests except selected Nests.\nYour input: ")),
     ).shell.asString().let {
@@ -64,7 +58,6 @@ class ExportCommandHandler @Inject constructor(
             else -> null
         }
     }
-
     private fun receiveSelectedNestSlots(availableNestSlots: Set<Slot>) = userInterfaceAdapterPort.receive(
         outputOf(shellOf("Specify Nest Slots separated by ','.\nYour input: ")),
     ).shell.asString().split(',')
@@ -73,11 +66,9 @@ class ExportCommandHandler @Inject constructor(
         ?.map { part -> slotAt(part) }
         ?.toSet()
         ?.takeIf { selectedSlots -> selectedSlots.all(availableNestSlots::contains) }
-
     private fun sendAbortMessage() {
         commandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
     }
 }
-
 private enum class ExportSelectionMode { SELECTED, EXCEPT_SELECTED }

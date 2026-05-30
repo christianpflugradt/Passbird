@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.domain.service.password
-
 import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.kotlinextensions.Option
@@ -13,10 +12,8 @@ import de.pflugradts.passbird.domain.model.slot.toSlots
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
-import jakarta.inject.Inject
 import java.util.stream.Stream
-
-class ViewPasswordService @Inject constructor(
+class ViewPasswordService constructor(
     cryptoProvider: CryptoProvider,
     eggRepository: EggRepository,
     eventRegistry: EventRegistry,
@@ -39,7 +36,6 @@ class ViewPasswordService @Inject constructor(
     }
     fun viewMemory() = eggRepository.memory().map { it.map { encryptedShell -> decrypted(encryptedShell) } }.toSlots()
     fun viewMemoryEntry(slot: Slot) = eggRepository.memory()[slot].map { decrypted(it) }
-
     private fun <T> extractFromEgg(eggIdShell: Shell, extraction: (egg: Egg) -> T): Option<T> = find(eggIdShell)
         .map { extraction(it) }.or {
             eventRegistry.register(EggNotFound(eggIdShell))

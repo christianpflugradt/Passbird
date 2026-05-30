@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.process.migration.keystore
-
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
@@ -7,11 +6,7 @@ import de.pflugradts.passbird.application.process.migration.MigrationCredentials
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
-@Singleton
-class KeyStoreFormatMigrationService @Inject constructor(
+class KeyStoreFormatMigrationService constructor(
     private val configuration: ReadableConfiguration,
     private val keyStoreAdapterPort: KeyStoreAdapterPort,
     private val systemOperation: SystemOperation,
@@ -23,7 +18,6 @@ class KeyStoreFormatMigrationService @Inject constructor(
             filePath,
         )
     }
-
     private val filePath get() = systemOperation.resolvePath(
         configuration.adapter.keyStore.location.toDirectory(),
         KEYSTORE_FILENAME.toFileName(),

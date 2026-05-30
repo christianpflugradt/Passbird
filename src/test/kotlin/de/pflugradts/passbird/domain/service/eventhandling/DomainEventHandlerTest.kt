@@ -7,7 +7,6 @@ import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import io.mockk.mockk
 import io.mockk.verify
-import jakarta.inject.Provider
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.Test
 class DomainEventHandlerTest {
 
     private val eggRepository = mockk<EggRepository>(relaxed = true)
-    private val domainEventHandler = DomainEventHandler(Provider { eggRepository })
+    private val domainEventHandler = DomainEventHandler { eggRepository }
     private var passbirdEventRegistry = PassbirdEventRegistry(mutableSetOf<EventHandler>(domainEventHandler))
 
     @Test

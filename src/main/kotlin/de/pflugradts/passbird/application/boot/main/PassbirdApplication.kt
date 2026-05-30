@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.boot.main
-
 import de.pflugradts.passbird.application.InactivityTerminationRequestedException
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.StdinTerminationRequestedException
@@ -14,13 +13,8 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
 import de.pflugradts.passbird.domain.service.nest.NestService
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
 const val INTERRUPT = 0x03.toChar()
-
-@Singleton
-class PassbirdApplication @Inject constructor(
+class PassbirdApplication constructor(
     private val inactivityHandler: InactivityHandler,
     private val initializers: Set<Initializer>,
     private val inputHandler: InputHandler,
@@ -28,7 +22,6 @@ class PassbirdApplication @Inject constructor(
     private val runContext: RunContext,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : Bootable {
-
     override fun boot() {
         userInterfaceAdapterPort.sendLineBreak()
         nestService.moveToNestAt(runContext.initialSlot)
@@ -50,15 +43,12 @@ class PassbirdApplication @Inject constructor(
             }
         }
     }
-
     private fun receiveInput() = userInterfaceAdapterPort.receive(
         outputOf(shellOf(nestPrefix()), NEST),
         outputOf(shellOf("Enter command: ")),
     )
-
     private fun nestPrefix() = nestService.currentNest().let {
         if (it == Nest.DEFAULT) "" else "[${it.viewNestId().asString()}] "
     }
-
     private fun isSigTerm(input: Input) = input.data.isEmpty && !input.command.isEmpty && input.command.firstByte == INTERRUPT.code.toByte()
 }

@@ -21,7 +21,7 @@ project:
 technical_profile:
   language: Kotlin
   runtime: Java 17
-  dependency_injection: Google Guice
+  dependency_injection: explicit Kotlin composition roots
   shell_bootstrap: source ~/.zprofile && source ~/.zshrc
   test_stack:
     - JUnit 5
@@ -75,10 +75,10 @@ repository_layout:
 key_entrypoints:
   - file: src/main/kotlin/de/pflugradts/passbird/application/Main.kt
     purpose: CLI entrypoint, argument validation, boot selection
-  - file: src/main/kotlin/de/pflugradts/passbird/application/boot/migration/MigrationModule.kt
+  - file: src/main/kotlin/de/pflugradts/passbird/application/boot/migration/MigrationGraph.kt
     purpose: dedicated startup path for persistence migrations that must complete before the main application boot path can proceed
-  - file: src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationModule.kt
-    purpose: Guice bindings and runtime wiring
+  - file: src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationGraph.kt
+    purpose: explicit runtime wiring for the main interactive application graph
   - file: src/main/kotlin/de/pflugradts/passbird/application/boot/main/PassbirdApplication.kt
     purpose: interactive main loop
   - file: src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt

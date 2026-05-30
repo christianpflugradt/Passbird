@@ -1,11 +1,9 @@
 package de.pflugradts.passbird
 
 import com.google.common.eventbus.Subscribe
-import com.google.inject.AbstractModule
 import com.tngtech.archunit.base.DescribedPredicate
 import com.tngtech.archunit.base.DescribedPredicate.alwaysTrue
 import com.tngtech.archunit.core.domain.JavaClass
-import com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo
 import com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEndingWith
 import com.tngtech.archunit.core.domain.JavaMethod
 import com.tngtech.archunit.core.domain.JavaModifier
@@ -41,6 +39,7 @@ private const val KOTLIN_EXTENSIONS_ROOT = "$ROOT.kotlinextensions"
 private const val OPTIONAL_BRIDGE = "$KOTLIN_EXTENSIONS_ROOT.OptionKt"
 private const val ADAPTER_ROOT = "$PASSBIRD_ROOT.adapter"
 private const val APPLICATION_ROOT = "$PASSBIRD_ROOT.application"
+private const val BOOT_ROOT = "$APPLICATION_ROOT.boot"
 private const val DOMAIN_ROOT = "$PASSBIRD_ROOT.domain"
 private const val DOMAIN_MODELS = "$DOMAIN_ROOT.model"
 private const val DOMAIN_SERVICES = "$DOMAIN_ROOT.service"
@@ -68,7 +67,7 @@ class PassbirdTest {
             .adapter(KEYSTORE_ADAPTER, path(ADAPTER_ROOT, KEYSTORE_ADAPTER))
             .adapter(PASSWORDTREE_ADAPTER, path(ADAPTER_ROOT, PASSWORDTREE_ADAPTER))
             .adapter(USERINTERFACE_ADAPTER, path(ADAPTER_ROOT, USERINTERFACE_ADAPTER))
-            .ignoreDependency(assignableTo(AbstractModule::class.java), alwaysTrue()) // exclude guice modules
+            .ignoreDependency(areCompositionRoots(), alwaysTrue())
             .check(passbirdClasses)
     }
 
@@ -95,25 +94,17 @@ class PassbirdTest {
         }
 
         @Test
-        fun `domain classes should not depend on guice`() {
-            noClasses().that().resideInAPackage(path(DOMAIN_ROOT))
+        fun `no classes should depend on guice`() {
+            noClasses()
                 .should().dependOnClassesThat().resideInAPackage("com.google.inject..")
-                .check(passbirdClasses)
+                .check(allClasses)
         }
 
         @Test
-        fun `no classes should depend on guice inject annotation`() {
-            noClasses().should().dependOnClassesThat().haveFullyQualifiedName("com.google.inject.Inject").check(allClasses)
-        }
-
-        @Test
-        fun `no classes should depend on guice singleton annotation`() {
-            noClasses().should().dependOnClassesThat().haveFullyQualifiedName("com.google.inject.Singleton").check(allClasses)
-        }
-
-        @Test
-        fun `no classes should depend on guice named annotation`() {
-            noClasses().should().dependOnClassesThat().haveFullyQualifiedName("com.google.inject.name.Named").check(allClasses)
+        fun `no classes should depend on jakarta inject`() {
+            noClasses()
+                .should().dependOnClassesThat().resideInAPackage("jakarta.inject..")
+                .check(allClasses)
         }
 
         @Test
@@ -234,7 +225,7 @@ class PassbirdTest {
         @Test
         fun `repositories should only be accessed from domain services`() {
             classes().that().areAssignableTo(Repository::class.java)
-                .should().onlyBeAccessed().byClassesThat().resideInAPackage(path(DOMAIN_SERVICES))
+                .should().onlyBeAccessed().byClassesThat(areDomainServicesOrCompositionRoots())
                 .check(passbirdClasses)
         }
     }
@@ -352,6 +343,20 @@ private fun areNotTheOptionalBridge() = object : DescribedPredicate<JavaClass>("
 private fun areNotSystemOperation() = object : DescribedPredicate<JavaClass>("are not SystemOperation") {
     override fun test(javaClass: JavaClass) = javaClass.name != "$APPLICATION_ROOT.util.SystemOperation"
 }
+
+private fun areCompositionRoots() = object : DescribedPredicate<JavaClass>("are explicit composition roots") {
+    override fun test(javaClass: JavaClass) = isCompositionRoot(javaClass)
+}
+
+private fun areDomainServicesOrCompositionRoots() =
+    object : DescribedPredicate<JavaClass>("reside in domain services or are explicit composition roots") {
+        override fun test(javaClass: JavaClass) = javaClass.packageName == DOMAIN_SERVICES ||
+            javaClass.packageName.startsWith("$DOMAIN_SERVICES.") ||
+            isCompositionRoot(javaClass)
+    }
+
+private fun isCompositionRoot(javaClass: JavaClass) =
+    javaClass.packageName.startsWith("$BOOT_ROOT.") && javaClass.simpleName.endsWith("Graph")
 
 private fun areNotKotlinLambdas() = object : DescribedPredicate<JavaMethod>("not a Kotlin lambda") {
     override fun test(method: JavaMethod) = !method.name.contains("$")

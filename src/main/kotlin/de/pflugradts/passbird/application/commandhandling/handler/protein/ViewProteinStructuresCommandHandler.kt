@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
@@ -13,9 +12,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import jakarta.inject.Inject
-
-class ViewProteinStructuresCommandHandler @Inject constructor(
+class ViewProteinStructuresCommandHandler constructor(
     private val canPrintInfo: CanPrintInfo,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -42,11 +39,9 @@ class ViewProteinStructuresCommandHandler @Inject constructor(
         viewProteinStructuresCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private fun List<Option<Shell>>.scramblePresentShells() {
         forEach { it.ifPresent(Shell::scramble) }
     }
-
     private fun outputsOfHeader(): Array<Output> = with(canPrintInfo) {
         arrayOf(out("\n"), outBold(SLOT_HEADER), outBold("Type".padded()), outBold(SEP), outBold("Structure".padded()))
     }
@@ -59,7 +54,6 @@ class ViewProteinStructuresCommandHandler @Inject constructor(
         )
     }
 }
-
 private const val SEP = " | "
 private const val SLOT_HEADER = "Slot "
 private fun String.padded() = padEnd(20, ' ')

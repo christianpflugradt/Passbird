@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.egg
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
@@ -14,9 +13,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.DO_NOTHING
-import jakarta.inject.Inject
-
-class CustomSetCommandHandler @Inject constructor(
+class CustomSetCommandHandler constructor(
     private val configuration: ReadableConfiguration,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -33,7 +30,6 @@ class CustomSetCommandHandler @Inject constructor(
         customSetCommand.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
-
     private fun processConfirmedCustomSetCommand(customSetCommand: CustomSetCommand) {
         try {
             passwordService.challengeEggId(customSetCommand.argument)
@@ -54,7 +50,6 @@ class CustomSetCommandHandler @Inject constructor(
             userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
         }
     }
-
     private fun receiveCustomPassword(): Input? = try {
         userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter custom Password: ")))
     } catch (_: SecureInputUnavailableException) {
@@ -62,7 +57,6 @@ class CustomSetCommandHandler @Inject constructor(
         userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
         null
     }
-
     private fun commandConfirmed(customSetCommand: CustomSetCommand) =
         if (configuration.application.password.promptOnRemoval && passwordService.eggExists(customSetCommand.argument, DO_NOTHING)) {
             userInterfaceAdapterPort

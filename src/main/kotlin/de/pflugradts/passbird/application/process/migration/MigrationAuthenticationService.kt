@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.process.migration
-
 import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
@@ -15,37 +14,28 @@ import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShell
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
 private const val DEFAULT_PROMPT = "Enter key: "
-
 class MigrationCredentials private constructor(
     private val key: Shell,
     private val password: PlainShell,
 ) {
     fun keyCopy() = key.copy()
     fun passwordCopy() = plainShellOf(password.toCharArray())
-
     fun invalidate() {
         key.scramble()
         password.scramble()
     }
-
     companion object {
         fun migrationCredentialsOf(key: Shell, password: PlainShell) = MigrationCredentials(key, password)
     }
 }
-
-@Singleton
-class MigrationAuthenticationService @Inject constructor(
+class MigrationAuthenticationService constructor(
     private val configuration: ReadableConfiguration,
     private val keyStoreAdapterPort: KeyStoreAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val systemOperation: SystemOperation,
 ) {
     private var migrationCredentials: MigrationCredentials? = null
-
     fun authenticate(maxAttempts: Int = 3, prompt: String = DEFAULT_PROMPT): TryResult<MigrationCredentials> {
         migrationCredentials?.let { return success(it) }
         var result = authenticate(prompt)
@@ -56,12 +46,10 @@ class MigrationAuthenticationService @Inject constructor(
         }
         return result
     }
-
     fun invalidate() {
         migrationCredentials?.invalidate()
         migrationCredentials = null
     }
-
     private fun authenticate(prompt: String): TryResult<MigrationCredentials> {
         migrationCredentials?.let { return success(it) }
         return try {
@@ -77,7 +65,6 @@ class MigrationAuthenticationService @Inject constructor(
             failure(ex)
         }
     }
-
     private fun keyStorePath() = systemOperation.resolvePath(
         configuration.adapter.keyStore.location.toDirectory(),
         ReadableConfiguration.KEYSTORE_FILENAME.toFileName(),

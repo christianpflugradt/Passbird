@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.egg
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
@@ -10,9 +9,7 @@ import de.pflugradts.passbird.application.useScrambled
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import jakarta.inject.Inject
-
-class GetCommandHandler @Inject constructor(
+class GetCommandHandler constructor(
     private val passwordService: PasswordService,
     private val clipboardAdapterPort: ClipboardAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,

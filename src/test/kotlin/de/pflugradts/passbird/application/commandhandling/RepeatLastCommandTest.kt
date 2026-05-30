@@ -22,7 +22,6 @@ import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import jakarta.inject.Provider
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
@@ -131,7 +130,7 @@ class RepeatLastCommandTest {
                         commandExecutionTracker,
                     ),
                     UseMemoryCommandHandler(
-                        delegatingInputHandler,
+                        { delegatingInputHandler },
                         passwordService,
                         userInterfaceAdapterPort,
                         commandExecutionTracker,
@@ -168,9 +167,7 @@ class RepeatLastCommandTest {
                 setOf(
                     AddNestCommandHandler(nestService, addNestUserInterfaceAdapterPort, commandExecutionTracker),
                     RepeatLastCommandHandler(
-                        object : Provider<InputHandler> {
-                            override fun get() = addNestInputHandler
-                        },
+                        { addNestInputHandler },
                         addNestRememberedCommandMemory,
                         addNestUserInterfaceAdapterPort,
                         commandExecutionTracker,
@@ -190,9 +187,7 @@ class RepeatLastCommandTest {
         expectThat(outputs.map { it.shell.asString() }).contains("No previous command is available to repeat.")
     }
 
-    private fun inputHandlerProvider() = object : Provider<InputHandler> {
-        override fun get() = inputHandler
-    }
+    private fun inputHandlerProvider() = { inputHandler }
 }
 
 private class DelegatingInputHandler : InputHandler {

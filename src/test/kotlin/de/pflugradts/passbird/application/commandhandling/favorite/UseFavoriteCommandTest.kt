@@ -25,7 +25,7 @@ class UseFavoriteCommandTest {
     private val mockedInputHandler = mockk<InputHandler>()
     private val commandExecutionTracker = CommandExecutionTracker()
     private val useFavoriteCommandHandler =
-        UseFavoriteCommandHandler(mockedInputHandler, passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+        UseFavoriteCommandHandler({ mockedInputHandler }, passwordService, userInterfaceAdapterPort, commandExecutionTracker)
     private val inputHandler = createInputHandlerFor(useFavoriteCommandHandler, commandExecutionTracker)
 
     @Test

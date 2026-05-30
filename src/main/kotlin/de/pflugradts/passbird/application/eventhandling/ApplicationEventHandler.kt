@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.eventhandling
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.event.EggCreated
@@ -21,9 +20,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.EVENT_HANDLED
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
-import jakarta.inject.Inject
-
-class ApplicationEventHandler @Inject constructor(
+class ApplicationEventHandler constructor(
     private val cryptoProvider: CryptoProvider,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : EventHandler {
@@ -107,7 +104,6 @@ class ApplicationEventHandler @Inject constructor(
     private fun handleNestDiscarded(nestDiscarded: NestDiscarded) {
         send("Nest '${nestDiscarded.nest.viewNestId().asString()}' successfully discarded.")
     }
-
     private fun send(str: String) = userInterfaceAdapterPort.send(outputOf(shellOf(str), EVENT_HANDLED))
     private fun decrypt(encryptedShell: EncryptedShell): String {
         val decryptedShell = cryptoProvider.decrypt(encryptedShell)
@@ -118,5 +114,4 @@ class ApplicationEventHandler @Inject constructor(
         }
     }
 }
-
 private fun nestSlotText(nestSlotIndex: Int) = if (nestSlotIndex in 1..9) "Nest at Slot $nestSlotIndex" else "Default Nest"

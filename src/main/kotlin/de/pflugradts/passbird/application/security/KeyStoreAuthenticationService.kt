@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.security
-
 import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
@@ -12,11 +11,7 @@ import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
-
-@Singleton
-class KeyStoreAuthenticationService @Inject constructor(
+class KeyStoreAuthenticationService constructor(
     private val configuration: ReadableConfiguration,
     private val keyStoreAdapterPort: KeyStoreAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
@@ -31,12 +26,10 @@ class KeyStoreAuthenticationService @Inject constructor(
         }
         return result
     }
-
     fun keyStorePath() = systemOperation.resolvePath(
         configuration.adapter.keyStore.location.toDirectory(),
         ReadableConfiguration.KEYSTORE_FILENAME.toFileName(),
     )
-
     private fun authenticate(prompt: String): TryResult<Shell> = try {
         keyStoreAdapterPort.loadKey(
             userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf(prompt))).toPlainShell(),

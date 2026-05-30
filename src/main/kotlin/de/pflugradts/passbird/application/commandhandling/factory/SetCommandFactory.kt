@@ -1,13 +1,9 @@
 package de.pflugradts.passbird.application.commandhandling.factory
-
 import de.pflugradts.passbird.application.commandhandling.command.OneTimeSetCommand
 import de.pflugradts.passbird.application.commandhandling.command.SetCommand
 import de.pflugradts.passbird.application.commandhandling.command.SetInfoCommand
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.transfer.Input
-import jakarta.inject.Singleton
-
-@Singleton
 class SetCommandFactory : SpecialCommandFactory() {
     override fun internalConstruct(input: Input) = input.command.let { cmd ->
         when {

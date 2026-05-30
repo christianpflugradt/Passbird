@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
@@ -11,9 +10,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 import de.pflugradts.passbird.domain.service.password.PasswordService
-import jakarta.inject.Inject
-
-class GetProteinCommandHandler @Inject constructor(
+class GetProteinCommandHandler constructor(
     private val passwordService: PasswordService,
     private val clipboardAdapterPort: ClipboardAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,

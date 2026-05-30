@@ -1,13 +1,10 @@
 package de.pflugradts.passbird.application.commandhandling.handler.favorite
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.FavoriteInfoCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
-import jakarta.inject.Inject
-
-class FavoriteInfoCommandHandler @Inject constructor(
+class FavoriteInfoCommandHandler constructor(
     private val canPrintInfo: CanPrintInfo,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : CommandHandler {

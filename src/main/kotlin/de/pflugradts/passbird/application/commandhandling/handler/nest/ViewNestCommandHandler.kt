@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.nest
-
 import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
@@ -7,9 +6,7 @@ import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintI
 import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.domain.service.nest.NestService
-import jakarta.inject.Inject
-
-class ViewNestCommandHandler @Inject constructor(
+class ViewNestCommandHandler constructor(
     private val canPrintInfo: CanPrintInfo,
     private val canListAvailableNests: CanListAvailableNests,
     private val nestService: NestService,
@@ -33,7 +30,6 @@ class ViewNestCommandHandler @Inject constructor(
             )
         }
     }
-
     private val currentNest get() = nestService.currentNest().viewNestId().asString()
     private val availableNests get() = canListAvailableNests.getAvailableNests(includeCurrent = true).let {
         if (canListAvailableNests.hasCustomNests()) it else "$it\t(use the n+ command to create custom Nests)\n"

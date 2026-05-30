@@ -1,16 +1,11 @@
 package de.pflugradts.passbird.application.boot.launcher
 
-import com.google.inject.Module
 import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
-import de.pflugradts.passbird.application.boot.main.ApplicationModule
-import de.pflugradts.passbird.application.boot.migration.MigrationModule
-import de.pflugradts.passbird.application.boot.setup.SetupModule
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.KEYSTORE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
-import de.pflugradts.passbird.application.mockMain
 import de.pflugradts.passbird.application.process.migration.MigrationRequest
 import de.pflugradts.passbird.application.process.migration.PendingMigration
 import de.pflugradts.passbird.application.process.migration.PreLaunchMigrationLocator
@@ -23,13 +18,11 @@ import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.domain.model.slot.Slot
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import strikt.assertions.isA
+import strikt.assertions.containsExactly
 
 class PassbirdLauncherTest {
 
@@ -38,24 +31,22 @@ class PassbirdLauncherTest {
     private val runContext: RunContext = PassbirdRunContext("/tmp".toDirectory(), Slot.DEFAULT)
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val systemOperation = mockk<SystemOperation>(relaxed = true)
+    private val bootedRoutes = mutableListOf<String>()
     private val passbirdLauncher = PassbirdLauncher(
         configuration,
         preLaunchMigrationLocator,
         runContext,
         userInterfaceAdapterPort,
         systemOperation,
+        setupBoot = { bootedRoutes.add("setup") },
+        migrationBoot = { _, _ -> bootedRoutes.add("migration") },
+        applicationBoot = { bootedRoutes.add("application") },
     )
-    private val moduleSlot = slot<Module>()
 
     @BeforeEach
     fun setup() {
-        mockMain(moduleSlot)
+        bootedRoutes.clear()
         every { preLaunchMigrationLocator.detect() } returns MigrationRequest.empty()
-    }
-
-    @AfterEach
-    fun cleanup() {
-        unmockMain()
     }
 
     @Test
@@ -78,8 +69,7 @@ class PassbirdLauncherTest {
         passbirdLauncher.boot()
 
         // then
-        expectThat(moduleSlot.captured).isA<ApplicationModule>()
-        expectThat(moduleSlot.captured).not().isA<SetupModule>()
+        expectThat(bootedRoutes).containsExactly("application")
     }
 
     @Test
@@ -104,9 +94,7 @@ class PassbirdLauncherTest {
         passbirdLauncher.boot()
 
         // then
-        expectThat(moduleSlot.captured).isA<MigrationModule>()
-        expectThat(moduleSlot.captured).not().isA<ApplicationModule>()
-        expectThat(moduleSlot.captured).not().isA<SetupModule>()
+        expectThat(bootedRoutes).containsExactly("migration")
     }
 
     @Test
@@ -130,8 +118,7 @@ class PassbirdLauncherTest {
         passbirdLauncher.boot()
 
         // then
-        expectThat(moduleSlot.captured).isA<SetupModule>()
-        expectThat(moduleSlot.captured).not().isA<ApplicationModule>()
+        expectThat(bootedRoutes).containsExactly("setup")
         verify(exactly = 0) { preLaunchMigrationLocator.detect() }
     }
 
@@ -145,8 +132,7 @@ class PassbirdLauncherTest {
         passbirdLauncher.boot()
 
         // then
-        expectThat(moduleSlot.captured).isA<SetupModule>()
-        expectThat(moduleSlot.captured).not().isA<ApplicationModule>()
+        expectThat(bootedRoutes).containsExactly("setup")
         verify(exactly = 0) { preLaunchMigrationLocator.detect() }
     }
 }
