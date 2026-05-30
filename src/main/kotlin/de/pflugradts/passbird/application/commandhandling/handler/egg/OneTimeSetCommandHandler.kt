@@ -1,9 +1,8 @@
 package de.pflugradts.passbird.application.commandhandling.handler.egg
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.OneTimeSetCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
@@ -19,11 +18,10 @@ class OneTimeSetCommandHandler constructor(
     private val passwordProvider: PasswordProvider,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleOneTimeSetCommand(oneTimeSetCommand: OneTimeSetCommand) {
+) : TypedCommandHandler<OneTimeSetCommand>(OneTimeSetCommand::class.java) {
+    override fun handleCommand(command: OneTimeSetCommand) {
         try {
-            passwordService.challengeEggId(oneTimeSetCommand.argument)
+            passwordService.challengeEggId(command.argument)
             val passwordLengthInput = receivePasswordLength()
             when {
                 passwordLengthInput.isAborted -> {
@@ -48,9 +46,9 @@ class OneTimeSetCommandHandler constructor(
                             )
                         }
 
-                        commandConfirmed(oneTimeSetCommand) -> {
+                        commandConfirmed(command) -> {
                             if (passwordService.putEgg(
-                                    oneTimeSetCommand.argument,
+                                    command.argument,
                                     passwordProvider.createNewPassword(passwordRequirements),
                                 ).failure
                             ) {
@@ -69,7 +67,7 @@ class OneTimeSetCommandHandler constructor(
             commandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("${ex.message} - Operation aborted."), OPERATION_ABORTED))
         }
-        oneTimeSetCommand.invalidateInput()
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
     private fun receivePasswordLength() = userInterfaceAdapterPort.receive(
@@ -107,13 +105,13 @@ class OneTimeSetCommandHandler constructor(
             it.invalidate()
         }
     }
-    private fun commandConfirmed(oneTimeSetCommand: OneTimeSetCommand) =
-        if (configuration.application.password.promptOnRemoval && passwordService.eggExists(oneTimeSetCommand.argument, DO_NOTHING)) {
+    private fun commandConfirmed(command: OneTimeSetCommand) =
+        if (configuration.application.password.promptOnRemoval && passwordService.eggExists(command.argument, DO_NOTHING)) {
             userInterfaceAdapterPort
                 .receiveConfirmation(
                     outputOf(
                         shellOf(
-                            "Existing Egg '${oneTimeSetCommand.argument.asString()}' will be irrevocably overwritten.\n" +
+                            "Existing Egg '${command.argument.asString()}' will be irrevocably overwritten.\n" +
                                 "Input 'c' to confirm or anything else to abort.\nYour input: ",
                         ),
                     ),

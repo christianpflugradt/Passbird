@@ -40,7 +40,6 @@ detekt {
     source.setFrom("src/main/kotlin", "src/test/kotlin")
 }
 
-val guavaVersion = "33.6.0-jre"
 val jacksonVersion = "2.21.3"
 
 val archunitVersion = "1.4.2"
@@ -55,8 +54,6 @@ dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
-
-    implementation("com.google.guava:guava:$guavaVersion")
 
     testImplementation("io.strikt:strikt-core:$striktVersion")
     testImplementation("io.strikt:strikt-jvm:$striktVersion")

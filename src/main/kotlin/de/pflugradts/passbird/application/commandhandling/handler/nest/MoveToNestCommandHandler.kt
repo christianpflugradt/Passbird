@@ -1,10 +1,9 @@
 package de.pflugradts.passbird.application.commandhandling.handler.nest
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
 import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
@@ -20,10 +19,9 @@ class MoveToNestCommandHandler constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleMoveToNestCommand(moveToNestCommand: MoveToNestCommand) {
-        if (passwordService.eggExists(moveToNestCommand.argument, EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT)) {
+) : TypedCommandHandler<MoveToNestCommand>(MoveToNestCommand::class.java) {
+    override fun handleCommand(command: MoveToNestCommand) {
+        if (passwordService.eggExists(command.argument, EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             userInterfaceAdapterPort.send(outputOf(shellOf("\nAvailable Nests: \n"), HIGHLIGHT))
             userInterfaceAdapterPort.send(outputOf(shellOf(canListAvailableNests.getAvailableNests(includeCurrent = false))))
             val input = userInterfaceAdapterPort.receive(outputOf(shellOf("\nEnter Nest you want to move Egg to: ")))
@@ -39,13 +37,13 @@ class MoveToNestCommandHandler constructor(
             } else if (nestService.atNestSlot(nestSlot).isEmpty) {
                 commandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted."), OPERATION_ABORTED))
-            } else if (passwordService.eggExists(moveToNestCommand.argument, nestSlot)) {
+            } else if (passwordService.eggExists(command.argument, nestSlot)) {
                 commandExecutionTracker.markAborted()
                 userInterfaceAdapterPort.send(
                     outputOf(shellOf("Egg with same EggId already exists in target Nest - Operation aborted."), OPERATION_ABORTED),
                 )
             } else {
-                if (passwordService.moveEgg(moveToNestCommand.argument, nestSlot).failure) {
+                if (passwordService.moveEgg(command.argument, nestSlot).failure) {
                     commandExecutionTracker.markFailure()
                 }
             }
@@ -53,7 +51,7 @@ class MoveToNestCommandHandler constructor(
         } else {
             commandExecutionTracker.markFailure()
         }
-        moveToNestCommand.invalidateInput()
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
     private fun String.toTargetNestSlot(): Slot? = takeIf { it.length == 1 && it[0].isDigit() }?.let(::slotAt)

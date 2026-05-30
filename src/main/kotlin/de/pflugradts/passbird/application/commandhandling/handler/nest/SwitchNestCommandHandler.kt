@@ -1,9 +1,8 @@
 package de.pflugradts.passbird.application.commandhandling.handler.nest
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.SwitchNestCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
@@ -12,15 +11,14 @@ class SwitchNestCommandHandler constructor(
     private val nestService: NestService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleSwitchNestCommand(switchNestCommand: SwitchNestCommand) {
-        if (nestService.currentNest().slot == switchNestCommand.slot) {
+) : TypedCommandHandler<SwitchNestCommand>(SwitchNestCommand::class.java) {
+    override fun handleCommand(command: SwitchNestCommand) {
+        if (nestService.currentNest().slot == command.slot) {
             userInterfaceAdapterPort.send(
                 outputOf(shellOf("'${nestService.currentNest().viewNestId().asString()}' is already the current Nest.")),
             )
-        } else if (nestService.atNestSlot(switchNestCommand.slot).isPresent) {
-            nestService.moveToNestAt(switchNestCommand.slot)
+        } else if (nestService.atNestSlot(command.slot).isPresent) {
+            nestService.moveToNestAt(command.slot)
         } else {
             commandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Specified Nest does not exist - Operation aborted."), OPERATION_ABORTED))

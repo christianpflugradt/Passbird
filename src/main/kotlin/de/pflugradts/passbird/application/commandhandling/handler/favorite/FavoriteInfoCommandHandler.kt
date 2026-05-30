@@ -1,15 +1,13 @@
 package de.pflugradts.passbird.application.commandhandling.handler.favorite
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.FavoriteInfoCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 class FavoriteInfoCommandHandler constructor(
     private val canPrintInfo: CanPrintInfo,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-) : CommandHandler {
-    @Subscribe
-    private fun handleFavoriteInfoCommand(@Suppress("UNUSED_PARAMETER") favoriteInfoCommand: FavoriteInfoCommand) {
+) : TypedCommandHandler<FavoriteInfoCommand>(FavoriteInfoCommand::class.java) {
+    override fun handleCommand(@Suppress("UNUSED_PARAMETER") command: FavoriteInfoCommand) {
         with(canPrintInfo) {
             userInterfaceAdapterPort.send(
                 outBold("\nAvailable Favorite commands:\n"),

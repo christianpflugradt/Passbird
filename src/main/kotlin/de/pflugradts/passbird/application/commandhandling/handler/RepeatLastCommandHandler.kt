@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.application.commandhandling.handler
 
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.InputHandler
@@ -16,9 +15,8 @@ class RepeatLastCommandHandler(
     private val rememberedCommandMemory: RememberedCommandMemory,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleRepeatLastCommand(@Suppress("UNUSED_PARAMETER") repeatLastCommand: RepeatLastCommand) {
+) : TypedCommandHandler<RepeatLastCommand>(RepeatLastCommand::class.java) {
+    override fun handleCommand(@Suppress("UNUSED_PARAMETER") command: RepeatLastCommand) {
         val rememberedCommand = rememberedCommandMemory.view()
         if (rememberedCommand == null) {
             commandExecutionTracker.markFailure()

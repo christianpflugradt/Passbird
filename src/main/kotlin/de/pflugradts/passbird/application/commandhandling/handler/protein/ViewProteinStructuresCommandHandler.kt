@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.kotlinextensions.Option
@@ -7,7 +6,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.ViewProteinStructuresCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.transfer.Output
@@ -17,12 +16,11 @@ class ViewProteinStructuresCommandHandler constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleViewProteinStructuresCommand(viewProteinStructuresCommand: ViewProteinStructuresCommand) {
-        passwordService.viewProteinTypes(viewProteinStructuresCommand.argument).orNull()?.also { types ->
+) : TypedCommandHandler<ViewProteinStructuresCommand>(ViewProteinStructuresCommand::class.java) {
+    override fun handleCommand(command: ViewProteinStructuresCommand) {
+        passwordService.viewProteinTypes(command.argument).orNull()?.also { types ->
             try {
-                passwordService.viewProteinStructures(viewProteinStructuresCommand.argument).orNull()?.also { structures ->
+                passwordService.viewProteinStructures(command.argument).orNull()?.also { structures ->
                     try {
                         userInterfaceAdapterPort.send(*outputsOfHeader())
                         types.zip(structures).forEachIndexed { index, proteinPair ->
@@ -36,7 +34,7 @@ class ViewProteinStructuresCommandHandler constructor(
                 types.scramblePresentShells()
             }
         } ?: commandExecutionTracker.markFailure()
-        viewProteinStructuresCommand.invalidateInput()
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
     private fun List<Option<Shell>>.scramblePresentShells() {

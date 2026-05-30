@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
@@ -18,10 +17,9 @@ class ExportCommandHandler constructor(
     private val nestService: NestService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleExportCommand(exportCommand: ExportCommand) {
-        if (exportCommand.selective) {
+) : TypedCommandHandler<ExportCommand>(ExportCommand::class.java) {
+    override fun handleCommand(command: ExportCommand) {
+        if (command.selective) {
             exportSelectedNests()
         } else {
             importExportService.exportEggs()

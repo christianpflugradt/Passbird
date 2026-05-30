@@ -61,7 +61,7 @@ coverage:
       reason: representative slot coverage through slot 0 and slot 1 exercises the relevant parsing and persistence paths without duplicating effort
 expected_outcome:
   - every session exits successfully
-  - every session log is free of stack traces, severe event bus logging, command parsing failures, and unexpected operation-aborted messages
+  - every session log is free of stack traces, severe dispatch logging, command parsing failures, and unexpected operation-aborted messages
   - clipboard assertions remain stable because clipboard reset is disabled in the patched smoke configuration
 sessions:
   - id: source-setup

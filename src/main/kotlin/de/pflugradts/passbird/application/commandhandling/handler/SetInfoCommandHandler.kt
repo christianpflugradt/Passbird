@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.SetInfoCommand
@@ -8,9 +7,8 @@ class SetInfoCommandHandler constructor(
     private val canPrintInfo: CanPrintInfo,
     private val configuration: ReadableConfiguration,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-) : CommandHandler {
-    @Subscribe
-    private fun handleSetInfoCommand(@Suppress("UNUSED_PARAMETER") setInfoCommand: SetInfoCommand) {
+) : TypedCommandHandler<SetInfoCommand>(SetInfoCommand::class.java) {
+    override fun handleCommand(@Suppress("UNUSED_PARAMETER") command: SetInfoCommand) {
         with(canPrintInfo) {
             userInterfaceAdapterPort.send(
                 outBold("\n0: Default\n"),

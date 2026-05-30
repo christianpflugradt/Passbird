@@ -1,9 +1,8 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.DiscardProteinCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -15,14 +14,13 @@ class DiscardProteinCommandHandler constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleDiscardProteinCommand(discardProteinCommand: DiscardProteinCommand) {
-        val eggIdShell = discardProteinCommand.argument
-        val slot = discardProteinCommand.slot
+) : TypedCommandHandler<DiscardProteinCommand>(DiscardProteinCommand::class.java) {
+    override fun handleCommand(command: DiscardProteinCommand) {
+        val eggIdShell = command.argument
+        val slot = command.slot
         run {
             if (passwordService.eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
-                if (!passwordService.proteinExists(eggIdShell, slot) || commandConfirmed(discardProteinCommand)) {
+                if (!passwordService.proteinExists(eggIdShell, slot) || commandConfirmed(command)) {
                     if (passwordService.discardProtein(eggIdShell, slot).failure) {
                         commandExecutionTracker.markFailure()
                     }
@@ -34,11 +32,11 @@ class DiscardProteinCommandHandler constructor(
                 commandExecutionTracker.markFailure()
             }
         }
-        discardProteinCommand.invalidateInput()
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
-    private fun commandConfirmed(discardProteinCommand: DiscardProteinCommand) = if (configuration.application.password.promptOnRemoval &&
-        passwordService.eggExists(discardProteinCommand.argument, PasswordService.EggNotExistsAction.DO_NOTHING)
+    private fun commandConfirmed(command: DiscardProteinCommand) = if (configuration.application.password.promptOnRemoval &&
+        passwordService.eggExists(command.argument, PasswordService.EggNotExistsAction.DO_NOTHING)
     ) {
         userInterfaceAdapterPort
             .receiveConfirmation(

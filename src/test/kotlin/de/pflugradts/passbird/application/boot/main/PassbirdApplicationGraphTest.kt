@@ -31,10 +31,7 @@ class PassbirdApplicationGraphTest {
         expectThat(actual.bootable).isA<PassbirdApplication>()
         expectThat(actual.runContext) isSameInstanceAs runContext
         expectThat(actual.commandHandlers.implementationClasses()) isEqualTo expectedGraphClasses(CommandHandler::class.java)
-        expectThat(actual.eventHandlers.implementationClasses()) isEqualTo expectedGraphClasses(
-            EventHandler::class.java,
-            CommandHandler::class.java,
-        )
+        expectThat(actual.eventHandlers.implementationClasses()) isEqualTo expectedGraphClasses(EventHandler::class.java)
         expectThat(actual.initializers.implementationClasses()) isEqualTo expectedGraphClasses(Initializer::class.java)
         expectThat(actual.finalizers.implementationClasses()) isEqualTo expectedGraphClasses(Finalizer::class.java)
     }

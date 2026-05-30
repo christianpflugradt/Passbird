@@ -1,10 +1,9 @@
 package de.pflugradts.passbird.application.commandhandling.handler.egg
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -18,27 +17,26 @@ class CustomSetCommandHandler constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleCustomSetCommand(customSetCommand: CustomSetCommand) {
-        if (commandConfirmed(customSetCommand)) {
-            processConfirmedCustomSetCommand(customSetCommand)
+) : TypedCommandHandler<CustomSetCommand>(CustomSetCommand::class.java) {
+    override fun handleCommand(command: CustomSetCommand) {
+        if (commandConfirmed(command)) {
+            processConfirmedCustomSetCommand(command)
         } else {
             commandExecutionTracker.markAborted()
             userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
         }
-        customSetCommand.invalidateInput()
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
-    private fun processConfirmedCustomSetCommand(customSetCommand: CustomSetCommand) {
+    private fun processConfirmedCustomSetCommand(command: CustomSetCommand) {
         try {
-            passwordService.challengeEggId(customSetCommand.argument)
+            passwordService.challengeEggId(command.argument)
             receiveCustomPassword()?.let { secureInput ->
                 try {
                     if (secureInput.isEmpty) {
                         commandExecutionTracker.markAborted()
                         userInterfaceAdapterPort.send(outputOf(shellOf("Empty input - Operation aborted."), OPERATION_ABORTED))
-                    } else if (passwordService.putEgg(customSetCommand.argument, secureInput.shell).failure) {
+                    } else if (passwordService.putEgg(command.argument, secureInput.shell).failure) {
                         commandExecutionTracker.markFailure()
                     }
                 } finally {
@@ -57,13 +55,13 @@ class CustomSetCommandHandler constructor(
         userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
         null
     }
-    private fun commandConfirmed(customSetCommand: CustomSetCommand) =
-        if (configuration.application.password.promptOnRemoval && passwordService.eggExists(customSetCommand.argument, DO_NOTHING)) {
+    private fun commandConfirmed(command: CustomSetCommand) =
+        if (configuration.application.password.promptOnRemoval && passwordService.eggExists(command.argument, DO_NOTHING)) {
             userInterfaceAdapterPort
                 .receiveConfirmation(
                     outputOf(
                         shellOf(
-                            "Existing Egg '${customSetCommand.argument.asString()}' will be irrevocably overwritten.\n" +
+                            "Existing Egg '${command.argument.asString()}' will be irrevocably overwritten.\n" +
                                 "Input 'c' to confirm or anything else to abort.\nYour input: ",
                         ),
                     ),

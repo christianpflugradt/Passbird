@@ -1,10 +1,9 @@
 package de.pflugradts.passbird.application.commandhandling.handler.egg
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.GetCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.useScrambled
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -14,10 +13,9 @@ class GetCommandHandler constructor(
     private val clipboardAdapterPort: ClipboardAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleGetCommand(getCommand: GetCommand) {
-        passwordService.viewPassword(getCommand.argument).ifPresentOrElse(
+) : TypedCommandHandler<GetCommand>(GetCommand::class.java) {
+    override fun handleCommand(command: GetCommand) {
+        passwordService.viewPassword(command.argument).ifPresentOrElse(
             block = { password ->
                 password.useScrambled {
                     val clipboardResult = clipboardAdapterPort.post(outputOf(it))
@@ -33,7 +31,7 @@ class GetCommandHandler constructor(
                 commandExecutionTracker.markFailure()
             },
         )
-        getCommand.invalidateInput()
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
 }

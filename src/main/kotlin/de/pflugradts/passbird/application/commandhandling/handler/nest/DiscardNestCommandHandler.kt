@@ -1,9 +1,8 @@
 package de.pflugradts.passbird.application.commandhandling.handler.nest
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.DiscardNestCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
@@ -18,41 +17,40 @@ class DiscardNestCommandHandler constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleDiscardNestCommand(discardNestCommand: DiscardNestCommand) {
+) : TypedCommandHandler<DiscardNestCommand>(DiscardNestCommand::class.java) {
+    override fun handleCommand(command: DiscardNestCommand) {
         when {
-            discardNestCommand.slot == DEFAULT -> {
+            command.slot == DEFAULT -> {
                 sendAbortMessage("Default Nest cannot be discarded - Operation aborted.")
                 return
             }
 
-            nestService.atNestSlot(discardNestCommand.slot).isEmpty -> {
+            nestService.atNestSlot(command.slot).isEmpty -> {
                 sendAbortMessage("Specified Nest does not exist - Operation aborted.")
                 return
             }
         }
-        discardExistingNest(discardNestCommand)
+        discardExistingNest(command)
         userInterfaceAdapterPort.sendLineBreak()
     }
-    private fun discardExistingNest(discardNestCommand: DiscardNestCommand) {
+    private fun discardExistingNest(command: DiscardNestCommand) {
         val currentNest = nestService.currentNest()
         try {
-            nestService.moveToNestAt(discardNestCommand.slot)
+            nestService.moveToNestAt(command.slot)
             val eggIds = passwordService.findAllEggIds().toList()
             try {
                 if (eggIds.isEmpty()) {
-                    if (nestService.discardNestAt(discardNestCommand.slot).failure) {
+                    if (nestService.discardNestAt(command.slot).failure) {
                         commandExecutionTracker.markFailure()
                     }
                     return
                 }
-                discardNestWithEggs(discardNestCommand.slot, eggIds)
+                discardNestWithEggs(command.slot, eggIds)
             } finally {
                 eggIds.scrambleShells()
             }
         } finally {
-            nestService.moveToNestAt(if (discardNestCommand.slot == currentNest.slot) DEFAULT else currentNest.slot)
+            nestService.moveToNestAt(if (command.slot == currentNest.slot) DEFAULT else currentNest.slot)
         }
     }
     private fun discardNestWithEggs(discardNestSlot: Slot, eggIds: List<Shell>) {

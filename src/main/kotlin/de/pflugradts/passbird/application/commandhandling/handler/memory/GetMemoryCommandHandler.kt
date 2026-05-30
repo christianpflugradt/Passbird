@@ -1,10 +1,9 @@
 package de.pflugradts.passbird.application.commandhandling.handler.memory
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.GetMemoryCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.useScrambled
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -14,10 +13,9 @@ class GetMemoryCommandHandler constructor(
     private val clipboardAdapterPort: ClipboardAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleGetMemoryCommand(getMemoryCommand: GetMemoryCommand) {
-        passwordService.viewMemoryEntry(getMemoryCommand.slot).ifPresentOrElse(
+) : TypedCommandHandler<GetMemoryCommand>(GetMemoryCommand::class.java) {
+    override fun handleCommand(command: GetMemoryCommand) {
+        passwordService.viewMemoryEntry(command.slot).ifPresentOrElse(
             block = { memory ->
                 memory.useScrambled {
                     val clipboardResult = clipboardAdapterPort.post(outputOf(it))
@@ -31,7 +29,7 @@ class GetMemoryCommandHandler constructor(
             },
             other = {
                 commandExecutionTracker.markFailure()
-                userInterfaceAdapterPort.send(outputOf(shellOf("Memory entry at slot ${getMemoryCommand.slot.index()} does not exist.")))
+                userInterfaceAdapterPort.send(outputOf(shellOf("Memory entry at slot ${command.slot.index()} does not exist.")))
             },
         )
         userInterfaceAdapterPort.sendLineBreak()

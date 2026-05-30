@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.application.eventhandling
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
+import de.pflugradts.passbird.domain.model.ddd.DomainEvent
 import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggMoved
@@ -24,48 +24,73 @@ class ApplicationEventHandler constructor(
     private val cryptoProvider: CryptoProvider,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : EventHandler {
-    @Subscribe
+    override val eventTypes: Set<Class<out DomainEvent>> = setOf(
+        EggCreated::class.java,
+        EggUpdated::class.java,
+        EggRenamed::class.java,
+        EggDiscarded::class.java,
+        EggMoved::class.java,
+        EggNotFound::class.java,
+        EggsExported::class.java,
+        EggsImported::class.java,
+        ProteinCreated::class.java,
+        ProteinUpdated::class.java,
+        ProteinDiscarded::class.java,
+        NestCreated::class.java,
+        NestDiscarded::class.java,
+    )
+
+    override fun handle(domainEvent: DomainEvent) {
+        when (domainEvent) {
+            is EggCreated -> handleEggCreated(domainEvent)
+            is EggUpdated -> handleEggUpdated(domainEvent)
+            is EggRenamed -> handleEggRenamed(domainEvent)
+            is EggDiscarded -> handleEggDiscarded(domainEvent)
+            is EggMoved -> handleEggMoved(domainEvent)
+            is EggNotFound -> handleEggNotFound(domainEvent)
+            is EggsExported -> handleEggsExported(domainEvent)
+            is EggsImported -> handleEggsImported(domainEvent)
+            is ProteinCreated -> handleProteinCreated(domainEvent)
+            is ProteinUpdated -> handleProteinUpdated(domainEvent)
+            is ProteinDiscarded -> handleProteinDiscarded(domainEvent)
+            is NestCreated -> handleNestCreated(domainEvent)
+            is NestDiscarded -> handleNestDiscarded(domainEvent)
+        }
+    }
+
     private fun handleEggCreated(eggCreated: EggCreated) {
         send("Egg '${decrypt(eggCreated.egg.viewEggId())}' successfully created.")
     }
 
-    @Subscribe
     private fun handleEggUpdated(eggUpdated: EggUpdated) {
         send("Egg '${decrypt(eggUpdated.egg.viewEggId())}' successfully updated.")
     }
 
-    @Subscribe
     private fun handleEggRenamed(eggRenamed: EggRenamed) {
         send("Egg '${decrypt(eggRenamed.egg.viewEggId())}' successfully renamed.")
     }
 
-    @Subscribe
     private fun handleEggDiscarded(eggDiscarded: EggDiscarded) {
         send("Egg '${decrypt(eggDiscarded.egg.viewEggId())}' successfully discarded.")
     }
 
-    @Subscribe
     private fun handleEggMoved(eggMoved: EggMoved) {
         send("Egg '${decrypt(eggMoved.egg.viewEggId())}' successfully moved to ${nestSlotText(eggMoved.egg.associatedNest().index())}.")
     }
 
-    @Subscribe
     private fun handleEggNotFound(eggNotFound: EggNotFound) {
         send("Egg '${eggNotFound.eggIdShell.asString()}' not found.")
         userInterfaceAdapterPort.warningSound()
     }
 
-    @Subscribe
     private fun handleEggsExported(eggsExported: EggsExported) {
         send("${eggsExported.count} eggs successfully exported.")
     }
 
-    @Subscribe
     private fun handleEggsImported(eggsImported: EggsImported) {
         send("${eggsImported.count} eggs successfully imported.")
     }
 
-    @Subscribe
     private fun handleProteinCreated(proteinCreated: ProteinCreated) {
         val proteinType = decrypt(proteinCreated.protein.viewType())
         val eggId = decrypt(proteinCreated.egg.viewEggId())
@@ -73,7 +98,6 @@ class ApplicationEventHandler constructor(
         send(msg)
     }
 
-    @Subscribe
     private fun handleProteinUpdated(proteinUpdated: ProteinUpdated) {
         val oldProteinType = decrypt(proteinUpdated.oldProtein.viewType())
         val newProteinType = decrypt(proteinUpdated.newProtein.viewType())
@@ -87,7 +111,6 @@ class ApplicationEventHandler constructor(
         send(msg)
     }
 
-    @Subscribe
     private fun handleProteinDiscarded(proteinDiscarded: ProteinDiscarded) {
         val proteinType = decrypt(proteinDiscarded.protein.viewType())
         val eggId = decrypt(proteinDiscarded.egg.viewEggId())
@@ -95,12 +118,10 @@ class ApplicationEventHandler constructor(
         send(msg)
     }
 
-    @Subscribe
     private fun handleNestCreated(nestCreated: NestCreated) {
         send("Nest '${nestCreated.nest.viewNestId().asString()}' successfully created.")
     }
 
-    @Subscribe
     private fun handleNestDiscarded(nestDiscarded: NestDiscarded) {
         send("Nest '${nestDiscarded.nest.viewNestId().asString()}' successfully discarded.")
     }

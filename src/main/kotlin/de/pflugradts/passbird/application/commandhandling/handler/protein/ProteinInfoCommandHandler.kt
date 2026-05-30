@@ -1,15 +1,13 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.ProteinInfoCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 class ProteinInfoCommandHandler constructor(
     private val canPrintInfo: CanPrintInfo,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-) : CommandHandler {
-    @Subscribe
-    private fun handleProteinInfoCommand(@Suppress("UNUSED_PARAMETER") proteinInfoCommand: ProteinInfoCommand) {
+) : TypedCommandHandler<ProteinInfoCommand>(ProteinInfoCommand::class.java) {
+    override fun handleCommand(@Suppress("UNUSED_PARAMETER") command: ProteinInfoCommand) {
         with(canPrintInfo) {
             userInterfaceAdapterPort.send(
                 outBold("\nAvailable Protein commands:\n"),

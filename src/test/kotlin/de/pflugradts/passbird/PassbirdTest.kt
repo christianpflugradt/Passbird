@@ -1,11 +1,9 @@
 package de.pflugradts.passbird
 
-import com.google.common.eventbus.Subscribe
 import com.tngtech.archunit.base.DescribedPredicate
 import com.tngtech.archunit.base.DescribedPredicate.alwaysTrue
 import com.tngtech.archunit.core.domain.JavaClass
 import com.tngtech.archunit.core.domain.JavaClass.Predicates.simpleNameEndingWith
-import com.tngtech.archunit.core.domain.JavaMethod
 import com.tngtech.archunit.core.domain.JavaModifier
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.core.importer.ImportOption.DoNotIncludeTests
@@ -13,10 +11,11 @@ import com.tngtech.archunit.lang.ArchRule
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
-import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods
 import com.tngtech.archunit.library.Architectures.onionArchitecture
 import de.pflugradts.kotlinextensions.UtilityArchitectureHelper
 import de.pflugradts.kotlinextensions.UtilityOptionalFixture
+import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.ddd.AggregateRoot
 import de.pflugradts.passbird.domain.model.ddd.DomainEntity
@@ -284,26 +283,23 @@ class PassbirdTest {
     @Nested
     inner class EventHandlerTest {
         @Test
-        fun `event handlers should not have public methods`() {
-            noMethods().that().areDeclaredInClassesThat().areAssignableTo(
-                EventHandler::class.java,
-            ).should().bePublic().check(passbirdClasses)
+        fun `no code should depend on guava eventbus`() {
+            noClasses().should().dependOnClassesThat().resideInAPackage("com.google.common.eventbus..")
+                .check(allClasses)
         }
 
         @Test
-        fun `event handlers handle methods must be annotated with subscribe`() {
-            methods().that().areDeclaredInClassesThat().areAssignableTo(EventHandler::class.java)
-                .and().haveNameMatching("^handle.*")
-                .and(areNotKotlinLambdas())
-                .should().beAnnotatedWith(Subscribe::class.java)
+        fun `command handlers should use typed command handler contract`() {
+            classes().that().areAssignableTo(CommandHandler::class.java).and().areNotInterfaces()
+                .should().beAssignableTo(TypedCommandHandler::class.java)
                 .check(passbirdClasses)
         }
 
         @Test
-        fun `no methods that are not event handlers may be annotated with subscribe`() {
-            noMethods().that().areDeclaredInClassesThat().areNotAssignableTo(EventHandler::class.java)
-                .or().haveNameNotMatching("^handle.*")
-                .should().beAnnotatedWith(Subscribe::class.java)
+        fun `event handlers should expose direct handle entrypoint`() {
+            methods().that().areDeclaredInClassesThat().areAssignableTo(EventHandler::class.java)
+                .and().haveNameMatching("^handle$")
+                .should().bePublic()
                 .check(passbirdClasses)
         }
     }
@@ -357,7 +353,3 @@ private fun areDomainServicesOrCompositionRoots() =
 
 private fun isCompositionRoot(javaClass: JavaClass) =
     javaClass.packageName.startsWith("$BOOT_ROOT.") && javaClass.simpleName.endsWith("Graph")
-
-private fun areNotKotlinLambdas() = object : DescribedPredicate<JavaMethod>("not a Kotlin lambda") {
-    override fun test(method: JavaMethod) = !method.name.contains("$")
-}

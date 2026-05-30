@@ -1,10 +1,9 @@
 package de.pflugradts.passbird.application.commandhandling.handler.favorite
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.GetFavoriteCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.useScrambled
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -14,10 +13,9 @@ class GetFavoriteCommandHandler constructor(
     private val clipboardAdapterPort: ClipboardAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleGetFavoriteCommand(getFavoriteCommand: GetFavoriteCommand) {
-        passwordService.viewFavoriteEntry(getFavoriteCommand.slot).ifPresentOrElse(
+) : TypedCommandHandler<GetFavoriteCommand>(GetFavoriteCommand::class.java) {
+    override fun handleCommand(command: GetFavoriteCommand) {
+        passwordService.viewFavoriteEntry(command.slot).ifPresentOrElse(
             block = { favorite ->
                 favorite.useScrambled {
                     val clipboardResult = clipboardAdapterPort.post(outputOf(it))
@@ -32,7 +30,7 @@ class GetFavoriteCommandHandler constructor(
             other = {
                 commandExecutionTracker.markFailure()
                 userInterfaceAdapterPort.send(
-                    outputOf(shellOf("Favorite entry at slot ${getFavoriteCommand.slot.index()} does not exist.")),
+                    outputOf(shellOf("Favorite entry at slot ${command.slot.index()} does not exist.")),
                 )
             },
         )

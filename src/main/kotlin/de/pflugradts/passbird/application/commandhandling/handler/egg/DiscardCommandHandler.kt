@@ -1,9 +1,8 @@
 package de.pflugradts.passbird.application.commandhandling.handler.egg
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.DiscardCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -14,12 +13,11 @@ class DiscardCommandHandler constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleDiscardCommand(discardCommand: DiscardCommand) {
-        if (passwordService.viewPassword(discardCommand.argument).isPresent) {
+) : TypedCommandHandler<DiscardCommand>(DiscardCommand::class.java) {
+    override fun handleCommand(command: DiscardCommand) {
+        if (passwordService.viewPassword(command.argument).isPresent) {
             if (commandConfirmed()) {
-                if (passwordService.discardEgg(discardCommand.argument).failure) {
+                if (passwordService.discardEgg(command.argument).failure) {
                     commandExecutionTracker.markFailure()
                 }
             } else {
@@ -29,7 +27,7 @@ class DiscardCommandHandler constructor(
         } else {
             commandExecutionTracker.markFailure()
         }
-        discardCommand.invalidateInput()
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
     private fun commandConfirmed() = if (configuration.application.password.promptOnRemoval) {

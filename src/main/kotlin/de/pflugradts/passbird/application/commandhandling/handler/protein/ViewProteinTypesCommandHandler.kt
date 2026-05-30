@@ -1,11 +1,10 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.ViewProteinTypesCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -14,10 +13,9 @@ class ViewProteinTypesCommandHandler constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleViewProteinTypesCommand(viewProteinTypesCommand: ViewProteinTypesCommand) {
-        passwordService.viewProteinTypes(viewProteinTypesCommand.argument).orNull()?.also { proteinTypes ->
+) : TypedCommandHandler<ViewProteinTypesCommand>(ViewProteinTypesCommand::class.java) {
+    override fun handleCommand(command: ViewProteinTypesCommand) {
+        passwordService.viewProteinTypes(command.argument).orNull()?.also { proteinTypes ->
             try {
                 userInterfaceAdapterPort.send(*outputsOfHeader())
                 proteinTypes.forEachIndexed { index, proteinType -> userInterfaceAdapterPort.send(*outputsOf(index, proteinType)) }
@@ -25,7 +23,7 @@ class ViewProteinTypesCommandHandler constructor(
                 proteinTypes.forEach { it.ifPresent(Shell::scramble) }
             }
         } ?: commandExecutionTracker.markFailure()
-        viewProteinTypesCommand.invalidateInput()
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
     private fun outputsOfHeader(): Array<Output> = with(canPrintInfo) {

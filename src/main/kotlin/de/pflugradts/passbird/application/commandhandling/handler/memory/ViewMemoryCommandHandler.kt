@@ -1,9 +1,8 @@
 package de.pflugradts.passbird.application.commandhandling.handler.memory
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.ViewMemoryCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -12,9 +11,8 @@ class ViewMemoryCommandHandler constructor(
     private val canPrintInfo: CanPrintInfo,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-) : CommandHandler {
-    @Subscribe
-    private fun handleViewMemoryCommand(viewMemoryCommand: ViewMemoryCommand) {
+) : TypedCommandHandler<ViewMemoryCommand>(ViewMemoryCommand::class.java) {
+    override fun handleCommand(command: ViewMemoryCommand) {
         val memory = passwordService.viewMemory()
         try {
             userInterfaceAdapterPort.sendLineBreak()

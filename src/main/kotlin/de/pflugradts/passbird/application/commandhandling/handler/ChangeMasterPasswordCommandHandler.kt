@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.SecureInputUnavailableException
@@ -20,9 +19,8 @@ class ChangeMasterPasswordCommandHandler constructor(
     private val keyStoreAuthenticationService: KeyStoreAuthenticationService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleChangeMasterPasswordCommand(@Suppress("UNUSED_PARAMETER") changeMasterPasswordCommand: ChangeMasterPasswordCommand) {
+) : TypedCommandHandler<ChangeMasterPasswordCommand>(ChangeMasterPasswordCommand::class.java) {
+    override fun handleCommand(@Suppress("UNUSED_PARAMETER") command: ChangeMasterPasswordCommand) {
         userInterfaceAdapterPort.sendLineBreak()
         userInterfaceAdapterPort.send(outputOf(shellOf(KEYSTORE_PREAMBLE)))
         userInterfaceAdapterPort.sendLineBreak()

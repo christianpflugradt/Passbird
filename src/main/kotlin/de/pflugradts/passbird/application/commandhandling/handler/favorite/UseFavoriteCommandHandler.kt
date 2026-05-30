@@ -1,11 +1,10 @@
 package de.pflugradts.passbird.application.commandhandling.handler.favorite
 
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.InputHandler
 import de.pflugradts.passbird.application.commandhandling.command.UseFavoriteCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.useScrambled
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
@@ -17,24 +16,23 @@ class UseFavoriteCommandHandler(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleUseFavoriteCommand(useFavoriteCommand: UseFavoriteCommand) {
-        passwordService.viewFavoriteEntry(useFavoriteCommand.slot).ifPresentOrElse(
+) : TypedCommandHandler<UseFavoriteCommand>(UseFavoriteCommand::class.java) {
+    override fun handleCommand(command: UseFavoriteCommand) {
+        passwordService.viewFavoriteEntry(command.slot).ifPresentOrElse(
             block = { favorite ->
                 favorite.useScrambled {
-                    inputHandler().handleInput(inputOf(useFavoriteCommand.argument + it))
+                    inputHandler().handleInput(inputOf(command.argument + it))
                     commandExecutionTracker.mark(commandExecutionTracker.lastCompletedOutcome())
                 }
             },
             other = {
                 commandExecutionTracker.markFailure()
                 userInterfaceAdapterPort.send(
-                    outputOf(shellOf("Favorite entry at slot ${useFavoriteCommand.slot.index()} does not exist.")),
+                    outputOf(shellOf("Favorite entry at slot ${command.slot.index()} does not exist.")),
                 )
             },
         )
-        useFavoriteCommand.invalidateInput()
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
 }

@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.application.eventhandling
 
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggCreated
@@ -103,11 +102,54 @@ class PassbirdEventRegistryTest {
         expectThat(collectedEvents).containsExactly(domainEvent)
     }
 
+    @Test
+    fun `should leave aggregate root events available for retry when subscriber fails`() {
+        // given
+        val collectedEvents = mutableListOf<DomainEvent>()
+        val eventHandler = FailingOnceEventHandler(collectedEvents)
+        val eventRegistry = PassbirdEventRegistry(setOf(eventHandler))
+        val aggregate = createEggForTesting()
+        aggregate.clearDomainEvents()
+        val domainEvent = EggCreated(aggregate)
+        aggregate.registerDomainEvent(domainEvent)
+        eventRegistry.register(aggregate)
+
+        // when / then
+        assertThrows<IllegalStateException> { eventRegistry.processEvents() }
+        expectThat(aggregate.getDomainEvents()).containsExactly(domainEvent)
+        eventRegistry.processEvents()
+        expectThat(aggregate.getDomainEvents()).isEmpty()
+        expectThat(collectedEvents).containsExactly(domainEvent)
+    }
+
+    @Test
+    fun `should deliver the same domain event to multiple handlers`() {
+        // given
+        val firstCollectedEvents = mutableListOf<DomainEvent>()
+        val secondCollectedEvents = mutableListOf<DomainEvent>()
+        val eventRegistry = PassbirdEventRegistry(
+            setOf(
+                CollectingEventHandler(firstCollectedEvents),
+                CollectingEventHandler(secondCollectedEvents),
+            ),
+        )
+        val domainEvent = mockk<DomainEvent>()
+
+        // when
+        eventRegistry.register(domainEvent)
+        eventRegistry.processEvents()
+
+        // then
+        expectThat(firstCollectedEvents).containsExactly(domainEvent)
+        expectThat(secondCollectedEvents).containsExactly(domainEvent)
+    }
+
     private class CollectingEventHandler(
         private val events: MutableList<DomainEvent>,
     ) : EventHandler {
-        @Subscribe
-        private fun handle(domainEvent: DomainEvent) {
+        override val eventTypes: Set<Class<out DomainEvent>> = setOf(DomainEvent::class.java)
+
+        override fun handle(domainEvent: DomainEvent) {
             events.add(domainEvent)
         }
     }
@@ -115,10 +157,11 @@ class PassbirdEventRegistryTest {
     private class FailingOnceEventHandler(
         private val events: MutableList<DomainEvent>,
     ) : EventHandler {
+        override val eventTypes: Set<Class<out DomainEvent>> = setOf(DomainEvent::class.java)
+
         private var shouldFail = true
 
-        @Subscribe
-        private fun handle(domainEvent: DomainEvent) {
+        override fun handle(domainEvent: DomainEvent) {
             if (shouldFail) {
                 shouldFail = false
                 throw IllegalStateException("event failed")

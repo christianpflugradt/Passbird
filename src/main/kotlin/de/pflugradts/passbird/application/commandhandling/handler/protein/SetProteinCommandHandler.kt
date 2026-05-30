@@ -1,10 +1,9 @@
 package de.pflugradts.passbird.application.commandhandling.handler.protein
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.SecureInputUnavailableException
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.SetProteinCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -21,34 +20,33 @@ class SetProteinCommandHandler constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleSetProteinCommand(setProteinCommand: SetProteinCommand) {
-        val eggIdShell = setProteinCommand.argument
-        val slot = setProteinCommand.slot
+) : TypedCommandHandler<SetProteinCommand>(SetProteinCommand::class.java) {
+    override fun handleCommand(command: SetProteinCommand) {
+        val eggIdShell = command.argument
+        val slot = command.slot
         if (!passwordService.eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             commandExecutionTracker.markFailure()
-            finish(setProteinCommand)
+            finish(command)
             return
         }
-        if (passwordService.proteinExists(eggIdShell, slot) && !commandConfirmed(setProteinCommand)) {
-            abort(setProteinCommand)
+        if (passwordService.proteinExists(eggIdShell, slot) && !commandConfirmed(command)) {
+            abort(command)
             return
         }
-        val typeInput = receiveTypeInput(setProteinCommand) ?: run {
-            abort(setProteinCommand)
+        val typeInput = receiveTypeInput(command) ?: run {
+            abort(command)
             return
         }
         try {
             val structureInput = try {
                 structureInputReceived(secureInputDetermined())
             } catch (_: SecureInputUnavailableException) {
-                abort(setProteinCommand)
+                abort(command)
                 return
             }
             try {
                 if (structureInput.isEmpty) {
-                    abort(setProteinCommand)
+                    abort(command)
                     return
                 }
                 putProtein(eggIdShell, slot, typeInput, structureInput)
@@ -58,12 +56,12 @@ class SetProteinCommandHandler constructor(
         } finally {
             typeInput.invalidate()
         }
-        finish(setProteinCommand)
+        finish(command)
     }
-    private fun commandConfirmed(setProteinCommand: SetProteinCommand) = if (configuration.application.password.promptOnRemoval &&
-        passwordService.eggExists(setProteinCommand.argument, PasswordService.EggNotExistsAction.DO_NOTHING)
+    private fun commandConfirmed(command: SetProteinCommand) = if (configuration.application.password.promptOnRemoval &&
+        passwordService.eggExists(command.argument, PasswordService.EggNotExistsAction.DO_NOTHING)
     ) {
-        val msg = "Existing Protein at Slot '${setProteinCommand.slot.index()}' of Egg '${setProteinCommand.argument.asString()}' " +
+        val msg = "Existing Protein at Slot '${command.slot.index()}' of Egg '${command.argument.asString()}' " +
             "will be irrevocably overwritten.\nInput 'c' to confirm or anything else to abort.\nYour input: "
         userInterfaceAdapterPort.receiveConfirmation(Output.outputOf(Shell.shellOf(msg)))
     } else {
@@ -86,10 +84,10 @@ class SetProteinCommandHandler constructor(
                 false -> userInterfaceAdapterPort.receive(this)
             }
         }
-    private fun receiveTypeInput(setProteinCommand: SetProteinCommand): Input? {
+    private fun receiveTypeInput(command: SetProteinCommand): Input? {
         val currentType = passwordService.viewProteinType(
-            setProteinCommand.argument,
-            setProteinCommand.slot,
+            command.argument,
+            command.slot,
         ).get()
         var selectedInput: Input? = null
         return try {
@@ -125,13 +123,13 @@ class SetProteinCommandHandler constructor(
             structureShell.scramble()
         }
     }
-    private fun abort(setProteinCommand: SetProteinCommand) {
+    private fun abort(command: SetProteinCommand) {
         commandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
-        finish(setProteinCommand)
+        finish(command)
     }
-    private fun finish(setProteinCommand: SetProteinCommand) {
-        setProteinCommand.invalidateInput()
+    private fun finish(command: SetProteinCommand) {
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
 }

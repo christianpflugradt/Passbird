@@ -1,9 +1,8 @@
 package de.pflugradts.passbird.application.commandhandling.handler.egg
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.SetCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
@@ -20,30 +19,28 @@ class SetCommandHandler constructor(
     private val passwordProvider: PasswordProvider,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
+) : TypedCommandHandler<SetCommand>(SetCommand::class.java) {
     private val customPasswordConfigurations: List<ReadableConfiguration.CustomPasswordConfiguration>
         get() = configuration.application.password.customPasswordConfigurations
-
-    @Subscribe
-    private fun handleSetCommand(setCommand: SetCommand) {
-        if (setCommand.slot != DEFAULT && customPasswordConfigurations.size < setCommand.slot.index()) {
+    override fun handleCommand(command: SetCommand) {
+        if (command.slot != DEFAULT && customPasswordConfigurations.size < command.slot.index()) {
             commandExecutionTracker.markAborted()
             val msg = "Specified configuration does not exist - Operation aborted."
             userInterfaceAdapterPort.send(outputOf(shellOf(msg), OPERATION_ABORTED))
         } else {
-            val passwordRequirements = if (setCommand.slot == DEFAULT) {
+            val passwordRequirements = if (command.slot == DEFAULT) {
                 configuration.parsePasswordRequirements()
             } else {
-                customPasswordConfigurations[setCommand.slot.index() - 1].toPasswordRequirements()
+                customPasswordConfigurations[command.slot.index() - 1].toPasswordRequirements()
             }
             if (!passwordRequirements.isValid()) {
                 commandExecutionTracker.markAborted()
                 val msg = "Specified configuration is invalid - Operation aborted."
                 userInterfaceAdapterPort.send(outputOf(shellOf(msg), OPERATION_ABORTED))
-            } else if (commandConfirmed(setCommand)) {
+            } else if (commandConfirmed(command)) {
                 try {
-                    passwordService.challengeEggId(setCommand.argument)
-                    if (passwordService.putEgg(setCommand.argument, passwordProvider.createNewPassword(passwordRequirements)).failure) {
+                    passwordService.challengeEggId(command.argument)
+                    if (passwordService.putEgg(command.argument, passwordProvider.createNewPassword(passwordRequirements)).failure) {
                         commandExecutionTracker.markFailure()
                     }
                 } catch (ex: InvalidEggIdException) {
@@ -55,13 +52,13 @@ class SetCommandHandler constructor(
                 userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
             }
         }
-        setCommand.invalidateInput()
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
-    private fun commandConfirmed(setCommand: SetCommand) = if (configuration.application.password.promptOnRemoval &&
-        passwordService.eggExists(setCommand.argument, EggNotExistsAction.DO_NOTHING)
+    private fun commandConfirmed(command: SetCommand) = if (configuration.application.password.promptOnRemoval &&
+        passwordService.eggExists(command.argument, EggNotExistsAction.DO_NOTHING)
     ) {
-        val msg = "Existing Egg '${setCommand.argument.asString()}' will be irrevocably overwritten.\n" +
+        val msg = "Existing Egg '${command.argument.asString()}' will be irrevocably overwritten.\n" +
             "Input 'c' to confirm or anything else to abort.\nYour input: "
         userInterfaceAdapterPort.receiveConfirmation(outputOf(shellOf(msg)))
     } else {

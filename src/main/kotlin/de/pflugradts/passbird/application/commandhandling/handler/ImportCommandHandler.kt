@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.ImportCommand
@@ -24,11 +23,10 @@ class ImportCommandHandler constructor(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
-) : CommandHandler {
-    @Subscribe
-    private fun handleImportCommand(importCommand: ImportCommand) {
-        when (if (importCommand.selective) selectiveCommandConfirmed() else commandConfirmed()) {
-            ImportCommandConfirmation.CONFIRMED -> if (importCommand.selective) {
+) : TypedCommandHandler<ImportCommand>(ImportCommand::class.java) {
+    override fun handleCommand(command: ImportCommand) {
+        when (if (command.selective) selectiveCommandConfirmed() else commandConfirmed()) {
+            ImportCommandConfirmation.CONFIRMED -> if (command.selective) {
                 val selectedNest = selectedNest ?: return
                 importExportService.importEggs(selectedNest.slot, selectedNest.targetSlot)
             } else {

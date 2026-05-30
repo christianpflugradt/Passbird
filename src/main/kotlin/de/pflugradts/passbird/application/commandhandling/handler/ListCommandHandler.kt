@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.ListCommand
 import de.pflugradts.passbird.domain.model.nest.Nest
@@ -13,16 +12,15 @@ class ListCommandHandler constructor(
     private val nestService: NestService,
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-) : CommandHandler {
-    @Subscribe
-    private fun handleListCommand(listCommand: ListCommand) {
-        val output = if (listCommand.showAll) {
-            groupByNest(listCommand.argument)
+) : TypedCommandHandler<ListCommand>(ListCommand::class.java) {
+    override fun handleCommand(command: ListCommand) {
+        val output = if (command.showAll) {
+            groupByNest(command.argument)
         } else {
-            listCurrentNest(listCommand.argument)
+            listCurrentNest(command.argument)
         }
         userInterfaceAdapterPort.send(outputOf(output))
-        listCommand.invalidateInput()
+        command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
     }
     private fun listCurrentNest(filter: Shell): Shell {

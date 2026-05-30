@@ -53,8 +53,8 @@ structural_rules:
   - no concrete classes may live directly in de.pflugradts.passbird.adapter or de.pflugradts.passbird.domain
   - no class names may end with Impl
   - no class names may end with Helper
-  - event handlers must not expose public methods
-  - handler methods for events must be annotated with Subscribe
+  - command handlers must use the TypedCommandHandler contract and declare their handled command class explicitly
+  - domain event handlers must expose handled domain event classes through EventHandler.eventTypes and dispatch through EventHandler.handle
   - repository-wide production import coverage must include every package under de.pflugradts that is included in the jar
   - do not introduce java.util.Optional outside the explicit Optional.toOption bridge in de.pflugradts.kotlinextensions.OptionKt; the codebase uses custom Option and TryResult types
   - dependency wiring must stay in explicit Kotlin composition roots without Guice, jakarta.inject, or another runtime DI framework
@@ -80,11 +80,11 @@ runtime_design:
     - user input is parsed into command types
     - CommandFactory creates command objects
     - CommandBus dispatches to handlers
-    - command dispatch propagates subscriber exceptions back to CommandInputHandler so failed handlers cannot complete as successful commands
+    - command dispatch propagates handler exceptions back to CommandInputHandler so failed handlers cannot complete as successful commands
     - CommandExecutionTracker tracks command outcomes as an application collaborator shared by the interactive session graph
     - handlers call application and domain services
     - event registries propagate side effects after persistence succeeds for mutating password and nest operations
-    - domain-event dispatch propagates subscriber exceptions back to the originating processEvents caller and keeps queued domain events available when posting fails
+    - domain-event dispatch propagates handler exceptions back to the originating processEvents caller and keeps queued domain events available when posting fails
     - inactivity monitoring may request shutdown from a daemon timer, but PassbirdApplication serializes the resulting QuitCommand on the interactive execution path instead of letting the timer thread post directly to the command bus
 ports_and_adapters:
   - port: UserInterfaceAdapterPort

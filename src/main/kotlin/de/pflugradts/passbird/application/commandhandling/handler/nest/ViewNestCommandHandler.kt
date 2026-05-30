@@ -1,19 +1,17 @@
 package de.pflugradts.passbird.application.commandhandling.handler.nest
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.domain.service.nest.NestService
 class ViewNestCommandHandler constructor(
     private val canPrintInfo: CanPrintInfo,
     private val canListAvailableNests: CanListAvailableNests,
     private val nestService: NestService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-) : CommandHandler {
-    @Subscribe
-    private fun handleViewNestCommand(@Suppress("UNUSED_PARAMETER") viewNestCommand: ViewNestCommand) {
+) : TypedCommandHandler<ViewNestCommand>(ViewNestCommand::class.java) {
+    override fun handleCommand(@Suppress("UNUSED_PARAMETER") command: ViewNestCommand) {
         with(canPrintInfo) {
             userInterfaceAdapterPort.send(
                 outBold("\nCurrent Nest: "), out(currentNest),

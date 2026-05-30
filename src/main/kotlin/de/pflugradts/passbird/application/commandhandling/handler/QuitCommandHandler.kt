@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.commandhandling.handler
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitReason.INACTIVITY
@@ -116,12 +115,11 @@ class QuitCommandHandler constructor(
     private val finalizers: Set<Finalizer>,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val systemOperation: SystemOperation,
-) : CommandHandler {
-    @Subscribe
-    private fun handleQuitCommand(quitCommand: QuitCommand) {
+) : TypedCommandHandler<QuitCommand>(QuitCommand::class.java) {
+    override fun handleCommand(command: QuitCommand) {
         finalizers.forEach { it.run() }
         userInterfaceAdapterPort.sendLineBreak()
-        if (quitCommand.quitReason == INACTIVITY) {
+        if (command.quitReason == INACTIVITY) {
             userInterfaceAdapterPort.sendLineBreak()
             userInterfaceAdapterPort.send(outputOf(shellOf("Terminating Passbird due to inactivity.")))
             userInterfaceAdapterPort.sendLineBreak()

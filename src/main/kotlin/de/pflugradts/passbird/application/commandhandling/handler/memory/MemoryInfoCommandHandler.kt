@@ -1,15 +1,13 @@
 package de.pflugradts.passbird.application.commandhandling.handler.memory
-import com.google.common.eventbus.Subscribe
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.MemoryInfoCommand
-import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 class MemoryInfoCommandHandler constructor(
     private val canPrintInfo: CanPrintInfo,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-) : CommandHandler {
-    @Subscribe
-    private fun handleMemoryInfoCommand(@Suppress("UNUSED_PARAMETER") memoryInfoCommand: MemoryInfoCommand) {
+) : TypedCommandHandler<MemoryInfoCommand>(MemoryInfoCommand::class.java) {
+    override fun handleCommand(@Suppress("UNUSED_PARAMETER") command: MemoryInfoCommand) {
         with(canPrintInfo) {
             userInterfaceAdapterPort.send(
                 outBold("\nAvailable Memory commands:\n"),
