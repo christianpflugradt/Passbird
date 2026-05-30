@@ -46,7 +46,7 @@ class BackupManagerPropertyTest {
                     val systemOperation = spyk(SystemOperation())
                     val cryptoProvider = createAesGcmCipherForTesting()
                     val passwordTreeEnvelope = PasswordTreeEnvelope()
-                    var now = Instant.parse("2026-01-01T00:00:00Z")
+                    val now = Instant.parse("2026-01-01T00:00:00Z")
                     every { systemOperation.clock } answers { Clock.fixed(now, ZoneOffset.UTC) }
                     val backupManager = BackupManager(
                         configuration = configuration,
@@ -77,7 +77,6 @@ class BackupManagerPropertyTest {
                             passwordTreeEnvelope.wrap(cryptoProvider.encrypt(shellOf(content)).toByteArray()),
                         )
                         backupManager.run()
-                        now = now.plusSeconds(1)
                     }
 
                     val actual = Files.list(workingDirectory)

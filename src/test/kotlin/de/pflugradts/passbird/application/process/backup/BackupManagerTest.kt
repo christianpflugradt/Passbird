@@ -20,6 +20,7 @@ import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -36,6 +37,9 @@ import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE
 import java.nio.file.attribute.PosixFilePermission.OWNER_READ
 import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 
 @Tag(INTEGRATION)
 class BackupManagerTest {
@@ -45,7 +49,7 @@ class BackupManagerTest {
     private val configurationBackupSettings = mockk<Configuration.BackupSettings>()
     private val treeBackupSettings = mockk<Configuration.BackupSettings>()
     private val configuration = mockk<Configuration>()
-    private val systemOperation = SystemOperation()
+    private val systemOperation = spyk(SystemOperation())
     private val cryptoProvider: CryptoProvider = createAesGcmCipherForTesting()
     private val passwordTreeEnvelope = PasswordTreeEnvelope()
     private val passwordTreeAdapterPort = mockk<PasswordTreeAdapterPort>(relaxed = true)
@@ -182,6 +186,44 @@ class BackupManagerTest {
     }
 
     @Test
+    fun `should create distinct backups for changed files in the same second`() {
+        // given
+        every { treeBackupSettings.enabled } returns true
+        every { treeBackupSettings.numberOfBackups } returns 3
+        every { systemOperation.clock } returns fixedClock()
+        updatePasswordTreeFileContent("first")
+        backupManager.run()
+        updatePasswordTreeFileContent("second")
+
+        // when
+        backupManager.run()
+
+        // then
+        expectThat(backupFiles(PASSWORD_TREE_FILENAME)) hasSize 2
+        expectThat(backupContents()) isEqualTo listOf("first", "second")
+    }
+
+    @Test
+    fun `should remove oldest same-second backup when retention limit is exceeded`() {
+        // given
+        every { treeBackupSettings.enabled } returns true
+        every { treeBackupSettings.numberOfBackups } returns 2
+        every { systemOperation.clock } returns fixedClock()
+        updatePasswordTreeFileContent("first")
+        backupManager.run()
+        updatePasswordTreeFileContent("second")
+        backupManager.run()
+        updatePasswordTreeFileContent("third")
+
+        // when
+        backupManager.run()
+
+        // then
+        expectThat(backupFiles(PASSWORD_TREE_FILENAME)) hasSize 2
+        expectThat(backupContents()) isEqualTo listOf("second", "third")
+    }
+
+    @Test
     fun `should not create another backup if decrypted password tree content has not changed`() {
         // given
         every { treeBackupSettings.enabled } returns true
@@ -295,13 +337,18 @@ class BackupManagerTest {
         Paths.get("$tempWorkingDirectory/$PASSWORD_TREE_FILENAME"),
         passwordTreeEnvelope.wrap(cryptoProvider.encrypt(shellOf(content)).toByteArray()),
     )
+    private fun fixedClock() = Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC)
+    private fun backupContents() = backupFiles(PASSWORD_TREE_FILENAME).sorted().map {
+        val backupFile = Paths.get("$tempWorkingDirectory/$it")
+        cryptoProvider.decrypt(encryptedShellOf(passwordTreeEnvelope.unwrap(Files.readAllBytes(backupFile)))).asString()
+    }
     private fun wait1Sec() = Thread.sleep(1000)
     private fun backupFiles(fileName: String, directory: String = tempWorkingDirectory) =
         systemOperation.getFileNames(directory.toDirectory())
             .map { it.value }
             .filter {
                 it.matches(
-                    "${fileName.substringBefore(".")}_\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}\\.${fileName.substringAfter(".")}"
+                    "${fileName.substringBefore(".")}_\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}(?:_\\d+)?\\.${fileName.substringAfter(".")}"
                         .toRegex(),
                 )
             }

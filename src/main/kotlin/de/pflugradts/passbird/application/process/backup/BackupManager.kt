@@ -21,6 +21,9 @@ import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+private val backupTimestampFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
+private const val BACKUP_TIMESTAMP_PATTERN = "\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}(?:_\\d+)?"
+
 class BackupManager @Inject constructor(
     private val configuration: ReadableConfiguration,
     private val runContext: RunContext,
@@ -45,9 +48,8 @@ class BackupManager @Inject constructor(
                     .resolve(settings.location ?: backupConfiguration.location)
                     .toString().toDirectory()
                 if (!systemOperation.exists(backupDirectory)) systemOperation.createDirectory(backupDirectory)
-                val backupPattern = "\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}"
                 val backups = systemOperation.getFileNames(backupDirectory).filter {
-                    it.value.matches("${fileName.stem()}_$backupPattern\\.${fileName.extension()}".toRegex())
+                    it.value.matches("${fileName.stem()}_$BACKUP_TIMESTAMP_PATTERN\\.${fileName.extension()}".toRegex())
                 }.sortedBy { it.value }
                 val backupWasCreated = if (backups.isNotEmpty()) {
                     val lastBackup = systemOperation.resolvePath(backupDirectory, backups.last())
@@ -112,14 +114,28 @@ class BackupManager @Inject constructor(
     }
 
     private fun backup(directory: Directory, fileName: String, backupDirectory: Directory) {
-        val format = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss")
-        val backupName = "${fileName.stem()}_${LocalDateTime.now(systemOperation.clock).format(format)}.${fileName.extension()}"
+        val timestamp = LocalDateTime.now(systemOperation.clock).format(backupTimestampFormatter)
+        val backupName = backupName(fileName, backupDirectory, timestamp)
         systemOperation.copyTo(
             systemOperation.resolvePath(directory, fileName.toFileName()),
             systemOperation.resolvePath(backupDirectory, backupName.toFileName()),
         )
     }
+
+    private fun backupName(fileName: String, backupDirectory: Directory, timestamp: String): String {
+        val backupNamePrefix = "${fileName.stem()}_$timestamp"
+        val suffixes = systemOperation.getFileNames(backupDirectory).mapNotNull {
+            it.value.backupSuffixFor(backupNamePrefix, fileName.extension())
+        }
+        val collisionSuffix = suffixes.maxOrNull()?.let { "_${(it + 1).toString().padStart(3, '0')}" }.orEmpty()
+        return "$backupNamePrefix$collisionSuffix.${fileName.extension()}"
+    }
 }
 
 private fun String.stem() = substring(0, indexOf("."))
 private fun String.extension() = substring(indexOf(".") + 1)
+private fun String.backupSuffixFor(backupNamePrefix: String, extension: String): Long? {
+    val regex = "${Regex.escape(backupNamePrefix)}(?:_(\\d+))?\\.${Regex.escape(extension)}".toRegex()
+    val match = regex.matchEntire(this) ?: return null
+    return match.groupValues[1].takeIf { it.isNotEmpty() }?.toLong() ?: 0
+}
