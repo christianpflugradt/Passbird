@@ -215,6 +215,31 @@ class InvalidCommandTest {
         @ParameterizedTest
         @ValueSource(
             strings = [
+                "n+",
+                "f+",
+                "m+",
+                "s+EggId",
+                "p+EggId",
+            ],
+        )
+        fun `should handle malformed slotted variant commands`(givenInput: String) {
+            // given
+            val input = inputOf(shellOf(givenInput))
+            val captureSystemErr = captureSystemErr()
+
+            // when
+            val actual = captureSystemErr.during {
+                commandFactory.construct(CommandType.resolveCommandTypeFrom(input.command), input)
+            }
+
+            // then
+            expectThat(actual).isA<NullCommand>()
+            expectThat(captureSystemErr.capture) isEqualTo ""
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
                 "email",
                 "iimport",
                 "kkey",

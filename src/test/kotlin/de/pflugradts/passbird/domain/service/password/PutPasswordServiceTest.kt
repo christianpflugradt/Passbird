@@ -5,6 +5,7 @@ import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.shell.fakeDec
@@ -82,6 +83,19 @@ class PutPasswordServiceTest {
         fun `should fail when challenging eggId with special characters`() {
             // given
             val givenEggId = shellOf("abc!")
+
+            // when
+            val actual = tryCatching { passwordService.challengeEggId(givenEggId) }
+
+            // then
+            expectThat(actual.failure).isTrue()
+            expectThat(actual.exceptionOrNull()).isNotNull().isA<InvalidEggIdException>()
+        }
+
+        @Test
+        fun `should fail when challenging empty eggId`() {
+            // given
+            val givenEggId = emptyShell()
 
             // when
             val actual = tryCatching { passwordService.challengeEggId(givenEggId) }

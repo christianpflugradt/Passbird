@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-25
+last_reviewed: 2026-05-30
 interaction_model:
   medium: line_oriented_terminal_cli
   posture:
@@ -56,6 +56,7 @@ copy_and_drift_rules:
   - prompt wording is maintainer-owned and must not be changed without approval for the exact text
   - when docs describe command input semantics, keep them aligned with receiveYes, receiveConfirmation, and empty-input behavior
   - do not file behavior issues based only on generic shell prompt conventions; verify Passbird interaction semantics first
+  - malformed command shapes should resolve through controlled parser rejection or command abort paths instead of surfacing internal indexing errors
 agent_hints:
   - inspect UserInterfaceAdapterPort and CommandLineInterfaceService first when a task depends on prompt semantics or raw input parsing
   - compare prompt text, parser behavior, and focused tests before concluding there is a behavior drift

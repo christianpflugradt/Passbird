@@ -81,6 +81,27 @@ class CustomSetCommandTest {
     }
 
     @Test
+    fun `should abort custom set command with missing eggId`() {
+        // given
+        val shell = shellOf("c")
+        val reference = shell.copy()
+        fakePasswordService(instance = passwordService, withInvalidEggId = true)
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
+        fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        val expectedOutput = "EggId '' contains non alphabetic characters - Operation aborted."
+        verify(exactly = 1) { passwordService.challengeEggId(emptyShell()) }
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf(expectedOutput), OPERATION_ABORTED))) }
+        verify(exactly = 0) { passwordService.putEgg(eq(emptyShell()), any()) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
     fun `should handle custom set command with empty password entered`() {
         // given
         val args = "EggId"

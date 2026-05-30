@@ -71,7 +71,7 @@ abstract class CommonPasswordServiceCapabilities(
     }
 
     fun challengeEggId(shell: Shell) {
-        if (plainValueOf(shell.getByte(0)).isDigit || anyMatch(shell.copy()) { plainValueOf(it).isSymbol }) {
+        if (shell.isEmpty || plainValueOf(shell.getByte(0)).isDigit || anyMatch(shell.copy()) { plainValueOf(it).isSymbol }) {
             throw InvalidEggIdException(shell)
         }
     }

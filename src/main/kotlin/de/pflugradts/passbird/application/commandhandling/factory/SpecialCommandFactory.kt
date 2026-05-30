@@ -34,10 +34,10 @@ abstract class SpecialCommandFactory {
         protected fun Shell.size3() = size == 3
 
         @JvmStatic
-        protected fun Shell.isSlotted() = getChar(1).isDigit() || getChar(2).isDigit()
+        protected fun Shell.isSlotted() = (size > 1 && getChar(1).isDigit()) || (size > 2 && getChar(2).isDigit())
 
         @JvmStatic
-        protected fun Shell.getSlot() = if (getChar(1).isDigit()) slotAt(getChar(1)) else slotAt(getChar(2))
+        protected fun Shell.getSlot() = if (size > 1 && getChar(1).isDigit()) slotAt(getChar(1)) else slotAt(getChar(2))
 
         @JvmStatic
         protected fun Shell.isAddVariant() = getChar(1) == CommandVariant.ADD.value
