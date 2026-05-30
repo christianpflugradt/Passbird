@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNull
 
 class CommandInputHandlerTest {
     @Test
@@ -49,5 +50,26 @@ class CommandInputHandlerTest {
 
         // then
         expectThat(captureSystemErr.capture) isEqualTo ""
+    }
+
+    @Test
+    fun `should mark command failure and not remember input when command dispatch throws`() {
+        // given
+        val commandBus = mockk<CommandBus>()
+        val rememberedCommandMemory = RememberedCommandMemory()
+        val commandExecutionTracker = CommandExecutionTracker()
+        val inputHandler = createInputHandlerFor(commandBus, rememberedCommandMemory, commandExecutionTracker)
+        val captureSystemErr = captureSystemErr()
+        every { commandBus.post(any()) } throws IllegalStateException("handler failed")
+
+        // when
+        captureSystemErr.during {
+            inputHandler.handleInput(inputOf(shellOf("q")))
+        }
+
+        // then
+        expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.FAILURE
+        expectThat(rememberedCommandMemory.view()).isNull()
+        expectThat(captureSystemErr.capture) isEqualTo "Command execution failed: handler failed\n"
     }
 }

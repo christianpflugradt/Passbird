@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-29
+last_reviewed: 2026-05-30
 architecture:
   style: onion
   enforcement:
@@ -77,9 +77,11 @@ runtime_design:
     - user input is parsed into command types
     - CommandFactory creates command objects
     - CommandBus dispatches to handlers
+    - command dispatch propagates subscriber exceptions back to CommandInputHandler so failed handlers cannot complete as successful commands
     - CommandExecutionTracker tracks command outcomes as an injected application collaborator shared by the interactive session graph
     - handlers call application and domain services
     - event registries propagate side effects after persistence succeeds for mutating password and nest operations
+    - domain-event dispatch propagates subscriber exceptions back to the originating processEvents caller and keeps queued domain events available when posting fails
     - inactivity monitoring may request shutdown from a daemon timer, but PassbirdApplication serializes the resulting QuitCommand on the interactive execution path instead of letting the timer thread post directly to the command bus
 ports_and_adapters:
   - port: UserInterfaceAdapterPort

@@ -17,6 +17,16 @@ class CommandHandlerBusTest {
         assertThrows<StdinTerminationRequestedException> { commandHandlerBus.post(NullCommand()) }
     }
 
+    @Test
+    fun `should rethrow ordinary exception thrown by command handler`() {
+        // given
+        val exception = IllegalStateException("command failed")
+        val commandHandlerBus = CommandHandlerBus(setOf(TerminatingCommandHandler(exception)))
+
+        // when / then
+        assertThrows<IllegalStateException> { commandHandlerBus.post(NullCommand()) }
+    }
+
     private class TerminatingCommandHandler(
         private val exception: RuntimeException,
     ) : CommandHandler {

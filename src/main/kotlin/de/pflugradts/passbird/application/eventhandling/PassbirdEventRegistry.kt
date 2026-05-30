@@ -11,12 +11,19 @@ import java.util.ArrayDeque
 import java.util.Collections
 import java.util.IdentityHashMap
 import java.util.Queue
+import java.util.concurrent.atomic.AtomicReference
+import java.util.logging.Level
+import java.util.logging.Logger
 
 @Singleton
 class PassbirdEventRegistry @Inject constructor(
     eventHandlers: Set<EventHandler>,
-    private val eventBus: EventBus = EventBus(),
 ) : EventRegistry {
+    private val subscriberException = AtomicReference<RuntimeException?>()
+    private val eventBus = EventBus { exception, _ ->
+        LOGGER.log(Level.SEVERE, "Exception thrown by event handler", exception)
+        subscriberException.compareAndSet(null, exception.asRuntimeException())
+    }
     private val aggregateRoots: MutableSet<AggregateRoot> = Collections.newSetFromMap(IdentityHashMap())
     private val domainEvents: Queue<DomainEvent> = ArrayDeque()
     private val abandonedAggregateRoots: Queue<AggregateRoot> = ArrayDeque()
@@ -50,18 +57,32 @@ class PassbirdEventRegistry @Inject constructor(
 
     private fun processAggregateRoots() {
         aggregateRoots.forEach { aggregateRoot ->
-            aggregateRoot.getDomainEvents().forEach { eventBus.post(it) }
+            aggregateRoot.getDomainEvents().forEach(::postEvent)
             aggregateRoot.clearDomainEvents()
         }
     }
 
     private fun processDomainEvents() {
         while (!domainEvents.isEmpty()) {
-            eventBus.post(domainEvents.poll())
+            val domainEvent = domainEvents.peek()
+            postEvent(domainEvent)
+            domainEvents.remove()
         }
+    }
+
+    private fun postEvent(domainEvent: DomainEvent) {
+        subscriberException.set(null)
+        eventBus.post(domainEvent)
+        subscriberException.getAndSet(null)?.let { throw it }
     }
 
     private fun processAbandonedAggregateRoots() {
         while (!abandonedAggregateRoots.isEmpty()) aggregateRoots.remove(abandonedAggregateRoots.poll())
     }
+
+    private companion object {
+        val LOGGER: Logger = Logger.getLogger(PassbirdEventRegistry::class.java.name)
+    }
 }
+
+private fun Throwable.asRuntimeException() = this as? RuntimeException ?: RuntimeException(this)

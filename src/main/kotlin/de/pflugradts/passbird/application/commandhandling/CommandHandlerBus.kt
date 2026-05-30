@@ -13,14 +13,17 @@ import java.util.logging.Logger
 
 @Singleton
 class CommandHandlerBus @Inject constructor(commandHandlers: Set<CommandHandler>) : CommandBus {
-    private val terminalException = AtomicReference<RuntimeException?>()
+    private val subscriberException = AtomicReference<RuntimeException?>()
     private val eventBus = EventBus { exception, _ ->
         when (exception) {
             is InactivityTerminationRequestedException,
             is StdinTerminationRequestedException,
-            -> terminalException.compareAndSet(null, exception)
+            -> subscriberException.compareAndSet(null, exception)
 
-            else -> LOGGER.log(Level.SEVERE, "Exception thrown by command handler", exception)
+            else -> {
+                LOGGER.log(Level.SEVERE, "Exception thrown by command handler", exception)
+                subscriberException.compareAndSet(null, exception.asRuntimeException())
+            }
         }
     }
 
@@ -29,12 +32,14 @@ class CommandHandlerBus @Inject constructor(commandHandlers: Set<CommandHandler>
     }
 
     override fun post(command: Command) {
-        terminalException.set(null)
+        subscriberException.set(null)
         eventBus.post(command)
-        terminalException.getAndSet(null)?.let { throw it }
+        subscriberException.getAndSet(null)?.let { throw it }
     }
 
     private companion object {
         val LOGGER: Logger = Logger.getLogger(CommandHandlerBus::class.java.name)
     }
 }
+
+private fun Throwable.asRuntimeException() = this as? RuntimeException ?: RuntimeException(this)
