@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-29
+last_reviewed: 2026-05-30
 quality_gates:
   formatting_and_style:
     - run ./gradlew ktlintFormat before staging, committing, or pushing to auto-resolve formatting issues when possible
@@ -21,6 +21,7 @@ quality_gates:
       instruction: ">= 0.90"
       branch: ">= 0.85"
   dependency_and_license:
+    - Gradle Wrapper pins the distribution URL and official SHA-256 checksum in gradle/wrapper/gradle-wrapper.properties
     - pre-commit hook runs ./gradlew checkLicense
     - Gradle dependency verification uses gradle/verification-metadata.xml and the armored gradle/verification-keyring.keys file
     - GitHub Actions OWASP dependency check workflows
@@ -52,9 +53,11 @@ local_verification_policy:
     note: only run locally when the maintainer explicitly asks for it
   dependency_verification:
     files:
+      - gradle/wrapper/gradle-wrapper.properties
       - gradle/verification-metadata.xml
       - gradle/verification-keyring.keys
     maintenance:
+      - when the Gradle Wrapper distribution changes, update distributionUrl and distributionSha256Sum together using the official Gradle distribution checksum
       - when third-party dependencies or Gradle plugins change, refresh with ./gradlew --write-verification-metadata sha256,pgp --export-keys help
       - retry with ./gradlew --refresh-keys help if key downloads fail before accepting new ignored-key entries
       - review checksum fallback and ignored-key additions before committing them
