@@ -13,6 +13,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.Called
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
@@ -33,10 +34,12 @@ class UseFavoriteCommandTest {
         val favoritedEggId = "eggId"
         val forwardCommand = "p0"
         fakePasswordService(instance = passwordService, withFavorites = mapOf(S1 to favoritedEggId))
+        every { mockedInputHandler.handleInput(any()) } answers { userInterfaceAdapterPort.sendLineBreak() }
 
         inputHandler.handleInput(inputOf(shellOf("f1$forwardCommand")))
 
         verify(exactly = 1) { mockedInputHandler.handleInput(inputOf(shellOf("$forwardCommand$favoritedEggId"))) }
+        verify(exactly = 1) { userInterfaceAdapterPort.sendLineBreak() }
     }
 
     @Test
@@ -47,5 +50,6 @@ class UseFavoriteCommandTest {
 
         verify { mockedInputHandler wasNot Called }
         verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(shellOf("Favorite entry at slot 1 does not exist."))) }
+        verify(exactly = 1) { userInterfaceAdapterPort.sendLineBreak() }
     }
 }

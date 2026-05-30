@@ -13,6 +13,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.Called
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
@@ -37,12 +38,14 @@ class UseMemoryCommandTest {
         val forwardCommand = "p0"
         val command = shellOf("m${slot.index()}$forwardCommand")
         fakePasswordService(instance = passwordService, withMemory = mapOf(slot to memorizedEggId))
+        every { mockedInputHandler.handleInput(any()) } answers { userInterfaceAdapterPort.sendLineBreak() }
 
         // when
         inputHandler.handleInput(inputOf(command))
 
         // then
         verify(exactly = 1) { mockedInputHandler.handleInput(inputOf(shellOf("$forwardCommand$memorizedEggId"))) }
+        verify(exactly = 1) { userInterfaceAdapterPort.sendLineBreak() }
     }
 
     @Test
@@ -58,5 +61,6 @@ class UseMemoryCommandTest {
         // then
         verify { mockedInputHandler wasNot Called }
         verify(exactly = 1) { userInterfaceAdapterPort.send(outputOf(shellOf("Memory entry at slot ${slot.index()} does not exist."))) }
+        verify(exactly = 1) { userInterfaceAdapterPort.sendLineBreak() }
     }
 }

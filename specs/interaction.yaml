@@ -44,6 +44,7 @@ spacing_and_output:
   - blank lines are intentional separators between boot phases, informational blocks, command results, and the next prompt
   - sendLineBreak is the standard way to emit an empty separator line
   - some multi-step flows intentionally embed leading newlines inside prompt text to visually separate local menus or sections
+  - delegated shortcut commands should not add a second trailing separator after the delegated command has already emitted its own output spacing
   - preserve surrounding spacing patterns when editing handlers; do not normalize blank lines mechanically across the CLI
   formatting_and_feedback:
     - if adapter.userInterface.ansiEscapeCodes.enabled is true, each output fragment is wrapped individually in ANSI color begin and reset escape codes

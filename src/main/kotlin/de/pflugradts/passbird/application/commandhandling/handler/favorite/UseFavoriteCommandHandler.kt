@@ -18,9 +18,11 @@ class UseFavoriteCommandHandler(
     private val commandExecutionTracker: CommandExecutionTracker,
 ) : TypedCommandHandler<UseFavoriteCommand>(UseFavoriteCommand::class.java) {
     override fun handleCommand(command: UseFavoriteCommand) {
+        var delegated = false
         passwordService.viewFavoriteEntry(command.slot).ifPresentOrElse(
             block = { favorite ->
                 favorite.useScrambled {
+                    delegated = true
                     inputHandler().handleInput(inputOf(command.argument + it))
                     commandExecutionTracker.mark(commandExecutionTracker.lastCompletedOutcome())
                 }
@@ -33,6 +35,6 @@ class UseFavoriteCommandHandler(
             },
         )
         command.invalidateInput()
-        userInterfaceAdapterPort.sendLineBreak()
+        if (!delegated) userInterfaceAdapterPort.sendLineBreak()
     }
 }

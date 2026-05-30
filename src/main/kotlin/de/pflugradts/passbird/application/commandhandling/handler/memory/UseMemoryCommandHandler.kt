@@ -18,9 +18,11 @@ class UseMemoryCommandHandler(
     private val commandExecutionTracker: CommandExecutionTracker,
 ) : TypedCommandHandler<UseMemoryCommand>(UseMemoryCommand::class.java) {
     override fun handleCommand(command: UseMemoryCommand) {
+        var delegated = false
         passwordService.viewMemoryEntry(command.slot).ifPresentOrElse(
             block = { memory ->
                 memory.useScrambled {
+                    delegated = true
                     inputHandler().handleInput(inputOf(command.argument + it))
                     commandExecutionTracker.mark(commandExecutionTracker.lastCompletedOutcome())
                 }
@@ -31,6 +33,6 @@ class UseMemoryCommandHandler(
             },
         )
         command.invalidateInput()
-        userInterfaceAdapterPort.sendLineBreak()
+        if (!delegated) userInterfaceAdapterPort.sendLineBreak()
     }
 }

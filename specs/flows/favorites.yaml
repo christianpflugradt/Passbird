@@ -40,7 +40,7 @@ flows:
         - if the selected Favorite slot is empty, Passbird prints Favorite entry at slot <slot> does not exist.
       finish:
         - the copy command ends with one trailing blank line after its main output
-        - the use command invalidates its original Favorite input after delegation and then appends its own trailing blank line
+        - after a delegated command runs, the use command does not add an extra blank line beyond the delegated command's own output rules
   - id: assign_or_clear_favorite
     commands:
       - f+[0-9][EggId]
