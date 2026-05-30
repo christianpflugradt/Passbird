@@ -15,6 +15,8 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import strikt.api.expectThat
 import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.containsKey
@@ -260,6 +262,40 @@ class FilePasswordExchangeIntegrationTest {
                 {
                   "exportedNest": {
                     "nestId": "DEFAULT"
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": []
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        // when
+        val actual = filePasswordExchange.receive()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["", "   "])
+    fun `should fail receive when custom nest id is empty or blank`(givenNestId: String) {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "$givenNestId",
+                    "slot": 2
                   },
                   "exportedEggs": [
                     {

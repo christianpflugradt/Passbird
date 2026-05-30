@@ -12,6 +12,7 @@ import de.pflugradts.passbird.application.failure.ImportFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -62,7 +63,7 @@ class FilePasswordExchange @Inject constructor(
     }
 
     private fun List<EggsPerNest>.toPasswordInfoMap() = associate { entry ->
-        createNest(shellOf(entry.exportedNest.nestId), entry.exportedNest.toValidatedSlot()) to
+        entry.exportedNest.toValidatedNest() to
             entry.exportedEggs.toValidatedPasswordInfos()
     }.also { passwordInfoMap ->
         require(passwordInfoMap.size == size) { "Duplicate nest slot in import file" }
@@ -83,6 +84,11 @@ class FilePasswordExchange @Inject constructor(
         val slot = requireNotNull(slot) { "Missing nest slot in import file" }
         require(slot in Slot.entries.indices) { "Invalid nest slot $slot" }
         return Slot.entries[slot]
+    }
+
+    private fun ExportedNest.toValidatedNest(): Nest {
+        require(nestId.isNotBlank()) { "Missing nestId in import file" }
+        return createNest(shellOf(nestId), toValidatedSlot())
     }
 
     private fun List<ExportedProtein>.toShellPairsBySlot(): List<ShellPair> {

@@ -3,11 +3,16 @@ package de.pflugradts.passbird.application.exchange
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
+import de.pflugradts.passbird.adapter.exchange.FilePasswordExchange
 import de.pflugradts.passbird.application.ExchangeAdapterPort
+import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.PasswordInfoMap
+import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
 import de.pflugradts.passbird.application.mainMocked
+import de.pflugradts.passbird.application.toDirectory
+import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
@@ -42,7 +47,10 @@ import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isNotEqualTo
+import strikt.assertions.isTrue
 import strikt.assertions.map
+import java.io.File
+import java.nio.file.Files
 import java.util.function.Supplier
 
 class PasswordImportExportServiceTest {
@@ -260,6 +268,62 @@ class PasswordImportExportServiceTest {
         verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
         verify(exactly = 0) { eventRegistry.processEvents() }
         expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
+    }
+
+    @Test
+    fun `should reject empty custom nest id before preview or import mutation`() {
+        // given
+        val tempExchangeDirectory = Files.createTempDirectory("passbird-import-empty-nest")
+        writeExchangeFile(
+            tempExchangeDirectory.toString(),
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "",
+                    "slot": 2
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId",
+                      "password": "Password",
+                      "proteins": []
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+        val importExportService = PasswordImportExportService(
+            object : ExchangeFactory {
+                override fun createPasswordExchange() = FilePasswordExchange(
+                    SystemOperation(),
+                    PassbirdRunContext(tempExchangeDirectory.toString().toDirectory(), DEFAULT),
+                )
+            },
+            passwordService,
+            nestService,
+            eventRegistry,
+        )
+
+        try {
+            // when
+            val fullPreview = captureSystemErr().during { importExportService.peekImportEggIdShells() }
+            val selectivePreview = captureSystemErr().during { importExportService.peekImportNests() }
+            captureSystemErr().during { importExportService.importEggs() }
+
+            // then
+            expectThat(fullPreview.failure).isTrue()
+            expectThat(selectivePreview.failure).isTrue()
+            expectThat(nestService.atNestSlot(S2).isEmpty).isTrue()
+            verify { passwordService wasNot Called }
+            verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
+            verify(exactly = 0) { eventRegistry.processEvents() }
+        } finally {
+            File(tempExchangeDirectory.toString()).deleteRecursively()
+        }
     }
 
     @Test
@@ -483,3 +547,7 @@ private fun testData() = listOf(
     createEggForTesting(withEggIdShell = shellOf("EggId4"), withPasswordShell = shellOf("Password4"), withSlot = S9),
     createEggForTesting(withEggIdShell = shellOf("EggId5"), withPasswordShell = shellOf("Password5"), withSlot = S9),
 )
+
+private fun writeExchangeFile(directory: String, content: String) {
+    File(directory + File.separator + ReadableConfiguration.EXCHANGE_FILENAME).writeText(content.trimIndent())
+}
