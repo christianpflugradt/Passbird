@@ -17,7 +17,7 @@ class Shell private constructor(
     val firstByte get() = content[0]
     fun getByte(index: Int) = content[index]
     fun getChar(index: Int) = Char(getByte(index).toUShort())
-    override fun iterator() = ShellIterator(content.clone())
+    override fun iterator() = ShellIterator(content)
     fun copy() = shellOf(content.clone())
     fun stream(): Stream<Byte> = StreamSupport.stream(spliterator(), false)
     fun toByteArray() = content.clone()
@@ -59,10 +59,10 @@ class Shell private constructor(
 
     private fun randomAsciiByte() = (SECURE_RANDOM.nextInt(1 + MAX_ASCII_VALUE - MIN_ASCII_VALUE) + MIN_ASCII_VALUE).toByte()
 
-    class ShellIterator(private val byteArray: ByteArray) : Iterator<Byte> {
+    class ShellIterator(private val content: ByteArray) : Iterator<Byte> {
         private var index = 0
-        override fun hasNext() = index < byteArray.size
-        override fun next() = if (hasNext()) byteArray[index++] else throw NoSuchElementException()
+        override fun hasNext() = index < content.size
+        override fun next() = if (hasNext()) content[index++] else throw NoSuchElementException()
     }
 
     override fun equals(other: Any?): Boolean = when {

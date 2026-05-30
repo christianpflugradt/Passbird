@@ -83,7 +83,9 @@ class CommandLineInterfaceService constructor(
         it.formatting?.also { formatting -> if (escapeCodesEnabled) beginEscape(formatting) }
         val renderedShell = it.shell.copy()
         try {
-            renderedShell.forEach { char -> sendChar(Char(char.toUShort())) }
+            for (index in 0 until renderedShell.size) {
+                sendChar(renderedShell.getChar(index))
+            }
         } finally {
             renderedShell.scramble()
         }

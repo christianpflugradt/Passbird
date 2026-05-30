@@ -93,6 +93,7 @@ class CommandLineInterfaceServiceTest {
             // then
             expectThat(captureSystemOut.capture) isEqualTo givenMessage + System.lineSeparator()
             expectThat(outputShell) isEqualTo shellOf(givenMessage)
+            verify(exactly = 0) { renderedShell.iterator() }
             verify(exactly = 1) { renderedShell.scramble() }
         }
     }

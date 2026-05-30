@@ -1,6 +1,9 @@
 package de.pflugradts.passbird.domain.service.password.provider
 
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
+import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import io.mockk.spyk
+import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -149,6 +152,26 @@ class RandomPasswordProviderTest {
         expectManyTimes {
             expectThat(createPassword().asString()) matches "^[^ +#(=']+\$".toRegex()
         }
+    }
+
+    @Test
+    fun `should scrub rejected candidates without copying strength checks`() {
+        // given
+        val rejectedPassword = spyk(shellOf("aaaa"))
+        val acceptedPassword = spyk(shellOf("aA1!"))
+        val candidates = listOf(rejectedPassword, acceptedPassword).iterator()
+        val passwordProvider = RandomPasswordProvider { candidates.next() }
+        val passwordRequirements = PasswordRequirements(length = 4)
+
+        // when
+        val actual = passwordProvider.createNewPassword(passwordRequirements)
+
+        // then
+        expectThat(actual) isEqualTo acceptedPassword
+        verify(exactly = 1) { rejectedPassword.scramble() }
+        verify(exactly = 0) { acceptedPassword.scramble() }
+        verify(exactly = 0) { rejectedPassword.copy() }
+        verify(exactly = 0) { acceptedPassword.copy() }
     }
 
     private fun expectManyTimes(block: () -> Unit) {

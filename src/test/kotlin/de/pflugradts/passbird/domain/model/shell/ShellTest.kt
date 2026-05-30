@@ -346,6 +346,20 @@ class ShellTest {
                 'l'.code.toByte(),
             )
         }
+
+        @Test
+        fun `should stream current shell content without snapshot copy`() {
+            // given
+            val shell = shellOf("abc")
+            val stream = shell.stream()
+
+            // when
+            shell.scramble()
+            val actual = stream.findFirst().get()
+
+            // then
+            expectThat(actual) isEqualTo shell.getByte(0) isNotEqualTo 'a'.code.toByte()
+        }
     }
 
     @Nested
@@ -404,6 +418,20 @@ class ShellTest {
 
             // then
             expectThat(actualShell) isEqualTo givenShell
+        }
+
+        @Test
+        fun `should iterate over current shell content without snapshot copy`() {
+            // given
+            val shell = shellOf("abc")
+            val iterator = shell.iterator()
+
+            // when
+            shell.scramble()
+            val actual = iterator.next()
+
+            // then
+            expectThat(actual) isEqualTo shell.getByte(0) isNotEqualTo 'a'.code.toByte()
         }
 
         @Test
