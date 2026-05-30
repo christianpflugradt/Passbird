@@ -9,12 +9,14 @@ import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
+import de.pflugradts.passbird.application.passwordtree.PasswordTreeSnapshot
 import de.pflugradts.passbird.application.passwordtree.checksum
 import de.pflugradts.passbird.application.passwordtree.checksumBytes
 import de.pflugradts.passbird.application.passwordtree.signature
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
 import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.util.copyInt
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
@@ -283,6 +285,34 @@ class PasswordTreeFacadeTest {
         verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
     }
 
+    @Test
+    fun `should shut down on malformed payload instead of restoring a coerced nest slot`() {
+        // given
+        every { systemOperation.exit(any()) } returns Unit
+        val payload = passwordTreePayloadWriter.write(
+            PasswordTreeSnapshot(
+                eggs = listOf(createEggFromStrings(slot = S1, eggId = "EggId1", password = "Password1")),
+            ),
+        ).toByteArray()
+        copyInt(99, payload, firstCurrentEggOffset())
+        payload[payload.size - checksumBytes()] = checksum(payload.copyOfRange(signature().size, payload.size - checksumBytes()))
+        File(passwordTreeFilename).writeBytes(
+            passwordTreeEnvelope.wrap(cryptoProvider.encrypt(shellOf(payload)).toByteArray()),
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        // when
+        val actual = captureSystemErr.during {
+            tryCatching { passwordTreeFacade.restore() }
+        }
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isA<IllegalStateException>()
+        expectThat(captureSystemErr.capture) contains "Password Tree at 'passbird.tree' could not be decrypted:"
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
+    }
+
     @Nested
     inner class SignatureAndCheckSumFailureTest {
 
@@ -442,6 +472,8 @@ class PasswordTreeFacadeTest {
 
     private fun restoredMemoryEntry(actual: EggStreamSupplier) =
         actual.memory()[DEFAULT].get()[0].map { cryptoProvider.decrypt(it).asString() }.orElse("")
+
+    private fun firstCurrentEggOffset() = signature().size + (2 * 100 * Integer.BYTES) + (CAPACITY * Integer.BYTES)
 
     private fun createEggFromStrings(slot: Slot = DEFAULT, eggId: String, password: String) = createEgg(
         slot = slot,

@@ -26,11 +26,15 @@ class PasswordTreeReader @Inject constructor(
 ) {
     fun restore(): EggStreamSupplier {
         val shell = readFromDisk()
-        val snapshot = try {
-            passwordTreePayloadReader.read(shell)
-        } finally {
-            shell.scramble()
+        val snapshot = tryCatching {
+            try {
+                passwordTreePayloadReader.read(shell)
+            } finally {
+                shell.scramble()
+            }
         }
+            .onFailure(::abortRestore)
+            .getOrNull()!!
         return EggStreamSupplier({ snapshot.eggs.stream() }, snapshot.memory, snapshot.favorites, snapshot.nests)
     }
 

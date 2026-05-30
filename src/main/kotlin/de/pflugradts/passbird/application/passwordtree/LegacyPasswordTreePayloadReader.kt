@@ -8,8 +8,6 @@ import de.pflugradts.passbird.application.failure.SignatureCheckFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.application.util.readBytes
-import de.pflugradts.passbird.application.util.readInt
 import de.pflugradts.passbird.application.util.scramble
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
@@ -22,7 +20,6 @@ import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryp
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
-import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.model.slot.Slots
 import de.pflugradts.passbird.domain.model.slot.Slots.Companion.slotIterator
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
@@ -39,10 +36,14 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
             if (byteArray.isEmpty()) {
                 return PasswordTreeSnapshot()
             }
-            verifySignature(byteArray)
-            verifyChecksum(byteArray)
+            validatePayloadEnvelope(byteArray)
+            if (!verifySignature(byteArray) || !verifyChecksum(byteArray)) {
+                return PasswordTreeSnapshot()
+            }
             var offset = signatureSize()
-            val memory = if (isPlaceholder(readBytes(byteArray, offset, placeHolder().size))) {
+            val payloadEnd = payloadContentEnd(byteArray)
+            val memory = if (isPlaceholder(readPayloadBytes(byteArray, offset, placeHolder().size, payloadEnd))) {
+                validatePayloadRange(byteArray, offset, Slot.CAPACITY * placeHolder().size, payloadEnd)
                 repeat(Slot.CAPACITY) {
                     offset += placeHolder().size
                 }
@@ -55,20 +56,21 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
             val (nests, incrementedOffset) = retrieveNests(byteArray, offset)
             offset = incrementedOffset
             val eggs = ArrayDeque<Egg>()
-            while (offset < byteArray.size - checksumBytes()) {
+            while (offset < payloadEnd) {
                 val (egg, newOffset) = byteArray.asEgg(offset)
                 eggs.add(egg)
                 offset = newOffset
             }
+            validatePayloadEnd(offset, payloadEnd)
             return PasswordTreeSnapshot(eggs = eggs.toList(), memory = memory, nests = nests)
         } finally {
             byteArray.scramble()
         }
     }
 
-    private fun verifySignature(bytes: ByteArray) {
+    private fun verifySignature(bytes: ByteArray): Boolean {
         val expectedSignature = legacySignature()
-        val actualSignature = readBytes(bytes, 0, signatureSize())
+        val actualSignature = readPayloadBytes(bytes, 0, signatureSize())
         try {
             if (!expectedSignature.contentEquals(actualSignature)) {
                 val critical = configuration.adapter.passwordTree.verifySignature
@@ -78,17 +80,21 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
                 } finally {
                     actualSignatureShell.scramble()
                 }
-                if (critical) systemOperation.exit(FAILURE_EXIT_STATUS)
+                if (critical) {
+                    systemOperation.exit(FAILURE_EXIT_STATUS)
+                    return false
+                }
             }
+            return true
         } finally {
             actualSignature.scramble()
         }
     }
 
-    private fun verifyChecksum(bytes: ByteArray) {
+    private fun verifyChecksum(bytes: ByteArray): Boolean {
         val contentSize = calcActualContentSize(bytes.size)
         val expectedChecksum = if (contentSize > 0) {
-            val checksumSource = readBytes(bytes, signatureSize(), contentSize)
+            val checksumSource = readPayloadBytes(bytes, signatureSize(), contentSize, payloadContentEnd(bytes))
             try {
                 checksum(checksumSource)
             } finally {
@@ -101,8 +107,12 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
         if (expectedChecksum != actualCheckSum) {
             val critical = configuration.adapter.passwordTree.verifyChecksum
             reportFailure(ChecksumFailure(actualCheckSum, expectedChecksum, critical))
-            if (critical) systemOperation.exit(FAILURE_EXIT_STATUS)
+            if (critical) {
+                systemOperation.exit(FAILURE_EXIT_STATUS)
+                return false
+            }
         }
+        return true
     }
 
     private fun retrieveNests(bytes: ByteArray, offset: Int): Pair<List<Shell>, Int> {
@@ -121,11 +131,12 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
     private fun calcActualContentSize(totalSize: Int) = totalSize - signatureSize() - checksumBytes()
 
     private fun ByteArray.asNestShell(offset: Int): Pair<Shell, Int> {
+        val payloadEnd = payloadContentEnd(this)
         var incrementedOffset = offset
-        val nestSize = readInt(this, incrementedOffset)
+        val nestSize = readPayloadSize(this, incrementedOffset, payloadEnd)
         incrementedOffset += Integer.BYTES
         val result = if (nestSize > 0) {
-            val nestBytes = readBytes(this, incrementedOffset, nestSize)
+            val nestBytes = readPayloadBytes(this, incrementedOffset, nestSize, payloadEnd)
             incrementedOffset += nestBytes.size
             nestBytes.toShellAndScramble()
         } else {
@@ -135,30 +146,35 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
     }
 
     private fun ByteArray.asEgg(offset: Int): Pair<Egg, Int> {
+        val payloadEnd = payloadContentEnd(this)
         var incrementedOffset = offset
-        val nestSlot = readInt(this, incrementedOffset)
+        val nestSlot = storedEggNestSlot(readPayloadInt(this, incrementedOffset, payloadEnd))
         incrementedOffset += Integer.BYTES
-        val eggIdSize = readInt(this, incrementedOffset)
+        val eggIdSize = readPayloadSize(this, incrementedOffset, payloadEnd)
         incrementedOffset += Integer.BYTES
-        val eggIdShell = readBytes(this, incrementedOffset, eggIdSize).toEncryptedShellAndScramble()
+        val eggIdShell = readPayloadBytes(this, incrementedOffset, eggIdSize, payloadEnd).toEncryptedShellAndScramble()
         incrementedOffset += eggIdSize
-        val passwordSize = readInt(this, incrementedOffset)
+        val passwordSize = readPayloadSize(this, incrementedOffset, payloadEnd)
         incrementedOffset += Integer.BYTES
-        val passwordShell = readBytes(this, incrementedOffset, passwordSize).toEncryptedShellAndScramble()
+        val passwordShell = readPayloadBytes(this, incrementedOffset, passwordSize, payloadEnd).toEncryptedShellAndScramble()
         incrementedOffset += passwordSize
         try {
             val proteins = (0..9).map {
-                val typeSize = readInt(this, incrementedOffset)
+                val typeSize = readPayloadSize(this, incrementedOffset, payloadEnd)
                 incrementedOffset += Integer.BYTES
-                val typeBytes = if (typeSize > 0) readBytes(this, incrementedOffset, typeSize) else byteArrayOf()
+                val typeBytes = if (typeSize > 0) readPayloadBytes(this, incrementedOffset, typeSize, payloadEnd) else byteArrayOf()
                 incrementedOffset += typeSize
-                val structureSize = readInt(this, incrementedOffset)
+                val structureSize = readPayloadSize(this, incrementedOffset, payloadEnd)
                 incrementedOffset += Integer.BYTES
-                val structureBytes = if (structureSize > 0) readBytes(this, incrementedOffset, structureSize) else byteArrayOf()
+                val structureBytes = if (structureSize > 0) {
+                    readPayloadBytes(this, incrementedOffset, structureSize, payloadEnd)
+                } else {
+                    byteArrayOf()
+                }
                 incrementedOffset += structureSize
                 proteinOption(typeBytes, structureBytes)
             }
-            return Pair(createEgg(slotAt(nestSlot), eggIdShell, passwordShell, proteins), incrementedOffset)
+            return Pair(createEgg(nestSlot, eggIdShell, passwordShell, proteins), incrementedOffset)
         } finally {
             eggIdShell.scramble()
             passwordShell.scramble()
@@ -191,11 +207,12 @@ class LegacyPasswordTreePayloadReader @Inject constructor(
     }
 
     private fun ByteArray.asMemoryEntry(offset: Int): Pair<MutableOption<EncryptedShell>, Int> {
+        val payloadEnd = payloadContentEnd(this)
         var incrementedOffset = offset
-        val shellSize = readInt(this, incrementedOffset)
+        val shellSize = readPayloadSize(this, incrementedOffset, payloadEnd)
         incrementedOffset += Integer.BYTES
         val encryptedShellOption = if (shellSize > 0) {
-            val shellBytes = readBytes(this, incrementedOffset, shellSize)
+            val shellBytes = readPayloadBytes(this, incrementedOffset, shellSize, payloadEnd)
             incrementedOffset += shellSize
             mutableOptionOf(shellBytes.toEncryptedShellAndScramble())
         } else {
