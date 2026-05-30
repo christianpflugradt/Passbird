@@ -96,6 +96,9 @@ class FilePasswordExchange @Inject constructor(
         forEach { protein ->
             val slot = requireNotNull(protein.slot) { "Missing protein slot in import file" }
             require(slot in Slot.entries.indices) { "Invalid protein slot $slot" }
+            require(protein.proteinType.isEmpty() == protein.proteinStructure.isEmpty()) {
+                "Partial protein record in import file"
+            }
             require(
                 proteinsBySlot.putIfAbsent(
                     slot,

@@ -134,6 +134,54 @@ class FilePasswordExchangeIntegrationTest {
     }
 
     @Test
+    fun `should receive explicit empty protein slots when type and structure are empty`() {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": [
+                        {
+                          "proteinType": "",
+                          "proteinStructure": "",
+                          "slot": 0
+                        },
+                        {
+                          "proteinType": "type8",
+                          "proteinStructure": "structure8",
+                          "slot": 8
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        // when
+        val actual = filePasswordExchange.receive()
+
+        // then
+        expectThat(actual.failure).isFalse()
+        expectThat(actual.getOrNull()!![Slot.DEFAULT.toNest()]!!.single().second).isEqualTo(
+            proteinShellPairs(
+                Slot.S8 to ShellPair(shellOf("type8"), shellOf("structure8")),
+            ),
+        )
+    }
+
+    @Test
     fun `should fail receive when protein slot values are duplicated`() {
         // given
         writeExchangeFile(
@@ -196,6 +244,82 @@ class FilePasswordExchangeIntegrationTest {
                         {
                           "proteinType": "type0",
                           "proteinStructure": "structure0"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        // when
+        val actual = filePasswordExchange.receive()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
+    }
+
+    @Test
+    fun `should fail receive when protein type is missing from populated protein record`() {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": [
+                        {
+                          "proteinStructure": "structure0",
+                          "slot": 0
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        // when
+        val actual = filePasswordExchange.receive()
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
+    }
+
+    @Test
+    fun `should fail receive when protein structure is missing from populated protein record`() {
+        // given
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": [
+                        {
+                          "proteinType": "type0",
+                          "slot": 0
                         }
                       ]
                     }

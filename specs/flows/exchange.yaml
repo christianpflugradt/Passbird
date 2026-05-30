@@ -92,7 +92,7 @@ flows:
       - if import parsing or reading fails with a generic import failure, Passbird prints Password Tree could not be imported. to standard error
       - if a full import targets an occupied Nest Slot whose local NestId differs from the exported NestId, Passbird treats it as a generic import failure before writing any imported Eggs
       - if placing a missing target Nest or persisting an imported egg or protein fails after import starts, Passbird stops importing remaining entries, preserves the existing password-tree sync failure output, and does not emit the final success summary
-      - missing, duplicate, or out-of-range exportedNest.slot metadata, empty or blank exportedNest.nestId metadata, duplicate EggIds within one exported Nest, or missing, duplicate, or out-of-range ExportedProtein.slot metadata is treated as a generic import failure rather than being coerced to another Nest or Protein slot
+      - Passbird treats missing, duplicate, or out-of-range exportedNest.slot metadata, empty or blank exportedNest.nestId metadata, duplicate EggIds within one exported Nest, missing, duplicate, or out-of-range ExportedProtein.slot metadata, or any ExportedProtein record with exactly one empty proteinType/proteinStructure field as a generic import failure rather than coercing it to another Nest or Protein slot
       - if import parsing fails because an eggId contains digits or special characters, Passbird prints Password Tree could not be imported because at least one eggId contains digits or special characters. Please correct invalid eggIds and try again. Erroneous eggId: <EggId> to standard error
       - after a FAILED path, the command handler still emits one empty line
   - id: import_selective
@@ -138,7 +138,7 @@ flows:
       - if previewing or parsing the import file fails before a selectable preview is available, the import handler prints no Operation aborted. message
       - generic import read or parse failures are reported to standard error as Password Tree could not be imported.
       - if placing a missing target Nest or persisting an imported egg or protein fails after selective import starts, Passbird stops importing remaining entries, preserves the existing password-tree sync failure output, and does not emit the final success summary
-      - missing, duplicate, or out-of-range exportedNest.slot metadata, empty or blank exportedNest.nestId metadata, duplicate EggIds within one exported Nest, or missing, duplicate, or out-of-range ExportedProtein.slot metadata is treated as a generic import failure before any preview list or local mutation is produced
+      - Passbird treats missing, duplicate, or out-of-range exportedNest.slot metadata, empty or blank exportedNest.nestId metadata, duplicate EggIds within one exported Nest, missing, duplicate, or out-of-range ExportedProtein.slot metadata, or any ExportedProtein record with exactly one empty proteinType/proteinStructure field as a generic import failure before any preview list or local mutation is produced
       - invalid eggId import failures are reported to standard error with the longer invalid-eggId message
       - after a FAILED path, the command handler still emits one empty line
 command_parse_rules:
