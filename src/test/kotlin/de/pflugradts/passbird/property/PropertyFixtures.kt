@@ -66,7 +66,7 @@ fun passwordTreeFixtures(): Arb<PasswordTreeFixture> = explicitNests().flatMap {
 }
 
 fun exchangeFixtures(): Arb<ExchangeFixture> = exchangeSlots().flatMap { slots ->
-    Arb.list(nonEmptyTextValues(), slots.size..slots.size).flatMap { nestIds ->
+    Arb.list(nonBlankTextValues(), slots.size..slots.size).flatMap { nestIds ->
         Arb.list(plainPasswordInfoLists(), slots.size..slots.size).map { eggLists ->
             ExchangeFixture(
                 slots.indices.associate { index ->
@@ -175,7 +175,7 @@ fun normalizePasswordInfoMap(passwordInfoMap: PasswordInfoMap): ExchangeFixture 
 )
 
 private fun explicitNests(): Arb<Map<Slot, String>> = nonDefaultSlots().flatMap { slots ->
-    Arb.list(nonEmptyTextValues(), slots.size..slots.size).map { nestIds ->
+    Arb.list(nonBlankTextValues(), slots.size..slots.size).map { nestIds ->
         slots.zip(nestIds).toMap().toSortedMap(compareBy(Slot::index))
     }
 }
@@ -238,6 +238,11 @@ private fun PasswordTreeFixture.toNestShells() = Slot.entries
 
 private fun nonEmptyProteinPairs(): Arb<Pair<String, String>> = Arb.bind(nonEmptyTextValues(), nonEmptyTextValues(), ::Pair)
 
+private fun nonBlankTextValues(): Arb<String> = Arb.bind(
+    Arb.string(0..15, ALLOWED_TEXT_CHARACTERS),
+    Arb.element(NON_BLANK_TEXT_CHARACTERS.toList()),
+) { prefix, marker -> prefix + marker }
+
 private fun nonEmptyTextValues(): Arb<String> = Arb.string(1..16, ALLOWED_TEXT_CHARACTERS)
 
 private fun PlainEggData.toEgg(cryptoProvider: CryptoProvider): Egg = createEgg(
@@ -285,6 +290,7 @@ private fun PlainPasswordInfoData.toPasswordInfo() = (shellOf(eggId) to shellOf(
 }
 
 private val ALLOWED_TEXT_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !@#\$%^&*()_-+=[]{}:;,.?/|~\t\n"
+private val NON_BLANK_TEXT_CHARACTERS = ALLOWED_TEXT_CHARACTERS.filterNot(Char::isWhitespace)
 private val nonDefaultSlotEntries = Slot.entries.filterNot { it == Slot.DEFAULT }
 private val allFavoriteCells = Slot.entries.flatMap { nestSlot ->
     Slot.entries.map { favoriteSlot -> FavoriteCell(nestSlot, favoriteSlot) }

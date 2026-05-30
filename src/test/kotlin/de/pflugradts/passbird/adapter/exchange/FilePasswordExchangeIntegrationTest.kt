@@ -285,8 +285,8 @@ class FilePasswordExchangeIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["", "   "])
-    fun `should fail receive when custom nest id is empty or blank`(givenNestId: String) {
+    @ValueSource(strings = ["\"\"", "\"   \"", "\"\\t\"", "\"\\n\""])
+    fun `should fail receive when custom nest id is empty or blank`(givenNestIdJson: String) {
         // given
         writeExchangeFile(
             """
@@ -294,7 +294,7 @@ class FilePasswordExchangeIntegrationTest {
               "exportedContent": [
                 {
                   "exportedNest": {
-                    "nestId": "$givenNestId",
+                    "nestId": $givenNestIdJson,
                     "slot": 2
                   },
                   "exportedEggs": [
