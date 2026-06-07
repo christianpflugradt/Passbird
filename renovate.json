@@ -1,15 +1,35 @@
 {
+    "description": [
+        "Standard dependency updates wait 7 days before Renovate creates branches or PRs.",
+        "GitHub Actions and major-version updates wait 14 days."
+    ],
     "dependencyDashboard": true,
     "dependencyDashboardOSVVulnerabilitySummary": "all",
+    "minimumReleaseAge": "7 days",
+    "minimumReleaseAgeBehaviour": "timestamp-required",
+    "internalChecksFilter": "strict",
     "separateMultipleMajor": true,
     "prCreation": "status-success",
     "packageRules": [
         {
+            "description": [
+                "GitHub Actions updates use a 14-day cooldown while preserving grouped PRs."
+            ],
             "matchFileNames": [
                 ".github/**"
             ],
             "groupName": "github-actions",
-            "separateMajorMinor": false
+            "separateMajorMinor": false,
+            "minimumReleaseAge": "14 days"
+        },
+        {
+            "description": [
+                "Major-version updates use a 14-day cooldown, overriding the standard 7-day cooldown."
+            ],
+            "matchUpdateTypes": [
+                "major"
+            ],
+            "minimumReleaseAge": "14 days"
         },
         {
             "matchPackageNames": [

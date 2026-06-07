@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-30
+last_reviewed: 2026-06-07
 agent_internal_scripts:
   location: .agent/scripts
   purpose:
@@ -47,6 +47,11 @@ quality_gates:
     - pre-commit hook runs ./gradlew checkLicense
     - Gradle dependency verification uses gradle/verification-metadata.xml and the armored gradle/verification-keyring.keys file
     - GitHub Actions OWASP dependency check workflows
+  dependency_maintenance:
+    - Renovate dependency dashboard stays enabled for pending and grouped dependency work
+    - Renovate standard dependency updates require a 7-day minimum release age before branch or pull-request creation
+    - Renovate GitHub Actions updates and major-version updates require a 14-day minimum release age
+    - Renovate internal checks use strict filtering so updates blocked by minimum release age stay visible through the dashboard without early branch or pull-request creation
   convenience_task:
     - ./gradlew preCommitCheck
   hook_managed_checks:
