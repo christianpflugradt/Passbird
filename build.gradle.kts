@@ -23,7 +23,7 @@ plugins {
     jacoco
     java
     kotlin("jvm") version "2.3.21"
-    id("com.github.jk1.dependency-license-report") version "3.1.2"
+    id("com.github.jk1.dependency-license-report") version "3.1.4"
     id("org.owasp.dependencycheck") version "12.2.2"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     id("org.barfuin.gradle.jacocolog") version "4.0.2"
