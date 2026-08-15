@@ -39,17 +39,24 @@ jobs:
               "artifact-smoke-test (Java 25)",
             ];
 
-            const workflowRuns = await github.paginate(github.rest.actions.listWorkflowRuns, {
+            const workflow = await github.rest.actions.getWorkflow({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: workflowId,
+            });
+
+            const workflowRunsResponse = await github.request("GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs", {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflow.data.id,
               branch,
+              head_sha: sha,
               status: "completed",
               per_page: 50,
             });
 
-            const candidateRuns = workflowRuns.filter((run) =>
-              run.head_sha === sha && run.conclusion === "success"
+            const candidateRuns = workflowRunsResponse.data.workflow_runs.filter((run) =>
+              run.conclusion === "success"
             );
 
             if (candidateRuns.length === 0) {
