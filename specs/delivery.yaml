@@ -79,7 +79,7 @@ local_verification_policy:
     default: rely_on_ci
     note: only run locally when the maintainer explicitly asks for it
     suppressions:
-      - keep `owasp-suppressions.xml` limited to confirmed false positives or verified build-time-only findings that do not affect shipped runtime artifacts
+      - keep `owasp-suppressions.xml` limited to confirmed false positives, verified unreachable runtime findings, or verified build-time-only findings that do not affect shipped runtime artifacts
   dependency_verification:
     files:
       - gradle/wrapper/gradle-wrapper.properties
