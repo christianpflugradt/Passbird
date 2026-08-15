@@ -40,7 +40,7 @@ detekt {
     source.setFrom("src/main/kotlin", "src/test/kotlin")
 }
 
-val jacksonVersion = "2.21.4"
+val jacksonVersion = "2.22.1"
 
 val archunitVersion = "1.4.2"
 val junitPlatformVersion = "6.1.0"
