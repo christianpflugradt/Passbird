@@ -143,6 +143,7 @@ flows:
         - if the Egg does not exist, Passbird asks no further questions and does not attempt to store any Protein
         - a missing Egg triggers the standard event output Egg '<EggId>' not found.
         - the missing-Egg event also triggers the warning sound defined in specs/interaction.yaml
+        - after command entry, Passbird prints one blank line before the template selection block
         - Passbird then prints the heading Available Protein templates:
         - Passbird lists the untemplated option first as 0 none
         - Passbird then lists configured templates in configuration order using 1-based indices and the format <Index> <TemplateName>
@@ -153,7 +154,9 @@ flows:
         - every abort path before slot prompting ends with one trailing blank line
       no_template_mode:
         - selecting 0 enters untemplated guided mode across all slots from 0 through 9
-        - before each slot prompt, Passbird prints Slot <SlotIndex>
+        - before the first slot prompt, Passbird prints one blank line
+        - before each additional slot prompt, Passbird prints two blank lines
+        - before each slot prompt, Passbird prints Slot <SlotIndex> using the highlight formatting defined in specs/interaction.yaml
         - on an empty slot, Passbird prompts with Enter Protein Type or just press enter to continue:
         - on an occupied slot, Passbird prompts with Enter new Protein Type to replace '<CurrentType>' or just press enter to keep it:
         - on an empty slot, empty type input skips the slot and continues with the next slot
@@ -165,12 +168,14 @@ flows:
         - on an occupied slot, empty structure input keeps the existing Structure and the flow continues
       template_mode:
         - selecting a configured template prompts only the slots explicitly defined by that template
-        - before each template-driven slot prompt, Passbird prints Slot <SlotIndex> Type '<TemplateType>'
+        - before the first template-driven slot prompt, Passbird prints one blank line
+        - before each additional template-driven slot prompt, Passbird prints two blank lines
+        - before each template-driven slot prompt, Passbird prints Slot <SlotIndex> Type '<TemplateType>' using the highlight formatting defined in specs/interaction.yaml
         - if an existing Protein is present and its Type matches the template Type, Passbird prints Existing Protein Structure at Slot '<SlotIndex>' of Egg '<EggId>' will be overwritten if you enter a new value.
         - if an existing Protein is present and its Type differs from the template Type, Passbird prints Existing Protein Type and Structure at Slot '<SlotIndex>' of Egg '<EggId>' will be overwritten if you enter a new value.
-        - on an empty slot, Passbird prompts with Enter Protein Structure for Type '<TemplateType>':
-        - on an occupied slot with matching Type, Passbird prompts with Enter new Protein Structure for Type '<TemplateType>' or just press enter to keep the existing value:
-        - on an occupied slot with differing Type, Passbird prompts with Enter new Protein Structure for Type '<TemplateType>' or just press enter to keep the existing Type and Structure:
+        - on an empty slot, Passbird prompts with Enter Protein Structure:
+        - on an occupied slot with matching Type, Passbird prompts with Enter Protein Structure or just press enter to keep existing value:
+        - on an occupied slot with differing Type, Passbird prompts with Enter Protein Structure or just press enter to keep existing Type and Structure:
         - if structure input is empty, the slot is kept unchanged and the flow continues
         - if structure input is non-empty, Passbird stores both the template Type and the entered Structure for that slot
       secure_input_behavior:
@@ -179,6 +184,7 @@ flows:
       completion_behavior:
         - after a valid template selection, the user cannot abort the guided flow through empty prompts; only keep or skip behavior remains available
         - the guided command suppresses the per-slot Protein created and updated success events that the slotted Protein update command emits
+        - before the final completion message, Passbird prints one blank line
         - if no slot is written, Passbird prints No Proteins were updated for egg '<EggId>'.
         - if one or more slots are written successfully, Passbird prints Proteins for egg '<EggId>' successfully updated.
         - the completion path ends with one trailing blank line

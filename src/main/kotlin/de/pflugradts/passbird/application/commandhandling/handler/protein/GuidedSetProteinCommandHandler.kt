@@ -13,6 +13,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.EVENT_HANDLED
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.HIGHLIGHT
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService.EggNotExistsAction.CREATE_ENTRY_NOT_EXISTS_EVENT
@@ -61,21 +62,11 @@ class GuidedSetProteinCommandHandler constructor(
         }
         try {
             if (proteinEntries.isEmpty()) {
-                userInterfaceAdapterPort.send(
-                    outputOf(shellOf("No Proteins were updated for egg '${eggIdShell.asString()}'."), EVENT_HANDLED),
-                )
+                sendNoProteinUpdatesMessage(eggIdShell)
                 finish(command)
                 return
             }
-            proteinEventOutputControl.suppress {
-                if (passwordService.putProteins(eggIdShell, proteinEntries).failure) {
-                    commandExecutionTracker.markFailure()
-                    return@suppress
-                }
-                userInterfaceAdapterPort.send(
-                    outputOf(shellOf("Proteins for egg '${eggIdShell.asString()}' successfully updated."), EVENT_HANDLED),
-                )
-            }
+            persistProteinEntries(eggIdShell, proteinEntries)
             finish(command)
         } finally {
             proteinEntries.forEach {
@@ -86,6 +77,7 @@ class GuidedSetProteinCommandHandler constructor(
     }
 
     private fun receiveTemplateSelection(): Int? {
+        userInterfaceAdapterPort.sendLineBreak()
         userInterfaceAdapterPort.send(outputOf(shellOf("Available Protein templates:")))
         userInterfaceAdapterPort.send(outputOf(shellOf("\t0 none")))
         configuration.domain.protein.templates.forEachIndexed { index, template ->
@@ -99,10 +91,31 @@ class GuidedSetProteinCommandHandler constructor(
         }
     }
 
-    private fun collectUntemplatedProteinEntries(command: GuidedSetProteinCommand): List<ProteinEntry> = Slot.entries.mapNotNull { slot ->
-        userInterfaceAdapterPort.send(outputOf(shellOf("Slot ${slot.index()}")))
-        collectUntemplatedProteinEntry(command, slot)
+    private fun sendNoProteinUpdatesMessage(eggIdShell: Shell) {
+        userInterfaceAdapterPort.sendLineBreak()
+        userInterfaceAdapterPort.send(
+            outputOf(shellOf("No Proteins were updated for egg '${eggIdShell.asString()}'."), EVENT_HANDLED),
+        )
     }
+
+    private fun persistProteinEntries(eggIdShell: Shell, proteinEntries: List<ProteinEntry>) {
+        proteinEventOutputControl.suppress {
+            if (passwordService.putProteins(eggIdShell, proteinEntries).failure) {
+                commandExecutionTracker.markFailure()
+                return@suppress
+            }
+            userInterfaceAdapterPort.sendLineBreak()
+            userInterfaceAdapterPort.send(
+                outputOf(shellOf("Proteins for egg '${eggIdShell.asString()}' successfully updated."), EVENT_HANDLED),
+            )
+        }
+    }
+
+    private fun collectUntemplatedProteinEntries(command: GuidedSetProteinCommand): List<ProteinEntry> =
+        Slot.entries.mapIndexedNotNull { index, slot ->
+            printSlotHeader(index, slot)
+            collectUntemplatedProteinEntry(command, slot)
+        }
 
     private fun collectUntemplatedProteinEntry(command: GuidedSetProteinCommand, slot: Slot): ProteinEntry? {
         val currentType = currentType(command, slot)
@@ -152,9 +165,9 @@ class GuidedSetProteinCommandHandler constructor(
     private fun collectTemplatedProteinEntries(
         command: GuidedSetProteinCommand,
         template: ReadableConfiguration.ProteinTemplate,
-    ): List<ProteinEntry> = template.slots.toSortedMap().mapNotNull { (index, configuredType) ->
+    ): List<ProteinEntry> = template.slots.toSortedMap().entries.mapIndexedNotNull { entryIndex, (index, configuredType) ->
         val slot = Slot.slotAt(index)
-        userInterfaceAdapterPort.send(outputOf(shellOf("Slot ${slot.index()} Type '$configuredType'")))
+        printSlotHeader(entryIndex, slot, configuredType)
         collectTemplatedProteinEntry(command, slot, configuredType)
     }
 
@@ -173,13 +186,9 @@ class GuidedSetProteinCommandHandler constructor(
                 userInterfaceAdapterPort.send(outputOf(shellOf(notice)))
             }
             val prompt = when {
-                !slotOccupied -> "Enter Protein Structure for Type '$configuredType': "
-
-                typeMatches ->
-                    "Enter new Protein Structure for Type '$configuredType' or just press enter to keep the existing value: "
-
-                else ->
-                    "Enter new Protein Structure for Type '$configuredType' or just press enter to keep the existing Type and Structure: "
+                !slotOccupied -> "Enter Protein Structure: "
+                typeMatches -> "Enter Protein Structure or just press enter to keep existing value: "
+                else -> "Enter Protein Structure or just press enter to keep existing Type and Structure: "
             }
             val structureInput = receiveStructureInput(prompt)
             try {
@@ -232,6 +241,17 @@ class GuidedSetProteinCommandHandler constructor(
     private fun finish(command: GuidedSetProteinCommand) {
         command.invalidateInput()
         userInterfaceAdapterPort.sendLineBreak()
+    }
+
+    private fun printSlotHeader(index: Int, slot: Slot, configuredType: String? = null) {
+        if (index == 0) {
+            userInterfaceAdapterPort.sendLineBreak()
+        } else {
+            userInterfaceAdapterPort.sendLineBreak()
+            userInterfaceAdapterPort.sendLineBreak()
+        }
+        val text = configuredType?.let { "Slot ${slot.index()} Type '$it'" } ?: "Slot ${slot.index()}"
+        userInterfaceAdapterPort.send(outputOf(shellOf(text), HIGHLIGHT))
     }
 
     private fun isExactIndex(input: String) = input.isNotEmpty() && input.all(Char::isDigit) && (input == "0" || !input.startsWith('0'))
