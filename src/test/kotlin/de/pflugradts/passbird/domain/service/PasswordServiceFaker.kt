@@ -35,6 +35,7 @@ private fun fakeWriteOperations(instance: PasswordService) {
     every { instance.putEgg(any(), any()) } returns success(Unit)
     every { instance.putEggs(any()) } returns success(Unit)
     every { instance.putProtein(any(), any(), any(), any()) } returns success(Unit)
+    every { instance.putProteins(any(), any()) } returns success(Unit)
 }
 
 private fun fakeEggQueries(instance: PasswordService, withEggs: List<Egg>, withNestService: NestService?) {

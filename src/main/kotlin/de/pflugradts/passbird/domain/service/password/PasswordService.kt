@@ -32,6 +32,7 @@ interface PasswordService {
     fun putEggs(eggs: Stream<ShellPair>): TryResult<Unit>
     fun putEgg(eggIdShell: Shell, passwordShell: Shell): TryResult<Unit>
     fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell): TryResult<Unit>
+    fun putProteins(eggIdShell: Shell, proteins: List<ProteinEntry>): TryResult<Unit>
     fun discardFavorite(slot: Slot): TryResult<Unit>
     fun discardEgg(eggIdShell: Shell): TryResult<Unit>
     fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit>

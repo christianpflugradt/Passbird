@@ -19,6 +19,8 @@ class ProteinInfoCommandHandler constructor(
                 out(" (details)      Displays both the Protein Types and their Structures for the specified Egg."),
                 outBold("\n\tp[0-9][EggId]"),
                 out(" (copy)     Copies the Protein Structure in the specified Slot (0–9) to the clipboard."),
+                outBold("\n\tp+[EggId]"),
+                out(" (guided)   Guides through creating Proteins for the specified Egg."),
                 outBold("\n\tp+[0-9][EggId]"),
                 out(" (update)  Updates the Protein Structure and optionally the Type in the specified Slot."),
                 outBold("\n\tp-[0-9][EggId]"),

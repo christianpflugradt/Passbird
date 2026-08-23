@@ -91,4 +91,100 @@ class ReadableConfigurationTest {
         expectThat(captureSystemErr.capture) contains "Configuration contains unrecognized property and will not be used."
         verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
     }
+
+    @Test
+    fun `should terminate when protein templates have duplicate names`() {
+        every { systemOperation.exit(any()) } returns Unit
+        File(configurationFile).writeText(
+            """
+            domain:
+              protein:
+                templates:
+                  - name: web-login
+                    0: domain
+                  - name: web-login
+                    1: user
+            """.trimIndent(),
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        val actual = captureSystemErr.during {
+            tryCatching { configurationFactory.loadConfiguration() }
+        }
+
+        expectThat(actual.failure).isTrue()
+        expectThat(captureSystemErr.capture) contains "Configuration could not be loaded: Protein template names must be unique"
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
+    }
+
+    @Test
+    fun `should terminate when protein template name is blank`() {
+        every { systemOperation.exit(any()) } returns Unit
+        File(configurationFile).writeText(
+            """
+            domain:
+              protein:
+                templates:
+                  - name: " "
+                    0: domain
+            """.trimIndent(),
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        val actual = captureSystemErr.during {
+            tryCatching { configurationFactory.loadConfiguration() }
+        }
+
+        expectThat(actual.failure).isTrue()
+        expectThat(captureSystemErr.capture) contains "Configuration could not be loaded: Protein template name is invalid"
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
+    }
+
+    @Test
+    fun `should terminate when protein template slot is out of range`() {
+        every { systemOperation.exit(any()) } returns Unit
+        File(configurationFile).writeText(
+            """
+            domain:
+              protein:
+                templates:
+                  - name: web-login
+                    10: invalid
+            """.trimIndent(),
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        val actual = captureSystemErr.during {
+            tryCatching { configurationFactory.loadConfiguration() }
+        }
+
+        expectThat(actual.failure).isTrue()
+        expectThat(captureSystemErr.capture) contains
+            "Configuration could not be loaded: Protein template 'web-login' contains invalid slot"
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
+    }
+
+    @Test
+    fun `should terminate when protein template slot key is not numeric`() {
+        every { systemOperation.exit(any()) } returns Unit
+        File(configurationFile).writeText(
+            """
+            domain:
+              protein:
+                templates:
+                  - name: web-login
+                    slot: invalid
+            """.trimIndent(),
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        val actual = captureSystemErr.during {
+            tryCatching { configurationFactory.loadConfiguration() }
+        }
+
+        expectThat(actual.failure).isTrue()
+        expectThat(captureSystemErr.capture) contains
+            "Configuration could not be loaded: Protein template 'web-login' contains invalid slot"
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
+    }
 }

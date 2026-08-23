@@ -100,6 +100,7 @@ command_surface:
     - p[EggId]
     - p*[EggId]
     - p[0-9][EggId]
+    - p+[EggId]
     - p+[0-9][EggId]
     - p-[0-9][EggId]
     - s?
@@ -142,6 +143,7 @@ capabilities:
   - name: protein_management
     user_outcomes:
       - inspect Protein types and structures
+      - populate multiple Protein slots through a guided flow
       - create, overwrite, or discard Proteins in fixed slots
     commands:
       - p
@@ -149,6 +151,7 @@ capabilities:
       - p[EggId]
       - p*[EggId]
       - p[0-9][EggId]
+      - p+[EggId]
       - p+[0-9][EggId]
       - p-[0-9][EggId]
   - name: favorites

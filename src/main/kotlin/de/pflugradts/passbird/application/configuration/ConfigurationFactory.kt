@@ -22,7 +22,7 @@ class ConfigurationFactory constructor(
             YAMLMapper().readValue(
                 it.toFile(),
                 Configuration::class.java,
-            )
+            ).validate()
         }
     }.let { result ->
         result.exceptionOrNull()?.let {
@@ -36,4 +36,14 @@ class ConfigurationFactory constructor(
         runContext.homeDirectory,
         CONFIGURATION_FILENAME.toFileName(),
     )
+}
+
+private fun Configuration.validate(): Configuration {
+    val names = domain.protein.templates.map { it.name }
+    require(names.none { it.isBlank() }) { "Protein template name is invalid" }
+    require(names.distinct().size == names.size) { "Protein template names must be unique" }
+    domain.protein.templates.forEach { template ->
+        require(template.slots.keys.all { it in 0..9 }) { "Protein template '${template.name}' contains invalid slot" }
+    }
+    return this
 }

@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.eventhandling
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
+import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggCreated
@@ -15,9 +16,14 @@ import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
 import de.pflugradts.passbird.domain.model.event.NestCreated
 import de.pflugradts.passbird.domain.model.event.NestDiscarded
+import de.pflugradts.passbird.domain.model.event.ProteinCreated
+import de.pflugradts.passbird.domain.model.event.ProteinDiscarded
+import de.pflugradts.passbird.domain.model.event.ProteinUpdated
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.shell.ShellPair
+import de.pflugradts.passbird.domain.model.shell.fakeEnc
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.slot.Slot.S1
 import de.pflugradts.passbird.domain.model.transfer.Output
@@ -108,6 +114,85 @@ class ApplicationEventHandlerTest {
         // then
         verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
         expectThat(outputSlot.captured.shell.asString()) contains NEST_NAME
+    }
+
+    @Test
+    fun `should process protein created event`() {
+        val egg = createEggForTesting(withEggIdShell = shellOf("EggId"))
+        egg.clearDomainEvents()
+        egg.updateProtein(S1, shellOf("user").fakeEnc(), shellOf("alice").fakeEnc())
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
+        val outputSlot = slot<Output>()
+        fakeCryptoProvider(instance = cryptoProvider)
+
+        passbirdEventRegistry.register(ProteinCreated(egg, egg.proteins[S1.index()].get()))
+        passbirdEventRegistry.processEvents()
+
+        verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell.asString()) contains "Protein 'user' for egg 'EggId' successfully created."
+    }
+
+    @Test
+    fun `should process protein updated event when type stays the same`() {
+        val egg = createEggForTesting(
+            withEggIdShell = shellOf("EggId"),
+            withProteins = mapOf(S1 to ShellPair(shellOf("user"), shellOf("alice"))),
+        )
+        val oldProtein = egg.proteins[S1.index()].get()
+        egg.clearDomainEvents()
+        egg.updateProtein(S1, shellOf("user").fakeEnc(), shellOf("bob").fakeEnc())
+        val newProtein = egg.proteins[S1.index()].get()
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
+        val outputSlot = slot<Output>()
+        fakeCryptoProvider(instance = cryptoProvider)
+
+        passbirdEventRegistry.register(ProteinUpdated(egg, S1, oldProtein, newProtein))
+        passbirdEventRegistry.processEvents()
+
+        verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell.asString()) contains
+            "Protein 'user' at slot 1 for egg 'EggId' successfully updated."
+    }
+
+    @Test
+    fun `should process protein updated event when type changes`() {
+        val egg = createEggForTesting(
+            withEggIdShell = shellOf("EggId"),
+            withProteins = mapOf(S1 to ShellPair(shellOf("login"), shellOf("alice"))),
+        )
+        val oldProtein = egg.proteins[S1.index()].get()
+        egg.clearDomainEvents()
+        egg.updateProtein(S1, shellOf("user").fakeEnc(), shellOf("bob").fakeEnc())
+        val newProtein = egg.proteins[S1.index()].get()
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
+        val outputSlot = slot<Output>()
+        fakeCryptoProvider(instance = cryptoProvider)
+
+        passbirdEventRegistry.register(ProteinUpdated(egg, S1, oldProtein, newProtein))
+        passbirdEventRegistry.processEvents()
+
+        verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell.asString()) contains
+            "Protein for egg 'EggId' at slot 1 successfully updated from 'login' to 'user'."
+    }
+
+    @Test
+    fun `should process protein discarded event`() {
+        val egg = createEggForTesting(
+            withEggIdShell = shellOf("EggId"),
+            withProteins = mapOf(S1 to ShellPair(shellOf("user"), shellOf("alice"))),
+        )
+        val protein = egg.proteins[S1.index()].get()
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort)
+        val outputSlot = slot<Output>()
+        fakeCryptoProvider(instance = cryptoProvider)
+
+        passbirdEventRegistry.register(ProteinDiscarded(egg, protein))
+        passbirdEventRegistry.processEvents()
+
+        verify { userInterfaceAdapterPort.send(capture(outputSlot)) }
+        expectThat(outputSlot.captured.shell.asString()) contains
+            "Protein 'user' of egg 'EggId' successfully discarded."
     }
 
     companion object {

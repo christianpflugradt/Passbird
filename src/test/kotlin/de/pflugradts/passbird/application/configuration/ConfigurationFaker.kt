@@ -3,6 +3,7 @@ package de.pflugradts.passbird.application.configuration
 import de.pflugradts.passbird.application.configuration.Configuration.AnsiEscapeCodes
 import de.pflugradts.passbird.application.configuration.Configuration.Clipboard
 import de.pflugradts.passbird.application.configuration.Configuration.ClipboardReset
+import de.pflugradts.passbird.application.configuration.Configuration.ProteinTemplate
 import de.pflugradts.passbird.application.configuration.Configuration.UserInterface
 import io.mockk.every
 import io.mockk.mockk
@@ -24,6 +25,7 @@ fun fakeConfiguration(
     withSecureInputEnabled: Boolean = true,
     withSecureProteinInputEnabled: Boolean = true,
     withPromptForProteinStructureInputToggle: Boolean = false,
+    withProteinTemplates: List<ProteinTemplate> = emptyList(),
     withInactivityTimeLimit: Int = 0,
     withVerifyChecksum: Boolean = true,
     withVerifySignature: Boolean = true,
@@ -71,6 +73,7 @@ fun fakeConfiguration(
     val protein = mockk<Configuration.Protein>()
     every { protein.secureProteinStructureInput } returns withSecureProteinInputEnabled
     every { protein.promptForProteinStructureInputToggle } returns withPromptForProteinStructureInputToggle
+    every { protein.templates } returns withProteinTemplates
     val eggIdMemory = mockk<Configuration.EggIdMemory>()
     every { eggIdMemory.enabled } returns withEggIdMemoryEnabled
     every { eggIdMemory.persisted } returns withEggIdMemoryPersisted

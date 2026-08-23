@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.configuration
 
+import com.fasterxml.jackson.annotation.JsonAnySetter
 import de.pflugradts.passbird.application.Directory
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 
@@ -103,5 +104,18 @@ data class Configuration(
     data class Protein(
         override val secureProteinStructureInput: Boolean = true,
         override val promptForProteinStructureInputToggle: Boolean = false,
+        override val templates: List<ProteinTemplate> = emptyList(),
     ) : ReadableConfiguration.Protein
+
+    data class ProteinTemplate(
+        override val name: String = "",
+        private val definedSlots: MutableMap<Int, String> = linkedMapOf(),
+    ) : ReadableConfiguration.ProteinTemplate {
+        @JsonAnySetter
+        fun putSlot(key: String, value: String) {
+            definedSlots[key.toIntOrNull() ?: Int.MIN_VALUE] = value
+        }
+
+        override val slots: Map<Int, String> get() = definedSlots.toMap()
+    }
 }

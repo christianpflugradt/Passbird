@@ -23,6 +23,7 @@ import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 class ApplicationEventHandler constructor(
     private val cryptoProvider: CryptoProvider,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
+    private val proteinEventOutputControl: ProteinEventOutputControl = ProteinEventOutputControl(),
 ) : EventHandler {
     override val eventTypes: Set<Class<out DomainEvent>> = setOf(
         EggCreated::class.java,
@@ -92,6 +93,7 @@ class ApplicationEventHandler constructor(
     }
 
     private fun handleProteinCreated(proteinCreated: ProteinCreated) {
+        if (proteinEventOutputControl.proteinEventsSuppressed()) return
         val proteinType = decrypt(proteinCreated.protein.viewType())
         val eggId = decrypt(proteinCreated.egg.viewEggId())
         val msg = "Protein '$proteinType' for egg '$eggId' successfully created."
@@ -99,6 +101,7 @@ class ApplicationEventHandler constructor(
     }
 
     private fun handleProteinUpdated(proteinUpdated: ProteinUpdated) {
+        if (proteinEventOutputControl.proteinEventsSuppressed()) return
         val oldProteinType = decrypt(proteinUpdated.oldProtein.viewType())
         val newProteinType = decrypt(proteinUpdated.newProtein.viewType())
         val eggId = decrypt(proteinUpdated.egg.viewEggId())

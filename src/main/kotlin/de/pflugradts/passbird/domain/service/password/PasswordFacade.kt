@@ -36,6 +36,8 @@ class PasswordFacade constructor(
     override fun putEgg(eggIdShell: Shell, passwordShell: Shell): TryResult<Unit> = putPasswordService.putEgg(eggIdShell, passwordShell)
     override fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell): TryResult<Unit> =
         putPasswordService.putProtein(eggIdShell, slot, typeShell, structureShell)
+    override fun putProteins(eggIdShell: Shell, proteins: List<ProteinEntry>): TryResult<Unit> =
+        putPasswordService.putProteins(eggIdShell, proteins)
     override fun discardFavorite(slot: Slot): TryResult<Unit> = favoritePasswordService.discardFavorite(slot)
     override fun discardEgg(eggIdShell: Shell): TryResult<Unit> = discardPasswordService.discardEgg(eggIdShell)
     override fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit> = discardPasswordService.discardProtein(eggIdShell, slot)

@@ -39,3 +39,4 @@ Passbird stores sensitive local files such as the keystore, password tree, expor
 | `domain.eggIdMemory.persisted`                        | Retains the EggId memory across Passbird restarts, if enabled.                                   | false                |
 | `domain.protein.secureProteinStructureInput`          | Treats protein structures as sensitive input, hiding them by default.                            | true                 |
 | `domain.protein.promptForProteinStructureInputToggle` | Prompts the user to toggle secure input for the next protein structure input.                    | false                |
+| `domain.protein.templates`                            | Defines named Protein templates for the guided `p+[EggId]` command.                              | *(unset)*            |

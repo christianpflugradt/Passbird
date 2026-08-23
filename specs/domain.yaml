@@ -65,6 +65,7 @@ user_command_families:
       - p[EggId]
       - p*[EggId]
       - p[0-9][EggId]
+      - p+[EggId]
       - p+[0-9][EggId]
       - p-[0-9][EggId]
   - family: memory

@@ -159,6 +159,7 @@ domain:
   protein:
     secureProteinStructureInput: true
     promptForProteinStructureInputToggle: false
+    templates: []
 ```
 
 You may modify the parameters to suit your needs by editing the YAML file in a text editor. Ensure the file adheres to valid YAML syntax and only includes supported parameters. If you omit parameters, Passbird will revert to defaults.
@@ -326,6 +327,7 @@ To view commands related to Proteins, input `p?` and press Enter.
     p[EggId] (info)          Displays the Protein Types associated with the specified Egg.
     p*[EggId] (details)      Displays both the Protein Types and their Structures for the specified Egg.
     p[0-9][EggId] (copy)     Copies the Protein Structure in the specified Slot (0–9) to the clipboard.
+    p+[EggId] (guided)       Guides through creating Proteins for the specified Egg.
     p+[0-9][EggId] (update)  Updates the Protein Structure and optionally the Type in the specified Slot.
     p-[0-9][EggId] (discard) Deletes the Protein Structure and Type from the specified Slot.
 
@@ -336,6 +338,20 @@ To display the actual Protein Structures (sensitive data) alongside their Types,
 If the Structure of a specific Protein is required in the clipboard, determine its Slot number (e.g., Slot 2 as shown in the `pemail` output) and use `p2email`. This will copy the content of Slot 2 directly to the clipboard.
 
 Each Egg contains ten Protein Slots, which are initially empty. To create or update a Protein in a specific Slot, e.g. Slot 1, use `p+1email`. You will first be prompted to enter the Protein Type (e.g., “user”). If a Protein already exists in the specified Slot and no new Type is provided, the existing Type will remain unchanged. Next, you will be asked to input the Protein Structure. Pressing Enter without input will abort the creation or update process.
+
+If you want to populate several Protein slots in one flow, use `p+email`. Passbird first lets you select a Protein template by index or choose `none`. Template mode prompts only for the configured slots and only asks for the Structure because the Type comes from the template. Choosing `none` walks through all ten slots and lets you enter, keep, or skip Type and Structure values slot by slot.
+
+Protein templates are configured in `passbird.yml` under `domain.protein.templates`. Each template has a required `name` and may define any subset of slots `0` through `9` as Protein Types.
+
+```yaml
+domain:
+  protein:
+    templates:
+      - name: web-login
+        0: domain
+        1: user
+        2: description
+```
 
 To delete a Protein from a specific Slot, e.g. Slot 1, input `p-1email`. This command removes both the Type and Structure from the specified Slot.
 

@@ -92,6 +92,12 @@ interface ReadableConfiguration {
     interface Protein {
         val secureProteinStructureInput: Boolean
         val promptForProteinStructureInputToggle: Boolean
+        val templates: List<ProteinTemplate>
+    }
+
+    interface ProteinTemplate {
+        val name: String
+        val slots: Map<Int, String>
     }
 
     companion object {

@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.factory
 import de.pflugradts.passbird.application.commandhandling.command.DiscardProteinCommand
 import de.pflugradts.passbird.application.commandhandling.command.GetProteinCommand
+import de.pflugradts.passbird.application.commandhandling.command.GuidedSetProteinCommand
 import de.pflugradts.passbird.application.commandhandling.command.ProteinInfoCommand
 import de.pflugradts.passbird.application.commandhandling.command.SetProteinCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewProteinStructuresCommand
@@ -27,6 +28,7 @@ class ProteinCommandFactory : SpecialCommandFactory() {
     private fun constructSizeTwoCommand(command: Shell, input: Input) = when {
         command.isShowAllVariant() -> ViewProteinStructuresCommand(input)
         command.isSlotted() -> GetProteinCommand(command.getSlot(), input)
+        command.isAddVariant() -> GuidedSetProteinCommand(input)
         else -> null
     }
     private fun constructSizeThreeCommand(command: Shell, input: Input) = command.takeIf { it.isSlotted() }?.let {

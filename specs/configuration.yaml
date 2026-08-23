@@ -34,6 +34,7 @@ configuration_surface:
     - domain.eggIdMemory.persisted defaults to false
     - domain.protein.secureProteinStructureInput defaults to true
     - domain.protein.promptForProteinStructureInputToggle defaults to false
+    - domain.protein.templates defaults to an empty list
   loading_behavior:
     - if passbird.yml does not exist in the run home directory, Passbird loads a template configuration instead of reporting a load failure
     - if passbird.yml exists and contains an unrecognized property, Passbird reports that the configuration contains an unrecognized property, exits with a non-zero process status, and does not fall back to template mode
@@ -127,9 +128,11 @@ areas:
       - domain.eggIdMemory.persisted
       - domain.protein.secureProteinStructureInput
       - domain.protein.promptForProteinStructureInputToggle
+      - domain.protein.templates
     visible_effects:
       - changes whether recent EggIds are shown and remembered across restarts
       - changes whether Protein structure input is hidden and whether the user is prompted to toggle it
+      - changes which guided Protein templates are available to p+[EggId]
     behavioral_contract:
       - domain.eggIdMemory.enabled controls whether EggId memory is updated at all during session activity
       - if domain.eggIdMemory.enabled is false, in-session memory updates are suppressed and restored memory is effectively unavailable
@@ -141,6 +144,12 @@ areas:
       - when the configured default is secure input, the toggle prompt text starts with Disable secure input for next input? Y/n
       - when the configured default is plain input, the toggle prompt text starts with Enable secure input for next input? Y/n
       - only explicit y or Y flips the structure-input mode for that next prompt; any other response leaves the configured mode unchanged
+      - domain.protein.templates configures zero or more guided Protein templates for p+[EggId]
+      - each Protein template requires a unique non-blank name and may define any subset of slots 0 through 9
+      - each configured template slot value is the Protein Type that p+[EggId] uses when prompting for that slot in template mode
+      - undefined template slots are skipped by p+[EggId]
+      - selecting a configured template with no defined slots aborts p+[EggId] with Specified template is empty - Operation aborted.
+      - duplicate Protein template names, template slot keys outside 0 through 9, and non-string template slot values make the configuration invalid and abort startup
   - name: password_tree_integrity_checks
     keys:
       - adapter.passwordTree.verifySignature

@@ -63,6 +63,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNes
 import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.protein.DiscardProteinCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.protein.GetProteinCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.protein.GuidedSetProteinCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.protein.ProteinInfoCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.protein.SetProteinCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.protein.ViewProteinStructuresCommandHandler
@@ -71,6 +72,7 @@ import de.pflugradts.passbird.application.configuration.ConfigurationFactory
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.eventhandling.ApplicationEventHandler
 import de.pflugradts.passbird.application.eventhandling.PassbirdEventRegistry
+import de.pflugradts.passbird.application.eventhandling.ProteinEventOutputControl
 import de.pflugradts.passbird.application.exchange.ExchangeFactory
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.exchange.PasswordImportExportService
@@ -156,6 +158,13 @@ class ApplicationGraph(
             GetCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort, commandExecutionTracker),
             GetMemoryCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort, commandExecutionTracker),
             GetProteinCommandHandler(passwordService, clipboardAdapterPort, userInterfaceAdapterPort, commandExecutionTracker),
+            GuidedSetProteinCommandHandler(
+                configuration,
+                passwordService,
+                userInterfaceAdapterPort,
+                proteinEventOutputControl,
+                commandExecutionTracker,
+            ),
             HelpCommandHandler(canPrintInfo, userInterfaceAdapterPort),
             ImportCommandHandler(
                 configuration,
@@ -194,7 +203,7 @@ class ApplicationGraph(
     val configuration: ReadableConfiguration by lazy { configurationFactory.loadConfiguration() }
     val eventHandlers: Set<EventHandler> by lazy {
         setOf(
-            ApplicationEventHandler(cryptoProvider, userInterfaceAdapterPort),
+            ApplicationEventHandler(cryptoProvider, userInterfaceAdapterPort, proteinEventOutputControl),
             DomainEventHandler { eggRepository },
         )
     }
@@ -244,6 +253,7 @@ class ApplicationGraph(
         )
     }
     private val rememberedCommandMemory by lazy { RememberedCommandMemory() }
+    private val proteinEventOutputControl by lazy { ProteinEventOutputControl() }
     private val exchangeFactory by lazy { ExchangeFactory { FilePasswordExchange(systemOperation, runContext) } }
     private val keyStoreAuthenticationService by lazy {
         KeyStoreAuthenticationService(configuration, keyStoreAdapterPort, userInterfaceAdapterPort, systemOperation)

@@ -262,6 +262,33 @@ class PutPasswordServiceTest {
     }
 
     @Test
+    fun `should upsert multiple proteins and sync once`() {
+        val eggId = shellOf("EggWithProtein")
+        val egg = createEggForTesting(
+            withEggIdShell = eggId,
+            withProteins = mapOf(Slot.S1 to ShellPair(shellOf("old"), shellOf("secret"))),
+        )
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(egg))
+
+        passwordService.putProteins(
+            eggId,
+            listOf(
+                ProteinEntry(Slot.S1, shellOf("user"), shellOf("alice")),
+                ProteinEntry(Slot.S4, shellOf("description"), shellOf("main account")),
+            ),
+        )
+
+        verify(exactly = 4) { cryptoProvider.encrypt(any()) }
+        verify(exactly = 1) { eggRepository.sync() }
+        verify(exactly = 1) { eventRegistry.processEvents() }
+        expectThat(egg.proteins[Slot.S1.index()].get().viewType().fakeDec()) isEqualTo shellOf("user")
+        expectThat(egg.proteins[Slot.S1.index()].get().viewStructure().fakeDec()) isEqualTo shellOf("alice")
+        expectThat(egg.proteins[Slot.S4.index()].get().viewType().fakeDec()) isEqualTo shellOf("description")
+        expectThat(egg.proteins[Slot.S4.index()].get().viewStructure().fakeDec()) isEqualTo shellOf("main account")
+    }
+
+    @Test
     fun `should not add protein when egg does not exist`() {
         // given
         val missingEggId = shellOf("NoEgg")

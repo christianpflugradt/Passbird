@@ -34,10 +34,18 @@ class PutPasswordService constructor(
         )
         return if (sync) processEventsAndSync() else success(Unit)
     }
-    fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell): TryResult<Unit> {
+    fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell): TryResult<Unit> =
+        putProtein(eggIdShell, slot, typeShell, structureShell, true)
+
+    fun putProteins(eggIdShell: Shell, proteins: List<ProteinEntry>): TryResult<Unit> {
+        proteins.forEach { putProtein(eggIdShell, it.slot, it.typeShell, it.structureShell, false) }
+        return processEventsAndSync()
+    }
+
+    private fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell, sync: Boolean): TryResult<Unit> {
         if (eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             findWithoutUpdatingMemory(eggIdShell).get().updateProtein(slot, encrypted(typeShell), encrypted(structureShell))
         }
-        return processEventsAndSync()
+        return if (sync) processEventsAndSync() else success(Unit)
     }
 }

@@ -219,7 +219,6 @@ class InvalidCommandTest {
                 "f+",
                 "m+",
                 "s+EggId",
-                "p+EggId",
             ],
         )
         fun `should handle malformed slotted variant commands`(givenInput: String) {
