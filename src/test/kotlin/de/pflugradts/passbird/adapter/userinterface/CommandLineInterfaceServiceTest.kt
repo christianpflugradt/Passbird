@@ -286,6 +286,38 @@ class CommandLineInterfaceServiceTest {
         }
 
         @Test
+        fun `should reuse pending stdin read after timeout while waiting for line break`() {
+            val readStarted = CountDownLatch(1)
+            val releaseRead = CountDownLatch(1)
+            var readCount = 0
+            every { terminalInputGateway.readCharFromStdin() } answers {
+                when (++readCount) {
+                    1 -> {
+                        readStarted.countDown()
+                        releaseRead.await(1, TimeUnit.SECONDS)
+                        '\n'
+                    }
+
+                    else -> {
+                        Thread.sleep(200)
+                        'x'
+                    }
+                }
+            }
+
+            val firstAttempt = commandLineInterfaceService.receiveLineBreakWithin(50L)
+            expectThat(firstAttempt).isFalse()
+            expectThat(readStarted.await(100, TimeUnit.MILLISECONDS)).isTrue()
+
+            releaseRead.countDown()
+
+            val secondAttempt = commandLineInterfaceService.receiveLineBreakWithin(200L)
+
+            expectThat(secondAttempt).isTrue()
+            expectThat(readCount).isEqualTo(1)
+        }
+
+        @Test
         fun `should abort waiting for line break when inactivity termination is requested`() {
             val inactivityTerminationSignal = InactivityTerminationSignal().also { it.request() }
             val commandLineInterfaceService =

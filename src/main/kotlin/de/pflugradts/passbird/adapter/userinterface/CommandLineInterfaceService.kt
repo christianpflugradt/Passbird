@@ -13,6 +13,7 @@ import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 private const val INPUT_POLL_INTERVAL_IN_MILLIS = 50L
@@ -26,6 +27,7 @@ class CommandLineInterfaceService constructor(
     private val inputReaderExecutor = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "passbird-input-reader").apply { isDaemon = true }
     }
+    private var visibleStdinReadTask: Future<Char>? = null
     private var ephemeralLineLength = 0
 
     constructor(
@@ -50,7 +52,26 @@ class CommandLineInterfaceService constructor(
     private fun isLinebreak(chr: Char) = chr == '\n'
     private fun isCarriageReturn(chr: Char) = chr == '\r'
     private fun isEndOfInput(chr: Char) = chr == STDIN_EOF
-    private fun readCharFromVisibleStdin(): Char = readWithInactivityCheck { runCatching(::stdin).getOrDefault(STDIN_EOF) }
+    private fun readCharFromVisibleStdin(): Char {
+        val readTask = visibleStdinReadTask ?: inputReaderExecutor.submit<Char> {
+            runCatching(::stdin).getOrDefault(STDIN_EOF)
+        }.also { visibleStdinReadTask = it }
+        while (true) {
+            if (inactivityTerminationSignal.isRequested()) {
+                throw InactivityTerminationRequestedException()
+            }
+            try {
+                return readTask.get(INPUT_POLL_INTERVAL_IN_MILLIS, TimeUnit.MILLISECONDS).also {
+                    visibleStdinReadTask = null
+                }
+            } catch (ex: ExecutionException) {
+                visibleStdinReadTask = null
+                throw ex.cause ?: ex
+            } catch (_: TimeoutException) {
+                continue
+            }
+        }
+    }
     private fun readPasswordFromConsole(): CharArray = readWithInactivityCheck { terminalInputGateway.readPasswordFromConsole() }
     private fun <T> readWithInactivityCheck(read: () -> T): T {
         if (inactivityTerminationSignal.isRequested()) {
@@ -146,13 +167,15 @@ class CommandLineInterfaceService constructor(
     }
 
     private fun readCharFromVisibleStdinWithin(timeoutInMillis: Long): Char? {
-        val readTask = inputReaderExecutor.submit<Char> { runCatching(::stdin).getOrDefault(STDIN_EOF) }
+        val readTask = visibleStdinReadTask ?: inputReaderExecutor.submit<Char> {
+            runCatching(::stdin).getOrDefault(STDIN_EOF)
+        }.also { visibleStdinReadTask = it }
         return try {
-            readTask.get(timeoutInMillis, TimeUnit.MILLISECONDS)
+            readTask.get(timeoutInMillis, TimeUnit.MILLISECONDS).also { visibleStdinReadTask = null }
         } catch (ex: ExecutionException) {
+            visibleStdinReadTask = null
             throw ex.cause ?: ex
         } catch (_: TimeoutException) {
-            readTask.cancel(true)
             null
         }
     }
