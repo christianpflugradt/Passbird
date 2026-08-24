@@ -61,11 +61,10 @@ agent_contains_hook_managed_check() {
   local arg
   for arg in "$@"; do
     case "$arg" in
-      ktlintCheck|detekt|checkLicense|jacocoTestCoverageVerification|allTests|preCommitCheck|:ktlintCheck|:detekt|:checkLicense|:jacocoTestCoverageVerification|:allTests|:preCommitCheck)
+      ktlintCheck|detekt|checkLicense|jacocoTestCoverageVerification|allTests|preCommitCheck|prePushCheck|:ktlintCheck|:detekt|:checkLicense|:jacocoTestCoverageVerification|:allTests|:preCommitCheck|:prePushCheck)
         return 0
         ;;
     esac
   done
   return 1
 }
-

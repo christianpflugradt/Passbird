@@ -65,7 +65,7 @@ repository_layout:
   - path: src/test/kotlin
     role: unit, property, integration, and architecture tests
   - path: smoke-test
-    role: jar-level smoke verification assets used by the local pre-commit hook and GitHub-side artifact validation
+    role: jar-level smoke verification assets used by the local pre-push hook and GitHub-side artifact validation
   - path: .github/workflows
     role: GitHub CI, security checks, and release automation
   - path: .agent/scripts
@@ -104,6 +104,7 @@ commands:
   license_gate: ./gradlew checkLicense
   owasp: GitHub Actions OWASP dependency-check workflows
   pre_commit: ./gradlew preCommitCheck
+  pre_push: ./gradlew prePushCheck
 release_model:
   versioning: semantic_versioning
   primary_branch: main

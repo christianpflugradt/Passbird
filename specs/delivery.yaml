@@ -27,6 +27,8 @@ quality_gates:
     - run ./gradlew ktlintFormat before staging, committing, or pushing to auto-resolve formatting issues when possible
     - pre-commit hook runs ./gradlew ktlintCheck
     - pre-commit hook runs ./gradlew detekt
+    - pre-commit hook runs ./gradlew compileKotlin
+    - pre-commit hook runs ./gradlew compileTestKotlin
   warning_enforcement:
     - Kotlin compilation treats warnings as errors across main and test sources
     - Gradle deprecations are monitored through build output and CI logs, but they do not fail the build by default because third-party plugins may emit warnings outside repository control
@@ -44,7 +46,7 @@ quality_gates:
       branch: ">= 0.85"
   dependency_and_license:
     - Gradle Wrapper pins the distribution URL and official SHA-256 checksum in gradle/wrapper/gradle-wrapper.properties
-    - pre-commit hook runs ./gradlew checkLicense
+    - pre-push hook runs ./gradlew checkLicense
     - Gradle dependency verification uses gradle/verification-metadata.xml and the armored gradle/verification-keyring.keys file
     - GitHub Actions OWASP dependency check workflows
   dependency_maintenance:
@@ -54,21 +56,26 @@ quality_gates:
     - Renovate internal checks use strict filtering so updates blocked by minimum release age stay visible through the dashboard without early branch or pull-request creation
   convenience_task:
     - ./gradlew preCommitCheck
+    - ./gradlew prePushCheck
   hook_managed_checks:
-    - the generated .git/hooks/pre-commit script runs ./gradlew --no-build-cache clean jar before smoke-test/run.sh
-    - the generated .git/hooks/pre-commit script removes build/smoke-test-pre-commit before each smoke run for a clean interactive workspace
-    - the generated .git/hooks/pre-commit script then runs ./gradlew preCommitCheck
+    - the generated .git/hooks/pre-commit script runs ./gradlew preCommitCheck
+    - the generated .git/hooks/pre-push script runs ./gradlew prePushCheck
 local_verification_policy:
   pre_commit_hook:
     covers:
-      - ./gradlew --no-build-cache clean jar
-      - ./smoke-test/run.sh
       - ./gradlew ktlintCheck
       - ./gradlew detekt
+      - ./gradlew compileKotlin
+      - ./gradlew compileTestKotlin
+    note: do not rerun these manually unless the maintainer explicitly asks for it
+  pre_push_hook:
+    covers:
       - ./gradlew checkLicense
       - ./gradlew jacocoTestCoverageVerification
       - ./gradlew allTests
-    note: do not rerun these manually unless the maintainer explicitly asks for it; preCommitCheck alone does not include the hook-only clean jar build and smoke pass
+      - ./gradlew jar
+      - ./smoke-test/run.sh
+    note: do not rerun these manually unless the maintainer explicitly asks for it; prePushCheck includes the hook-managed jar build and smoke pass
   focused_tests:
     default: run only tests that exercise the code you changed or the tests you added
     expand_scope_when:

@@ -176,7 +176,7 @@ validation_matrix:
       - run only the focused tests relevant to the dependency or build change
     recommended:
       - refresh and review dependency verification metadata when third-party dependencies or Gradle plugins change
-      - rely on the pre-commit hook for license, coverage, and full-test enforcement
+      - rely on the pre-push hook for license, coverage, full-test, and jar smoke enforcement
       - rely on GitHub Actions OWASP dependency-check workflows instead of local runs unless the maintainer explicitly asks otherwise
   ui_or_command_change_touching_secrets:
     required:

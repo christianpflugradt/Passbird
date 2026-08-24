@@ -488,11 +488,10 @@ While working locally, prefer focused manual checks for the behavior you changed
 - `./gradlew integration` runs tagged integration tests.
 - `./gradlew architecture` runs the ArchUnit-based architecture suite.
 
-The generated local pre-commit hook runs the broader release gate automatically:
+The generated local git hooks run the broader release gate automatically:
 
-- `./gradlew --no-build-cache clean jar`
-- `./smoke-test/run.sh`
-- `./gradlew preCommitCheck`, which runs `ktlintCheck`, `detekt`, `checkLicense`, `jacocoTestCoverageVerification`, and `allTests`
+- `./gradlew preCommitCheck`, which runs `ktlintCheck`, `detekt`, `compileKotlin`, and `compileTestKotlin`
+- `./gradlew prePushCheck`, which runs `checkLicense`, `jacocoTestCoverageVerification`, `allTests`, `jar`, and `./smoke-test/run.sh`
 
 GitHub Actions enforces the same verification model in CI and also runs dedicated workflow jobs for `ktlintCheck`, `detekt`, `checkLicense`, and OWASP dependency scanning.
 

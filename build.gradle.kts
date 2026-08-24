@@ -1,4 +1,6 @@
 
+import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.TestDescriptor
 import org.gradle.api.tasks.testing.TestListener
@@ -270,15 +272,40 @@ licenseReport {
     allowedLicensesFile = file("$projectDir/allowed-licenses.json")
 }
 
+val cleanPrePushSmokeDirectory = tasks.register<Delete>("cleanPrePushSmokeDirectory") {
+    delete(layout.buildDirectory.dir("smoke-test-pre-push"))
+}
+
+val prePushSmokeTest = tasks.register<Exec>("prePushSmokeTest") {
+    group = VERIFICATION_GROUP
+    description = "Builds the local jar and verifies the interactive smoke flow before push."
+
+    dependsOn(tasks.jar, cleanPrePushSmokeDirectory)
+    mustRunAfter("allTests", "jacocoTestCoverageVerification", "checkLicense")
+    environment("PASSBIRD_SMOKE_TMPDIR", layout.buildDirectory.dir("smoke-test-pre-push").get().asFile.absolutePath)
+    commandLine("./smoke-test/run.sh")
+}
+
 tasks.register("preCommitCheck") {
     group = VERIFICATION_GROUP
-    description = "Runs all verification tasks used in the pre-commit hook."
+    description = "Runs the fast local verification tasks used in the pre-commit hook."
 
     dependsOn(
         "ktlintCheck",
         "detekt",
+        "compileKotlin",
+        "compileTestKotlin",
+    )
+}
+
+tasks.register("prePushCheck") {
+    group = VERIFICATION_GROUP
+    description = "Runs the full local verification tasks used in the pre-push hook."
+
+    dependsOn(
         "checkLicense",
         "jacocoTestCoverageVerification",
         "allTests",
+        prePushSmokeTest,
     )
 }

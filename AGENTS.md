@@ -31,7 +31,7 @@ This repository keeps its agent-facing product specifications, design rules, and
 - Once a requested task is complete and suitable for release, commit it, run `git pull -r` on the current branch, and push it immediately.
 - Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.
 - Do not run `./gradlew dependencyCheckAnalyze` locally for verification. Treat OWASP dependency scanning as CI-only unless the maintainer explicitly asks for a local run.
-- Do not manually run verification tasks that are already covered by the local `pre-commit` hook. Before committing, run only focused tests for the behavior you changed or the tests you added, plus any extra checks that are not part of the hook but are truly needed for the change.
+- Do not manually run verification tasks that are already covered by the local git hooks. Before committing, run only focused tests for the behavior you changed or the tests you added, plus any extra checks that are not part of the hooks but are truly needed for the change.
 
 ## Issue Task
 
@@ -75,5 +75,6 @@ Use `specs/delivery.yaml` to choose the right checks. At minimum:
 - run only the focused tests that cover the code you changed or the tests you added
 - use `.agent/scripts/agent-validate.sh` for deterministic validation sequences
 - run `./gradlew architecture` only for structural or wiring changes that are not already otherwise covered
-- rely on the local `pre-commit` hook for `./gradlew --no-build-cache clean jar`, `./smoke-test/run.sh`, `ktlintCheck`, `detekt`, `checkLicense`, `jacocoTestCoverageVerification`, and `allTests`
+- rely on the local `pre-commit` hook for `ktlintCheck`, `detekt`, `compileKotlin`, and `compileTestKotlin`
+- rely on the local `pre-push` hook for `checkLicense`, `jacocoTestCoverageVerification`, `allTests`, `jar`, and `./smoke-test/run.sh`
 - rely on GitHub Actions for OWASP dependency scanning unless the maintainer explicitly requests a local run

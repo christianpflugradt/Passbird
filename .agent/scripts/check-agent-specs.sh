@@ -90,9 +90,10 @@ if scopes != delivery_scopes:
     failures.append("specs/delivery.yaml commit scopes differ from settings.gradle.kts")
 
 required_hook_strings = [
-    "./gradlew --no-build-cache clean jar",
-    "PASSBIRD_SMOKE_TMPDIR=\"./build/smoke-test-pre-commit\" ./smoke-test/run.sh",
-    "preCommitCheck",
+    "preCommit {",
+    "tasks(\"preCommitCheck\")",
+    "hook(\"pre-push\")",
+    "tasks(\"prePushCheck\")",
 ]
 
 for text in required_hook_strings:
@@ -100,9 +101,9 @@ for text in required_hook_strings:
         failures.append(f"settings.gradle.kts no longer contains hook step: {text}")
 
 for text in [
-    "./gradlew --no-build-cache clean jar",
-    "./smoke-test/run.sh",
     "./gradlew preCommitCheck",
+    "./gradlew prePushCheck",
+    "./smoke-test/run.sh",
 ]:
     if text not in delivery:
         failures.append(f"specs/delivery.yaml no longer documents hook step: {text}")
@@ -114,4 +115,3 @@ if failures:
 
 print("Agent script and spec wiring checks passed.")
 PY
-

@@ -45,16 +45,10 @@ val conventionalCommitScopesForCase = conventionalCommitScopes.joinToString(" | 
 
 gitHooks {
     preCommit {
-        from {
-            """
-            |set -euo pipefail
-            |./gradlew --no-build-cache clean jar
-            |rm -rf build/smoke-test-pre-commit
-            |PASSBIRD_SMOKE_TMPDIR="./build/smoke-test-pre-commit" ./smoke-test/run.sh
-            |
-            """.trimMargin()
-        }
         tasks("preCommitCheck")
+    }
+    hook("pre-push") {
+        tasks("prePushCheck")
     }
     commitMsg {
         from {

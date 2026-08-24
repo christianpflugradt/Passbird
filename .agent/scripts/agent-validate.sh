@@ -71,7 +71,7 @@ if agent_contains_dependency_check "${focused_args[@]}" && [[ "$allow_local_owas
 fi
 
 if agent_contains_hook_managed_check "${focused_args[@]}"; then
-  agent_die "Focused validation includes a pre-commit-hook-managed check. Let the hook run it unless the maintainer explicitly asked for a manual run."
+  agent_die "Focused validation includes a local-hook-managed check. Let the git hooks run it unless the maintainer explicitly asked for a manual run."
 fi
 
 run_gradle_focused() {
@@ -134,4 +134,3 @@ esac
 if [[ "$run" == "0" ]]; then
   print -r -- "Dry run only. Re-run with --run to execute."
 fi
-
