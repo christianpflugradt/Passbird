@@ -55,15 +55,6 @@ class ViewYolkCommandHandler(
 
     private fun showCurrentCode(totpGenerator: TotpGenerator, secretBytes: ByteArray, yolkView: YolkView) {
         var code = nextCode(totpGenerator, secretBytes, yolkView)
-        if (code.remainingValiditySeconds <= minimumValiditySeconds) {
-            userInterfaceAdapterPort.send(
-                outputOf(
-                    shellOf("Current Yolk expires in ${code.remainingValiditySeconds}s. Waiting for next Yolk..."),
-                ),
-            )
-            systemOperation.sleep(code.remainingValiditySeconds * MILLI_SECONDS)
-            code = nextCode(totpGenerator, secretBytes, yolkView)
-        }
         userInterfaceAdapterPort.send(outputOf(shellOf("Press Enter to return.")))
         userInterfaceAdapterPort.sendLineBreak()
         syncClipboard(code.value)
@@ -99,9 +90,6 @@ class ViewYolkCommandHandler(
     }
 
     companion object {
-        private const val MINIMUM_VALIDITY_SECONDS = 5
         private const val MILLI_SECONDS = 1000L
     }
-
-    private val minimumValiditySeconds get() = MINIMUM_VALIDITY_SECONDS
 }

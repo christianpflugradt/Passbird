@@ -11,8 +11,7 @@ flows:
   - id: yolk_view
     command: y[EggId]
     user_experience:
-      - if the Egg has a stored yolk and the current code has 5 or fewer seconds of validity left, Passbird first prints Current Yolk expires in <Remaining>s. Waiting for next Yolk... and then waits for the next TOTP code before opening the live Yolk view
-      - if the Egg has a stored yolk and the current code has more than 5 seconds of validity left, Passbird opens the live Yolk view immediately
+      - if the Egg has a stored yolk, Passbird opens the live Yolk view immediately
       - the live Yolk view first prints Press Enter to return.
       - the live Yolk view leaves one blank line before the displayed code line
       - the live Yolk view keeps the current TOTP code visible in the form <Code> (<Remaining>s), updates that same line once per second, and blocks until Enter is pressed

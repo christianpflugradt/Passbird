@@ -23,7 +23,6 @@ import io.mockk.verify
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import strikt.assertions.contains
 import strikt.assertions.isEqualTo
 import java.time.Clock
 import java.time.Instant
@@ -50,25 +49,9 @@ class ViewYolkCommandTest {
     private val inputHandler = createInputHandlerFor(viewYolkCommandHandler, commandExecutionTracker)
 
     @Test
-    fun `should wait for next yolk code when current one is near expiry`() {
+    fun `should show current yolk code immediately even when current one is near expiry`() {
         fakeConfiguration(instance = configuration)
-        val mutableClock = object : Clock() {
-            private var currentInstant = Instant.parse("1970-01-01T00:00:59Z")
-
-            override fun getZone(): ZoneId = ZoneOffset.UTC
-
-            override fun withZone(zone: ZoneId?): Clock = this
-
-            override fun instant(): Instant = currentInstant
-
-            fun advanceSeconds(seconds: Long) {
-                currentInstant = currentInstant.plusSeconds(seconds)
-            }
-        }
-        every { systemOperation.clock } returns mutableClock
-        every { systemOperation.sleep(any()) } answers {
-            mutableClock.advanceSeconds(firstArg<Long>() / 1000L)
-        }
+        fakeSystemOperation(instance = systemOperation, withClock = Clock.fixed(Instant.parse("1970-01-01T00:00:59Z"), ZoneOffset.UTC))
         fakePasswordService(
             instance = passwordService,
             withEggs = listOf(
@@ -84,16 +67,17 @@ class ViewYolkCommandTest {
 
         inputHandler.handleInput(inputOf(shellOf("yegg")))
 
-        expectThat(outputs.map { it.shell.asString() }).contains("Current Yolk expires in 1s. Waiting for next Yolk...")
+        expectThat(outputs.size) isEqualTo 1
+        expectThat(outputs.first().shell.asString()) isEqualTo "Press Enter to return."
         verify(exactly = 1) { userInterfaceAdapterPort.startEphemeralLine(any()) }
         verify(exactly = 1) { userInterfaceAdapterPort.updateEphemeralLine(any()) }
         verify(exactly = 1) { userInterfaceAdapterPort.finishEphemeralLine() }
         verify(exactly = 1) { clipboardAdapterPort.post(any()) }
-        verify(exactly = 1) { systemOperation.sleep(1000L) }
+        verify(exactly = 0) { systemOperation.sleep(any()) }
     }
 
     @Test
-    fun `should show current yolk code immediately when validity exceeds minimum`() {
+    fun `should show current yolk code immediately when validity is high`() {
         fakeConfiguration(instance = configuration, withYolkCopyToClipboard = false)
         fakeSystemOperation(instance = systemOperation, withClock = Clock.fixed(Instant.parse("1970-01-01T00:00:50Z"), ZoneOffset.UTC))
         fakePasswordService(

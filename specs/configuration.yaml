@@ -97,7 +97,7 @@ areas:
       - application.yolk.periodSeconds must be positive
       - if y+[EggId] receives an otpauth://totp URI, the URI-provided algorithm, digit count, and period override the configured fallback values
       - if y+[EggId] receives only a plain Base32 secret, Passbird stores the secret using application.yolk.algorithm, application.yolk.digits, and application.yolk.periodSeconds
-      - y[EggId] waits for the next TOTP code first only when the currently valid code has 5 or fewer seconds remaining
+      - y[EggId] opens the live Yolk view immediately
       - when application.yolk.copyToClipboard is true, y[EggId] posts the displayed TOTP code to the clipboard when the live view opens and on each later rollover
       - when application.yolk.copyToClipboard is false, y[EggId] does not post TOTP codes to the clipboard
   - name: backup_and_storage_locations

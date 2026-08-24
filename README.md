@@ -388,8 +388,6 @@ If you provide only a Base32 secret, Passbird uses the fallback settings from `p
 
 Use `y[EggId]` to open a blocking live view of the current TOTP code. Passbird shows `Press Enter to return.`, leaves a blank line, and then keeps the current code visible together with its remaining validity in seconds on the last line. That line is updated once per second until you press Enter.
 
-If the current code has 5 or fewer seconds of validity left, Passbird first prints `Current Yolk expires in <Remaining>s. Waiting for next Yolk...` and waits for the next code before opening the live view.
-
 By default, Passbird also copies the currently displayed Yolk code to the clipboard and automatically refreshes the clipboard again when the next code becomes valid. You can disable that with `application.yolk.copyToClipboard: false`.
 
 Use `y-[EggId]` to discard the stored yolk again.
