@@ -94,7 +94,7 @@ class CommandLineInterfaceService constructor(
             val next = readCharFromVisibleStdinWithin(
                 TimeUnit.NANOSECONDS.toMillis(remainingNanos).coerceAtLeast(1L),
             ) ?: return false
-            if (isEndOfInput(next) || isLinebreak(next)) {
+            if (isEndOfInput(next) || isLinebreak(next) || isCarriageReturn(next)) {
                 return true
             }
         }

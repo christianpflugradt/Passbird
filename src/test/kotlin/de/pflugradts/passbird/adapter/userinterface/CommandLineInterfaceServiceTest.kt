@@ -256,6 +256,15 @@ class CommandLineInterfaceServiceTest {
         }
 
         @Test
+        fun `should detect carriage return as completed line break within timeout`() {
+            every { terminalInputGateway.readCharFromStdin() } returns '\r'
+
+            val actual = commandLineInterfaceService.receiveLineBreakWithin(100L)
+
+            expectThat(actual).isTrue()
+        }
+
+        @Test
         fun `should detect stdin exhaustion as completed line break within timeout`() {
             every { terminalInputGateway.readCharFromStdin() } returns Char.MAX_VALUE
 
