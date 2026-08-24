@@ -1,5 +1,4 @@
 package de.pflugradts.passbird.application.configuration
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.CONFIGURATION_FILENAME
@@ -8,10 +7,10 @@ import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.application.yolk.normalizeTotpAlgorithm
 class ConfigurationFactory constructor(
     private val systemOperation: SystemOperation,
     private val runContext: RunContext,
+    private val configurationYamlMapper: ConfigurationYamlMapper = ConfigurationYamlMapper(),
 ) {
     fun loadConfiguration() = if (!systemOperation.exists(filePath)) {
         Configuration(template = true)
@@ -20,10 +19,7 @@ class ConfigurationFactory constructor(
     }
     private fun configurationFromFile() = tryCatching {
         filePath.let {
-            YAMLMapper().readValue(
-                it.toFile(),
-                Configuration::class.java,
-            ).validate()
+            it.toFile().inputStream().use(configurationYamlMapper::readConfiguration)
         }
     }.let { result ->
         result.exceptionOrNull()?.let {
@@ -37,17 +33,4 @@ class ConfigurationFactory constructor(
         runContext.homeDirectory,
         CONFIGURATION_FILENAME.toFileName(),
     )
-}
-
-private fun Configuration.validate(): Configuration {
-    normalizeTotpAlgorithm(application.yolk.algorithm)
-    require(application.yolk.digits == 6 || application.yolk.digits == 8) { "Yolk digits are invalid" }
-    require(application.yolk.periodSeconds > 0) { "Yolk period is invalid" }
-    val names = domain.protein.templates.map { it.name }
-    require(names.none { it.isBlank() }) { "Protein template name is invalid" }
-    require(names.distinct().size == names.size) { "Protein template names must be unique" }
-    domain.protein.templates.forEach { template ->
-        require(template.slots.keys.all { it in 0..9 }) { "Protein template '${template.name}' contains invalid slot" }
-    }
-    return this
 }

@@ -1,7 +1,4 @@
 package de.pflugradts.passbird.application.configuration
-import com.fasterxml.jackson.databind.MapperFeature
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.Directory
@@ -13,6 +10,7 @@ import de.pflugradts.passbird.application.util.SystemOperation
 class ConfigurationSyncService constructor(
     private val updatableConfiguration: UpdatableConfiguration,
     private val systemOperation: SystemOperation,
+    private val configurationYamlMapper: ConfigurationYamlMapper = ConfigurationYamlMapper(),
 ) : ConfigurationSync {
     override fun sync(directory: Directory): TryResult<Unit> = writeConfiguration(directory) {
         updatableConfiguration.updateDirectory(directory)
@@ -25,17 +23,14 @@ class ConfigurationSyncService constructor(
 
     private fun writeConfiguration(directory: Directory, updateConfiguration: () -> Unit): TryResult<Unit> = tryCatching {
         updateConfiguration()
-        YAMLMapper.builder()
-            .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
-            .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
-            .build()
-            .let { mapper ->
-                systemOperation.writeToSensitiveFile(
-                    systemOperation.resolvePath(directory, CONFIGURATION_FILENAME.toFileName()),
-                ) { outputStream ->
-                    mapper.writeValue(outputStream, updatableConfiguration)
-                }
+        val yaml = configurationYamlMapper.writeConfiguration(updatableConfiguration)
+        systemOperation.writeToSensitiveFile(
+            systemOperation.resolvePath(directory, CONFIGURATION_FILENAME.toFileName()),
+        ) { outputStream ->
+            outputStream.writer(Charsets.UTF_8).use { writer ->
+                writer.write(yaml)
             }
+        }
         Unit
     }.onFailure {
         reportFailure(ConfigurationFailure(it))

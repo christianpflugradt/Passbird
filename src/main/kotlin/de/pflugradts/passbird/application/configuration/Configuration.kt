@@ -1,7 +1,7 @@
 package de.pflugradts.passbird.application.configuration
 
-import com.fasterxml.jackson.annotation.JsonAnySetter
 import de.pflugradts.passbird.application.Directory
+import de.pflugradts.passbird.application.yolk.normalizeTotpAlgorithm
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 
 private const val DEFAULT_BACKUP_DIRECTORY = "backups"
@@ -130,11 +130,23 @@ data class Configuration(
         override val name: String = "",
         private val definedSlots: MutableMap<Int, String> = linkedMapOf(),
     ) : ReadableConfiguration.ProteinTemplate {
-        @JsonAnySetter
         fun putSlot(key: String, value: String) {
             definedSlots[key.toIntOrNull() ?: Int.MIN_VALUE] = value
         }
 
         override val slots: Map<Int, String> get() = definedSlots.toMap()
     }
+}
+
+internal fun Configuration.validate(): Configuration {
+    normalizeTotpAlgorithm(application.yolk.algorithm)
+    require(application.yolk.digits == 6 || application.yolk.digits == 8) { "Yolk digits are invalid" }
+    require(application.yolk.periodSeconds > 0) { "Yolk period is invalid" }
+    val names = domain.protein.templates.map { it.name }
+    require(names.none { it.isBlank() }) { "Protein template name is invalid" }
+    require(names.distinct().size == names.size) { "Protein template names must be unique" }
+    domain.protein.templates.forEach { template ->
+        require(template.slots.keys.all { it in 0..9 }) { "Protein template '${template.name}' contains invalid slot" }
+    }
+    return this
 }

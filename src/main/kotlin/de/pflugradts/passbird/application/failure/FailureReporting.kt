@@ -1,6 +1,6 @@
 package de.pflugradts.passbird.application.failure
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException
+import de.pflugradts.passbird.application.configuration.UnrecognizedConfigurationPropertyException
 import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.DOES_NOT_EXIST
 import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.IS_NOT_A_DIRECTORY
 import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.IS_NULL
@@ -19,7 +19,9 @@ fun reportFailure(checksumFailure: ChecksumFailure) {
 fun reportFailure(clipboardFailure: ClipboardFailure) =
     err("Clipboard could not be updated. Please check your Java version. Exception: ${clipboardFailure.ex.message}")
 fun reportFailure(commandFailure: CommandFailure) = err("Command execution failed: ${commandFailure.ex.message}")
-fun reportFailure(configurationFailure: ConfigurationFailure) = if (configurationFailure.ex is UnrecognizedPropertyException) {
+fun reportFailure(configurationFailure: ConfigurationFailure) = if (
+    configurationFailure.ex is UnrecognizedConfigurationPropertyException
+) {
     err(
         "Configuration contains unrecognized property and will not be used. Please remove the unrecognized field " +
             "before restarting Passbird: ${configurationFailure.ex.message?.split("(")?.get(0)}",

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
+import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
@@ -54,7 +55,18 @@ class ReadableConfigurationTest {
     fun `should read, write, and read configuration again`() {
         // first load template if physical files does not exist
         val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
-        val configuration = captureSystemErr.during { configurationFactory.loadConfiguration() }
+        val configuration = captureSystemErr.during { configurationFactory.loadConfiguration() }.copy(
+            domain = Configuration.Domain(
+                protein = Configuration.Protein(
+                    templates = listOf(
+                        Configuration.ProteinTemplate(name = "web-login").apply {
+                            putSlot("0", "domain")
+                            putSlot("1", "user")
+                        },
+                    ),
+                ),
+            ),
+        )
         expectThat(configuration.template).isTrue()
         expectThat(captureSystemErr.capture).isEqualTo("")
 
@@ -69,6 +81,8 @@ class ReadableConfigurationTest {
         // now load the persisted configuration and ensure the given configuration directory has been persisted too
         val loadedConfiguration = configurationFactory.loadConfiguration()
         expectThat(loadedConfiguration.adapter.keyStore.location) isEqualTo tempConfigurationDirectory
+        expectThat(loadedConfiguration.domain.protein.templates).hasSize(1)
+        expectThat(loadedConfiguration.domain.protein.templates.first().slots) isEqualTo mapOf(0 to "domain", 1 to "user")
         expectThat(loadedConfiguration.template).isFalse()
     }
 
