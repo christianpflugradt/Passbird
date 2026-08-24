@@ -42,6 +42,29 @@ class TotpSupportTest {
     }
 
     @Test
+    fun `should accept grouped base32 secrets with whitespace hyphens and underscores`() {
+        val whitespace = YolkInputParser().parse(shellOf("MZXW 6YTB"))
+        val hyphen = YolkInputParser().parse(shellOf("MZXW-6YTB"))
+        val underscore = YolkInputParser().parse(shellOf("MZXW_6YTB"))
+
+        expectThat(whitespace.secret.asString()) isEqualTo "fooba"
+        expectThat(hyphen.secret.asString()) isEqualTo "fooba"
+        expectThat(underscore.secret.asString()) isEqualTo "fooba"
+    }
+
+    @Test
+    fun `should accept grouped secret in otpauth uri`() {
+        val parsed = YolkInputParser().parse(
+            shellOf("otpauth://totp/Passbird:egg?secret=MZXW-6YTB&algorithm=SHA512&digits=8&period=45"),
+        )
+
+        expectThat(parsed.secret.asString()) isEqualTo "fooba"
+        expectThat(parsed.algorithm) isEqualTo "SHA512"
+        expectThat(parsed.digits) isEqualTo 8
+        expectThat(parsed.periodSeconds) isEqualTo 45
+    }
+
+    @Test
     fun `should use configured defaults when parsing plain secret`() {
         val parsed = YolkInputParser().parse(
             shellOf("MZXW6YTB"),
@@ -123,6 +146,7 @@ class TotpSupportTest {
             )
         }
         assertThrows<IllegalStateException> { totpAlgorithmAtOrdinal(99) }
+        assertThrows<IllegalArgumentException> { YolkInputParser().parse(shellOf("MZXW.6YTB")) }
     }
 
     @Test

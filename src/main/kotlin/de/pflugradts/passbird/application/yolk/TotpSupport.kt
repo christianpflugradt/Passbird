@@ -104,7 +104,9 @@ class YolkInputParser {
         }
 
     private fun decodeBase32Secret(rawInput: String): Shell {
-        val normalized = rawInput.filterNot(Char::isWhitespace).uppercase()
+        val normalized = rawInput
+            .filterNot { it.isWhitespace() || it == '-' || it == '_' }
+            .uppercase()
         require(normalized.isNotEmpty()) { "Empty secret" }
         val unpadded = normalized.trimEnd('=')
         require(unpadded.isNotEmpty()) { "Empty secret" }
