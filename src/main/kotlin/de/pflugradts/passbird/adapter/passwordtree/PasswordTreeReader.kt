@@ -4,6 +4,7 @@ import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
 import de.pflugradts.passbird.application.failure.DecryptPasswordTreeFailure
 import de.pflugradts.passbird.application.failure.reportFailure
+import de.pflugradts.passbird.application.passwordtree.LegacyCurrentPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.toDirectory
@@ -20,12 +21,13 @@ class PasswordTreeReader constructor(
     private val cryptoProvider: CryptoProvider,
     private val passwordTreeEnvelope: PasswordTreeEnvelope,
     private val passwordTreePayloadReader: PasswordTreePayloadReader,
+    private val legacyCurrentPasswordTreePayloadReader: LegacyCurrentPasswordTreePayloadReader,
 ) {
     fun restore(): EggStreamSupplier {
         val shell = readFromDisk()
         val snapshot = tryCatching {
             try {
-                passwordTreePayloadReader.read(shell)
+                readPayload(shell)
             } finally {
                 shell.scramble()
             }
@@ -33,6 +35,12 @@ class PasswordTreeReader constructor(
             .onFailure(::abortRestore)
             .getOrNull()!!
         return EggStreamSupplier({ snapshot.eggs.stream() }, snapshot.memory, snapshot.favorites, snapshot.nests)
+    }
+
+    private fun readPayload(shell: de.pflugradts.passbird.domain.model.shell.Shell) = try {
+        passwordTreePayloadReader.read(shell.copy())
+    } catch (_: Exception) {
+        legacyCurrentPasswordTreePayloadReader.read(shell)
     }
     private fun readFromDisk() = tryCatching {
         if (!systemOperation.exists(filePath)) {

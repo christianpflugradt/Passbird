@@ -5,6 +5,7 @@ import de.pflugradts.passbird.adapter.passwordtree.PasswordTreeReader
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.passwordtree.LegacyCurrentPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadWriter
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
@@ -185,6 +186,7 @@ class PasswordTreeKeyDerivationMigrationServiceTest {
             cryptoProvider = currentCryptoProvider,
             passwordTreeEnvelope = passwordTreeEnvelope,
             passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
+            legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation),
         )
 }
 

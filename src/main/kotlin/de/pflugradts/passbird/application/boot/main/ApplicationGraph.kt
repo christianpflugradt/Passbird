@@ -81,6 +81,7 @@ import de.pflugradts.passbird.application.eventhandling.ProteinEventOutputContro
 import de.pflugradts.passbird.application.exchange.ExchangeFactory
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.exchange.PasswordImportExportService
+import de.pflugradts.passbird.application.passwordtree.LegacyCurrentPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
@@ -269,10 +270,18 @@ class ApplicationGraph(
         KeyStoreAuthenticationService(configuration, keyStoreAdapterPort, userInterfaceAdapterPort, systemOperation)
     }
     private val passwordTreeEnvelope by lazy { PasswordTreeEnvelope() }
+    private val legacyCurrentPasswordTreePayloadReader by lazy { LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation) }
     private val passwordTreePayloadReader by lazy { PasswordTreePayloadReader(configuration, systemOperation) }
     private val passwordTreePayloadWriter by lazy { PasswordTreePayloadWriter() }
     private val passwordTreeReader by lazy {
-        PasswordTreeReader(systemOperation, configuration, cryptoProvider, passwordTreeEnvelope, passwordTreePayloadReader)
+        PasswordTreeReader(
+            systemOperation,
+            configuration,
+            cryptoProvider,
+            passwordTreeEnvelope,
+            passwordTreePayloadReader,
+            legacyCurrentPasswordTreePayloadReader,
+        )
     }
     private val passwordTreeWriter by lazy {
         PasswordTreeWriter(systemOperation, configuration, cryptoProvider, passwordTreeEnvelope, passwordTreePayloadWriter)

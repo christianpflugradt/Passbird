@@ -3,6 +3,7 @@ package de.pflugradts.passbird.adapter.passwordtree
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.application.passwordtree.LegacyCurrentPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
@@ -41,7 +42,7 @@ class PasswordTreeSecretHandlingTest {
     fun `should scramble decrypted password tree shell after restore`() {
         val decryptedShell = spyk(shellOf("decrypted payload"))
         val passwordTreePayloadReader = mockk<PasswordTreePayloadReader>()
-        every { passwordTreePayloadReader.read(decryptedShell) } returns PasswordTreeSnapshot()
+        every { passwordTreePayloadReader.read(any()) } returns PasswordTreeSnapshot()
         val passwordTreeFile = passwordTreeDirectory.resolve(PASSWORD_TREE_FILENAME)
         Files.write(passwordTreeFile, passwordTreeEnvelope.wrap(cryptoProvider.encrypt(shellOf("payload")).toByteArray()))
 
@@ -53,6 +54,7 @@ class PasswordTreeSecretHandlingTest {
             },
             passwordTreeEnvelope = passwordTreeEnvelope,
             passwordTreePayloadReader = passwordTreePayloadReader,
+            legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation),
         ).restore()
 
         verify(exactly = 1) { decryptedShell.scramble() }

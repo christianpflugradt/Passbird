@@ -73,7 +73,7 @@ class LegacyCurrentPasswordTreePayloadReader(
     }
 
     private fun verifySignature(bytes: ByteArray): Boolean {
-        val expectedSignature = legacyCurrentSignature()
+        val expectedSignature = signature()
         val actualSignature = readPayloadBytes(bytes, 0, signatureSize())
         try {
             if (!expectedSignature.contentEquals(actualSignature)) {

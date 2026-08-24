@@ -3,8 +3,6 @@ package de.pflugradts.passbird.application.process.migration
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.passbird.application.process.migration.keystore.KeyStoreFormatMigration
 import de.pflugradts.passbird.application.process.migration.keystore.KeyStoreFormatMigrationService
-import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeFavoritesMigration
-import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeFavoritesMigrationService
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigration
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigrationService
 import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
@@ -40,17 +38,6 @@ class MigrationFailureExitStatusTest {
         PasswordTreeKeyDerivationMigration(
             migrationAuthenticationService = migrationAuthenticationService,
             passwordTreeKeyDerivationMigrationService = mockk<PasswordTreeKeyDerivationMigrationService>(relaxed = true),
-            systemOperation = systemOperation,
-        ).run()
-
-        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
-    }
-
-    @Test
-    fun `should exit with failure status when password tree favorites migration authentication fails`() {
-        PasswordTreeFavoritesMigration(
-            migrationAuthenticationService = migrationAuthenticationService,
-            passwordTreeFavoritesMigrationService = mockk<PasswordTreeFavoritesMigrationService>(relaxed = true),
             systemOperation = systemOperation,
         ).run()
 

@@ -1,7 +1,6 @@
-package de.pflugradts.passbird.application.process.migration.passwordtree
+package de.pflugradts.passbird.adapter.passwordtree
 
 import de.pflugradts.passbird.INTEGRATION
-import de.pflugradts.passbird.adapter.passwordtree.PasswordTreeReader
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
@@ -11,7 +10,6 @@ import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeSnapshot
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
-import de.pflugradts.passbird.application.security.createTestKeyShell
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -30,7 +28,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @Tag(INTEGRATION)
-class PasswordTreeYolkMigrationServiceTest {
+class CurrentPasswordTreeCompatibilityTest {
     private val configuration = mockk<Configuration>()
     private val systemOperation = SystemOperation()
     private val cryptoProvider = createAesGcmCipherForTesting()
@@ -41,7 +39,7 @@ class PasswordTreeYolkMigrationServiceTest {
 
     @BeforeEach
     fun setup() {
-        passwordTreeDirectory = Files.createTempDirectory("passbird-yolk-migration")
+        passwordTreeDirectory = Files.createTempDirectory("passbird-current-password-tree")
         passwordTreeFile = passwordTreeDirectory.resolve(ReadableConfiguration.PASSWORD_TREE_FILENAME)
         fakeConfiguration(instance = configuration, withPasswordTreeLocation = passwordTreeDirectory.toString())
     }
@@ -52,47 +50,32 @@ class PasswordTreeYolkMigrationServiceTest {
     }
 
     @Test
-    fun `should migrate legacy current password tree format to yolk capable format without changing eggs`() {
-        val detector = PasswordTreeYolkMigrationDetector(configuration, passwordTreeEnvelope, systemOperation)
+    fun `should restore pre yolk current password tree format without migration`() {
         val egg = createEgg(
             slot = Slot.DEFAULT,
             eggIdShell = cryptoProvider.encrypt(shellOf("email")),
             passwordShell = cryptoProvider.encrypt(shellOf("Password1")),
         )
-        writeLegacyCurrentPasswordTree(PasswordTreeSnapshot(eggs = listOf(egg)))
+        Files.write(
+            passwordTreeFile,
+            passwordTreeEnvelope.wrap(
+                cryptoProvider.encrypt(legacyCurrentPasswordTreePayloadWriter.write(PasswordTreeSnapshot(eggs = listOf(egg))))
+                    .toByteArray(),
+            ),
+        )
 
-        expectThat(detector.detect().required).isTrue()
-
-        createMigrationService().migrate(createTestKeyShell())
         val restored = PasswordTreeReader(
             systemOperation = systemOperation,
             configuration = configuration,
             cryptoProvider = cryptoProvider,
             passwordTreeEnvelope = passwordTreeEnvelope,
             passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
+            legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation),
         ).restore()
 
-        expectThat(detector.detect().required).isFalse()
-        expectThat(passwordTreeEnvelope.isCurrent(Files.readAllBytes(passwordTreeFile))).isTrue()
         val restoredEgg = restored.get().toList().single()
         expectThat(cryptoProvider.decrypt(restoredEgg.viewEggId()).asString()) isEqualTo "email"
+        expectThat(cryptoProvider.decrypt(restoredEgg.viewPassword()).asString()) isEqualTo "Password1"
         expectThat(restoredEgg.hasYolk()).isFalse()
     }
-
-    private fun writeLegacyCurrentPasswordTree(snapshot: PasswordTreeSnapshot) {
-        Files.write(
-            passwordTreeFile,
-            passwordTreeEnvelope.wrapLegacyCurrent(
-                cryptoProvider.encrypt(legacyCurrentPasswordTreePayloadWriter.write(snapshot)).toByteArray(),
-            ),
-        )
-    }
-
-    private fun createMigrationService() = PasswordTreeYolkMigrationService(
-        configuration = configuration,
-        legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation),
-        passwordTreeEnvelope = passwordTreeEnvelope,
-        passwordTreePayloadWriter = de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter(),
-        systemOperation = systemOperation,
-    )
 }

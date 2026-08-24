@@ -7,7 +7,6 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.expectedGraphClasses
 import de.pflugradts.passbird.application.boot.implementationClasses
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.application.process.migration.AuthenticatedMigrationDetector
 import de.pflugradts.passbird.application.process.migration.Migration
 import de.pflugradts.passbird.application.process.migration.MigrationRequest
 import de.pflugradts.passbird.application.process.migration.PendingMigration
@@ -36,9 +35,7 @@ class PassbirdMigrationGraphTest {
         expectThat(actual.configuration).isA<ReadableConfiguration>()
         expectThat(actual.runContext) isSameInstanceAs runContext
         expectThat(actual.migrationRequest) isEqualTo migrationRequest
-        expectThat(actual.authenticatedMigrationDetectors.implementationClasses()) isEqualTo expectedGraphClasses(
-            AuthenticatedMigrationDetector::class.java,
-        )
+        expectThat(actual.authenticatedMigrationDetectors).isEqualTo(emptySet())
         expectThat(actual.migrations.implementationClasses()) isEqualTo expectedGraphClasses(Migration::class.java)
     }
 }
