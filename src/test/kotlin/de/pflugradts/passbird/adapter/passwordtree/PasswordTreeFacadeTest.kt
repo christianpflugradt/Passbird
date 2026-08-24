@@ -6,7 +6,6 @@ import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
-import de.pflugradts.passbird.application.passwordtree.LegacyCurrentPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
@@ -83,7 +82,6 @@ class PasswordTreeFacadeTest {
             cryptoProvider = cryptoProvider,
             passwordTreeEnvelope = passwordTreeEnvelope,
             passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
-            legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation),
         ),
         passwordTreeWriter = PasswordTreeWriter(
             systemOperation = systemOperation,
@@ -247,10 +245,6 @@ class PasswordTreeFacadeTest {
                 cryptoProvider = cryptoProvider,
                 passwordTreeEnvelope = passwordTreeEnvelope,
                 passwordTreePayloadReader = PasswordTreePayloadReader(configuration, failingSystemOperation),
-                legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(
-                    configuration,
-                    failingSystemOperation,
-                ),
             ),
             passwordTreeWriter = PasswordTreeWriter(
                 systemOperation = failingSystemOperation,

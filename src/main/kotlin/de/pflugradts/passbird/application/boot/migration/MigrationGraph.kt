@@ -13,6 +13,7 @@ import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.ConfigurationFactory
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.keystore.KeyStoreFormatDetector
+import de.pflugradts.passbird.application.passwordtree.LegacyCurrentPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
@@ -26,6 +27,8 @@ import de.pflugradts.passbird.application.process.migration.keystore.KeyStoreFor
 import de.pflugradts.passbird.application.process.migration.keystore.KeyStoreFormatMigrationService
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigration
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigrationService
+import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeYolkMigration
+import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeYolkMigrationService
 import de.pflugradts.passbird.application.util.SystemOperation
 
 class MigrationGraph(
@@ -42,6 +45,7 @@ class MigrationGraph(
         setOf(
             KeyStoreFormatMigration(keyStoreFormatMigrationService, migrationAuthenticationService, systemOperation),
             PasswordTreeKeyDerivationMigration(migrationAuthenticationService, passwordTreeKeyDerivationMigrationService, systemOperation),
+            PasswordTreeYolkMigration(migrationAuthenticationService, passwordTreeYolkMigrationService, systemOperation),
         )
     }
     val userInterfaceAdapterPort: UserInterfaceAdapterPort by lazy {
@@ -69,6 +73,14 @@ class MigrationGraph(
             configuration = configuration,
             passwordTreeEnvelope = passwordTreeEnvelope,
             legacyPasswordTreePayloadReader = legacyPasswordTreePayloadReader,
+            passwordTreePayloadWriter = passwordTreePayloadWriter,
+            systemOperation = systemOperation,
+        )
+    }
+    private val passwordTreeYolkMigrationService by lazy {
+        PasswordTreeYolkMigrationService(
+            configuration = configuration,
+            legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation),
             passwordTreePayloadWriter = passwordTreePayloadWriter,
             systemOperation = systemOperation,
         )

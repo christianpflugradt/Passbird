@@ -23,30 +23,12 @@ class PasswordTreeEnvelopeTest {
     @Test
     fun `should reject unsupported bytes when unwrapping current password tree`() {
         assertThrows<IllegalStateException> {
-            passwordTreeEnvelope.unwrap(passwordTreeEnvelope.wrapLegacyCurrent(payload))
-        }
-    }
-
-    @Test
-    fun `should unwrap legacy current password tree bytes`() {
-        expectThat(passwordTreeEnvelope.unwrapLegacyCurrent(passwordTreeEnvelope.wrapLegacyCurrent(payload))) isEqualTo payload
-    }
-
-    @Test
-    fun `should return empty bytes when unwrapping empty legacy current password tree`() {
-        expectThat(passwordTreeEnvelope.unwrapLegacyCurrent(byteArrayOf())) isEqualTo byteArrayOf()
-    }
-
-    @Test
-    fun `should reject unsupported bytes when unwrapping legacy current password tree`() {
-        assertThrows<IllegalStateException> {
-            passwordTreeEnvelope.unwrapLegacyCurrent(passwordTreeEnvelope.wrap(payload))
+            passwordTreeEnvelope.unwrap(byteArrayOf(0x0, 0x50))
         }
     }
 
     @Test
     fun `should detect truncated headers as unsupported`() {
         expectThat(passwordTreeEnvelope.isCurrent(byteArrayOf(0x0, 0x50))).isFalse()
-        expectThat(passwordTreeEnvelope.isLegacyCurrent(byteArrayOf(0x0, 0x50))).isFalse()
     }
 }

@@ -110,7 +110,7 @@ current_security_relevant_implementation:
       - scrubs full decrypted password-tree payload Shells after restore and migration parsing, and scrubs full plaintext payload Shells after sync and migration encryption
       - scrubs temporary password-tree checksum ranges, per-entry read buffers, per-entry serialization buffers, and full payload assembly buffers after copying them into their destination owners
       - validates current and legacy password-tree payload field boundaries and stored egg nest slots before constructing restore snapshots
-      - detects both legacy pre-envelope password tree files and legacy current-format trees that require a Favorites migration before main startup
+      - detects both legacy pre-envelope password tree files and older current-format trees without yolk persistence before main startup, then routes them through the dedicated migration boot path
   secret_output_paths:
     files:
       - src/main/kotlin/de/pflugradts/passbird/application/commandhandling/handler

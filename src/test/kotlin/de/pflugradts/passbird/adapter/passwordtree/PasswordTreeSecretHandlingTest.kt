@@ -3,7 +3,6 @@ package de.pflugradts.passbird.adapter.passwordtree
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.PASSWORD_TREE_FILENAME
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
-import de.pflugradts.passbird.application.passwordtree.LegacyCurrentPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
@@ -54,7 +53,6 @@ class PasswordTreeSecretHandlingTest {
             },
             passwordTreeEnvelope = passwordTreeEnvelope,
             passwordTreePayloadReader = passwordTreePayloadReader,
-            legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation),
         ).restore()
 
         verify(exactly = 1) { decryptedShell.scramble() }

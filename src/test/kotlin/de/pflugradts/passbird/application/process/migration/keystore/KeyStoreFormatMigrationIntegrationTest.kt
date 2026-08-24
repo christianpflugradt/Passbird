@@ -13,7 +13,6 @@ import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.application.keystore.KeyStoreFormat
 import de.pflugradts.passbird.application.keystore.KeyStoreFormatDetector
-import de.pflugradts.passbird.application.passwordtree.LegacyCurrentPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadWriter
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
@@ -165,7 +164,6 @@ class KeyStoreFormatMigrationIntegrationTest {
             cryptoProvider = currentCryptoProvider,
             passwordTreeEnvelope = passwordTreeEnvelope,
             passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
-            legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation),
         ).restore()
 
         expectThat(keyStoreFormatDetector.detect(Files.readAllBytes(keyStoreFile))) isEqualTo KeyStoreFormat.PKCS12

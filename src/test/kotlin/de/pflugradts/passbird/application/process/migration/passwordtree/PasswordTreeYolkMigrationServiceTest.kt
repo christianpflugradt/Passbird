@@ -5,14 +5,13 @@ import de.pflugradts.passbird.adapter.passwordtree.PasswordTreeReader
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
-import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadReader
-import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadWriter
+import de.pflugradts.passbird.application.passwordtree.LegacyCurrentPasswordTreePayloadReader
+import de.pflugradts.passbird.application.passwordtree.LegacyCurrentPasswordTreePayloadWriter
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader
 import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
 import de.pflugradts.passbird.application.passwordtree.PasswordTreeSnapshot
 import de.pflugradts.passbird.application.security.createAesGcmCipherForTesting
-import de.pflugradts.passbird.application.security.createLegacyAesGcmCipherForTesting
 import de.pflugradts.passbird.application.security.createTestKeyShell
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
@@ -20,6 +19,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.service.password.tree.emptyFavorites
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
 import io.mockk.every
 import io.mockk.mockk
@@ -39,18 +39,18 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @Tag(INTEGRATION)
-class PasswordTreeKeyDerivationMigrationServiceTest {
+class PasswordTreeYolkMigrationServiceTest {
     private val configuration = mockk<Configuration>()
     private val systemOperation = SystemOperation()
     private val passwordTreeEnvelope = PasswordTreeEnvelope()
-    private val legacyPasswordTreePayloadWriter = LegacyPasswordTreePayloadWriter()
+    private val legacyCurrentPasswordTreePayloadWriter = LegacyCurrentPasswordTreePayloadWriter()
     private val passwordTreePayloadWriter = PasswordTreePayloadWriter()
     private lateinit var passwordTreeDirectory: Path
     private lateinit var passwordTreeFile: Path
 
     @BeforeEach
     fun setup() {
-        passwordTreeDirectory = Files.createTempDirectory("passbird-key-derivation-migration")
+        passwordTreeDirectory = Files.createTempDirectory("passbird-yolk-migration")
         passwordTreeFile = passwordTreeDirectory.resolve(ReadableConfiguration.PASSWORD_TREE_FILENAME)
         fakeConfiguration(
             instance = configuration,
@@ -66,55 +66,61 @@ class PasswordTreeKeyDerivationMigrationServiceTest {
     }
 
     @Test
-    fun `should migrate legacy password tree content to current format without losing secrets`() {
-        val legacyCryptoProvider = createLegacyAesGcmCipherForTesting()
-        val currentCryptoProvider = createAesGcmCipherForTesting()
-        val detector = PasswordTreeKeyDerivationMigrationDetector(configuration, passwordTreeEnvelope, systemOperation)
-        writeLegacyPasswordTree(createLegacySnapshot(legacyCryptoProvider), legacyCryptoProvider)
+    fun `should migrate older current password tree content to current yolk format without losing data`() {
+        val cryptoProvider = createAesGcmCipherForTesting()
+        val detector = PasswordTreeYolkMigrationDetector(configuration, systemOperation)
+        writeLegacyCurrentPasswordTree(createLegacyCurrentSnapshot(cryptoProvider), cryptoProvider)
+
         expectThat(detector.detect().required).isTrue()
+
         createMigrationService().migrate(createTestKeyShell())
-        val restored = createPasswordTreeReader(currentCryptoProvider).restore()
+        val restored = createPasswordTreeReader(cryptoProvider).restore()
 
         expectThat(detector.detect().required) isEqualTo false
         expectThat(passwordTreeEnvelope.isCurrent(Files.readAllBytes(passwordTreeFile))).isTrue()
-        expectThat(restored.get().toList().map { it.decryptedSummary(currentCryptoProvider) }) containsExactly listOf(
+        expectThat(restored.get().toList().map { it.decryptedSummaryWithYolkMigration(cryptoProvider) }) containsExactly listOf(
             "DEFAULT:email:Password1:user:user@example.com",
             "S3:bank:Password2",
         )
         expectThat(
-            restored.memory()[Slot.DEFAULT].get()[0].map { currentCryptoProvider.decrypt(it).asString() }.orElse(""),
+            restored.memory()[Slot.DEFAULT].get()[0].map { cryptoProvider.decrypt(it).asString() }.orElse(""),
         ) isEqualTo "email"
         expectThat(
-            restored.memory()[Slot.S3].get()[0].map { currentCryptoProvider.decrypt(it).asString() }.orElse(""),
+            restored.memory()[Slot.S3].get()[0].map { cryptoProvider.decrypt(it).asString() }.orElse(""),
         ) isEqualTo "bank"
-        expectThat(restored.favorites()[Slot.DEFAULT].get().any { it.isPresent }).isEqualTo(false)
+        expectThat(
+            restored.favorites()[Slot.DEFAULT].get()[0].map { cryptoProvider.decrypt(it).asString() }.orElse(""),
+        ) isEqualTo "email"
         expectThat(restored.nests()[Slot.S1.index() - 1].asString()) isEqualTo "work"
         expectThat(restored.nests()[Slot.S3.index() - 1].asString()) isEqualTo "finance"
     }
 
     @Test
-    fun `should scramble migration payload shells during key derivation migration`() {
+    fun `should scramble migration payload shells during yolk migration`() {
+        val cryptoProvider = createAesGcmCipherForTesting()
         Files.write(
             passwordTreeFile,
-            createLegacyAesGcmCipherForTesting().encrypt(shellOf("legacy payload")).toByteArray(),
+            wrapLegacyCurrentPasswordTree(cryptoProvider.encrypt(shellOf("current payload")).toByteArray()),
         )
-        val legacyPasswordTreePayloadReader = mockk<LegacyPasswordTreePayloadReader>()
+        val legacyCurrentPasswordTreePayloadReader = mockk<LegacyCurrentPasswordTreePayloadReader>()
         val passwordTreePayloadWriter = mockk<PasswordTreePayloadWriter>()
-        val payloadShell = spyk(shellOf("current payload"))
+        val payloadShell = spyk(shellOf("migrated payload"))
         val nestShell = spyk(shellOf("finance"))
         lateinit var decryptedPayloadShell: Shell
         var decryptedPayloadBytes = emptyList<Byte>()
-        every { legacyPasswordTreePayloadReader.read(any()) } answers {
+        every { legacyCurrentPasswordTreePayloadReader.read(any()) } answers {
             decryptedPayloadShell = firstArg()
             decryptedPayloadBytes = decryptedPayloadShell.toByteArray().toList()
-            PasswordTreeSnapshot(nests = List(Slot.CAPACITY) { if (it == 0) nestShell else emptyShell() })
+            PasswordTreeSnapshot(
+                favorites = emptyFavorites(),
+                nests = List(Slot.CAPACITY) { if (it == 0) nestShell else emptyShell() },
+            )
         }
         every { passwordTreePayloadWriter.write(any()) } returns payloadShell
 
-        PasswordTreeKeyDerivationMigrationService(
+        PasswordTreeYolkMigrationService(
             configuration = configuration,
-            passwordTreeEnvelope = passwordTreeEnvelope,
-            legacyPasswordTreePayloadReader = legacyPasswordTreePayloadReader,
+            legacyCurrentPasswordTreePayloadReader = legacyCurrentPasswordTreePayloadReader,
             passwordTreePayloadWriter = passwordTreePayloadWriter,
             systemOperation = systemOperation,
         ).migrate(createTestKeyShell())
@@ -124,27 +130,30 @@ class PasswordTreeKeyDerivationMigrationServiceTest {
         verify(exactly = 1) { nestShell.scramble() }
     }
 
-    private fun createLegacySnapshot(
-        legacyCryptoProvider: de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider,
+    private fun createLegacyCurrentSnapshot(
+        cryptoProvider: de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider,
     ): PasswordTreeSnapshot {
         val defaultEgg = createEgg(
             slot = Slot.DEFAULT,
-            eggIdShell = legacyCryptoProvider.encrypt(shellOf("email")),
-            passwordShell = legacyCryptoProvider.encrypt(shellOf("Password1")),
+            eggIdShell = cryptoProvider.encrypt(shellOf("email")),
+            passwordShell = cryptoProvider.encrypt(shellOf("Password1")),
         ).apply {
             updateProtein(
                 slot = Slot.S1,
-                typeShell = legacyCryptoProvider.encrypt(shellOf("user")),
-                structureShell = legacyCryptoProvider.encrypt(shellOf("user@example.com")),
+                typeShell = cryptoProvider.encrypt(shellOf("user")),
+                structureShell = cryptoProvider.encrypt(shellOf("user@example.com")),
             )
         }
         val nestedEgg = createEgg(
             slot = Slot.S3,
-            eggIdShell = legacyCryptoProvider.encrypt(shellOf("bank")),
-            passwordShell = legacyCryptoProvider.encrypt(shellOf("Password2")),
+            eggIdShell = cryptoProvider.encrypt(shellOf("bank")),
+            passwordShell = cryptoProvider.encrypt(shellOf("Password2")),
         )
         return PasswordTreeSnapshot(
             eggs = listOf(defaultEgg, nestedEgg),
+            favorites = emptyFavorites().apply {
+                this[Slot.DEFAULT].get().assign(Slot.DEFAULT, defaultEgg.viewEggId())
+            },
             memory = emptyMemory().apply {
                 this[Slot.DEFAULT].get().memorize(defaultEgg.viewEggId(), null)
                 this[Slot.S3].get().memorize(nestedEgg.viewEggId(), null)
@@ -163,32 +172,36 @@ class PasswordTreeKeyDerivationMigrationServiceTest {
         )
     }
 
-    private fun writeLegacyPasswordTree(
+    private fun writeLegacyCurrentPasswordTree(
         snapshot: PasswordTreeSnapshot,
-        legacyCryptoProvider: de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider,
+        cryptoProvider: de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider,
     ) {
-        Files.write(passwordTreeFile, legacyCryptoProvider.encrypt(legacyPasswordTreePayloadWriter.write(snapshot)).toByteArray())
+        Files.write(
+            passwordTreeFile,
+            wrapLegacyCurrentPasswordTree(
+                cryptoProvider.encrypt(legacyCurrentPasswordTreePayloadWriter.write(snapshot)).toByteArray(),
+            ),
+        )
     }
 
-    private fun createMigrationService() = PasswordTreeKeyDerivationMigrationService(
+    private fun createMigrationService() = PasswordTreeYolkMigrationService(
         configuration = configuration,
-        passwordTreeEnvelope = passwordTreeEnvelope,
-        legacyPasswordTreePayloadReader = LegacyPasswordTreePayloadReader(configuration, systemOperation),
+        legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation),
         passwordTreePayloadWriter = passwordTreePayloadWriter,
         systemOperation = systemOperation,
     )
 
-    private fun createPasswordTreeReader(currentCryptoProvider: de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider) =
+    private fun createPasswordTreeReader(cryptoProvider: de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider) =
         PasswordTreeReader(
             systemOperation = systemOperation,
             configuration = configuration,
-            cryptoProvider = currentCryptoProvider,
+            cryptoProvider = cryptoProvider,
             passwordTreeEnvelope = passwordTreeEnvelope,
             passwordTreePayloadReader = PasswordTreePayloadReader(configuration, systemOperation),
         )
 }
 
-private fun de.pflugradts.passbird.domain.model.egg.Egg.decryptedSummary(
+private fun de.pflugradts.passbird.domain.model.egg.Egg.decryptedSummaryWithYolkMigration(
     cryptoProvider: de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider,
 ) = buildList {
     add(associatedNest().name)
