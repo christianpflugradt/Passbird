@@ -37,6 +37,7 @@ flows:
         - if the selected Favorite slot contains an EggId, Passbird prepends the requested command fragment and re-enters normal command handling with that EggId
         - Passbird concatenates the command fragment and EggId without inserting a separator
         - the delegated command behaves exactly as if the user had typed the resolved command directly, including that command's own prompts, confirmations, and output rules
+        - if domain.eggIdMemory.updateOnFavoriteUse is false, delegated Favorite commands keep their normal command behavior but do not add the resolved EggId to EggIdMemory
         - if the selected Favorite slot is empty, Passbird prints Favorite entry at slot <slot> does not exist.
       finish:
         - the copy command ends with one trailing blank line after its main output

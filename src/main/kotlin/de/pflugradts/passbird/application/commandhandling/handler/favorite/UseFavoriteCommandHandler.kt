@@ -9,6 +9,7 @@ import de.pflugradts.passbird.application.useScrambled
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
+import de.pflugradts.passbird.domain.service.password.MemoryUpdateControl
 import de.pflugradts.passbird.domain.service.password.PasswordService
 
 class UseFavoriteCommandHandler(
@@ -16,6 +17,8 @@ class UseFavoriteCommandHandler(
     private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
+    private val memoryUpdateControl: MemoryUpdateControl,
+    private val updateOnFavoriteUse: Boolean,
 ) : TypedCommandHandler<UseFavoriteCommand>(UseFavoriteCommand::class.java) {
     override fun handleCommand(command: UseFavoriteCommand) {
         var delegated = false
@@ -23,7 +26,7 @@ class UseFavoriteCommandHandler(
             block = { favorite ->
                 favorite.useScrambled {
                     delegated = true
-                    inputHandler().handleInput(inputOf(command.argument + it))
+                    delegate(inputOf(command.argument + it))
                     commandExecutionTracker.mark(commandExecutionTracker.lastCompletedOutcome())
                 }
             },
@@ -36,5 +39,15 @@ class UseFavoriteCommandHandler(
         )
         command.invalidateInput()
         if (!delegated) userInterfaceAdapterPort.sendLineBreak()
+    }
+
+    private fun delegate(input: de.pflugradts.passbird.domain.model.transfer.Input) {
+        if (updateOnFavoriteUse) {
+            inputHandler().handleInput(input)
+        } else {
+            memoryUpdateControl.withoutUpdates {
+                inputHandler().handleInput(input)
+            }
+        }
     }
 }

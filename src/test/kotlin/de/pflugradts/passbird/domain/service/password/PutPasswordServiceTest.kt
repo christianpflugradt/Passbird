@@ -38,7 +38,13 @@ class PutPasswordServiceTest {
     private val eggRepository = mockk<EggRepository>(relaxed = true)
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
     private val nestService = createNestServiceForTesting()
-    private val passwordService = PutPasswordService(cryptoProvider, eggRepository, eventRegistry, nestService)
+    private val passwordService = PutPasswordService(
+        cryptoProvider,
+        eggRepository,
+        eventRegistry,
+        MemoryUpdateControl(),
+        nestService,
+    )
 
     @Nested
     inner class ChallengeEggIdTest {
@@ -167,7 +173,13 @@ class PutPasswordServiceTest {
             nestStateView = nestService,
             eventRegistry = eventRegistry,
         )
-        val passwordService = PutPasswordService(cryptoProvider, failingEggRepository, eventRegistry, nestService)
+        val passwordService = PutPasswordService(
+            cryptoProvider,
+            failingEggRepository,
+            eventRegistry,
+            MemoryUpdateControl(),
+            nestService,
+        )
         fakeCryptoProvider(instance = cryptoProvider)
 
         // when

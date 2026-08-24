@@ -102,6 +102,7 @@ import de.pflugradts.passbird.domain.service.nest.NestStateView
 import de.pflugradts.passbird.domain.service.nest.NestingGroundService
 import de.pflugradts.passbird.domain.service.password.DiscardPasswordService
 import de.pflugradts.passbird.domain.service.password.FavoritePasswordService
+import de.pflugradts.passbird.domain.service.password.MemoryUpdateControl
 import de.pflugradts.passbird.domain.service.password.MovePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordFacade
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -195,7 +196,14 @@ class ApplicationGraph(
             SetInfoCommandHandler(canPrintInfo, configuration, userInterfaceAdapterPort),
             SetProteinCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             SwitchNestCommandHandler(nestService, userInterfaceAdapterPort, commandExecutionTracker),
-            UseFavoriteCommandHandler({ inputHandler }, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
+            UseFavoriteCommandHandler(
+                { inputHandler },
+                passwordService,
+                userInterfaceAdapterPort,
+                commandExecutionTracker,
+                memoryUpdateControl,
+                configuration.domain.eggIdMemory.updateOnFavoriteUse,
+            ),
             UseMemoryCommandHandler({ inputHandler }, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             ViewCommandHandler(passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             ViewFavoriteCommandHandler(canPrintInfo, passwordService, userInterfaceAdapterPort),
@@ -271,6 +279,7 @@ class ApplicationGraph(
     }
     private val rememberedCommandMemory by lazy { RememberedCommandMemory() }
     private val proteinEventOutputControl by lazy { ProteinEventOutputControl() }
+    private val memoryUpdateControl by lazy { MemoryUpdateControl() }
     private val exchangeFactory by lazy { ExchangeFactory { FilePasswordExchange(systemOperation, runContext) } }
     private val keyStoreAuthenticationService by lazy {
         KeyStoreAuthenticationService(configuration, keyStoreAdapterPort, userInterfaceAdapterPort, systemOperation)
@@ -303,22 +312,22 @@ class ApplicationGraph(
         NestingGroundService(passwordTreeAdapterPort, passwordTreeSyncService, eventRegistry)
     }
     private val favoritePasswordService by lazy {
-        FavoritePasswordService(cryptoProvider, eggRepository, eventRegistry)
+        FavoritePasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl)
     }
     private val putPasswordService by lazy {
-        PutPasswordService(cryptoProvider, eggRepository, eventRegistry, nestService)
+        PutPasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl, nestService)
     }
     private val viewPasswordService by lazy {
-        ViewPasswordService(cryptoProvider, eggRepository, eventRegistry)
+        ViewPasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl)
     }
     private val discardPasswordService by lazy {
-        DiscardPasswordService(cryptoProvider, eggRepository, eventRegistry)
+        DiscardPasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl)
     }
     private val renamePasswordService by lazy {
-        RenamePasswordService(cryptoProvider, eggRepository, eventRegistry)
+        RenamePasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl)
     }
     private val movePasswordService by lazy {
-        MovePasswordService(cryptoProvider, eggRepository, eventRegistry)
+        MovePasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl)
     }
     private val canPrintInfo by lazy { CanPrintInfo() }
     private val canListAvailableNests by lazy { CanListAvailableNests(nestService) }

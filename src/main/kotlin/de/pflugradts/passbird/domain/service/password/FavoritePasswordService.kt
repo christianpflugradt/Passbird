@@ -12,7 +12,8 @@ class FavoritePasswordService constructor(
     cryptoProvider: CryptoProvider,
     eggRepository: EggRepository,
     eventRegistry: EventRegistry,
-) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
+    memoryUpdateControl: MemoryUpdateControl,
+) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl) {
     fun viewFavorites() = Slots<Shell>().apply {
         eggRepository.favorites().forEachIndexed { index, favorite ->
             favorite.map(::decrypted).ifPresent { this[index] = it }

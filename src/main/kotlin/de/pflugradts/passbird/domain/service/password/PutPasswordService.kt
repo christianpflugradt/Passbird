@@ -15,8 +15,9 @@ class PutPasswordService constructor(
     cryptoProvider: CryptoProvider,
     eggRepository: EggRepository,
     eventRegistry: EventRegistry,
+    memoryUpdateControl: MemoryUpdateControl,
     private val nestService: NestService,
-) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
+) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl) {
     fun putEggs(shellPairs: Stream<ShellPair>): TryResult<Unit> {
         shellPairs.forEach { putEgg(it.first, it.second, false) }
         return processEventsAndSync()

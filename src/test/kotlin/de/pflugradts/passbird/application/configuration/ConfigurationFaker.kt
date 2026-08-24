@@ -37,6 +37,7 @@ fun fakeConfiguration(
     withVerifySignature: Boolean = true,
     withEggIdMemoryEnabled: Boolean = false,
     withEggIdMemoryPersisted: Boolean = false,
+    withEggIdMemoryUpdateOnFavoriteUse: Boolean = true,
 ) {
     every { instance.adapter } returns fakeAdapter(
         withAnsiEscapeCodesEnabled = withAnsiEscapeCodesEnabled,
@@ -68,6 +69,7 @@ fun fakeConfiguration(
         withProteinTemplates = withProteinTemplates,
         withEggIdMemoryEnabled = withEggIdMemoryEnabled,
         withEggIdMemoryPersisted = withEggIdMemoryPersisted,
+        withEggIdMemoryUpdateOnFavoriteUse = withEggIdMemoryUpdateOnFavoriteUse,
     )
     every { instance.template } returns withConfigurationTemplate
     every { instance.parsePasswordRequirements() } answers { callOriginal() }
@@ -154,6 +156,7 @@ private fun fakeDomain(
     withProteinTemplates: List<ProteinTemplate>,
     withEggIdMemoryEnabled: Boolean,
     withEggIdMemoryPersisted: Boolean,
+    withEggIdMemoryUpdateOnFavoriteUse: Boolean,
 ): Configuration.Domain {
     val protein = mockk<Configuration.Protein>()
     every { protein.secureProteinStructureInput } returns withSecureProteinInputEnabled
@@ -162,6 +165,7 @@ private fun fakeDomain(
     val eggIdMemory = mockk<Configuration.EggIdMemory>()
     every { eggIdMemory.enabled } returns withEggIdMemoryEnabled
     every { eggIdMemory.persisted } returns withEggIdMemoryPersisted
+    every { eggIdMemory.updateOnFavoriteUse } returns withEggIdMemoryUpdateOnFavoriteUse
     return mockk<Configuration.Domain>().also {
         every { it.protein } returns protein
         every { it.eggIdMemory } returns eggIdMemory

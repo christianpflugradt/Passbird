@@ -11,10 +11,12 @@ import de.pflugradts.passbird.domain.model.slot.Slot.S1
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
+import de.pflugradts.passbird.domain.service.password.MemoryUpdateControl
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -25,8 +27,16 @@ class UseFavoriteCommandTest {
     private val passwordService = mockk<PasswordService>()
     private val mockedInputHandler = mockk<InputHandler>()
     private val commandExecutionTracker = CommandExecutionTracker()
+    private val memoryUpdateControl = spyk(MemoryUpdateControl())
     private val useFavoriteCommandHandler =
-        UseFavoriteCommandHandler({ mockedInputHandler }, passwordService, userInterfaceAdapterPort, commandExecutionTracker)
+        UseFavoriteCommandHandler(
+            { mockedInputHandler },
+            passwordService,
+            userInterfaceAdapterPort,
+            commandExecutionTracker,
+            memoryUpdateControl,
+            updateOnFavoriteUse = true,
+        )
     private val inputHandler = createInputHandlerFor(useFavoriteCommandHandler, commandExecutionTracker)
 
     @Test
@@ -39,7 +49,29 @@ class UseFavoriteCommandTest {
         inputHandler.handleInput(inputOf(shellOf("f1$forwardCommand")))
 
         verify(exactly = 1) { mockedInputHandler.handleInput(inputOf(shellOf("$forwardCommand$favoritedEggId"))) }
+        verify { memoryUpdateControl wasNot Called }
         verify(exactly = 1) { userInterfaceAdapterPort.sendLineBreak() }
+    }
+
+    @Test
+    fun `should suppress memory updates during delegated favorite command when configured`() {
+        val favoritedEggId = "eggId"
+        val forwardCommand = "p0"
+        val handler = UseFavoriteCommandHandler(
+            { mockedInputHandler },
+            passwordService,
+            userInterfaceAdapterPort,
+            commandExecutionTracker,
+            memoryUpdateControl,
+            updateOnFavoriteUse = false,
+        )
+        val configuredInputHandler = createInputHandlerFor(handler, commandExecutionTracker)
+        fakePasswordService(instance = passwordService, withFavorites = mapOf(S1 to favoritedEggId))
+        every { mockedInputHandler.handleInput(any()) } answers { userInterfaceAdapterPort.sendLineBreak() }
+
+        configuredInputHandler.handleInput(inputOf(shellOf("f1$forwardCommand")))
+
+        verify(exactly = 1) { mockedInputHandler.handleInput(inputOf(shellOf("$forwardCommand$favoritedEggId"))) }
     }
 
     @Test

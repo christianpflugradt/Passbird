@@ -27,7 +27,7 @@ class DiscardPasswordServiceTest {
     private val cryptoProvider = mockk<CryptoProvider>()
     private val eggRepository = mockk<EggRepository>()
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
-    private val passwordService = DiscardPasswordService(cryptoProvider, eggRepository, eventRegistry)
+    private val passwordService = DiscardPasswordService(cryptoProvider, eggRepository, eventRegistry, MemoryUpdateControl())
 
     @Test
     fun `should discard egg`() {

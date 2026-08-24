@@ -7,6 +7,7 @@ import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.service.password.MemoryUpdateControl
 import de.pflugradts.passbird.domain.service.password.MovePasswordService
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
@@ -28,7 +29,12 @@ internal class MovePasswordServiceTest {
     private val cryptoProvider = mockk<CryptoProvider>()
     private val eggRepository = mockk<EggRepository>()
     private val passbirdEventRegistry = mockk<PassbirdEventRegistry>(relaxed = true)
-    private val passwordService = MovePasswordService(cryptoProvider, eggRepository, passbirdEventRegistry)
+    private val passwordService = MovePasswordService(
+        cryptoProvider,
+        eggRepository,
+        passbirdEventRegistry,
+        MemoryUpdateControl(),
+    )
 
     @Test
     fun `should move egg`() {

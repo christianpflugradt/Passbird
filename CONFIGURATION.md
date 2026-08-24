@@ -42,6 +42,7 @@ Passbird stores sensitive local files such as the keystore, password tree, expor
 | `adapter.userInterface.secureInput`                   | Hides sensitive user input (e.g., passwords) in the terminal and aborts secure prompts when no console is available. | true                 |
 | `domain.eggIdMemory.enabled`                          | Enables or disables EggIdMemory, tracking the most recently used EggIds for quick access.        | true                 |
 | `domain.eggIdMemory.persisted`                        | Retains the EggId memory across Passbird restarts, if enabled.                                   | false                |
+| `domain.eggIdMemory.updateOnFavoriteUse`              | Controls whether Favorite use commands also add the delegated EggId to EggIdMemory.              | true                 |
 | `domain.protein.secureProteinStructureInput`          | Treats protein structures as sensitive input, hiding them by default.                            | true                 |
 | `domain.protein.promptForProteinStructureInputToggle` | Prompts the user to toggle secure input for the next protein structure input.                    | false                |
 | `domain.protein.templates`                            | Defines named Protein templates for the guided `p+[EggId]` command.                              | *(unset)*            |

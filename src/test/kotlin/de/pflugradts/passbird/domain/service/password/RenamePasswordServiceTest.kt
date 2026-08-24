@@ -27,7 +27,7 @@ class RenamePasswordServiceTest {
     private val cryptoProvider = mockk<CryptoProvider>()
     private val eggRepository = mockk<EggRepository>()
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
-    private val passwordService = RenamePasswordService(cryptoProvider, eggRepository, eventRegistry)
+    private val passwordService = RenamePasswordService(cryptoProvider, eggRepository, eventRegistry, MemoryUpdateControl())
 
     @Test
     fun `should rename egg`() {

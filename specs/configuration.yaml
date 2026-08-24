@@ -152,11 +152,13 @@ areas:
     keys:
       - domain.eggIdMemory.enabled
       - domain.eggIdMemory.persisted
+      - domain.eggIdMemory.updateOnFavoriteUse
       - domain.protein.secureProteinStructureInput
       - domain.protein.promptForProteinStructureInputToggle
       - domain.protein.templates
     visible_effects:
       - changes whether recent EggIds are shown and remembered across restarts
+      - changes whether Favorite use commands also populate EggIdMemory
       - changes whether Protein structure input is hidden and whether the user is prompted to toggle it
       - changes which guided Protein templates are available to p+[EggId]
     behavioral_contract:
@@ -164,6 +166,8 @@ areas:
       - if domain.eggIdMemory.enabled is false, in-session memory updates are suppressed and restored memory is effectively unavailable
       - cross-restart EggId memory restoration requires both domain.eggIdMemory.enabled and domain.eggIdMemory.persisted to be true
       - if domain.eggIdMemory.persisted is false, Passbird restores empty EggId memory on startup even if older tree data contains remembered entries
+      - domain.eggIdMemory.updateOnFavoriteUse controls whether Favorite use commands such as f0g also add the delegated EggId to EggIdMemory
+      - if domain.eggIdMemory.updateOnFavoriteUse is false, Favorite copy and Favorite use behavior stay otherwise unchanged while delegated Favorite commands skip EggIdMemory updates
       - domain.protein.secureProteinStructureInput controls only the Protein Structure prompt, not the Protein Type prompt
       - if domain.protein.secureProteinStructureInput is true, Protein Structure input uses secure input by default; if false, it uses plain visible line input by default
       - if domain.protein.promptForProteinStructureInputToggle is true, Passbird asks once before the Protein Structure prompt whether secure input should be flipped for that next structure input only

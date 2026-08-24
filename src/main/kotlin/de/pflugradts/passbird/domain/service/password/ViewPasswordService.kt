@@ -17,7 +17,8 @@ class ViewPasswordService constructor(
     cryptoProvider: CryptoProvider,
     eggRepository: EggRepository,
     eventRegistry: EventRegistry,
-) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
+    memoryUpdateControl: MemoryUpdateControl,
+) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl) {
     fun findAllEggIds(): Stream<Shell> = eggRepository.findAll().map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
     fun findAllEggIds(slot: Slot): Stream<Shell> = eggRepository.findAll(slot).map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
     fun viewPassword(eggIdShell: Shell): Option<Shell> = extractFromEgg(eggIdShell) { decrypted(it.viewPassword()) }

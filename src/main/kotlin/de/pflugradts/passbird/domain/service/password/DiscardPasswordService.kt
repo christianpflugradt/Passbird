@@ -10,7 +10,8 @@ class DiscardPasswordService constructor(
     cryptoProvider: CryptoProvider,
     eggRepository: EggRepository,
     eventRegistry: EventRegistry,
-) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
+    memoryUpdateControl: MemoryUpdateControl,
+) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl) {
     fun discardEgg(eggIdShell: Shell): TryResult<Unit> = findWithoutUpdatingMemory(eggIdShell)
         .ifPresentOrElse(
             {

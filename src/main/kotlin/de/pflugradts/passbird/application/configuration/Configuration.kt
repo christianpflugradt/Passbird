@@ -118,6 +118,7 @@ data class Configuration(
     data class EggIdMemory(
         override val enabled: Boolean = true,
         override val persisted: Boolean = false,
+        override val updateOnFavoriteUse: Boolean = true,
     ) : ReadableConfiguration.EggIdMemory
     data class Protein(
         override val secureProteinStructureInput: Boolean = true,

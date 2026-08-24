@@ -11,7 +11,8 @@ class RenamePasswordService constructor(
     cryptoProvider: CryptoProvider,
     eggRepository: EggRepository,
     eventRegistry: EventRegistry,
-) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
+    memoryUpdateControl: MemoryUpdateControl,
+) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl) {
     fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell): TryResult<Unit> {
         challengeEggId(newEggIdShell)
         if (eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {

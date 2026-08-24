@@ -20,9 +20,16 @@ abstract class CommonPasswordServiceCapabilities(
     private val cryptoProvider: CryptoProvider,
     protected val eggRepository: EggRepository,
     protected val eventRegistry: EventRegistry,
+    private val memoryUpdateControl: MemoryUpdateControl,
 ) {
     fun find(eggIdShell: Shell, slot: Slot): Option<Egg> = eggRepository.findAll(slot).findDecrypted(eggIdShell)
-    fun find(eggIdShell: Shell): Option<Egg> = eggRepository.findAll().findDecrypted(eggIdShell).apply { ifPresent { updateMemory(it) } }
+    fun find(eggIdShell: Shell): Option<Egg> = eggRepository.findAll().findDecrypted(eggIdShell).apply {
+        ifPresent {
+            if (memoryUpdateControl.updatesEnabled()) {
+                updateMemory(it)
+            }
+        }
+    }
     fun findWithoutUpdatingMemory(eggIdShell: Shell): Option<Egg> = eggRepository.findAll().findDecrypted(eggIdShell)
 
     private fun Stream<Egg>.findDecrypted(eggIdShell: Shell) = filter {

@@ -98,6 +98,7 @@ interface ReadableConfiguration {
     interface EggIdMemory {
         val enabled: Boolean
         val persisted: Boolean
+        val updateOnFavoriteUse: Boolean
     }
 
     interface Protein {

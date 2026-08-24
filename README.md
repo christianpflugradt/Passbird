@@ -420,6 +420,7 @@ Favorites are maintained per Nest. Renaming an Egg updates matching Favorites, d
 The EggIdMemory stores up to ten of the most recently accessed EggIds for each Nest. This feature allows you to avoid retyping the same EggId repeatedly, which is particularly useful when performing multiple operations on the same Egg, such as setting multiple Proteins.
 
 Unlike Favorites, Memory is filled automatically from recent use and can be disabled or left non-persistent through configuration.
+You can also configure whether delegated Favorite commands such as `f0g` should populate EggIdMemory or leave memory reserved for non-favorite recent activity.
 
 To view commands related to the EggIdMemory, input `m?`. This displays the following options:
 

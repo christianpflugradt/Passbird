@@ -11,7 +11,8 @@ class MovePasswordService constructor(
     cryptoProvider: CryptoProvider,
     eggRepository: EggRepository,
     eventRegistry: EventRegistry,
-) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry) {
+    memoryUpdateControl: MemoryUpdateControl,
+) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl) {
     fun movePassword(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit> {
         if (eggExists(eggIdShell, targetSlot)) {
             throw EggIdAlreadyExistsException(eggIdShell)

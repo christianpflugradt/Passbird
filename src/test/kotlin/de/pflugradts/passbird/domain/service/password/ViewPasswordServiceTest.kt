@@ -33,7 +33,8 @@ class ViewPasswordServiceTest {
     private val cryptoProvider = mockk<CryptoProvider>()
     private val eggRepository = mockk<EggRepository>()
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
-    private val passwordService = ViewPasswordService(cryptoProvider, eggRepository, eventRegistry)
+    private val memoryUpdateControl = MemoryUpdateControl()
+    private val passwordService = ViewPasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl)
 
     @Test
     fun `should return true if egg exists`() {
@@ -89,6 +90,21 @@ class ViewPasswordServiceTest {
         verify { eventRegistry wasNot Called }
         expectThat(actual.isPresent).isTrue()
         expectThat(actual.get()) isEqualTo expectedPassword
+    }
+
+    @Test
+    fun `should not update memory when updates are suppressed`() {
+        val givenEggId = shellOf("EggId")
+        val expectedPassword = shellOf("Password")
+        val matchingEgg = createEggForTesting(withEggIdShell = givenEggId, withPasswordShell = expectedPassword)
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(matchingEgg))
+
+        memoryUpdateControl.withoutUpdates {
+            passwordService.viewPassword(givenEggId)
+        }
+
+        verify(exactly = 0) { eggRepository.updateMemory(any(), any(), any()) }
     }
 
     @Test
