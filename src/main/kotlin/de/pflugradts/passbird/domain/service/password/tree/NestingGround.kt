@@ -74,6 +74,9 @@ class NestingGround constructor(
     override fun discardFavorites(nestSlot: Slot) {
         favorites[nestSlot].set(EggIdFavorites())
     }
+    override fun discardMemory(nestSlot: Slot, encryptedShell: EncryptedShell) {
+        memory[nestSlot].get().discard(encryptedShell)
+    }
     override fun renameFavorites(nestSlot: Slot, from: EncryptedShell, to: EncryptedShell) {
         favorites[nestSlot].get().rename(from, to)
     }

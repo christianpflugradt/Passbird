@@ -14,5 +14,14 @@ class EggIdMemory : Slots<EncryptedShell>() {
         this[0].set(encryptedShell)
     }
 
+    fun discard(encryptedShell: EncryptedShell) {
+        indexOfFirst { it.map { item -> item == encryptedShell }.orElse(false) }
+            .takeIf { it != -1 }
+            ?.let { startIndex ->
+                (startIndex until Slot.S9.index()).forEach { this[it].set(this[it + 1].orNull()) }
+                this[Slot.S9].set(null)
+            }
+    }
+
     fun copy() = EggIdMemory().apply { this@EggIdMemory.forEachIndexed { index, item -> this[index] = item.map(EncryptedShell::copy) } }
 }

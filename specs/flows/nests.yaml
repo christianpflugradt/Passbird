@@ -100,6 +100,7 @@ flows:
         - if a different Egg with the same EggId already exists in the target Nest, Passbird prints Egg with same EggId already exists in target Nest - Operation aborted.
         - on success, Passbird moves the Egg to the selected Nest slot
         - on success, any matching Favorite entries in the source Nest are cleared and no Favorite is created automatically in the target Nest
+        - on success, any matching EggIdMemory entries in the source Nest are cleared and no EggIdMemory entry is created automatically in the target Nest
         - successful moves print no dedicated success line from the handler
       finish:
         - all abort branches in this flow use the OPERATION_ABORTED path and therefore also trigger the warning-sound behavior from specs/interaction.yaml

@@ -19,6 +19,7 @@ class MovePasswordService constructor(
             findWithoutUpdatingMemory(eggIdShell).ifPresentOrElse(
                 {
                     eggRepository.discardFavorites(it.associatedNest(), it.viewEggId())
+                    eggRepository.discardMemory(it.associatedNest(), it.viewEggId())
                     it.moveToNestAt(targetSlot)
                 },
                 { eventRegistry.register(EggNotFound(eggIdShell)) },
