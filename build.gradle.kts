@@ -106,6 +106,9 @@ tasks.withType<KotlinJvmCompile>().configureEach {
         freeCompilerArgs.add("-Xjdk-release=17")
         jvmTarget.set(JvmTarget.JVM_17)
     }
+    if (name == "compileTestKotlin") {
+        outputs.cacheIf { false }
+    }
 }
 
 ktlint.version = "1.8.0"

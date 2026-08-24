@@ -121,15 +121,69 @@ class ViewYolkCommandTest {
     }
 
     @Test
+    fun `should sync clipboard again when yolk code rolls over while view stays open`() {
+        fakeConfiguration(instance = configuration)
+        val mutableClock = object : Clock() {
+            private var currentInstant = Instant.parse("1970-01-01T00:00:24Z")
+
+            override fun getZone(): ZoneId = ZoneOffset.UTC
+
+            override fun withZone(zone: ZoneId?): Clock = this
+
+            override fun instant(): Instant = currentInstant
+
+            fun advanceSeconds(seconds: Long) {
+                currentInstant = currentInstant.plusSeconds(seconds)
+            }
+        }
+        every { systemOperation.clock } returns mutableClock
+        fakePasswordService(
+            instance = passwordService,
+            withEggs = listOf(
+                createEggForTesting(
+                    withEggIdShell = shellOf("egg"),
+                    withYolk = TestYolkData(shellOf("12345678901234567890")),
+                ),
+            ),
+        )
+        every { userInterfaceAdapterPort.receiveLineBreakWithin(any()) } answers {
+            mutableClock.advanceSeconds(6)
+            false
+        } andThen true
+
+        inputHandler.handleInput(inputOf(shellOf("yegg")))
+
+        verify(exactly = 2) { clipboardAdapterPort.post(any()) }
+        verify(exactly = 1) { userInterfaceAdapterPort.updateEphemeralLine(any()) }
+    }
+
+    @Test
     fun `should abort when yolk is not found`() {
         fakeConfiguration(instance = configuration)
-        fakePasswordService(instance = passwordService)
+        fakePasswordService(
+            instance = passwordService,
+            withEggs = listOf(
+                createEggForTesting(withEggIdShell = shellOf("egg")),
+            ),
+        )
 
         inputHandler.handleInput(inputOf(shellOf("yegg")))
 
         verify(exactly = 1) {
             userInterfaceAdapterPort.send(match { it.shell.asString() == "Yolk not found - Operation aborted." })
         }
+        verify(exactly = 0) { userInterfaceAdapterPort.startEphemeralLine(any()) }
+        verify(exactly = 0) { clipboardAdapterPort.post(any()) }
+    }
+
+    @Test
+    fun `should only report missing egg when egg does not exist`() {
+        fakeConfiguration(instance = configuration)
+        fakePasswordService(instance = passwordService)
+
+        inputHandler.handleInput(inputOf(shellOf("yegg")))
+
+        verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
         verify(exactly = 0) { userInterfaceAdapterPort.startEphemeralLine(any()) }
         verify(exactly = 0) { clipboardAdapterPort.post(any()) }
     }
