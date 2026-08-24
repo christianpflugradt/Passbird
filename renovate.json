@@ -54,10 +54,7 @@
                     "gradle/verification-metadata.xml",
                     "gradle/verification-keyring.keys"
                 ],
-                "executionMode": "branch",
-                "installTools": {
-                    "java": {}
-                }
+                "executionMode": "branch"
             }
         }
     ],
