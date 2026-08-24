@@ -16,6 +16,7 @@ sensitive_assets:
   - keystore secret stored in passbird.sec
   - decrypted EggIds and Favorite mappings
   - decrypted password and protein content
+  - decrypted yolk secrets and generated TOTP codes
   - password tree bytes in passbird.tree
   - exported plaintext-equivalent password data in passbird-export.json
 current_security_relevant_implementation:
@@ -105,6 +106,7 @@ current_security_relevant_implementation:
       - failed password-tree sync restores the live session to the last restored or successfully synced Egg, Favorite, Memory, and Nest snapshot before reporting failure
       - can exit immediately with a non-zero process status when verification is configured as critical
       - stores eggs, nests, per-nest Favorite slots, and optionally persisted memory in a custom binary layout before encryption
+      - stores at most one encrypted yolk secret plus its TOTP metadata per Egg in the current password-tree payload format
       - scrubs full decrypted password-tree payload Shells after restore and migration parsing, and scrubs full plaintext payload Shells after sync and migration encryption
       - scrubs temporary password-tree checksum ranges, per-entry read buffers, per-entry serialization buffers, and full payload assembly buffers after copying them into their destination owners
       - validates current and legacy password-tree payload field boundaries and stored egg nest slots before constructing restore snapshots
@@ -118,8 +120,8 @@ current_security_relevant_implementation:
       - Shell and PlainShell scrambling overwrites each stored byte or character with a different printable random value instead of allowing a same-value replacement
       - command handlers that copy, render, or delegate decrypted password, protein, Favorite, or memory Shell values scramble those temporary Shells after the sink operation completes
       - Shell iteration and streams traverse the owning Shell content without creating extra plaintext byte-array snapshots
-      - export collection keeps decrypted Shell values alive only until the exchange adapter send operation returns, then scrambles the exported EggId, password, and protein Shell values before the command completes
-      - import preview and import execution scrub parsed EggId, password, and protein Shell values after deriving previews or finishing the import attempt
+      - export collection keeps decrypted Shell values alive only until the exchange adapter send operation returns, then scrambles the exported EggId, password, protein, and yolk Shell values before the command completes
+      - import preview and import execution scrub parsed EggId, password, protein, and yolk Shell values after deriving previews or finishing the import attempt
       - event rendering scrambles decrypted EggId and protein type Shell values after converting them into the user-facing message text
   build_supply_chain:
     files:

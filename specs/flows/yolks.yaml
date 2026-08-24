@@ -1,0 +1,36 @@
+schema_version: 1
+last_reviewed: 2026-08-24
+flow_family: yolks
+applies_interaction_rules_from: specs/interaction.yaml
+flows:
+  - id: yolk_info
+    command: y?
+    user_experience:
+      - Passbird prints a yolk-specific help screen in the same short command-family style used by Favorites, Memory, and Proteins
+      - the help screen advertises y[EggId], y+[EggId], and y-[EggId]
+  - id: yolk_view
+    command: y[EggId]
+    user_experience:
+      - if the Egg has a stored yolk and the current code has more remaining validity than application.yolk.minimumValiditySeconds, Passbird prints the current TOTP code followed by the remaining validity in seconds in the form <Code> (<Remaining>s)
+      - if the Egg has a stored yolk and the current code has remaining validity less than or equal to application.yolk.minimumValiditySeconds, Passbird first prints Current Yolk expires in <Remaining>s. Waiting for next Yolk... and then prints the next TOTP code in the form <Code> (<Remaining>s)
+      - if the Egg has no stored yolk, Passbird prints Yolk not found - Operation aborted.
+      - after the command finishes, Passbird emits one empty line
+  - id: yolk_set
+    command: y+[EggId]
+    exact_secret_prompt: "Enter Yolk secret or otpauth URI or just press enter to abort: "
+    user_experience:
+      - Passbird accepts either a Base32 TOTP secret or an otpauth://totp URI
+      - if the input is an otpauth://totp URI, Passbird stores the URI-provided algorithm, digit count, and period
+      - if the input is a plain Base32 secret, Passbird stores the secret together with the configured fallback values from application.yolk.algorithm, application.yolk.digits, and application.yolk.periodSeconds
+      - empty input aborts without changing the Egg
+      - if a yolk already exists for the Egg, Passbird requires explicit overwrite confirmation before replacing it
+  - id: yolk_discard
+    command: y-[EggId]
+    user_experience:
+      - if the Egg has no stored yolk, Passbird prints Yolk not found - Operation aborted.
+      - if a yolk exists, Passbird requires explicit confirmation before discarding it
+  - id: yolk_persistence
+    observable_rules:
+      - the current password-tree format persists at most one yolk per Egg
+      - import and export include yolks when present
+      - older current-format password trees without yolk support are migrated once at startup before the normal application boot path continues

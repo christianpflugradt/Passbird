@@ -14,6 +14,7 @@
     + [General Usage](#general-usage)
     + [Nests](#nests)
     + [Proteins](#proteins)
+    + [Yolks](#yolks)
     + [Favorites](#favorites)
     + [Memory](#memory)
     + [Custom Passwords](#custom-passwords)
@@ -136,6 +137,11 @@ application:
     specialCharacters: true
     promptOnRemoval: true
     customPasswordConfigurations:
+  yolk:
+    algorithm: SHA1
+    digits: 6
+    minimumValiditySeconds: 5
+    periodSeconds: 30
 adapter:
   clipboard:
     reset:
@@ -262,6 +268,7 @@ You can access Passbird’s in-app help at any time by pressing h and then Enter
         f? (Favorites)        Displays Favorites-related usage information.
         m? (Memory)           Displays Memory-related usage information.
         p? (Proteins)         Displays Protein-related usage information.
+        y? (Yolks)            Displays Yolk-related usage information.
         s? (Password configs) Displays available password configurations and related help.
 
 ### General Usage
@@ -341,6 +348,8 @@ Each Egg contains ten Protein Slots, which are initially empty. To create or upd
 
 If you want to populate several Protein slots in one flow, use `p+email`. Passbird first lets you select a Protein template by index or choose `none`. Template mode prompts only for the configured slots and only asks for the Structure because the Type comes from the template. Choosing `none` walks through all ten slots and lets you enter, keep, or skip Type and Structure values slot by slot.
 
+To delete a Protein from a specific Slot, e.g. Slot 1, input `p-1email`. This command removes both the Type and Structure from the specified Slot.
+
 Protein templates are configured in `passbird.yml` under `domain.protein.templates`. Each template has a required `name` and may define any subset of slots `0` through `9` as Protein Types.
 
 ```yaml
@@ -353,7 +362,31 @@ domain:
         2: description
 ```
 
-To delete a Protein from a specific Slot, e.g. Slot 1, input `p-1email`. This command removes both the Type and Structure from the specified Slot.
+### Yolks
+
+Yolks let you store one TOTP secret per Egg. This is useful for services that require time-based one-time passwords in addition to the main password stored in the Egg.
+
+To view commands related to Yolks, input `y?` and press Enter.
+
+    y? (help)       Displays this help menu for Yolk commands.
+    y[EggId] (view)       Displays the current TOTP code for the specified Egg.
+    y+[EggId] (set)        Prompts for a TOTP secret or otpauth URI and stores it for the specified Egg.
+    y-[EggId] (discard)    Deletes the Yolk stored for the specified Egg.
+
+Use `y+[EggId]` to store either a Base32 secret or an `otpauth://totp` URI.
+
+If you provide an `otpauth://totp` URI, Passbird reads the algorithm, digit count, and period from that URI. This is the usual way to configure non-standard TOTP settings.
+
+If you provide only a Base32 secret, Passbird uses the fallback settings from `passbird.yml` under `application.yolk`. The default fallback settings match the most common TOTP setup used by sites such as GitHub:
+- `algorithm: SHA1`
+- `digits: 6`
+- `periodSeconds: 30`
+
+Use `y[EggId]` to display the current TOTP code. Passbird reads `application.yolk.minimumValiditySeconds` from `passbird.yml` to decide whether a nearly expired code is shown immediately or whether Passbird waits for the next code first. The default value is `5`.
+
+Use `y-[EggId]` to discard the stored yolk again.
+
+Yolks are persisted in the password tree, included in `passbird-export.json` when present, and restored again through normal startup and migration handling.
 
 ### Favorites
 

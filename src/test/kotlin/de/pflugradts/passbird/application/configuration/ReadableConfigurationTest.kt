@@ -187,4 +187,88 @@ class ReadableConfigurationTest {
             "Configuration could not be loaded: Protein template 'web-login' contains invalid slot"
         verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
     }
+
+    @Test
+    fun `should terminate when yolk minimum validity is negative`() {
+        every { systemOperation.exit(any()) } returns Unit
+        File(configurationFile).writeText(
+            """
+            application:
+              yolk:
+                minimumValiditySeconds: -1
+            """.trimIndent(),
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        val actual = captureSystemErr.during {
+            tryCatching { configurationFactory.loadConfiguration() }
+        }
+
+        expectThat(actual.failure).isTrue()
+        expectThat(captureSystemErr.capture) contains "Configuration could not be loaded: Yolk minimum validity is invalid"
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
+    }
+
+    @Test
+    fun `should terminate when yolk algorithm is invalid`() {
+        every { systemOperation.exit(any()) } returns Unit
+        File(configurationFile).writeText(
+            """
+            application:
+              yolk:
+                algorithm: SHA999
+            """.trimIndent(),
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        val actual = captureSystemErr.during {
+            tryCatching { configurationFactory.loadConfiguration() }
+        }
+
+        expectThat(actual.failure).isTrue()
+        expectThat(captureSystemErr.capture) contains "Configuration could not be loaded: Unsupported algorithm"
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
+    }
+
+    @Test
+    fun `should terminate when yolk digits are invalid`() {
+        every { systemOperation.exit(any()) } returns Unit
+        File(configurationFile).writeText(
+            """
+            application:
+              yolk:
+                digits: 7
+            """.trimIndent(),
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        val actual = captureSystemErr.during {
+            tryCatching { configurationFactory.loadConfiguration() }
+        }
+
+        expectThat(actual.failure).isTrue()
+        expectThat(captureSystemErr.capture) contains "Configuration could not be loaded: Yolk digits are invalid"
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
+    }
+
+    @Test
+    fun `should terminate when yolk period is invalid`() {
+        every { systemOperation.exit(any()) } returns Unit
+        File(configurationFile).writeText(
+            """
+            application:
+              yolk:
+                periodSeconds: 0
+            """.trimIndent(),
+        )
+        val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
+
+        val actual = captureSystemErr.during {
+            tryCatching { configurationFactory.loadConfiguration() }
+        }
+
+        expectThat(actual.failure).isTrue()
+        expectThat(captureSystemErr.capture) contains "Configuration could not be loaded: Yolk period is invalid"
+        verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
+    }
 }

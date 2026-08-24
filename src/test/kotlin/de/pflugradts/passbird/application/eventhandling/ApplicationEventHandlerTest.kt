@@ -5,6 +5,7 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
+import de.pflugradts.passbird.domain.model.egg.TestYolkData
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
@@ -19,6 +20,8 @@ import de.pflugradts.passbird.domain.model.event.NestDiscarded
 import de.pflugradts.passbird.domain.model.event.ProteinCreated
 import de.pflugradts.passbird.domain.model.event.ProteinDiscarded
 import de.pflugradts.passbird.domain.model.event.ProteinUpdated
+import de.pflugradts.passbird.domain.model.event.YolkDiscarded
+import de.pflugradts.passbird.domain.model.event.YolkUpdated
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -198,15 +201,20 @@ class ApplicationEventHandlerTest {
     companion object {
 
         @JvmStatic
-        private fun provideEggEvents() = Stream.of(
-            Arguments.of(EggCreated(createEggForTesting())),
-            Arguments.of(EggDiscarded(createEggForTesting())),
-            Arguments.of(EggUpdated(createEggForTesting())),
-            Arguments.of(EggRenamed(createEggForTesting())),
-            Arguments.of(EggMoved(createEggForTesting(withSlot = DEFAULT))),
-            Arguments.of(EggMoved(createEggForTesting(withSlot = S1))),
-            Arguments.of(EggNotFound(shellOf("expected eggId"))),
-        )
+        private fun provideEggEvents(): Stream<Arguments> {
+            val eggWithYolk = createEggForTesting(withYolk = TestYolkData(shellOf("secret")))
+            return Stream.of(
+                Arguments.of(EggCreated(createEggForTesting())),
+                Arguments.of(EggDiscarded(createEggForTesting())),
+                Arguments.of(EggUpdated(createEggForTesting())),
+                Arguments.of(EggRenamed(createEggForTesting())),
+                Arguments.of(EggMoved(createEggForTesting(withSlot = DEFAULT))),
+                Arguments.of(EggMoved(createEggForTesting(withSlot = S1))),
+                Arguments.of(EggNotFound(shellOf("expected eggId"))),
+                Arguments.of(YolkUpdated(createEggForTesting())),
+                Arguments.of(YolkDiscarded(eggWithYolk, eggWithYolk.viewYolk().get())),
+            )
+        }
 
         @JvmStatic
         private fun provideImportExportEvents() = Stream.of(

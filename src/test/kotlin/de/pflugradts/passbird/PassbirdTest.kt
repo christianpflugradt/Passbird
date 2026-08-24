@@ -134,6 +134,7 @@ class PassbirdTest {
                 "newOutputStream",
                 "readBytesFromFile",
                 "resolvePath",
+                "sleep",
                 "writeBytesToSensitiveFile",
                 "writeStringToSensitiveFile",
                 "writeToSensitiveFile",

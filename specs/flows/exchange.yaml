@@ -164,3 +164,5 @@ observable_rules:
   - import and export behavior must stay aligned with README and startup reminder behavior
   - favorites remain local password-tree metadata and are not serialized into passbird-export.json
   - import flows do not create, clear, or otherwise directly edit Favorite slots
+  - exported eggs may include one optional yolk record containing the secret plus TOTP metadata
+  - import accepts both legacy exchange files without yolks and newer exchange files with yolks

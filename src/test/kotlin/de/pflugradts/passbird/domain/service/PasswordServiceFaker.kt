@@ -14,6 +14,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slots
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import de.pflugradts.passbird.domain.service.password.YolkView
 import io.mockk.every
 
 fun fakePasswordService(
@@ -36,6 +37,7 @@ private fun fakeWriteOperations(instance: PasswordService) {
     every { instance.putEggs(any()) } returns success(Unit)
     every { instance.putProtein(any(), any(), any(), any()) } returns success(Unit)
     every { instance.putProteins(any(), any()) } returns success(Unit)
+    every { instance.putYolk(any(), any(), any<String>(), any(), any()) } returns success(Unit)
 }
 
 private fun fakeEggQueries(instance: PasswordService, withEggs: List<Egg>, withNestService: NestService?) {
@@ -88,6 +90,18 @@ private fun fakeProteinQueries(instance: PasswordService, withEggs: List<Egg>) {
             }?.proteins?.get(secondArg<Slot>().index())?.extractStructure(),
         )
     }
+    every { instance.viewYolk(any()) } answers {
+        optionOf(
+            withEggs.find { it.viewEggId().fakeDec() == firstArg() }?.viewYolk()?.map {
+                YolkView(
+                    secret = it.viewSecret().fakeDec(),
+                    algorithm = it.algorithm,
+                    digits = it.digits,
+                    periodSeconds = it.periodSeconds,
+                )
+            }?.orNull(),
+        )
+    }
 }
 
 private fun fakeEggValidation(instance: PasswordService, withInvalidEggId: Boolean) {
@@ -103,6 +117,7 @@ private fun fakeRemainingQueries(instance: PasswordService, withFavorites: Map<S
     every { instance.discardFavorite(any()) } returns success(Unit)
     every { instance.discardEgg(any()) } returns success(Unit)
     every { instance.discardProtein(any(), any()) } returns success(Unit)
+    every { instance.discardYolk(any()) } returns success(Unit)
     every { instance.renameEgg(any(), any()) } returns success(Unit)
     every { instance.moveEgg(any(), any()) } returns success(Unit)
     every { instance.viewFavorites() } answers { Slots<Shell>().apply { withFavorites.forEach { this[it.key] = shellOf(it.value) } } }

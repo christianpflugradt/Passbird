@@ -40,6 +40,7 @@ class HelpCommandHandler constructor(
                 outBold("\tf?"), out(" (Favorites)         Displays Favorites-related usage information.\n"),
                 outBold("\tm?"), out(" (Memory)           Displays Memory-related usage information.\n"),
                 outBold("\tp?"), out(" (Proteins)         Displays Protein-related usage information.\n"),
+                outBold("\ty?"), out(" (Yolks)            Displays Yolk-related usage information.\n"),
                 outBold("\ts?"), out(" (Password configs) Displays available password configurations and related help.\n"),
             )
         }

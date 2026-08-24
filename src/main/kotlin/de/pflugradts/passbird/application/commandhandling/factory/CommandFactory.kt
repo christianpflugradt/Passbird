@@ -27,6 +27,7 @@ class CommandFactory constructor(
     private val nestCommandFactory: NestCommandFactory,
     private val proteinCommandFactory: ProteinCommandFactory,
     private val setCommandFactory: SetCommandFactory,
+    private val yolkCommandFactory: YolkCommandFactory,
 ) {
     fun construct(commandType: CommandType, input: Input) = constructDirectly(commandType, input)
         ?: constructWithoutArguments(commandType, input)
@@ -56,6 +57,7 @@ class CommandFactory constructor(
         CommandType.NEST -> constructSafely(nestCommandFactory, input)
         CommandType.PROTEIN -> constructSafely(proteinCommandFactory, input)
         CommandType.SET -> constructSafely(setCommandFactory, input)
+        CommandType.YOLK -> constructSafely(yolkCommandFactory, input)
         else -> null
     }
     private fun constructSafely(factory: SpecialCommandFactory, input: Input) = tryCatching { factory.constructFromInput(input) }

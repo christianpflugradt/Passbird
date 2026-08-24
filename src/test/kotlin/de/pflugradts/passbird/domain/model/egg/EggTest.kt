@@ -7,6 +7,8 @@ import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggMoved
 import de.pflugradts.passbird.domain.model.event.EggRenamed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
+import de.pflugradts.passbird.domain.model.event.YolkDiscarded
+import de.pflugradts.passbird.domain.model.event.YolkUpdated
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.fakeDec
@@ -95,6 +97,24 @@ class EggTest {
 
         // then
         verify { givenShell.scramble() }
+    }
+
+    @Test
+    fun `should view update and discard yolk`() {
+        val egg = createEggForTesting()
+
+        egg.updateYolk(shellOf("secret").fakeEnc(), "SHA256", 8, 45)
+        val actual = egg.viewYolk().get()
+
+        expectThat(egg.hasYolk()).isTrue()
+        expectThat(actual.viewSecret().fakeDec()) isEqualTo shellOf("secret")
+        expectThat(actual.algorithm) isEqualTo "SHA256"
+        expectThat(actual.digits) isEqualTo 8
+        expectThat(actual.periodSeconds) isEqualTo 45
+
+        egg.discardYolk()
+
+        expectThat(egg.hasYolk()).isFalse()
     }
 
     @Nested
@@ -264,6 +284,19 @@ class EggTest {
             val actual = egg.getDomainEvents()[0]
             expectThat(actual).isA<EggMoved>()
             expectThat((actual as EggMoved).egg) isEqualTo egg
+        }
+
+        @Test
+        fun `should have yolk events when yolk is updated and discarded`() {
+            val egg = createEggForTesting(withYolk = TestYolkData(shellOf("before")))
+
+            egg.clearDomainEvents()
+            egg.updateYolk(shellOf("after").fakeEnc(), "SHA512", 8, 60)
+            egg.discardYolk()
+
+            expectThat(egg.getDomainEvents()) hasSize 2
+            expectThat(egg.getDomainEvents()[0]).isA<YolkUpdated>()
+            expectThat(egg.getDomainEvents()[1]).isA<YolkDiscarded>()
         }
     }
 }

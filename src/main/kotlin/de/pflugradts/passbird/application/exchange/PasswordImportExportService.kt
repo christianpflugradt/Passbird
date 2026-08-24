@@ -3,6 +3,7 @@ import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.kotlinextensions.TryResult
 import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.PasswordInfoMap
+import de.pflugradts.passbird.application.PasswordYolkInfo
 import de.pflugradts.passbird.application.failure.ImportFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.domain.model.event.EggsExported
@@ -83,6 +84,9 @@ class PasswordImportExportService constructor(
                                     first = ShellPair(eggId, passwordService.viewPassword(eggId).get()),
                                     second = passwordService.viewProteinTypes(eggId).toShellList()
                                         .zip(passwordService.viewProteinStructures(eggId).toShellList()),
+                                    yolk = passwordService.viewYolk(eggId).orNull()?.let {
+                                        PasswordYolkInfo(it.secret, it.algorithm, it.digits, it.periodSeconds)
+                                    },
                                 )
                             }.toList()
                     }
@@ -105,6 +109,7 @@ class PasswordImportExportService constructor(
                 protein.first.scramble()
                 protein.second.scramble()
             }
+            it.yolk?.secret?.scramble()
         }
     }
     private fun receiveImportData() = exchangeFactory.createPasswordExchange().receive()
@@ -142,6 +147,9 @@ class PasswordImportExportService constructor(
                     if (!importProteins(passwordInfo)) {
                         return
                     }
+                    if (!importYolk(passwordInfo)) {
+                        return
+                    }
                     importedEggCount++
                 }
             }
@@ -164,6 +172,29 @@ class PasswordImportExportService constructor(
             }
         }
         return true
+    }
+    private fun importYolk(passwordInfo: PasswordInfo): Boolean {
+        val yolk = passwordInfo.yolk ?: return true
+        val eggIdShellCopy = passwordInfo.first.first.copy()
+        val secretShellCopy = yolk.secret.copy()
+        return try {
+            if (passwordService.putYolk(
+                    eggIdShell = eggIdShellCopy,
+                    secretShell = secretShellCopy,
+                    algorithm = yolk.algorithm,
+                    digits = yolk.digits,
+                    periodSeconds = yolk.periodSeconds,
+                ).failure
+            ) {
+                eventRegistry.clearEvents()
+                false
+            } else {
+                true
+            }
+        } finally {
+            eggIdShellCopy.scramble()
+            secretShellCopy.scramble()
+        }
     }
     private fun putEgg(eggIdShell: Shell, passwordShell: Shell): TryResult<Unit> {
         val eggIdShellCopy = eggIdShell.copy()

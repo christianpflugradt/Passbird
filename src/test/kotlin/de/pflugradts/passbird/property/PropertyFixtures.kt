@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.property
 
+import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.PasswordInfoMap
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
@@ -288,11 +289,14 @@ private fun PasswordTreeFixture.toEggIdFavorites(nestSlot: Slot, cryptoProvider:
     }
 }
 
-private fun PlainPasswordInfoData.toPasswordInfo() = (shellOf(eggId) to shellOf(password)) to MutableList(Slot.entries.size) {
-    emptyProteinPair
-}.apply {
-    proteins.forEach { (slot, shells) -> this[slot.index()] = shellOf(shells.first) to shellOf(shells.second) }
-}
+private fun PlainPasswordInfoData.toPasswordInfo() = PasswordInfo(
+    first = shellOf(eggId) to shellOf(password),
+    second = MutableList(Slot.entries.size) {
+        emptyProteinPair
+    }.apply {
+        proteins.forEach { (slot, shells) -> this[slot.index()] = shellOf(shells.first) to shellOf(shells.second) }
+    },
+)
 
 private val ALLOWED_TEXT_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !@#\$%^&*()_-+=[]{}:;,.?/|~\t\n"
 private val NON_BLANK_TEXT_CHARACTERS = ALLOWED_TEXT_CHARACTERS.filterNot(Char::isWhitespace)

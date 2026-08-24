@@ -14,6 +14,8 @@ import de.pflugradts.passbird.domain.model.event.NestDiscarded
 import de.pflugradts.passbird.domain.model.event.ProteinCreated
 import de.pflugradts.passbird.domain.model.event.ProteinDiscarded
 import de.pflugradts.passbird.domain.model.event.ProteinUpdated
+import de.pflugradts.passbird.domain.model.event.YolkDiscarded
+import de.pflugradts.passbird.domain.model.event.YolkUpdated
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
@@ -37,27 +39,30 @@ class ApplicationEventHandler constructor(
         ProteinCreated::class.java,
         ProteinUpdated::class.java,
         ProteinDiscarded::class.java,
+        YolkUpdated::class.java,
+        YolkDiscarded::class.java,
         NestCreated::class.java,
         NestDiscarded::class.java,
     )
+    private val handlers: Map<Class<out DomainEvent>, (DomainEvent) -> Unit> = mapOf(
+        EggCreated::class.java to { handleEggCreated(it as EggCreated) },
+        EggUpdated::class.java to { handleEggUpdated(it as EggUpdated) },
+        EggRenamed::class.java to { handleEggRenamed(it as EggRenamed) },
+        EggDiscarded::class.java to { handleEggDiscarded(it as EggDiscarded) },
+        EggMoved::class.java to { handleEggMoved(it as EggMoved) },
+        EggNotFound::class.java to { handleEggNotFound(it as EggNotFound) },
+        EggsExported::class.java to { handleEggsExported(it as EggsExported) },
+        EggsImported::class.java to { handleEggsImported(it as EggsImported) },
+        ProteinCreated::class.java to { handleProteinCreated(it as ProteinCreated) },
+        ProteinUpdated::class.java to { handleProteinUpdated(it as ProteinUpdated) },
+        ProteinDiscarded::class.java to { handleProteinDiscarded(it as ProteinDiscarded) },
+        YolkUpdated::class.java to { handleYolkUpdated(it as YolkUpdated) },
+        YolkDiscarded::class.java to { handleYolkDiscarded(it as YolkDiscarded) },
+        NestCreated::class.java to { handleNestCreated(it as NestCreated) },
+        NestDiscarded::class.java to { handleNestDiscarded(it as NestDiscarded) },
+    )
 
-    override fun handle(domainEvent: DomainEvent) {
-        when (domainEvent) {
-            is EggCreated -> handleEggCreated(domainEvent)
-            is EggUpdated -> handleEggUpdated(domainEvent)
-            is EggRenamed -> handleEggRenamed(domainEvent)
-            is EggDiscarded -> handleEggDiscarded(domainEvent)
-            is EggMoved -> handleEggMoved(domainEvent)
-            is EggNotFound -> handleEggNotFound(domainEvent)
-            is EggsExported -> handleEggsExported(domainEvent)
-            is EggsImported -> handleEggsImported(domainEvent)
-            is ProteinCreated -> handleProteinCreated(domainEvent)
-            is ProteinUpdated -> handleProteinUpdated(domainEvent)
-            is ProteinDiscarded -> handleProteinDiscarded(domainEvent)
-            is NestCreated -> handleNestCreated(domainEvent)
-            is NestDiscarded -> handleNestDiscarded(domainEvent)
-        }
-    }
+    override fun handle(domainEvent: DomainEvent) = handlers.getValue(domainEvent.javaClass)(domainEvent)
 
     private fun handleEggCreated(eggCreated: EggCreated) {
         send("Egg '${decrypt(eggCreated.egg.viewEggId())}' successfully created.")
@@ -119,6 +124,14 @@ class ApplicationEventHandler constructor(
         val eggId = decrypt(proteinDiscarded.egg.viewEggId())
         val msg = "Protein '$proteinType' of egg '$eggId' successfully discarded."
         send(msg)
+    }
+
+    private fun handleYolkUpdated(yolkUpdated: YolkUpdated) {
+        send("Yolk of egg '${decrypt(yolkUpdated.egg.viewEggId())}' successfully updated.")
+    }
+
+    private fun handleYolkDiscarded(yolkDiscarded: YolkDiscarded) {
+        send("Yolk of egg '${decrypt(yolkDiscarded.egg.viewEggId())}' successfully discarded.")
     }
 
     private fun handleNestCreated(nestCreated: NestCreated) {

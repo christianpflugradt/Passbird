@@ -19,6 +19,7 @@ fun fakeSystemOperation(
     withIoException: Boolean = false,
 ) {
     every { instance.clock } returns withClock
+    every { instance.sleep(any()) } returns Unit
     every { instance.newInputStream(any()) } returns mockk()
     every { instance.newOutputStream(any()) } returns mockk()
     every { instance.writeToSensitiveFile(any(), any()) } answers {

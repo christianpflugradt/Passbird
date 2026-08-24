@@ -27,16 +27,26 @@ interface PasswordService {
     fun viewProteinStructures(eggIdShell: Shell): Option<List<Option<Shell>>>
     fun viewProteinType(eggIdShell: Shell, slot: Slot): Option<Shell>
     fun viewProteinTypes(eggIdShell: Shell): Option<List<Option<Shell>>>
+    fun viewYolk(eggIdShell: Shell): Option<YolkView>
     fun renameEgg(eggIdShell: Shell, newEggIdShell: Shell): TryResult<Unit>
     fun challengeEggId(shell: Shell)
     fun putEggs(eggs: Stream<ShellPair>): TryResult<Unit>
     fun putEgg(eggIdShell: Shell, passwordShell: Shell): TryResult<Unit>
     fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell): TryResult<Unit>
     fun putProteins(eggIdShell: Shell, proteins: List<ProteinEntry>): TryResult<Unit>
+    fun putYolk(eggIdShell: Shell, secretShell: Shell, algorithm: String, digits: Int, periodSeconds: Int): TryResult<Unit>
     fun discardFavorite(slot: Slot): TryResult<Unit>
     fun discardEgg(eggIdShell: Shell): TryResult<Unit>
     fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit>
+    fun discardYolk(eggIdShell: Shell): TryResult<Unit>
     fun moveEgg(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit>
     fun findAllEggIds(): Stream<Shell>
     fun findAllEggIds(slot: Slot): Stream<Shell>
 }
+
+data class YolkView(
+    val secret: Shell,
+    val algorithm: String,
+    val digits: Int,
+    val periodSeconds: Int,
+)

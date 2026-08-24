@@ -23,4 +23,7 @@ class DiscardPasswordService constructor(
     fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit> = findWithoutUpdatingMemory(eggIdShell)
         .ifPresentOrElse({ it.discardProtein(slot)}, { eventRegistry.register(EggNotFound(eggIdShell)) })
         .let { processEventsAndSync() }
+    fun discardYolk(eggIdShell: Shell): TryResult<Unit> = findWithoutUpdatingMemory(eggIdShell)
+        .ifPresentOrElse({ it.discardYolk() }, { eventRegistry.register(EggNotFound(eggIdShell)) })
+        .let { processEventsAndSync() }
 }

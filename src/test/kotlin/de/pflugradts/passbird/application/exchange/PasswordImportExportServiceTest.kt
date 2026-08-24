@@ -8,6 +8,7 @@ import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.PasswordInfoMap
+import de.pflugradts.passbird.application.PasswordYolkInfo
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.fakeExchangeAdapterPort
 import de.pflugradts.passbird.application.mainMocked
@@ -92,11 +93,11 @@ class PasswordImportExportServiceTest {
         every { exchangeAdapterPort.receive() } returns success(
             linkedMapOf(
                 createNest(shellOf("Default"), DEFAULT) to listOf(
-                    Pair(ShellPair(shellOf("EggId1"), shellOf("Password1")), emptyList()),
+                    passwordInfo("EggId1", "Password1"),
                 ),
                 createNest(shellOf("work"), S2) to listOf(
-                    Pair(ShellPair(shellOf("EggId2"), shellOf("Password2")), emptyList()),
-                    Pair(ShellPair(shellOf("EggId3"), shellOf("Password3")), emptyList()),
+                    passwordInfo("EggId2", "Password2"),
+                    passwordInfo("EggId3", "Password3"),
                 ),
             ),
         )
@@ -125,9 +126,9 @@ class PasswordImportExportServiceTest {
         every { exchangeAdapterPort.receive() } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
-                    Pair(
-                        ShellPair(eggId, password),
-                        proteinShellPairs(S3 to ShellPair(proteinType, proteinStructure)),
+                    PasswordInfo(
+                        first = ShellPair(eggId, password),
+                        second = proteinShellPairs(S3 to ShellPair(proteinType, proteinStructure)),
                     ),
                 ),
             ),
@@ -190,9 +191,9 @@ class PasswordImportExportServiceTest {
         every { exchangeAdapterPort.receive() } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
-                    Pair(
-                        ShellPair(eggId, password),
-                        proteinShellPairs(S3 to ShellPair(proteinType, proteinStructure)),
+                    PasswordInfo(
+                        first = ShellPair(eggId, password),
+                        second = proteinShellPairs(S3 to ShellPair(proteinType, proteinStructure)),
                     ),
                 ),
             ),
@@ -218,7 +219,7 @@ class PasswordImportExportServiceTest {
         every { exchangeAdapterPort.receive() } returns success(
             linkedMapOf(
                 createNest(shellOf("imported"), S2) to listOf(
-                    Pair(ShellPair(shellOf("EggId"), shellOf("Password")), emptyList()),
+                    passwordInfo("EggId", "Password"),
                 ),
             ),
         )
@@ -249,9 +250,9 @@ class PasswordImportExportServiceTest {
         every { exchangeAdapterPort.receive() } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
-                    Pair(
-                        ShellPair(givenEggId, givenPassword),
-                        proteinShellPairs(
+                    PasswordInfo(
+                        first = ShellPair(givenEggId, givenPassword),
+                        second = proteinShellPairs(
                             Slot.S3 to ShellPair(shellOf("type3"), shellOf("structure3")),
                             S9 to ShellPair(shellOf("type9"), shellOf("structure9")),
                         ),
@@ -286,9 +287,9 @@ class PasswordImportExportServiceTest {
         every { exchangeAdapterPort.receive() } returns success(
             linkedMapOf(
                 createNest(shellOf("work"), S2) to listOf(
-                    Pair(
-                        ShellPair(givenEggId, givenPassword),
-                        proteinShellPairs(
+                    PasswordInfo(
+                        first = ShellPair(givenEggId, givenPassword),
+                        second = proteinShellPairs(
                             S3 to ShellPair(shellOf("type3"), shellOf("structure3")),
                         ),
                     ),
@@ -468,8 +469,8 @@ class PasswordImportExportServiceTest {
         every { exchangeAdapterPort.receive() } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
-                    Pair(ShellPair(firstEggId, firstPassword), emptyList()),
-                    Pair(ShellPair(secondEggId, secondPassword), emptyList()),
+                    PasswordInfo(ShellPair(firstEggId, firstPassword), emptyList()),
+                    PasswordInfo(ShellPair(secondEggId, secondPassword), emptyList()),
                 ),
             ),
         )
@@ -502,11 +503,11 @@ class PasswordImportExportServiceTest {
         every { exchangeAdapterPort.receive() } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
-                    Pair(
-                        ShellPair(firstEggId, firstPassword),
-                        proteinShellPairs(S3 to ShellPair(shellOf("type3"), shellOf("structure3"))),
+                    PasswordInfo(
+                        first = ShellPair(firstEggId, firstPassword),
+                        second = proteinShellPairs(S3 to ShellPair(shellOf("type3"), shellOf("structure3"))),
                     ),
-                    Pair(ShellPair(secondEggId, secondPassword), emptyList()),
+                    PasswordInfo(ShellPair(secondEggId, secondPassword), emptyList()),
                 ),
             ),
         )
@@ -588,6 +589,87 @@ class PasswordImportExportServiceTest {
     }
 
     @Test
+    fun `should not export when no slots are selected`() {
+        importExportServiceSupplier.get().exportEggs(emptySet())
+
+        verify { exchangeFactory wasNot Called }
+        verify { passwordService wasNot Called }
+        verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
+    }
+
+    @Test
+    fun `should import yolk when present`() {
+        val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
+        every { exchangeAdapterPort.receive() } returns success(
+            mapOf(
+                nestService.currentNest() to listOf(
+                    PasswordInfo(
+                        first = ShellPair(shellOf("EggId"), shellOf("Password")),
+                        second = emptyList(),
+                        yolk = PasswordYolkInfo(
+                            secret = shellOf("MZXW6YTB"),
+                            algorithm = "SHA256",
+                            digits = 8,
+                            periodSeconds = 45,
+                        ),
+                    ),
+                ),
+            ),
+        )
+        every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
+        fakePasswordService(instance = passwordService)
+        val putYolkCalls = mutableListOf<PutYolkCall>()
+        every { passwordService.putYolk(any(), any(), any(), any(), any()) } answers {
+            putYolkCalls.add(
+                PutYolkCall(
+                    eggIdShell = firstArg<Shell>().copy(),
+                    secretShell = secondArg<Shell>().copy(),
+                    algorithm = thirdArg(),
+                    digits = arg(3),
+                    periodSeconds = arg(4),
+                ),
+            )
+            success(Unit)
+        }
+
+        importExportServiceSupplier.get().importEggs()
+
+        expectThat(putYolkCalls.single()) isEqualTo PutYolkCall(shellOf("EggId"), shellOf("MZXW6YTB"), "SHA256", 8, 45)
+        verify(exactly = 1) { eventRegistry.register(any<EggsImported>()) }
+        verify(exactly = 1) { eventRegistry.processEvents() }
+    }
+
+    @Test
+    fun `should clear events when importing yolk fails`() {
+        val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
+        every { exchangeAdapterPort.receive() } returns success(
+            mapOf(
+                nestService.currentNest() to listOf(
+                    PasswordInfo(
+                        first = ShellPair(shellOf("EggId"), shellOf("Password")),
+                        second = emptyList(),
+                        yolk = PasswordYolkInfo(
+                            secret = shellOf("MZXW6YTB"),
+                            algorithm = "SHA256",
+                            digits = 8,
+                            periodSeconds = 45,
+                        ),
+                    ),
+                ),
+            ),
+        )
+        every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
+        fakePasswordService(instance = passwordService)
+        every { passwordService.putYolk(any(), any(), any(), any(), any()) } returns failure(IllegalStateException("disk full"))
+
+        importExportServiceSupplier.get().importEggs()
+
+        verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
+        verify(exactly = 0) { eventRegistry.processEvents() }
+        verify(exactly = 1) { eventRegistry.clearEvents() }
+    }
+
+    @Test
     fun `should scramble exported shells after exchange completes`() {
         // given
         val exportedEgg = createEggForTesting(
@@ -636,6 +718,26 @@ class PasswordImportExportServiceTest {
         expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
     }
 
+    @Test
+    fun `should ignore selective imports for missing source slots`() {
+        val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
+        every { exchangeAdapterPort.receive() } returns success(
+            linkedMapOf(
+                createNest(shellOf("Default"), DEFAULT) to listOf(
+                    passwordInfo("EggId1", "Password1"),
+                ),
+            ),
+        )
+        every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
+        fakePasswordService(instance = passwordService)
+
+        importExportServiceSupplier.get().importEggs(S2, S9)
+
+        verify(exactly = 0) { passwordService.putEgg(any(), any()) }
+        verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
+        verify(exactly = 0) { eventRegistry.processEvents() }
+    }
+
     private fun Slot.toNest() = nestService.atNestSlot(this).get()
 }
 
@@ -661,6 +763,14 @@ private fun expectThatActualBytePairsMatchExpected(actual: PasswordInfoMap, expe
 private data class PutEggCall(val eggIdShell: Shell, val passwordShell: Shell)
 
 private data class PutProteinCall(val eggIdShell: Shell, val slot: Slot, val typeShell: Shell, val structureShell: Shell)
+
+private data class PutYolkCall(
+    val eggIdShell: Shell,
+    val secretShell: Shell,
+    val algorithm: String,
+    val digits: Int,
+    val periodSeconds: Int,
+)
 
 private fun PasswordService.capturePutEggCalls(calls: MutableList<PutEggCall>, fails: (PutEggCall) -> Boolean = { false }) {
     every { putEgg(any(), any()) } answers {
@@ -706,6 +816,11 @@ private fun testData() = listOf(
     createEggForTesting(withEggIdShell = shellOf("EggId3"), withPasswordShell = shellOf("Password3"), withSlot = S2),
     createEggForTesting(withEggIdShell = shellOf("EggId4"), withPasswordShell = shellOf("Password4"), withSlot = S9),
     createEggForTesting(withEggIdShell = shellOf("EggId5"), withPasswordShell = shellOf("Password5"), withSlot = S9),
+)
+
+private fun passwordInfo(eggId: String, password: String) = PasswordInfo(
+    first = ShellPair(shellOf(eggId), shellOf(password)),
+    second = emptyList(),
 )
 
 private fun writeExchangeFile(directory: String, content: String) {

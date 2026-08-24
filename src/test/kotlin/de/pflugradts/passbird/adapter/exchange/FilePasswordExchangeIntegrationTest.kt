@@ -4,6 +4,7 @@ import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captur
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.PasswordInfo
+import de.pflugradts.passbird.application.PasswordYolkInfo
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -85,6 +86,21 @@ class FilePasswordExchangeIntegrationTest {
         expectThat(actual[Slot.DEFAULT.toNest()]!!).containsExactlyInAnyOrder(givenEgg1, givenEgg2)
         expectThat(actual[Slot.S2.toNest()]!!).containsExactlyInAnyOrder(givenEgg3)
         expectThat(actual[Slot.S9.toNest()]!!).containsExactlyInAnyOrder(givenEgg4, givenEgg5)
+    }
+
+    @Test
+    fun `should export and re import yolk data`() {
+        val givenEgg = PasswordInfo(
+            first = ShellPair(shellOf("EggId1"), shellOf("Password1")),
+            second = proteinShellPairs(),
+            yolk = PasswordYolkInfo(shellOf("JBSWY3DPEHPK3PXP"), "SHA256", 8, 45),
+        )
+
+        filePasswordExchange.send(mapOf(Slot.DEFAULT.toNest() to listOf(givenEgg))).getOrNull()
+        val actual = filePasswordExchange.receive().getOrNull()!!
+
+        expectThat(actual[Slot.DEFAULT.toNest()]!!.single().yolk!!) isEqualTo
+            PasswordYolkInfo(shellOf("JBSWY3DPEHPK3PXP"), "SHA256", 8, 45)
     }
 
     @Test
@@ -225,6 +241,74 @@ class FilePasswordExchangeIntegrationTest {
 
         // then
         expectThat(actual.failure).isTrue()
+    }
+
+    @Test
+    fun `should default missing yolk parameters on import`() {
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": [],
+                      "yolk": {
+                        "secret": "JBSWY3DPEHPK3PXP"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        val actual = filePasswordExchange.receive().getOrNull()!!
+
+        expectThat(actual[Slot.DEFAULT.toNest()]!!.single().yolk!!) isEqualTo
+            PasswordYolkInfo(shellOf("JBSWY3DPEHPK3PXP"), "SHA1", 6, 30)
+    }
+
+    @Test
+    fun `should fail receive on invalid yolk parameters`() {
+        writeExchangeFile(
+            """
+            {
+              "exportedContent": [
+                {
+                  "exportedNest": {
+                    "nestId": "DEFAULT",
+                    "slot": 0
+                  },
+                  "exportedEggs": [
+                    {
+                      "eggId": "EggId1",
+                      "password": "Password1",
+                      "proteins": [],
+                      "yolk": {
+                        "secret": "JBSWY3DPEHPK3PXP",
+                        "digits": 7
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+            """,
+        )
+
+        val captureSystemErr = captureSystemErr()
+        val actual = captureSystemErr.during { filePasswordExchange.receive() }
+
+        expectThat(actual.failure).isTrue()
+        expectThat(captureSystemErr.capture) contains "Password Tree could not be imported."
     }
 
     @Test

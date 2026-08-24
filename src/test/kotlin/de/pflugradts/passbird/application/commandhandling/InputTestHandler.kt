@@ -7,6 +7,7 @@ import de.pflugradts.passbird.application.commandhandling.factory.MemoryCommandF
 import de.pflugradts.passbird.application.commandhandling.factory.NestCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.ProteinCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.SetCommandFactory
+import de.pflugradts.passbird.application.commandhandling.factory.YolkCommandFactory
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 
 private val commandFactory = CommandFactory(
@@ -16,6 +17,7 @@ private val commandFactory = CommandFactory(
     nestCommandFactory = NestCommandFactory(),
     proteinCommandFactory = ProteinCommandFactory(),
     setCommandFactory = SetCommandFactory(),
+    yolkCommandFactory = YolkCommandFactory(),
 )
 
 fun createInputHandlerFor(

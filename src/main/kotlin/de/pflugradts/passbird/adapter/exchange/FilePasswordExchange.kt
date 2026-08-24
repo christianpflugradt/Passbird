@@ -4,6 +4,7 @@ import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.PasswordInfo
 import de.pflugradts.passbird.application.PasswordInfoMap
+import de.pflugradts.passbird.application.PasswordYolkInfo
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration.Companion.EXCHANGE_FILENAME
 import de.pflugradts.passbird.application.failure.ExportFailure
@@ -11,6 +12,8 @@ import de.pflugradts.passbird.application.failure.ImportFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.yolk.defaultTotpAlgorithm
+import de.pflugradts.passbird.application.yolk.normalizeTotpAlgorithm
 import de.pflugradts.passbird.domain.model.egg.requireValidEggId
 import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
@@ -52,6 +55,14 @@ class FilePasswordExchange constructor(
                             slot = index,
                         )
                     },
+                    yolk = it.yolk?.let { yolk ->
+                        ExportedYolk(
+                            secret = yolk.secret.asString(),
+                            algorithm = yolk.algorithm,
+                            digits = yolk.digits,
+                            period = yolk.periodSeconds,
+                        )
+                    },
                 )
             },
         )
@@ -71,6 +82,7 @@ class FilePasswordExchange constructor(
             PasswordInfo(
                 first = ShellPair(shellOf(it.eggId), shellOf(it.password)),
                 second = it.proteins.toShellPairsBySlot(),
+                yolk = it.yolk?.toValidatedPasswordYolkInfo(),
             )
         }
     }
@@ -108,9 +120,32 @@ class FilePasswordExchange constructor(
             proteinsBySlot[slot] ?: ShellPair(emptyShell(), emptyShell())
         }
     }
+    private fun ExportedYolk.toValidatedPasswordYolkInfo(): PasswordYolkInfo {
+        require(secret.isNotBlank()) { "Missing yolk secret in import file" }
+        val algorithmName = algorithm?.takeIf { it.isNotBlank() } ?: defaultTotpAlgorithm()
+        val actualDigits = digits ?: 6
+        val actualPeriod = period ?: 30
+        return PasswordYolkInfo(
+            secret = shellOf(secret),
+            algorithm = normalizeTotpAlgorithm(algorithmName),
+            digits = actualDigits.also { require(it == 6 || it == 8) { "Unsupported yolk digits" } },
+            periodSeconds = actualPeriod.also { require(it > 0) { "Unsupported yolk period" } },
+        )
+    }
 }
 private class ExportedProtein(var proteinType: String = "", var proteinStructure: String = "", var slot: Int? = null)
-private class ExportedEgg(var eggId: String = "", var password: String = "", var proteins: List<ExportedProtein> = emptyList())
+private class ExportedYolk(
+    var secret: String = "",
+    var algorithm: String? = null,
+    var digits: Int? = null,
+    var period: Int? = null,
+)
+private class ExportedEgg(
+    var eggId: String = "",
+    var password: String = "",
+    var proteins: List<ExportedProtein> = emptyList(),
+    var yolk: ExportedYolk? = null,
+)
 private class ExportedNest(var nestId: String = "", var slot: Int? = null)
 private class EggsPerNest(var exportedNest: ExportedNest = ExportedNest(), var exportedEggs: List<ExportedEgg> = emptyList())
 private class ExchangeWrapper(val exportedContent: List<EggsPerNest> = emptyList())

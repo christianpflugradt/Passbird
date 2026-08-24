@@ -34,6 +34,22 @@ class ViewPasswordService constructor(
     fun viewProteinTypes(eggIdShell: Shell) = extractFromEgg(eggIdShell) { egg ->
         egg.proteins.map { protein -> protein.map { optionOf(decrypted(it.viewType())) }.orElse(emptyOption()) }
     }
+    fun viewYolk(eggIdShell: Shell): Option<YolkView> = find(eggIdShell).let { eggOption ->
+        if (eggOption.isPresent) {
+            eggOption.get().viewYolk().map {
+                YolkView(
+                    secret = decrypted(it.viewSecret()),
+                    algorithm = it.algorithm,
+                    digits = it.digits,
+                    periodSeconds = it.periodSeconds,
+                )
+            }
+        } else {
+            eventRegistry.register(EggNotFound(eggIdShell))
+            eventRegistry.processEvents()
+            emptyOption()
+        }
+    }
     fun viewMemory() = eggRepository.memory().map { it.map { encryptedShell -> decrypted(encryptedShell) } }.toSlots()
     fun viewMemoryEntry(slot: Slot) = eggRepository.memory()[slot].map { decrypted(it) }
     private fun <T> extractFromEgg(eggIdShell: Shell, extraction: (egg: Egg) -> T): Option<T> = find(eggIdShell)

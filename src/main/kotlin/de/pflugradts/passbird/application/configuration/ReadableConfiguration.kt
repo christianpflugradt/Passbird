@@ -14,6 +14,7 @@ interface ReadableConfiguration {
         val exchange: Exchange
         val inactivityLimit: InactivityLimit
         val password: Password
+        val yolk: Yolk
     }
     interface Backup {
         val location: String
@@ -39,6 +40,12 @@ interface ReadableConfiguration {
         val specialCharacters: Boolean
         val promptOnRemoval: Boolean
         val customPasswordConfigurations: List<CustomPasswordConfiguration>
+    }
+    interface Yolk {
+        val algorithm: String
+        val digits: Int
+        val minimumValiditySeconds: Int
+        val periodSeconds: Int
     }
     interface CustomPasswordConfiguration {
         val name: String

@@ -30,6 +30,7 @@ import de.pflugradts.passbird.application.commandhandling.factory.MemoryCommandF
 import de.pflugradts.passbird.application.commandhandling.factory.NestCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.ProteinCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.SetCommandFactory
+import de.pflugradts.passbird.application.commandhandling.factory.YolkCommandFactory
 import de.pflugradts.passbird.application.commandhandling.handler.ChangeMasterPasswordCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.ExportCommandHandler
@@ -68,6 +69,10 @@ import de.pflugradts.passbird.application.commandhandling.handler.protein.Protei
 import de.pflugradts.passbird.application.commandhandling.handler.protein.SetProteinCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.protein.ViewProteinStructuresCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.protein.ViewProteinTypesCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.yolk.DiscardYolkCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.yolk.SetYolkCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.yolk.ViewYolkCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.yolk.YolkInfoCommandHandler
 import de.pflugradts.passbird.application.configuration.ConfigurationFactory
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.eventhandling.ApplicationEventHandler
@@ -198,6 +203,10 @@ class ApplicationGraph(
             ViewNestCommandHandler(canPrintInfo, canListAvailableNests, nestService, userInterfaceAdapterPort),
             ViewProteinStructuresCommandHandler(canPrintInfo, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             ViewProteinTypesCommandHandler(canPrintInfo, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
+            YolkInfoCommandHandler(canPrintInfo, userInterfaceAdapterPort),
+            ViewYolkCommandHandler(configuration, passwordService, userInterfaceAdapterPort, systemOperation, commandExecutionTracker),
+            SetYolkCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
+            DiscardYolkCommandHandler(passwordService, userInterfaceAdapterPort, commandExecutionTracker),
         )
     }
     val configuration: ReadableConfiguration by lazy { configurationFactory.loadConfiguration() }
@@ -250,6 +259,7 @@ class ApplicationGraph(
             nestCommandFactory = NestCommandFactory(),
             proteinCommandFactory = ProteinCommandFactory(),
             setCommandFactory = SetCommandFactory(),
+            yolkCommandFactory = YolkCommandFactory(),
         )
     }
     private val rememberedCommandMemory by lazy { RememberedCommandMemory() }

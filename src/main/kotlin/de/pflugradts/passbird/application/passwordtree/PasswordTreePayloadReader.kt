@@ -8,6 +8,7 @@ import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.scramble
+import de.pflugradts.passbird.application.yolk.totpAlgorithmAtOrdinal
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Egg.Companion.createEgg
 import de.pflugradts.passbird.domain.model.egg.EggIdFavorites
@@ -16,6 +17,8 @@ import de.pflugradts.passbird.domain.model.egg.FavoriteMap
 import de.pflugradts.passbird.domain.model.egg.MemoryMap
 import de.pflugradts.passbird.domain.model.egg.Protein
 import de.pflugradts.passbird.domain.model.egg.Protein.Companion.createProtein
+import de.pflugradts.passbird.domain.model.egg.Yolk
+import de.pflugradts.passbird.domain.model.egg.Yolk.Companion.createYolk
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell.Companion.encryptedShellOf
 import de.pflugradts.passbird.domain.model.shell.Shell
@@ -169,7 +172,9 @@ class PasswordTreePayloadReader constructor(
                 incrementedOffset += structureSize
                 proteinOption(typeBytes, structureBytes)
             }
-            return Pair(createEgg(nestSlot, eggIdShell, passwordShell, proteins), incrementedOffset)
+            val yolk = yolkOption(this, incrementedOffset, payloadEnd)
+            incrementedOffset = yolk.second
+            return Pair(createEgg(nestSlot, eggIdShell, passwordShell, proteins, yolk.first), incrementedOffset)
         } finally {
             eggIdShell.scramble()
             passwordShell.scramble()
@@ -188,6 +193,32 @@ class PasswordTreePayloadReader constructor(
         } finally {
             typeShell.scramble()
             structureShell.scramble()
+        }
+    }
+    private fun yolkOption(bytes: ByteArray, offset: Int, payloadEnd: Int): Pair<MutableOption<Yolk>, Int> {
+        var incrementedOffset = offset
+        val secretSize = readPayloadSize(bytes, incrementedOffset, payloadEnd)
+        incrementedOffset += Integer.BYTES
+        if (secretSize <= 0) {
+            repeat(3) {
+                readPayloadInt(bytes, incrementedOffset, payloadEnd)
+                incrementedOffset += Integer.BYTES
+            }
+            return Pair(mutableOptionOf(), incrementedOffset)
+        }
+        val secretShell = readPayloadBytes(bytes, incrementedOffset, secretSize, payloadEnd).toEncryptedShellAndScramble()
+        incrementedOffset += secretSize
+        val algorithmOrdinal = readPayloadInt(bytes, incrementedOffset, payloadEnd)
+        incrementedOffset += Integer.BYTES
+        val digits = readPayloadInt(bytes, incrementedOffset, payloadEnd)
+        incrementedOffset += Integer.BYTES
+        val periodSeconds = readPayloadInt(bytes, incrementedOffset, payloadEnd)
+        incrementedOffset += Integer.BYTES
+        return try {
+            val algorithm = totpAlgorithmAtOrdinal(algorithmOrdinal)
+            Pair(mutableOptionOf(createYolk(secretShell, algorithm, digits, periodSeconds)), incrementedOffset)
+        } finally {
+            secretShell.scramble()
         }
     }
     private fun isPlaceholder(byteArray: ByteArray): Boolean {

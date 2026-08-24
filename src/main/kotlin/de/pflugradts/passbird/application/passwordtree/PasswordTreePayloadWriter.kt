@@ -4,8 +4,10 @@ import de.pflugradts.passbird.application.util.copyBytes
 import de.pflugradts.passbird.application.util.copyInt
 import de.pflugradts.passbird.application.util.readBytes
 import de.pflugradts.passbird.application.util.scramble
+import de.pflugradts.passbird.application.yolk.totpAlgorithmOrdinal
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Protein
+import de.pflugradts.passbird.domain.model.egg.Yolk
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -54,7 +56,7 @@ class PasswordTreePayloadWriter constructor() {
             acc + inner.map { slots -> slots.sumOf { it.map(EncryptedShell::size).orElse(0) } }.orElse(0)
         }
         val eggDataSize = snapshot.eggs.sumOf { it.serializedDataSize() }
-        val eggMetaSize = snapshot.eggs.size * 22 * intBytes()
+        val eggMetaSize = snapshot.eggs.size * 26 * intBytes()
         val nestSize = snapshot.nests.size * intBytes() + snapshot.nests.filter { !it.isEmpty }.sumOf { it.size }
         return memorySize + favoriteSize + eggDataSize + eggMetaSize + nestSize
     }
@@ -81,9 +83,10 @@ class PasswordTreePayloadWriter constructor() {
         val passwordShell = viewPassword()
         val eggIdSize = eggIdShell.size
         val passwordSize = passwordShell.size
-        val metaSize = 22 * Integer.BYTES
+        val metaSize = 26 * Integer.BYTES
         val proteinDataSize = proteins.filter { it.isPresent }.sumOf { it.get().serializedDataSize() }
-        val bytes = ByteArray(Integer.BYTES + eggIdSize + passwordSize + metaSize + proteinDataSize)
+        val yolkDataSize = viewYolk().map { it.serializedDataSize() }.orElse(0)
+        val bytes = ByteArray(Integer.BYTES + eggIdSize + passwordSize + metaSize + proteinDataSize + yolkDataSize)
         var completed = false
         try {
             var offset = copyInt(associatedNest().index(), bytes, 0)
@@ -109,6 +112,24 @@ class PasswordTreePayloadWriter constructor() {
                     offset += copyInt(0, bytes, offset)
                 }
             }
+            val yolk = viewYolk().orNull()
+            if (yolk != null) {
+                val secretShell = yolk.viewSecret()
+                try {
+                    offset += copyInt(secretShell.size, bytes, offset)
+                    offset += secretShell.toByteArray().copyToAndScramble(bytes, offset)
+                    offset += copyInt(totpAlgorithmOrdinal(yolk.algorithm), bytes, offset)
+                    offset += copyInt(yolk.digits, bytes, offset)
+                    offset += copyInt(yolk.periodSeconds, bytes, offset)
+                } finally {
+                    secretShell.scramble()
+                }
+            } else {
+                offset += copyInt(0, bytes, offset)
+                offset += copyInt(0, bytes, offset)
+                offset += copyInt(0, bytes, offset)
+                offset += copyInt(0, bytes, offset)
+            }
             completed = true
             return bytes
         } finally {
@@ -123,7 +144,7 @@ class PasswordTreePayloadWriter constructor() {
         try {
             return intBytes() + eggIdShell.size + passwordShell.size + proteins.filter { it.isPresent }.sumOf {
                 it.get().serializedDataSize()
-            }
+            } + viewYolk().map { it.serializedDataSize() }.orElse(0)
         } finally {
             eggIdShell.scramble()
             passwordShell.scramble()
@@ -137,6 +158,14 @@ class PasswordTreePayloadWriter constructor() {
         } finally {
             typeShell.scramble()
             structureShell.scramble()
+        }
+    }
+    private fun Yolk.serializedDataSize(): Int {
+        val secretShell = viewSecret()
+        try {
+            return secretShell.size
+        } finally {
+            secretShell.scramble()
         }
     }
     private fun ByteArray.copyToAndScramble(target: ByteArray, offset: Int) = try {

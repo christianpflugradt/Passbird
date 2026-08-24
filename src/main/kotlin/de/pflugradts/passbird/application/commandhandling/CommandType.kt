@@ -20,6 +20,7 @@ enum class CommandType(val type: Char) {
     RENAME('r'),
     SET('s'),
     VIEW('v'),
+    YOLK('y'),
     UNDEFINED('?'),
     ;
 

@@ -27,6 +27,7 @@ class PasswordTreePayloadWriterSecretHandlingTest {
         every { egg.viewEggId() } returnsMany listOf(sizingEggId, writingEggId)
         every { egg.viewPassword() } returnsMany listOf(sizingPassword, writingPassword)
         every { egg.proteins } returns List(10) { mutableOptionOf<Protein>() }
+        every { egg.viewYolk() } returns mutableOptionOf()
 
         PasswordTreePayloadWriter().write(PasswordTreeSnapshot(eggs = listOf(egg)))
 

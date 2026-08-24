@@ -8,6 +8,7 @@ import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.FAILURE_EXIT_STATUS
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.yolk.normalizeTotpAlgorithm
 class ConfigurationFactory constructor(
     private val systemOperation: SystemOperation,
     private val runContext: RunContext,
@@ -39,6 +40,10 @@ class ConfigurationFactory constructor(
 }
 
 private fun Configuration.validate(): Configuration {
+    normalizeTotpAlgorithm(application.yolk.algorithm)
+    require(application.yolk.digits == 6 || application.yolk.digits == 8) { "Yolk digits are invalid" }
+    require(application.yolk.minimumValiditySeconds >= 0) { "Yolk minimum validity is invalid" }
+    require(application.yolk.periodSeconds > 0) { "Yolk period is invalid" }
     val names = domain.protein.templates.map { it.name }
     require(names.none { it.isBlank() }) { "Protein template name is invalid" }
     require(names.distinct().size == names.size) { "Protein template names must be unique" }

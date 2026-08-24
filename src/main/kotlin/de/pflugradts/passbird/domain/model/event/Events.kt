@@ -3,6 +3,7 @@ package de.pflugradts.passbird.domain.model.event
 import de.pflugradts.passbird.domain.model.ddd.DomainEvent
 import de.pflugradts.passbird.domain.model.egg.Egg
 import de.pflugradts.passbird.domain.model.egg.Protein
+import de.pflugradts.passbird.domain.model.egg.Yolk
 import de.pflugradts.passbird.domain.model.nest.Nest
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.slot.Slot
@@ -20,3 +21,5 @@ data class NestDiscarded(val nest: Nest) : DomainEvent
 data class ProteinCreated(val egg: Egg, val protein: Protein) : DomainEvent
 data class ProteinDiscarded(val egg: Egg, val protein: Protein) : DomainEvent
 data class ProteinUpdated(val egg: Egg, val slot: Slot, val oldProtein: Protein, val newProtein: Protein) : DomainEvent
+data class YolkDiscarded(val egg: Egg, val yolk: Yolk) : DomainEvent
+data class YolkUpdated(val egg: Egg) : DomainEvent

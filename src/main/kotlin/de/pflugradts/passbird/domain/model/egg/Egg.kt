@@ -6,6 +6,7 @@ import de.pflugradts.passbird.domain.model.ddd.AggregateRoot
 import de.pflugradts.passbird.domain.model.egg.EggId.Companion.createEggId
 import de.pflugradts.passbird.domain.model.egg.Password.Companion.createPassword
 import de.pflugradts.passbird.domain.model.egg.Protein.Companion.createProtein
+import de.pflugradts.passbird.domain.model.egg.Yolk.Companion.createYolk
 import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggMoved
@@ -14,6 +15,8 @@ import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.event.ProteinCreated
 import de.pflugradts.passbird.domain.model.event.ProteinDiscarded
 import de.pflugradts.passbird.domain.model.event.ProteinUpdated
+import de.pflugradts.passbird.domain.model.event.YolkDiscarded
+import de.pflugradts.passbird.domain.model.event.YolkUpdated
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.slot.Slot
 
@@ -22,6 +25,7 @@ class Egg private constructor(
     private val eggId: EggId,
     private val password: Password,
     val proteins: List<MutableOption<Protein>>,
+    private val yolk: MutableOption<Yolk>,
 ) : AggregateRoot() {
 
     init {
@@ -30,6 +34,8 @@ class Egg private constructor(
     fun associatedNest() = slot
     fun viewEggId() = eggId.view()
     fun viewPassword() = password.view()
+    fun hasYolk() = yolk.isPresent
+    fun viewYolk() = yolk.map { createYolk(it.viewSecret(), it.algorithm, it.digits, it.periodSeconds) }
 
     fun rename(eggIdShell: EncryptedShell) {
         eggId.rename(eggIdShell)
@@ -52,6 +58,11 @@ class Egg private constructor(
         }
     }
 
+    fun updateYolk(secret: EncryptedShell, algorithm: String, digits: Int, periodSeconds: Int) {
+        yolk.set(createYolk(secret, algorithm, digits, periodSeconds))
+        registerDomainEvent(YolkUpdated(this))
+    }
+
     fun moveToNestAt(slot: Slot) {
         this.slot = slot
         registerDomainEvent(EggMoved(this))
@@ -70,11 +81,20 @@ class Egg private constructor(
         }
     }
 
+    fun discardYolk() {
+        if (yolk.isPresent) {
+            val discardedYolk = yolk.get()
+            yolk.set(null)
+            registerDomainEvent(YolkDiscarded(this, discardedYolk))
+        }
+    }
+
     fun copy() = Egg(
         slot = slot,
         eggId = createEggId(eggId.view()),
         password = createPassword(password.view()),
         proteins = proteins.map { protein -> protein.mapMutable { createProtein(it.viewType(), it.viewStructure()) } },
+        yolk = yolk.mapMutable { createYolk(it.viewSecret(), it.algorithm, it.digits, it.periodSeconds) },
     ).also { it.clearDomainEvents() }
 
     override fun equals(other: Any?) = (other as? Egg)?.let {
@@ -88,7 +108,14 @@ class Egg private constructor(
             eggIdShell: EncryptedShell,
             passwordShell: EncryptedShell,
             proteins: List<MutableOption<Protein>> = emptyProteins(),
-        ) = Egg(slot = slot, eggId = createEggId(eggIdShell), password = createPassword(passwordShell), proteins = proteins)
+            yolk: MutableOption<Yolk> = mutableOptionOf(),
+        ) = Egg(
+            slot = slot,
+            eggId = createEggId(eggIdShell),
+            password = createPassword(passwordShell),
+            proteins = proteins,
+            yolk = yolk,
+        )
     }
 }
 

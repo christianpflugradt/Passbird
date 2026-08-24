@@ -10,6 +10,7 @@ import de.pflugradts.passbird.application.commandhandling.factory.MemoryCommandF
 import de.pflugradts.passbird.application.commandhandling.factory.NestCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.ProteinCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.SetCommandFactory
+import de.pflugradts.passbird.application.commandhandling.factory.YolkCommandFactory
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
@@ -113,6 +114,7 @@ class InvalidCommandTest {
             nestCommandFactory = NestCommandFactory(),
             proteinCommandFactory = ProteinCommandFactory(),
             setCommandFactory = SetCommandFactory(),
+            yolkCommandFactory = YolkCommandFactory(),
         )
 
         @ParameterizedTest

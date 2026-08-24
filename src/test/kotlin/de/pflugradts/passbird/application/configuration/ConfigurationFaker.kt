@@ -19,6 +19,10 @@ fun fakeConfiguration(
     withPasswordTreeLocation: String = "",
     withPromptOnRemoval: Boolean = false,
     withPromptOnExportFile: Boolean = false,
+    withYolkAlgorithm: String = "SHA1",
+    withYolkDigits: Int = 6,
+    withYolkMinimumValiditySeconds: Int = 5,
+    withYolkPeriodSeconds: Int = 30,
     withSpecialCharacters: Boolean = true,
     withPasswordLength: Int = 20,
     withCustomPasswordConfigurations: List<Configuration.CustomPasswordConfiguration> = emptyList(),
@@ -65,10 +69,16 @@ fun fakeConfiguration(
     every { password.specialCharacters } returns withSpecialCharacters
     every { password.length } returns withPasswordLength
     every { password.customPasswordConfigurations } returns withCustomPasswordConfigurations
+    val yolk = mockk<Configuration.Yolk>()
+    every { yolk.algorithm } returns withYolkAlgorithm
+    every { yolk.digits } returns withYolkDigits
+    every { yolk.minimumValiditySeconds } returns withYolkMinimumValiditySeconds
+    every { yolk.periodSeconds } returns withYolkPeriodSeconds
     val application = mockk<Configuration.Application>()
     every { application.exchange } returns exchange
     every { application.inactivityLimit } returns inactivityLimit
     every { application.password } returns password
+    every { application.yolk } returns yolk
     every { instance.application } returns application
     val protein = mockk<Configuration.Protein>()
     every { protein.secureProteinStructureInput } returns withSecureProteinInputEnabled

@@ -68,6 +68,7 @@ class SystemOperation {
         outputStream.write(content.toByteArray())
     }
     fun readBytesFromFile(path: Path): ByteArray = Files.readAllBytes(path)
+    fun sleep(milliseconds: Long) = Thread.sleep(milliseconds)
     fun exit(status: Int = SUCCESS_EXIT_STATUS): Unit = exitProcess(status)
 
     private fun applyPosixPermissionsIfSupported(path: Path, permissions: Set<java.nio.file.attribute.PosixFilePermission>) {

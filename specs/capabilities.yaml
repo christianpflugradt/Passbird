@@ -51,12 +51,14 @@ command_surface:
       - f?
       - m?
       - p?
+      - y?
       - s?
     secondary_help_menus:
       - n displays current Nest state plus Nest-specific commands
       - f? displays Favorites-specific commands
       - m? displays Memory-specific commands
       - p? displays Protein-specific commands
+      - y? displays Yolk-specific commands
       - s? displays available password configurations plus Set-specific commands
   primary_entry_commands:
     - h
@@ -103,6 +105,10 @@ command_surface:
     - p+[EggId]
     - p+[0-9][EggId]
     - p-[0-9][EggId]
+    - y?
+    - y[EggId]
+    - y+[EggId]
+    - y-[EggId]
     - s?
 capabilities:
   - name: password_entry_management
@@ -154,6 +160,17 @@ capabilities:
       - p+[EggId]
       - p+[0-9][EggId]
       - p-[0-9][EggId]
+  - name: yolk_management
+    user_outcomes:
+      - inspect Yolk commands
+      - store one TOTP secret per Egg
+      - display the current TOTP code for an Egg
+      - discard a stored TOTP secret
+    commands:
+      - y?
+      - y[EggId]
+      - y+[EggId]
+      - y-[EggId]
   - name: favorites
     user_outcomes:
       - pin frequently used EggIds per Nest

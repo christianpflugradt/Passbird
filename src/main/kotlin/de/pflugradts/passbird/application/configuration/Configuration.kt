@@ -7,6 +7,10 @@ import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 private const val DEFAULT_BACKUP_DIRECTORY = "backups"
 private const val DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS = 10
 private const val DEFAULT_PASSWORD_LENGTH = 20
+private const val DEFAULT_YOLK_ALGORITHM = "SHA1"
+private const val DEFAULT_YOLK_DIGITS = 6
+private const val DEFAULT_YOLK_MINIMUM_VALIDITY_SECONDS = 5
+private const val DEFAULT_YOLK_PERIOD_SECONDS = 30
 
 data class Configuration(
     @Transient override var template: Boolean = false,
@@ -35,6 +39,7 @@ data class Configuration(
         override val exchange: Exchange = Exchange(),
         override val inactivityLimit: InactivityLimit = InactivityLimit(),
         override val password: Password = Password(),
+        override val yolk: Yolk = Yolk(),
     ) : ReadableConfiguration.Application
     data class Backup(
         override var location: String = DEFAULT_BACKUP_DIRECTORY,
@@ -61,6 +66,12 @@ data class Configuration(
         override val promptOnRemoval: Boolean = true,
         override val customPasswordConfigurations: List<CustomPasswordConfiguration> = emptyList(),
     ) : ReadableConfiguration.Password
+    data class Yolk(
+        override val algorithm: String = DEFAULT_YOLK_ALGORITHM,
+        override val digits: Int = DEFAULT_YOLK_DIGITS,
+        override val minimumValiditySeconds: Int = DEFAULT_YOLK_MINIMUM_VALIDITY_SECONDS,
+        override val periodSeconds: Int = DEFAULT_YOLK_PERIOD_SECONDS,
+    ) : ReadableConfiguration.Yolk
     data class CustomPasswordConfiguration(
         override val name: String = "",
         override val length: Int = DEFAULT_PASSWORD_LENGTH,

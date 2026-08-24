@@ -23,3 +23,6 @@ class UseMemoryCommand(val slot: Slot, input: Input) : AbstractInputCommand(inpu
 class ViewCommand(input: Input) : AbstractSingleCharInputCommand(input)
 class ViewProteinStructuresCommand(input: Input) : AbstractInputCommand(input)
 class ViewProteinTypesCommand(input: Input) : AbstractSingleCharInputCommand(input)
+class ViewYolkCommand(input: Input) : AbstractSingleCharInputCommand(input)
+class SetYolkCommand(input: Input) : AbstractInputCommand(input)
+class DiscardYolkCommand(input: Input) : AbstractInputCommand(input)

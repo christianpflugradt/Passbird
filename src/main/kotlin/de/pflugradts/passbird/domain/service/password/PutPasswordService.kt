@@ -42,6 +42,18 @@ class PutPasswordService constructor(
         return processEventsAndSync()
     }
 
+    fun putYolk(eggIdShell: Shell, secretShell: Shell, algorithm: String, digits: Int, periodSeconds: Int): TryResult<Unit> {
+        if (eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
+            findWithoutUpdatingMemory(eggIdShell).get().updateYolk(
+                secret = encrypted(secretShell),
+                algorithm = algorithm,
+                digits = digits,
+                periodSeconds = periodSeconds,
+            )
+        }
+        return processEventsAndSync()
+    }
+
     private fun putProtein(eggIdShell: Shell, slot: Slot, typeShell: Shell, structureShell: Shell, sync: Boolean): TryResult<Unit> {
         if (eggExists(eggIdShell, CREATE_ENTRY_NOT_EXISTS_EVENT)) {
             findWithoutUpdatingMemory(eggIdShell).get().updateProtein(slot, encrypted(typeShell), encrypted(structureShell))

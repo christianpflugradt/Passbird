@@ -21,6 +21,10 @@ configuration_surface:
     - application.password.specialCharacters defaults to true
     - application.password.promptOnRemoval defaults to true
     - application.password.customPasswordConfigurations defaults to an empty list
+    - application.yolk.algorithm defaults to SHA1
+    - application.yolk.digits defaults to 6
+    - application.yolk.minimumValiditySeconds defaults to 5
+    - application.yolk.periodSeconds defaults to 30
     - adapter.userInterface.ansiEscapeCodes.enabled defaults to false
     - adapter.userInterface.audibleBell defaults to false
     - adapter.userInterface.secureInput defaults to true
@@ -77,6 +81,24 @@ areas:
       - s? output prints each custom configuration name and length
       - s? output also prints no numbers, no letters, no lowercase letters, no uppercase letters, no special characters, and unused special characters details according to the configured flags
       - unused special characters are only shown in s? output when that custom configuration still enables special characters
+  - name: yolk_behavior
+    keys:
+      - application.yolk.algorithm
+      - application.yolk.digits
+      - application.yolk.minimumValiditySeconds
+      - application.yolk.periodSeconds
+    visible_effects:
+      - changes whether y[EggId] shows a nearly expired TOTP code immediately or waits for the next code first
+      - changes which TOTP algorithm, digit count, and period are used when y+[EggId] stores a plain Base32 secret
+    behavioral_contract:
+      - application.yolk.algorithm must resolve to a supported TOTP algorithm name
+      - application.yolk.digits must be either 6 or 8
+      - application.yolk.minimumValiditySeconds must be zero or positive
+      - application.yolk.periodSeconds must be positive
+      - if y+[EggId] receives an otpauth://totp URI, the URI-provided algorithm, digit count, and period override the configured fallback values
+      - if y+[EggId] receives only a plain Base32 secret, Passbird stores the secret using application.yolk.algorithm, application.yolk.digits, and application.yolk.periodSeconds
+      - if the current TOTP code has more remaining validity than application.yolk.minimumValiditySeconds, y[EggId] prints that code immediately
+      - if the current TOTP code has remaining validity less than or equal to application.yolk.minimumValiditySeconds, y[EggId] first prints a waiting message, waits until the next TOTP code becomes valid, and then prints that fresh code
   - name: backup_and_storage_locations
     keys:
       - application.backup.location

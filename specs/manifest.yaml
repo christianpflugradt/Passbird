@@ -61,6 +61,9 @@ task_specific_specs:
   - file: specs/flows/proteins.yaml
     read_when:
       - touching protein prompts, secure-input toggles, or protein slot behavior
+  - file: specs/flows/yolks.yaml
+    read_when:
+      - touching yolk commands, TOTP handling, or yolk persistence
   - file: specs/flows/migration.yaml
     read_when:
       - touching migration boot, migration consent, or compatibility-preserving startup rerouting
