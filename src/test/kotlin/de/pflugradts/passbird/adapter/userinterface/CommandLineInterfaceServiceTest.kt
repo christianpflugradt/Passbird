@@ -434,6 +434,17 @@ class CommandLineInterfaceServiceTest {
         }
 
         @Test
+        fun `should propagate secure input read failure`() {
+            // given
+            fakeConfiguration(instance = configuration, withSecureInputEnabled = true)
+            every { terminalInputGateway.readPasswordFromConsole() } throws IllegalStateException("boom")
+
+            // when / then
+            assertThrows<IllegalStateException> { commandLineInterfaceService.receiveSecurely() }
+            verify(exactly = 1) { terminalInputGateway.readPasswordFromConsole() }
+        }
+
+        @Test
         fun `should receive secure input as plain if secure input is disabled`() {
             // given
             val givenInput = "hello world"
@@ -622,6 +633,20 @@ class CommandLineInterfaceServiceTest {
             // then
             expectThat(captureSystemOut.capture) contains "\u0007"
         }
+
+        @Test
+        fun `should not send bell character on abort output formatting when disabled`() {
+            // given
+            fakeConfiguration(instance = configuration, withAudibleBellEnabled = false)
+            val givenOutput = outputOf(shellOf("foo"), OPERATION_ABORTED)
+            val captureSystemOut = captureSystemOut()
+
+            // when
+            captureSystemOut.during { commandLineInterfaceService.send(givenOutput) }
+
+            // then
+            expectThat(captureSystemOut.capture) isEqualTo "foo\n"
+        }
     }
 
     @ParameterizedTest
@@ -637,6 +662,22 @@ class CommandLineInterfaceServiceTest {
 
         // then
         expectThat(captureSystemOut.capture) isEqualTo "\u001B[38;5;${code}m$givenMessage\u001B[0m\n"
+    }
+
+    @Test
+    fun `should send formatted output without escape codes when disabled`() {
+        // given
+        val givenMessage = "hello world"
+        fakeConfiguration(instance = configuration, withAnsiEscapeCodesEnabled = false)
+        val captureSystemOut = captureSystemOut()
+
+        // when
+        captureSystemOut.during {
+            commandLineInterfaceService.send(outputOf(shellOf(givenMessage), OutputFormatting.HIGHLIGHT))
+        }
+
+        // then
+        expectThat(captureSystemOut.capture) isEqualTo "$givenMessage\n"
     }
 
     companion object {
