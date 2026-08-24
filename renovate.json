@@ -36,6 +36,29 @@
                 "eclipse-temurin"
             ],
             "allowedVersions": "/^(21|25)-jdk/"
+        },
+        {
+            "description": [
+                "Gradle-related updates refresh dependency verification metadata before Renovate commits the branch."
+            ],
+            "matchManagers": [
+                "gradle",
+                "gradle-wrapper",
+                "custom.regex"
+            ],
+            "postUpgradeTasks": {
+                "commands": [
+                    "./gradlew --write-verification-metadata sha256,pgp --export-keys help"
+                ],
+                "fileFilters": [
+                    "gradle/verification-metadata.xml",
+                    "gradle/verification-keyring.keys"
+                ],
+                "executionMode": "branch",
+                "installTools": {
+                    "java": {}
+                }
+            }
         }
     ],
     "customManagers": [

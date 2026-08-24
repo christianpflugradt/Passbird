@@ -54,6 +54,7 @@ quality_gates:
     - Renovate standard dependency updates require a 7-day minimum release age before branch or pull-request creation
     - Renovate GitHub Actions updates and major-version updates require a 14-day minimum release age
     - Renovate internal checks use strict filtering so updates blocked by minimum release age stay visible through the dashboard without early branch or pull-request creation
+    - repository renovate.json config refreshes gradle/verification-metadata.xml and gradle/verification-keyring.keys as a post-upgrade task for Gradle-related updates
   convenience_task:
     - ./gradlew preCommitCheck
     - ./gradlew prePushCheck
@@ -98,14 +99,14 @@ local_verification_policy:
       - retry with ./gradlew --refresh-keys help if key downloads fail before accepting new ignored-key entries
       - review checksum fallback and ignored-key additions before committing them
       - keep the armored keyring in version control and do not commit the generated gradle/verification-keyring.gpg file
-ci_landscape:
-  github:
-    workflows:
-      - .github/workflows/build.yml
-      - .github/workflows/codeql.yml
-      - .github/workflows/owasp-update.yml
-      - .github/workflows/owasp-purge.yml
-      - .github/workflows/publish.yml
+  ci_landscape:
+    github:
+      workflows:
+        - .github/workflows/build.yml
+        - .github/workflows/codeql.yml
+        - .github/workflows/owasp-update.yml
+        - .github/workflows/owasp-purge.yml
+        - .github/workflows/publish.yml
     notes:
       - ordinary branch pushes prove the always-on compile, lint, static-analysis, license, OWASP, LTS jar-smoke matrix, and non-conditional test jobs; they skip architecture-tests, test-coverage-verification, test-coverage-report, pages-site, and deploy-pages
       - the build workflow installs Xvfb and xclip, builds the releasable passbird.jar once with the GitHub Actions manifest metadata on Temurin 25 LTS, and runs smoke-test/run.sh against that same artifact under xvfb-run on Java 17, 21, and 25
