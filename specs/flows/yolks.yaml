@@ -11,8 +11,14 @@ flows:
   - id: yolk_view
     command: y[EggId]
     user_experience:
-      - if the Egg has a stored yolk and the current code has more remaining validity than application.yolk.minimumValiditySeconds, Passbird prints the current TOTP code followed by the remaining validity in seconds in the form <Code> (<Remaining>s)
-      - if the Egg has a stored yolk and the current code has remaining validity less than or equal to application.yolk.minimumValiditySeconds, Passbird first prints Current Yolk expires in <Remaining>s. Waiting for next Yolk... and then prints the next TOTP code in the form <Code> (<Remaining>s)
+      - if the Egg has a stored yolk and the current code has 5 or fewer seconds of validity left, Passbird first prints Current Yolk expires in <Remaining>s. Waiting for next Yolk... and then waits for the next TOTP code before opening the live Yolk view
+      - if the Egg has a stored yolk and the current code has more than 5 seconds of validity left, Passbird opens the live Yolk view immediately
+      - the live Yolk view first prints Press Enter to return.
+      - the live Yolk view leaves one blank line before the displayed code line
+      - the live Yolk view keeps the current TOTP code visible in the form <Code> (<Remaining>s), updates that same line once per second, and blocks until Enter is pressed
+      - when a new TOTP code becomes valid while the live Yolk view remains open, Passbird replaces the displayed code on the same line with the newly valid code
+      - if application.yolk.copyToClipboard is true, Passbird copies the currently displayed TOTP code to the clipboard when the live Yolk view opens and copies each newly displayed TOTP code again when it rolls over
+      - if application.yolk.copyToClipboard is false, the live Yolk view never updates the clipboard
       - if the Egg has no stored yolk, Passbird prints Yolk not found - Operation aborted.
       - after the command finishes, Passbird emits one empty line
   - id: yolk_set

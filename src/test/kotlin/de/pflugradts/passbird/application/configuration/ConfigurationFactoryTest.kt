@@ -44,8 +44,8 @@ class ConfigurationFactoryTest {
         expectThat(actual.template).isTrue()
         expectThat(actual.application.password.length) isEqualTo 20
         expectThat(actual.application.yolk.algorithm) isEqualTo "SHA1"
+        expectThat(actual.application.yolk.copyToClipboard).isTrue()
         expectThat(actual.application.yolk.digits) isEqualTo 6
-        expectThat(actual.application.yolk.minimumValiditySeconds) isEqualTo 5
         expectThat(actual.application.yolk.periodSeconds) isEqualTo 30
         expectThat(captureSystemErr.capture).isEqualTo("")
     }

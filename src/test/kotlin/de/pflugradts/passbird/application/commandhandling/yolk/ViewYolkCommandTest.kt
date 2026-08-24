@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.yolk
 
 import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.isEqualTo
-import strikt.assertions.matches
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
@@ -34,6 +34,7 @@ import java.time.ZoneOffset
 class ViewYolkCommandTest {
 
     private val configuration = mockk<Configuration>()
+    private val clipboardAdapterPort = mockk<ClipboardAdapterPort>(relaxed = true)
     private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
     private val passwordService = mockk<PasswordService>()
     private val systemOperation = mockk<SystemOperation>()
@@ -41,6 +42,7 @@ class ViewYolkCommandTest {
     private val viewYolkCommandHandler = ViewYolkCommandHandler(
         configuration,
         passwordService,
+        clipboardAdapterPort,
         userInterfaceAdapterPort,
         systemOperation,
         commandExecutionTracker,
@@ -49,7 +51,7 @@ class ViewYolkCommandTest {
 
     @Test
     fun `should wait for next yolk code when current one is near expiry`() {
-        fakeConfiguration(instance = configuration, withYolkMinimumValiditySeconds = 5)
+        fakeConfiguration(instance = configuration)
         val mutableClock = object : Clock() {
             private var currentInstant = Instant.parse("1970-01-01T00:00:59Z")
 
@@ -78,18 +80,22 @@ class ViewYolkCommandTest {
         )
         val outputs = mutableListOf<Output>()
         every { userInterfaceAdapterPort.send(capture(outputs)) } returns Unit
+        every { userInterfaceAdapterPort.receiveLineBreakWithin(any()) } returnsMany listOf(false, true)
 
         inputHandler.handleInput(inputOf(shellOf("yegg")))
 
         expectThat(outputs.map { it.shell.asString() }).contains("Current Yolk expires in 1s. Waiting for next Yolk...")
-        expectThat(outputs.last().shell.asString()).matches(Regex("\\d{6} \\(30s\\)"))
+        verify(exactly = 1) { userInterfaceAdapterPort.startEphemeralLine(any()) }
+        verify(exactly = 1) { userInterfaceAdapterPort.updateEphemeralLine(any()) }
+        verify(exactly = 1) { userInterfaceAdapterPort.finishEphemeralLine() }
+        verify(exactly = 1) { clipboardAdapterPort.post(any()) }
         verify(exactly = 1) { systemOperation.sleep(1000L) }
     }
 
     @Test
     fun `should show current yolk code immediately when validity exceeds minimum`() {
-        fakeConfiguration(instance = configuration, withYolkMinimumValiditySeconds = 0)
-        fakeSystemOperation(instance = systemOperation, withClock = Clock.fixed(Instant.parse("1970-01-01T00:00:59Z"), ZoneOffset.UTC))
+        fakeConfiguration(instance = configuration, withYolkCopyToClipboard = false)
+        fakeSystemOperation(instance = systemOperation, withClock = Clock.fixed(Instant.parse("1970-01-01T00:00:50Z"), ZoneOffset.UTC))
         fakePasswordService(
             instance = passwordService,
             withEggs = listOf(
@@ -101,11 +107,30 @@ class ViewYolkCommandTest {
         )
         val outputs = mutableListOf<Output>()
         every { userInterfaceAdapterPort.send(capture(outputs)) } returns Unit
+        every { userInterfaceAdapterPort.receiveLineBreakWithin(any()) } returns true
 
         inputHandler.handleInput(inputOf(shellOf("yegg")))
 
         expectThat(outputs.size) isEqualTo 1
-        expectThat(outputs.single().shell.asString()) isEqualTo "287082 (1s)"
+        expectThat(outputs.first().shell.asString()) isEqualTo "Press Enter to return."
+        verify(exactly = 1) { userInterfaceAdapterPort.startEphemeralLine(any()) }
+        verify(exactly = 0) { userInterfaceAdapterPort.updateEphemeralLine(any()) }
+        verify(exactly = 1) { userInterfaceAdapterPort.finishEphemeralLine() }
+        verify(exactly = 0) { clipboardAdapterPort.post(any()) }
         verify(exactly = 0) { systemOperation.sleep(any()) }
+    }
+
+    @Test
+    fun `should abort when yolk is not found`() {
+        fakeConfiguration(instance = configuration)
+        fakePasswordService(instance = passwordService)
+
+        inputHandler.handleInput(inputOf(shellOf("yegg")))
+
+        verify(exactly = 1) {
+            userInterfaceAdapterPort.send(match { it.shell.asString() == "Yolk not found - Operation aborted." })
+        }
+        verify(exactly = 0) { userInterfaceAdapterPort.startEphemeralLine(any()) }
+        verify(exactly = 0) { clipboardAdapterPort.post(any()) }
     }
 }

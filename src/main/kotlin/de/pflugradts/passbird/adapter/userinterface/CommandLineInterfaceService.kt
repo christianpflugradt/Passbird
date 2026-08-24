@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 private const val INPUT_POLL_INTERVAL_IN_MILLIS = 50L
 private val STDIN_EOF = Char.MAX_VALUE
+
 class CommandLineInterfaceService constructor(
     private val terminalInputGateway: TerminalInputGateway,
     private val configuration: ReadableConfiguration,
@@ -25,6 +26,7 @@ class CommandLineInterfaceService constructor(
     private val inputReaderExecutor = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "passbird-input-reader").apply { isDaemon = true }
     }
+    private var ephemeralLineLength = 0
 
     constructor(
         terminalInputGateway: TerminalInputGateway,
@@ -78,19 +80,81 @@ class CommandLineInterfaceService constructor(
             else -> throw SecureInputUnavailableException()
         }
     }
+
+    override fun receiveLineBreakWithin(milliseconds: Long): Boolean {
+        val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(milliseconds)
+        while (true) {
+            if (inactivityTerminationSignal.isRequested()) {
+                throw InactivityTerminationRequestedException()
+            }
+            val remainingNanos = deadline - System.nanoTime()
+            if (remainingNanos <= 0L) {
+                return false
+            }
+            val next = readCharFromVisibleStdinWithin(
+                TimeUnit.NANOSECONDS.toMillis(remainingNanos).coerceAtLeast(1L),
+            ) ?: return false
+            if (isEndOfInput(next) || isLinebreak(next)) {
+                return true
+            }
+        }
+    }
+
     override fun send(vararg output: Output) = output.forEach { sendWithoutLineBreak(it) }.also { sendChar('\n') }
+
+    override fun startEphemeralLine(output: Output) {
+        ephemeralLineLength = renderWithoutLineBreak(output)
+    }
+
+    override fun updateEphemeralLine(output: Output) {
+        sendChar('\r')
+        val nextLength = renderWithoutLineBreak(output)
+        if (nextLength < ephemeralLineLength) {
+            repeat(ephemeralLineLength - nextLength) { sendChar(' ') }
+            sendChar('\r')
+            renderWithoutLineBreak(output)
+        }
+        ephemeralLineLength = nextLength
+    }
+
+    override fun finishEphemeralLine() {
+        ephemeralLineLength = 0
+        sendChar('\n')
+    }
+
     private fun sendWithoutLineBreak(vararg output: Output) = output.forEach {
-        it.formatting?.also { formatting -> if (escapeCodesEnabled) beginEscape(formatting) }
-        val renderedShell = it.shell.copy()
+        renderOutput(it)
+    }
+
+    private fun renderWithoutLineBreak(output: Output): Int = renderOutput(output)
+
+    private fun renderOutput(output: Output): Int {
+        var renderedLength = 0
+        output.formatting?.also { formatting -> if (escapeCodesEnabled) beginEscape(formatting) }
+        val renderedShell = output.shell.copy()
         try {
             for (index in 0 until renderedShell.size) {
                 sendChar(renderedShell.getChar(index))
+                renderedLength++
             }
         } finally {
             renderedShell.scramble()
         }
-        it.formatting?.also { if (escapeCodesEnabled) endEscape() }
-        it.formatting?.let { formatting -> if (formatting == OutputFormatting.OPERATION_ABORTED) warningSound() }
+        output.formatting?.also { if (escapeCodesEnabled) endEscape() }
+        output.formatting?.let { formatting -> if (formatting == OutputFormatting.OPERATION_ABORTED) warningSound() }
+        return renderedLength
+    }
+
+    private fun readCharFromVisibleStdinWithin(timeoutInMillis: Long): Char? {
+        val readTask = inputReaderExecutor.submit<Char> { runCatching(::stdin).getOrDefault(STDIN_EOF) }
+        return try {
+            readTask.get(timeoutInMillis, TimeUnit.MILLISECONDS)
+        } catch (ex: ExecutionException) {
+            throw ex.cause ?: ex
+        } catch (_: TimeoutException) {
+            readTask.cancel(true)
+            null
+        }
     }
     private fun CharArray.toInput(): Input = try {
         inputOf(plainShellOf(this).toShell())

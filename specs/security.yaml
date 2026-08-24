@@ -57,6 +57,7 @@ current_security_relevant_implementation:
       - initial clipboard copy failures are reported through stderr and cause the clipboard adapter result to fail
       - when clipboard reset is enabled, reset scheduling failures and failed automatic clear attempts are reported through stderr
       - posting a newer clipboard value supersedes older pending clear attempts so only the latest copied value is cleared
+      - when application.yolk.copyToClipboard is true, the live y[EggId] view copies the currently displayed TOTP code to the clipboard and refreshes that clipboard content again on each later TOTP rollover while the view remains open
   keystore:
     file: src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
     facts:

@@ -8,8 +8,8 @@ private const val DEFAULT_BACKUP_DIRECTORY = "backups"
 private const val DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS = 10
 private const val DEFAULT_PASSWORD_LENGTH = 20
 private const val DEFAULT_YOLK_ALGORITHM = "SHA1"
+private const val DEFAULT_YOLK_COPY_TO_CLIPBOARD = true
 private const val DEFAULT_YOLK_DIGITS = 6
-private const val DEFAULT_YOLK_MINIMUM_VALIDITY_SECONDS = 5
 private const val DEFAULT_YOLK_PERIOD_SECONDS = 30
 
 data class Configuration(
@@ -68,8 +68,8 @@ data class Configuration(
     ) : ReadableConfiguration.Password
     data class Yolk(
         override val algorithm: String = DEFAULT_YOLK_ALGORITHM,
+        override val copyToClipboard: Boolean = DEFAULT_YOLK_COPY_TO_CLIPBOARD,
         override val digits: Int = DEFAULT_YOLK_DIGITS,
-        override val minimumValiditySeconds: Int = DEFAULT_YOLK_MINIMUM_VALIDITY_SECONDS,
         override val periodSeconds: Int = DEFAULT_YOLK_PERIOD_SECONDS,
     ) : ReadableConfiguration.Yolk
     data class CustomPasswordConfiguration(

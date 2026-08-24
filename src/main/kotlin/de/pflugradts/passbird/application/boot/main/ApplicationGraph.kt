@@ -204,7 +204,14 @@ class ApplicationGraph(
             ViewProteinStructuresCommandHandler(canPrintInfo, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             ViewProteinTypesCommandHandler(canPrintInfo, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             YolkInfoCommandHandler(canPrintInfo, userInterfaceAdapterPort),
-            ViewYolkCommandHandler(configuration, passwordService, userInterfaceAdapterPort, systemOperation, commandExecutionTracker),
+            ViewYolkCommandHandler(
+                configuration,
+                passwordService,
+                clipboardAdapterPort,
+                userInterfaceAdapterPort,
+                systemOperation,
+                commandExecutionTracker,
+            ),
             SetYolkCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             DiscardYolkCommandHandler(passwordService, userInterfaceAdapterPort, commandExecutionTracker),
         )

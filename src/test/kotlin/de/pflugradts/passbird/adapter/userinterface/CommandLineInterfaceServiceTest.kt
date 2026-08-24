@@ -96,6 +96,32 @@ class CommandLineInterfaceServiceTest {
             verify(exactly = 0) { renderedShell.iterator() }
             verify(exactly = 1) { renderedShell.scramble() }
         }
+
+        @Test
+        fun `should update ephemeral line and finish it`() {
+            val captureSystemOut = captureSystemOut()
+
+            captureSystemOut.during {
+                commandLineInterfaceService.startEphemeralLine(outputOf(shellOf("123456 (30s)")))
+                commandLineInterfaceService.updateEphemeralLine(outputOf(shellOf("654321 (29s)")))
+                commandLineInterfaceService.finishEphemeralLine()
+            }
+
+            expectThat(captureSystemOut.capture).isEqualTo("123456 (30s)\r654321 (29s)\n")
+        }
+
+        @Test
+        fun `should clear trailing characters when updating ephemeral line with shorter output`() {
+            val captureSystemOut = captureSystemOut()
+
+            captureSystemOut.during {
+                commandLineInterfaceService.startEphemeralLine(outputOf(shellOf("123456 (30s)")))
+                commandLineInterfaceService.updateEphemeralLine(outputOf(shellOf("1 (9s)")))
+                commandLineInterfaceService.finishEphemeralLine()
+            }
+
+            expectThat(captureSystemOut.capture).isEqualTo("123456 (30s)\r1 (9s)      \r1 (9s)\n")
+        }
     }
 
     @Nested
@@ -217,6 +243,48 @@ class CommandLineInterfaceServiceTest {
 
             // then
             expectThat(actual.shell.asString()) isEqualTo "q"
+        }
+
+        @Test
+        fun `should detect line break within timeout after intermediate characters`() {
+            val stdin = listOf('x', '\n').iterator()
+            every { terminalInputGateway.readCharFromStdin() } answers { stdin.next() }
+
+            val actual = commandLineInterfaceService.receiveLineBreakWithin(100L)
+
+            expectThat(actual).isTrue()
+        }
+
+        @Test
+        fun `should detect stdin exhaustion as completed line break within timeout`() {
+            every { terminalInputGateway.readCharFromStdin() } returns Char.MAX_VALUE
+
+            val actual = commandLineInterfaceService.receiveLineBreakWithin(100L)
+
+            expectThat(actual).isTrue()
+        }
+
+        @Test
+        fun `should return false when no line break is received within timeout`() {
+            every { terminalInputGateway.readCharFromStdin() } answers {
+                Thread.sleep(200)
+                'x'
+            }
+
+            val actual = commandLineInterfaceService.receiveLineBreakWithin(50L)
+
+            expectThat(actual).isFalse()
+        }
+
+        @Test
+        fun `should abort waiting for line break when inactivity termination is requested`() {
+            val inactivityTerminationSignal = InactivityTerminationSignal().also { it.request() }
+            val commandLineInterfaceService =
+                CommandLineInterfaceService(terminalInputGateway, configuration, inactivityTerminationSignal)
+
+            assertThrows<InactivityTerminationRequestedException> {
+                commandLineInterfaceService.receiveLineBreakWithin(100L)
+            }
         }
     }
 

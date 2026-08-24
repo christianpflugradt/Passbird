@@ -43,8 +43,8 @@ interface ReadableConfiguration {
     }
     interface Yolk {
         val algorithm: String
+        val copyToClipboard: Boolean
         val digits: Int
-        val minimumValiditySeconds: Int
         val periodSeconds: Int
     }
     interface CustomPasswordConfiguration {

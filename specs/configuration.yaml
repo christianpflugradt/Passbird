@@ -22,8 +22,8 @@ configuration_surface:
     - application.password.promptOnRemoval defaults to true
     - application.password.customPasswordConfigurations defaults to an empty list
     - application.yolk.algorithm defaults to SHA1
+    - application.yolk.copyToClipboard defaults to true
     - application.yolk.digits defaults to 6
-    - application.yolk.minimumValiditySeconds defaults to 5
     - application.yolk.periodSeconds defaults to 30
     - adapter.userInterface.ansiEscapeCodes.enabled defaults to false
     - adapter.userInterface.audibleBell defaults to false
@@ -84,21 +84,21 @@ areas:
   - name: yolk_behavior
     keys:
       - application.yolk.algorithm
+      - application.yolk.copyToClipboard
       - application.yolk.digits
-      - application.yolk.minimumValiditySeconds
       - application.yolk.periodSeconds
     visible_effects:
-      - changes whether y[EggId] shows a nearly expired TOTP code immediately or waits for the next code first
       - changes which TOTP algorithm, digit count, and period are used when y+[EggId] stores a plain Base32 secret
+      - changes whether the live y[EggId] view copies each displayed TOTP code to the clipboard
     behavioral_contract:
       - application.yolk.algorithm must resolve to a supported TOTP algorithm name
       - application.yolk.digits must be either 6 or 8
-      - application.yolk.minimumValiditySeconds must be zero or positive
       - application.yolk.periodSeconds must be positive
       - if y+[EggId] receives an otpauth://totp URI, the URI-provided algorithm, digit count, and period override the configured fallback values
       - if y+[EggId] receives only a plain Base32 secret, Passbird stores the secret using application.yolk.algorithm, application.yolk.digits, and application.yolk.periodSeconds
-      - if the current TOTP code has more remaining validity than application.yolk.minimumValiditySeconds, y[EggId] prints that code immediately
-      - if the current TOTP code has remaining validity less than or equal to application.yolk.minimumValiditySeconds, y[EggId] first prints a waiting message, waits until the next TOTP code becomes valid, and then prints that fresh code
+      - y[EggId] waits for the next TOTP code first only when the currently valid code has 5 or fewer seconds remaining
+      - when application.yolk.copyToClipboard is true, y[EggId] posts the displayed TOTP code to the clipboard when the live view opens and on each later rollover
+      - when application.yolk.copyToClipboard is false, y[EggId] does not post TOTP codes to the clipboard
   - name: backup_and_storage_locations
     keys:
       - application.backup.location

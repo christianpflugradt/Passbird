@@ -42,7 +42,6 @@ class ConfigurationFactory constructor(
 private fun Configuration.validate(): Configuration {
     normalizeTotpAlgorithm(application.yolk.algorithm)
     require(application.yolk.digits == 6 || application.yolk.digits == 8) { "Yolk digits are invalid" }
-    require(application.yolk.minimumValiditySeconds >= 0) { "Yolk minimum validity is invalid" }
     require(application.yolk.periodSeconds > 0) { "Yolk period is invalid" }
     val names = domain.protein.templates.map { it.name }
     require(names.none { it.isBlank() }) { "Protein template name is invalid" }

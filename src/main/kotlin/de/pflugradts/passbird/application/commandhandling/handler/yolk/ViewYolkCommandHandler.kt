@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.handler.yolk
 
+import de.pflugradts.passbird.application.ClipboardAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracker
 import de.pflugradts.passbird.application.commandhandling.command.ViewYolkCommand
@@ -15,6 +16,7 @@ import de.pflugradts.passbird.domain.service.password.PasswordService
 class ViewYolkCommandHandler(
     private val configuration: ReadableConfiguration,
     private val passwordService: PasswordService,
+    private val clipboardAdapterPort: ClipboardAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val systemOperation: SystemOperation,
     private val commandExecutionTracker: CommandExecutionTracker,
@@ -45,7 +47,26 @@ class ViewYolkCommandHandler(
                             periodSeconds = yolkView.periodSeconds,
                         )
                     }
-                    userInterfaceAdapterPort.send(outputOf(shellOf("${code.value} (${code.remainingValiditySeconds}s)")))
+                    userInterfaceAdapterPort.send(outputOf(shellOf("Press Enter to return.")))
+                    userInterfaceAdapterPort.sendLineBreak()
+                    syncClipboard(code.value)
+                    userInterfaceAdapterPort.startEphemeralLine(outputOf(shellOf("${code.value} (${code.remainingValiditySeconds}s)")))
+                    while (!userInterfaceAdapterPort.receiveLineBreakWithin(MILLI_SECONDS)) {
+                        val nextCode = totpGenerator.generate(
+                            secret = secretBytes,
+                            algorithm = yolkView.algorithm,
+                            digits = yolkView.digits,
+                            periodSeconds = yolkView.periodSeconds,
+                        )
+                        if (nextCode.value != code.value) {
+                            syncClipboard(nextCode.value)
+                        }
+                        code = nextCode
+                        userInterfaceAdapterPort.updateEphemeralLine(
+                            outputOf(shellOf("${code.value} (${code.remainingValiditySeconds}s)")),
+                        )
+                    }
+                    userInterfaceAdapterPort.finishEphemeralLine()
                 } finally {
                     secretBytes.fill(0)
                     yolkView.secret.scramble()
@@ -60,9 +81,16 @@ class ViewYolkCommandHandler(
         userInterfaceAdapterPort.sendLineBreak()
     }
 
-    private val minimumValiditySeconds get() = configuration.application.yolk.minimumValiditySeconds
+    private fun syncClipboard(code: String) {
+        if (configuration.application.yolk.copyToClipboard) {
+            clipboardAdapterPort.post(outputOf(shellOf(code)))
+        }
+    }
 
     companion object {
+        private const val MINIMUM_VALIDITY_SECONDS = 5
         private const val MILLI_SECONDS = 1000L
     }
+
+    private val minimumValiditySeconds get() = MINIMUM_VALIDITY_SECONDS
 }

@@ -20,8 +20,8 @@ fun fakeConfiguration(
     withPromptOnRemoval: Boolean = false,
     withPromptOnExportFile: Boolean = false,
     withYolkAlgorithm: String = "SHA1",
+    withYolkCopyToClipboard: Boolean = true,
     withYolkDigits: Int = 6,
-    withYolkMinimumValiditySeconds: Int = 5,
     withYolkPeriodSeconds: Int = 30,
     withSpecialCharacters: Boolean = true,
     withPasswordLength: Int = 20,
@@ -71,8 +71,8 @@ fun fakeConfiguration(
     every { password.customPasswordConfigurations } returns withCustomPasswordConfigurations
     val yolk = mockk<Configuration.Yolk>()
     every { yolk.algorithm } returns withYolkAlgorithm
+    every { yolk.copyToClipboard } returns withYolkCopyToClipboard
     every { yolk.digits } returns withYolkDigits
-    every { yolk.minimumValiditySeconds } returns withYolkMinimumValiditySeconds
     every { yolk.periodSeconds } returns withYolkPeriodSeconds
     val application = mockk<Configuration.Application>()
     every { application.exchange } returns exchange

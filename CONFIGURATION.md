@@ -27,8 +27,8 @@ Passbird stores sensitive local files such as the keystore, password tree, expor
 | `application.password.promptOnRemoval`                | Requires confirmation before deleting or updating passwords.                                     | true                 |
 | `application.password.customPasswordConfigurations`   | Allows defining custom password configurations for specific use cases (see [README](README.md)). | *(unset)*            |
 | `application.yolk.algorithm`                          | Specifies the fallback TOTP algorithm used when a Yolk is created from a plain Base32 secret instead of an `otpauth://totp` URI. Supported values are `SHA1`, `SHA256`, and `SHA512`. | SHA1                 |
+| `application.yolk.copyToClipboard`                    | Enables or disables copying the currently displayed TOTP code to the clipboard while the live `y[EggId]` view is open. When enabled, each newly displayed rollover code is copied again automatically. | true                 |
 | `application.yolk.digits`                             | Specifies the fallback TOTP digit count used when a Yolk is created from a plain Base32 secret. Supported values are `6` and `8`. | 6                    |
-| `application.yolk.minimumValiditySeconds`             | Waits for the next TOTP code instead of showing one that has this many or fewer seconds of validity left. Must be zero or positive. | 5                    |
 | `application.yolk.periodSeconds`                      | Specifies the fallback TOTP period used when a Yolk is created from a plain Base32 secret. Must be positive. | 30                   |
 | `adapter.clipboard.reset.enabled`                     | Enables or disables automatic clearing of the clipboard after copying a password.                | true                 |
 | `adapter.clipboard.reset.delaySeconds`                | Specifies the non-negative seconds to wait before clearing the clipboard after copying a password. | 10                   |
