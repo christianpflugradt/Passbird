@@ -144,6 +144,8 @@ application:
     periodSeconds: 30
 adapter:
   clipboard:
+    nativeTooling:
+      enabled: true
     reset:
       enabled: true
       delaySeconds: 10
@@ -177,6 +179,8 @@ Note: Default values may change with major updates. New parameters introduced in
 For a complete list of configuration settings and their descriptions, consult the [CONFIGURATION.md](CONFIGURATION.md) file. It provides an exhaustive reference to all available parameters, their purposes, and how to customize them.
 
 The `verifySignature` setting checks the password tree's built-in file signature marker. It is not a separate cryptographic digital signature.
+
+By default, Passbird tries native clipboard utilities first and falls back to Java's clipboard integration only when needed. You can disable native clipboard tooling with `adapter.clipboard.nativeTooling.enabled: false`.
 
 ### Custom Password Configuration
 

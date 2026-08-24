@@ -54,6 +54,8 @@ current_security_relevant_implementation:
   clipboard:
     file: src/main/kotlin/de/pflugradts/passbird/adapter/clipboard/ClipboardService.kt
     facts:
+      - when adapter.clipboard.nativeTooling.enabled is true, Passbird first tries an OS-native clipboard utility and silently falls back to Java clipboard integration if that native path is unavailable or fails
+      - when adapter.clipboard.nativeTooling.enabled is false, Passbird uses Java clipboard integration directly
       - initial clipboard copy failures are reported through stderr and cause the clipboard adapter result to fail
       - when clipboard reset is enabled, reset scheduling failures and failed automatic clear attempts are reported through stderr
       - posting a newer clipboard value supersedes older pending clear attempts so only the latest copied value is cleared

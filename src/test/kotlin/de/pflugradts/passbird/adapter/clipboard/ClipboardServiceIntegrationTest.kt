@@ -76,8 +76,8 @@ class ClipboardServiceIntegrationTest {
             // given
             val message = "write this to clipboard"
             val anotherMessage = "write this next"
-            val delaySeconds = 1
-            val almostASecond = 800
+            val delaySeconds = 2
+            val oneSecond = 1000
             fakeConfiguration(
                 instance = configuration,
                 withClipboardResetEnabled = true,
@@ -86,9 +86,9 @@ class ClipboardServiceIntegrationTest {
 
             // when
             clipboardService.post(outputOf(shellOf(message)))
-            Thread.sleep(almostASecond.toLong())
+            Thread.sleep(oneSecond.toLong())
             clipboardService.post(outputOf(shellOf(anotherMessage)))
-            Thread.sleep(almostASecond.toLong())
+            Thread.sleep(oneSecond.toLong())
 
             // then
             val clipboard = systemClipboard()

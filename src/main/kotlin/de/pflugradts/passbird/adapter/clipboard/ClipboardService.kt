@@ -14,7 +14,7 @@ class ClipboardService constructor(
     private var cleanerGeneration = 0L
     override fun post(output: Output) = tryCatching {
         synchronized(cleanerLock) {
-            clipboardGateway.copy(output.shell.asString())
+            clipboardGateway.copy(output.shell.asString(), nativeToolingEnabled)
             cleanerGeneration += 1
             cleanerGeneration
         }
@@ -36,12 +36,13 @@ class ClipboardService constructor(
     private fun clearClipboard(generation: Long) {
         synchronized(cleanerLock) {
             if (cleanerGeneration == generation) {
-                tryCatching { clipboardGateway.copy("") }.onFailure { reportFailure(ClipboardFailure(it)) }
+                tryCatching { clipboardGateway.copy("", nativeToolingEnabled) }.onFailure { reportFailure(ClipboardFailure(it)) }
             }
         }
     }
 
     private fun sleep() = tryCatching { Thread.sleep(delaySeconds * MILLI_SECONDS) }
+    private val nativeToolingEnabled: Boolean get() = configuration.adapter.clipboard.nativeTooling.enabled
     private val isResetEnabled: Boolean get() = configuration.adapter.clipboard.reset.enabled
     private val delaySeconds: Int get() = configuration.adapter.clipboard.reset.delaySeconds
 }

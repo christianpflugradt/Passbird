@@ -63,7 +63,11 @@ interface ReadableConfiguration {
         val userInterface: UserInterface
     }
     interface Clipboard {
+        val nativeTooling: ClipboardNativeTooling
         val reset: ClipboardReset
+    }
+    interface ClipboardNativeTooling {
+        val enabled: Boolean
     }
     interface ClipboardReset {
         val enabled: Boolean

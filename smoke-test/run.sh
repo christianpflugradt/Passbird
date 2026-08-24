@@ -428,8 +428,8 @@ replacements = [
         "  exchange:\n    promptOnExportFile: false\n",
     ),
     (
-        "  clipboard:\n    reset:\n      enabled: true\n      delaySeconds: 10\n",
-        "  clipboard:\n    reset:\n      enabled: false\n      delaySeconds: 10\n",
+        "  clipboard:\n    nativeTooling:\n      enabled: true\n    reset:\n      enabled: true\n      delaySeconds: 10\n",
+        "  clipboard:\n    nativeTooling:\n      enabled: true\n    reset:\n      enabled: false\n      delaySeconds: 10\n",
     ),
     (
         "    customPasswordConfigurations: []\n",

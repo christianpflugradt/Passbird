@@ -6,6 +6,7 @@ import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 
 private const val DEFAULT_BACKUP_DIRECTORY = "backups"
 private const val DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS = 10
+private const val DEFAULT_CLIPBOARD_NATIVE_TOOLING_ENABLED = true
 private const val DEFAULT_PASSWORD_LENGTH = 20
 private const val DEFAULT_YOLK_ALGORITHM = "SHA1"
 private const val DEFAULT_YOLK_COPY_TO_CLIPBOARD = true
@@ -87,7 +88,13 @@ data class Configuration(
         override val passwordTree: PasswordTree = PasswordTree(),
         override val userInterface: UserInterface = UserInterface(),
     ) : ReadableConfiguration.Adapter
-    data class Clipboard(override val reset: ClipboardReset = ClipboardReset()) : ReadableConfiguration.Clipboard
+    data class Clipboard(
+        override val nativeTooling: ClipboardNativeTooling = ClipboardNativeTooling(),
+        override val reset: ClipboardReset = ClipboardReset(),
+    ) : ReadableConfiguration.Clipboard
+    data class ClipboardNativeTooling(
+        override val enabled: Boolean = DEFAULT_CLIPBOARD_NATIVE_TOOLING_ENABLED,
+    ) : ReadableConfiguration.ClipboardNativeTooling
     data class ClipboardReset(
         override val enabled: Boolean = true,
         override val delaySeconds: Int = DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS,

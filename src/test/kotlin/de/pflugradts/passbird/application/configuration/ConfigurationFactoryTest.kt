@@ -47,6 +47,7 @@ class ConfigurationFactoryTest {
         expectThat(actual.application.yolk.copyToClipboard).isTrue()
         expectThat(actual.application.yolk.digits) isEqualTo 6
         expectThat(actual.application.yolk.periodSeconds) isEqualTo 30
+        expectThat(actual.adapter.clipboard.nativeTooling.enabled).isTrue()
         expectThat(captureSystemErr.capture).isEqualTo("")
     }
 }

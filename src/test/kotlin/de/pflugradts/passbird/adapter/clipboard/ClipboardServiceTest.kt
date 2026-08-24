@@ -24,7 +24,7 @@ class ClipboardServiceTest {
 
     @BeforeEach
     fun setup() {
-        every { clipboardGateway.copy(any()) } returns Unit
+        every { clipboardGateway.copy(any(), any()) } returns Unit
     }
 
     @Test
@@ -38,7 +38,7 @@ class ClipboardServiceTest {
 
         // then
         expectThat(actual.success) isEqualTo true
-        verify(exactly = 1) { clipboardGateway.copy(message) }
+        verify(exactly = 1) { clipboardGateway.copy(message, true) }
     }
 
     @Test
@@ -47,7 +47,7 @@ class ClipboardServiceTest {
         val message = "write this to clipboard"
         val error = "clipboard unavailable"
         fakeConfiguration(instance = configuration)
-        every { clipboardGateway.copy(message) } throws IllegalStateException(error)
+        every { clipboardGateway.copy(message, true) } throws IllegalStateException(error)
         val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
 
         // when
@@ -77,9 +77,9 @@ class ClipboardServiceTest {
             clipboardService.post(outputOf(shellOf(message)))
 
             // then
-            verify(exactly = 1) { clipboardGateway.copy(message) }
+            verify(exactly = 1) { clipboardGateway.copy(message, true) }
             eventually(2.seconds) {
-                verify(exactly = 1) { clipboardGateway.copy("") }
+                verify(exactly = 1) { clipboardGateway.copy("", true) }
             }
         }
     }
@@ -105,11 +105,11 @@ class ClipboardServiceTest {
             Thread.sleep(almostASecond.toLong())
 
             // then
-            verify(exactly = 1) { clipboardGateway.copy(message) }
-            verify(exactly = 0) { clipboardGateway.copy("") }
-            verify(exactly = 1) { clipboardGateway.copy(anotherMessage) }
+            verify(exactly = 1) { clipboardGateway.copy(message, true) }
+            verify(exactly = 0) { clipboardGateway.copy("", true) }
+            verify(exactly = 1) { clipboardGateway.copy(anotherMessage, true) }
             eventually(2.seconds) {
-                verify(exactly = 1) { clipboardGateway.copy("") }
+                verify(exactly = 1) { clipboardGateway.copy("", true) }
             }
         }
     }
@@ -124,7 +124,7 @@ class ClipboardServiceTest {
             withClipboardResetEnabled = true,
             withClipboardResetDelaySeconds = 0,
         )
-        every { clipboardGateway.copy("") } throws IllegalStateException(error)
+        every { clipboardGateway.copy("", true) } throws IllegalStateException(error)
         val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
         val expectedError = "Clipboard could not be updated. Please check your Java version. Exception: $error\n"
 
@@ -157,8 +157,19 @@ class ClipboardServiceTest {
         }
 
         // then
-        verify(exactly = 0) { clipboardGateway.copy("") }
+        verify(exactly = 0) { clipboardGateway.copy("", true) }
         expectThat(captureSystemErr.capture) isEqualTo expectedError
+    }
+
+    @Test
+    fun `should disable native clipboard tooling when configured`() {
+        val message = "write this to clipboard"
+        fakeConfiguration(instance = configuration, withClipboardNativeToolingEnabled = false)
+
+        val actual = clipboardService.post(outputOf(shellOf(message)))
+
+        expectThat(actual.success) isEqualTo true
+        verify(exactly = 1) { clipboardGateway.copy(message, false) }
     }
 
     private fun waitForError(captureSystemErr: CapturedOutputPrintStream, expectedError: String) {

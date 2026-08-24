@@ -28,6 +28,7 @@ configuration_surface:
     - adapter.userInterface.ansiEscapeCodes.enabled defaults to false
     - adapter.userInterface.audibleBell defaults to false
     - adapter.userInterface.secureInput defaults to true
+    - adapter.clipboard.nativeTooling.enabled defaults to true
     - adapter.clipboard.reset.enabled defaults to true
     - adapter.clipboard.reset.delaySeconds defaults to 10
     - adapter.passwordTree.verifySignature defaults to true
@@ -127,9 +128,12 @@ areas:
       - encountering a legacy password-tree backup format causes one fresh current-format backup to be created; repeated runs after that do not keep creating duplicates if content is unchanged
   - name: clipboard_behavior
     keys:
+      - adapter.clipboard.nativeTooling.enabled
       - adapter.clipboard.reset.enabled
       - adapter.clipboard.reset.delaySeconds
     visible_effects:
+      - when enabled, Passbird tries OS-native clipboard utilities first and silently falls back to Java clipboard integration if the native path is unavailable or fails
+      - when disabled, Passbird skips native clipboard utilities and uses Java clipboard integration directly
       - when enabled, clipboard copies are cleared automatically after the configured delay
       - adapter.clipboard.reset.delaySeconds must be zero or positive for automatic clearing to be schedulable
       - if the reset delay cannot be scheduled or the automatic clear operation fails, Passbird reports the clipboard failure through stderr

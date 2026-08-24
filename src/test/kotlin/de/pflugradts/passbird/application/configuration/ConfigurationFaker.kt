@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.configuration
 
 import de.pflugradts.passbird.application.configuration.Configuration.AnsiEscapeCodes
 import de.pflugradts.passbird.application.configuration.Configuration.Clipboard
+import de.pflugradts.passbird.application.configuration.Configuration.ClipboardNativeTooling
 import de.pflugradts.passbird.application.configuration.Configuration.ClipboardReset
 import de.pflugradts.passbird.application.configuration.Configuration.ProteinTemplate
 import de.pflugradts.passbird.application.configuration.Configuration.UserInterface
@@ -12,6 +13,7 @@ fun fakeConfiguration(
     instance: Configuration,
     withAnsiEscapeCodesEnabled: Boolean = false,
     withAudibleBellEnabled: Boolean = false,
+    withClipboardNativeToolingEnabled: Boolean = true,
     withClipboardResetDelaySeconds: Int = 0,
     withClipboardResetEnabled: Boolean = false,
     withConfigurationTemplate: Boolean = false,
@@ -36,10 +38,60 @@ fun fakeConfiguration(
     withEggIdMemoryEnabled: Boolean = false,
     withEggIdMemoryPersisted: Boolean = false,
 ) {
+    every { instance.adapter } returns fakeAdapter(
+        withAnsiEscapeCodesEnabled = withAnsiEscapeCodesEnabled,
+        withAudibleBellEnabled = withAudibleBellEnabled,
+        withClipboardNativeToolingEnabled = withClipboardNativeToolingEnabled,
+        withClipboardResetDelaySeconds = withClipboardResetDelaySeconds,
+        withClipboardResetEnabled = withClipboardResetEnabled,
+        withKeyStoreLocation = withKeyStoreLocation,
+        withPasswordTreeLocation = withPasswordTreeLocation,
+        withSecureInputEnabled = withSecureInputEnabled,
+        withVerifyChecksum = withVerifyChecksum,
+        withVerifySignature = withVerifySignature,
+    )
+    every { instance.application } returns fakeApplication(
+        withPromptOnRemoval = withPromptOnRemoval,
+        withPromptOnExportFile = withPromptOnExportFile,
+        withYolkAlgorithm = withYolkAlgorithm,
+        withYolkCopyToClipboard = withYolkCopyToClipboard,
+        withYolkDigits = withYolkDigits,
+        withYolkPeriodSeconds = withYolkPeriodSeconds,
+        withSpecialCharacters = withSpecialCharacters,
+        withPasswordLength = withPasswordLength,
+        withCustomPasswordConfigurations = withCustomPasswordConfigurations,
+        withInactivityTimeLimit = withInactivityTimeLimit,
+    )
+    every { instance.domain } returns fakeDomain(
+        withSecureProteinInputEnabled = withSecureProteinInputEnabled,
+        withPromptForProteinStructureInputToggle = withPromptForProteinStructureInputToggle,
+        withProteinTemplates = withProteinTemplates,
+        withEggIdMemoryEnabled = withEggIdMemoryEnabled,
+        withEggIdMemoryPersisted = withEggIdMemoryPersisted,
+    )
+    every { instance.template } returns withConfigurationTemplate
+    every { instance.parsePasswordRequirements() } answers { callOriginal() }
+}
+
+private fun fakeAdapter(
+    withAnsiEscapeCodesEnabled: Boolean,
+    withAudibleBellEnabled: Boolean,
+    withClipboardNativeToolingEnabled: Boolean,
+    withClipboardResetDelaySeconds: Int,
+    withClipboardResetEnabled: Boolean,
+    withKeyStoreLocation: String,
+    withPasswordTreeLocation: String,
+    withSecureInputEnabled: Boolean,
+    withVerifyChecksum: Boolean,
+    withVerifySignature: Boolean,
+): Configuration.Adapter {
+    val clipboardNativeTooling = mockk<ClipboardNativeTooling>()
+    every { clipboardNativeTooling.enabled } returns withClipboardNativeToolingEnabled
     val clipboardReset = mockk<ClipboardReset>()
     every { clipboardReset.enabled } returns withClipboardResetEnabled
     every { clipboardReset.delaySeconds } returns withClipboardResetDelaySeconds
     val clipboard = mockk<Clipboard>()
+    every { clipboard.nativeTooling } returns clipboardNativeTooling
     every { clipboard.reset } returns clipboardReset
     val ansiEscapeCodes = mockk<AnsiEscapeCodes>()
     every { ansiEscapeCodes.enabled } returns withAnsiEscapeCodesEnabled
@@ -53,12 +105,26 @@ fun fakeConfiguration(
     every { passwordTree.location } returns withPasswordTreeLocation
     every { passwordTree.verifyChecksum } returns withVerifyChecksum
     every { passwordTree.verifySignature } returns withVerifySignature
-    val adapter = mockk<Configuration.Adapter>()
-    every { adapter.clipboard } returns clipboard
-    every { adapter.userInterface } returns userInterface
-    every { adapter.keyStore } returns keyStore
-    every { adapter.passwordTree } returns passwordTree
-    every { instance.adapter } returns adapter
+    return mockk<Configuration.Adapter>().also {
+        every { it.clipboard } returns clipboard
+        every { it.userInterface } returns userInterface
+        every { it.keyStore } returns keyStore
+        every { it.passwordTree } returns passwordTree
+    }
+}
+
+private fun fakeApplication(
+    withPromptOnRemoval: Boolean,
+    withPromptOnExportFile: Boolean,
+    withYolkAlgorithm: String,
+    withYolkCopyToClipboard: Boolean,
+    withYolkDigits: Int,
+    withYolkPeriodSeconds: Int,
+    withSpecialCharacters: Boolean,
+    withPasswordLength: Int,
+    withCustomPasswordConfigurations: List<Configuration.CustomPasswordConfiguration>,
+    withInactivityTimeLimit: Int,
+): Configuration.Application {
     val exchange = mockk<Configuration.Exchange>()
     every { exchange.promptOnExportFile } returns withPromptOnExportFile
     val inactivityLimit = mockk<Configuration.InactivityLimit>()
@@ -74,12 +140,21 @@ fun fakeConfiguration(
     every { yolk.copyToClipboard } returns withYolkCopyToClipboard
     every { yolk.digits } returns withYolkDigits
     every { yolk.periodSeconds } returns withYolkPeriodSeconds
-    val application = mockk<Configuration.Application>()
-    every { application.exchange } returns exchange
-    every { application.inactivityLimit } returns inactivityLimit
-    every { application.password } returns password
-    every { application.yolk } returns yolk
-    every { instance.application } returns application
+    return mockk<Configuration.Application>().also {
+        every { it.exchange } returns exchange
+        every { it.inactivityLimit } returns inactivityLimit
+        every { it.password } returns password
+        every { it.yolk } returns yolk
+    }
+}
+
+private fun fakeDomain(
+    withSecureProteinInputEnabled: Boolean,
+    withPromptForProteinStructureInputToggle: Boolean,
+    withProteinTemplates: List<ProteinTemplate>,
+    withEggIdMemoryEnabled: Boolean,
+    withEggIdMemoryPersisted: Boolean,
+): Configuration.Domain {
     val protein = mockk<Configuration.Protein>()
     every { protein.secureProteinStructureInput } returns withSecureProteinInputEnabled
     every { protein.promptForProteinStructureInputToggle } returns withPromptForProteinStructureInputToggle
@@ -87,10 +162,8 @@ fun fakeConfiguration(
     val eggIdMemory = mockk<Configuration.EggIdMemory>()
     every { eggIdMemory.enabled } returns withEggIdMemoryEnabled
     every { eggIdMemory.persisted } returns withEggIdMemoryPersisted
-    val domain = mockk<Configuration.Domain>()
-    every { domain.protein } returns protein
-    every { domain.eggIdMemory } returns eggIdMemory
-    every { instance.domain } returns domain
-    every { instance.template } returns withConfigurationTemplate
-    every { instance.parsePasswordRequirements() } answers { callOriginal() }
+    return mockk<Configuration.Domain>().also {
+        every { it.protein } returns protein
+        every { it.eggIdMemory } returns eggIdMemory
+    }
 }
