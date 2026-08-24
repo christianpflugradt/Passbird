@@ -16,7 +16,7 @@ class LegacyCurrentPasswordTreePayloadWriter {
         val contentSize = calcRequiredContentSize(snapshot)
         val bytes = ByteArray(signatureSize() + contentSize + checksumBytes())
         try {
-            var offset = copyBytes(signature(), bytes, 0, signatureSize())
+            var offset = copyBytes(legacyCurrentSignature(), bytes, 0, signatureSize())
             snapshot.memory.forEach { memoryListOption ->
                 memoryListOption.ifPresent { memoryList ->
                     memoryList.forEach { memoryEntry ->

@@ -58,7 +58,7 @@ class CurrentPasswordTreeCompatibilityTest {
         )
         Files.write(
             passwordTreeFile,
-            passwordTreeEnvelope.wrap(
+            passwordTreeEnvelope.wrapLegacyCurrent(
                 cryptoProvider.encrypt(legacyCurrentPasswordTreePayloadWriter.write(PasswordTreeSnapshot(eggs = listOf(egg))))
                     .toByteArray(),
             ),

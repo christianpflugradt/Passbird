@@ -50,7 +50,11 @@ class PasswordTreeReader constructor(
             if (it.isEmpty()) {
                 throw IllegalStateException("Unsupported password tree format.")
             }
-            cryptoProvider.decrypt(encryptedShellOf(passwordTreeEnvelope.unwrap(it)))
+            try {
+                cryptoProvider.decrypt(encryptedShellOf(passwordTreeEnvelope.unwrap(it)))
+            } catch (_: Exception) {
+                cryptoProvider.decrypt(encryptedShellOf(passwordTreeEnvelope.unwrapLegacyCurrent(it)))
+            }
         }
     }
         .onFailure(::abortRestore)
