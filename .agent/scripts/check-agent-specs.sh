@@ -93,12 +93,22 @@ required_hook_strings = [
     "preCommit {",
     "tasks(\"preCommitCheck\")",
     "hook(\"pre-push\")",
-    "tasks(\"prePushCheck\")",
 ]
 
 for text in required_hook_strings:
     if text not in settings:
         failures.append(f"settings.gradle.kts no longer contains hook step: {text}")
+
+pre_push_variants = [
+    "tasks(\"prePushCheck\")",
+    "./gradlew --no-configuration-cache prePushCheck",
+]
+
+if not any(variant in settings for variant in pre_push_variants):
+    failures.append(
+        "settings.gradle.kts no longer contains a recognized pre-push hook target "
+        "(expected tasks(\"prePushCheck\") or ./gradlew --no-configuration-cache prePushCheck)"
+    )
 
 for text in [
     "./gradlew preCommitCheck",
