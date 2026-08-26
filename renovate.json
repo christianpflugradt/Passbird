@@ -10,6 +10,9 @@
     "internalChecksFilter": "strict",
     "separateMultipleMajor": true,
     "prCreation": "status-success",
+    "automerge": false,
+    "platformAutomerge": false,
+    "rebaseWhen": "behind-base-branch"
     "packageRules": [
         {
             "description": [
@@ -20,16 +23,28 @@
             ],
             "groupName": "github-actions",
             "separateMajorMinor": false,
-            "minimumReleaseAge": "14 days"
+            "minimumReleaseAge": "14 days",
+            "automerge": true,
         },
         {
             "description": [
-                "Major-version updates use a 14-day cooldown, overriding the standard 7-day cooldown."
+                "Patch, minor, and digest dependency updates auto-merge after green CI."
+            ],
+            "matchUpdateTypes": [
+                "patch",
+                "minor",
+                "digest"
+            ],
+            "automerge": true,
+        },
+        {
+            "description": [
+                "Major-version updates stay manual unless another more specific rule enables automerge."
             ],
             "matchUpdateTypes": [
                 "major"
             ],
-            "minimumReleaseAge": "14 days"
+            "minimumReleaseAge": "14 days",
         },
         {
             "matchPackageNames": [

@@ -54,6 +54,9 @@ quality_gates:
     - Renovate standard dependency updates require a 7-day minimum release age before branch or pull-request creation
     - Renovate GitHub Actions updates and major-version updates require a 14-day minimum release age
     - Renovate internal checks use strict filtering so updates blocked by minimum release age stay visible through the dashboard without early branch or pull-request creation
+    - Renovate auto-merges patch, minor, and digest updates through GitHub once required CI checks succeed
+    - Renovate keeps non-GitHub-Actions major-version updates manual even after CI succeeds
+    - Renovate GitHub Actions updates auto-merge after green CI regardless of whether the update is major, minor, or patch
     - repository renovate.json config refreshes gradle/verification-metadata.xml and gradle/verification-keyring.keys as a post-upgrade task for Gradle-related updates
   convenience_task:
     - ./gradlew preCommitCheck
