@@ -34,6 +34,7 @@ This repository keeps its agent-facing product specifications, design rules, and
 - Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.
 - Do not run `./gradlew dependencyCheckAnalyze` locally for verification. Treat OWASP dependency scanning as CI-only unless the maintainer explicitly asks for a local run.
 - Do not manually run verification tasks that are already covered by the local git hooks. Do not rerun the same verification during a task unless the code or environment changed in a way that makes the repeated run materially informative. Before committing, rely on the hook-managed checks for their covered tasks and run only focused tests for the behavior you changed or the tests you added, plus any extra checks that are not part of the hooks but are truly needed for the change.
+- Gradle tasks and git hooks may legitimately take multiple minutes to finish. Let them run without repeated status checks or speculative analysis. If a task has been running for more than 5 minutes, you may check its status, but not more than once every 5 minutes after that. Do not spend unnecessary tokens narrating or polling long-running work.
 
 ## Issue Task
 

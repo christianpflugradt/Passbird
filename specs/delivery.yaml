@@ -85,9 +85,13 @@ local_verification_policy:
     default: run only tests that exercise the code you changed or the tests you added
     avoid_repetition:
       - do not rerun the same local verification during one task unless the code or environment changed in a way that makes the repeated run materially informative
+      - do not poll or narrate long-running Gradle tasks or git hooks unnecessarily; a multi-minute runtime is expected for some local gates
     expand_scope_when:
       - a structural or wiring change needs ./gradlew architecture
       - the maintainer explicitly asks for broader local verification
+    long_running_tasks:
+      - allow Gradle tasks and git hooks to run for at least 5 minutes before checking status
+      - after the first status check on a long-running task, do not check again more than once every 5 minutes
   owasp_dependency_check:
     local_runs: discouraged
     default: rely_on_ci
