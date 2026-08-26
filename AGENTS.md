@@ -26,12 +26,14 @@ This repository keeps its agent-facing product specifications, design rules, and
 - After sourcing the shell environment, prefer the local `rtk` wrapper for shell commands; otherwise use direct commands.
 - Use deterministic helper workflows under `.agent/scripts` instead of manually composing the same multi-step operations. Prefer `.agent/scripts/agent-context.sh`, `.agent/scripts/agent-pick-issue.sh`, `.agent/scripts/agent-validate.sh`, `.agent/scripts/agent-ship.sh`, `.agent/scripts/agent-review-preflight.sh`, `.agent/scripts/agent-review-finding.sh`, `.agent/scripts/check-agent-specs.sh`, and `.agent/scripts/agent-release-artifact-check.sh` when their purpose matches the task.
 - For GitHub-hosted repository work where local files are not enough, use GitHub CLI rather than browser-only workflows. Inspect workflow registration, runs, jobs, and logs with `gh`; inspect and update issues, pull requests, releases, and repository metadata with `gh`. Prefer `rtk gh` for supported subcommands and otherwise use direct `gh` commands after sourcing the shell environment.
-- Do not create or switch to a new git branch unless the maintainer explicitly approves that branch action.
+- Work directly on `main`. Do not create, switch to, or push any other local or remote branch.
+- Do not use `git stash`.
+- If working safely on `main` without stashing is blocked by unrelated workspace state or another Git constraint, stop, explain the blocker clearly, and wait for maintainer instructions before proceeding.
 - Before staging, committing, or pushing, run `./gradlew ktlintFormat` to auto-resolve formatting issues when possible.
 - Once a requested task is complete and suitable for release, commit it, run `git pull -r` on the current branch, and push it immediately.
 - Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.
 - Do not run `./gradlew dependencyCheckAnalyze` locally for verification. Treat OWASP dependency scanning as CI-only unless the maintainer explicitly asks for a local run.
-- Do not manually run verification tasks that are already covered by the local git hooks. Before committing, run only focused tests for the behavior you changed or the tests you added, plus any extra checks that are not part of the hooks but are truly needed for the change.
+- Do not manually run verification tasks that are already covered by the local git hooks. Do not rerun the same verification during a task unless the code or environment changed in a way that makes the repeated run materially informative. Before committing, rely on the hook-managed checks for their covered tasks and run only focused tests for the behavior you changed or the tests you added, plus any extra checks that are not part of the hooks but are truly needed for the change.
 
 ## Issue Task
 

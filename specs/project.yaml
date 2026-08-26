@@ -133,7 +133,11 @@ agent_notes:
   - treat all password-manager wording as maintainer-owned copy; do not change user-visible text without approval for the exact wording
   - use GitHub CLI for GitHub-hosted repository work when local files are not enough; inspect Actions runs or workflow state, issues, pull requests, releases, and repository metadata with gh, preferring rtk gh when the needed subcommand is supported there
   - use deterministic helper workflows under .agent/scripts instead of manually composing the same multi-step shell, GitHub, Gradle, or release-check operations
-  - do not create or switch to a new git branch unless the maintainer explicitly approves that branch action
+  - work directly on main; do not create, switch to, or push any other local or remote branch
+  - do not use git stash
+  - if unrelated workspace state or another git constraint blocks working safely on main without stashing, stop, explain the blocker, and wait for maintainer instructions
   - before pushing committed work, run git pull -r on the current branch to integrate remote updates without a merge commit
   - do not run OWASP dependency-check locally for routine verification; use the GitHub Actions workflows unless the maintainer explicitly asks for a local run
   - use smoke-test/run.sh when the maintainer explicitly asks for a manual jar-level interactive smoke pass; it is complementary to Gradle tests rather than part of the default local gate
+  - do not rerun the same local verification during one task unless the code or environment changed in a way that makes the repeated run materially informative
+  - when a verification is already covered by the local pre-commit hook, do not run that same verification explicitly beforehand unless the maintainer asks for it or a non-hook reason makes it necessary

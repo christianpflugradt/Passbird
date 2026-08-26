@@ -72,7 +72,7 @@ local_verification_policy:
       - ./gradlew detekt
       - ./gradlew compileKotlin
       - ./gradlew compileTestKotlin
-    note: do not rerun these manually unless the maintainer explicitly asks for it
+    note: do not rerun these manually before commit unless the maintainer explicitly asks for it or a non-hook reason makes the duplicate run necessary
   pre_push_hook:
     covers:
       - ./gradlew checkLicense
@@ -83,6 +83,8 @@ local_verification_policy:
     note: do not rerun these manually unless the maintainer explicitly asks for it; prePushCheck includes the hook-managed jar build and smoke pass
   focused_tests:
     default: run only tests that exercise the code you changed or the tests you added
+    avoid_repetition:
+      - do not rerun the same local verification during one task unless the code or environment changed in a way that makes the repeated run materially informative
     expand_scope_when:
       - a structural or wiring change needs ./gradlew architecture
       - the maintainer explicitly asks for broader local verification
@@ -154,6 +156,8 @@ change_rules:
   - preserve backward compatibility unless the maintainer explicitly chooses a breaking change
   - use .agent/scripts/agent-ship.sh for the deterministic format, stage, commit, pull --rebase, and push sequence when shipping completed releasable work
   - delay commit and push only when maintainer input is still required or the current state is incomplete or not ready to release
+  - work directly on main; do not create, switch to, or push any other local or remote branch
+  - do not use git stash; if main-only work is blocked by unrelated workspace state or another git constraint, stop and wait for maintainer instructions
 commit_messages:
   standard: conventional_commits
   enforced_by:
