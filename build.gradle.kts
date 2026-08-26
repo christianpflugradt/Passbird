@@ -20,7 +20,7 @@ fun envOrNull(name: String): String? = System.getenv(name)?.takeIf { it.isNotBla
 plugins {
     idea
     application
-    id("dev.detekt") version "2.0.0-alpha.3"
+    id("dev.detekt") version "2.0.0-alpha.6"
     id("info.solidsoft.pitest") version "1.19.0"
     jacoco
     java
