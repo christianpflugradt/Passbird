@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.yolk
 
+import de.pflugradts.passbird.application.util.withScrambledBytes
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import java.net.URI
@@ -57,22 +58,17 @@ class TotpGenerator(
 }
 
 class YolkInputParser {
-    fun parse(
-        shell: Shell,
-        configuredDefaults: ConfiguredYolkDefaults = ConfiguredYolkDefaults(defaultTotpAlgorithm(), 6, 30),
-    ): ParsedYolk {
-        val input = shell.asString()
-        return if (input.startsWith("otpauth://", ignoreCase = true)) {
-            parseOtpauthUri(input)
+    fun parse(shell: Shell, configuredDefaults: ConfiguredYolkDefaults = ConfiguredYolkDefaults(defaultTotpAlgorithm(), 6, 30)) =
+        if (shell.startsWithAsciiIgnoreCase("otpauth://")) {
+            parseOtpauthUri(shell.asString())
         } else {
             ParsedYolk(
-                secret = decodeBase32Secret(input),
+                secret = decodeBase32Secret(shell),
                 algorithm = normalizeTotpAlgorithm(configuredDefaults.algorithm),
                 digits = configuredDefaults.digits.also { require(it == 6 || it == 8) { "Unsupported digits" } },
                 periodSeconds = configuredDefaults.periodSeconds.also { require(it > 0) { "Unsupported period" } },
             )
         }
-    }
 
     private fun parseOtpauthUri(input: String): ParsedYolk {
         val uri = runCatching { URI(input) }.getOrElse { throw IllegalArgumentException("Malformed otpauth URI") }
@@ -86,7 +82,7 @@ class YolkInputParser {
         require(digits == 6 || digits == 8) { "Unsupported digits" }
         require(periodSeconds > 0) { "Unsupported period" }
         return ParsedYolk(
-            secret = decodeBase32Secret(secret),
+            secret = decodeBase32Secret(shellOf(secret)),
             algorithm = algorithm,
             digits = digits,
             periodSeconds = periodSeconds,
@@ -103,31 +99,78 @@ class YolkInputParser {
             key to value
         }
 
-    private fun decodeBase32Secret(rawInput: String): Shell {
-        val normalized = rawInput
-            .filterNot { it.isWhitespace() || it == '-' || it == '_' }
-            .uppercase()
-        require(normalized.isNotEmpty()) { "Empty secret" }
-        val unpadded = normalized.trimEnd('=')
-        require(unpadded.isNotEmpty()) { "Empty secret" }
-        val bytes = ArrayList<Byte>()
-        var buffer = 0
-        var bitsLeft = 0
-        unpadded.forEach { chr ->
-            val value = BASE32_ALPHABET.indexOf(chr)
-            require(value >= 0) { "Invalid Base32 secret" }
-            buffer = (buffer shl 5) or value
-            bitsLeft += 5
-            while (bitsLeft >= 8) {
-                bitsLeft -= 8
-                bytes.add(((buffer shr bitsLeft) and 0xff).toByte())
+    private fun decodeBase32Secret(rawInput: Shell): Shell = withScrambledBytes(ByteArray(rawInput.size)) { normalized ->
+        val normalizedSize = copyNormalizedInput(rawInput, normalized)
+        require(normalizedSize > 0) { "Empty secret" }
+        val unpaddedSize = normalized.trimmedPaddingSize(normalizedSize)
+        require(unpaddedSize > 0) { "Empty secret" }
+        withScrambledBytes(ByteArray(unpaddedSize * 5 / 8)) { decoded ->
+            var decodedIndex = 0
+            var buffer = 0
+            var bitsLeft = 0
+            for (index in 0 until unpaddedSize) {
+                val value = normalized[index].base32Value()
+                require(value >= 0) { "Invalid Base32 secret" }
+                buffer = (buffer shl 5) or value
+                bitsLeft += 5
+                while (bitsLeft >= 8) {
+                    bitsLeft -= 8
+                    decoded[decodedIndex++] = ((buffer shr bitsLeft) and 0xff).toByte()
+                }
             }
+            shellOf(decoded)
         }
-        return shellOf(bytes)
     }
 
-    companion object {
-        private const val BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+    private fun copyNormalizedInput(rawInput: Shell, normalized: ByteArray): Int {
+        var normalizedSize = 0
+        for (byte in rawInput) {
+            if (!byte.isIgnoredBase32Separator()) {
+                normalized[normalizedSize++] = byte.uppercaseAscii()
+            }
+        }
+        return normalizedSize
+    }
+
+    private fun ByteArray.trimmedPaddingSize(size: Int): Int {
+        var trimmedSize = size
+        while (trimmedSize > 0 && this[trimmedSize - 1] == '='.code.toByte()) {
+            trimmedSize--
+        }
+        return trimmedSize
+    }
+
+    private fun Byte.base32Value(): Int {
+        val code = toInt() and 0xff
+        return when (code) {
+            in 'A'.code..'Z'.code -> code - 'A'.code
+            in '2'.code..'7'.code -> code - '2'.code + 26
+            else -> -1
+        }
+    }
+
+    private fun Byte.uppercaseAscii(): Byte {
+        val code = toInt() and 0xff
+        return if (code in 'a'.code..'z'.code) {
+            (code - ('a'.code - 'A'.code)).toByte()
+        } else {
+            code.toByte()
+        }
+    }
+
+    private fun Byte.isIgnoredBase32Separator() = isWhitespace() || this == '-'.code.toByte() || this == '_'.code.toByte()
+
+    private fun Byte.isWhitespace() = when (toInt() and 0xff) {
+        ' '.code, '\n'.code, '\r'.code, '\t'.code -> true
+        else -> false
+    }
+
+    private fun Shell.startsWithAsciiIgnoreCase(prefix: String): Boolean {
+        if (size < prefix.length) return false
+        for (index in prefix.indices) {
+            if (getByte(index).uppercaseAscii() != prefix[index].code.toByte().uppercaseAscii()) return false
+        }
+        return true
     }
 }
 

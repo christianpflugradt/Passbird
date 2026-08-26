@@ -125,6 +125,7 @@ current_security_relevant_implementation:
       - Shell iteration and streams traverse the owning Shell content without creating extra plaintext byte-array snapshots
       - export collection keeps decrypted Shell values alive only until the exchange adapter send operation returns, then scrambles the exported EggId, password, protein, and yolk Shell values before the command completes
       - import preview and import execution scrub parsed EggId, password, protein, and yolk Shell values after deriving previews or finishing the import attempt
+      - plain Base32 yolk parsing decodes directly from mutable Shell bytes and scrubs normalization buffers instead of materializing an immutable plaintext String copy before decode
       - event rendering scrambles decrypted EggId and protein type Shell values after converting them into the user-facing message text
   build_supply_chain:
     files:

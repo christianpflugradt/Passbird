@@ -46,10 +46,12 @@ class TotpSupportTest {
         val whitespace = YolkInputParser().parse(shellOf("MZXW 6YTB"))
         val hyphen = YolkInputParser().parse(shellOf("MZXW-6YTB"))
         val underscore = YolkInputParser().parse(shellOf("MZXW_6YTB"))
+        val lowercase = YolkInputParser().parse(shellOf("mzxw 6ytb"))
 
         expectThat(whitespace.secret.asString()) isEqualTo "fooba"
         expectThat(hyphen.secret.asString()) isEqualTo "fooba"
         expectThat(underscore.secret.asString()) isEqualTo "fooba"
+        expectThat(lowercase.secret.asString()) isEqualTo "fooba"
     }
 
     @Test
