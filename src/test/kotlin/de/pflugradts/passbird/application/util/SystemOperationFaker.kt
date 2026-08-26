@@ -22,6 +22,7 @@ fun fakeSystemOperation(
     every { instance.sleep(any()) } returns Unit
     every { instance.newInputStream(any()) } returns mockk()
     every { instance.newOutputStream(any()) } returns mockk()
+    every { instance.delete(any()) } returns Unit
     every { instance.writeToSensitiveFile(any(), any()) } answers {
         secondArg<(OutputStream) -> Unit>().invoke(mockk<OutputStream>(relaxed = true))
         Paths.get("")

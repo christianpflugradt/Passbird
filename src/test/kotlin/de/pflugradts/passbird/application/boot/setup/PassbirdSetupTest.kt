@@ -191,6 +191,7 @@ class PassbirdSetupTest {
         verify(exactly = 1) {
             configurationSync.syncKeyStoreLocation(activeConfigurationDirectory, VALID_DIRECTORY.toDirectory())
         }
+        verify(exactly = 0) { systemOperation.delete(any()) }
         verify(exactly = 1) { setupGuide.sendCreateKeyStoreSucceeded() }
         verify(exactly = 1) { setupGuide.sendRestart() }
         verify(exactly = 1) { setupGuide.sendGoodbye() }
@@ -233,6 +234,7 @@ class PassbirdSetupTest {
         verify(exactly = 1) {
             configurationSync.syncKeyStoreLocation(activeConfigurationDirectory, VALID_DIRECTORY.toDirectory())
         }
+        verify(exactly = 1) { systemOperation.delete(pathSlot.captured) }
         verify(exactly = 0) { setupGuide.sendCreateKeyStoreSucceeded() }
         verify(exactly = 0) { setupGuide.sendRestart() }
         verify(exactly = 1) { setupGuide.sendGoodbye() }

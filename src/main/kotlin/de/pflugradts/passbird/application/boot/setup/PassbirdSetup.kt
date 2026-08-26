@@ -56,8 +56,10 @@ class PassbirdSetup constructor(
         setupGuide.sendInputPath("keystore")
         setupGuide.sendCreateKeyStoreInformation()
         val directory = receiveValidDirectory()
-        createKeyStore(directory, receiveMasterPassword())
+        val keyStorePath = keyStorePath(directory)
+        keyStoreAdapterPort.storeKey(receiveMasterPassword(), keyStorePath)
         if (configurationSync.syncKeyStoreLocation(configurationDirectory, directory).failure) {
+            systemOperation.delete(keyStorePath)
             return
         }
         setupGuide.sendCreateKeyStoreSucceeded()
@@ -88,11 +90,9 @@ class PassbirdSetup constructor(
         }
     }
     private fun createKeyStore(directory: Directory, password: PlainShell) {
-        keyStoreAdapterPort.storeKey(
-            password,
-            Paths.get(directory.value).resolve(ReadableConfiguration.KEYSTORE_FILENAME),
-        )
+        keyStoreAdapterPort.storeKey(password, keyStorePath(directory))
     }
+    private fun keyStorePath(directory: Directory) = Paths.get(directory.value).resolve(ReadableConfiguration.KEYSTORE_FILENAME)
     private fun receiveValidDirectory(): Directory {
         var directory = Directory(userInterfaceAdapterPort.receive(outputOf(shellOf("your input: "))).shell.asString())
         while (!isValidDirectory(directory)) {
