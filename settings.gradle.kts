@@ -48,7 +48,13 @@ gitHooks {
         tasks("preCommitCheck")
     }
     hook("pre-push") {
-        tasks("prePushCheck")
+        from {
+            """
+            |set -e
+            |./gradlew --no-configuration-cache prePushCheck
+            |set +e
+            """.trimMargin()
+        }
     }
     commitMsg {
         from {

@@ -47,6 +47,7 @@ quality_gates:
   dependency_and_license:
     - Gradle Wrapper pins the distribution URL and official SHA-256 checksum in gradle/wrapper/gradle-wrapper.properties
     - pre-push hook runs ./gradlew checkLicense
+    - the generated pre-push hook intentionally runs ./gradlew --no-configuration-cache prePushCheck because dependency-license-report tasks retain Gradle Project state and otherwise force configuration-cache discard at the end of the hook run
     - Gradle dependency verification uses gradle/verification-metadata.xml and the armored gradle/verification-keyring.keys file
     - GitHub Actions OWASP dependency check workflows
   dependency_maintenance:
