@@ -24,7 +24,7 @@
             "groupName": "github-actions",
             "separateMajorMinor": false,
             "minimumReleaseAge": "14 days",
-            "automerge": true,
+            "automerge": true
         },
         {
             "description": [
@@ -35,7 +35,7 @@
                 "minor",
                 "digest"
             ],
-            "automerge": true,
+            "automerge": true
         },
         {
             "description": [
@@ -44,7 +44,7 @@
             "matchUpdateTypes": [
                 "major"
             ],
-            "minimumReleaseAge": "14 days",
+            "minimumReleaseAge": "14 days"
         },
         {
             "matchPackageNames": [
