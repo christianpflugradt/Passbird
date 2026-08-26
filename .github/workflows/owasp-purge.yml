@@ -18,14 +18,14 @@ jobs:
       cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-java@v5
         with:
           java-version: '25'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v6
       - id: dependency-check-cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
           key: ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}purge-${{ github.run_id }}
@@ -42,7 +42,7 @@ jobs:
           rm -rf "$DEPENDENCY_CHECK_DATA_LOCATION"
           ./gradlew dependencyCheckUpdate --stacktrace
       - name: save rebuilt dependency-check cache
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
           key: ${{ steps.dependency-check-cache.outputs.cache-primary-key }}
