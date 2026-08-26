@@ -12,7 +12,7 @@
     "prCreation": "status-success",
     "automerge": false,
     "platformAutomerge": false,
-    "rebaseWhen": "behind-base-branch"
+    "rebaseWhen": "behind-base-branch",
     "packageRules": [
         {
             "description": [
