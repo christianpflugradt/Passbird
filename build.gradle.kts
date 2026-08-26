@@ -47,7 +47,7 @@ val snakeYamlEngineVersion = "3.1.1"
 
 val archunitVersion = "1.5.0"
 val junitPlatformVersion = "6.1.3"
-val kotestPropertyVersion = "6.1.11"
+val kotestPropertyVersion = "6.2.4"
 val mockkVersion = "1.14.11"
 val pitestCoreVersion = "1.22.1"
 val pitestJunit5Version = "1.2.3"
