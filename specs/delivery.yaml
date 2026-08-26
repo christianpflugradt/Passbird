@@ -95,10 +95,9 @@ local_verification_policy:
       - gradle/verification-keyring.keys
     maintenance:
       - when the Gradle Wrapper distribution changes, update distributionUrl and distributionSha256Sum together using the official Gradle distribution checksum
-      - when third-party dependencies or Gradle plugins change, refresh with ./gradlew --write-verification-metadata sha256,pgp --export-keys help
-      - when test-only dependency graphs change, prefer resolving the same compile tasks CI uses so verification metadata captures test artifacts as well
-      - retry with ./gradlew --refresh-keys help if key downloads fail before accepting new ignored-key entries
-      - review checksum fallback and ignored-key additions before committing them
+      - when third-party dependencies or Gradle plugins change, refresh with ./gradlew --refresh-keys --write-verification-metadata sha256,pgp --export-keys compileKotlin compileTestKotlin compileJava compileTestJava
+      - prefer resolving the same compile tasks CI uses so verification metadata captures test artifacts as well
+      - if key downloads still fail after refreshing keys, review any newly generated checksum fallback entries carefully before committing them
       - keep the armored keyring in version control and do not commit the generated gradle/verification-keyring.gpg file
   ci_landscape:
     github:

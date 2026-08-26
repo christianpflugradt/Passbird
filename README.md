@@ -503,9 +503,9 @@ Passbird uses Gradle dependency verification to record checksums for unsigned ar
 
 When a dependency or Gradle plugin version changes, refresh the verification files with:
 
-`./gradlew --write-verification-metadata sha256,pgp --export-keys help`
+`./gradlew --refresh-keys --write-verification-metadata sha256,pgp --export-keys compileKotlin compileTestKotlin compileJava compileTestJava`
 
-Review the diff before committing. If Gradle reports keys that could not be downloaded, retry with `./gradlew --refresh-keys help` before deciding whether new checksum fallback entries or ignored keys are acceptable to keep.
+Review the diff before committing. If Gradle still reports key-download failures after refreshing keys, review any newly generated checksum fallback entries carefully before committing them.
 
 ### Commit Messages
 

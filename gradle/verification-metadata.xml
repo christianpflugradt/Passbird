@@ -4,37 +4,6 @@
       <verify-metadata>true</verify-metadata>
       <verify-signatures>true</verify-signatures>
       <keyring-format>armored</keyring-format>
-      <ignored-keys>
-         <ignored-key id="02216ED811210DAA" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="0374CF2E8DD1BDFD" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="08A4A4958D61FC3D" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="0AA3E5C3D232E79B" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="0E91C2DE43B72BB1" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="10C81B79DBFF09EA" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="153E7A3C2B4E5118" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="15C71C0A4E0B8EDD" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="31D2D79DF7E85DD3" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="40B4D7ECFEAF091D" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="419A28E3A649A40B" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="479D601F3A7B5C1A" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="586654072EAD6677" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="5F69AD087600B22C" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="72FEFD1572EB75E1" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="85911F425EC61B51" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="A141A874C360D694" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="A8E3B39F19E1CCE7" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="AADF2C18DCF95764" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="ABE9F3126BB741C1" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="B5BD4591883D638C" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="B717998EA3A25E91" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="BA9255C2CA445309" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="BCF4173966770193" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="BEDE11EAF1164480" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="C2148900BCD3C2AF" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="D364ABAA39A47320" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="F0D0AE433308B042" reason="Key couldn't be downloaded from any key server"/>
-         <ignored-key id="F6D4A1D411E9D1AE" reason="Key couldn't be downloaded from any key server"/>
-      </ignored-keys>
       <trusted-keys>
          <trusted-key id="03C123038C20AAE9E286C857479D601F3A7B5C1A" group="com.github.ajalt.clikt"/>
          <trusted-key id="05F1A5DA5701D415BEFC67FC6329ADE2B25B244B" group="io.github.pdvrieze.xmlutil"/>
