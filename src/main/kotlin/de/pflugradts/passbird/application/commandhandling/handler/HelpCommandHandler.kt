@@ -2,14 +2,24 @@ package de.pflugradts.passbird.application.commandhandling.handler
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.command.HelpCommand
+import de.pflugradts.passbird.domain.model.transfer.Output
+import de.pflugradts.passbird.domain.service.nest.NestService
+import de.pflugradts.passbird.domain.service.password.NestStats
+import de.pflugradts.passbird.domain.service.password.PasswordService
+
 class HelpCommandHandler constructor(
     private val canPrintInfo: CanPrintInfo,
+    private val nestService: NestService,
+    private val passwordService: PasswordService,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
 ) : TypedCommandHandler<HelpCommand>(HelpCommand::class.java) {
-    override fun handleCommand(@Suppress("UNUSED_PARAMETER") command: HelpCommand) {
+    override fun handleCommand(command: HelpCommand) {
         with(canPrintInfo) {
+            if (command.showStats) {
+                userInterfaceAdapterPort.send(*statsOutputs().toTypedArray())
+            }
             userInterfaceAdapterPort.send(
-                outBold("\nUsage: [command][parameter]\n"),
+                outBold(if (command.showStats) "Usage: [command][parameter]\n" else "\nUsage: [command][parameter]\n"),
                 out("A command takes at most one parameter which is usually an EggId.\n\n"),
                 outBold("Commands:\n\n"),
                 outBold("\tg[EggId]"), out(" (get)        Copies the password for the specified Egg to the clipboard.\n"),
@@ -45,4 +55,44 @@ class HelpCommandHandler constructor(
             )
         }
     }
+
+    private fun CanPrintInfo.statsOutputs(): List<Output> {
+        val currentNestStats = passwordService.viewNestStats()
+        val allNestStats = allNestStats()
+        val activeNests = activeNestCount()
+        return buildList {
+            add(outBold("Stats\n\n"))
+            add(outSpecial("Current Nest\n"))
+            addAll(statOutputs(currentNestStats))
+            add(out("\n"))
+            add(outSpecial("Across All Nests\n"))
+            addAll(statOutputs(allNestStats, activeNests))
+        }
+    }
+
+    private fun allNestStats() = nestService.all(includeDefault = true)
+        .filter { it.isPresent }
+        .map { passwordService.viewNestStats(it.get().slot) }
+        .reduce(NestStats(0, 0, 0, 0, 0), ::sum)
+
+    private fun activeNestCount() = nestService.all().filter { it.isPresent }.count().toInt()
+
+    private fun CanPrintInfo.statOutputs(stats: NestStats, activeNests: Int? = null): List<Output> = buildList {
+        addAll(statLine("Eggs", stats.eggs))
+        activeNests?.let { addAll(statLine("Active Nests", it)) }
+        addAll(statLine("Eggs with Yolks", stats.eggsWithYolks))
+        addAll(statLine("Eggs with Proteins", stats.eggsWithProteins))
+        addAll(statLine("Occupied Protein Slots", stats.occupiedProteinSlots))
+        addAll(statLine("Assigned Favorites", stats.assignedFavorites))
+    }
+
+    private fun CanPrintInfo.statLine(label: String, value: Int): List<Output> = listOf(out("$label: "), outNest("$value\n"))
 }
+
+private fun sum(left: NestStats, right: NestStats) = NestStats(
+    eggs = left.eggs + right.eggs,
+    eggsWithYolks = left.eggsWithYolks + right.eggsWithYolks,
+    eggsWithProteins = left.eggsWithProteins + right.eggsWithProteins,
+    occupiedProteinSlots = left.occupiedProteinSlots + right.occupiedProteinSlots,
+    assignedFavorites = left.assignedFavorites + right.assignedFavorites,
+)

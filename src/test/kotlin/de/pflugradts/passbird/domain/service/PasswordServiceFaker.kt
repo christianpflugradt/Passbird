@@ -13,6 +13,7 @@ import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slots
 import de.pflugradts.passbird.domain.service.nest.NestService
+import de.pflugradts.passbird.domain.service.password.NestStats
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import de.pflugradts.passbird.domain.service.password.YolkView
 import io.mockk.every
@@ -23,10 +24,11 @@ fun fakePasswordService(
     withEggs: List<Egg> = emptyList(),
     withNestService: NestService? = null,
     withFavorites: Map<Slot, String> = emptyMap(),
+    withNestFavoriteCounts: Map<Slot, Int> = emptyMap(),
     withMemory: Map<Slot, String> = emptyMap(),
 ) {
     fakeWriteOperations(instance)
-    fakeEggQueries(instance, withEggs, withNestService)
+    fakeEggQueries(instance, withEggs, withNestService, withFavorites, withNestFavoriteCounts)
     fakeProteinQueries(instance, withEggs)
     fakeEggValidation(instance, withInvalidEggId)
     fakeRemainingQueries(instance, withFavorites, withMemory)
@@ -40,7 +42,13 @@ private fun fakeWriteOperations(instance: PasswordService) {
     every { instance.putYolk(any(), any(), any<String>(), any(), any()) } returns success(Unit)
 }
 
-private fun fakeEggQueries(instance: PasswordService, withEggs: List<Egg>, withNestService: NestService?) {
+private fun fakeEggQueries(
+    instance: PasswordService,
+    withEggs: List<Egg>,
+    withNestService: NestService?,
+    withFavorites: Map<Slot, String>,
+    withNestFavoriteCounts: Map<Slot, Int>,
+) {
     every { instance.findAllEggIds() } answers {
         if (withNestService != null) {
             withEggs
@@ -57,6 +65,19 @@ private fun fakeEggQueries(instance: PasswordService, withEggs: List<Egg>, withN
     }
     every { instance.viewPassword(any()) } answers {
         optionOf(withEggs.find { it.viewEggId().fakeDec() == firstArg() }?.viewPassword()?.fakeDec())
+    }
+    every { instance.viewNestStats() } answers {
+        val currentNestSlot = withNestService?.currentNest()?.slot ?: Slot.DEFAULT
+        statsFor(
+            withEggs.filter { it.associatedNest() == currentNestSlot },
+            withNestFavoriteCounts[currentNestSlot] ?: withFavorites.size,
+        )
+    }
+    every { instance.viewNestStats(any<Slot>()) } answers {
+        val slot = firstArg<Slot>()
+        val assignedFavorites = withNestFavoriteCounts[slot]
+            ?: if (withNestService?.currentNest()?.slot == slot) withFavorites.size else 0
+        statsFor(withEggs.filter { it.associatedNest() == slot }, assignedFavorites)
     }
     every { instance.eggExists(any(), any<PasswordService.EggNotExistsAction>()) } answers {
         withEggs.find { it.viewEggId().fakeDec() == firstArg() } != null
@@ -128,3 +149,10 @@ private fun fakeRemainingQueries(instance: PasswordService, withFavorites: Map<S
 
 private fun MutableOption<Protein>.extractType() = orNull()?.viewType()?.fakeDec() ?: emptyShell()
 private fun MutableOption<Protein>.extractStructure() = orNull()?.viewStructure()?.fakeDec() ?: emptyShell()
+private fun statsFor(eggs: List<Egg>, assignedFavorites: Int) = NestStats(
+    eggs = eggs.size,
+    eggsWithYolks = eggs.count(Egg::hasYolk),
+    eggsWithProteins = eggs.count { egg -> egg.proteins.any { it.isPresent } },
+    occupiedProteinSlots = eggs.sumOf { egg -> egg.proteins.count { it.isPresent } },
+    assignedFavorites = assignedFavorites,
+)

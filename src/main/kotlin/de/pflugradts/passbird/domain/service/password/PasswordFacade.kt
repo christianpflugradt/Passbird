@@ -17,6 +17,8 @@ class PasswordFacade constructor(
     override fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction) =
         viewPasswordService.eggExists(eggIdShell, eggNotExistsAction)
     override fun proteinExists(eggIdShell: Shell, slot: Slot) = viewPasswordService.proteinExists(eggIdShell, slot)
+    override fun viewNestStats() = viewPasswordService.viewNestStats()
+    override fun viewNestStats(slot: Slot) = viewPasswordService.viewNestStats(slot)
     override fun viewFavorites() = favoritePasswordService.viewFavorites()
     override fun viewFavoriteEntry(slot: Slot) = favoritePasswordService.viewFavoriteEntry(slot)
     override fun viewMemory() = viewPasswordService.viewMemory()

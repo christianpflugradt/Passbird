@@ -3,6 +3,7 @@ import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
 import de.pflugradts.kotlinextensions.MutableOption.Companion.optionOf
 import de.pflugradts.kotlinextensions.Option
 import de.pflugradts.passbird.domain.model.egg.Egg
+import de.pflugradts.passbird.domain.model.egg.EggIdFavorites
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
@@ -21,6 +22,8 @@ class ViewPasswordService constructor(
 ) : CommonPasswordServiceCapabilities(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl) {
     fun findAllEggIds(): Stream<Shell> = eggRepository.findAll().map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
     fun findAllEggIds(slot: Slot): Stream<Shell> = eggRepository.findAll(slot).map { decrypted(it.viewEggId()) }.sorted(ShellComparator())
+    fun viewNestStats() = eggRepository.findAll().toList().toNestStats(eggRepository.favorites())
+    fun viewNestStats(slot: Slot) = eggRepository.findAll(slot).toList().toNestStats(eggRepository.favorites(slot))
     fun viewPassword(eggIdShell: Shell): Option<Shell> = extractFromEgg(eggIdShell) { decrypted(it.viewPassword()) }
     fun proteinExists(eggIdShell: Shell, slot: Slot) = viewProteinStructure(eggIdShell, slot).map { it.isNotEmpty }.orElse(false)
     fun viewProteinStructure(eggIdShell: Shell, slot: Slot): Option<Shell> = extractFromEgg(eggIdShell) { egg ->
@@ -60,3 +63,11 @@ class ViewPasswordService constructor(
             emptyOption()
         }
 }
+
+private fun List<Egg>.toNestStats(favorites: EggIdFavorites) = NestStats(
+    eggs = size,
+    eggsWithYolks = count(Egg::hasYolk),
+    eggsWithProteins = count { egg -> egg.proteins.any { it.isPresent } },
+    occupiedProteinSlots = sumOf { egg -> egg.proteins.count { it.isPresent } },
+    assignedFavorites = favorites.count { it.isPresent },
+)

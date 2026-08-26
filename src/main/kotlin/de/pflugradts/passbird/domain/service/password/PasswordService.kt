@@ -17,6 +17,8 @@ interface PasswordService {
     fun eggExists(eggIdShell: Shell, slot: Slot): Boolean
     fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction): Boolean
     fun proteinExists(eggIdShell: Shell, slot: Slot): Boolean
+    fun viewNestStats(): NestStats
+    fun viewNestStats(slot: Slot): NestStats
     fun viewFavorites(): Slots<Shell>
     fun viewFavoriteEntry(slot: Slot): Option<Shell>
     fun viewMemory(): Slots<Shell>
@@ -43,6 +45,14 @@ interface PasswordService {
     fun findAllEggIds(): Stream<Shell>
     fun findAllEggIds(slot: Slot): Stream<Shell>
 }
+
+data class NestStats(
+    val eggs: Int,
+    val eggsWithYolks: Int,
+    val eggsWithProteins: Int,
+    val occupiedProteinSlots: Int,
+    val assignedFavorites: Int,
+)
 
 data class YolkView(
     val secret: Shell,

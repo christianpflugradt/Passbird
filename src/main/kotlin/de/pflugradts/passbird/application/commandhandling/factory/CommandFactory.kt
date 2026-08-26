@@ -43,7 +43,7 @@ class CommandFactory constructor(
     }
     private fun constructWithoutArguments(commandType: CommandType, input: Input) = when (commandType) {
         CommandType.EXPORT -> constructWithOptionalStarVariant(input) { ExportCommand(it) }
-        CommandType.HELP -> constructSafely(input) { HelpCommand() }
+        CommandType.HELP -> constructWithOptionalStarVariant(input) { HelpCommand(it) }
         CommandType.IMPORT -> constructWithOptionalStarVariant(input) { ImportCommand(it) }
         CommandType.KEYSTORE -> constructSafely(input) { ChangeMasterPasswordCommand() }
         CommandType.QUIT -> constructSafely(input) { QuitCommand(quitReason = USER) }

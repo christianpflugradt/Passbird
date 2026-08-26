@@ -45,6 +45,7 @@ user_command_families:
     commands:
       - .
       - h
+      - h*
       - q
   - family: list
     commands:

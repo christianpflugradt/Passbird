@@ -25,6 +25,7 @@ command_surface:
   discoverability:
     top_level_help_command:
       - h is the explicit top-level help command
+      - h* extends the top-level help output with password-tree statistics shown before the usage information
       - the top-level help screen presents the syntax contract as [command][parameter]
       - the top-level help screen describes commands as taking at most one parameter, usually an EggId
     top_level_help_advertised_entrypoints:
@@ -46,6 +47,7 @@ command_surface:
       - l*[filter]
       - .
       - h
+      - h*
       - q
       - n
       - f?
@@ -206,6 +208,7 @@ capabilities:
     commands:
       - .
       - h
+      - h*
       - q
   - name: memory_and_listing
     user_outcomes:

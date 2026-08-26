@@ -242,6 +242,7 @@ The s command stands for “set” and generates a random password for the speci
 The g command stands for “get” and copies the password to your clipboard.
 
 You can access Passbird’s in-app help at any time by pressing h and then Enter.
+Enter `h*` to view password-tree statistics before the same usage information.
 
     Usage: [command][parameter]
     A command takes at most one parameter which is usually an EggId.

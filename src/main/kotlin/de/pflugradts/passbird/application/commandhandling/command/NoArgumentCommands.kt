@@ -4,7 +4,7 @@ import de.pflugradts.passbird.application.commandhandling.command.base.NoArgumen
 
 class ExportCommand(val selective: Boolean = false) : NoArgumentCommand
 class FavoriteInfoCommand : NoArgumentCommand
-class HelpCommand : NoArgumentCommand
+class HelpCommand(val showStats: Boolean = false) : NoArgumentCommand
 class ImportCommand(val selective: Boolean = false) : NoArgumentCommand
 class ChangeMasterPasswordCommand : NoArgumentCommand
 class MemoryInfoCommand : NoArgumentCommand

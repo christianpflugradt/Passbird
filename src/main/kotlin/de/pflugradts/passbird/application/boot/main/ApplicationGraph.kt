@@ -171,7 +171,7 @@ class ApplicationGraph(
                 proteinEventOutputControl,
                 commandExecutionTracker,
             ),
-            HelpCommandHandler(canPrintInfo, userInterfaceAdapterPort),
+            HelpCommandHandler(canPrintInfo, nestService, passwordService, userInterfaceAdapterPort),
             ImportCommandHandler(
                 configuration,
                 importExportService,

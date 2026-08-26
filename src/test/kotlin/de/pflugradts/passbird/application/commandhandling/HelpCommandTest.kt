@@ -8,8 +8,15 @@ import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintI
 import de.pflugradts.passbird.application.commandhandling.handler.HelpCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
+import de.pflugradts.passbird.domain.model.egg.TestYolkData
+import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.slot.Slot.S1
+import de.pflugradts.passbird.domain.model.slot.Slot.S2
 import de.pflugradts.passbird.domain.model.transfer.Input
+import de.pflugradts.passbird.domain.service.fakePasswordService
+import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import io.mockk.mockk
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -21,8 +28,10 @@ import strikt.assertions.isEqualTo
 class HelpCommandTest {
 
     private val configuration = mockk<Configuration>()
+    private val nestService = createNestServiceForTesting()
+    private val passwordService = mockk<de.pflugradts.passbird.domain.service.password.PasswordService>()
     private val commandLineInterfaceService = CommandLineInterfaceService(mockk(), configuration)
-    private val helpCommandHandler = HelpCommandHandler(CanPrintInfo(), commandLineInterfaceService)
+    private val helpCommandHandler = HelpCommandHandler(CanPrintInfo(), nestService, passwordService, commandLineInterfaceService)
     private val inputHandler = createInputHandlerFor(helpCommandHandler)
 
     @Test
@@ -49,6 +58,23 @@ class HelpCommandTest {
     }
 
     @Test
+    fun `should handle help stats command`() {
+        // given
+        arrangeHelpStatsData()
+        val input = Input.inputOf(shellOf("h*"))
+        fakeConfiguration(instance = configuration)
+        val captureSystemOut = CapturedOutputPrintStream.captureSystemOut()
+
+        // when
+        captureSystemOut.during {
+            inputHandler.handleInput(input)
+        }
+
+        // then
+        expectThat(captureSystemOut.capture) contains expectedHelpStatsOutput()
+    }
+
+    @Test
     fun `should reject help command with trailing input`() {
         // given
         val input = Input.inputOf(shellOf("hhelp"))
@@ -67,4 +93,70 @@ class HelpCommandTest {
         expectThat(captureSystemOut.capture) isEqualTo ""
         expectThat(captureSystemErr.capture) isEqualTo "Command execution failed: Parameter for command 'h' not supported: help\n"
     }
+
+    private fun arrangeHelpStatsData() {
+        nestService.place(shellOf("work"), S1)
+        nestService.place(shellOf("private"), S2)
+        nestService.moveToNestAt(S1)
+        fakePasswordService(
+            instance = passwordService,
+            withNestService = nestService,
+            withNestFavoriteCounts = mapOf(DEFAULT to 1, S1 to 2, S2 to 1),
+            withEggs = statsEggs(),
+        )
+    }
+
+    private fun statsEggs() = listOf(
+        createEggForTesting(
+            withEggIdShell = shellOf("mail"),
+            withSlot = S1,
+            withProteins = mapOf(
+                DEFAULT to Pair(shellOf("username"), shellOf("alice")),
+                S1 to Pair(shellOf("url"), shellOf("mail.example")),
+            ),
+            withYolk = TestYolkData(shellOf("secret-1")),
+        ),
+        createEggForTesting(
+            withEggIdShell = shellOf("calendar"),
+            withSlot = S1,
+            withProteins = mapOf(DEFAULT to Pair(shellOf("url"), shellOf("calendar.example"))),
+        ),
+        createEggForTesting(withEggIdShell = shellOf("notes"), withSlot = S1),
+        createEggForTesting(withEggIdShell = shellOf("bank"), withSlot = S2, withYolk = TestYolkData(shellOf("secret-2"))),
+        createEggForTesting(
+            withEggIdShell = shellOf("shop"),
+            withSlot = S2,
+            withProteins = mapOf(
+                DEFAULT to Pair(shellOf("username"), shellOf("bob")),
+                S1 to Pair(shellOf("url"), shellOf("shop.example")),
+            ),
+            withYolk = TestYolkData(shellOf("secret-3")),
+        ),
+        createEggForTesting(
+            withEggIdShell = shellOf("forum"),
+            withSlot = DEFAULT,
+            withProteins = mapOf(DEFAULT to Pair(shellOf("username"), shellOf("carol"))),
+        ),
+    )
+
+    private fun expectedHelpStatsOutput() = """
+Stats
+
+Current Nest
+Eggs: 3
+Eggs with Yolks: 1
+Eggs with Proteins: 2
+Occupied Protein Slots: 3
+Assigned Favorites: 2
+
+Across All Nests
+Eggs: 6
+Active Nests: 2
+Eggs with Yolks: 3
+Eggs with Proteins: 4
+Occupied Protein Slots: 6
+Assigned Favorites: 4
+
+Usage: [command][parameter]
+    """.trimIndent()
 }

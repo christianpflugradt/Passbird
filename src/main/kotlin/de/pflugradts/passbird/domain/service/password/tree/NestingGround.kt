@@ -60,7 +60,8 @@ class NestingGround constructor(
     override fun findAll() = createEggStreamSupplier(inNest(currentNestSlot)).get()
     private fun createEggStreamSupplier(slot: Slot) = createEggStreamSupplier(inNest(slot))
     private fun createEggStreamSupplier(predicate: Predicate<Egg>) = EggStreamSupplier({ eggs.stream().filter(predicate) })
-    override fun favorites() = favorites[currentNestSlot].get().copy()
+    override fun favorites(slot: Slot) = favorites[slot].get().copy()
+    override fun favorites() = favorites(currentNestSlot)
     override fun memory() = memory[currentNestSlot].get().copy()
     override fun putFavorite(slot: Slot, encryptedShell: EncryptedShell) {
         favorites[currentNestSlot].get().assign(slot, encryptedShell)
