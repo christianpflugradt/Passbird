@@ -39,7 +39,7 @@ class ProteinInfoCommandTest {
         // then
         expectThat(captureSystemOut.capture) contains "Available Protein commands"
         expectThat(captureSystemOut.capture) contains
-            "  p+[0-9][EggId]     (update)        Updates the Protein Structure and optionally the Type in the specified Slot."
+            "    p+[0-9][EggId]  (update)     Updates the Protein Structure and optionally the Type in the specified Slot."
         expectThat(captureSystemOut.capture).not().contains("\t")
     }
 }

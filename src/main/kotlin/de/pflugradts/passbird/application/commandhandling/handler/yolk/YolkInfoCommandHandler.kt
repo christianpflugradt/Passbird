@@ -15,15 +15,38 @@ class YolkInfoCommandHandler(
             userInterfaceAdapterPort.send(
                 *buildList {
                     add(outBold("\nAvailable Yolk commands:\n"))
-                    addAll(commandInfoOutputs("y?", " (help)       Displays this help menu for Yolk commands.").toList())
-                    addAll(commandInfoOutputs("y[EggId]", " (view)       Displays the current TOTP code for the specified Egg.").toList())
+                    addAll(
+                        commandInfoOutputs(
+                            "y?",
+                            "(help)",
+                            "Displays this help menu for Yolk commands.",
+                            actionColumnWidth = 13,
+                        ).toList(),
+                    )
+                    addAll(
+                        commandInfoOutputs(
+                            "y[EggId]",
+                            "(view)",
+                            "Displays the current TOTP code for the specified Egg.",
+                            actionColumnWidth = 13,
+                        ).toList(),
+                    )
                     addAll(
                         commandInfoOutputs(
                             "y+[EggId]",
-                            " (set)        Prompts for a TOTP secret or otpauth URI and stores it for the specified Egg.",
+                            "(set)",
+                            "Prompts for a TOTP secret or otpauth URI and stores it for the specified Egg.",
+                            actionColumnWidth = 13,
                         ).toList(),
                     )
-                    addAll(commandInfoOutputs("y-[EggId]", " (discard)    Deletes the Yolk stored for the specified Egg.").toList())
+                    addAll(
+                        commandInfoOutputs(
+                            "y-[EggId]",
+                            "(discard)",
+                            "Deletes the Yolk stored for the specified Egg.",
+                            actionColumnWidth = 13,
+                        ).toList(),
+                    )
                     add(out("\n"))
                 }.toTypedArray(),
             )

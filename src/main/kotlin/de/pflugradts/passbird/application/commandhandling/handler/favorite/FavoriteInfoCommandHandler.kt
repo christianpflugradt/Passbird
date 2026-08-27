@@ -10,33 +10,58 @@ class FavoriteInfoCommandHandler constructor(
 ) : TypedCommandHandler<FavoriteInfoCommand>(FavoriteInfoCommand::class.java) {
     override fun handleCommand(@Suppress("UNUSED_PARAMETER") command: FavoriteInfoCommand) {
         with(canPrintInfo) {
-            userInterfaceAdapterPort.send(
-                *buildList {
-                    add(outBold("\nAvailable Favorite commands:\n"))
-                    addAll(commandInfoOutputs("f?", " (help)            Displays this help menu for Favorite commands.").toList())
-                    addAll(commandInfoOutputs("f", " (info)            Lists the favorite EggIds for the current Nest.").toList())
-                    addAll(
-                        commandInfoOutputs(
-                            "f[0-9]",
-                            " (copy)            Copies the EggId from the specified Favorite Slot to the clipboard.",
-                        ).toList(),
-                    )
-                    addAll(
-                        commandInfoOutputs(
-                            "f[0-9]Command",
-                            " (use)             Executes the specified command using the EggId from the given Favorite Slot.",
-                        ).toList(),
-                    )
-                    addAll(
-                        commandInfoOutputs(
-                            "f+[0-9][EggId]",
-                            "                   Assigns the specified EggId to the given Favorite Slot.",
-                        ).toList(),
-                    )
-                    addAll(commandInfoOutputs("f-[0-9]", "                   Clears the specified Favorite Slot.").toList())
-                    add(out("\n"))
-                }.toTypedArray(),
-            )
+            userInterfaceAdapterPort.send(*favoriteCommandOutputs().toTypedArray())
         }
+    }
+
+    private fun CanPrintInfo.favoriteCommandOutputs() = buildList {
+        add(outBold("\nAvailable Favorite commands:\n"))
+        addAll(
+            commandInfoOutputs(
+                "f?",
+                "(help)",
+                "Displays this help menu for Favorite commands.",
+                commandColumnWidth = 15,
+                actionColumnWidth = 13,
+            ),
+        )
+        addAll(
+            commandInfoOutputs(
+                "f",
+                "(info)",
+                "Lists the favorite EggIds for the current Nest.",
+                commandColumnWidth = 15,
+                actionColumnWidth = 13,
+            ),
+        )
+        addAll(
+            commandInfoOutputs(
+                "f[0-9]",
+                "(copy)",
+                "Copies the EggId from the specified Favorite Slot to the clipboard.",
+                commandColumnWidth = 15,
+                actionColumnWidth = 13,
+            ),
+        )
+        addAll(
+            commandInfoOutputs(
+                "f[0-9]Command",
+                "(use)",
+                "Executes the specified command using the EggId from the given Favorite Slot.",
+                commandColumnWidth = 15,
+                actionColumnWidth = 13,
+            ),
+        )
+        addAll(
+            commandInfoOutputs(
+                "f+[0-9][EggId]",
+                "(assign)",
+                "Assigns the specified EggId to the given Favorite Slot.",
+                commandColumnWidth = 15,
+                actionColumnWidth = 13,
+            ),
+        )
+        addAll(commandInfoOutputs("f-[0-9]", null, "Clears the specified Favorite Slot.", commandColumnWidth = 15, actionColumnWidth = 13))
+        add(out("\n"))
     }
 }

@@ -19,6 +19,6 @@ class CanListAvailableNests constructor(private val nestService: NestService) {
             .filter { it.isPresent }
             .map { it.get() }
             .filter { includeCurrent || it != nestService.currentNest() }
-            .map { labeledValueLine("${it.slot.index()}:", it.viewNestId().asString()) }
+            .map { labeledValueLine("${it.slot.index()}:", it.viewNestId().asString(), labelColumnWidth = 5) }
             .toList().joinToString("\n")
 }

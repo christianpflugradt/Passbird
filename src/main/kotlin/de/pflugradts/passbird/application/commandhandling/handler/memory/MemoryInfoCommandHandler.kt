@@ -13,18 +13,40 @@ class MemoryInfoCommandHandler constructor(
             userInterfaceAdapterPort.send(
                 *buildList {
                     add(outBold("\nAvailable Memory commands:\n"))
-                    addAll(commandInfoOutputs("m?", " (help)           Displays this help menu for Memory commands.").toList())
-                    addAll(commandInfoOutputs("m", " (info)           Lists the EggIds currently stored in the EggIdMemory.").toList())
+                    addAll(
+                        commandInfoOutputs(
+                            "m?",
+                            "(help)",
+                            "Displays this help menu for Memory commands.",
+                            commandColumnWidth = 15,
+                            actionColumnWidth = 13,
+                        ).toList(),
+                    )
+                    addAll(
+                        commandInfoOutputs(
+                            "m",
+                            "(info)",
+                            "Lists the EggIds currently stored in the EggIdMemory.",
+                            commandColumnWidth = 15,
+                            actionColumnWidth = 13,
+                        ).toList(),
+                    )
                     addAll(
                         commandInfoOutputs(
                             "m[0-9]",
-                            " (copy)           Copies the EggId from the specified Memory Slot to the clipboard.",
+                            "(copy)",
+                            "Copies the EggId from the specified Memory Slot to the clipboard.",
+                            commandColumnWidth = 15,
+                            actionColumnWidth = 13,
                         ).toList(),
                     )
                     addAll(
                         commandInfoOutputs(
                             "m[0-9]Command",
-                            " (use)            Executes the specified command using the EggId from the given Memory Slot.",
+                            "(use)",
+                            "Executes the specified command using the EggId from the given Memory Slot.",
+                            commandColumnWidth = 15,
+                            actionColumnWidth = 13,
                         ).toList(),
                     )
                     add(out("\n"))

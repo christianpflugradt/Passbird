@@ -22,18 +22,19 @@ class ViewNestCommandHandler constructor(
                     add(out(availableNests))
                     add(outBold("\n\nAvailable Nest commands:\n"))
                     addAll(
-                        commandInfoOutputs("n", " (view)       Displays the current Nest, available Nests, and related commands.").toList(),
+                        commandInfoOutputs("n", "(view)", "Displays the current Nest, available Nests, and related commands.").toList(),
                     )
-                    addAll(commandInfoOutputs("n0", " (switch)     Switches to the default Nest.").toList())
-                    addAll(commandInfoOutputs("n[1-9]", " (switch)     Switches to the Nest in the specified Nest Slot (1–9).").toList())
+                    addAll(commandInfoOutputs("n0", "(switch)", "Switches to the default Nest.").toList())
+                    addAll(commandInfoOutputs("n[1-9]", "(switch)", "Switches to the Nest in the specified Nest Slot (1–9).").toList())
                     addAll(
                         commandInfoOutputs(
                             "n[EggId]",
-                            " (assign)     Assigns the specified EggId to a Nest selected interactively.",
+                            "(assign)",
+                            "Assigns the specified EggId to a Nest selected interactively.",
                         ).toList(),
                     )
-                    addAll(commandInfoOutputs("n+[1-9]", " (create)     Creates a new Nest in the specified Nest Slot.").toList())
-                    addAll(commandInfoOutputs("n-[1-9]", " (discard)    Deletes the Nest in the specified Nest Slot.").toList())
+                    addAll(commandInfoOutputs("n+[1-9]", "(create)", "Creates a new Nest in the specified Nest Slot.").toList())
+                    addAll(commandInfoOutputs("n-[1-9]", "(discard)", "Deletes the Nest in the specified Nest Slot.").toList())
                     add(out("\n"))
                 }.toTypedArray(),
             )
@@ -41,6 +42,6 @@ class ViewNestCommandHandler constructor(
     }
     private val currentNest get() = nestService.currentNest().viewNestId().asString()
     private val availableNests get() = canListAvailableNests.getAvailableNests(includeCurrent = true).let {
-        if (canListAvailableNests.hasCustomNests()) it else "$it\n  (use the n+ command to create custom Nests)\n"
+        if (canListAvailableNests.hasCustomNests()) it else "$it\n\n    (use the n+ command to create custom Nests)\n"
     }
 }

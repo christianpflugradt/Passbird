@@ -27,7 +27,7 @@ flows:
       - Passbird starts this flow with a leading empty line before the Available Nests heading
       - Passbird prints Available Nests:
       - Passbird prints one empty line after that heading before the Nest list
-      - Passbird then prints a tab-indented Nest list including the default Nest at slot 0 and every deployed custom Nest
+      - Passbird then prints a four-space-indented Nest list including the default Nest at slot 0 and every deployed custom Nest
     nest_list_template:
       - "\t0: <DefaultNestId>"
       - "\t<SlotIndex>: <NestId>"
@@ -102,7 +102,7 @@ flows:
       - Passbird starts this flow with a leading empty line before the Available Nests in import file heading
       - Passbird prints Available Nests in import file:
       - Passbird prints one empty line after that heading before the preview list
-      - Passbird then prints a space-padded preview list with a fixed-width source-slot column in the form "  <SourceSlotIndex>:      <NestId>"
+      - Passbird then prints a four-space-indented preview list with a fixed-width source-slot column in the form "    <SourceSlotIndex>:   <NestId>"
     exact_source_slot_prompt: "\nSpecify a Nest Slot 0-9 to import or anything else to abort: "
     exact_target_slot_prompt: "Specify a target Nest Slot 0-9 or anything else to abort: "
     accepted_slot_input_shape:

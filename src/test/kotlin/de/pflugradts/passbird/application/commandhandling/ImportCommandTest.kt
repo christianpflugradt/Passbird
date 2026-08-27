@@ -80,7 +80,7 @@ class ImportCommandTest {
 
         // then
         verify(exactly = 1) { importExportService.importEggs(S9, S2) }
-        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("  9:      work")))) }
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("    9:   work")))) }
     }
 
     @Test

@@ -48,7 +48,7 @@ class ViewNestCommandTest {
         // then
         expectThat(captureSystemOut.capture) contains "Available Nest commands"
         expectThat(captureSystemOut.capture) contains
-            "  n[EggId]           (assign)     Assigns the specified EggId to a Nest selected interactively."
+            "    n[EggId]    (assign)      Assigns the specified EggId to a Nest selected interactively."
         expectThat(captureSystemOut.capture).not().contains("n[0-9][EggId] (assign)")
         expectThat(captureSystemOut.capture).not().contains("\t")
     }
@@ -86,6 +86,6 @@ class ViewNestCommandTest {
         }
 
         // then
-        expectThat(captureSystemOut.capture) contains "  $deployedNestSlot:      $deployedNest"
+        expectThat(captureSystemOut.capture) contains "    $deployedNestSlot:   $deployedNest"
     }
 }

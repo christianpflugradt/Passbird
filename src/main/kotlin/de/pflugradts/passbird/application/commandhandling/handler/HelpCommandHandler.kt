@@ -24,11 +24,11 @@ class HelpCommandHandler constructor(
             addAll(statsOutputs())
         }
         addAll(helpIntroOutputs())
-        addAll(commandSectionOutputs(primaryCommands()))
+        addAll(primaryCommandOutputs())
         add(out("\n"))
-        addAll(commandSectionOutputs(secondaryCommands()))
+        addAll(secondaryCommandOutputs())
         add(out("\n"))
-        addAll(commandSectionOutputs(infoCommands()))
+        addAll(infoCommandOutputs())
     }
 
     private fun CanPrintInfo.helpIntroOutputs() = listOf(
@@ -38,45 +38,54 @@ class HelpCommandHandler constructor(
     )
 
     private fun primaryCommands() = listOf(
-        "g[EggId]" to " (get)        Copies the password for the specified Egg to the clipboard.\n",
-        "s[EggId]" to " (set)        Sets a random password for the specified Egg, overwriting any existing one.\n",
-        "s*[EggId]" to " (set once)   Sets a random password for the specified EggId using a one-time configuration.\n",
-        "c[EggId]" to " (custom set) Prompts the user to input a custom password for the specified Egg.\n",
-        "v[EggId]" to " (view)       Displays the password for the specified Egg in the console.\n",
-        "r[EggId]" to " (rename)     Renames the specified Egg by prompting the user for a new EggId.\n",
-        "d[EggId]" to " (discard)    Moves the specified Egg to trash.\n",
-        "d![EggId]" to " (force)      Permanently deletes the specified Egg.\n",
-        "d" to " (trash)      Displays trashed Eggs and allows restoring them.\n",
+        Triple("g[EggId]", "(get)", "Copies the password for the specified Egg to the clipboard.\n"),
+        Triple("s[EggId]", "(set)", "Sets a random password for the specified Egg, overwriting any existing one.\n"),
+        Triple("s*[EggId]", "(set once)", "Sets a random password for the specified EggId using a one-time configuration.\n"),
+        Triple("c[EggId]", "(custom set)", "Prompts the user to input a custom password for the specified Egg.\n"),
+        Triple("v[EggId]", "(view)", "Displays the password for the specified Egg in the console.\n"),
+        Triple("r[EggId]", "(rename)", "Renames the specified Egg by prompting the user for a new EggId.\n"),
+        Triple("d[EggId]", "(discard)", "Moves the specified Egg to trash.\n"),
+        Triple("d![EggId]", "(force)", "Permanently deletes the specified Egg.\n"),
+        Triple("d", "(trash)", "Displays trashed Eggs and allows restoring them.\n"),
     )
 
     private fun secondaryCommands() = listOf(
-        "e" to " (export)            Exports the Password Tree to a human-readable JSON file.\n",
-        "e*" to " (selective export)  Exports selected Nests or all Nests except selected Nests.\n",
-        "i" to " (import)            Imports passwords from a JSON file into the Password Tree.\n",
-        "i*" to " (selective import)  Imports one Nest from a JSON file into a selected Nest Slot.\n",
-        "k" to " (keystore)          Changes the master password of the keystore.\n",
-        "l" to " (list)              Lists all EggIds in the current Nest.\n",
-        "l[filter]" to "              Lists EggIds in the current Nest whose name contains filter.\n",
-        "l*" to "                    Lists all EggIds across all Nests, grouped by Nest.\n",
-        "l*[filter]" to "             Lists EggIds across all Nests whose name contains filter, grouped by Nest.\n",
-        "." to " (repeat)            Repeats the last successful non-repeat command.\n",
-        "h" to " (help)              Displays this help menu.\n",
-        "h*" to " (help with stats)   Displays password-tree statistics before this help menu.\n",
-        "q" to " (quit)              Exits the Passbird application.\n",
+        Triple("e", "(export)", "Exports the Password Tree to a human-readable JSON file.\n"),
+        Triple("e*", "(selective export)", "Exports selected Nests or all Nests except selected Nests.\n"),
+        Triple("i", "(import)", "Imports passwords from a JSON file into the Password Tree.\n"),
+        Triple("i*", "(selective import)", "Imports one Nest from a JSON file into a selected Nest Slot.\n"),
+        Triple("k", "(keystore)", "Changes the master password of the keystore.\n"),
+        Triple("l", "(list)", "Lists all EggIds in the current Nest.\n"),
+        Triple("l[filter]", null, "Lists EggIds in the current Nest whose name contains filter.\n"),
+        Triple("l*", null, "Lists all EggIds across all Nests, grouped by Nest.\n"),
+        Triple("l*[filter]", null, "Lists EggIds across all Nests whose name contains filter, grouped by Nest.\n"),
+        Triple(".", "(repeat)", "Repeats the last successful non-repeat command.\n"),
+        Triple("h", "(help)", "Displays this help menu.\n"),
+        Triple("h*", "(help with stats)", "Displays password-tree statistics before this help menu.\n"),
+        Triple("q", "(quit)", "Exits the Passbird application.\n"),
     )
 
     private fun infoCommands() = listOf(
-        "n" to " (Nests)             Displays available Nests and related commands.\n",
-        "f?" to " (Favorites)         Displays Favorites-related usage information.\n",
-        "m?" to " (Memory)            Displays Memory-related usage information.\n",
-        "p?" to " (Proteins)          Displays Protein-related usage information.\n",
-        "y?" to " (Yolks)             Displays Yolk-related usage information.\n",
-        "s?" to " (Password configs)  Displays available password configurations and related help.\n",
+        Triple("n", "(Nests)", "Displays available Nests and related commands.\n"),
+        Triple("f?", "(Favorites)", "Displays Favorites-related usage information.\n"),
+        Triple("m?", "(Memory)", "Displays Memory-related usage information.\n"),
+        Triple("p?", "(Proteins)", "Displays Protein-related usage information.\n"),
+        Triple("y?", "(Yolks)", "Displays Yolk-related usage information.\n"),
+        Triple("s?", "(Password configs)", "Displays available password configurations and related help.\n"),
     )
 
-    private fun CanPrintInfo.commandSectionOutputs(commands: List<Pair<String, String>>): List<Output> = buildList {
-        commands.forEach { (command, description) ->
-            addAll(commandInfoOutputs(command, description))
+    private fun CanPrintInfo.primaryCommandOutputs() = commandSectionOutputs(primaryCommands())
+
+    private fun CanPrintInfo.secondaryCommandOutputs() = commandSectionOutputs(secondaryCommands(), actionColumnWidth = 20)
+
+    private fun CanPrintInfo.infoCommandOutputs() = commandSectionOutputs(infoCommands(), actionColumnWidth = 20)
+
+    private fun CanPrintInfo.commandSectionOutputs(
+        commands: List<Triple<String, String?, String>>,
+        actionColumnWidth: Int = 14,
+    ): List<Output> = buildList {
+        commands.forEach { (command, action, description) ->
+            addAll(commandInfoOutputs(command, action, description, actionColumnWidth = actionColumnWidth))
         }
     }
 

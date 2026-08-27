@@ -46,7 +46,7 @@ spacing_and_output:
   - some multi-step flows intentionally embed leading newlines inside prompt text to visually separate local menus or sections
   - delegated shortcut commands should not add a second trailing separator after the delegated command has already emitted its own output spacing
   - preserve surrounding spacing patterns when editing handlers; do not normalize blank lines mechanically across the CLI
-  - when menus or previews intentionally align a command, slot, or index column, prefer fixed-width space padding over tab characters so alignment stays stable for variable content lengths
+  - when menus or previews intentionally align a command, slot, or index column, prefer fixed-width space padding over tab characters, use a four-space visual indent, and align descriptions within the local block instead of forcing one global width
   formatting_and_feedback:
     - if adapter.userInterface.ansiEscapeCodes.enabled is true, each output fragment is wrapped individually in ANSI color begin and reset escape codes
     - the ANSI color mapping is fixed: DEFAULT -> 231, SPECIAL -> 220, OPERATION_ABORTED -> 208, ERROR_MESSAGE -> 196, HIGHLIGHT -> 207, NEST -> 39, EVENT_HANDLED -> 118
