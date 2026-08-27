@@ -37,7 +37,8 @@ class SetInfoCommandTest {
 
         // then
         expectThat(captureSystemOut.capture) contains "Available Set commands"
-        expectThat(captureSystemOut.capture) contains "s*[EggId] (set once)"
+        expectThat(captureSystemOut.capture) contains "  s*[EggId]          (set once)"
+        expectThat(captureSystemOut.capture).not().contains("\t")
     }
 
     @Test
@@ -57,8 +58,8 @@ class SetInfoCommandTest {
         }
 
         // then
-        expectThat(captureSystemOut.capture) contains "13 characters"
-        expectThat(captureSystemOut.capture) contains "no special characters"
+        expectThat(captureSystemOut.capture) contains "  13 characters"
+        expectThat(captureSystemOut.capture) contains "  no special characters"
     }
 
     @Test

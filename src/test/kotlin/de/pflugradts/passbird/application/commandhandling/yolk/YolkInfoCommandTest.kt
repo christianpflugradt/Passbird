@@ -1,11 +1,11 @@
-package de.pflugradts.passbird.application.commandhandling.memory
+package de.pflugradts.passbird.application.commandhandling.yolk
 
 import de.pflugradts.kotlinextensions.CapturedOutputPrintStream
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
-import de.pflugradts.passbird.application.commandhandling.handler.memory.MemoryInfoCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.yolk.YolkInfoCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -17,17 +17,17 @@ import strikt.api.expectThat
 import strikt.assertions.contains
 
 @Tag(INTEGRATION)
-class MemoryInfoCommandTest {
+class YolkInfoCommandTest {
 
     private val configuration = mockk<Configuration>()
     private val commandLineInterfaceService = CommandLineInterfaceService(mockk(), configuration)
-    private val memoryInfoCommandHandler = MemoryInfoCommandHandler(CanPrintInfo(), commandLineInterfaceService)
-    private val inputHandler = createInputHandlerFor(memoryInfoCommandHandler)
+    private val yolkInfoCommandHandler = YolkInfoCommandHandler(CanPrintInfo(), commandLineInterfaceService)
+    private val inputHandler = createInputHandlerFor(yolkInfoCommandHandler)
 
     @Test
     fun `should print info`() {
         // given
-        val input = inputOf(shellOf("m?"))
+        val input = inputOf(shellOf("y?"))
         fakeConfiguration(instance = configuration)
         val captureSystemOut = CapturedOutputPrintStream.captureSystemOut()
 
@@ -37,9 +37,9 @@ class MemoryInfoCommandTest {
         }
 
         // then
-        expectThat(captureSystemOut.capture) contains "Available Memory commands"
+        expectThat(captureSystemOut.capture) contains "Available Yolk commands"
         expectThat(captureSystemOut.capture) contains
-            "  m[0-9]Command      (use)            Executes the specified command using the EggId from the given Memory Slot."
+            "  y+[EggId]          (set)        Prompts for a TOTP secret or otpauth URI and stores it for the specified Egg."
         expectThat(captureSystemOut.capture).not().contains("\t")
     }
 }

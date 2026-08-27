@@ -48,17 +48,19 @@ class HelpCommandTest {
 
         // then
         expectThat(captureSystemOut.capture) contains "Usage: [command][parameter]"
-        expectThat(captureSystemOut.capture) contains "k (keystore)"
+        expectThat(captureSystemOut.capture) contains "  k                  (keystore)"
         expectThat(captureSystemOut.capture) contains "Lists all EggIds across all Nests, grouped by Nest."
         expectThat(captureSystemOut.capture) contains "e*"
-        expectThat(captureSystemOut.capture) contains "f? (Favorites)"
+        expectThat(captureSystemOut.capture) contains "  f?                 (Favorites)"
         expectThat(captureSystemOut.capture) contains "i*"
-        expectThat(captureSystemOut.capture) contains ". (repeat)"
-        expectThat(captureSystemOut.capture) contains "s*[EggId] (set once)"
-        expectThat(captureSystemOut.capture) contains "h* (help with stats)   Displays password-tree statistics before this help menu."
-        expectThat(captureSystemOut.capture) contains "d[EggId] (discard)    Moves the specified Egg to trash."
-        expectThat(captureSystemOut.capture) contains "d![EggId] (force)      Permanently deletes the specified Egg."
-        expectThat(captureSystemOut.capture) contains "d (trash)      Displays trashed Eggs and allows restoring them."
+        expectThat(captureSystemOut.capture) contains "  .                  (repeat)"
+        expectThat(captureSystemOut.capture) contains "  s*[EggId]          (set once)"
+        expectThat(captureSystemOut.capture) contains
+            "  h*                 (help with stats)   Displays password-tree statistics before this help menu."
+        expectThat(captureSystemOut.capture) contains "  d[EggId]           (discard)    Moves the specified Egg to trash."
+        expectThat(captureSystemOut.capture) contains "  d![EggId]          (force)      Permanently deletes the specified Egg."
+        expectThat(captureSystemOut.capture) contains "  d                  (trash)      Displays trashed Eggs and allows restoring them."
+        expectThat(captureSystemOut.capture).not().contains("\t")
     }
 
     @Test

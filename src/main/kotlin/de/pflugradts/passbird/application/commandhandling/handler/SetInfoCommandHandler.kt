@@ -12,39 +12,51 @@ class SetInfoCommandHandler constructor(
         with(canPrintInfo) {
             userInterfaceAdapterPort.send(
                 outBold("\n0: Default\n"),
-                out("\t${configuration.application.password.length} characters"),
-                out(if (configuration.application.password.specialCharacters) "" else "\n\tno special characters"),
+                out("  ${configuration.application.password.length} characters"),
+                out(if (configuration.application.password.specialCharacters) "" else "\n  no special characters"),
             )
             configuration.application.password.customPasswordConfigurations.forEachIndexed { index, it ->
                 userInterfaceAdapterPort.send(
                     outBold("${index + 1}: ${it.name}\n"),
-                    out("\t${it.length} characters"),
+                    out("  ${it.length} characters"),
                 )
-                if (!it.hasNumbers) userInterfaceAdapterPort.send(out("\tno numbers"))
+                if (!it.hasNumbers) userInterfaceAdapterPort.send(out("  no numbers"))
                 if (!it.hasLowercaseLetters && !it.hasUppercaseLetters) {
-                    userInterfaceAdapterPort.send(out("\tno letters"))
+                    userInterfaceAdapterPort.send(out("  no letters"))
                 } else if (!it.hasLowercaseLetters) {
-                    userInterfaceAdapterPort.send(out("\tno lowercase letters"))
+                    userInterfaceAdapterPort.send(out("  no lowercase letters"))
                 } else if (!it.hasUppercaseLetters) {
-                    userInterfaceAdapterPort.send(out("\tno uppercase letters"))
+                    userInterfaceAdapterPort.send(out("  no uppercase letters"))
                 }
                 if (!it.hasSpecialCharacters) {
-                    userInterfaceAdapterPort.send(out("\tno special characters"))
+                    userInterfaceAdapterPort.send(out("  no special characters"))
                 } else if (it.unusedSpecialCharacters.isNotEmpty()) {
-                    userInterfaceAdapterPort.send(out("\tunused special characters: ${it.unusedSpecialCharacters}"))
+                    userInterfaceAdapterPort.send(out("  unused special characters: ${it.unusedSpecialCharacters}"))
                 }
             }
             userInterfaceAdapterPort.send(
-                outBold("\nAvailable Set commands:\n"),
-                outBold("\n\ts?"),
-                out(" (help)                  Displays an overview of available password configurations.\n"),
-                outBold("\n\ts[EggId]"),
-                out(" (set)             Sets a random password for the specified EggId using the default configuration."),
-                outBold("\n\ts*[EggId]"),
-                out(" (set once)   Sets a random password for the specified EggId using a one-time configuration."),
-                outBold("\n\ts[1-9][EggId]"),
-                out(" (set custom) Sets a random password for the specified EggId using a custom configuration."),
-                out("\n"),
+                *buildList {
+                    add(outBold("\nAvailable Set commands:\n"))
+                    addAll(commandInfoOutputs("s?", " (help)        Displays an overview of available password configurations.\n").toList())
+                    addAll(
+                        commandInfoOutputs(
+                            "s[EggId]",
+                            " (set)         Sets a random password for the specified EggId using the default configuration.\n",
+                        ).toList(),
+                    )
+                    addAll(
+                        commandInfoOutputs(
+                            "s*[EggId]",
+                            " (set once)    Sets a random password for the specified EggId using a one-time configuration.\n",
+                        ).toList(),
+                    )
+                    addAll(
+                        commandInfoOutputs(
+                            "s[1-9][EggId]",
+                            " (set custom)  Sets a random password for the specified EggId using a custom configuration.\n",
+                        ).toList(),
+                    )
+                }.toTypedArray(),
             )
         }
     }

@@ -75,7 +75,15 @@ class ImportCommandHandler constructor(
             ?: return ImportCommandConfirmation.ABORTED
         return previews.useScrambled {
             userInterfaceAdapterPort.send(outputOf(shellOf("\nAvailable Nests in import file:\n"), HIGHLIGHT))
-            userInterfaceAdapterPort.send(outputOf(shellOf(it.joinToString("\n") { "\t${it.slot.index()}: ${it.nestId.asString()}" })))
+            userInterfaceAdapterPort.send(
+                outputOf(
+                    shellOf(
+                        it.joinToString("\n") { preview ->
+                            labeledValueLine("${preview.slot.index()}:", preview.nestId.asString())
+                        },
+                    ),
+                ),
+            )
             val sourceSlot = receiveSourceSlot(it) ?: return@useScrambled ImportCommandConfirmation.ABORTED
             val targetSlot = receiveTargetSlot() ?: return@useScrambled ImportCommandConfirmation.ABORTED
             val preview = it.first { it.slot == sourceSlot }

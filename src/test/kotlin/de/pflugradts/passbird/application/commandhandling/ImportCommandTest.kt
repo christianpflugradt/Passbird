@@ -18,6 +18,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.slot.Slot.S2
 import de.pflugradts.passbird.domain.model.slot.Slot.S9
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
+import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.PasswordService
@@ -79,6 +80,7 @@ class ImportCommandTest {
 
         // then
         verify(exactly = 1) { importExportService.importEggs(S9, S2) }
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("  9:      work")))) }
     }
 
     @Test

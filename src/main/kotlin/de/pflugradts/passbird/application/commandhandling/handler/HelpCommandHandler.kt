@@ -15,47 +15,68 @@ class HelpCommandHandler constructor(
 ) : TypedCommandHandler<HelpCommand>(HelpCommand::class.java) {
     override fun handleCommand(command: HelpCommand) {
         with(canPrintInfo) {
-            if (command.showStats) {
-                userInterfaceAdapterPort.send(*statsOutputs().toTypedArray())
-            }
-            userInterfaceAdapterPort.send(
-                outBold(if (command.showStats) "Usage: [command][parameter]\n" else "\nUsage: [command][parameter]\n"),
-                out("A command takes at most one parameter which is usually an EggId.\n\n"),
-                outBold("Commands:\n\n"),
-                outBold("\tg[EggId]"), out(" (get)        Copies the password for the specified Egg to the clipboard.\n"),
-                outBold("\ts[EggId]"), out(" (set)        Sets a random password for the specified Egg, overwriting any existing one.\n"),
-                outBold(
-                    "\ts*[EggId]",
-                ),
-                out(" (set once)   Sets a random password for the specified EggId using a one-time configuration.\n"),
-                outBold("\tc[EggId]"), out(" (custom set) Prompts the user to input a custom password for the specified Egg.\n"),
-                outBold("\tv[EggId]"), out(" (view)       Displays the password for the specified Egg in the console.\n"),
-                outBold("\tr[EggId]"), out(" (rename)     Renames the specified Egg by prompting the user for a new EggId.\n"),
-                outBold("\td[EggId]"), out(" (discard)    Moves the specified Egg to trash.\n"),
-                outBold("\td![EggId]"), out(" (force)      Permanently deletes the specified Egg.\n"),
-                outBold("\td"), out(" (trash)      Displays trashed Eggs and allows restoring them.\n"),
-                out("\n"),
-                outBold("\te"), out(" (export)            Exports the Password Tree to a human-readable JSON file.\n"),
-                outBold("\te*"), out(" (selective export)  Exports selected Nests or all Nests except selected Nests.\n"),
-                outBold("\ti"), out(" (import)            Imports passwords from a JSON file into the Password Tree.\n"),
-                outBold("\ti*"), out(" (selective import)  Imports one Nest from a JSON file into a selected Nest Slot.\n"),
-                outBold("\tk"), out(" (keystore)          Changes the master password of the keystore.\n"),
-                outBold("\tl"), out(" (list)              Lists all EggIds in the current Nest.\n"),
-                outBold("\tl[filter]"), out("              Lists EggIds in the current Nest whose name contains filter.\n"),
-                outBold("\tl*"), out("                    Lists all EggIds across all Nests, grouped by Nest.\n"),
-                outBold("\tl*[filter]"), out("             Lists EggIds across all Nests whose name contains filter, grouped by Nest.\n"),
-                outBold("\t."), out(" (repeat)            Repeats the last successful non-repeat command.\n"),
-                outBold("\th"), out(" (help)              Displays this help menu.\n"),
-                outBold("\th*"), out(" (help with stats)   Displays password-tree statistics before this help menu.\n"),
-                outBold("\tq"), out(" (quit)              Exits the Passbird application.\n"),
-                out("\n"),
-                outBold("\tn"), out(" (Nests)             Displays available Nests and related commands.\n"),
-                outBold("\tf?"), out(" (Favorites)         Displays Favorites-related usage information.\n"),
-                outBold("\tm?"), out(" (Memory)           Displays Memory-related usage information.\n"),
-                outBold("\tp?"), out(" (Proteins)         Displays Protein-related usage information.\n"),
-                outBold("\ty?"), out(" (Yolks)            Displays Yolk-related usage information.\n"),
-                outBold("\ts?"), out(" (Password configs) Displays available password configurations and related help.\n"),
-            )
+            userInterfaceAdapterPort.send(*helpOutputs(command).toTypedArray())
+        }
+    }
+
+    private fun CanPrintInfo.helpOutputs(command: HelpCommand): List<Output> = buildList {
+        if (command.showStats) {
+            addAll(statsOutputs())
+        }
+        addAll(helpIntroOutputs())
+        addAll(commandSectionOutputs(primaryCommands()))
+        add(out("\n"))
+        addAll(commandSectionOutputs(secondaryCommands()))
+        add(out("\n"))
+        addAll(commandSectionOutputs(infoCommands()))
+    }
+
+    private fun CanPrintInfo.helpIntroOutputs() = listOf(
+        outBold("\nUsage: [command][parameter]\n"),
+        out("A command takes at most one parameter which is usually an EggId.\n\n"),
+        outBold("Commands:\n"),
+    )
+
+    private fun primaryCommands() = listOf(
+        "g[EggId]" to " (get)        Copies the password for the specified Egg to the clipboard.\n",
+        "s[EggId]" to " (set)        Sets a random password for the specified Egg, overwriting any existing one.\n",
+        "s*[EggId]" to " (set once)   Sets a random password for the specified EggId using a one-time configuration.\n",
+        "c[EggId]" to " (custom set) Prompts the user to input a custom password for the specified Egg.\n",
+        "v[EggId]" to " (view)       Displays the password for the specified Egg in the console.\n",
+        "r[EggId]" to " (rename)     Renames the specified Egg by prompting the user for a new EggId.\n",
+        "d[EggId]" to " (discard)    Moves the specified Egg to trash.\n",
+        "d![EggId]" to " (force)      Permanently deletes the specified Egg.\n",
+        "d" to " (trash)      Displays trashed Eggs and allows restoring them.\n",
+    )
+
+    private fun secondaryCommands() = listOf(
+        "e" to " (export)            Exports the Password Tree to a human-readable JSON file.\n",
+        "e*" to " (selective export)  Exports selected Nests or all Nests except selected Nests.\n",
+        "i" to " (import)            Imports passwords from a JSON file into the Password Tree.\n",
+        "i*" to " (selective import)  Imports one Nest from a JSON file into a selected Nest Slot.\n",
+        "k" to " (keystore)          Changes the master password of the keystore.\n",
+        "l" to " (list)              Lists all EggIds in the current Nest.\n",
+        "l[filter]" to "              Lists EggIds in the current Nest whose name contains filter.\n",
+        "l*" to "                    Lists all EggIds across all Nests, grouped by Nest.\n",
+        "l*[filter]" to "             Lists EggIds across all Nests whose name contains filter, grouped by Nest.\n",
+        "." to " (repeat)            Repeats the last successful non-repeat command.\n",
+        "h" to " (help)              Displays this help menu.\n",
+        "h*" to " (help with stats)   Displays password-tree statistics before this help menu.\n",
+        "q" to " (quit)              Exits the Passbird application.\n",
+    )
+
+    private fun infoCommands() = listOf(
+        "n" to " (Nests)             Displays available Nests and related commands.\n",
+        "f?" to " (Favorites)         Displays Favorites-related usage information.\n",
+        "m?" to " (Memory)            Displays Memory-related usage information.\n",
+        "p?" to " (Proteins)          Displays Protein-related usage information.\n",
+        "y?" to " (Yolks)             Displays Yolk-related usage information.\n",
+        "s?" to " (Password configs)  Displays available password configurations and related help.\n",
+    )
+
+    private fun CanPrintInfo.commandSectionOutputs(commands: List<Pair<String, String>>): List<Output> = buildList {
+        commands.forEach { (command, description) ->
+            addAll(commandInfoOutputs(command, description))
         }
     }
 
