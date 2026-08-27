@@ -68,8 +68,11 @@ class ViewTrashCommandTest {
                         shellOf(
                             """
                             Trash
-                            [0]	Default/alpha	11
-                            [1]	work/beta	3
+
+                            Index   Days    Nest/EggId
+                            [0]     11      Default/alpha
+                            [1]     3       work/beta
+
                             Enter index to restore Egg or just press enter to abort: 
                             """.trimIndent(),
                         ),
@@ -79,6 +82,40 @@ class ViewTrashCommandTest {
         }
         verify(exactly = 1) { passwordService.restoreEgg(any()) }
         verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Trash is empty")))) }
+    }
+
+    @Test
+    fun `should align trash rows with formatted columns`() {
+        // given
+        nestService.place(shellOf("very-long-nest-name"), S2)
+        every { passwordService.viewTrash() } returns listOf(
+            TrashEggView(shellOf("some-very-long-egg-id"), S2, 365),
+        )
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(Input.emptyInput()))
+        fakeConfiguration(instance = configuration)
+
+        // when
+        inputHandler.handleInput(inputOf(shellOf("d")))
+
+        // then
+        verify(exactly = 1) {
+            userInterfaceAdapterPort.receive(
+                eq(
+                    outputOf(
+                        shellOf(
+                            """
+                            Trash
+
+                            Index   Days    Nest/EggId
+                            [0]     365     very-long-nest-name/some-very-long-egg-id
+
+                            Enter index to restore Egg or just press enter to abort: 
+                            """.trimIndent(),
+                        ),
+                    ),
+                ),
+            )
+        }
     }
 
     @Test

@@ -22,6 +22,11 @@ class ViewTrashCommandHandler constructor(
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
     private val commandExecutionTracker: CommandExecutionTracker,
 ) : TypedCommandHandler<ViewTrashCommand>(ViewTrashCommand::class.java) {
+    private companion object {
+        const val INDEX_COLUMN_WIDTH = 8
+        const val DAYS_COLUMN_WIDTH = 8
+    }
+
     override fun handleCommand(command: ViewTrashCommand) {
         while (true) {
             val trashedEggs = passwordService.viewTrash()
@@ -102,10 +107,26 @@ class ViewTrashCommandHandler constructor(
 
     private fun trashText(trashedEggs: List<TrashEggView>) = buildString {
         append("Trash")
+        appendLine()
+        appendLine()
+        append(
+            "%-${INDEX_COLUMN_WIDTH}s%-${DAYS_COLUMN_WIDTH}s%s".format(
+                "Index",
+                "Days",
+                "Nest/EggId",
+            ),
+        )
         trashedEggs.forEachIndexed { index, egg ->
             appendLine()
-            append("[$index]\t${nestName(egg.nestSlot)}/${egg.eggId.asString()}\t${egg.deletionAgeDays}")
+            append(
+                "%-${INDEX_COLUMN_WIDTH}s%-${DAYS_COLUMN_WIDTH}s%s".format(
+                    "[$index]",
+                    egg.deletionAgeDays,
+                    "${nestName(egg.nestSlot)}/${egg.eggId.asString()}",
+                ),
+            )
         }
+        appendLine()
         appendLine()
         append("Enter index to restore Egg or just press enter to abort: ")
     }
