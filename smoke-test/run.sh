@@ -610,7 +610,7 @@ pass "$CURRENT_STEP"
 
 CURRENT_STEP="imported-discard-mail"
 run_session "$CURRENT_STEP" "$IMPORT_HOME" "$MASTER_PASSWORD" "n1" "dmail" "c" "q"
-assert_contains "$LAST_OUTPUT" "Egg 'mail' successfully discarded."
+assert_contains "$LAST_OUTPUT" "Egg 'mail' successfully moved to trash."
 pass "$CURRENT_STEP"
 
 CURRENT_STEP="imported-discard-work-nest"
