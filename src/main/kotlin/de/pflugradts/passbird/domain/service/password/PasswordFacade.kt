@@ -12,6 +12,7 @@ class PasswordFacade constructor(
     private val discardPasswordService: DiscardPasswordService,
     private val renamePasswordService: RenamePasswordService,
     private val movePasswordService: MovePasswordService,
+    private val currentEpochDaySupplier: () -> Int,
 ) : PasswordService {
     override fun eggExists(eggIdShell: Shell, slot: Slot) = viewPasswordService.eggExists(eggIdShell, slot)
     override fun eggExists(eggIdShell: Shell, eggNotExistsAction: EggNotExistsAction) =
@@ -25,6 +26,7 @@ class PasswordFacade constructor(
     override fun putFavorite(slot: Slot, eggIdShell: Shell) = favoritePasswordService.putFavorite(slot, eggIdShell)
     override fun viewMemoryEntry(slot: Slot) = viewPasswordService.viewMemoryEntry(slot)
     override fun viewPassword(eggIdShell: Shell) = viewPasswordService.viewPassword(eggIdShell)
+    override fun viewTrash() = viewPasswordService.viewTrash(currentEpochDaySupplier())
     override fun viewProteinStructure(eggIdShell: Shell, slot: Slot) = viewPasswordService.viewProteinStructure(eggIdShell, slot)
     override fun viewProteinStructures(eggIdShell: Shell) = viewPasswordService.viewProteinStructures(eggIdShell)
     override fun viewProteinType(eggIdShell: Shell, slot: Slot) = viewPasswordService.viewProteinType(eggIdShell, slot)
@@ -44,8 +46,11 @@ class PasswordFacade constructor(
     override fun putYolk(eggIdShell: Shell, secretShell: Shell, algorithm: String, digits: Int, periodSeconds: Int): TryResult<Unit> =
         putPasswordService.putYolk(eggIdShell, secretShell, algorithm, digits, periodSeconds)
     override fun discardFavorite(slot: Slot): TryResult<Unit> = favoritePasswordService.discardFavorite(slot)
-    override fun discardEgg(eggIdShell: Shell): TryResult<Unit> = discardPasswordService.discardEgg(eggIdShell)
+    override fun discardEgg(eggIdShell: Shell): TryResult<Unit> = discardPasswordService.discardEgg(eggIdShell, currentEpochDaySupplier())
+    override fun discardEggPermanently(eggIdShell: Shell): TryResult<Unit> = discardPasswordService.discardEggPermanently(eggIdShell)
+    override fun cleanupTrash(): TryResult<Int> = discardPasswordService.cleanupTrash()
     override fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit> = discardPasswordService.discardProtein(eggIdShell, slot)
     override fun discardYolk(eggIdShell: Shell): TryResult<Unit> = discardPasswordService.discardYolk(eggIdShell)
     override fun moveEgg(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit> = movePasswordService.movePassword(eggIdShell, targetSlot)
+    override fun restoreEgg(eggIdShell: Shell) = discardPasswordService.restoreEgg(eggIdShell)
 }

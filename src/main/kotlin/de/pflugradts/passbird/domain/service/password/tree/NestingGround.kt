@@ -58,8 +58,15 @@ class NestingGround constructor(
     }
     override fun findAll(slot: Slot) = createEggStreamSupplier(slot).get()
     override fun findAll() = createEggStreamSupplier(inNest(currentNestSlot)).get()
+    override fun findAllIncludingTrashed(slot: Slot) = createEggStreamSupplier(inNest(slot), includeTrashed = true).get()
+    override fun findAllIncludingTrashed() = createEggStreamSupplier(inNest(currentNestSlot), includeTrashed = true).get()
+    override fun findAllTrashed() = createEggStreamSupplier(Predicate(Egg::isTrashed), includeTrashed = true).get()
     private fun createEggStreamSupplier(slot: Slot) = createEggStreamSupplier(inNest(slot))
-    private fun createEggStreamSupplier(predicate: Predicate<Egg>) = EggStreamSupplier({ eggs.stream().filter(predicate) })
+    private fun createEggStreamSupplier(predicate: Predicate<Egg>, includeTrashed: Boolean = false) = EggStreamSupplier({
+        eggs.stream()
+            .filter(predicate)
+            .filter { egg -> includeTrashed || !egg.isTrashed() }
+    })
     override fun favorites(slot: Slot) = favorites[slot].get().copy()
     override fun favorites() = favorites(currentNestSlot)
     override fun memory() = memory[currentNestSlot].get().copy()

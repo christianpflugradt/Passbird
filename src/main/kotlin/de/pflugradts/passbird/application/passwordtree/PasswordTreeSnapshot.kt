@@ -14,6 +14,7 @@ data class PasswordTreeSnapshot(
     val favorites: FavoriteMap = emptyFavorites(),
     val memory: MemoryMap = emptyMemory(),
     val nests: List<Shell> = List(Slot.CAPACITY) { emptyShell() },
+    val currentEpochDay: Int = 0,
 ) {
     init {
         require(nests.size == Slot.CAPACITY)

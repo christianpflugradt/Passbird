@@ -70,4 +70,5 @@ flows:
       - renaming an Egg updates matching Favorite slots in that Egg's Nest
       - discarding or moving an Egg clears matching Favorite slots in the source Nest
       - moving an Egg does not create or copy a Favorite entry in the target Nest automatically
+      - restoring an Egg from trash does not recreate prior Favorite assignments automatically
       - discarding a Nest clears every Favorite slot owned by that Nest

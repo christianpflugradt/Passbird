@@ -77,6 +77,20 @@ flows:
       - the migrated password tree remains readable with the normal current restore path after migration
       - after successful migration, future startup detection no longer requests password-tree-yolk migration for that password tree file
       - this migration produces no dedicated user-visible success line beyond the shared overall migration success message
+  - id: password_tree_trash_migration
+    trigger:
+      - the password tree file exists, is non-empty, and still uses the older current-format envelope from before the trash payload marker update
+    user_experience:
+      - this migration contributes the pending migration id password-tree-trash
+      - it is a pre-launch migration and therefore participates in the shared migration boot path rather than the normal command loop
+      - it runs after password-tree-yolk when both migrations are pending in the same run
+      - after successful shared migration authentication, Passbird decrypts the older current-format password tree with the current crypto path and rewrites it directly in the latest password-tree format
+      - the migrated password tree is wrapped in the current password-tree envelope format after migration
+      - the stored eggs, passwords, proteins, yolks, favorites, nest assignments, persisted EggId memory entries, and trash metadata are preserved across the migration
+      - because this migration rewrites directly into the latest password-tree format, no follow-up password-tree migration is required for the same file
+      - the migrated password tree remains readable with the normal current restore path after migration
+      - after successful migration, future startup detection no longer requests password-tree-trash migration for that password tree file
+      - this migration produces no dedicated user-visible success line beyond the shared overall migration success message
   - id: migration_completion
     trigger:
       - pending migrations finish successfully

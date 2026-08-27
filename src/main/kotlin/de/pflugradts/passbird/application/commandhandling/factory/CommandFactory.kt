@@ -4,7 +4,6 @@ import de.pflugradts.passbird.application.commandhandling.CommandType
 import de.pflugradts.passbird.application.commandhandling.CommandVariant
 import de.pflugradts.passbird.application.commandhandling.command.ChangeMasterPasswordCommand
 import de.pflugradts.passbird.application.commandhandling.command.CustomSetCommand
-import de.pflugradts.passbird.application.commandhandling.command.DiscardCommand
 import de.pflugradts.passbird.application.commandhandling.command.ExportCommand
 import de.pflugradts.passbird.application.commandhandling.command.GetCommand
 import de.pflugradts.passbird.application.commandhandling.command.HelpCommand
@@ -21,6 +20,7 @@ import de.pflugradts.passbird.application.failure.CommandFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.domain.model.transfer.Input
 class CommandFactory constructor(
+    private val discardCommandFactory: DiscardCommandFactory,
     private val favoriteCommandFactory: FavoriteCommandFactory,
     private val listCommandFactory: ListCommandFactory,
     private val memoryCommandFactory: MemoryCommandFactory,
@@ -35,7 +35,6 @@ class CommandFactory constructor(
         ?: NullCommand()
     private fun constructDirectly(commandType: CommandType, input: Input) = when (commandType) {
         CommandType.CUSTOM_SET -> CustomSetCommand(input)
-        CommandType.DISCARD -> DiscardCommand(input)
         CommandType.GET -> GetCommand(input)
         CommandType.RENAME -> RenameCommand(input)
         CommandType.VIEW -> ViewCommand(input)
@@ -51,6 +50,7 @@ class CommandFactory constructor(
         else -> null
     }
     private fun constructViaSpecialFactory(commandType: CommandType, input: Input) = when (commandType) {
+        CommandType.DISCARD -> constructSafely(discardCommandFactory, input)
         CommandType.FAVORITE -> constructSafely(favoriteCommandFactory, input)
         CommandType.LIST -> constructSafely(listCommandFactory, input)
         CommandType.MEMORY -> constructSafely(memoryCommandFactory, input)

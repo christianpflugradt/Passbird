@@ -1,14 +1,19 @@
 package de.pflugradts.passbird.domain.service.password
 
+import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.security.fakeCryptoProvider
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.event.EggNotFound
+import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.fakeDec
 import de.pflugradts.passbird.domain.model.shell.fakeEnc
 import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.slot.Slot.S2
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
+import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.encryption.CryptoProvider
 import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import de.pflugradts.passbird.domain.service.password.tree.fakeEggRepository
@@ -19,6 +24,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
 import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
 
@@ -27,7 +33,16 @@ class DiscardPasswordServiceTest {
     private val cryptoProvider = mockk<CryptoProvider>()
     private val eggRepository = mockk<EggRepository>()
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
-    private val passwordService = DiscardPasswordService(cryptoProvider, eggRepository, eventRegistry, MemoryUpdateControl())
+    private val nestService = createNestServiceForTesting()
+    private val passwordService = DiscardPasswordService(
+        cryptoProvider,
+        eggRepository,
+        eventRegistry,
+        MemoryUpdateControl(),
+        { Configuration.Trash().retentionDays },
+        nestService,
+        currentEpochDaySupplier = { 100 },
+    )
 
     @Test
     fun `should discard egg`() {
@@ -40,13 +55,31 @@ class DiscardPasswordServiceTest {
 
         // when
         expectThat(givenEgg.viewPassword().fakeDec()) isEqualTo givenPassword
-        passwordService.discardEgg(givenEggId)
+        passwordService.discardEgg(givenEggId, 100)
 
         // then
         verify(exactly = 1) { eventRegistry.processEvents() }
         verify(exactly = 1) { eggRepository.sync() }
         verify(exactly = 1) { eggRepository.discardFavorites(givenEgg.associatedNest(), givenEgg.viewEggId()) }
-        expectThat(givenEgg.viewPassword()) isNotEqualTo givenPassword.fakeEnc()
+        expectThat(givenEgg.viewPassword()) isEqualTo givenPassword.fakeEnc()
+        expectThat(givenEgg.isTrashed()).isTrue()
+    }
+
+    @Test
+    fun `should move egg to trash`() {
+        // given
+        val givenEggId = shellOf("EggId")
+        val givenEgg = createEggForTesting(withEggIdShell = givenEggId)
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
+
+        // when
+        passwordService.discardEgg(givenEggId, 100)
+
+        // then
+        expectThat(givenEgg.isTrashed()).isTrue()
+        expectThat(givenEgg.deletionEpochDay()) isEqualTo 100
+        verify(exactly = 1) { eggRepository.discardMemory(givenEgg.associatedNest(), givenEgg.viewEggId()) }
     }
 
     @Test
@@ -60,7 +93,7 @@ class DiscardPasswordServiceTest {
         val eggNotFoundSlot = slot<EggNotFound>()
 
         // when
-        passwordService.discardEgg(otherEggId)
+        passwordService.discardEgg(otherEggId, 100)
 
         // then
         verify { eventRegistry.register(capture(eggNotFoundSlot)) }
@@ -129,6 +162,130 @@ class DiscardPasswordServiceTest {
         expectThat(eggNotFoundSlot.isCaptured).isTrue()
         expectThat(eggNotFoundSlot.captured.eggIdShell) isEqualTo missingEggId
         verify(exactly = 1) { eventRegistry.processEvents() }
+        verify(exactly = 1) { eggRepository.sync() }
+    }
+
+    @Test
+    fun `should restore trashed egg into original nest and update memory`() {
+        // given
+        nestService.place(shellOf("work"), S2)
+        val givenEggId = shellOf("EggId")
+        val trashedEgg = createEggForTesting(withEggIdShell = givenEggId, withSlot = S2, withTrashed = true, withDeletionEpochDay = 88)
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(trashedEgg))
+
+        // when
+        val actual = passwordService.restoreEgg(givenEggId)
+
+        // then
+        expectThat(actual.getOrNull()) isEqualTo RestoreEggResult.RESTORED
+        expectThat(trashedEgg.isTrashed()).isFalse()
+        expectThat(trashedEgg.associatedNest()) isEqualTo S2
+        verify(exactly = 1) { eggRepository.updateMemory(trashedEgg, any(), false) }
+        verify(exactly = 1) { eggRepository.sync() }
+    }
+
+    @Test
+    fun `should restore trashed egg to default nest when original nest no longer exists`() {
+        // given
+        val givenEggId = shellOf("EggId")
+        val trashedEgg = createEggForTesting(withEggIdShell = givenEggId, withSlot = S2, withTrashed = true, withDeletionEpochDay = 88)
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(trashedEgg))
+
+        // when
+        val actual = passwordService.restoreEgg(givenEggId)
+
+        // then
+        expectThat(actual.getOrNull()) isEqualTo RestoreEggResult.RESTORED_TO_DEFAULT
+        expectThat(trashedEgg.isTrashed()).isFalse()
+        expectThat(trashedEgg.associatedNest()) isEqualTo DEFAULT
+        verify(exactly = 1) { eggRepository.updateMemory(trashedEgg, any(), false) }
+    }
+
+    @Test
+    fun `should abort restoring trashed egg when target nest already contains same eggId`() {
+        // given
+        nestService.place(shellOf("work"), S2)
+        val givenEggId = shellOf("EggId")
+        val trashedEgg = createEggForTesting(withEggIdShell = givenEggId, withSlot = S2, withTrashed = true, withDeletionEpochDay = 88)
+        val activeConflict = createEggForTesting(withEggIdShell = givenEggId, withSlot = S2)
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(trashedEgg, activeConflict))
+
+        // when
+        val actual = passwordService.restoreEgg(givenEggId)
+
+        // then
+        expectThat(actual.getOrNull()) isEqualTo RestoreEggResult.TARGET_CONFLICT
+        expectThat(trashedEgg.isTrashed()).isTrue()
+        verify(exactly = 0) { eggRepository.updateMemory(any(), any(), any()) }
+        verify(exactly = 0) { eggRepository.sync() }
+    }
+
+    @Test
+    fun `should abort restoring to default nest when fallback target already contains same eggId`() {
+        // given
+        val givenEggId = shellOf("EggId")
+        val trashedEgg = createEggForTesting(withEggIdShell = givenEggId, withSlot = S2, withTrashed = true, withDeletionEpochDay = 88)
+        val activeConflict = createEggForTesting(withEggIdShell = givenEggId, withSlot = DEFAULT)
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(trashedEgg, activeConflict))
+
+        // when
+        val actual = passwordService.restoreEgg(givenEggId)
+
+        // then
+        expectThat(actual.getOrNull()) isEqualTo RestoreEggResult.TARGET_CONFLICT
+        expectThat(trashedEgg.associatedNest()) isEqualTo S2
+        expectThat(trashedEgg.isTrashed()).isTrue()
+    }
+
+    @Test
+    fun `should permanently discard trashed egg from current nest`() {
+        // given
+        nestService.place(shellOf("work"), S2)
+        nestService.moveToNestAt(S2)
+        val givenEggId = shellOf("EggId")
+        val givenEgg = createEggForTesting(withEggIdShell = givenEggId, withSlot = S2, withTrashed = true, withDeletionEpochDay = 100)
+        val givenPassword = givenEgg.viewPassword()
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(givenEgg))
+
+        // when
+        passwordService.discardEggPermanently(givenEggId)
+
+        // then
+        expectThat(givenEgg.viewPassword()) isNotEqualTo givenPassword
+        verify(exactly = 1) { eggRepository.discardFavorites(givenEgg.associatedNest(), givenEgg.viewEggId()) }
+        verify(exactly = 1) { eggRepository.discardMemory(givenEgg.associatedNest(), givenEgg.viewEggId()) }
+    }
+
+    @Test
+    fun `should clean up trashed eggs older than retention`() {
+        // given
+        val passwordService = DiscardPasswordService(
+            cryptoProvider,
+            eggRepository,
+            eventRegistry,
+            MemoryUpdateControl(),
+            { 15 },
+            nestService,
+            currentEpochDaySupplier = { 100 },
+        )
+        val expiredEgg = createEggForTesting(withEggIdShell = shellOf("expired"), withTrashed = true, withDeletionEpochDay = 80)
+        val retainedEgg = createEggForTesting(withEggIdShell = shellOf("retained"), withTrashed = true, withDeletionEpochDay = 90)
+        val expiredPassword = expiredEgg.viewPassword()
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(instance = eggRepository, withEggs = listOf(expiredEgg, retainedEgg))
+
+        // when
+        val actual = passwordService.cleanupTrash()
+
+        // then
+        expectThat(actual.getOrNull()) isEqualTo 1
+        expectThat(expiredEgg.viewPassword()) isNotEqualTo expiredPassword
+        expectThat(retainedEgg.isTrashed()).isTrue()
         verify(exactly = 1) { eggRepository.sync() }
     }
 }

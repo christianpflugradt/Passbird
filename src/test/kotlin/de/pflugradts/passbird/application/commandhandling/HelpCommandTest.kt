@@ -56,6 +56,9 @@ class HelpCommandTest {
         expectThat(captureSystemOut.capture) contains ". (repeat)"
         expectThat(captureSystemOut.capture) contains "s*[EggId] (set once)"
         expectThat(captureSystemOut.capture) contains "h* (help with stats)   Displays password-tree statistics before this help menu."
+        expectThat(captureSystemOut.capture) contains "d[EggId] (discard)    Moves the specified Egg to trash."
+        expectThat(captureSystemOut.capture) contains "d![EggId] (force)      Permanently deletes the specified Egg."
+        expectThat(captureSystemOut.capture) contains "d (trash)      Displays trashed Eggs and allows restoring them."
     }
 
     @Test

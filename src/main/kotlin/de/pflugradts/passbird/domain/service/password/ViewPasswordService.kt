@@ -25,6 +25,12 @@ class ViewPasswordService constructor(
     fun viewNestStats() = eggRepository.findAll().toList().toNestStats(eggRepository.favorites())
     fun viewNestStats(slot: Slot) = eggRepository.findAll(slot).toList().toNestStats(eggRepository.favorites(slot))
     fun viewPassword(eggIdShell: Shell): Option<Shell> = extractFromEgg(eggIdShell) { decrypted(it.viewPassword()) }
+    fun viewTrash(currentEpochDay: Int) = eggRepository.findAllTrashed().toList()
+        .sortedBy(Egg::deletionEpochDay)
+        .map { egg ->
+            val eggId = decrypted(egg.viewEggId())
+            TrashEggView(eggId = eggId, nestSlot = egg.associatedNest(), deletionAgeDays = currentEpochDay - egg.deletionEpochDay())
+        }
     fun proteinExists(eggIdShell: Shell, slot: Slot) = viewProteinStructure(eggIdShell, slot).map { it.isNotEmpty }.orElse(false)
     fun viewProteinStructure(eggIdShell: Shell, slot: Slot): Option<Shell> = extractFromEgg(eggIdShell) { egg ->
         egg.proteins[slot.index()].map { decrypted(it.viewStructure()) }.orElse(emptyShell())

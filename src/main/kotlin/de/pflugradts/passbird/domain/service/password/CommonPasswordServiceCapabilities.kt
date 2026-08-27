@@ -31,6 +31,9 @@ abstract class CommonPasswordServiceCapabilities(
         }
     }
     fun findWithoutUpdatingMemory(eggIdShell: Shell): Option<Egg> = eggRepository.findAll().findDecrypted(eggIdShell)
+    fun findIncludingTrashed(eggIdShell: Shell, slot: Slot): Option<Egg> =
+        eggRepository.findAllIncludingTrashed(slot).findDecrypted(eggIdShell)
+    fun findTrashed(eggIdShell: Shell): Option<Egg> = eggRepository.findAllTrashed().findDecrypted(eggIdShell)
 
     private fun Stream<Egg>.findDecrypted(eggIdShell: Shell) = filter {
         decryptedMatches(it.viewEggId(), eggIdShell)

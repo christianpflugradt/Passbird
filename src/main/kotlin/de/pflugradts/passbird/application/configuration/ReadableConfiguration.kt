@@ -14,6 +14,7 @@ interface ReadableConfiguration {
         val exchange: Exchange
         val inactivityLimit: InactivityLimit
         val password: Password
+        val trash: Trash
         val yolk: Yolk
     }
     interface Backup {
@@ -40,6 +41,9 @@ interface ReadableConfiguration {
         val specialCharacters: Boolean
         val promptOnRemoval: Boolean
         val customPasswordConfigurations: List<CustomPasswordConfiguration>
+    }
+    interface Trash {
+        val retentionDays: Int
     }
     interface Yolk {
         val algorithm: String

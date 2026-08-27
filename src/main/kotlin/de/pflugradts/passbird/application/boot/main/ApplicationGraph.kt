@@ -24,6 +24,7 @@ import de.pflugradts.passbird.application.commandhandling.RememberedCommandMemor
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanListAvailableNests
 import de.pflugradts.passbird.application.commandhandling.capabilities.CanPrintInfo
 import de.pflugradts.passbird.application.commandhandling.factory.CommandFactory
+import de.pflugradts.passbird.application.commandhandling.factory.DiscardCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.FavoriteCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.ListCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.MemoryCommandFactory
@@ -47,6 +48,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.egg.OneTimeSet
 import de.pflugradts.passbird.application.commandhandling.handler.egg.RenameCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.SetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewTrashCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.favorite.AddFavoriteCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.favorite.DiscardFavoriteCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.favorite.FavoriteInfoCommandHandler
@@ -91,6 +93,7 @@ import de.pflugradts.passbird.application.process.exchange.ExportFileChecker
 import de.pflugradts.passbird.application.process.inactivity.InactivityHandler
 import de.pflugradts.passbird.application.process.inactivity.InactivityHandlerScheduler
 import de.pflugradts.passbird.application.process.inactivity.InactivityTerminationSignal
+import de.pflugradts.passbird.application.process.password.TrashCleanup
 import de.pflugradts.passbird.application.security.CryptoProviderFactory
 import de.pflugradts.passbird.application.security.KeyStoreAuthenticationService
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -220,6 +223,7 @@ class ApplicationGraph(
                 systemOperation,
                 commandExecutionTracker,
             ),
+            ViewTrashCommandHandler(configuration, nestService, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             SetYolkCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             DiscardYolkCommandHandler(passwordService, userInterfaceAdapterPort, commandExecutionTracker),
         )
@@ -236,7 +240,7 @@ class ApplicationGraph(
     val importExportService: ImportExportService by lazy {
         PasswordImportExportService(exchangeFactory, passwordService, nestService, eventRegistry)
     }
-    val initializers: Set<Initializer> by lazy { setOf(exportFileChecker, inactivityHandlerScheduler) }
+    val initializers: Set<Initializer> by lazy { setOf(exportFileChecker, trashCleanup, inactivityHandlerScheduler) }
     val inputHandler: InputHandler by lazy {
         CommandInputHandler(commandBus, commandFactory, rememberedCommandMemory, commandExecutionTracker)
     }
@@ -252,6 +256,7 @@ class ApplicationGraph(
             discardPasswordService = discardPasswordService,
             renamePasswordService = renamePasswordService,
             movePasswordService = movePasswordService,
+            currentEpochDaySupplier = ::currentEpochDay,
         )
     }
     val passwordTreeAdapterPort: PasswordTreeAdapterPort by lazy { PasswordTreeFacade(passwordTreeReader, passwordTreeWriter) }
@@ -268,6 +273,7 @@ class ApplicationGraph(
     private val commandExecutionTracker by lazy { CommandExecutionTracker() }
     private val commandFactory by lazy {
         CommandFactory(
+            discardCommandFactory = DiscardCommandFactory(),
             favoriteCommandFactory = FavoriteCommandFactory(),
             listCommandFactory = ListCommandFactory(),
             memoryCommandFactory = MemoryCommandFactory(),
@@ -321,7 +327,15 @@ class ApplicationGraph(
         ViewPasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl)
     }
     private val discardPasswordService by lazy {
-        DiscardPasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl)
+        DiscardPasswordService(
+            cryptoProvider,
+            eggRepository,
+            eventRegistry,
+            memoryUpdateControl,
+            { configuration.application.trash.retentionDays },
+            nestService,
+            ::currentEpochDay,
+        )
     }
     private val renamePasswordService by lazy {
         RenamePasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl)
@@ -337,6 +351,7 @@ class ApplicationGraph(
     private val exportFileChecker by lazy {
         ExportFileChecker(configuration, runContext, systemOperation, userInterfaceAdapterPort)
     }
+    private val trashCleanup by lazy { TrashCleanup(passwordService) }
     private val inactivityTerminationSignal by lazy { InactivityTerminationSignal() }
     private val inactivityHandler by lazy {
         InactivityHandler(commandBus, configuration, inactivityTerminationSignal, systemOperation)
@@ -352,4 +367,6 @@ class ApplicationGraph(
             userInterfaceAdapterPort = userInterfaceAdapterPort,
         )
     }
+
+    private fun currentEpochDay() = java.time.LocalDate.now(systemOperation.clock).toEpochDay().toInt()
 }

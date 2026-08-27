@@ -1,5 +1,5 @@
 package de.pflugradts.passbird.application.passwordtree
-private val PASSWORD_TREE_FILE_HEADER = byteArrayOf(0x0, 0x50, 0x77, 0x54, 0x72, 0x65, 0x65, 0x37, 0x0)
+private val PASSWORD_TREE_FILE_HEADER = byteArrayOf(0x0, 0x50, 0x77, 0x54, 0x72, 0x65, 0x65, 0x38, 0x0)
 class PasswordTreeEnvelope constructor() {
     fun wrap(bytes: ByteArray) = PASSWORD_TREE_FILE_HEADER + bytes
     fun unwrap(bytes: ByteArray) = when {

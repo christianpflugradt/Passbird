@@ -15,6 +15,9 @@ interface EggRepository : Repository {
     fun delete(egg: Egg)
     fun findAll(slot: Slot): Stream<Egg>
     fun findAll(): Stream<Egg>
+    fun findAllIncludingTrashed(slot: Slot): Stream<Egg>
+    fun findAllIncludingTrashed(): Stream<Egg>
+    fun findAllTrashed(): Stream<Egg>
     fun favorites(slot: Slot): EggIdFavorites
     fun favorites(): EggIdFavorites
     fun memory(): EggIdMemory

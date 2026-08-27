@@ -96,9 +96,11 @@ The password is now copied to your clipboard. By default, the clipboard is clear
 
 To display the password in the terminal, type: `vemail`
 
-#### 4. Delete the Password
+#### 4. Discard the Password
 
-Since this is just a tutorial, delete the password by typing: `demail`
+Since this is just a tutorial, discard the password by typing: `demail`
+
+This moves the Egg to Passbird's trash instead of deleting it permanently. Use `d!email` if you want to skip the trash and delete it irrevocably.
 
 #### Summary of Commands Used
 
@@ -106,7 +108,7 @@ In this tutorial, you’ve used these basic commands, all of which operate on an
 1. set: Creates or updates a password for the specified EggId.
 2. get: Copies the password for the EggId to the clipboard.
 3. view: Displays the password in the terminal.
-4. delete: Removes the password and its associated Egg.
+4. discard: Moves the Egg and its password to trash.
 
 Finally, type: `q`
 
@@ -132,6 +134,8 @@ application:
   inactivityLimit:
     enabled: false
     limitInMinutes: 10
+  trash:
+    retentionDays: 365
   password:
     length: 20
     specialCharacters: true
@@ -254,7 +258,9 @@ Enter `h*` to view password-tree statistics before the same usage information.
         c[EggId] (custom set) Prompts the user to input a custom password for the specified Egg.
         v[EggId] (view)       Displays the password for the specified Egg in the console.
         r[EggId] (rename)     Renames the specified Egg by prompting the user for a new EggId.
-        d[EggId] (discard)    Deletes the specified Egg and its associated password.
+        d[EggId] (discard)    Moves the specified Egg to trash.
+        d![EggId] (force)     Permanently deletes the specified Egg.
+        d (trash)             Displays trashed Eggs and allows restoring them.
 
         e (export)            Exports the Password Tree to a human-readable JSON file.
         e* (selective export) Exports selected Nests or all Nests except selected Nests.
@@ -288,7 +294,11 @@ Passbird immediately updates the password database (Password Tree file) after ev
 
 `vemail` displays the password for the Egg identified by email in the terminal (standard output).
 
-`demail` deletes the Egg identified by email, including its associated password.
+`demail` moves the Egg identified by email to trash.
+
+`d!email` permanently deletes the Egg identified by email and skips the trash.
+
+`d` shows the current trash. Enter a listed index to restore the matching Egg or press Enter to leave the trash view.
 
 `cemail` prompts you to input a custom password for the Egg identified by email. The input is hidden by default when a console is available. Use this command if the system you’re storing the password for does not support Passbird’s standard password format. Be sure to verify your input immediately, as it is not confirmed.
 
@@ -308,15 +318,15 @@ operation is aborted.
 
 `remail` prompts you to rename the Egg identified by email. The new EggId must be unique (not already in use).
 
-`e` exports all Eggs to a file named `passbird-export.json` in the directory specified during program start.
+`e` exports all non-trashed Eggs to a file named `passbird-export.json` in the directory specified during program start.
 
-`e*` previews deployed Nests and lets you export only selected Nest Slots or all Nests except selected Nest Slots.
+`e*` previews deployed Nests and lets you export only selected Nest Slots or all Nests except selected Nest Slots. Trashed Eggs are excluded.
 
 `i` imports all Eggs from a `passbird-export.json` file located in the directory specified during program start.
 
 `i*` previews the Nests in `passbird-export.json`, imports one selected Nest, and lets you restore it into a chosen Nest Slot.
 
-Import expects every exported Nest record in `passbird-export.json` to declare a unique Slot from `0` to `9`, every exported Nest to contain distinct valid EggIds, and every exported Protein record to declare a unique Slot from `0` to `9` within its Egg. Exported Protein records must contain both Type and Structure fields or leave both empty. If Nest or Protein slot metadata is missing, duplicated, or out of range, if one exported Nest repeats or contains an invalid EggId, or if an exported Protein record contains only one of Type or Structure, Passbird rejects the file instead of importing it into another Nest or Protein slot.
+Import expects every exported Nest record in `passbird-export.json` to declare a unique Slot from `0` to `9`, every exported Nest to contain distinct valid EggIds, and every exported Protein record to declare a unique Slot from `0` to `9` within its Egg. Trashed Eggs are never serialized into the export file and therefore are never restored through import. Exported Protein records must contain both Type and Structure fields or leave both empty. If Nest or Protein slot metadata is missing, duplicated, or out of range, if one exported Nest repeats or contains an invalid EggId, or if an exported Protein record contains only one of Type or Structure, Passbird rejects the file instead of importing it into another Nest or Protein slot.
 
 ### Nests
 
@@ -414,7 +424,7 @@ To assign the EggId `email` to Favorite Slot 0, input `f+0email`. The Egg must e
 
 Once stored, `f0` copies the favorited EggId to the clipboard. To reuse it for another command, input a command suffix such as `f0g` to run `gemail`, or `f0p+1` to run `p+1email`.
 
-Favorites are maintained per Nest. Renaming an Egg updates matching Favorites, discarding or moving an Egg clears matching Favorites in the source Nest, and discarding a Nest clears that Nest's Favorites.
+Favorites are maintained per Nest. Renaming an Egg updates matching Favorites, discarding or moving an Egg clears matching Favorites in the source Nest, restoring an Egg does not recreate Favorites automatically, and discarding a Nest clears that Nest's Favorites.
 
 ### Memory
 
@@ -431,6 +441,8 @@ To view commands related to the EggIdMemory, input `m?`. This displays the follo
     m[0-9]Command (use) Executes the specified command using the EggId from the given Memory Slot.
 
 The `use memory` command is especially versatile. Consider an Egg identified by email. To copy its password to the clipboard, you would first input `gemail`. This action stores the EggId email in the most recent memory slot (Slot 0).
+
+Restoring an Egg from trash also stores the restored EggId in memory slot 0 of the Nest it was restored into.
 
 Subsequently, if you wish to set a Protein for this Egg, you could input `p+1email` directly. However, by using the memory feature, you may instead input `m0p+1`. This command invokes the `p+1` operation using the EggId stored in Slot 0, eliminating the need to retype "email".
 
@@ -572,7 +584,7 @@ No. Many programs do not support Unicode characters in passwords, and some even 
 ### How do I update Passbird?
 Passbird follows semantic versioning (`x.y.z`, where `x` is the major version, `y` the minor version, and `z` the patch level). To update to a minor or patch version, download the latest JAR file and use it as usual. For major updates, review the release notes carefully before upgrading so you can catch any migration or compatibility guidance.
 
-Some releases may require a one-time migration before Passbird can start normally. When that happens, Passbird will stop before entering the main application, prompt for confirmation, run the migration, and then ask you to start Passbird again. Keep an up-to-date backup before upgrading so you can revert safely if a migration or upgrade fails.
+Some releases may require a one-time migration before Passbird can start normally. When that happens, Passbird will stop before entering the main application, prompt for confirmation, run the migration, and then ask you to start Passbird again. Keep an up-to-date backup before upgrading so you can revert safely if a migration or upgrade fails. This includes compatibility migrations for password-tree format extensions such as yolk persistence and trash metadata.
 
 Versions up to `6.2.0` created `passbird.sec` as a JCEKS keystore. Current releases create PKCS12 keystores instead and automatically route legacy `passbird.sec` files through the migration boot path before normal startup.
 

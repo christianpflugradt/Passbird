@@ -55,4 +55,11 @@ internal fun storedEggNestSlot(index: Int): Slot {
     return Slot.slotAt(index)
 }
 
+internal fun storedTrashFlag(value: Int): Boolean {
+    if (value !in 0..1) {
+        throwUnsupportedPasswordTreeFormat()
+    }
+    return value == 1
+}
+
 internal fun throwUnsupportedPasswordTreeFormat(): Nothing = throw IllegalStateException("Unsupported password tree format.")

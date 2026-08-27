@@ -21,7 +21,15 @@ fun createEggForTesting(
     withSlot: Slot = DEFAULT,
     withProteins: Map<Slot, ShellPair> = emptyMap(),
     withYolk: TestYolkData? = null,
-): Egg = createEgg(withSlot, withEggIdShell.fakeEnc(), withPasswordShell.fakeEnc()).apply {
+    withTrashed: Boolean = false,
+    withDeletionEpochDay: Int = 0,
+): Egg = createEgg(
+    withSlot,
+    withEggIdShell.fakeEnc(),
+    withPasswordShell.fakeEnc(),
+    trashed = withTrashed,
+    deletionEpochDay = withDeletionEpochDay,
+).apply {
     withProteins.forEach { updateProtein(it.key, it.value.first.fakeEnc(), it.value.second.fakeEnc()) }
     withYolk?.let { updateYolk(it.secret.fakeEnc(), it.algorithm, it.digits, it.periodSeconds) }
 }

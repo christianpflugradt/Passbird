@@ -10,6 +10,8 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 
 data class EggCreated(val egg: Egg) : DomainEvent
 data class EggDiscarded(val egg: Egg) : DomainEvent
+data class EggRestored(val egg: Egg) : DomainEvent
+data class EggTrashed(val egg: Egg) : DomainEvent
 data class EggMoved(val egg: Egg) : DomainEvent
 data class EggNotFound(val eggIdShell: Shell) : DomainEvent
 data class EggRenamed(val egg: Egg) : DomainEvent

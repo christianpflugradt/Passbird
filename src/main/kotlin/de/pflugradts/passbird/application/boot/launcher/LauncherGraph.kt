@@ -13,6 +13,7 @@ import de.pflugradts.passbird.application.process.migration.PreLaunchMigrationDe
 import de.pflugradts.passbird.application.process.migration.PreLaunchMigrationLocator
 import de.pflugradts.passbird.application.process.migration.keystore.KeyStoreFormatMigrationDetector
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigrationDetector
+import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeTrashMigrationDetector
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeYolkMigrationDetector
 import de.pflugradts.passbird.application.util.SystemOperation
 
@@ -24,6 +25,7 @@ class LauncherGraph(val runContext: RunContext) {
             KeyStoreFormatMigrationDetector(configuration, KeyStoreFormatDetector(), systemOperation),
             PasswordTreeKeyDerivationMigrationDetector(configuration, passwordTreeEnvelope, systemOperation),
             PasswordTreeYolkMigrationDetector(configuration, systemOperation),
+            PasswordTreeTrashMigrationDetector(configuration, systemOperation),
         )
     }
     val userInterfaceAdapterPort: UserInterfaceAdapterPort by lazy {

@@ -13,6 +13,8 @@ domain_language:
     meaning: short-term memory of recently used EggIds, maintained per nest
   - term: EggIdFavorites
     meaning: persistent quick-access EggId slots, maintained per nest
+  - term: Trash
+    meaning: the set of Eggs marked as trashed together with their deletion day metadata
   - term: RememberedCommand
     meaning: session-only copy of the last successful non-repeat command input, used by the repeat command
   - term: Slot
@@ -32,6 +34,8 @@ user_command_families:
       - v[EggId]
       - r[EggId]
       - d[EggId]
+      - d![EggId]
+      - d
   - family: exchange
     commands:
       - e
@@ -98,12 +102,15 @@ state_and_limits:
   custom_password_configurations: up_to_9_plus_default
 important_domain_invariants:
   - Egg identity is tied to EggId plus associated nest
-  - egg operations emit domain events such as created, updated, renamed, moved, or discarded
+  - egg operations emit domain events such as created, updated, renamed, moved, trashed, restored, or discarded
   - protein operations emit create, update, and discard events
   - favorites are per nest, persist in the password tree, and use fixed slots
   - renaming an Egg updates matching favorites in that Egg's nest
   - discarding or moving an Egg clears matching favorites in the source nest
+  - restoring an Egg does not recreate favorites automatically
   - discarding a Nest clears every favorite stored for that Nest
+  - trashed Eggs stay in the password tree until restored, force deleted, or removed by retention cleanup
+  - trashed Eggs are excluded from normal Egg commands and import or export serialization
   - memory is per nest and may be disabled or non-persistent via configuration
   - the remembered repeat-command input is session-only, is never persisted, and is replaced only by a successful non-repeat command
   - user-facing Unicode support is intentionally not guaranteed; README warns against Unicode input

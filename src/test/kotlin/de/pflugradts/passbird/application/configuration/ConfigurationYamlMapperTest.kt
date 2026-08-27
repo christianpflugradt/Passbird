@@ -45,6 +45,8 @@ class ConfigurationYamlMapperTest {
                 hasUppercaseLetters: false
                 hasSpecialCharacters: true
                 unusedSpecialCharacters: "!?"
+          trash:
+            retentionDays: 45
           yolk:
             algorithm: SHA256
             copyToClipboard: false
@@ -217,6 +219,7 @@ class ConfigurationYamlMapperTest {
         expectThat(actual.application.exchange.promptOnExportFile).isTrue()
         expectThat(actual.application.inactivityLimit.enabled).isFalse()
         expectThat(actual.application.inactivityLimit.limitInMinutes) isEqualTo 10
+        expectThat(actual.application.trash.retentionDays) isEqualTo 365
         expectThat(actual.application.password.customPasswordConfigurations).hasSize(1)
         expectThat(actual.application.password.customPasswordConfigurations.first().name) isEqualTo ""
         expectThat(actual.application.password.customPasswordConfigurations.first().length) isEqualTo 20
@@ -257,6 +260,7 @@ class ConfigurationYamlMapperTest {
         expectThat(actual.application.backup.location) isEqualTo "backups"
         expectThat(actual.application.exchange.promptOnExportFile).isTrue()
         expectThat(actual.application.inactivityLimit.limitInMinutes) isEqualTo 10
+        expectThat(actual.application.trash.retentionDays) isEqualTo 365
         expectThat(actual.application.password.length) isEqualTo 20
         expectThat(actual.application.yolk.algorithm) isEqualTo "SHA1"
         expectThat(actual.adapter.clipboard.nativeTooling.enabled).isTrue()
@@ -341,6 +345,7 @@ class ConfigurationYamlMapperTest {
         expectThat(configuration.application.exchange.promptOnExportFile).isFalse()
         expectThat(configuration.application.inactivityLimit.enabled).isTrue()
         expectThat(configuration.application.inactivityLimit.limitInMinutes) isEqualTo 15
+        expectThat(configuration.application.trash.retentionDays) isEqualTo 45
         expectThat(configuration.application.password.length) isEqualTo 32
         expectThat(configuration.application.password.specialCharacters).isFalse()
         expectThat(configuration.application.password.promptOnRemoval).isFalse()

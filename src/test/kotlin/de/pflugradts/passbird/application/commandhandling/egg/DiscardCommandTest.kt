@@ -49,6 +49,27 @@ class DiscardCommandTest {
 
         // then
         verify(exactly = 1) { passwordService.discardEgg(eq(shellOf(args))) }
+        verify(exactly = 0) { passwordService.discardEggPermanently(any()) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
+    fun `should handle force discard command`() {
+        // given
+        val args = "EggId"
+        val shell = shellOf("d!$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeConfiguration(instance = configuration)
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) { passwordService.discardEggPermanently(eq(shellOf(args))) }
+        verify(exactly = 0) { passwordService.discardEgg(any()) }
         expectThat(shell) isNotEqualTo reference
     }
 
@@ -66,7 +87,9 @@ class DiscardCommandTest {
         inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 1) { passwordService.viewPassword(eq(shellOf(args))) }
+        verify(exactly = 1) {
+            passwordService.eggExists(eq(shellOf(args)), any<PasswordService.EggNotExistsAction>())
+        }
         verify(exactly = 0) { passwordService.discardEgg(eq(shellOf(args))) }
         expectThat(shell) isNotEqualTo reference
     }
@@ -92,6 +115,26 @@ class DiscardCommandTest {
     }
 
     @Test
+    fun `should handle force discard command with prompt on removal`() {
+        // given
+        val args = "EggId"
+        val shell = shellOf("d!$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = true)
+        fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 1) { passwordService.discardEggPermanently(eq(shellOf(args))) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
     fun `should handle discard command with prompt on removal and operation aborted`() {
         // given
         val args = "EggId"
@@ -113,6 +156,27 @@ class DiscardCommandTest {
     }
 
     @Test
+    fun `should handle force discard command with prompt on removal and operation aborted`() {
+        // given
+        val args = "EggId"
+        val shell = shellOf("d!$args")
+        val reference = shell.copy()
+        val givenEgg = createEggForTesting(withEggIdShell = shellOf(args))
+        fakePasswordService(instance = passwordService, withEggs = listOf(givenEgg))
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withReceiveConfirmation = false)
+        fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
+
+        // when
+        expectThat(shell) isEqualTo reference
+        inputHandler.handleInput(inputOf(shell))
+
+        // then
+        verify(exactly = 0) { passwordService.discardEggPermanently(eq(shellOf(args))) }
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+        expectThat(shell) isNotEqualTo reference
+    }
+
+    @Test
     fun `should not prompt for removal for non existing egg`() {
         // given
         val args = "EggId"
@@ -126,7 +190,9 @@ class DiscardCommandTest {
         inputHandler.handleInput(inputOf(shell))
 
         // then
-        verify(exactly = 1) { passwordService.viewPassword(eq(shellOf(args))) }
+        verify(exactly = 1) {
+            passwordService.eggExists(eq(shellOf(args)), any<PasswordService.EggNotExistsAction>())
+        }
         verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
         verify(exactly = 0) { userInterfaceAdapterPort.receiveConfirmation(any()) }
         verify(exactly = 0) { passwordService.discardEgg(eq(shellOf(args))) }

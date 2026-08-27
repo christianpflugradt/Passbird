@@ -11,6 +11,8 @@ import de.pflugradts.passbird.domain.model.event.EggCreated
 import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggMoved
 import de.pflugradts.passbird.domain.model.event.EggRenamed
+import de.pflugradts.passbird.domain.model.event.EggRestored
+import de.pflugradts.passbird.domain.model.event.EggTrashed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.event.ProteinCreated
 import de.pflugradts.passbird.domain.model.event.ProteinDiscarded
@@ -26,6 +28,8 @@ class Egg private constructor(
     private val password: Password,
     val proteins: List<MutableOption<Protein>>,
     private val yolk: MutableOption<Yolk>,
+    private var trashed: Boolean,
+    private var deletionEpochDay: Int,
 ) : AggregateRoot() {
 
     init {
@@ -35,6 +39,8 @@ class Egg private constructor(
     fun viewEggId() = eggId.view()
     fun viewPassword() = password.view()
     fun hasYolk() = yolk.isPresent
+    fun isTrashed() = trashed
+    fun deletionEpochDay() = deletionEpochDay
     fun viewYolk() = yolk.map { createYolk(it.viewSecret(), it.algorithm, it.digits, it.periodSeconds) }
 
     fun rename(eggIdShell: EncryptedShell) {
@@ -68,6 +74,19 @@ class Egg private constructor(
         registerDomainEvent(EggMoved(this))
     }
 
+    fun trash(epochDay: Int) {
+        trashed = true
+        deletionEpochDay = epochDay
+        registerDomainEvent(EggTrashed(this))
+    }
+
+    fun restore(targetSlot: Slot) {
+        slot = targetSlot
+        trashed = false
+        deletionEpochDay = 0
+        registerDomainEvent(EggRestored(this))
+    }
+
     fun discard() {
         password.discard()
         registerDomainEvent(EggDiscarded(this))
@@ -95,6 +114,8 @@ class Egg private constructor(
         password = createPassword(password.view()),
         proteins = proteins.map { protein -> protein.mapMutable { createProtein(it.viewType(), it.viewStructure()) } },
         yolk = yolk.mapMutable { createYolk(it.viewSecret(), it.algorithm, it.digits, it.periodSeconds) },
+        trashed = trashed,
+        deletionEpochDay = deletionEpochDay,
     ).also { it.clearDomainEvents() }
 
     override fun equals(other: Any?) = (other as? Egg)?.let {
@@ -109,12 +130,16 @@ class Egg private constructor(
             passwordShell: EncryptedShell,
             proteins: List<MutableOption<Protein>> = emptyProteins(),
             yolk: MutableOption<Yolk> = mutableOptionOf(),
+            trashed: Boolean = false,
+            deletionEpochDay: Int = 0,
         ) = Egg(
             slot = slot,
             eggId = createEggId(eggIdShell),
             password = createPassword(passwordShell),
             proteins = proteins,
             yolk = yolk,
+            trashed = trashed,
+            deletionEpochDay = deletionEpochDay,
         )
     }
 }

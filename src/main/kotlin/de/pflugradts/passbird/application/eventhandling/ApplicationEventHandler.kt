@@ -6,6 +6,8 @@ import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggMoved
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.event.EggRenamed
+import de.pflugradts.passbird.domain.model.event.EggRestored
+import de.pflugradts.passbird.domain.model.event.EggTrashed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
@@ -32,6 +34,8 @@ class ApplicationEventHandler constructor(
         EggUpdated::class.java,
         EggRenamed::class.java,
         EggDiscarded::class.java,
+        EggRestored::class.java,
+        EggTrashed::class.java,
         EggMoved::class.java,
         EggNotFound::class.java,
         EggsExported::class.java,
@@ -49,6 +53,8 @@ class ApplicationEventHandler constructor(
         EggUpdated::class.java to { handleEggUpdated(it as EggUpdated) },
         EggRenamed::class.java to { handleEggRenamed(it as EggRenamed) },
         EggDiscarded::class.java to { handleEggDiscarded(it as EggDiscarded) },
+        EggRestored::class.java to { handleEggRestored(it as EggRestored) },
+        EggTrashed::class.java to { handleEggTrashed(it as EggTrashed) },
         EggMoved::class.java to { handleEggMoved(it as EggMoved) },
         EggNotFound::class.java to { handleEggNotFound(it as EggNotFound) },
         EggsExported::class.java to { handleEggsExported(it as EggsExported) },
@@ -78,6 +84,14 @@ class ApplicationEventHandler constructor(
 
     private fun handleEggDiscarded(eggDiscarded: EggDiscarded) {
         send("Egg '${decrypt(eggDiscarded.egg.viewEggId())}' successfully discarded.")
+    }
+
+    private fun handleEggRestored(eggRestored: EggRestored) {
+        send("Egg '${decrypt(eggRestored.egg.viewEggId())}' successfully restored.")
+    }
+
+    private fun handleEggTrashed(eggTrashed: EggTrashed) {
+        send("Egg '${decrypt(eggTrashed.egg.viewEggId())}' successfully moved to trash.")
     }
 
     private fun handleEggMoved(eggMoved: EggMoved) {

@@ -13,6 +13,7 @@ flows:
     visible_rules:
       - there is no welcome banner or startup summary in the normal boot path itself
       - if no initializer emits user-visible output, the first visible steady-state content after the opening empty line is the command prompt
+      - startup trash cleanup runs before the first command prompt and produces no user-visible output of its own
   - id: invalid_initial_nest_slot
     trigger:
       - Passbird starts with a valid home directory and a second CLI argument outside Nest Slots 1 through 9

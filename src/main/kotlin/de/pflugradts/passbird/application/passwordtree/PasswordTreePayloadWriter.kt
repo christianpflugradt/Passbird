@@ -17,6 +17,8 @@ class PasswordTreePayloadWriter constructor() {
         val bytes = ByteArray(signatureSize() + contentSize + checksumBytes())
         try {
             var offset = copyBytes(signature(), bytes, 0, signatureSize())
+            offset += copyInt(currentPasswordTreePayloadFormatMarker(), bytes, offset)
+            offset += copyInt(currentPasswordTreePayloadVersion(), bytes, offset)
             snapshot.memory.forEach { memoryListOption ->
                 memoryListOption.ifPresent { memoryList ->
                     memoryList.forEach { memoryEntry ->
@@ -49,6 +51,7 @@ class PasswordTreePayloadWriter constructor() {
         }
     }
     private fun calcRequiredContentSize(snapshot: PasswordTreeSnapshot): Int {
+        val metadataHeaderSize = 2 * Integer.BYTES
         val memorySize = 100 * Integer.BYTES + snapshot.memory.fold(0) { acc, inner ->
             acc + inner.map { slots -> slots.sumOf { it.map(EncryptedShell::size).orElse(0) } }.orElse(0)
         }
@@ -58,7 +61,7 @@ class PasswordTreePayloadWriter constructor() {
         val eggDataSize = snapshot.eggs.sumOf { it.serializedDataSize() }
         val eggMetaSize = snapshot.eggs.size * 26 * intBytes()
         val nestSize = snapshot.nests.size * intBytes() + snapshot.nests.filter { !it.isEmpty }.sumOf { it.size }
-        return memorySize + favoriteSize + eggDataSize + eggMetaSize + nestSize
+        return metadataHeaderSize + memorySize + favoriteSize + eggDataSize + eggMetaSize + nestSize
     }
     private fun Option<EncryptedShell>.encryptedShellAsByteArray() = if (isPresent) {
         val shellBytesSize = get().size
@@ -83,59 +86,87 @@ class PasswordTreePayloadWriter constructor() {
         val passwordShell = viewPassword()
         val eggIdSize = eggIdShell.size
         val passwordSize = passwordShell.size
-        val metaSize = 26 * Integer.BYTES
+        val metaSize = 28 * Integer.BYTES
         val proteinDataSize = proteins.filter { it.isPresent }.sumOf { it.get().serializedDataSize() }
         val yolkDataSize = viewYolk().map { it.serializedDataSize() }.orElse(0)
         val bytes = ByteArray(Integer.BYTES + eggIdSize + passwordSize + metaSize + proteinDataSize + yolkDataSize)
         var completed = false
         try {
-            var offset = copyInt(associatedNest().index(), bytes, 0)
-            offset += copyInt(eggIdSize, bytes, offset)
-            offset += eggIdShell.toByteArray().copyToAndScramble(bytes, offset)
-            offset += copyInt(passwordSize, bytes, offset)
-            offset += passwordShell.toByteArray().copyToAndScramble(bytes, offset)
-            proteins.forEach { slottedProtein ->
-                if (slottedProtein.isPresent) {
-                    val typeShell = slottedProtein.get().viewType()
-                    val structureShell = slottedProtein.get().viewStructure()
-                    try {
-                        offset += copyInt(typeShell.size, bytes, offset)
-                        offset += typeShell.toByteArray().copyToAndScramble(bytes, offset)
-                        offset += copyInt(structureShell.size, bytes, offset)
-                        offset += structureShell.toByteArray().copyToAndScramble(bytes, offset)
-                    } finally {
-                        typeShell.scramble()
-                        structureShell.scramble()
-                    }
-                } else {
-                    offset += copyInt(0, bytes, offset)
-                    offset += copyInt(0, bytes, offset)
-                }
-            }
-            val yolk = viewYolk().orNull()
-            if (yolk != null) {
-                val secretShell = yolk.viewSecret()
-                try {
-                    offset += copyInt(secretShell.size, bytes, offset)
-                    offset += secretShell.toByteArray().copyToAndScramble(bytes, offset)
-                    offset += copyInt(totpAlgorithmOrdinal(yolk.algorithm), bytes, offset)
-                    offset += copyInt(yolk.digits, bytes, offset)
-                    offset += copyInt(yolk.periodSeconds, bytes, offset)
-                } finally {
-                    secretShell.scramble()
-                }
-            } else {
-                offset += copyInt(0, bytes, offset)
-                offset += copyInt(0, bytes, offset)
-                offset += copyInt(0, bytes, offset)
-                offset += copyInt(0, bytes, offset)
-            }
+            var offset = writeEggMetadata(bytes, eggIdShell, eggIdSize, passwordShell, passwordSize)
+            offset = writeProteinBytes(bytes, offset)
+            writeYolkBytes(bytes, offset)
             completed = true
             return bytes
         } finally {
             eggIdShell.scramble()
             passwordShell.scramble()
             if (!completed) bytes.scramble()
+        }
+    }
+    private fun Egg.writeEggMetadata(
+        bytes: ByteArray,
+        eggIdShell: EncryptedShell,
+        eggIdSize: Int,
+        passwordShell: EncryptedShell,
+        passwordSize: Int,
+    ): Int {
+        var offset = copyInt(associatedNest().index(), bytes, 0)
+        offset += copyInt(if (isTrashed()) 1 else 0, bytes, offset)
+        offset += copyInt(deletionEpochDay(), bytes, offset)
+        offset += copyInt(eggIdSize, bytes, offset)
+        offset += eggIdShell.toByteArray().copyToAndScramble(bytes, offset)
+        offset += copyInt(passwordSize, bytes, offset)
+        offset += passwordShell.toByteArray().copyToAndScramble(bytes, offset)
+        return offset
+    }
+    private fun Egg.writeProteinBytes(bytes: ByteArray, offset: Int): Int {
+        var nextOffset = offset
+        proteins.forEach { slottedProtein ->
+            if (slottedProtein.isPresent) {
+                nextOffset += slottedProtein.get().toByteArray(bytes, nextOffset)
+            } else {
+                nextOffset += copyInt(0, bytes, nextOffset)
+                nextOffset += copyInt(0, bytes, nextOffset)
+            }
+        }
+        return nextOffset
+    }
+    private fun Egg.writeYolkBytes(bytes: ByteArray, offset: Int): Int {
+        val yolk = viewYolk().orNull()
+        return if (yolk != null) {
+            yolk.toByteArray(bytes, offset)
+        } else {
+            copyInt(0, bytes, offset) +
+                copyInt(0, bytes, offset + Integer.BYTES) +
+                copyInt(0, bytes, offset + 2 * Integer.BYTES) +
+                copyInt(0, bytes, offset + 3 * Integer.BYTES)
+        }
+    }
+    private fun Protein.toByteArray(bytes: ByteArray, offset: Int): Int {
+        val typeShell = viewType()
+        val structureShell = viewStructure()
+        try {
+            var nextOffset = copyInt(typeShell.size, bytes, offset)
+            nextOffset += typeShell.toByteArray().copyToAndScramble(bytes, offset + nextOffset)
+            nextOffset += copyInt(structureShell.size, bytes, offset + nextOffset)
+            nextOffset += structureShell.toByteArray().copyToAndScramble(bytes, offset + nextOffset)
+            return nextOffset
+        } finally {
+            typeShell.scramble()
+            structureShell.scramble()
+        }
+    }
+    private fun Yolk.toByteArray(bytes: ByteArray, offset: Int): Int {
+        val secretShell = viewSecret()
+        try {
+            var nextOffset = copyInt(secretShell.size, bytes, offset)
+            nextOffset += secretShell.toByteArray().copyToAndScramble(bytes, offset + nextOffset)
+            nextOffset += copyInt(totpAlgorithmOrdinal(algorithm), bytes, offset + nextOffset)
+            nextOffset += copyInt(digits, bytes, offset + nextOffset)
+            nextOffset += copyInt(periodSeconds, bytes, offset + nextOffset)
+            return nextOffset
+        } finally {
+            secretShell.scramble()
         }
     }
     private fun Egg.serializedDataSize(): Int {

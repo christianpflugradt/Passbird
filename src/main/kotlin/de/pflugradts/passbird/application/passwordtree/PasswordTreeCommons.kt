@@ -11,3 +11,5 @@ fun signatureSize() = signature().size
 fun intBytes() = Integer.BYTES
 fun checksumBytes() = 1
 fun placeHolder() = EncryptedShell(payload = shellOf("placeholder"), iv = shellOf("000000000000"))
+fun currentPasswordTreePayloadFormatMarker() = Int.MAX_VALUE
+fun currentPasswordTreePayloadVersion() = 1

@@ -15,6 +15,7 @@ class SetInfoCommand : NoArgumentCommand
 class ViewFavoriteCommand : NoArgumentCommand
 class ViewNestCommand : NoArgumentCommand
 class ViewMemoryCommand : NoArgumentCommand
+class ViewTrashCommand : NoArgumentCommand
 class YolkInfoCommand : NoArgumentCommand
 
 class NullCommand : NoArgumentCommand

@@ -199,6 +199,47 @@ class ViewPasswordServiceTest {
     }
 
     @Test
+    fun `should exclude trashed eggs from active egg listing`() {
+        // given
+        val activeEgg = createEggForTesting(withEggIdShell = shellOf("abc"))
+        val trashedEgg = createEggForTesting(withEggIdShell = shellOf("def"), withTrashed = true, withDeletionEpochDay = 90)
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(
+            instance = eggRepository,
+            withEggs = listOf(activeEgg, trashedEgg),
+        )
+
+        // when
+        val actual = passwordService.findAllEggIds()
+
+        // then
+        expectThat(actual.toList()).containsExactly(shellOf("abc"))
+    }
+
+    @Test
+    fun `should list trashed eggs sorted by deletion age`() {
+        // given
+        val older =
+            createEggForTesting(withEggIdShell = shellOf("older"), withSlot = Slot.S2, withTrashed = true, withDeletionEpochDay = 80)
+        val newer =
+            createEggForTesting(withEggIdShell = shellOf("newer"), withSlot = Slot.DEFAULT, withTrashed = true, withDeletionEpochDay = 95)
+        val active = createEggForTesting(withEggIdShell = shellOf("active"))
+        fakeCryptoProvider(instance = cryptoProvider)
+        fakeEggRepository(
+            instance = eggRepository,
+            withEggs = listOf(newer, active, older),
+        )
+
+        // when
+        val actual = passwordService.viewTrash(currentEpochDay = 100)
+
+        // then
+        expectThat(actual.map { it.eggId }).containsExactly(shellOf("older"), shellOf("newer"))
+        expectThat(actual.map { it.nestSlot }).containsExactly(Slot.S2, Slot.DEFAULT)
+        expectThat(actual.map { it.deletionAgeDays }).containsExactly(20, 5)
+    }
+
+    @Test
     fun `should find all eggIds for specified nest in alphabetical order`() {
         // given
         val eggId1 = shellOf("abc")

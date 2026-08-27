@@ -50,6 +50,7 @@ private fun ConfigurationNode.toApplication() = Configuration.Application(
     exchange = nested("exchange")?.toExchange() ?: Configuration.Exchange(),
     inactivityLimit = nested("inactivityLimit")?.toInactivityLimit() ?: Configuration.InactivityLimit(),
     password = nested("password")?.toPassword() ?: Configuration.Password(),
+    trash = nested("trash")?.toTrash() ?: Configuration.Trash(),
     yolk = nested("yolk")?.toYolk() ?: Configuration.Yolk(),
 ).also { ensureFullyConsumed() }
 
@@ -83,6 +84,10 @@ private fun ConfigurationNode.toPassword() = Configuration.Password(
     customPasswordConfigurations = list("customPasswordConfigurations")?.mapIndexed { index, item ->
         item.toNode("$path.customPasswordConfigurations[$index]").toCustomPasswordConfiguration()
     } ?: emptyList(),
+).also { ensureFullyConsumed() }
+
+private fun ConfigurationNode.toTrash() = Configuration.Trash(
+    retentionDays = int("retentionDays") ?: Configuration.Trash().retentionDays,
 ).also { ensureFullyConsumed() }
 
 private fun ConfigurationNode.toCustomPasswordConfiguration() = Configuration.CustomPasswordConfiguration(
@@ -187,6 +192,7 @@ private fun ReadableConfiguration.Application.toYamlValue(): Map<String, Any?> =
     "exchange" to exchange.toYamlValue(),
     "inactivityLimit" to inactivityLimit.toYamlValue(),
     "password" to password.toYamlValue(),
+    "trash" to trash.toYamlValue(),
     "yolk" to yolk.toYamlValue(),
 )
 
@@ -218,6 +224,10 @@ private fun ReadableConfiguration.Password.toYamlValue(): Map<String, Any?> = li
     "specialCharacters" to specialCharacters,
     "promptOnRemoval" to promptOnRemoval,
     "customPasswordConfigurations" to customPasswordConfigurations.map { it.toYamlValue() },
+)
+
+private fun ReadableConfiguration.Trash.toYamlValue(): Map<String, Any?> = linkedMapOf(
+    "retentionDays" to retentionDays,
 )
 
 private fun ReadableConfiguration.CustomPasswordConfiguration.toYamlValue(): Map<String, Any?> = linkedMapOf(

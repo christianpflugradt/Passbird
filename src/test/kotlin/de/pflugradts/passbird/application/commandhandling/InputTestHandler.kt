@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling
 
 import de.pflugradts.passbird.application.commandhandling.factory.CommandFactory
+import de.pflugradts.passbird.application.commandhandling.factory.DiscardCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.FavoriteCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.ListCommandFactory
 import de.pflugradts.passbird.application.commandhandling.factory.MemoryCommandFactory
@@ -11,6 +12,7 @@ import de.pflugradts.passbird.application.commandhandling.factory.YolkCommandFac
 import de.pflugradts.passbird.application.commandhandling.handler.CommandHandler
 
 private val commandFactory = CommandFactory(
+    discardCommandFactory = DiscardCommandFactory(),
     favoriteCommandFactory = FavoriteCommandFactory(),
     listCommandFactory = ListCommandFactory(),
     memoryCommandFactory = MemoryCommandFactory(),

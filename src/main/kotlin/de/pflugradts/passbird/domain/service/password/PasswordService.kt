@@ -25,6 +25,7 @@ interface PasswordService {
     fun putFavorite(slot: Slot, eggIdShell: Shell): TryResult<Unit>
     fun viewMemoryEntry(slot: Slot): Option<Shell>
     fun viewPassword(eggIdShell: Shell): Option<Shell>
+    fun viewTrash(): List<TrashEggView>
     fun viewProteinStructure(eggIdShell: Shell, slot: Slot): Option<Shell>
     fun viewProteinStructures(eggIdShell: Shell): Option<List<Option<Shell>>>
     fun viewProteinType(eggIdShell: Shell, slot: Slot): Option<Shell>
@@ -39,9 +40,12 @@ interface PasswordService {
     fun putYolk(eggIdShell: Shell, secretShell: Shell, algorithm: String, digits: Int, periodSeconds: Int): TryResult<Unit>
     fun discardFavorite(slot: Slot): TryResult<Unit>
     fun discardEgg(eggIdShell: Shell): TryResult<Unit>
+    fun discardEggPermanently(eggIdShell: Shell): TryResult<Unit>
+    fun cleanupTrash(): TryResult<Int>
     fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit>
     fun discardYolk(eggIdShell: Shell): TryResult<Unit>
     fun moveEgg(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit>
+    fun restoreEgg(eggIdShell: Shell): TryResult<RestoreEggResult>
     fun findAllEggIds(): Stream<Shell>
     fun findAllEggIds(slot: Slot): Stream<Shell>
 }
@@ -60,3 +64,16 @@ data class YolkView(
     val digits: Int,
     val periodSeconds: Int,
 )
+
+data class TrashEggView(
+    val eggId: Shell,
+    val nestSlot: Slot,
+    val deletionAgeDays: Int,
+)
+
+enum class RestoreEggResult {
+    RESTORED,
+    RESTORED_TO_DEFAULT,
+    TARGET_CONFLICT,
+    NOT_FOUND,
+}

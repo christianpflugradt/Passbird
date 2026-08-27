@@ -166,3 +166,4 @@ observable_rules:
   - import flows do not create, clear, or otherwise directly edit Favorite slots
   - exported eggs may include one optional yolk record containing the secret plus TOTP metadata
   - import accepts both legacy exchange files without yolks and newer exchange files with yolks
+  - trashed Eggs are excluded from export and cannot be recreated through import

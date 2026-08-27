@@ -12,6 +12,8 @@ import de.pflugradts.passbird.domain.model.event.EggDiscarded
 import de.pflugradts.passbird.domain.model.event.EggMoved
 import de.pflugradts.passbird.domain.model.event.EggNotFound
 import de.pflugradts.passbird.domain.model.event.EggRenamed
+import de.pflugradts.passbird.domain.model.event.EggRestored
+import de.pflugradts.passbird.domain.model.event.EggTrashed
 import de.pflugradts.passbird.domain.model.event.EggUpdated
 import de.pflugradts.passbird.domain.model.event.EggsExported
 import de.pflugradts.passbird.domain.model.event.EggsImported
@@ -208,6 +210,8 @@ class ApplicationEventHandlerTest {
                 Arguments.of(EggDiscarded(createEggForTesting())),
                 Arguments.of(EggUpdated(createEggForTesting())),
                 Arguments.of(EggRenamed(createEggForTesting())),
+                Arguments.of(EggRestored(createEggForTesting())),
+                Arguments.of(EggTrashed(createEggForTesting())),
                 Arguments.of(EggMoved(createEggForTesting(withSlot = DEFAULT))),
                 Arguments.of(EggMoved(createEggForTesting(withSlot = S1))),
                 Arguments.of(EggNotFound(shellOf("expected eggId"))),

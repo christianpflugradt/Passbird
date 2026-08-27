@@ -36,6 +36,8 @@ command_surface:
       - v[EggId]
       - r[EggId]
       - d[EggId]
+      - d![EggId]
+      - d
       - e
       - e*
       - i
@@ -73,6 +75,8 @@ command_surface:
     - v[EggId]
     - r[EggId]
     - d[EggId]
+    - d![EggId]
+    - d
     - e
     - e*
     - i
@@ -120,7 +124,9 @@ capabilities:
       - reveal a password
       - copy a password to the clipboard
       - rename an EggId
-      - discard a password entry
+      - move a password entry to trash
+      - permanently delete a password entry
+      - restore a trashed password entry
     commands:
       - g[EggId]
       - s[EggId]
@@ -128,6 +134,8 @@ capabilities:
       - v[EggId]
       - r[EggId]
       - d[EggId]
+      - d![EggId]
+      - d
   - name: selective_password_generation
     user_outcomes:
       - generate passwords with default or named custom configurations

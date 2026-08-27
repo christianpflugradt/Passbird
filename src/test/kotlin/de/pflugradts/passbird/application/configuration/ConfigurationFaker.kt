@@ -21,6 +21,7 @@ fun fakeConfiguration(
     withPasswordTreeLocation: String = "",
     withPromptOnRemoval: Boolean = false,
     withPromptOnExportFile: Boolean = false,
+    withTrashRetentionDays: Int = 365,
     withYolkAlgorithm: String = "SHA1",
     withYolkCopyToClipboard: Boolean = true,
     withYolkDigits: Int = 6,
@@ -54,6 +55,7 @@ fun fakeConfiguration(
     every { instance.application } returns fakeApplication(
         withPromptOnRemoval = withPromptOnRemoval,
         withPromptOnExportFile = withPromptOnExportFile,
+        withTrashRetentionDays = withTrashRetentionDays,
         withYolkAlgorithm = withYolkAlgorithm,
         withYolkCopyToClipboard = withYolkCopyToClipboard,
         withYolkDigits = withYolkDigits,
@@ -118,6 +120,7 @@ private fun fakeAdapter(
 private fun fakeApplication(
     withPromptOnRemoval: Boolean,
     withPromptOnExportFile: Boolean,
+    withTrashRetentionDays: Int,
     withYolkAlgorithm: String,
     withYolkCopyToClipboard: Boolean,
     withYolkDigits: Int,
@@ -137,6 +140,8 @@ private fun fakeApplication(
     every { password.specialCharacters } returns withSpecialCharacters
     every { password.length } returns withPasswordLength
     every { password.customPasswordConfigurations } returns withCustomPasswordConfigurations
+    val trash = mockk<Configuration.Trash>()
+    every { trash.retentionDays } returns withTrashRetentionDays
     val yolk = mockk<Configuration.Yolk>()
     every { yolk.algorithm } returns withYolkAlgorithm
     every { yolk.copyToClipboard } returns withYolkCopyToClipboard
@@ -146,6 +151,7 @@ private fun fakeApplication(
         every { it.exchange } returns exchange
         every { it.inactivityLimit } returns inactivityLimit
         every { it.password } returns password
+        every { it.trash } returns trash
         every { it.yolk } returns yolk
     }
 }

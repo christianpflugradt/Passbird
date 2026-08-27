@@ -15,6 +15,8 @@ import de.pflugradts.passbird.domain.model.slot.Slots
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.NestStats
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import de.pflugradts.passbird.domain.service.password.RestoreEggResult
+import de.pflugradts.passbird.domain.service.password.TrashEggView
 import de.pflugradts.passbird.domain.service.password.YolkView
 import io.mockk.every
 
@@ -31,7 +33,7 @@ fun fakePasswordService(
     fakeEggQueries(instance, withEggs, withNestService, withFavorites, withNestFavoriteCounts)
     fakeProteinQueries(instance, withEggs)
     fakeEggValidation(instance, withInvalidEggId)
-    fakeRemainingQueries(instance, withFavorites, withMemory)
+    fakeRemainingQueries(instance, withEggs, withFavorites, withMemory)
 }
 
 private fun fakeWriteOperations(instance: PasswordService) {
@@ -133,14 +135,31 @@ private fun fakeEggValidation(instance: PasswordService, withInvalidEggId: Boole
     }
 }
 
-private fun fakeRemainingQueries(instance: PasswordService, withFavorites: Map<Slot, String>, withMemory: Map<Slot, String>) {
+private fun fakeRemainingQueries(
+    instance: PasswordService,
+    withEggs: List<Egg>,
+    withFavorites: Map<Slot, String>,
+    withMemory: Map<Slot, String>,
+) {
     every { instance.putFavorite(any(), any()) } returns success(Unit)
     every { instance.discardFavorite(any()) } returns success(Unit)
     every { instance.discardEgg(any()) } returns success(Unit)
+    every { instance.discardEggPermanently(any()) } returns success(Unit)
+    every { instance.cleanupTrash() } returns success(0)
     every { instance.discardProtein(any(), any()) } returns success(Unit)
     every { instance.discardYolk(any()) } returns success(Unit)
     every { instance.renameEgg(any(), any()) } returns success(Unit)
     every { instance.moveEgg(any(), any()) } returns success(Unit)
+    every { instance.restoreEgg(any()) } returns success(RestoreEggResult.RESTORED)
+    every { instance.viewTrash() } answers {
+        withEggs.filter(Egg::isTrashed).map { egg ->
+            TrashEggView(
+                eggId = egg.viewEggId().fakeDec(),
+                nestSlot = egg.associatedNest(),
+                deletionAgeDays = 0,
+            )
+        }
+    }
     every { instance.viewFavorites() } answers { Slots<Shell>().apply { withFavorites.forEach { this[it.key] = shellOf(it.value) } } }
     every { instance.viewFavoriteEntry(any<Slot>()) } answers { instance.viewFavorites()[firstArg<Slot>()] }
     every { instance.viewMemory() } answers { Slots<Shell>().apply { withMemory.forEach { this[it.key] = shellOf(it.value) } } }

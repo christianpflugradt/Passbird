@@ -172,6 +172,23 @@ class PasswordTreeFacadeTest {
     }
 
     @Test
+    fun `should preserve trash metadata across sync and restore`() {
+        // given
+        val trashedEgg = createEggFromStrings(slot = S2, eggId = "EggId4", password = "Password4").apply {
+            trash(123)
+        }
+
+        // when
+        passwordTreeFacade.sync(EggStreamSupplier({ listOf(trashedEgg).stream() }))
+        val restored = passwordTreeFacade.restore().get().toList().single()
+
+        // then
+        expectThat(restored.associatedNest()) isEqualTo S2
+        expectThat(restored.isTrashed()).isTrue()
+        expectThat(restored.deletionEpochDay()) isEqualTo 123
+    }
+
+    @Test
     fun `should scrub egg id memory from future writes when persistence is disabled`() {
         fakeConfiguration(
             instance = configuration,

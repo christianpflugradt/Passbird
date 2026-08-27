@@ -44,6 +44,19 @@ class PasswordTreePayloadReader constructor(
                 return PasswordTreeSnapshot()
             }
             var offset = signatureSize()
+            val payloadVersion = readPayloadInt(byteArray, offset, payloadContentEnd(byteArray)).let {
+                if (it == currentPasswordTreePayloadFormatMarker()) {
+                    offset += Integer.BYTES
+                    readPayloadInt(byteArray, offset, payloadContentEnd(byteArray)).also { version ->
+                        offset += Integer.BYTES
+                        if (version != currentPasswordTreePayloadVersion()) {
+                            throwUnsupportedPasswordTreeFormat()
+                        }
+                    }
+                } else {
+                    0
+                }
+            }
             val payloadEnd = payloadContentEnd(byteArray)
             val memory = if (isPlaceholder(readPayloadBytes(byteArray, offset, placeHolder().size, payloadEnd))) {
                 validatePayloadRange(byteArray, offset, Slot.CAPACITY * placeHolder().size, payloadEnd)
@@ -62,7 +75,7 @@ class PasswordTreePayloadReader constructor(
             offset = incrementedNestOffset
             val eggs = ArrayDeque<Egg>()
             while (offset < payloadEnd) {
-                val (egg, newOffset) = byteArray.asEgg(offset)
+                val (egg, newOffset) = byteArray.asEgg(offset, payloadVersion >= currentPasswordTreePayloadVersion())
                 eggs.add(egg)
                 offset = newOffset
             }
@@ -143,11 +156,27 @@ class PasswordTreePayloadReader constructor(
         }
         return Pair(result, incrementedOffset - offset)
     }
-    private fun ByteArray.asEgg(offset: Int): Pair<Egg, Int> {
+    private fun ByteArray.asEgg(offset: Int, hasTrashMetadata: Boolean): Pair<Egg, Int> {
         val payloadEnd = payloadContentEnd(this)
         var incrementedOffset = offset
         val nestSlot = storedEggNestSlot(readPayloadInt(this, incrementedOffset, payloadEnd))
         incrementedOffset += Integer.BYTES
+        val trashed = if (hasTrashMetadata) {
+            readPayloadInt(this, incrementedOffset, payloadEnd).let {
+                incrementedOffset += Integer.BYTES
+                storedTrashFlag(it)
+            }
+        } else {
+            false
+        }
+        val deletionEpochDay = if (hasTrashMetadata) {
+            readPayloadInt(this, incrementedOffset, payloadEnd).also {
+                incrementedOffset += Integer.BYTES
+                require(it >= 0) { throwUnsupportedPasswordTreeFormat() }
+            }
+        } else {
+            0
+        }
         val eggIdSize = readPayloadSize(this, incrementedOffset, payloadEnd)
         incrementedOffset += Integer.BYTES
         val eggIdShell = readPayloadBytes(this, incrementedOffset, eggIdSize, payloadEnd).toEncryptedShellAndScramble()
@@ -174,7 +203,7 @@ class PasswordTreePayloadReader constructor(
             }
             val yolk = yolkOption(this, incrementedOffset, payloadEnd)
             incrementedOffset = yolk.second
-            return Pair(createEgg(nestSlot, eggIdShell, passwordShell, proteins, yolk.first), incrementedOffset)
+            return Pair(createEgg(nestSlot, eggIdShell, passwordShell, proteins, yolk.first, trashed, deletionEpochDay), incrementedOffset)
         } finally {
             eggIdShell.scramble()
             passwordShell.scramble()

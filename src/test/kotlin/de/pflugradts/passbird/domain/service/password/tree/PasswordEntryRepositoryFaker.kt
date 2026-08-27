@@ -9,8 +9,13 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import io.mockk.every
 
 fun fakeEggRepository(instance: EggRepository, withEggs: List<Egg> = emptyList(), withSyncFailure: Exception? = null) {
-    every { instance.findAll() } answers { withEggs.stream() }
-    every { instance.findAll(any<Slot>()) } answers { withEggs.filter { it.associatedNest() == firstArg() }.stream() }
+    every { instance.findAll() } answers { withEggs.filterNot(Egg::isTrashed).stream() }
+    every { instance.findAll(any<Slot>()) } answers {
+        withEggs.filter { !it.isTrashed() && it.associatedNest() == firstArg() }.stream()
+    }
+    every { instance.findAllIncludingTrashed() } answers { withEggs.stream() }
+    every { instance.findAllIncludingTrashed(any<Slot>()) } answers { withEggs.filter { it.associatedNest() == firstArg() }.stream() }
+    every { instance.findAllTrashed() } answers { withEggs.filter(Egg::isTrashed).stream() }
     every { instance.favorites() } returns EggIdFavorites()
     every { instance.memory() } returns EggIdMemory()
     every { instance.putFavorite(any(), any()) } returns Unit

@@ -8,6 +8,7 @@ private const val DEFAULT_BACKUP_DIRECTORY = "backups"
 private const val DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS = 10
 private const val DEFAULT_CLIPBOARD_NATIVE_TOOLING_ENABLED = true
 private const val DEFAULT_PASSWORD_LENGTH = 20
+private const val DEFAULT_TRASH_RETENTION_DAYS = 365
 private const val DEFAULT_YOLK_ALGORITHM = "SHA1"
 private const val DEFAULT_YOLK_COPY_TO_CLIPBOARD = true
 private const val DEFAULT_YOLK_DIGITS = 6
@@ -40,6 +41,7 @@ data class Configuration(
         override val exchange: Exchange = Exchange(),
         override val inactivityLimit: InactivityLimit = InactivityLimit(),
         override val password: Password = Password(),
+        override val trash: Trash = Trash(),
         override val yolk: Yolk = Yolk(),
     ) : ReadableConfiguration.Application
     data class Backup(
@@ -67,6 +69,9 @@ data class Configuration(
         override val promptOnRemoval: Boolean = true,
         override val customPasswordConfigurations: List<CustomPasswordConfiguration> = emptyList(),
     ) : ReadableConfiguration.Password
+    data class Trash(
+        override val retentionDays: Int = DEFAULT_TRASH_RETENTION_DAYS,
+    ) : ReadableConfiguration.Trash
     data class Yolk(
         override val algorithm: String = DEFAULT_YOLK_ALGORITHM,
         override val copyToClipboard: Boolean = DEFAULT_YOLK_COPY_TO_CLIPBOARD,
@@ -142,6 +147,7 @@ internal fun Configuration.validate(): Configuration {
     normalizeTotpAlgorithm(application.yolk.algorithm)
     require(application.yolk.digits == 6 || application.yolk.digits == 8) { "Yolk digits are invalid" }
     require(application.yolk.periodSeconds > 0) { "Yolk period is invalid" }
+    require(application.trash.retentionDays >= 0) { "Trash retention is invalid" }
     val names = domain.protein.templates.map { it.name }
     require(names.none { it.isBlank() }) { "Protein template name is invalid" }
     require(names.distinct().size == names.size) { "Protein template names must be unique" }

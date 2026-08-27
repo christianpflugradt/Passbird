@@ -7,7 +7,7 @@ import de.pflugradts.passbird.domain.model.transfer.Input
 
 class CustomSetCommand(input: Input) : AbstractSingleCharInputCommand(input)
 class AddFavoriteCommand(val slot: Slot, input: Input) : AbstractInputCommand(input)
-class DiscardCommand(input: Input) : AbstractSingleCharInputCommand(input)
+class DiscardCommand(val force: Boolean, input: Input) : AbstractInputCommand(input)
 class DiscardProteinCommand(val slot: Slot, input: Input) : AbstractInputCommand(input)
 class GetCommand(input: Input) : AbstractSingleCharInputCommand(input)
 class GetProteinCommand(val slot: Slot, input: Input) : AbstractInputCommand(input)

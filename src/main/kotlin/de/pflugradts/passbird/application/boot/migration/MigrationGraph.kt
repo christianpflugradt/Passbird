@@ -27,6 +27,8 @@ import de.pflugradts.passbird.application.process.migration.keystore.KeyStoreFor
 import de.pflugradts.passbird.application.process.migration.keystore.KeyStoreFormatMigrationService
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigration
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigrationService
+import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeTrashMigration
+import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeTrashMigrationService
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeYolkMigration
 import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeYolkMigrationService
 import de.pflugradts.passbird.application.util.SystemOperation
@@ -46,6 +48,7 @@ class MigrationGraph(
             KeyStoreFormatMigration(keyStoreFormatMigrationService, migrationAuthenticationService, systemOperation),
             PasswordTreeKeyDerivationMigration(migrationAuthenticationService, passwordTreeKeyDerivationMigrationService, systemOperation),
             PasswordTreeYolkMigration(migrationAuthenticationService, passwordTreeYolkMigrationService, systemOperation),
+            PasswordTreeTrashMigration(migrationAuthenticationService, passwordTreeTrashMigrationService, systemOperation),
         )
     }
     val userInterfaceAdapterPort: UserInterfaceAdapterPort by lazy {
@@ -81,6 +84,17 @@ class MigrationGraph(
         PasswordTreeYolkMigrationService(
             configuration = configuration,
             legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation),
+            passwordTreePayloadWriter = passwordTreePayloadWriter,
+            systemOperation = systemOperation,
+        )
+    }
+    private val passwordTreeTrashMigrationService by lazy {
+        PasswordTreeTrashMigrationService(
+            configuration = configuration,
+            passwordTreePayloadReader = de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader(
+                configuration,
+                systemOperation,
+            ),
             passwordTreePayloadWriter = passwordTreePayloadWriter,
             systemOperation = systemOperation,
         )
