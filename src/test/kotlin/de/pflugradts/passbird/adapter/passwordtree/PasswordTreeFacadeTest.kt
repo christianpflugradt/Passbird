@@ -490,7 +490,7 @@ class PasswordTreeFacadeTest {
     private fun restoredMemoryEntry(actual: EggStreamSupplier) =
         actual.memory()[DEFAULT].get()[0].map { cryptoProvider.decrypt(it).asString() }.orElse("")
 
-    private fun firstCurrentEggOffset() = signature().size + (2 * 100 * Integer.BYTES) + (CAPACITY * Integer.BYTES)
+    private fun firstCurrentEggOffset() = signature().size + (2 * Integer.BYTES) + (2 * 100 * Integer.BYTES) + (CAPACITY * Integer.BYTES)
 
     private fun createEggFromStrings(slot: Slot = DEFAULT, eggId: String, password: String) = createEgg(
         slot = slot,

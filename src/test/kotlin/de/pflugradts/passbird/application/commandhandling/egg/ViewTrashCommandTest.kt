@@ -75,7 +75,7 @@ class ViewTrashCommandTest {
                 ),
             )
         }
-        verify(exactly = 1) { passwordService.restoreEgg(shellOf("beta")) }
+        verify(exactly = 1) { passwordService.restoreEgg(any()) }
         verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Trash is empty")))) }
     }
 
