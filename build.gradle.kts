@@ -247,7 +247,6 @@ dependencyCheck {
     scanConfigurations = listOf("runtimeClasspath")
     failBuildOnCVSS = 0.0f
     nvd.apiKey = envOrNull("NVD_API_KEY")
-    nvd.delay = 16000
     envOrNull("DEPENDENCY_CHECK_NVD_DATAFEED_URL")?.let { nvd.datafeedUrl = it }
     suppressionFile = "owasp-suppressions.xml"
     envOrNull("DEPENDENCY_CHECK_HOSTED_SUPPRESSIONS_URL")?.let { hostedSuppressions.url = it }
