@@ -44,6 +44,7 @@ class HelpCommandHandler constructor(
                 outBold("\tl*[filter]"), out("             Lists EggIds across all Nests whose name contains filter, grouped by Nest.\n"),
                 outBold("\t."), out(" (repeat)            Repeats the last successful non-repeat command.\n"),
                 outBold("\th"), out(" (help)              Displays this help menu.\n"),
+                outBold("\th*"), out(" (help with stats)   Displays password-tree statistics before this help menu.\n"),
                 outBold("\tq"), out(" (quit)              Exits the Passbird application.\n"),
                 out("\n"),
                 outBold("\tn"), out(" (Nests)             Displays available Nests and related commands.\n"),

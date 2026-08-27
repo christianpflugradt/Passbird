@@ -55,6 +55,7 @@ class HelpCommandTest {
         expectThat(captureSystemOut.capture) contains "i*"
         expectThat(captureSystemOut.capture) contains ". (repeat)"
         expectThat(captureSystemOut.capture) contains "s*[EggId] (set once)"
+        expectThat(captureSystemOut.capture) contains "h* (help with stats)   Displays password-tree statistics before this help menu."
     }
 
     @Test
