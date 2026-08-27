@@ -14,6 +14,7 @@ issue_task:
   process:
     - inspect the selected issue body, labels, linked context, and relevant local code before editing
     - when creating or relabeling issues, add the migration label to work that exists to preserve end-user compatibility across otherwise breaking changes
+    - when creating a new GitHub issue through gh, use a create-once-then-verify flow: if the create attempt returns ambiguous output or fails unclearly, verify first whether the issue already exists before considering any retry
     - load task-relevant files under specs/ based on the issue scope before making changes
     - implement the fix, add focused tests, and run the minimum validation required by specs/delivery.yaml
     - update matching files under specs/ if the change affects behavior, architecture, security, persistence, configuration, or delivery guidance
@@ -34,3 +35,6 @@ issue_task:
       - gh issue view
       - gh issue comment
       - gh issue close
+    safeguards:
+      - never retry gh issue create before checking whether the earlier attempt already created the intended issue
+      - when issue creation output is ambiguous, search the live issue list by title and context before deciding that creation failed
