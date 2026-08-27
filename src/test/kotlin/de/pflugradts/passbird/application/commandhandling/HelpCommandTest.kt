@@ -149,19 +149,19 @@ class HelpCommandTest {
 Stats
 
 Current Nest
-Eggs: 3
-Eggs with Yolks: 1
-Eggs with Proteins: 2
-Occupied Protein Slots: 3
-Assigned Favorites: 2
+  Eggs:                   3
+  Eggs with Yolks:        1
+  Eggs with Proteins:     2
+  Occupied Protein Slots: 3
+  Assigned Favorites:     2
 
 Across All Nests
-Eggs: 6
-Active Nests: 2
-Eggs with Yolks: 3
-Eggs with Proteins: 4
-Occupied Protein Slots: 6
-Assigned Favorites: 4
+  Eggs:                   6
+  Active Nests:           2
+  Eggs with Yolks:        3
+  Eggs with Proteins:     4
+  Occupied Protein Slots: 6
+  Assigned Favorites:     4
 
 Usage: [command][parameter]
     """.trimIndent()

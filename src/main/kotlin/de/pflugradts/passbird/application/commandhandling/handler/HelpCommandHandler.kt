@@ -110,7 +110,7 @@ class HelpCommandHandler constructor(
         addAll(statLine("Assigned Favorites", stats.assignedFavorites))
     }
 
-    private fun CanPrintInfo.statLine(label: String, value: Int): List<Output> = listOf(out("$label: "), outNest("$value\n"))
+    private fun CanPrintInfo.statLine(label: String, value: Int): List<Output> = listOf(out(statLabel(label)), outNest("$value\n"))
 }
 
 private fun sum(left: NestStats, right: NestStats) = NestStats(
