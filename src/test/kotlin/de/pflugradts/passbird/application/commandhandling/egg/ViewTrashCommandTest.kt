@@ -12,6 +12,7 @@ import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.slot.Slot.S2
+import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
@@ -51,9 +52,10 @@ class ViewTrashCommandTest {
         every { passwordService.restoreEgg(shellOf("beta")) } returns success(RestoreEggResult.RESTORED)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseInputs = listOf(inputOf(shellOf("1")), inputOf(shellOf("c"))),
+            withTheseInputs = listOf(inputOf(shellOf("1"))),
+            withReceiveConfirmation = true,
         )
-        fakeConfiguration(instance = configuration)
+        fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
 
         // when
         inputHandler.handleInput(inputOf(shellOf("d")))
@@ -77,6 +79,115 @@ class ViewTrashCommandTest {
         }
         verify(exactly = 1) { passwordService.restoreEgg(any()) }
         verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Trash is empty")))) }
+    }
+
+    @Test
+    fun `should exit trash view on empty input`() {
+        // given
+        every { passwordService.viewTrash() } returns listOf(TrashEggView(shellOf("alpha"), DEFAULT, 11))
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(Input.emptyInput()))
+        fakeConfiguration(instance = configuration)
+
+        // when
+        inputHandler.handleInput(inputOf(shellOf("d")))
+
+        // then
+        verify(exactly = 1) { passwordService.viewTrash() }
+        verify(exactly = 0) { passwordService.restoreEgg(any()) }
+        verify(exactly = 0) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+    }
+
+    @Test
+    fun `should abort restore on invalid trash index`() {
+        // given
+        every { passwordService.viewTrash() } returnsMany listOf(
+            listOf(TrashEggView(shellOf("alpha"), DEFAULT, 11)),
+            listOf(TrashEggView(shellOf("alpha"), DEFAULT, 11)),
+        )
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf("9")), Input.emptyInput()),
+        )
+        fakeConfiguration(instance = configuration)
+
+        // when
+        inputHandler.handleInput(inputOf(shellOf("d")))
+
+        // then
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+        verify(exactly = 0) { passwordService.restoreEgg(any()) }
+    }
+
+    @Test
+    fun `should abort restore when confirmation is rejected`() {
+        // given
+        every { passwordService.viewTrash() } returnsMany listOf(
+            listOf(TrashEggView(shellOf("alpha"), DEFAULT, 11)),
+            listOf(TrashEggView(shellOf("alpha"), DEFAULT, 11)),
+        )
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf("0")), Input.emptyInput()),
+            withReceiveConfirmation = false,
+        )
+        fakeConfiguration(instance = configuration, withPromptOnRemoval = true)
+
+        // when
+        inputHandler.handleInput(inputOf(shellOf("d")))
+
+        // then
+        verify(exactly = 1) { userInterfaceAdapterPort.receiveConfirmation(any()) }
+        verify(exactly = 1) { userInterfaceAdapterPort.send(eq(outputOf(shellOf("Operation aborted.")))) }
+        verify(exactly = 0) { passwordService.restoreEgg(any()) }
+    }
+
+    @Test
+    fun `should show fallback message when restoring to default nest`() {
+        // given
+        every { passwordService.viewTrash() } returnsMany listOf(
+            listOf(TrashEggView(shellOf("alpha"), S2, 11)),
+            emptyList(),
+        )
+        every { passwordService.restoreEgg(any()) } returns success(RestoreEggResult.RESTORED_TO_DEFAULT)
+        fakeUserInterfaceAdapterPort(instance = userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(shellOf("0"))))
+        fakeConfiguration(instance = configuration)
+
+        // when
+        inputHandler.handleInput(inputOf(shellOf("d")))
+
+        // then
+        verify(exactly = 1) {
+            userInterfaceAdapterPort.send(
+                eq(outputOf(shellOf("Original Nest no longer exists. Egg will be restored to Default Nest."))),
+            )
+        }
+        verify(exactly = 1) { passwordService.restoreEgg(any()) }
+    }
+
+    @Test
+    fun `should show restore conflict message and keep trash open`() {
+        // given
+        every { passwordService.viewTrash() } returnsMany listOf(
+            listOf(TrashEggView(shellOf("alpha"), DEFAULT, 11)),
+            listOf(TrashEggView(shellOf("alpha"), DEFAULT, 11)),
+        )
+        every { passwordService.restoreEgg(any()) } returns success(RestoreEggResult.TARGET_CONFLICT)
+        fakeUserInterfaceAdapterPort(
+            instance = userInterfaceAdapterPort,
+            withTheseInputs = listOf(inputOf(shellOf("0")), Input.emptyInput()),
+        )
+        fakeConfiguration(instance = configuration)
+
+        // when
+        inputHandler.handleInput(inputOf(shellOf("d")))
+
+        // then
+        verify(exactly = 1) {
+            userInterfaceAdapterPort.send(
+                eq(outputOf(shellOf("Egg with same EggId already exists in target Nest - Operation aborted."))),
+            )
+        }
+        verify(exactly = 1) { passwordService.restoreEgg(any()) }
     }
 
     @Test
