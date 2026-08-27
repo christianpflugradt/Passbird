@@ -65,12 +65,12 @@ class SetInfoCommandHandler constructor(
 
     private fun CanPrintInfo.setCommandOutputs() = buildList {
         add(outBold("\nAvailable Set commands:\n"))
-        addAll(commandInfoOutputs("s?", "(help)", "Displays an overview of available password configurations.\n", commandColumnWidth = 15))
+        addAll(commandInfoOutputs("s?", "(help)", "Displays an overview of available password configurations.", commandColumnWidth = 15))
         addAll(
             commandInfoOutputs(
                 "s[EggId]",
                 "(set)",
-                "Sets a random password for the specified EggId using the default configuration.\n",
+                "Sets a random password for the specified EggId using the default configuration.",
                 commandColumnWidth = 15,
             ),
         )
@@ -78,7 +78,7 @@ class SetInfoCommandHandler constructor(
             commandInfoOutputs(
                 "s*[EggId]",
                 "(set once)",
-                "Sets a random password for the specified EggId using a one-time configuration.\n",
+                "Sets a random password for the specified EggId using a one-time configuration.",
                 commandColumnWidth = 15,
             ),
         )
@@ -86,7 +86,7 @@ class SetInfoCommandHandler constructor(
             commandInfoOutputs(
                 "s[1-9][EggId]",
                 "(set custom)",
-                "Sets a random password for the specified EggId using a custom configuration.\n",
+                "Sets a random password for the specified EggId using a custom configuration.",
                 commandColumnWidth = 15,
             ),
         )
