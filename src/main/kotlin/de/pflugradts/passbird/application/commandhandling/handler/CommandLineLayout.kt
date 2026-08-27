@@ -17,7 +17,7 @@ internal fun CanPrintInfo.commandInfoOutputs(
     commandColumnWidth: Int = COMMAND_COLUMN_WIDTH,
     actionColumnWidth: Int = ACTION_COLUMN_WIDTH,
 ): Array<Output> = arrayOf(
-    outBold("\n$INDENT${command.padEnd(commandColumnWidth)} "),
+    outBold("$INDENT${command.padEnd(commandColumnWidth)} "),
     out((action ?: "").padEnd(actionColumnWidth)),
     out(description),
 )
