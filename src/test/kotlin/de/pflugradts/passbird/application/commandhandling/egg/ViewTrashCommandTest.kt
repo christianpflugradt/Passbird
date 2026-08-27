@@ -51,7 +51,7 @@ class ViewTrashCommandTest {
         every { passwordService.restoreEgg(shellOf("beta")) } returns success(RestoreEggResult.RESTORED)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseInputs = listOf(inputOf(shellOf("1"))),
+            withTheseInputs = listOf(inputOf(shellOf("1")), inputOf(shellOf("c"))),
         )
         fakeConfiguration(instance = configuration)
 

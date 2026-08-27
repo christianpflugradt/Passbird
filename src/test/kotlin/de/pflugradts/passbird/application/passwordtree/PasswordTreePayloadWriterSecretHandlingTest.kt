@@ -24,6 +24,8 @@ class PasswordTreePayloadWriterSecretHandlingTest {
         val writingPassword = spyk(cryptoProvider.encrypt(shellOf("password")))
         val egg = mockk<Egg>()
         every { egg.associatedNest() } returns Slot.DEFAULT
+        every { egg.isTrashed() } returns false
+        every { egg.deletionEpochDay() } returns 0
         every { egg.viewEggId() } returnsMany listOf(sizingEggId, writingEggId)
         every { egg.viewPassword() } returnsMany listOf(sizingPassword, writingPassword)
         every { egg.proteins } returns List(10) { mutableOptionOf<Protein>() }

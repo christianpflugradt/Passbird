@@ -59,7 +59,7 @@ class PasswordTreePayloadWriter constructor() {
             acc + inner.map { slots -> slots.sumOf { it.map(EncryptedShell::size).orElse(0) } }.orElse(0)
         }
         val eggDataSize = snapshot.eggs.sumOf { it.serializedDataSize() }
-        val eggMetaSize = snapshot.eggs.size * 26 * intBytes()
+        val eggMetaSize = snapshot.eggs.size * 28 * intBytes()
         val nestSize = snapshot.nests.size * intBytes() + snapshot.nests.filter { !it.isEmpty }.sumOf { it.size }
         return metadataHeaderSize + memorySize + favoriteSize + eggDataSize + eggMetaSize + nestSize
     }

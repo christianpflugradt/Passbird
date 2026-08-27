@@ -30,7 +30,7 @@ class PasswordTreePayloadReaderMalformedPayloadTest {
     @Test
     fun `current reader rejects invalid egg nest slots`() {
         val payload = currentPayloadBytes()
-        val malformed = payload.withPayloadInt(eggOffsets(payload, currentEggOffset(payload)).nestSlot, 99)
+        val malformed = payload.withPayloadInt(eggOffsets(payload, currentEggOffset(payload), hasTrashMetadata = true).nestSlot, 99)
 
         assertMalformedCurrent(malformed)
     }
@@ -38,7 +38,7 @@ class PasswordTreePayloadReaderMalformedPayloadTest {
     @Test
     fun `legacy reader rejects invalid egg nest slots`() {
         val payload = legacyPayloadBytes()
-        val malformed = payload.withPayloadInt(eggOffsets(payload, legacyEggOffset(payload)).nestSlot, 99)
+        val malformed = payload.withPayloadInt(eggOffsets(payload, legacyEggOffset(payload), hasTrashMetadata = false).nestSlot, 99)
 
         assertMalformedLegacy(malformed)
     }
@@ -118,9 +118,9 @@ class PasswordTreePayloadReaderMalformedPayloadTest {
     )
 
     private fun currentSizeOffsets(payload: ByteArray): List<Int> {
-        val eggOffsets = eggOffsets(payload, currentEggOffset(payload))
+        val eggOffsets = eggOffsets(payload, currentEggOffset(payload), hasTrashMetadata = true)
         return listOf(
-            signatureSize(),
+            signatureSize() + 2 * Integer.BYTES,
             currentFavoriteOffset(payload),
             currentNestOffset(payload),
             eggOffsets.eggIdSize,
@@ -131,7 +131,7 @@ class PasswordTreePayloadReaderMalformedPayloadTest {
     }
 
     private fun legacySizeOffsets(payload: ByteArray): List<Int> {
-        val eggOffsets = eggOffsets(payload, legacyEggOffset(payload))
+        val eggOffsets = eggOffsets(payload, legacyEggOffset(payload), hasTrashMetadata = false)
         return listOf(
             signatureSize(),
             legacyNestOffset(payload),
@@ -142,7 +142,11 @@ class PasswordTreePayloadReaderMalformedPayloadTest {
         )
     }
 
-    private fun currentFavoriteOffset(payload: ByteArray) = skipEntries(payload, signatureSize(), PERSISTED_SLOT_ENTRIES)
+    private fun currentFavoriteOffset(payload: ByteArray) = skipEntries(
+        payload,
+        signatureSize() + 2 * Integer.BYTES,
+        PERSISTED_SLOT_ENTRIES,
+    )
 
     private fun currentNestOffset(payload: ByteArray) = skipEntries(payload, currentFavoriteOffset(payload), PERSISTED_SLOT_ENTRIES)
 
@@ -160,10 +164,13 @@ class PasswordTreePayloadReaderMalformedPayloadTest {
         return incrementedOffset
     }
 
-    private fun eggOffsets(payload: ByteArray, offset: Int): EggOffsets {
+    private fun eggOffsets(payload: ByteArray, offset: Int, hasTrashMetadata: Boolean): EggOffsets {
         var incrementedOffset = offset
         val nestSlot = incrementedOffset
         incrementedOffset += Integer.BYTES
+        if (hasTrashMetadata) {
+            incrementedOffset += 2 * Integer.BYTES
+        }
         val eggIdSize = incrementedOffset
         incrementedOffset += Integer.BYTES + readTestInt(payload, incrementedOffset)
         val passwordSize = incrementedOffset
