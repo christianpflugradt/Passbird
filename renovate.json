@@ -9,7 +9,7 @@
     "minimumReleaseAgeBehaviour": "timestamp-required",
     "internalChecksFilter": "strict",
     "separateMultipleMajor": true,
-    "prCreation": "status-success",
+    "prCreation": "immediate",
     "automerge": false,
     "platformAutomerge": false,
     "rebaseWhen": "behind-base-branch",
