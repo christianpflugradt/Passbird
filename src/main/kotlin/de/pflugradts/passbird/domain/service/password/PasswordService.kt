@@ -41,7 +41,7 @@ interface PasswordService {
     fun discardFavorite(slot: Slot): TryResult<Unit>
     fun discardEgg(eggIdShell: Shell): TryResult<Unit>
     fun discardEggPermanently(eggIdShell: Shell): TryResult<Unit>
-    fun cleanupTrash(): TryResult<Int>
+    fun cleanupTrash(onDiscarding: () -> Unit = {}): TryResult<Int>
     fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit>
     fun discardYolk(eggIdShell: Shell): TryResult<Unit>
     fun moveEgg(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit>

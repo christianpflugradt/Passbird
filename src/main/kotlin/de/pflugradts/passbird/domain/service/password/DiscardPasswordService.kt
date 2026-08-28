@@ -64,15 +64,17 @@ class DiscardPasswordService constructor(
             }
         }
     }.orElse(success(RestoreEggResult.NOT_FOUND))
-    fun cleanupTrash(): TryResult<Int> {
+    fun cleanupTrash(onDiscarding: () -> Unit = {}): TryResult<Int> {
         val thresholdEpochDay = currentEpochDaySupplier() - trashRetentionDaysSupplier()
         val trashedEggs = eggRepository.findAllTrashed().toList()
+        val eggsToDiscard = trashedEggs.filter { thresholdEpochDay > it.deletionEpochDay() }
+        if (eggsToDiscard.isNotEmpty()) {
+            onDiscarding()
+        }
         var discarded = 0
-        trashedEggs.forEach { egg ->
-            if (thresholdEpochDay > egg.deletionEpochDay()) {
-                egg.discard()
-                discarded += 1
-            }
+        eggsToDiscard.forEach { egg ->
+            egg.discard()
+            discarded += 1
         }
         return if (discarded > 0) {
             processEventsAndSync().map { discarded }

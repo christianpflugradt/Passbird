@@ -351,7 +351,7 @@ class ApplicationGraph(
     private val exportFileChecker by lazy {
         ExportFileChecker(configuration, runContext, systemOperation, userInterfaceAdapterPort)
     }
-    private val trashCleanup by lazy { TrashCleanup(passwordService) }
+    private val trashCleanup by lazy { TrashCleanup(passwordService, userInterfaceAdapterPort) }
     private val inactivityTerminationSignal by lazy { InactivityTerminationSignal() }
     private val inactivityHandler by lazy {
         InactivityHandler(commandBus, configuration, inactivityTerminationSignal, systemOperation)

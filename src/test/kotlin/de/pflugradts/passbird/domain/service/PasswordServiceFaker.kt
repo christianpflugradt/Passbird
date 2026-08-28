@@ -145,7 +145,7 @@ private fun fakeRemainingQueries(
     every { instance.discardFavorite(any()) } returns success(Unit)
     every { instance.discardEgg(any()) } returns success(Unit)
     every { instance.discardEggPermanently(any()) } returns success(Unit)
-    every { instance.cleanupTrash() } returns success(0)
+    every { instance.cleanupTrash(any()) } returns success(0)
     every { instance.discardProtein(any(), any()) } returns success(Unit)
     every { instance.discardYolk(any()) } returns success(Unit)
     every { instance.renameEgg(any(), any()) } returns success(Unit)

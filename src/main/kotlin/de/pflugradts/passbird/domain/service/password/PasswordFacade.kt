@@ -48,7 +48,7 @@ class PasswordFacade constructor(
     override fun discardFavorite(slot: Slot): TryResult<Unit> = favoritePasswordService.discardFavorite(slot)
     override fun discardEgg(eggIdShell: Shell): TryResult<Unit> = discardPasswordService.discardEgg(eggIdShell, currentEpochDaySupplier())
     override fun discardEggPermanently(eggIdShell: Shell): TryResult<Unit> = discardPasswordService.discardEggPermanently(eggIdShell)
-    override fun cleanupTrash(): TryResult<Int> = discardPasswordService.cleanupTrash()
+    override fun cleanupTrash(onDiscarding: () -> Unit): TryResult<Int> = discardPasswordService.cleanupTrash(onDiscarding)
     override fun discardProtein(eggIdShell: Shell, slot: Slot): TryResult<Unit> = discardPasswordService.discardProtein(eggIdShell, slot)
     override fun discardYolk(eggIdShell: Shell): TryResult<Unit> = discardPasswordService.discardYolk(eggIdShell)
     override fun moveEgg(eggIdShell: Shell, targetSlot: Slot): TryResult<Unit> = movePasswordService.movePassword(eggIdShell, targetSlot)
