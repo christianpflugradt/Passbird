@@ -18,7 +18,7 @@ flows:
         - the Available Nests section always includes the default nest line as 0: Default
         - each deployed custom Nest is listed on its own line as <slot>: <NestId>
         - if no custom Nests exist, the Available Nests section appends the hint (use the n+ command to create custom Nests)
-        - the Available Nest commands section lists n, n0, n[1-9], n[EggId], n+[1-9], and n-[1-9]
+        - the Available Nest commands section lists n, n0, n[1-9], n[EggId], n+[1-9], n>[1-9], and n-[1-9]
       switch_command:
         - n0 switches to the default Nest
         - n[1-9] switches to the Nest in the specified slot if that Nest exists
@@ -78,6 +78,28 @@ flows:
       current_nest_restoration:
         - if a different Nest was current before discard processing began, Passbird returns to that original current Nest after processing
         - if the Nest being discarded was itself current, Passbird ends in the default Nest after processing
+  - id: move_nest
+    command: n>[1-9]
+    user_experience:
+      guard_paths:
+        - n>0 is accepted by the current parser but aborts immediately with Default Nest cannot be moved - Operation aborted.
+        - if the requested Nest slot does not contain a deployed Nest, Passbird aborts immediately with Specified Nest does not exist - Operation aborted.
+        - both immediate guard aborts use the OPERATION_ABORTED path and return without the trailing blank line used by the main move flow
+      target_selection:
+        - after validating that the source Nest exists and is not the default Nest, Passbird prints the currently free custom Nest slots on one line as Available free Nest Slots: <slot list>
+        - Passbird then prompts with Enter free Nest Slot you want to move Nest to:
+        - this target-slot prompt uses regular visible input, not secure-input handling
+        - input must be exactly one digit from 0 to 9
+        - any non-digit or multi-character input prints Operation aborted.
+        - if the chosen target slot is not a free custom Nest slot, Passbird prints Specified Nest Slot is not free - Operation aborted.
+      success:
+        - on success, the Nest is moved to the selected free custom slot
+        - moving a Nest preserves its Eggs, Favorites, and EggIdMemory
+        - if the moved Nest was current before processing began, it remains the current Nest at its new slot
+        - successful moves print no dedicated success line
+      finish:
+        - all abort branches in this flow use the OPERATION_ABORTED path and therefore also trigger the warning-sound behavior from specs/interaction.yaml
+        - every main command path ends with a blank line
   - id: assign_and_move
     commands:
       - n[EggId]

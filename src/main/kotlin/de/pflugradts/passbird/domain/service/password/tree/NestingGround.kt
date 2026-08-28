@@ -85,6 +85,16 @@ class NestingGround constructor(
     override fun discardMemory(nestSlot: Slot, encryptedShell: EncryptedShell) {
         memory[nestSlot].get().discard(encryptedShell)
     }
+    override fun moveNest(from: Slot, to: Slot) {
+        eggs.filter { it.associatedNest() == from }.forEach {
+            it.moveToNestAt(to)
+            it.clearDomainEvents()
+        }
+        favorites[to].set(favorites[from].get().copy())
+        favorites[from].set(EggIdFavorites())
+        memory[to].set(memory[from].get().copy())
+        memory[from].set(EggIdMemory())
+    }
     override fun renameFavorites(nestSlot: Slot, from: EncryptedShell, to: EncryptedShell) {
         favorites[nestSlot].get().rename(from, to)
     }

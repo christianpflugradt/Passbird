@@ -62,6 +62,7 @@ user_command_families:
       - n
       - n[0-9]
       - n+[1-9]
+      - n>[1-9]
       - n-[1-9]
       - n[EggId]
   - family: protein

@@ -51,6 +51,8 @@ class ViewNestCommandTest {
             "    n[EggId]    (assign)      Assigns the specified EggId to a Nest selected interactively."
         expectThat(captureSystemOut.capture) contains
             "    n0          (switch)      Switches to the default Nest.\n    n[1-9]"
+        expectThat(captureSystemOut.capture) contains
+            "    n>[1-9]     (move)        Moves the Nest in the specified Nest Slot to another free Nest Slot."
         expectThat(captureSystemOut.capture).not().contains("n[0-9][EggId] (assign)")
         expectThat(captureSystemOut.capture).not().contains("\t")
     }

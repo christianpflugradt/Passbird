@@ -91,6 +91,7 @@ command_surface:
     - n0
     - n[1-9]
     - n+[1-9]
+    - n>[1-9]
     - n-[1-9]
     - n[EggId]
     - f?
@@ -148,12 +149,14 @@ capabilities:
     user_outcomes:
       - switch between Nest contexts
       - create and discard Nests
+      - relocate a Nest to another free custom slot
       - assign Eggs to Nests by entering the EggId and then choosing the target Nest interactively
     commands:
       - n
       - n0
       - n[1-9]
       - n+[1-9]
+      - n>[1-9]
       - n-[1-9]
       - n[EggId]
   - name: protein_management

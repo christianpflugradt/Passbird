@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.commandhandling.factory
 import de.pflugradts.passbird.application.commandhandling.command.AddNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.DiscardNestCommand
+import de.pflugradts.passbird.application.commandhandling.command.MoveNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.MoveToNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.SwitchNestCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewNestCommand
@@ -23,6 +24,7 @@ class NestCommandFactory : SpecialCommandFactory() {
         when {
             it.isAddVariant() -> AddNestCommand(it.getSlot())
             it.isDiscardVariant() -> DiscardNestCommand(it.getSlot())
+            it.isMoveVariant() -> MoveNestCommand(it.getSlot())
             else -> null
         }
     }

@@ -26,6 +26,7 @@ interface EggRepository : Repository {
     fun discardFavorites(nestSlot: Slot, encryptedShell: EncryptedShell)
     fun discardFavorites(nestSlot: Slot)
     fun discardMemory(nestSlot: Slot, encryptedShell: EncryptedShell)
+    fun moveNest(from: Slot, to: Slot)
     fun renameFavorites(nestSlot: Slot, from: EncryptedShell, to: EncryptedShell)
     fun updateMemory(mostRecentEgg: Egg, duplicate: EncryptedShell? = null, sync: Boolean = true)
 }

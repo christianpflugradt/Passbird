@@ -252,6 +252,40 @@ class NestingGroundTest {
         expectThat(actual.toList()).containsExactlyInAnyOrder(givenEgg1, givenEgg2)
     }
 
+    @Test
+    fun `should move nest state to target slot`() {
+        // given
+        val sourceSlot = Slot.S2
+        val targetSlot = Slot.S5
+        val sourceEgg = createEggForTesting(withEggIdShell = shellOf("source"), withSlot = sourceSlot)
+        val sourceFavorites = emptyFavorites().apply { get(sourceSlot).get().assign(Slot.S1, shellOf("favorite").fakeEnc()) }
+        val sourceMemory = emptyMemory().apply { get(sourceSlot).get().memorize(shellOf("memory").fakeEnc(), null) }
+        val movedNestingGround = NestingGround(
+            eggIdMemoryEnabled = true,
+            passwordTreeAdapterPort = fakePasswordTreeAdapterPort(
+                withEggs = listOf(sourceEgg),
+                withFavorites = sourceFavorites,
+                withMemory = sourceMemory,
+            ),
+            nestStateView = nestService,
+            eventRegistry = eventRegistry,
+        )
+        nestService.place(shellOf("Nest"), sourceSlot)
+
+        // when
+        movedNestingGround.moveNest(sourceSlot, targetSlot)
+
+        // then
+        nestService.place(shellOf("Moved"), targetSlot)
+        nestService.moveToNestAt(targetSlot)
+        expectThat(movedNestingGround.findAll(targetSlot).toList().single().associatedNest()) isEqualTo targetSlot
+        expectThat(movedNestingGround.favorites(targetSlot)[Slot.S1].get().fakeDec().asString()) isEqualTo "favorite"
+        expectThat(movedNestingGround.favorites(sourceSlot)[Slot.S1].isEmpty).isTrue()
+        expectThat(movedNestingGround.memory()[0].get().fakeDec().asString()) isEqualTo "memory"
+        nestService.moveToNestAt(sourceSlot)
+        expectThat(movedNestingGround.memory()[0].isEmpty).isTrue()
+    }
+
     @Nested
     inner class NestTest {
         @Test

@@ -61,6 +61,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.memory.UseMemo
 import de.pflugradts.passbird.application.commandhandling.handler.memory.ViewMemoryCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.DiscardNestCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.nest.MoveNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.MoveToNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.SwitchNestCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.ViewNestCommandHandler
@@ -154,6 +155,7 @@ class ApplicationGraph(
             DiscardCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             DiscardFavoriteCommandHandler(passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             DiscardNestCommandHandler(nestService, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
+            MoveNestCommandHandler(nestService, userInterfaceAdapterPort, commandExecutionTracker),
             DiscardProteinCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             ExportCommandHandler(
                 canListAvailableNests,
@@ -315,7 +317,7 @@ class ApplicationGraph(
     }
     private val passwordTreeSyncService by lazy { PasswordTreeSyncService { eggRepository } }
     private val nestingGroundService by lazy {
-        NestingGroundService(passwordTreeAdapterPort, passwordTreeSyncService, eventRegistry)
+        NestingGroundService(passwordTreeAdapterPort, passwordTreeSyncService, eventRegistry) { eggRepository }
     }
     private val favoritePasswordService by lazy {
         FavoritePasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl)

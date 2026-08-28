@@ -34,6 +34,13 @@ class ViewNestCommandHandler constructor(
                         ).toList(),
                     )
                     addAll(commandInfoOutputs("n+[1-9]", "(create)", "Creates a new Nest in the specified Nest Slot.").toList())
+                    addAll(
+                        commandInfoOutputs(
+                            "n>[1-9]",
+                            "(move)",
+                            "Moves the Nest in the specified Nest Slot to another free Nest Slot.",
+                        ).toList(),
+                    )
                     addAll(commandInfoOutputs("n-[1-9]", "(discard)", "Deletes the Nest in the specified Nest Slot.").toList())
                     add(out("\n"))
                 }.toTypedArray(),

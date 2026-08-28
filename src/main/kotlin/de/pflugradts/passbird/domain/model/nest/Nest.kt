@@ -7,7 +7,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
 
-class Nest private constructor(private val shell: Shell, val slot: Slot) : AggregateRoot() {
+class Nest private constructor(private val shell: Shell, var slot: Slot) : AggregateRoot() {
     init {
         registerDomainEvent(NestCreated(this))
     }
@@ -15,6 +15,10 @@ class Nest private constructor(private val shell: Shell, val slot: Slot) : Aggre
 
     fun discard() {
         registerDomainEvent(NestDiscarded(this))
+    }
+
+    fun moveTo(slot: Slot) {
+        this.slot = slot
     }
 
     override fun equals(other: Any?): Boolean {

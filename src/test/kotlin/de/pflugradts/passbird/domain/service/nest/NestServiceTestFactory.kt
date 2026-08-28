@@ -18,6 +18,7 @@ fun createNestServiceForTesting() = NestingGroundService(
     mockk<PasswordTreeAdapterPort>(relaxed = true),
     mockk<PasswordTreeSyncService>(relaxed = true).also { every { it.sync() } returns success(Unit) },
     mockk<EventRegistry>(relaxed = true),
+    { mockk(relaxed = true) },
 )
 fun createNestServiceSpyForTesting() = spyk(createNestServiceForTesting())
 

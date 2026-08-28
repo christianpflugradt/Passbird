@@ -8,6 +8,7 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
+import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeSyncService
@@ -38,12 +39,15 @@ class NestingGroundServiceTest {
         every { it.sync() } returns success(Unit)
     }
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
-    private val nestingGroundService = NestingGroundService(passwordTreeAdapterPort, passwordTreeSyncService, eventRegistry)
+    private val eggRepository = mockk<EggRepository>(relaxed = true)
+    private val nestingGroundService =
+        NestingGroundService(passwordTreeAdapterPort, passwordTreeSyncService, eventRegistry) { eggRepository }
 
     @Test
     fun `should have 9 empty nest slots upon initialisation`() {
         // given / when
-        val actual = NestingGroundService(mockk(relaxed = true), passwordTreeSyncService, eventRegistry).populateAndList(emptyList())
+        val actual = NestingGroundService(mockk(relaxed = true), passwordTreeSyncService, eventRegistry) { eggRepository }
+            .populateAndList(emptyList())
 
         // then
         expectThat(actual) hasSize CAPACITY
@@ -199,6 +203,39 @@ class NestingGroundServiceTest {
     @Test
     fun `should expose explicit nests as snapshot`() {
         expectThat(nestingGroundService.snapshot()) isEqualTo restoredNests
+    }
+
+    @Test
+    fun `should move nest to free slot and keep it current`() {
+        // given
+        val nestShell = shellOf("Nest")
+        nestingGroundService.place(nestShell, Slot.S2)
+        nestingGroundService.moveToNestAt(Slot.S2)
+
+        // when
+        nestingGroundService.moveNest(Slot.S2, Slot.S5)
+
+        // then
+        verify { eggRepository.moveNest(Slot.S2, Slot.S5) }
+        expectThat(nestingGroundService.atNestSlot(Slot.S2).isEmpty).isTrue()
+        expectThat(nestingGroundService.atNestSlot(Slot.S5).get().viewNestId()) isEqualTo nestShell
+        expectThat(nestingGroundService.currentNest().slot) isEqualTo Slot.S5
+    }
+
+    @Test
+    fun `should roll back moved nest when sync fails`() {
+        // given
+        val nestShell = shellOf("Nest")
+        nestingGroundService.place(nestShell, Slot.S2)
+        every { passwordTreeSyncService.sync() } returns failure(IOException("disk full"))
+
+        // when
+        val actual = nestingGroundService.moveNest(Slot.S2, Slot.S5)
+
+        // then
+        expectThat(actual.failure).isTrue()
+        expectThat(nestingGroundService.atNestSlot(Slot.S2).get().viewNestId()) isEqualTo nestShell
+        expectThat(nestingGroundService.atNestSlot(Slot.S5).isEmpty).isTrue()
     }
 }
 

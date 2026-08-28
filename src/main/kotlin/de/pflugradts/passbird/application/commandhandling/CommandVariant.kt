@@ -5,5 +5,6 @@ enum class CommandVariant(val value: Char) {
     DISCARD('-'),
     FORCE('!'),
     INFO('?'),
+    MOVE('>'),
     SHOW_ALL('*'),
 }

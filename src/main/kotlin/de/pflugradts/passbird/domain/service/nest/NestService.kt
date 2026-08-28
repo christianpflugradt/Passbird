@@ -15,4 +15,5 @@ interface NestService {
     fun all(includeDefault: Boolean = false): Stream<Option<Nest>>
     fun currentNest(): Nest
     fun moveToNestAt(slot: Slot)
+    fun moveNest(from: Slot, to: Slot): TryResult<Unit>
 }
