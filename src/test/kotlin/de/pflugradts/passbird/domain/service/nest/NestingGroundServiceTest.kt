@@ -8,7 +8,6 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.CAPACITY
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
-import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeSyncService
@@ -39,14 +38,14 @@ class NestingGroundServiceTest {
         every { it.sync() } returns success(Unit)
     }
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
-    private val eggRepository = mockk<EggRepository>(relaxed = true)
+    private val nestStateMover = mockk<NestStateMover>(relaxed = true)
     private val nestingGroundService =
-        NestingGroundService(passwordTreeAdapterPort, passwordTreeSyncService, eventRegistry) { eggRepository }
+        NestingGroundService(passwordTreeAdapterPort, passwordTreeSyncService, eventRegistry, nestStateMover)
 
     @Test
     fun `should have 9 empty nest slots upon initialisation`() {
         // given / when
-        val actual = NestingGroundService(mockk(relaxed = true), passwordTreeSyncService, eventRegistry) { eggRepository }
+        val actual = NestingGroundService(mockk(relaxed = true), passwordTreeSyncService, eventRegistry, nestStateMover)
             .populateAndList(emptyList())
 
         // then
@@ -216,7 +215,7 @@ class NestingGroundServiceTest {
         nestingGroundService.moveNest(Slot.S2, Slot.S5)
 
         // then
-        verify { eggRepository.moveNest(Slot.S2, Slot.S5) }
+        verify { nestStateMover.moveNest(Slot.S2, Slot.S5) }
         expectThat(nestingGroundService.atNestSlot(Slot.S2).isEmpty).isTrue()
         expectThat(nestingGroundService.atNestSlot(Slot.S5).get().viewNestId()) isEqualTo nestShell
         expectThat(nestingGroundService.currentNest().slot) isEqualTo Slot.S5

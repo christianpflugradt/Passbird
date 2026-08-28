@@ -15,15 +15,15 @@ import de.pflugradts.passbird.domain.model.slot.Slot.Companion.FIRST_SLOT
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.LAST_SLOT
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
-import de.pflugradts.passbird.domain.service.password.tree.EggRepository
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeAdapterPort
 import de.pflugradts.passbird.domain.service.password.tree.PasswordTreeSyncService
 import java.util.function.Supplier
+
 class NestingGroundService constructor(
     private val passwordTreeAdapterPort: PasswordTreeAdapterPort,
     private val passwordTreeSyncService: PasswordTreeSyncService,
     private val eventRegistry: EventRegistry,
-    private val eggRepositoryProvider: () -> EggRepository,
+    private val nestStateMover: NestStateMover,
 ) : NestService, NestStateView {
     private val lazyNests = mutableListOf<MutableOption<Nest>>()
     private val nests: MutableList<MutableOption<Nest>> get() = lazyNests.also { restoreIfNeeded() }
@@ -75,7 +75,7 @@ class NestingGroundService constructor(
         lazyNests[from.nestIndex()].get().moveTo(to)
         lazyNests[to.nestIndex()] = lazyNests[from.nestIndex()]
         lazyNests[from.nestIndex()] = EMPTY_NEST_SUPPLIER.get()
-        eggRepositoryProvider().moveNest(from, to)
+        nestStateMover.moveNest(from, to)
         if (currentNest == from) {
             currentNest = to
         }

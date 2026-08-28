@@ -102,6 +102,7 @@ import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
 import de.pflugradts.passbird.domain.service.nest.NestService
+import de.pflugradts.passbird.domain.service.nest.NestStateMover
 import de.pflugradts.passbird.domain.service.nest.NestStateView
 import de.pflugradts.passbird.domain.service.nest.NestingGroundService
 import de.pflugradts.passbird.domain.service.password.DiscardPasswordService
@@ -315,9 +316,10 @@ class ApplicationGraph(
             eventRegistry = eventRegistry,
         )
     }
+    private val nestStateMover: NestStateMover by lazy { eggRepository as NestStateMover }
     private val passwordTreeSyncService by lazy { PasswordTreeSyncService { eggRepository } }
     private val nestingGroundService by lazy {
-        NestingGroundService(passwordTreeAdapterPort, passwordTreeSyncService, eventRegistry) { eggRepository }
+        NestingGroundService(passwordTreeAdapterPort, passwordTreeSyncService, eventRegistry, nestStateMover)
     }
     private val favoritePasswordService by lazy {
         FavoritePasswordService(cryptoProvider, eggRepository, eventRegistry, memoryUpdateControl)

@@ -11,14 +11,16 @@ import de.pflugradts.passbird.domain.model.shell.EncryptedShell
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
+import de.pflugradts.passbird.domain.service.nest.NestStateMover
 import de.pflugradts.passbird.domain.service.nest.NestStateView
 import java.util.function.Predicate
+
 class NestingGround constructor(
     private val eggIdMemoryEnabled: Boolean,
     private val passwordTreeAdapterPort: PasswordTreeAdapterPort,
     private val nestStateView: NestStateView,
     private val eventRegistry: EventRegistry,
-) : EggRepository {
+) : EggRepository, NestStateMover {
     private val lazyFavorites: MutableOption<FavoriteMap> = mutableOptionOf()
     private val lazyMemory: MutableOption<MemoryMap> = mutableOptionOf()
     private val lazyEggs: MutableOption<MutableList<Egg>> = mutableOptionOf()
