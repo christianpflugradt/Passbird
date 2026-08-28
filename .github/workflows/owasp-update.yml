@@ -37,7 +37,7 @@ jobs:
           DEPENDENCY_CHECK_DATA_LOCATION: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
           OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
           OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
-        run: ./gradlew dependencyCheckUpdate --stacktrace
+        run: ./gradlew --no-configuration-cache dependencyCheckUpdate --stacktrace
       - name: save refreshed dependency-check cache
         uses: actions/cache/save@v6
         with:

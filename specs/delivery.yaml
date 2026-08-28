@@ -122,6 +122,7 @@ local_verification_policy:
       - the build workflow installs Xvfb and xclip, builds the releasable passbird.jar once with the GitHub Actions manifest metadata on Temurin 25 LTS, and runs smoke-test/run.sh against that same artifact under xvfb-run on Java 17, 21, and 25
       - architecture tests and coverage jobs run only on pull requests and direct pushes to main, while GitHub Pages publication stays main-only
       - the build workflow runs dependency-check analysis on push and restores its local database from the default-branch GitHub Actions cache when available
+      - the dedicated OWASP cache refresh and purge workflows must invoke dependency-check maintenance tasks with `--no-configuration-cache` because the OWASP Gradle plugin still stores unsupported `Project` state under Gradle 9.7.1 and otherwise fails after completing the maintenance work
       - single-run Java-based GitHub Actions workflow jobs use Temurin 25 LTS while the Gradle build enforces a Java 17 API floor for compilation and the build workflow proves runtime compatibility for the current LTS line
       - the build workflow runs detekt as a dedicated static-analysis job and uploads its reports as artifacts
       - unit, integration, property, architecture, and PIT mutation diagnostic artifacts are uploaded when present even after their owning test steps fail, so test reports, generated-test failures, and mutation context remain inspectable after CI failures

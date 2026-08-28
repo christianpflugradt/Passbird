@@ -38,9 +38,9 @@ jobs:
           OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
           OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
         run: |
-          ./gradlew dependencyCheckPurge --stacktrace
+          ./gradlew --no-configuration-cache dependencyCheckPurge --stacktrace
           rm -rf "$DEPENDENCY_CHECK_DATA_LOCATION"
-          ./gradlew dependencyCheckUpdate --stacktrace
+          ./gradlew --no-configuration-cache dependencyCheckUpdate --stacktrace
       - name: save rebuilt dependency-check cache
         uses: actions/cache/save@v6
         with:
