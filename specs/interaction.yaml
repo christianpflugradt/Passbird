@@ -50,6 +50,7 @@ spacing_and_output:
   formatting_and_feedback:
     - if adapter.userInterface.ansiEscapeCodes.enabled is true, each output fragment is wrapped individually in ANSI color begin and reset escape codes
     - the ANSI color mapping is fixed: DEFAULT -> 231, SPECIAL -> 220, OPERATION_ABORTED -> 208, ERROR_MESSAGE -> 196, HIGHLIGHT -> 207, NEST -> 39, EVENT_HANDLED -> 118
+    - list command rendering keeps its existing text layout, uses HIGHLIGHT for grouped Nest/index header lines, and uses SPECIAL only for matched filter substrings inside EggIds
     - if ANSI escape codes are disabled, the same text is emitted without escape sequences
     - output fragments formatted as OPERATION_ABORTED trigger warningSound after their text is emitted
     - warningSound emits the terminal BEL character only if adapter.userInterface.audibleBell is enabled

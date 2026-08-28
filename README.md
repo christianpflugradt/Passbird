@@ -304,11 +304,11 @@ Passbird immediately updates the password database (Password Tree file) after ev
 
 `l` lists all EggIds in the current Nest.
 
-`lmiro` lists EggIds in the current Nest whose name contains `miro`. Filtering is case-insensitive and preserves the original EggId casing in the output.
+`lmiro` lists EggIds in the current Nest whose name contains `miro`. Filtering is case-insensitive and preserves the original EggId casing in the output. When ANSI escape codes are enabled, only the matching substring is highlighted.
 
-`l*` lists all EggIds across all Nests, grouped by Nest.
+`l*` lists all EggIds across all Nests, grouped by Nest. When ANSI escape codes are enabled, each Nest/index header line is highlighted.
 
-`l*miro` lists EggIds across all Nests whose name contains `miro`, grouped by Nest.
+`l*miro` lists EggIds across all Nests whose name contains `miro`, grouped by Nest. When ANSI escape codes are enabled, each Nest/index header line is highlighted and only the matching substring inside each EggId is highlighted.
 
 `.` repeats the last successful non-repeat command using the exact original command input.
 

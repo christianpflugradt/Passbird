@@ -66,6 +66,7 @@ class RepeatLastCommandTest {
     fun `should repeat the last successful non-repeat command multiple times`() {
         val passwordService = mockk<PasswordService>()
         val nestService = createNestServiceForTesting()
+        val recordingUserInterfaceAdapterPort = RecordingUserInterfaceAdapterPort()
         fakePasswordService(
             instance = passwordService,
             withEggs = listOf(
@@ -75,16 +76,15 @@ class RepeatLastCommandTest {
             ),
             withNestService = nestService,
         )
-        val outputs = mutableListOf<Output>()
         val commandExecutionTracker = CommandExecutionTracker()
         inputHandler = createInputHandlerFor(
             CommandHandlerBus(
                 setOf(
-                    ListCommandHandler(nestService, passwordService, userInterfaceAdapterPort),
+                    ListCommandHandler(nestService, passwordService, recordingUserInterfaceAdapterPort),
                     RepeatLastCommandHandler(
                         inputHandlerProvider(),
                         rememberedCommandMemory,
-                        userInterfaceAdapterPort,
+                        recordingUserInterfaceAdapterPort,
                         commandExecutionTracker,
                     ),
                 ),
@@ -97,8 +97,11 @@ class RepeatLastCommandTest {
         inputHandler.handleInput(inputOf(shellOf(".")))
         inputHandler.handleInput(inputOf(shellOf(".")))
 
-        verify(exactly = 3) { userInterfaceAdapterPort.send(capture(outputs)) }
-        expectThat(outputs.map { it.shell.asString() }).containsExactly("Miro, miroBoard", "Miro, miroBoard", "Miro, miroBoard")
+        expectThat(
+            recordingUserInterfaceAdapterPort.sentOutputs.map { outputs ->
+                outputs.joinToString(separator = "") { it.shell.asString() }
+            },
+        ).containsExactly("Miro, miroBoard", "Miro, miroBoard", "Miro, miroBoard")
     }
 
     @Test
@@ -194,4 +197,19 @@ private class DelegatingInputHandler : InputHandler {
     lateinit var delegate: InputHandler
 
     override fun handleInput(input: Input) = delegate.handleInput(input)
+}
+
+private class RecordingUserInterfaceAdapterPort : UserInterfaceAdapterPort {
+    val sentOutputs = mutableListOf<List<Output>>()
+
+    override fun receive(vararg output: Output) = error("not used in RepeatLastCommandTest")
+    override fun receiveSecurely(output: Output) = error("not used in RepeatLastCommandTest")
+    override fun receiveLineBreakWithin(milliseconds: Long) = error("not used in RepeatLastCommandTest")
+    override fun send(vararg output: Output) {
+        output.toList().takeUnless { outputs -> outputs.all { it.shell.isEmpty } }?.let(sentOutputs::add)
+    }
+    override fun startEphemeralLine(output: Output) = error("not used in RepeatLastCommandTest")
+    override fun updateEphemeralLine(output: Output) = error("not used in RepeatLastCommandTest")
+    override fun finishEphemeralLine() = error("not used in RepeatLastCommandTest")
+    override fun warningSound() = error("not used in RepeatLastCommandTest")
 }
