@@ -230,40 +230,9 @@ class ConfigurationYamlMapperTest {
             """.trimIndent().byteInputStream(),
         )
 
-        expectThat(actual.application.backup.configuration.enabled).isTrue()
-        expectThat(actual.application.backup.configuration.location) isEqualTo null
-        expectThat(actual.application.backup.configuration.numberOfBackups) isEqualTo null
-        expectThat(actual.application.exchange.promptOnExportFile).isTrue()
-        expectThat(actual.application.flow.loginProteinSlot) isEqualTo 0
-        expectThat(actual.application.flow.globalHotkey.enabled).isTrue()
-        expectThat(actual.application.flow.globalHotkey.key) isEqualTo "P"
-        expectThat(actual.application.inactivityLimit.enabled).isFalse()
-        expectThat(actual.application.inactivityLimit.limitInMinutes) isEqualTo 10
-        expectThat(actual.application.trash.retentionDays) isEqualTo 365
-        expectThat(actual.application.password.customPasswordConfigurations).hasSize(1)
-        expectThat(actual.application.password.customPasswordConfigurations.first().name) isEqualTo ""
-        expectThat(actual.application.password.customPasswordConfigurations.first().length) isEqualTo 20
-        expectThat(actual.application.password.customPasswordConfigurations.first().hasNumbers).isTrue()
-        expectThat(actual.application.password.customPasswordConfigurations.first().hasLowercaseLetters).isTrue()
-        expectThat(actual.application.password.customPasswordConfigurations.first().hasUppercaseLetters).isTrue()
-        expectThat(actual.application.password.customPasswordConfigurations.first().hasSpecialCharacters).isTrue()
-        expectThat(actual.application.password.customPasswordConfigurations.first().unusedSpecialCharacters) isEqualTo ""
-        expectThat(actual.adapter.clipboard.nativeTooling.enabled).isTrue()
-        expectThat(actual.adapter.clipboard.reset.enabled).isTrue()
-        expectThat(actual.adapter.clipboard.reset.delaySeconds) isEqualTo 10
-        expectThat(actual.adapter.keyStore.location) isEqualTo ""
-        expectThat(actual.adapter.passwordTree.location) isEqualTo ""
-        expectThat(actual.adapter.passwordTree.verifySignature).isTrue()
-        expectThat(actual.adapter.passwordTree.verifyChecksum).isTrue()
-        expectThat(actual.adapter.userInterface.ansiEscapeCodes.enabled).isFalse()
-        expectThat(actual.adapter.userInterface.audibleBell).isFalse()
-        expectThat(actual.adapter.userInterface.secureInput).isTrue()
-        expectThat(actual.domain.eggIdMemory.enabled).isTrue()
-        expectThat(actual.domain.eggIdMemory.persisted).isFalse()
-        expectThat(actual.domain.eggIdMemory.updateOnFavoriteUse).isTrue()
-        expectThat(actual.domain.protein.templates).hasSize(1)
-        expectThat(actual.domain.protein.templates.first().name) isEqualTo "login"
-        expectThat(actual.domain.protein.templates.first().slots) isEqualTo emptyMap()
+        assertDefaultsInsidePresentApplicationSections(actual)
+        assertDefaultsInsidePresentAdapterSections(actual)
+        assertDefaultsInsidePresentDomainSections(actual)
     }
 
     @Test
@@ -313,75 +282,101 @@ class ConfigurationYamlMapperTest {
 
     @Test
     fun `should reject invalid scalar and list item types`() {
-        val invalidPasswordLength = kotlin.runCatching {
-            mapper.readConfiguration(
-                """
-                application:
-                  password:
-                    length: invalid
-                """.trimIndent().byteInputStream(),
-            )
-        }
-        val invalidTemplateSlot = kotlin.runCatching {
-            mapper.readConfiguration(
-                """
-                domain:
-                  protein:
-                    templates:
-                      - name: login
-                        0: 123
-                """.trimIndent().byteInputStream(),
-            )
-        }
-        val invalidCustomPasswordConfiguration = kotlin.runCatching {
-            mapper.readConfiguration(
-                """
-                application:
-                  password:
-                    customPasswordConfigurations:
-                      - null
-                """.trimIndent().byteInputStream(),
-            )
-        }
-        val invalidGlobalHotkeyKey = kotlin.runCatching {
-            mapper.readConfiguration(
-                """
-                application:
-                  flow:
-                    globalHotkey:
-                      key: "12"
-                """.trimIndent().byteInputStream(),
-            )
-        }
-        val invalidLoginProteinSlot = kotlin.runCatching {
-            mapper.readConfiguration(
-                """
-                application:
-                  flow:
-                    loginProteinSlot: 11
-                """.trimIndent().byteInputStream(),
-            )
-        }
+        assertInvalidConfiguration(
+            """
+            application:
+              password:
+                length: invalid
+            """.trimIndent(),
+            "configuration.application.password.length must be an integer",
+        )
+        assertInvalidConfiguration(
+            """
+            domain:
+              protein:
+                templates:
+                  - name: login
+                    0: 123
+            """.trimIndent(),
+            "Protein template 'login' contains invalid slot",
+        )
+        assertInvalidConfiguration(
+            """
+            application:
+              password:
+                customPasswordConfigurations:
+                  - null
+            """.trimIndent(),
+            "configuration.application.password.customPasswordConfigurations[0] must not be null",
+        )
+        assertInvalidConfiguration(
+            """
+            application:
+              flow:
+                globalHotkey:
+                  key: "12"
+            """.trimIndent(),
+            "Global hotkey key is invalid",
+        )
+        assertInvalidConfiguration(
+            """
+            application:
+              flow:
+                loginProteinSlot: 11
+            """.trimIndent(),
+            "Login Protein Slot is invalid",
+        )
+    }
 
-        expectThat(invalidPasswordLength.isFailure).isTrue()
-        expectThat(invalidPasswordLength.exceptionOrNull()).isNotNull()
-        expectThat(
-            invalidPasswordLength.exceptionOrNull()!!.message!!,
-        ).contains("configuration.application.password.length must be an integer")
-        expectThat(invalidTemplateSlot.isFailure).isTrue()
-        expectThat(invalidTemplateSlot.exceptionOrNull()).isNotNull()
-        expectThat(invalidTemplateSlot.exceptionOrNull()!!.message!!).contains("Protein template 'login' contains invalid slot")
-        expectThat(invalidCustomPasswordConfiguration.isFailure).isTrue()
-        expectThat(invalidCustomPasswordConfiguration.exceptionOrNull()).isNotNull()
-        expectThat(
-            invalidCustomPasswordConfiguration.exceptionOrNull()!!.message!!,
-        ).contains("configuration.application.password.customPasswordConfigurations[0] must not be null")
-        expectThat(invalidGlobalHotkeyKey.isFailure).isTrue()
-        expectThat(invalidGlobalHotkeyKey.exceptionOrNull()).isNotNull()
-        expectThat(invalidGlobalHotkeyKey.exceptionOrNull()!!.message!!) contains "Global hotkey key is invalid"
-        expectThat(invalidLoginProteinSlot.isFailure).isTrue()
-        expectThat(invalidLoginProteinSlot.exceptionOrNull()).isNotNull()
-        expectThat(invalidLoginProteinSlot.exceptionOrNull()!!.message!!) contains "Login Protein Slot is invalid"
+    private fun assertDefaultsInsidePresentApplicationSections(configuration: Configuration) {
+        expectThat(configuration.application.backup.configuration.enabled).isTrue()
+        expectThat(configuration.application.backup.configuration.location) isEqualTo null
+        expectThat(configuration.application.backup.configuration.numberOfBackups) isEqualTo null
+        expectThat(configuration.application.exchange.promptOnExportFile).isTrue()
+        expectThat(configuration.application.flow.loginProteinSlot) isEqualTo 0
+        expectThat(configuration.application.flow.globalHotkey.enabled).isTrue()
+        expectThat(configuration.application.flow.globalHotkey.key) isEqualTo "P"
+        expectThat(configuration.application.inactivityLimit.enabled).isFalse()
+        expectThat(configuration.application.inactivityLimit.limitInMinutes) isEqualTo 10
+        expectThat(configuration.application.trash.retentionDays) isEqualTo 365
+        expectThat(configuration.application.password.customPasswordConfigurations).hasSize(1)
+        expectThat(configuration.application.password.customPasswordConfigurations.first().name) isEqualTo ""
+        expectThat(configuration.application.password.customPasswordConfigurations.first().length) isEqualTo 20
+        expectThat(configuration.application.password.customPasswordConfigurations.first().hasNumbers).isTrue()
+        expectThat(configuration.application.password.customPasswordConfigurations.first().hasLowercaseLetters).isTrue()
+        expectThat(configuration.application.password.customPasswordConfigurations.first().hasUppercaseLetters).isTrue()
+        expectThat(configuration.application.password.customPasswordConfigurations.first().hasSpecialCharacters).isTrue()
+        expectThat(configuration.application.password.customPasswordConfigurations.first().unusedSpecialCharacters) isEqualTo ""
+    }
+
+    private fun assertDefaultsInsidePresentAdapterSections(configuration: Configuration) {
+        expectThat(configuration.adapter.clipboard.nativeTooling.enabled).isTrue()
+        expectThat(configuration.adapter.clipboard.reset.enabled).isTrue()
+        expectThat(configuration.adapter.clipboard.reset.delaySeconds) isEqualTo 10
+        expectThat(configuration.adapter.keyStore.location) isEqualTo ""
+        expectThat(configuration.adapter.passwordTree.location) isEqualTo ""
+        expectThat(configuration.adapter.passwordTree.verifySignature).isTrue()
+        expectThat(configuration.adapter.passwordTree.verifyChecksum).isTrue()
+        expectThat(configuration.adapter.userInterface.ansiEscapeCodes.enabled).isFalse()
+        expectThat(configuration.adapter.userInterface.audibleBell).isFalse()
+        expectThat(configuration.adapter.userInterface.secureInput).isTrue()
+    }
+
+    private fun assertDefaultsInsidePresentDomainSections(configuration: Configuration) {
+        expectThat(configuration.domain.eggIdMemory.enabled).isTrue()
+        expectThat(configuration.domain.eggIdMemory.persisted).isFalse()
+        expectThat(configuration.domain.eggIdMemory.updateOnFavoriteUse).isTrue()
+        expectThat(configuration.domain.protein.templates).hasSize(1)
+        expectThat(configuration.domain.protein.templates.first().name) isEqualTo "login"
+        expectThat(configuration.domain.protein.templates.first().slots) isEqualTo emptyMap()
+    }
+
+    private fun assertInvalidConfiguration(yaml: String, message: String) {
+        val actual = kotlin.runCatching { mapper.readConfiguration(yaml.byteInputStream()) }
+
+        expectThat(actual.isFailure).isTrue()
+        expectThat(actual.exceptionOrNull()).isNotNull()
+        expectThat(actual.exceptionOrNull()!!.message!!).contains(message)
     }
 
     private fun assertExplicitApplicationConfiguration(configuration: Configuration) {

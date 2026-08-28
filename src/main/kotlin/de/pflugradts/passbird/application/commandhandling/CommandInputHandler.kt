@@ -42,15 +42,20 @@ class CommandInputHandler constructor(
                 reportFailure(CommandFailure(ex))
             }.getOrNull() ?: commandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
         }
-        if ((outcome == CommandExecutionOutcome.SUCCESS || (command is UseCommand && outcome == CommandExecutionOutcome.ABORTED)) &&
-            command !is RepeatLastCommand
-        ) {
+        if (shouldRemember(command, outcome)) {
             rememberedCommandMemory.remember(originalInput)
         } else {
             originalInput.scramble()
         }
     }
 }
+
+private fun shouldRemember(command: Command?, outcome: CommandExecutionOutcome) =
+    command !is RepeatLastCommand && (outcome == CommandExecutionOutcome.SUCCESS || isRepeatableAbortedUse(command, outcome))
+
+private fun isRepeatableAbortedUse(command: Command?, outcome: CommandExecutionOutcome) =
+    command is UseCommand && outcome == CommandExecutionOutcome.ABORTED
+
 private fun Command.defaultOutcome() = if (this is NullCommand) {
     CommandExecutionOutcome.FAILURE
 } else {
