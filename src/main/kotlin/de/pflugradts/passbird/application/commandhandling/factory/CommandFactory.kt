@@ -14,6 +14,7 @@ import de.pflugradts.passbird.application.commandhandling.command.QuitCommand
 import de.pflugradts.passbird.application.commandhandling.command.QuitReason.USER
 import de.pflugradts.passbird.application.commandhandling.command.RenameCommand
 import de.pflugradts.passbird.application.commandhandling.command.RepeatLastCommand
+import de.pflugradts.passbird.application.commandhandling.command.UseCommand
 import de.pflugradts.passbird.application.commandhandling.command.ViewCommand
 import de.pflugradts.passbird.application.commandhandling.command.base.Command
 import de.pflugradts.passbird.application.failure.CommandFailure
@@ -37,6 +38,7 @@ class CommandFactory constructor(
         CommandType.CUSTOM_SET -> CustomSetCommand(input)
         CommandType.GET -> GetCommand(input)
         CommandType.RENAME -> RenameCommand(input)
+        CommandType.USE -> UseCommand(input)
         CommandType.VIEW -> ViewCommand(input)
         else -> null
     }

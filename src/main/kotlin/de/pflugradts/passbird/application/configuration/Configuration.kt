@@ -7,6 +7,9 @@ import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 private const val DEFAULT_BACKUP_DIRECTORY = "backups"
 private const val DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS = 10
 private const val DEFAULT_CLIPBOARD_NATIVE_TOOLING_ENABLED = true
+private const val DEFAULT_FLOW_GLOBAL_HOTKEY_ENABLED = true
+private const val DEFAULT_FLOW_GLOBAL_HOTKEY_KEY = "P"
+private const val DEFAULT_FLOW_LOGIN_PROTEIN_SLOT = 0
 private const val DEFAULT_PASSWORD_LENGTH = 20
 private const val DEFAULT_TRASH_RETENTION_DAYS = 365
 private const val DEFAULT_YOLK_ALGORITHM = "SHA1"
@@ -39,6 +42,7 @@ data class Configuration(
     data class Application(
         override val backup: Backup = Backup(),
         override val exchange: Exchange = Exchange(),
+        override val flow: Flow = Flow(),
         override val inactivityLimit: InactivityLimit = InactivityLimit(),
         override val password: Password = Password(),
         override val trash: Trash = Trash(),
@@ -59,6 +63,14 @@ data class Configuration(
     data class Exchange(
         override val promptOnExportFile: Boolean = true,
     ) : ReadableConfiguration.Exchange
+    data class Flow(
+        override val loginProteinSlot: Int = DEFAULT_FLOW_LOGIN_PROTEIN_SLOT,
+        override val globalHotkey: GlobalHotkey = GlobalHotkey(),
+    ) : ReadableConfiguration.Flow
+    data class GlobalHotkey(
+        override val enabled: Boolean = DEFAULT_FLOW_GLOBAL_HOTKEY_ENABLED,
+        override val key: String = DEFAULT_FLOW_GLOBAL_HOTKEY_KEY,
+    ) : ReadableConfiguration.GlobalHotkey
     data class InactivityLimit(
         override val enabled: Boolean = false,
         override val limitInMinutes: Int = 10,
@@ -144,6 +156,10 @@ data class Configuration(
 }
 
 internal fun Configuration.validate(): Configuration {
+    require(application.flow.loginProteinSlot in 0..9) { "Login Protein Slot is invalid" }
+    require(application.flow.globalHotkey.key.length == 1 && application.flow.globalHotkey.key[0].uppercaseChar() in 'A'..'Z') {
+        "Global hotkey key is invalid"
+    }
     normalizeTotpAlgorithm(application.yolk.algorithm)
     require(application.yolk.digits == 6 || application.yolk.digits == 8) { "Yolk digits are invalid" }
     require(application.yolk.periodSeconds > 0) { "Yolk period is invalid" }

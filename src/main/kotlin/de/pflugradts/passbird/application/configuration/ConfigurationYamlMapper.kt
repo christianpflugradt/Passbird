@@ -48,6 +48,7 @@ private fun ConfigurationNode.toConfiguration() = Configuration(
 private fun ConfigurationNode.toApplication() = Configuration.Application(
     backup = nested("backup")?.toBackup() ?: Configuration.Backup(),
     exchange = nested("exchange")?.toExchange() ?: Configuration.Exchange(),
+    flow = nested("flow")?.toFlow() ?: Configuration.Flow(),
     inactivityLimit = nested("inactivityLimit")?.toInactivityLimit() ?: Configuration.InactivityLimit(),
     password = nested("password")?.toPassword() ?: Configuration.Password(),
     trash = nested("trash")?.toTrash() ?: Configuration.Trash(),
@@ -70,6 +71,16 @@ private fun ConfigurationNode.toBackupSettings() = Configuration.BackupSettings(
 
 private fun ConfigurationNode.toExchange() = Configuration.Exchange(
     promptOnExportFile = boolean("promptOnExportFile") ?: Configuration.Exchange().promptOnExportFile,
+).also { ensureFullyConsumed() }
+
+private fun ConfigurationNode.toFlow() = Configuration.Flow(
+    loginProteinSlot = int("loginProteinSlot") ?: Configuration.Flow().loginProteinSlot,
+    globalHotkey = nested("globalHotkey")?.toGlobalHotkey() ?: Configuration.GlobalHotkey(),
+).also { ensureFullyConsumed() }
+
+private fun ConfigurationNode.toGlobalHotkey() = Configuration.GlobalHotkey(
+    enabled = boolean("enabled") ?: Configuration.GlobalHotkey().enabled,
+    key = string("key") ?: Configuration.GlobalHotkey().key,
 ).also { ensureFullyConsumed() }
 
 private fun ConfigurationNode.toInactivityLimit() = Configuration.InactivityLimit(
@@ -190,6 +201,7 @@ private fun ReadableConfiguration.toYamlValue(): Map<String, Any?> = linkedMapOf
 private fun ReadableConfiguration.Application.toYamlValue(): Map<String, Any?> = linkedMapOf(
     "backup" to backup.toYamlValue(),
     "exchange" to exchange.toYamlValue(),
+    "flow" to flow.toYamlValue(),
     "inactivityLimit" to inactivityLimit.toYamlValue(),
     "password" to password.toYamlValue(),
     "trash" to trash.toYamlValue(),
@@ -212,6 +224,16 @@ private fun ReadableConfiguration.BackupSettings.toYamlValue(): Map<String, Any?
 
 private fun ReadableConfiguration.Exchange.toYamlValue(): Map<String, Any?> = linkedMapOf(
     "promptOnExportFile" to promptOnExportFile,
+)
+
+private fun ReadableConfiguration.Flow.toYamlValue(): Map<String, Any?> = linkedMapOf(
+    "loginProteinSlot" to loginProteinSlot,
+    "globalHotkey" to globalHotkey.toYamlValue(),
+)
+
+private fun ReadableConfiguration.GlobalHotkey.toYamlValue(): Map<String, Any?> = linkedMapOf(
+    "enabled" to enabled,
+    "key" to key,
 )
 
 private fun ReadableConfiguration.InactivityLimit.toYamlValue(): Map<String, Any?> = linkedMapOf(

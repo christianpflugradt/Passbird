@@ -17,6 +17,9 @@ configuration_surface:
     - application.backup.keyStore.enabled defaults to true
     - application.backup.passwordTree.enabled defaults to true
     - application.exchange.promptOnExportFile defaults to true
+    - application.flow.loginProteinSlot defaults to 0
+    - application.flow.globalHotkey.enabled defaults to true
+    - application.flow.globalHotkey.key defaults to P
     - application.password.length defaults to 20
     - application.password.specialCharacters defaults to true
     - application.password.promptOnRemoval defaults to true
@@ -61,6 +64,19 @@ areas:
     visible_effects:
       - controls whether startup reminds about an existing passbird-export.json file
       - controls whether inactivity can terminate an otherwise running session
+  - name: guided_use_flow
+    keys:
+      - application.flow.loginProteinSlot
+      - application.flow.globalHotkey.enabled
+      - application.flow.globalHotkey.key
+    visible_effects:
+      - selects which Protein slot is treated as the login step for the guided u[EggId] flow
+      - controls whether guided flows may be advanced by a temporary global hotkey in addition to Enter
+    behavioral_contract:
+      - application.flow.loginProteinSlot must be an integer from 0 through 9
+      - application.flow.globalHotkey.enabled only affects the temporary hotkey path and must not disable Enter-based progression
+      - application.flow.globalHotkey.key accepts exactly one alphabetic character from A through Z, case-insensitive in YAML
+      - the effective guided-flow hotkey is always Ctrl+Shift+<ConfiguredKey>
   - name: password_generation_and_confirmation
     keys:
       - application.password.length

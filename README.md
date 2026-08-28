@@ -12,6 +12,7 @@
     + [Custom Password Configuration](#custom-password-configuration)
 * [Usage](#usage)
     + [General Usage](#general-usage)
+    + [Use](#use)
     + [Nests](#nests)
     + [Proteins](#proteins)
     + [Yolks](#yolks)
@@ -131,6 +132,11 @@ application:
       enabled: true
   exchange:
     promptOnExportFile: true
+  flow:
+    loginProteinSlot: 0
+    globalHotkey:
+      enabled: true
+      key: P
   inactivityLimit:
     enabled: false
     limitInMinutes: 10
@@ -168,6 +174,7 @@ domain:
   eggIdMemory:
     enabled: true
     persisted: false
+    updateOnFavoriteUse: true
   protein:
     secureProteinStructureInput: true
     promptForProteinStructureInputToggle: false
@@ -271,6 +278,7 @@ Enter `h*` to view password-tree statistics before the same usage information.
         l[filter]             Lists EggIds in the current Nest whose name contains filter.
         l*                    Lists all EggIds across all Nests, grouped by Nest.
         l*[filter]            Lists EggIds across all Nests whose name contains filter, grouped by Nest.
+        u[EggId]              Guides through using login, password, and optional Yolk for the specified Egg.
         . (repeat)            Repeats the last successful non-repeat command.
         h (help)              Displays this help menu.
         q (quit)              Exits the Passbird application.
@@ -327,6 +335,45 @@ operation is aborted.
 `i*` previews the Nests in `passbird-export.json`, imports one selected Nest, and lets you restore it into a chosen Nest Slot.
 
 Import expects every exported Nest record in `passbird-export.json` to declare a unique Slot from `0` to `9`, every exported Nest to contain distinct valid EggIds, and every exported Protein record to declare a unique Slot from `0` to `9` within its Egg. Trashed Eggs are never serialized into the export file and therefore are never restored through import. Exported Protein records must contain both Type and Structure fields or leave both empty. If Nest or Protein slot metadata is missing, duplicated, or out of range, if one exported Nest repeats or contains an invalid EggId, or if an exported Protein record contains only one of Type or Structure, Passbird rejects the file instead of importing it into another Nest or Protein slot.
+
+### Use
+
+Use `u[EggId]` to guide a login flow through one Egg without retyping follow-up commands. The flow uses a fixed order: the configured login Protein slot first, then the password, then the optional Yolk. Empty optional values are skipped automatically, so an Egg without a login Protein starts with the password, and an Egg without a Yolk finishes after the password.
+
+For example, `uemail` can produce a flow like this:
+
+    Ctrl+Shift+P or Enter to continue
+
+    Login copied to clipboard.
+
+    Password copied to clipboard.
+
+    Yolk copied to clipboard.
+    482193 (17s)
+
+Pressing Enter advances the flow, but Enter requires the Passbird window to have focus. When the temporary global hotkey is available, `Ctrl+Shift+P` advances the same flow step without forcing you to leave the browser or application where you are entering the credentials. The hotkey exists only while a multi-step `u[EggId]` flow is active. If hotkey registration fails, Passbird keeps the flow usable and falls back to:
+
+    Global hotkey Ctrl+Shift+P could not be registered.
+    Press Enter to continue.
+
+The login value is taken from the global configuration key `application.flow.loginProteinSlot`. The hotkey behavior is configured in the same section:
+
+```yaml
+application:
+  flow:
+    loginProteinSlot: 0
+    globalHotkey:
+      enabled: true
+      key: P
+```
+
+Only letters `A` through `Z` are accepted for `key`, and the effective hotkey is always `Ctrl+Shift+<key>`.
+
+The Yolk step reuses the normal live `y[EggId]` behavior. If `application.yolk.copyToClipboard` is enabled, the currently shown TOTP code is copied to the clipboard and refreshed automatically when the code rolls over.
+
+Favorites and memory reuse `u` naturally through their existing delegation. For example, `f0u` runs the full guided flow for the Egg stored in Favorite slot `0`, and `m0u` does the same for the Egg stored in Memory slot `0`.
+
+If a `u[EggId]` flow aborts because a clipboard copy fails or another flow step encounters an error, `.` repeats that failed guided flow as well.
 
 ### Nests
 

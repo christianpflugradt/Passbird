@@ -30,6 +30,11 @@ class ConfigurationYamlMapperTest {
               numberOfBackups: 2
           exchange:
             promptOnExportFile: false
+          flow:
+            loginProteinSlot: 1
+            globalHotkey:
+              enabled: false
+              key: x
           inactivityLimit:
             enabled: true
             limitInMinutes: 15
@@ -106,6 +111,9 @@ class ConfigurationYamlMapperTest {
         expectThat(actual.application.password.length) isEqualTo 24
         expectThat(actual.application.yolk.algorithm) isEqualTo "SHA256"
         expectThat(actual.application.yolk.digits) isEqualTo 8
+        expectThat(actual.application.flow.loginProteinSlot) isEqualTo 0
+        expectThat(actual.application.flow.globalHotkey.enabled).isTrue()
+        expectThat(actual.application.flow.globalHotkey.key) isEqualTo "P"
         expectThat(actual.domain.protein.templates).hasSize(1)
         expectThat(actual.domain.protein.templates.first().slots) isEqualTo mapOf(0 to "domain", 4 to "description")
     }
@@ -131,6 +139,10 @@ class ConfigurationYamlMapperTest {
         val configuration = Configuration(
             application = Configuration.Application(
                 backup = Configuration.Backup(location = "/tmp/backups"),
+                flow = Configuration.Flow(
+                    loginProteinSlot = 2,
+                    globalHotkey = Configuration.GlobalHotkey(enabled = false, key = "z"),
+                ),
             ),
             adapter = Configuration.Adapter(
                 keyStore = Configuration.KeyStore(location = "/tmp"),
@@ -153,6 +165,9 @@ class ConfigurationYamlMapperTest {
 
         expectThat(yaml).contains("templates:")
         expectThat(yaml).contains("name: web-login")
+        expectThat(reloaded.application.flow.loginProteinSlot) isEqualTo 2
+        expectThat(reloaded.application.flow.globalHotkey.enabled).isFalse()
+        expectThat(reloaded.application.flow.globalHotkey.key) isEqualTo "z"
         expectThat(reloaded.adapter.keyStore.location) isEqualTo "/tmp"
         expectThat(reloaded.adapter.passwordTree.location) isEqualTo "/tree"
         expectThat(reloaded.domain.protein.templates.first().slots) isEqualTo mapOf(0 to "domain", 1 to "user")
@@ -193,6 +208,8 @@ class ConfigurationYamlMapperTest {
               backup:
                 configuration: {}
               exchange: {}
+              flow:
+                globalHotkey: {}
               inactivityLimit: {}
               password:
                 customPasswordConfigurations:
@@ -217,6 +234,9 @@ class ConfigurationYamlMapperTest {
         expectThat(actual.application.backup.configuration.location) isEqualTo null
         expectThat(actual.application.backup.configuration.numberOfBackups) isEqualTo null
         expectThat(actual.application.exchange.promptOnExportFile).isTrue()
+        expectThat(actual.application.flow.loginProteinSlot) isEqualTo 0
+        expectThat(actual.application.flow.globalHotkey.enabled).isTrue()
+        expectThat(actual.application.flow.globalHotkey.key) isEqualTo "P"
         expectThat(actual.application.inactivityLimit.enabled).isFalse()
         expectThat(actual.application.inactivityLimit.limitInMinutes) isEqualTo 10
         expectThat(actual.application.trash.retentionDays) isEqualTo 365
@@ -259,6 +279,9 @@ class ConfigurationYamlMapperTest {
 
         expectThat(actual.application.backup.location) isEqualTo "backups"
         expectThat(actual.application.exchange.promptOnExportFile).isTrue()
+        expectThat(actual.application.flow.loginProteinSlot) isEqualTo 0
+        expectThat(actual.application.flow.globalHotkey.enabled).isTrue()
+        expectThat(actual.application.flow.globalHotkey.key) isEqualTo "P"
         expectThat(actual.application.inactivityLimit.limitInMinutes) isEqualTo 10
         expectThat(actual.application.trash.retentionDays) isEqualTo 365
         expectThat(actual.application.password.length) isEqualTo 20
@@ -320,6 +343,25 @@ class ConfigurationYamlMapperTest {
                 """.trimIndent().byteInputStream(),
             )
         }
+        val invalidGlobalHotkeyKey = kotlin.runCatching {
+            mapper.readConfiguration(
+                """
+                application:
+                  flow:
+                    globalHotkey:
+                      key: "12"
+                """.trimIndent().byteInputStream(),
+            )
+        }
+        val invalidLoginProteinSlot = kotlin.runCatching {
+            mapper.readConfiguration(
+                """
+                application:
+                  flow:
+                    loginProteinSlot: 11
+                """.trimIndent().byteInputStream(),
+            )
+        }
 
         expectThat(invalidPasswordLength.isFailure).isTrue()
         expectThat(invalidPasswordLength.exceptionOrNull()).isNotNull()
@@ -334,6 +376,12 @@ class ConfigurationYamlMapperTest {
         expectThat(
             invalidCustomPasswordConfiguration.exceptionOrNull()!!.message!!,
         ).contains("configuration.application.password.customPasswordConfigurations[0] must not be null")
+        expectThat(invalidGlobalHotkeyKey.isFailure).isTrue()
+        expectThat(invalidGlobalHotkeyKey.exceptionOrNull()).isNotNull()
+        expectThat(invalidGlobalHotkeyKey.exceptionOrNull()!!.message!!) contains "Global hotkey key is invalid"
+        expectThat(invalidLoginProteinSlot.isFailure).isTrue()
+        expectThat(invalidLoginProteinSlot.exceptionOrNull()).isNotNull()
+        expectThat(invalidLoginProteinSlot.exceptionOrNull()!!.message!!) contains "Login Protein Slot is invalid"
     }
 
     private fun assertExplicitApplicationConfiguration(configuration: Configuration) {
@@ -343,6 +391,9 @@ class ConfigurationYamlMapperTest {
         expectThat(configuration.application.backup.configuration.location) isEqualTo "/vault/config-backups"
         expectThat(configuration.application.backup.configuration.numberOfBackups) isEqualTo 4
         expectThat(configuration.application.exchange.promptOnExportFile).isFalse()
+        expectThat(configuration.application.flow.loginProteinSlot) isEqualTo 1
+        expectThat(configuration.application.flow.globalHotkey.enabled).isFalse()
+        expectThat(configuration.application.flow.globalHotkey.key) isEqualTo "x"
         expectThat(configuration.application.inactivityLimit.enabled).isTrue()
         expectThat(configuration.application.inactivityLimit.limitInMinutes) isEqualTo 15
         expectThat(configuration.application.trash.retentionDays) isEqualTo 45

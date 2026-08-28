@@ -16,6 +16,7 @@ input_semantics:
     - an empty submitted line yields empty input
     - if visible stdin reaches EOF after at least one character and before newline, receive returns the buffered characters as the final line
     - if visible stdin reaches EOF before any character is read, receive terminates the interactive session instead of fabricating input
+    - receiveLineBreakWithin observes Enter only from the focused Passbird terminal input stream; non-terminal NEXT inputs must be modeled through explicit ports
   secure_input:
     - if adapter.userInterface.secureInput is enabled and a console is available, receiveSecurely reads characters through the console password reader instead of standard line input
     - receiveSecurely observes inactivity termination while waiting for console password input and aborts the current flow when shutdown is requested

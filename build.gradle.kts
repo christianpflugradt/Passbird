@@ -43,6 +43,7 @@ detekt {
 }
 
 val jacksonVersion = "2.22.2"
+val jnaVersion = "5.19.1"
 val snakeYamlEngineVersion = "3.1.1"
 
 val archunitVersion = "1.5.0"
@@ -56,6 +57,7 @@ val striktVersion = "0.35.1"
 dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("net.java.dev.jna:jna:$jnaVersion")
     implementation("org.snakeyaml:snakeyaml-engine:$snakeYamlEngineVersion")
 
     testImplementation("io.strikt:strikt-core:$striktVersion")

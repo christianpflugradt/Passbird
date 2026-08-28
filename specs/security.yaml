@@ -60,6 +60,17 @@ current_security_relevant_implementation:
       - when clipboard reset is enabled, reset scheduling failures and failed automatic clear attempts are reported through stderr
       - posting a newer clipboard value supersedes older pending clear attempts so only the latest copied value is cleared
       - when application.yolk.copyToClipboard is true, the live y[EggId] view copies the currently displayed TOTP code to the clipboard and refreshes that clipboard content again on each later TOTP rollover while the view remains open
+  guided_use_flow:
+    files:
+      - src/main/kotlin/de/pflugradts/passbird/application/commandhandling/handler/egg/UseCommandHandler.kt
+      - src/main/kotlin/de/pflugradts/passbird/application/yolk/LiveYolkView.kt
+      - src/main/kotlin/de/pflugradts/passbird/adapter/userinterface/hotkey/GlobalHotkeyService.kt
+    facts:
+      - u[EggId] reveals or copies secret material only after explicit user command entry
+      - the optional global hotkey exists only while a multi-step guided flow is active and is released through cleanup/finally-style control flow
+      - the global hotkey advances an already active guided flow only; it is not an autofill, paste, browser-integration, or background monitoring feature
+      - clipboard failure during the guided flow aborts the flow immediately instead of silently continuing to later secrets
+      - the Yolk phase of the guided flow reuses the same live TOTP display and clipboard-refresh behavior as y[EggId]
   keystore:
     file: src/main/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStoreService.kt
     facts:

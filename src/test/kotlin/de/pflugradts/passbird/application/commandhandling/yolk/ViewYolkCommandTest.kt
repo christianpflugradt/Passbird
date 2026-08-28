@@ -10,6 +10,7 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
+import de.pflugradts.passbird.application.yolk.LiveYolkView
 import de.pflugradts.passbird.domain.model.egg.TestYolkData
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -38,12 +39,11 @@ class ViewYolkCommandTest {
     private val passwordService = mockk<PasswordService>()
     private val systemOperation = mockk<SystemOperation>()
     private val commandExecutionTracker = CommandExecutionTracker()
+    private val liveYolkView = LiveYolkView(configuration, clipboardAdapterPort, userInterfaceAdapterPort, systemOperation)
     private val viewYolkCommandHandler = ViewYolkCommandHandler(
-        configuration,
         passwordService,
-        clipboardAdapterPort,
         userInterfaceAdapterPort,
-        systemOperation,
+        liveYolkView,
         commandExecutionTracker,
     )
     private val inputHandler = createInputHandlerFor(viewYolkCommandHandler, commandExecutionTracker)

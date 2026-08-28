@@ -12,6 +12,7 @@ interface ReadableConfiguration {
     interface Application {
         val backup: Backup
         val exchange: Exchange
+        val flow: Flow
         val inactivityLimit: InactivityLimit
         val password: Password
         val trash: Trash
@@ -31,6 +32,14 @@ interface ReadableConfiguration {
     }
     interface Exchange {
         val promptOnExportFile: Boolean
+    }
+    interface Flow {
+        val loginProteinSlot: Int
+        val globalHotkey: GlobalHotkey
+    }
+    interface GlobalHotkey {
+        val enabled: Boolean
+        val key: String
     }
     interface InactivityLimit {
         val enabled: Boolean

@@ -47,6 +47,7 @@ command_surface:
       - l[filter]
       - l*
       - l*[filter]
+      - u[EggId]
       - .
       - h
       - h*
@@ -86,6 +87,7 @@ command_surface:
     - l[filter]
     - l*
     - l*[filter]
+    - u[EggId]
     - .
     - n
     - n0
@@ -124,12 +126,14 @@ capabilities:
       - replace an existing password entry
       - reveal a password
       - copy a password to the clipboard
+      - guide credential use across login, password, and optional Yolk
       - rename an EggId
       - move a password entry to trash
       - permanently delete a password entry
       - restore a trashed password entry
     commands:
       - g[EggId]
+      - u[EggId]
       - s[EggId]
       - c[EggId]
       - v[EggId]

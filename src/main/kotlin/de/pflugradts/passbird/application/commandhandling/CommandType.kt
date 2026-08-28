@@ -19,6 +19,7 @@ enum class CommandType(val type: Char) {
     REPEAT('.'),
     RENAME('r'),
     SET('s'),
+    USE('u'),
     VIEW('v'),
     YOLK('y'),
     UNDEFINED('?'),

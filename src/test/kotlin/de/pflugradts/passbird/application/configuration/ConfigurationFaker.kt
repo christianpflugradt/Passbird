@@ -21,6 +21,9 @@ fun fakeConfiguration(
     withPasswordTreeLocation: String = "",
     withPromptOnRemoval: Boolean = false,
     withPromptOnExportFile: Boolean = false,
+    withFlowGlobalHotkeyEnabled: Boolean = true,
+    withFlowGlobalHotkeyKey: String = "P",
+    withLoginProteinSlot: Int = 0,
     withTrashRetentionDays: Int = 365,
     withYolkAlgorithm: String = "SHA1",
     withYolkCopyToClipboard: Boolean = true,
@@ -55,6 +58,9 @@ fun fakeConfiguration(
     every { instance.application } returns fakeApplication(
         withPromptOnRemoval = withPromptOnRemoval,
         withPromptOnExportFile = withPromptOnExportFile,
+        withFlowGlobalHotkeyEnabled = withFlowGlobalHotkeyEnabled,
+        withFlowGlobalHotkeyKey = withFlowGlobalHotkeyKey,
+        withLoginProteinSlot = withLoginProteinSlot,
         withTrashRetentionDays = withTrashRetentionDays,
         withYolkAlgorithm = withYolkAlgorithm,
         withYolkCopyToClipboard = withYolkCopyToClipboard,
@@ -120,6 +126,9 @@ private fun fakeAdapter(
 private fun fakeApplication(
     withPromptOnRemoval: Boolean,
     withPromptOnExportFile: Boolean,
+    withFlowGlobalHotkeyEnabled: Boolean,
+    withFlowGlobalHotkeyKey: String,
+    withLoginProteinSlot: Int,
     withTrashRetentionDays: Int,
     withYolkAlgorithm: String,
     withYolkCopyToClipboard: Boolean,
@@ -132,6 +141,12 @@ private fun fakeApplication(
 ): Configuration.Application {
     val exchange = mockk<Configuration.Exchange>()
     every { exchange.promptOnExportFile } returns withPromptOnExportFile
+    val globalHotkey = mockk<Configuration.GlobalHotkey>()
+    every { globalHotkey.enabled } returns withFlowGlobalHotkeyEnabled
+    every { globalHotkey.key } returns withFlowGlobalHotkeyKey
+    val flow = mockk<Configuration.Flow>()
+    every { flow.loginProteinSlot } returns withLoginProteinSlot
+    every { flow.globalHotkey } returns globalHotkey
     val inactivityLimit = mockk<Configuration.InactivityLimit>()
     every { inactivityLimit.enabled } returns (withInactivityTimeLimit > 0)
     every { inactivityLimit.limitInMinutes } returns withInactivityTimeLimit
@@ -149,6 +164,7 @@ private fun fakeApplication(
     every { yolk.periodSeconds } returns withYolkPeriodSeconds
     return mockk<Configuration.Application>().also {
         every { it.exchange } returns exchange
+        every { it.flow } returns flow
         every { it.inactivityLimit } returns inactivityLimit
         every { it.password } returns password
         every { it.trash } returns trash

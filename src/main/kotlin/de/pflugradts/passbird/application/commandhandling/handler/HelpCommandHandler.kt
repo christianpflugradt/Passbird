@@ -39,6 +39,7 @@ class HelpCommandHandler constructor(
 
     private fun primaryCommands() = listOf(
         Triple("g[EggId]", "(get)", "Copies the password for the specified Egg to the clipboard."),
+        Triple("u[EggId]", "(use)", "Guides through using login, password, and optional Yolk for the specified Egg."),
         Triple("s[EggId]", "(set)", "Sets a random password for the specified Egg, overwriting any existing one."),
         Triple("s*[EggId]", "(set once)", "Sets a random password for the specified EggId using a one-time configuration."),
         Triple("c[EggId]", "(custom set)", "Prompts the user to input a custom password for the specified Egg."),

@@ -1,13 +1,23 @@
 package de.pflugradts.passbird.application.commandhandling
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.passbird.INTEGRATION
+import de.pflugradts.passbird.application.ClipboardAdapterPort
+import de.pflugradts.passbird.application.GlobalHotkeyAdapterPort
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.commandhandling.handler.ListCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.RepeatLastCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.egg.UseCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.memory.UseMemoryCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCommandHandler
+import de.pflugradts.passbird.application.configuration.Configuration
+import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
+import de.pflugradts.passbird.application.process.inactivity.InactivityHandler
+import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.util.fakeSystemOperation
+import de.pflugradts.passbird.application.yolk.LiveYolkView
 import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
@@ -21,6 +31,7 @@ import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -188,6 +199,70 @@ class RepeatLastCommandTest {
         verify(atLeast = 2) { addNestUserInterfaceAdapterPort.send(capture(outputs)) }
         expectThat(outputs.map { it.shell.asString() }).contains("Empty input - Operation aborted.")
         expectThat(outputs.map { it.shell.asString() }).contains("No previous command is available to repeat.")
+    }
+
+    @Test
+    fun `should remember an aborted use command and repeat the full flow`() {
+        val configuration = mockk<Configuration>()
+        val passwordService = mockk<PasswordService>()
+        val clipboardAdapterPort = mockk<ClipboardAdapterPort>()
+        val globalHotkeyAdapterPort = mockk<GlobalHotkeyAdapterPort>()
+        val useUserInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
+        val systemOperation = mockk<SystemOperation>()
+        val rememberedCommandMemory = RememberedCommandMemory()
+        val commandExecutionTracker = CommandExecutionTracker()
+        val inactivityHandler = spyk(
+            InactivityHandler(
+                mockk(relaxed = true),
+                configuration,
+                mockk(relaxed = true),
+                systemOperation,
+            ),
+        )
+        fakeConfiguration(instance = configuration, withFlowGlobalHotkeyEnabled = false)
+        fakeSystemOperation(instance = systemOperation)
+        fakePasswordService(
+            instance = passwordService,
+            withEggs = listOf(createEggForTesting(withEggIdShell = shellOf("egg"), withProteins = emptyMap())),
+        )
+        every { clipboardAdapterPort.post(any()) } returns failure(IllegalStateException("clipboard unavailable"))
+        every { globalHotkeyAdapterPort.register(any()) } returns null
+        val outputs = mutableListOf<Output>()
+        every { useUserInterfaceAdapterPort.send(capture(outputs)) } returns Unit
+        lateinit var useInputHandler: InputHandler
+        useInputHandler = createInputHandlerFor(
+            CommandHandlerBus(
+                setOf(
+                    UseCommandHandler(
+                        configuration,
+                        passwordService,
+                        clipboardAdapterPort,
+                        globalHotkeyAdapterPort,
+                        useUserInterfaceAdapterPort,
+                        inactivityHandler,
+                        LiveYolkView(configuration, clipboardAdapterPort, useUserInterfaceAdapterPort, systemOperation),
+                        commandExecutionTracker,
+                    ),
+                    RepeatLastCommandHandler(
+                        { useInputHandler },
+                        rememberedCommandMemory,
+                        useUserInterfaceAdapterPort,
+                        commandExecutionTracker,
+                    ),
+                ),
+            ),
+            rememberedCommandMemory,
+            commandExecutionTracker,
+        )
+
+        useInputHandler.handleInput(inputOf(shellOf("uegg")))
+        useInputHandler.handleInput(inputOf(shellOf(".")))
+
+        verify(exactly = 2) { clipboardAdapterPort.post(any()) }
+        expectThat(outputs.map { it.shell.asString() }).containsExactly(
+            "Password could not be copied to clipboard - Operation aborted.",
+            "Password could not be copied to clipboard - Operation aborted.",
+        )
     }
 
     private fun inputHandlerProvider() = { inputHandler }

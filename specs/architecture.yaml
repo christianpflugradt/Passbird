@@ -46,6 +46,7 @@ layers:
       - keystore access
       - clipboard access
       - terminal UI
+      - temporary global hotkey registration
       - import and export serialization
 structural_rules:
   - repositories must only be accessed from domain services
@@ -93,6 +94,9 @@ ports_and_adapters:
   - port: ClipboardAdapterPort
     implementation: adapter.clipboard.ClipboardService
     concern: clipboard copy and reset behavior
+  - port: GlobalHotkeyAdapterPort
+    implementation: adapter.userinterface.hotkey.GlobalHotkeyService
+    concern: temporary registration of a global NEXT hotkey for guided credential flows without leaking OS-specific APIs into application handlers
   - port: KeyStoreAdapterPort
     implementation: adapter.keystore.KeyStoreService
     concern: load and store secret material in PKCS12, while migration boot may construct compatibility adapters for legacy JCEKS reads; JVM keystore construction stays inside adapter.keystore

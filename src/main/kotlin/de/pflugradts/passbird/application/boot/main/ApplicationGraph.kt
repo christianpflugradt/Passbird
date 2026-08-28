@@ -10,7 +10,9 @@ import de.pflugradts.passbird.adapter.passwordtree.PasswordTreeReader
 import de.pflugradts.passbird.adapter.passwordtree.PasswordTreeWriter
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.adapter.userinterface.TerminalInputGateway
+import de.pflugradts.passbird.adapter.userinterface.hotkey.GlobalHotkeyService
 import de.pflugradts.passbird.application.ClipboardAdapterPort
+import de.pflugradts.passbird.application.GlobalHotkeyAdapterPort
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.RunContext
 import de.pflugradts.passbird.application.UserInterfaceAdapterPort
@@ -47,6 +49,7 @@ import de.pflugradts.passbird.application.commandhandling.handler.egg.GetCommand
 import de.pflugradts.passbird.application.commandhandling.handler.egg.OneTimeSetCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.RenameCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.SetCommandHandler
+import de.pflugradts.passbird.application.commandhandling.handler.egg.UseCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.egg.ViewTrashCommandHandler
 import de.pflugradts.passbird.application.commandhandling.handler.favorite.AddFavoriteCommandHandler
@@ -98,6 +101,7 @@ import de.pflugradts.passbird.application.process.password.TrashCleanup
 import de.pflugradts.passbird.application.security.CryptoProviderFactory
 import de.pflugradts.passbird.application.security.KeyStoreAuthenticationService
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.yolk.LiveYolkView
 import de.pflugradts.passbird.domain.service.eventhandling.DomainEventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventHandler
 import de.pflugradts.passbird.domain.service.eventhandling.EventRegistry
@@ -129,6 +133,7 @@ class ApplicationGraph(
 ) {
     val bootable: Bootable get() = passbirdApplication
     val clipboardAdapterPort: ClipboardAdapterPort by lazy { ClipboardService(ClipboardGateway(), configuration) }
+    val globalHotkeyAdapterPort: GlobalHotkeyAdapterPort by lazy { GlobalHotkeyService() }
     val commandHandlers: Set<CommandHandler> by lazy {
         setOf(
             AddFavoriteCommandHandler(passwordService, userInterfaceAdapterPort, commandExecutionTracker),
@@ -202,6 +207,16 @@ class ApplicationGraph(
             ),
             SetInfoCommandHandler(canPrintInfo, configuration, userInterfaceAdapterPort),
             SetProteinCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
+            UseCommandHandler(
+                configuration,
+                passwordService,
+                clipboardAdapterPort,
+                globalHotkeyAdapterPort,
+                userInterfaceAdapterPort,
+                inactivityHandler,
+                liveYolkView,
+                commandExecutionTracker,
+            ),
             SwitchNestCommandHandler(nestService, userInterfaceAdapterPort, commandExecutionTracker),
             UseFavoriteCommandHandler(
                 { inputHandler },
@@ -220,11 +235,9 @@ class ApplicationGraph(
             ViewProteinTypesCommandHandler(canPrintInfo, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             YolkInfoCommandHandler(canPrintInfo, userInterfaceAdapterPort),
             ViewYolkCommandHandler(
-                configuration,
                 passwordService,
-                clipboardAdapterPort,
                 userInterfaceAdapterPort,
-                systemOperation,
+                liveYolkView,
                 commandExecutionTracker,
             ),
             ViewTrashCommandHandler(configuration, nestService, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
@@ -291,6 +304,7 @@ class ApplicationGraph(
     private val proteinEventOutputControl by lazy { ProteinEventOutputControl() }
     private val memoryUpdateControl by lazy { MemoryUpdateControl() }
     private val exchangeFactory by lazy { ExchangeFactory { FilePasswordExchange(systemOperation, runContext) } }
+    private val liveYolkView by lazy { LiveYolkView(configuration, clipboardAdapterPort, userInterfaceAdapterPort, systemOperation) }
     private val keyStoreAuthenticationService by lazy {
         KeyStoreAuthenticationService(configuration, keyStoreAdapterPort, userInterfaceAdapterPort, systemOperation)
     }

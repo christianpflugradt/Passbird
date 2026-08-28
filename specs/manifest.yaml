@@ -64,6 +64,9 @@ task_specific_specs:
   - file: specs/flows/yolks.yaml
     read_when:
       - touching yolk commands, TOTP handling, or yolk persistence
+  - file: specs/flows/use.yaml
+    read_when:
+      - touching the guided u[EggId] credential flow or temporary global hotkey behavior
   - file: specs/flows/migration.yaml
     read_when:
       - touching migration boot, migration consent, or compatibility-preserving startup rerouting

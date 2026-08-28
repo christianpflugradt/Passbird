@@ -1,0 +1,49 @@
+schema_version: 1
+last_reviewed: 2026-08-28
+flow_family: guided_use
+applies_interaction_rules_from: specs/interaction.yaml
+flows:
+  - id: guided_credential_use
+    command: u[EggId]
+    user_experience:
+      command_scope:
+        - the command starts a terminal-native guided credential flow for one Egg
+        - the flow order is fixed as login Protein, then password, then optional Yolk
+        - login semantics are determined only by application.flow.loginProteinSlot and never inferred from Protein type names
+      effective_steps:
+        - if the configured login Protein slot is empty, the flow starts with the password
+        - the password step is always present for an existing Egg
+        - if no Yolk exists, the flow ends after the password step
+        - if only the password step is present, Passbird copies it and returns immediately without showing the instruction line
+      instruction_and_spacing:
+        - the instruction line is shown only when the effective flow contains more than one step
+        - if the global hotkey is registered successfully, Passbird prints Ctrl+Shift+<ConfiguredKey> or Enter to continue
+        - in that instruction line only Ctrl+Shift+<ConfiguredKey> and Enter use HIGHLIGHT while the remaining text uses DEFAULT
+        - the instruction line is followed by one blank separator line before the first copied-value line
+        - normal copied-value lines are separated from each other by one blank line
+        - no blank line is inserted between Yolk copied to clipboard. and the live Yolk line
+        - the live Yolk line remains the final rendered line so it can be updated in place
+      copied_value_feedback:
+        - successful login and password copy steps print <Label> copied to clipboard. where only <Label> uses HIGHLIGHT
+        - the Yolk step first prints Yolk copied to clipboard. using the same formatting split and then opens the live Yolk display
+      continuation_inputs:
+        - Enter and the optional global hotkey represent the same logical NEXT action
+        - Enter advances the flow only while the Passbird terminal window has focus
+        - a hotkey NEXT event counts as user interaction for inactivity tracking
+        - another NEXT action after the final effective step completes the flow and returns to normal Passbird input
+      hotkey_lifecycle:
+        - the hotkey is registered only for guided flows with more than one effective step
+        - the effective combination is always Ctrl+Shift+<ConfiguredKey>
+        - the hotkey is deregistered after the final step, on process termination, on inactivity-triggered termination, and on every exception or error path after successful registration
+        - the hotkey implementation stays behind an application port and never leaks OS-specific APIs into the flow handler
+      hotkey_registration_failure:
+        - failure to register the global hotkey does not abort the flow
+        - Passbird prints Global hotkey Ctrl+Shift+<ConfiguredKey> could not be registered. using SPECIAL
+        - Passbird then prints Press Enter to continue. using DEFAULT
+        - that fallback block is followed by one blank separator line before the first copied-value line
+      failure_behavior:
+        - if copying any login or password value to the clipboard fails, the flow aborts immediately with <Label> could not be copied to clipboard - Operation aborted.
+        - if the live Yolk step fails to start or another unexpected exception happens while the flow is active, the flow aborts with a user-relevant operation-aborted message
+        - every aborted guided flow is still eligible for repetition through .
+      delegated_reuse:
+        - favorites and memory reuse the command without special-case syntax because they delegate the original command text to the command parser

@@ -5,6 +5,7 @@ import de.pflugradts.passbird.application.StdinTerminationRequestedException
 import de.pflugradts.passbird.application.commandhandling.CommandType.Companion.resolveCommandTypeFrom
 import de.pflugradts.passbird.application.commandhandling.command.NullCommand
 import de.pflugradts.passbird.application.commandhandling.command.RepeatLastCommand
+import de.pflugradts.passbird.application.commandhandling.command.UseCommand
 import de.pflugradts.passbird.application.commandhandling.command.base.Command
 import de.pflugradts.passbird.application.commandhandling.factory.CommandFactory
 import de.pflugradts.passbird.application.failure.CommandFailure
@@ -41,7 +42,9 @@ class CommandInputHandler constructor(
                 reportFailure(CommandFailure(ex))
             }.getOrNull() ?: commandExecutionTracker.finish(CommandExecutionOutcome.FAILURE)
         }
-        if (outcome == CommandExecutionOutcome.SUCCESS && command !is RepeatLastCommand) {
+        if ((outcome == CommandExecutionOutcome.SUCCESS || (command is UseCommand && outcome == CommandExecutionOutcome.ABORTED)) &&
+            command !is RepeatLastCommand
+        ) {
             rememberedCommandMemory.remember(originalInput)
         } else {
             originalInput.scramble()
