@@ -15,6 +15,9 @@ import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 import de.pflugradts.passbird.domain.model.slot.Slot.S1
 import de.pflugradts.passbird.domain.model.slot.Slot.S2
 import de.pflugradts.passbird.domain.model.transfer.Input
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.HIGHLIGHT
+import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.NEST
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import io.mockk.mockk
@@ -82,6 +85,27 @@ class HelpCommandTest {
 
         // then
         expectThat(captureSystemOut.capture) contains expectedHelpStatsOutput()
+        expectThat(captureSystemOut.capture).not().contains("Stats\n")
+    }
+
+    @Test
+    fun `should render help stats headings in highlight and values in default when escape codes are enabled`() {
+        // given
+        arrangeHelpStatsData()
+        val input = Input.inputOf(shellOf("h*"))
+        fakeConfiguration(instance = configuration, withAnsiEscapeCodesEnabled = true)
+        val captureSystemOut = CapturedOutputPrintStream.captureSystemOut()
+
+        // when
+        captureSystemOut.during {
+            inputHandler.handleInput(input)
+        }
+
+        // then
+        expectThat(captureSystemOut.capture) contains escaped("Current Nest\n", HIGHLIGHT)
+        expectThat(captureSystemOut.capture) contains escaped("Across All Nests\n", HIGHLIGHT)
+        expectThat(captureSystemOut.capture) contains escaped("3\n", OutputFormatting.DEFAULT)
+        expectThat(captureSystemOut.capture).not().contains(escaped("3\n", NEST))
     }
 
     @Test
@@ -150,8 +174,6 @@ class HelpCommandTest {
     )
 
     private fun expectedHelpStatsOutput() = """
-Stats
-
 Current Nest
     Eggs:                   3
     Eggs with Yolks:        1
@@ -169,4 +191,11 @@ Across All Nests
 
 Usage: [command][parameter]
     """.trimIndent()
+
+    private fun escaped(text: String, formatting: OutputFormatting) = when (formatting) {
+        OutputFormatting.DEFAULT -> "\u001B[38;5;231m$text\u001B[0m"
+        HIGHLIGHT -> "\u001B[38;5;207m$text\u001B[0m"
+        NEST -> "\u001B[38;5;39m$text\u001B[0m"
+        else -> error("Unsupported formatting in test: $formatting")
+    }
 }

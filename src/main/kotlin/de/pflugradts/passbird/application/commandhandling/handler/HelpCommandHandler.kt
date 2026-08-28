@@ -94,11 +94,10 @@ class HelpCommandHandler constructor(
         val allNestStats = allNestStats()
         val activeNests = activeNestCount()
         return buildList {
-            add(outBold("Stats\n\n"))
-            add(outSpecial("Current Nest\n"))
+            add(outBold("Current Nest\n"))
             addAll(statOutputs(currentNestStats))
             add(out("\n"))
-            add(outSpecial("Across All Nests\n"))
+            add(outBold("Across All Nests\n"))
             addAll(statOutputs(allNestStats, activeNests))
         }
     }
@@ -119,7 +118,7 @@ class HelpCommandHandler constructor(
         addAll(statLine("Assigned Favorites", stats.assignedFavorites))
     }
 
-    private fun CanPrintInfo.statLine(label: String, value: Int): List<Output> = listOf(out(statLabel(label)), outNest("$value\n"))
+    private fun CanPrintInfo.statLine(label: String, value: Int): List<Output> = listOf(out(statLabel(label)), out("$value\n"))
 }
 
 private fun sum(left: NestStats, right: NestStats) = NestStats(
