@@ -27,6 +27,7 @@ This repository keeps its agent-facing product specifications, design rules, and
 - Use deterministic helper workflows under `.agent/scripts` instead of manually composing the same multi-step operations. Prefer `.agent/scripts/agent-context.sh`, `.agent/scripts/agent-pick-issue.sh`, `.agent/scripts/agent-validate.sh`, `.agent/scripts/agent-ship.sh`, `.agent/scripts/agent-review-preflight.sh`, `.agent/scripts/agent-review-finding.sh`, `.agent/scripts/check-agent-specs.sh`, and `.agent/scripts/agent-release-artifact-check.sh` when their purpose matches the task.
 - For GitHub-hosted repository work where local files are not enough, use GitHub CLI rather than browser-only workflows. Inspect workflow registration, runs, jobs, and logs with `gh`; inspect and update issues, pull requests, releases, and repository metadata with `gh`. Prefer `rtk gh` for supported subcommands and otherwise use direct `gh` commands after sourcing the shell environment.
 - When creating a GitHub issue through `gh`, treat issue creation as create-once-then-verify. Do not rerun `gh issue create` just because the first attempt had ambiguous output or a transient CLI failure. First verify whether the issue was already created by checking the returned identifier when available or by searching the live issue list for the intended title and context. Only create again when that verification confirms no matching issue exists.
+- When creating an ordinary GitHub issue outside the review-finding workflow, apply the most specific existing type label that matches the issue, such as `bug` or `enhancement`. Do not invent new labels. If compatibility-preserving work needs labeling, also add `migration` where applicable.
 - Work directly on `main`. Do not create, switch to, or push any other local or remote branch.
 - Do not use `git stash`.
 - If working safely on `main` without stashing is blocked by unrelated workspace state or another Git constraint, stop, explain the blocker clearly, and wait for maintainer instructions before proceeding.
@@ -47,6 +48,7 @@ This repository keeps its agent-facing product specifications, design rules, and
 - If no remaining open `bug` issues exist and it is simple to determine which remaining open issue is oldest, resolve the oldest open issue.
 - If the ordering is ambiguous or otherwise not simple to determine, resolve any open issue and proceed.
 - If no eligible open issues exist after excluding issue `#22`, say so explicitly.
+- If creating a new GitHub issue is part of the work, apply the most specific existing type label that matches the issue, such as `bug` or `enhancement`, and also add `migration` when compatibility-preserving work needs that label.
 - If creating a new GitHub issue is part of the work, never retry `gh issue create` blindly. Verify first whether the earlier attempt already succeeded, and only retry after confirming that no matching issue exists.
 - When the resolving commit closes the selected issue, add a `Closes #<issue-number>` footer line to the commit message.
 - If an important decision is not clearly answered by the project documents, return to the maintainer before deciding.
