@@ -36,6 +36,9 @@ class FavoriteInfoCommandTest {
         expectThat(captureSystemOut.capture) contains "Available Favorite commands"
         expectThat(captureSystemOut.capture) contains
             "    f[0-9]Command   (use)        Executes the specified command using the EggId from the given Favorite Slot."
+        expectThat(captureSystemOut.capture) contains
+            "    f[0-9]          (copy)       Copies the EggId from the specified Favorite Slot to the clipboard.\n" +
+            "    f[0-9]Command   (use)        Executes the specified command using the EggId from the given Favorite Slot."
         expectThat(captureSystemOut.capture).not().contains("\t")
     }
 }

@@ -38,40 +38,40 @@ class HelpCommandHandler constructor(
     )
 
     private fun primaryCommands() = listOf(
-        Triple("g[EggId]", "(get)", "Copies the password for the specified Egg to the clipboard.\n"),
-        Triple("s[EggId]", "(set)", "Sets a random password for the specified Egg, overwriting any existing one.\n"),
-        Triple("s*[EggId]", "(set once)", "Sets a random password for the specified EggId using a one-time configuration.\n"),
-        Triple("c[EggId]", "(custom set)", "Prompts the user to input a custom password for the specified Egg.\n"),
-        Triple("v[EggId]", "(view)", "Displays the password for the specified Egg in the console.\n"),
-        Triple("r[EggId]", "(rename)", "Renames the specified Egg by prompting the user for a new EggId.\n"),
-        Triple("d[EggId]", "(discard)", "Moves the specified Egg to trash.\n"),
-        Triple("d![EggId]", "(force)", "Permanently deletes the specified Egg.\n"),
-        Triple("d", "(trash)", "Displays trashed Eggs and allows restoring them.\n"),
+        Triple("g[EggId]", "(get)", "Copies the password for the specified Egg to the clipboard."),
+        Triple("s[EggId]", "(set)", "Sets a random password for the specified Egg, overwriting any existing one."),
+        Triple("s*[EggId]", "(set once)", "Sets a random password for the specified EggId using a one-time configuration."),
+        Triple("c[EggId]", "(custom set)", "Prompts the user to input a custom password for the specified Egg."),
+        Triple("v[EggId]", "(view)", "Displays the password for the specified Egg in the console."),
+        Triple("r[EggId]", "(rename)", "Renames the specified Egg by prompting the user for a new EggId."),
+        Triple("d[EggId]", "(discard)", "Moves the specified Egg to trash."),
+        Triple("d![EggId]", "(force)", "Permanently deletes the specified Egg."),
+        Triple("d", "(trash)", "Displays trashed Eggs and allows restoring them."),
     )
 
     private fun secondaryCommands() = listOf(
-        Triple("e", "(export)", "Exports the Password Tree to a human-readable JSON file.\n"),
-        Triple("e*", "(selective export)", "Exports selected Nests or all Nests except selected Nests.\n"),
-        Triple("i", "(import)", "Imports passwords from a JSON file into the Password Tree.\n"),
-        Triple("i*", "(selective import)", "Imports one Nest from a JSON file into a selected Nest Slot.\n"),
-        Triple("k", "(keystore)", "Changes the master password of the keystore.\n"),
-        Triple("l", "(list)", "Lists all EggIds in the current Nest.\n"),
-        Triple("l[filter]", null, "Lists EggIds in the current Nest whose name contains filter.\n"),
-        Triple("l*", null, "Lists all EggIds across all Nests, grouped by Nest.\n"),
-        Triple("l*[filter]", null, "Lists EggIds across all Nests whose name contains filter, grouped by Nest.\n"),
-        Triple(".", "(repeat)", "Repeats the last successful non-repeat command.\n"),
-        Triple("h", "(help)", "Displays this help menu.\n"),
-        Triple("h*", "(help with stats)", "Displays password-tree statistics before this help menu.\n"),
-        Triple("q", "(quit)", "Exits the Passbird application.\n"),
+        Triple("e", "(export)", "Exports the Password Tree to a human-readable JSON file."),
+        Triple("e*", "(selective export)", "Exports selected Nests or all Nests except selected Nests."),
+        Triple("i", "(import)", "Imports passwords from a JSON file into the Password Tree."),
+        Triple("i*", "(selective import)", "Imports one Nest from a JSON file into a selected Nest Slot."),
+        Triple("k", "(keystore)", "Changes the master password of the keystore."),
+        Triple("l", "(list)", "Lists all EggIds in the current Nest."),
+        Triple("l[filter]", null, "Lists EggIds in the current Nest whose name contains filter."),
+        Triple("l*", null, "Lists all EggIds across all Nests, grouped by Nest."),
+        Triple("l*[filter]", null, "Lists EggIds across all Nests whose name contains filter, grouped by Nest."),
+        Triple(".", "(repeat)", "Repeats the last successful non-repeat command."),
+        Triple("h", "(help)", "Displays this help menu."),
+        Triple("h*", "(help with stats)", "Displays password-tree statistics before this help menu."),
+        Triple("q", "(quit)", "Exits the Passbird application."),
     )
 
     private fun infoCommands() = listOf(
-        Triple("n", "(Nests)", "Displays available Nests and related commands.\n"),
-        Triple("f?", "(Favorites)", "Displays Favorites-related usage information.\n"),
-        Triple("m?", "(Memory)", "Displays Memory-related usage information.\n"),
-        Triple("p?", "(Proteins)", "Displays Protein-related usage information.\n"),
-        Triple("y?", "(Yolks)", "Displays Yolk-related usage information.\n"),
-        Triple("s?", "(Password configs)", "Displays available password configurations and related help.\n"),
+        Triple("n", "(Nests)", "Displays available Nests and related commands."),
+        Triple("f?", "(Favorites)", "Displays Favorites-related usage information."),
+        Triple("m?", "(Memory)", "Displays Memory-related usage information."),
+        Triple("p?", "(Proteins)", "Displays Protein-related usage information."),
+        Triple("y?", "(Yolks)", "Displays Yolk-related usage information."),
+        Triple("s?", "(Password configs)", "Displays available password configurations and related help."),
     )
 
     private fun CanPrintInfo.primaryCommandOutputs() = commandSectionOutputs(primaryCommands())

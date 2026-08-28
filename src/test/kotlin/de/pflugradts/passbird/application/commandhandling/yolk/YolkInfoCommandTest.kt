@@ -40,6 +40,9 @@ class YolkInfoCommandTest {
         expectThat(captureSystemOut.capture) contains "Available Yolk commands"
         expectThat(captureSystemOut.capture) contains
             "    y+[EggId]   (set)        Prompts for a TOTP secret or otpauth URI and stores it for the specified Egg."
+        expectThat(captureSystemOut.capture) contains
+            "    y[EggId]    (view)       Displays the current TOTP code for the specified Egg.\n" +
+            "    y+[EggId]   (set)        Prompts for a TOTP secret or otpauth URI and stores it for the specified Egg."
         expectThat(captureSystemOut.capture).not().contains("\t")
     }
 }

@@ -19,7 +19,7 @@ internal fun CanPrintInfo.commandInfoOutputs(
 ): Array<Output> = arrayOf(
     outBold("$INDENT${command.padEnd(commandColumnWidth)} "),
     out((action ?: "").padEnd(actionColumnWidth)),
-    out(description),
+    out("$description\n"),
 )
 
 internal fun paddedLabel(label: String, columnWidth: Int = LABEL_COLUMN_WIDTH): String = "$INDENT${label.padEnd(columnWidth)}"

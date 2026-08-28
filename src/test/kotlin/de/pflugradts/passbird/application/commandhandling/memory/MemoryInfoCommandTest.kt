@@ -40,6 +40,9 @@ class MemoryInfoCommandTest {
         expectThat(captureSystemOut.capture) contains "Available Memory commands"
         expectThat(captureSystemOut.capture) contains
             "    m[0-9]Command   (use)        Executes the specified command using the EggId from the given Memory Slot."
+        expectThat(captureSystemOut.capture) contains
+            "    m[0-9]          (copy)       Copies the EggId from the specified Memory Slot to the clipboard.\n" +
+            "    m[0-9]Command   (use)        Executes the specified command using the EggId from the given Memory Slot."
         expectThat(captureSystemOut.capture).not().contains("\t")
     }
 }

@@ -38,6 +38,9 @@ class SetInfoCommandTest {
         // then
         expectThat(captureSystemOut.capture) contains "Available Set commands"
         expectThat(captureSystemOut.capture) contains "    s*[EggId]       (set once)"
+        expectThat(captureSystemOut.capture) contains
+            "    s?              (help)        Displays an overview of available password configurations.\n" +
+            "    s[EggId]        (set)         Sets a random password for the specified EggId using the default configuration."
         expectThat(captureSystemOut.capture).not().contains("\t")
     }
 

@@ -60,6 +60,10 @@ class HelpCommandTest {
         expectThat(captureSystemOut.capture) contains "    d[EggId]    (discard)     Moves the specified Egg to trash."
         expectThat(captureSystemOut.capture) contains "    d![EggId]   (force)       Permanently deletes the specified Egg."
         expectThat(captureSystemOut.capture) contains "    d           (trash)       Displays trashed Eggs and allows restoring them."
+        expectThat(captureSystemOut.capture) contains
+            "    d![EggId]   (force)       Permanently deletes the specified Egg.\n    d           (trash)       Displays trashed Eggs and allows restoring them."
+        expectThat(captureSystemOut.capture) contains
+            "    q           (quit)              Exits the Passbird application.\n\n    n           (Nests)             Displays available Nests and related commands."
         expectThat(captureSystemOut.capture).not().contains("\t")
     }
 
