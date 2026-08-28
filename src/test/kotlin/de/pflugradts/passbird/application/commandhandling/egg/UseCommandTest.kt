@@ -13,7 +13,6 @@ import de.pflugradts.passbird.application.commandhandling.createInputHandlerFor
 import de.pflugradts.passbird.application.commandhandling.handler.egg.UseCommandHandler
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
-import de.pflugradts.passbird.application.process.inactivity.InactivityHandler
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.application.yolk.LiveYolkView
@@ -22,13 +21,13 @@ import de.pflugradts.passbird.domain.model.egg.createEggForTesting
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.transfer.Input
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.model.transfer.Output
 import de.pflugradts.passbird.domain.service.fakePasswordService
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -36,6 +35,7 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
 import strikt.assertions.isEqualTo
+import java.util.ArrayDeque
 
 @Tag(INTEGRATION)
 class UseCommandTest {
@@ -44,16 +44,9 @@ class UseCommandTest {
     private val passwordService = mockk<PasswordService>()
     private val clipboardAdapterPort = mockk<ClipboardAdapterPort>()
     private val globalHotkeyAdapterPort = mockk<GlobalHotkeyAdapterPort>()
-    private val userInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
+    private val userInterfaceAdapterPort = RecordingUseUserInterfaceAdapterPort()
     private val systemOperation = mockk<SystemOperation>()
-    private val inactivityHandler = spyk(
-        InactivityHandler(
-            mockk(relaxed = true),
-            configuration,
-            mockk(relaxed = true),
-            systemOperation,
-        ),
-    )
+    private val registerInteraction = mockk<() -> Unit>(relaxed = true)
     private val liveYolkView = LiveYolkView(configuration, clipboardAdapterPort, userInterfaceAdapterPort, systemOperation)
     private val commandExecutionTracker = CommandExecutionTracker()
     private val commandHandler = UseCommandHandler(
@@ -62,7 +55,7 @@ class UseCommandTest {
         clipboardAdapterPort,
         globalHotkeyAdapterPort,
         userInterfaceAdapterPort,
-        inactivityHandler,
+        registerInteraction,
         liveYolkView,
         commandExecutionTracker,
     )
@@ -74,6 +67,7 @@ class UseCommandTest {
         fakeSystemOperation(instance = systemOperation)
         every { clipboardAdapterPort.post(any()) } returns success(Unit)
         every { globalHotkeyAdapterPort.register(any()) } returns null
+        userInterfaceAdapterPort.reset()
     }
 
     @Test
@@ -81,9 +75,8 @@ class UseCommandTest {
         val registeredHotkey = mockk<RegisteredGlobalHotkey>(relaxed = true)
         every { registeredHotkey.awaitWithin(any()) } returnsMany listOf(true, false)
         every { globalHotkeyAdapterPort.register('P') } returns registeredHotkey
-        every { userInterfaceAdapterPort.receiveLineBreakWithin(any()) } returns true
-        val outputs = mutableListOf<Output>()
-        every { userInterfaceAdapterPort.send(capture(outputs)) } returns Unit
+        userInterfaceAdapterPort.lineBreakResponses += true
+        userInterfaceAdapterPort.lineBreakResponses += true
         fakePasswordService(
             instance = passwordService,
             withEggs = listOf(
@@ -97,7 +90,7 @@ class UseCommandTest {
 
         inputHandler.handleInput(inputOf(shellOf("uegg")))
 
-        expectThat(outputs.map { it.shell.asString() }).containsExactly(
+        expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() }).containsExactly(
             "Ctrl+Shift+P",
             " or ",
             "Enter",
@@ -108,21 +101,20 @@ class UseCommandTest {
             "",
             "Password",
             " copied to clipboard.",
+            "",
             "Yolk",
             " copied to clipboard.",
         )
         verify(exactly = 1) { globalHotkeyAdapterPort.register('P') }
         verify(exactly = 1) { registeredHotkey.release() }
-        verify(exactly = 2) { inactivityHandler.registerInteraction() }
+        verify(exactly = 3) { registerInteraction.invoke() }
         verify(exactly = 3) { clipboardAdapterPort.post(any()) }
-        verify(exactly = 1) { userInterfaceAdapterPort.startEphemeralLine(any()) }
+        expectThat(userInterfaceAdapterPort.ephemeralStarts) isEqualTo 1
         expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.SUCCESS
     }
 
     @Test
     fun `should return immediately for password only flow`() {
-        val outputs = mutableListOf<Output>()
-        every { userInterfaceAdapterPort.send(capture(outputs)) } returns Unit
         fakePasswordService(
             instance = passwordService,
             withEggs = listOf(createEggForTesting(withEggIdShell = shellOf("egg"), withProteins = emptyMap())),
@@ -130,17 +122,15 @@ class UseCommandTest {
 
         inputHandler.handleInput(inputOf(shellOf("uegg")))
 
-        expectThat(outputs.map { it.shell.asString() }).containsExactly("Password", " copied to clipboard.")
+        expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() }).containsExactly("Password", " copied to clipboard.")
         verify(exactly = 0) { globalHotkeyAdapterPort.register(any()) }
-        verify(exactly = 0) { userInterfaceAdapterPort.receiveLineBreakWithin(any()) }
+        expectThat(userInterfaceAdapterPort.lineBreakPolls) isEqualTo 0
         expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.SUCCESS
     }
 
     @Test
     fun `should continue with enter when global hotkey registration fails`() {
-        val outputs = mutableListOf<Output>()
-        every { userInterfaceAdapterPort.send(capture(outputs)) } returns Unit
-        every { userInterfaceAdapterPort.receiveLineBreakWithin(any()) } returns true
+        userInterfaceAdapterPort.lineBreakResponses += true
         fakePasswordService(
             instance = passwordService,
             withEggs = listOf(
@@ -153,7 +143,7 @@ class UseCommandTest {
 
         inputHandler.handleInput(inputOf(shellOf("uegg")))
 
-        expectThat(outputs.map { it.shell.asString() }).containsExactly(
+        expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() }).containsExactly(
             "Global hotkey Ctrl+Shift+P could not be registered.",
             "Press Enter to continue.",
             "",
@@ -163,14 +153,12 @@ class UseCommandTest {
             "Password",
             " copied to clipboard.",
         )
-        verify(exactly = 1) { userInterfaceAdapterPort.receiveLineBreakWithin(any()) }
+        expectThat(userInterfaceAdapterPort.lineBreakPolls) isEqualTo 1
     }
 
     @Test
     fun `should abort when clipboard copy fails`() {
         every { clipboardAdapterPort.post(any()) } returns failure(IllegalStateException("clipboard unavailable"))
-        val outputs = mutableListOf<Output>()
-        every { userInterfaceAdapterPort.send(capture(outputs)) } returns Unit
         fakePasswordService(
             instance = passwordService,
             withEggs = listOf(createEggForTesting(withEggIdShell = shellOf("egg"), withProteins = emptyMap())),
@@ -178,7 +166,8 @@ class UseCommandTest {
 
         inputHandler.handleInput(inputOf(shellOf("uegg")))
 
-        expectThat(outputs.map { it.shell.asString() }).containsExactly("Password could not be copied to clipboard - Operation aborted.")
+        expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() })
+            .containsExactly("Password could not be copied to clipboard - Operation aborted.")
         expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.ABORTED
     }
 
@@ -187,9 +176,7 @@ class UseCommandTest {
         val registeredHotkey = mockk<RegisteredGlobalHotkey>(relaxed = true)
         every { registeredHotkey.awaitWithin(any()) } returns false
         every { globalHotkeyAdapterPort.register('P') } returns registeredHotkey
-        every { userInterfaceAdapterPort.receiveLineBreakWithin(any()) } throws IllegalStateException("stdin failed")
-        val outputs = mutableListOf<Output>()
-        every { userInterfaceAdapterPort.send(capture(outputs)) } returns Unit
+        userInterfaceAdapterPort.lineBreakFailure = IllegalStateException("stdin failed")
         fakePasswordService(
             instance = passwordService,
             withEggs = listOf(
@@ -202,7 +189,7 @@ class UseCommandTest {
 
         inputHandler.handleInput(inputOf(shellOf("uegg")))
 
-        expectThat(outputs.map { it.shell.asString() }).containsExactly(
+        expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() }).containsExactly(
             "Ctrl+Shift+P",
             " or ",
             "Enter",
@@ -215,4 +202,48 @@ class UseCommandTest {
         verify(exactly = 1) { registeredHotkey.release() }
         expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.ABORTED
     }
+}
+
+private class RecordingUseUserInterfaceAdapterPort : UserInterfaceAdapterPort {
+    val sentOutputs = mutableListOf<Output>()
+    val lineBreakResponses = ArrayDeque<Boolean>()
+    var lineBreakFailure: Exception? = null
+    var lineBreakPolls = 0
+    var ephemeralStarts = 0
+
+    fun reset() {
+        sentOutputs.clear()
+        lineBreakResponses.clear()
+        lineBreakFailure = null
+        lineBreakPolls = 0
+        ephemeralStarts = 0
+    }
+
+    override fun receive(vararg output: Output): Input = error("not used in UseCommandTest")
+
+    override fun receiveSecurely(output: Output): Input = error("not used in UseCommandTest")
+
+    override fun receiveLineBreakWithin(milliseconds: Long): Boolean {
+        lineBreakPolls++
+        lineBreakFailure?.let { throw it }
+        return if (lineBreakResponses.isEmpty()) {
+            false
+        } else {
+            lineBreakResponses.removeFirst()
+        }
+    }
+
+    override fun send(vararg output: Output) {
+        sentOutputs += output
+    }
+
+    override fun startEphemeralLine(output: Output) {
+        ephemeralStarts++
+    }
+
+    override fun updateEphemeralLine(output: Output) = Unit
+
+    override fun finishEphemeralLine() = Unit
+
+    override fun warningSound() = error("not used in UseCommandTest")
 }

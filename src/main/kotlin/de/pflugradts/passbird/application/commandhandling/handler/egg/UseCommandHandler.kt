@@ -8,7 +8,6 @@ import de.pflugradts.passbird.application.commandhandling.CommandExecutionTracke
 import de.pflugradts.passbird.application.commandhandling.command.UseCommand
 import de.pflugradts.passbird.application.commandhandling.handler.TypedCommandHandler
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.application.process.inactivity.InactivityHandler
 import de.pflugradts.passbird.application.useScrambled
 import de.pflugradts.passbird.application.yolk.LiveYolkView
 import de.pflugradts.passbird.domain.model.shell.Shell
@@ -30,7 +29,7 @@ class UseCommandHandler(
     private val clipboardAdapterPort: ClipboardAdapterPort,
     private val globalHotkeyAdapterPort: GlobalHotkeyAdapterPort,
     private val userInterfaceAdapterPort: UserInterfaceAdapterPort,
-    private val inactivityHandler: InactivityHandler,
+    private val registerInteraction: () -> Unit,
     private val liveYolkView: LiveYolkView,
     private val commandExecutionTracker: CommandExecutionTracker,
 ) : TypedCommandHandler<UseCommand>(UseCommand::class.java) {
@@ -151,11 +150,11 @@ class UseCommandHandler(
         while (true) {
             val pollInterval = remainingMilliseconds.coerceAtMost(POLL_INTERVAL_MILLISECONDS)
             if (registeredHotkey?.awaitWithin(pollInterval) == true) {
-                inactivityHandler.registerInteraction()
+                registerInteraction()
                 return true
             }
             if (userInterfaceAdapterPort.receiveLineBreakWithin(pollInterval)) {
-                inactivityHandler.registerInteraction()
+                registerInteraction()
                 return true
             }
             if (remainingMilliseconds != WAIT_FOREVER_MILLISECONDS) {

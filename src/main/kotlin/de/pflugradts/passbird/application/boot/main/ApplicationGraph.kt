@@ -213,7 +213,7 @@ class ApplicationGraph(
                 clipboardAdapterPort,
                 globalHotkeyAdapterPort,
                 userInterfaceAdapterPort,
-                inactivityHandler,
+                { inactivityHandler.registerInteraction() },
                 liveYolkView,
                 commandExecutionTracker,
             ),

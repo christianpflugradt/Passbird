@@ -14,7 +14,6 @@ import de.pflugradts.passbird.application.commandhandling.handler.nest.AddNestCo
 import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
-import de.pflugradts.passbird.application.process.inactivity.InactivityHandler
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.fakeSystemOperation
 import de.pflugradts.passbird.application.yolk.LiveYolkView
@@ -31,7 +30,6 @@ import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.PasswordService
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.spyk
 import io.mockk.verify
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -209,16 +207,9 @@ class RepeatLastCommandTest {
         val globalHotkeyAdapterPort = mockk<GlobalHotkeyAdapterPort>()
         val useUserInterfaceAdapterPort = mockk<UserInterfaceAdapterPort>(relaxed = true)
         val systemOperation = mockk<SystemOperation>()
+        val registerInteraction = mockk<() -> Unit>(relaxed = true)
         val rememberedCommandMemory = RememberedCommandMemory()
         val commandExecutionTracker = CommandExecutionTracker()
-        val inactivityHandler = spyk(
-            InactivityHandler(
-                mockk(relaxed = true),
-                configuration,
-                mockk(relaxed = true),
-                systemOperation,
-            ),
-        )
         fakeConfiguration(instance = configuration, withFlowGlobalHotkeyEnabled = false)
         fakeSystemOperation(instance = systemOperation)
         fakePasswordService(
@@ -239,7 +230,7 @@ class RepeatLastCommandTest {
                         clipboardAdapterPort,
                         globalHotkeyAdapterPort,
                         useUserInterfaceAdapterPort,
-                        inactivityHandler,
+                        registerInteraction,
                         LiveYolkView(configuration, clipboardAdapterPort, useUserInterfaceAdapterPort, systemOperation),
                         commandExecutionTracker,
                     ),

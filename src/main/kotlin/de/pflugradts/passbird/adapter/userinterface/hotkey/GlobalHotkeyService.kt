@@ -99,7 +99,7 @@ private class WindowsGlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
     override fun register(key: Char): RegisteredGlobalHotkey? = WindowsRegistration(key).takeIf(WindowsRegistration::awaitRegistration)
 
     private class WindowsRegistration(key: Char) : BackgroundHotkeyRegistration() {
-        private val user32 = Win32User32.INSTANCE
+        private val user32 = Win32User32.instance()
 
         init {
             start("passbird-hotkey-windows") {
@@ -132,7 +132,7 @@ private class MacOsGlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
         carbonKeyCode(key)?.let(::MacOsRegistration)?.takeIf(MacOsRegistration::awaitRegistration)
 
     private class MacOsRegistration(private val keyCode: Int) : BackgroundHotkeyRegistration() {
-        private val carbon = Carbon.INSTANCE
+        private val carbon = Carbon.instance()
         private val eventHandler = Carbon.EventHandlerCallback { _, _, _ ->
             signalNextAction()
             0
@@ -183,7 +183,7 @@ private class X11GlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
     override fun register(key: Char): RegisteredGlobalHotkey? = X11Registration(key).takeIf(X11Registration::awaitRegistration)
 
     private class X11Registration(key: Char) : BackgroundHotkeyRegistration() {
-        private val x11 = XLib.INSTANCE
+        private val x11 = XLib.instance()
 
         init {
             start("passbird-hotkey-x11") {
@@ -238,7 +238,7 @@ private interface Win32User32 : Library {
     fun PeekMessage(message: Win32Message, window: Pointer?, minFilter: Int, maxFilter: Int, removeMessage: Int): Boolean
 
     companion object {
-        val INSTANCE: Win32User32 = Native.load("user32", Win32User32::class.java)
+        fun instance(): Win32User32 = Native.load("user32", Win32User32::class.java)
     }
 }
 
@@ -280,7 +280,7 @@ private interface Carbon : Library {
     }
 
     companion object {
-        val INSTANCE: Carbon = Native.load("Carbon", Carbon::class.java)
+        fun instance(): Carbon = Native.load("Carbon", Carbon::class.java)
     }
 }
 
@@ -306,7 +306,7 @@ private interface XLib : Library {
     fun XCloseDisplay(display: Pointer): Int
 
     companion object {
-        val INSTANCE: XLib = Native.load("X11", XLib::class.java)
+        fun instance(): XLib = Native.load("X11", XLib::class.java)
     }
 }
 
