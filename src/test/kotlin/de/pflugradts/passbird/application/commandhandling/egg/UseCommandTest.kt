@@ -92,6 +92,7 @@ class UseCommandTest {
         inputHandler.handleInput(inputOf(shellOf("uegg")))
 
         expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() }).containsExactly(
+            "",
             "Ctrl+Shift+P",
             " or ",
             "Enter",
@@ -145,6 +146,7 @@ class UseCommandTest {
         inputHandler.handleInput(inputOf(shellOf("uegg")))
 
         expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() }).containsExactly(
+            "",
             "Global hotkey Ctrl+Shift+P could not be registered.",
             "Press Enter to continue.",
             "",
@@ -174,6 +176,7 @@ class UseCommandTest {
         inputHandler.handleInput(inputOf(shellOf("uegg")))
 
         expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() }).containsExactly(
+            "",
             "Press Enter to continue.",
             "",
             "Login",
@@ -238,6 +241,7 @@ class UseCommandTest {
         inputHandler.handleInput(inputOf(shellOf("uegg")))
 
         expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() }).containsExactly(
+            "",
             "Press Enter to continue.",
             "",
             "Password",
@@ -270,6 +274,7 @@ class UseCommandTest {
         inputHandler.handleInput(inputOf(shellOf("uegg")))
 
         expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() }).containsExactly(
+            "",
             "Ctrl+Shift+P",
             " or ",
             "Enter",

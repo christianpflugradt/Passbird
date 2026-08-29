@@ -17,6 +17,7 @@ flows:
         - if only the password step is present, Passbird copies it and returns immediately without showing the instruction line
       instruction_and_spacing:
         - the instruction line is shown only when the effective flow contains more than one step
+        - the instruction block is preceded by one blank separator line after the Enter command: prompt line
         - if the global hotkey is registered successfully, Passbird prints Ctrl+Shift+<ConfiguredKey> or Enter to continue
         - in that instruction line only Ctrl+Shift+<ConfiguredKey> and Enter use HIGHLIGHT while the remaining text uses DEFAULT
         - the instruction line is followed by one blank separator line before the first copied-value line
@@ -40,6 +41,7 @@ flows:
         - failure to register the global hotkey does not abort the flow
         - Passbird prints Global hotkey Ctrl+Shift+<ConfiguredKey> could not be registered. using SPECIAL
         - Passbird then prints Press Enter to continue. using DEFAULT
+        - that fallback block is preceded by one blank separator line after the Enter command: prompt line
         - that fallback block is followed by one blank separator line before the first copied-value line
       failure_behavior:
         - if copying any login or password value to the clipboard fails, the flow aborts immediately with <Label> could not be copied to clipboard - Operation aborted.

@@ -74,6 +74,7 @@ class UseCommandHandler(
 
     private fun renderInstruction(steps: List<Step>, hotkeyRegistered: Boolean) {
         if (steps.size <= 1) return
+        userInterfaceAdapterPort.sendLineBreak()
         if (!configuration.application.flow.globalHotkey.enabled) {
             userInterfaceAdapterPort.send(outputOf(shellOf("Press Enter to continue.")))
             userInterfaceAdapterPort.sendLineBreak()
