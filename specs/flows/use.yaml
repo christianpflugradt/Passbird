@@ -44,7 +44,7 @@ flows:
         - Passbird then prints Press Enter to continue. using DEFAULT
         - that fallback block is preceded by one blank separator line after the Enter command: prompt line
         - that fallback block is followed by one blank separator line before the first copied-value line
-        - this runtime registration failure path applies only after startup has already allowed the selected backend; macOS permission failures are handled earlier during startup when quartz is the effective backend
+        - this runtime registration failure path applies only after startup has already allowed the selected backend; macOS permission failures are handled earlier during startup only when quartz is explicitly selected
       failure_behavior:
         - if copying any login or password value to the clipboard fails, the flow aborts immediately with <Label> could not be copied to clipboard - Operation aborted.
         - if the live Yolk step fails to start or another unexpected exception happens while the flow is active, the flow aborts with a user-relevant operation-aborted message

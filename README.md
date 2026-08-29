@@ -493,11 +493,11 @@ application:
       backend: auto
 ```
 
-Only letters `A` through `Z` are accepted for `key`, and the effective hotkey is always `Ctrl+Shift+<key>`. `backend` defaults to `auto`, which chooses `win32` on Windows, `quartz` on macOS, and `x11` when an X11 display is available. You can also force `win32`, `quartz`, or `x11` explicitly for verification or troubleshooting. On macOS, if `backend: quartz` is selected or `auto` resolves to macOS and the launching terminal app is missing the required Input Monitoring permission, Passbird opens the macOS settings page and terminates so you can grant that permission and restart the terminal before trying again.
+Only letters `A` through `Z` are accepted for `key`, and the effective hotkey is always `Ctrl+Shift+<key>`. `backend` defaults to `auto`, which chooses `win32` on Windows, `carbon` on macOS, and `x11` when an X11 display is available. You can also force `win32`, `carbon`, `quartz`, or `x11` explicitly for verification or troubleshooting. Carbon works with macOS secure input and does not require Input Monitoring permission. On macOS, Passbird opens the Input Monitoring settings page and terminates only when `backend: quartz` is explicitly selected and the launching terminal app lacks the required permission.
 
 #### macOS secure input
 
-Some macOS password fields enable secure input, which can temporarily prevent the global hotkey from working. If a login flow moves from a username screen to a password field, press the hotkey to copy the login before selecting the button that opens the password screen. If the password field already has focus, click outside it or press Tab to move focus away before using the hotkey.
+The default macOS Carbon backend continues to receive the temporary global hotkey while secure input is active. The optional Quartz backend does not have this property and requires Input Monitoring permission.
 
 ### Custom Passwords
 

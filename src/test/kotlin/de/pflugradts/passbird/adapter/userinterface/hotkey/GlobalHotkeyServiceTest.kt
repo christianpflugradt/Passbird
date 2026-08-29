@@ -2,6 +2,7 @@ package de.pflugradts.passbird.adapter.userinterface.hotkey
 
 import com.sun.jna.Memory
 import com.sun.jna.Pointer
+import com.sun.jna.ptr.PointerByReference
 import de.pflugradts.passbird.application.RegisteredGlobalHotkey
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
@@ -15,6 +16,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.util.ArrayDeque
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CountDownLatch
 
 class GlobalHotkeyServiceTest {
 
@@ -25,6 +27,7 @@ class GlobalHotkeyServiceTest {
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Windows 11"),
             windowsRegistrarFactory = { windowsRegistrar },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
             quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { error("x11 registrar must not be used") },
         )
@@ -36,20 +39,21 @@ class GlobalHotkeyServiceTest {
     }
 
     @Test
-    fun `should use quartz registrar on mac os when backend is auto`() {
+    fun `should use carbon registrar on mac os when backend is auto`() {
         val expectedRegistration = mockk<RegisteredGlobalHotkey>()
-        val quartzRegistrar = RecordingRegistrar(expectedRegistration)
+        val carbonRegistrar = RecordingRegistrar(expectedRegistration)
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Mac OS X"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
-            quartzRegistrarFactory = { quartzRegistrar },
+            carbonRegistrarFactory = { carbonRegistrar },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { error("x11 registrar must not be used") },
         )
 
         val actual = service.register('p')
 
         expectThat(actual).isSameInstanceAs(expectedRegistration)
-        expectThat(quartzRegistrar.recordedKeys).containsExactly('P')
+        expectThat(carbonRegistrar.recordedKeys).containsExactly('P')
     }
 
     @Test
@@ -60,6 +64,7 @@ class GlobalHotkeyServiceTest {
             backend = "x11",
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
             quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { x11Registrar },
         )
@@ -75,6 +80,7 @@ class GlobalHotkeyServiceTest {
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
             quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { error("x11 registrar must not be used") },
         )
@@ -90,6 +96,7 @@ class GlobalHotkeyServiceTest {
             backend = "win32",
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
             windowsRegistrarFactory = { error("backend unavailable") },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
             quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { error("x11 registrar must not be used") },
         )
@@ -100,11 +107,28 @@ class GlobalHotkeyServiceTest {
     }
 
     @Test
-    fun `should prepare startup through quartz registrar on mac os when backend is auto`() {
-        val quartzRegistrar = RecordingRegistrar(startupPrepared = false)
+    fun `should not prepare startup through quartz registrar when backend is auto on mac os`() {
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Mac OS X"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
+            x11RegistrarFactory = { error("x11 registrar must not be used") },
+        )
+
+        val actual = service.prepareOnStartup()
+
+        expectThat(actual).isEqualTo(true)
+    }
+
+    @Test
+    fun `should prepare startup through quartz registrar when backend is forced`() {
+        val quartzRegistrar = RecordingRegistrar(startupPrepared = false)
+        val service = GlobalHotkeyService(
+            backend = "quartz",
+            runtimeEnvironment = RuntimeEnvironment(osName = "Mac OS X"),
+            windowsRegistrarFactory = { error("windows registrar must not be used") },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
             quartzRegistrarFactory = { quartzRegistrar },
             x11RegistrarFactory = { error("x11 registrar must not be used") },
         )
@@ -121,6 +145,7 @@ class GlobalHotkeyServiceTest {
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux", display = ":0"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
             quartzRegistrarFactory = { quartzRegistrar },
             x11RegistrarFactory = { RecordingRegistrar() },
         )
@@ -207,6 +232,82 @@ class GlobalHotkeyServiceTest {
         registration?.release()
 
         expectThat(loop.closed).isEqualTo(true)
+    }
+
+    @Test
+    fun `should return null for unsupported carbon mac os key`() {
+        val actual = CarbonMacOsGlobalHotkeyRegistrar(keyCodeResolver = { null }).register('1')
+
+        expectThat(actual).isEqualTo(null)
+    }
+
+    @Test
+    fun `should return null when carbon mac os hotkey runtime cannot open`() {
+        val runtime = FakeCarbonMacOsHotkeyRuntime(session = null)
+
+        val actual = CarbonMacOsGlobalHotkeyRegistrar(runtimeFactory = { runtime }).register('P')
+
+        expectThat(actual).isEqualTo(null)
+    }
+
+    @Test
+    fun `should signal and unregister carbon mac os hotkey`() {
+        val session = FakeCarbonMacOsHotkeySession()
+        val runtime = FakeCarbonMacOsHotkeyRuntime(session)
+        val registration = CarbonMacOsGlobalHotkeyRegistrar(runtimeFactory = { runtime }).register('P')
+
+        expectThat(registration?.awaitWithin(250)).isEqualTo(true)
+
+        registration?.release()
+
+        expectThat(session.stopped).isEqualTo(true)
+        expectThat(session.closed).isEqualTo(true)
+    }
+
+    @Test
+    fun `should remove carbon event handler when hotkey registration fails`() {
+        val carbon = FakeCarbon(registerStatus = 1)
+
+        val actual = CarbonMacOsHotkeyRuntime(carbon).open(35) { }
+
+        expectThat(actual).isEqualTo(null)
+        expectThat(carbon.removedEventHandlers).containsExactly(Pointer(52))
+    }
+
+    @Test
+    fun `should return null when carbon event target is unavailable`() {
+        val carbon = FakeCarbon(eventTarget = null)
+
+        val actual = CarbonMacOsHotkeyRuntime(carbon).open(35) { }
+
+        expectThat(actual).isEqualTo(null)
+        expectThat(carbon.installEventHandlerCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun `should return null when carbon event handler installation fails`() {
+        val carbon = FakeCarbon(installStatus = 1)
+
+        val actual = CarbonMacOsHotkeyRuntime(carbon).open(35) { }
+
+        expectThat(actual).isEqualTo(null)
+        expectThat(carbon.registerHotkeyCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun `should signal and release carbon hotkey session`() {
+        val carbon = FakeCarbon()
+        var nextActions = 0
+
+        val session = CarbonMacOsHotkeyRuntime(carbon).open(35) { nextActions++ }
+        carbon.eventHandler?.callback(null, null, null)
+        session?.stop()
+        session?.close()
+
+        expectThat(nextActions).isEqualTo(1)
+        expectThat(carbon.quitApplicationEventLoopCalls).isEqualTo(1)
+        expectThat(carbon.unregisteredHotkeys).containsExactly(Pointer(53))
+        expectThat(carbon.removedEventHandlers).containsExactly(Pointer(52))
     }
 
     @Test
@@ -459,6 +560,94 @@ private class FakeMacOsHotkeyLoop : MacOsHotkeyLoop {
 
     override fun close() {
         closed = true
+    }
+}
+
+private class FakeCarbonMacOsHotkeyRuntime(
+    private val session: FakeCarbonMacOsHotkeySession? = FakeCarbonMacOsHotkeySession(),
+) : CarbonHotkeyRuntime {
+    override fun open(keyCode: Int, onNextAction: () -> Unit): CarbonMacOsHotkeySession? {
+        session?.onNextAction = onNextAction
+        return session
+    }
+}
+
+private class FakeCarbonMacOsHotkeySession : CarbonMacOsHotkeySession {
+    var onNextAction: (() -> Unit)? = null
+    var stopped = false
+    var closed = false
+    private val stoppedSignal = CountDownLatch(1)
+
+    override fun run() {
+        onNextAction?.invoke()
+        stoppedSignal.await()
+    }
+
+    override fun stop() {
+        stopped = true
+        stoppedSignal.countDown()
+    }
+
+    override fun close() {
+        closed = true
+    }
+}
+
+private class FakeCarbon(
+    private val eventTarget: Pointer? = Pointer(51),
+    private val installStatus: Int = 0,
+    private val registerStatus: Int = 0,
+) : Carbon {
+    var eventHandler: Carbon.EventHandler? = null
+    val unregisteredHotkeys = mutableListOf<Pointer>()
+    val removedEventHandlers = mutableListOf<Pointer>()
+    var quitApplicationEventLoopCalls = 0
+    var installEventHandlerCalls = 0
+    var registerHotkeyCalls = 0
+
+    override fun GetApplicationEventTarget(): Pointer? = eventTarget
+
+    override fun InstallEventHandler(
+        target: Pointer,
+        handler: Carbon.EventHandler,
+        numTypes: Int,
+        eventTypes: CarbonEventTypeSpec,
+        userData: Pointer?,
+        eventHandlerRef: PointerByReference,
+    ): Int {
+        installEventHandlerCalls++
+        eventHandler = handler
+        eventHandlerRef.value = Pointer(52)
+        return installStatus
+    }
+
+    override fun RegisterEventHotKey(
+        keyCode: Int,
+        modifiers: Int,
+        hotkeyId: CarbonEventHotkeyId.ByValue,
+        target: Pointer,
+        options: Int,
+        hotkeyRef: PointerByReference,
+    ): Int {
+        registerHotkeyCalls++
+        hotkeyRef.value = Pointer(53)
+        return registerStatus
+    }
+
+    override fun UnregisterEventHotKey(hotkeyRef: Pointer): Int {
+        unregisteredHotkeys += hotkeyRef
+        return 0
+    }
+
+    override fun RemoveEventHandler(eventHandlerRef: Pointer): Int {
+        removedEventHandlers += eventHandlerRef
+        return 0
+    }
+
+    override fun RunApplicationEventLoop() = Unit
+
+    override fun QuitApplicationEventLoop() {
+        quitApplicationEventLoopCalls++
     }
 }
 

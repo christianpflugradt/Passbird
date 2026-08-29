@@ -44,7 +44,7 @@ flows:
   - id: macos_hotkey_permission_missing
     trigger:
       - application.flow.globalHotkey.enabled is true
-      - application.flow.globalHotkey.backend is quartz or auto resolves to macOS
+      - application.flow.globalHotkey.backend is explicitly quartz
       - Passbird cannot create the macOS global hotkey listener because the launching terminal app lacks the required Input Monitoring permission
     exact_sequence:
       - the normal application boot path emits one empty line before startup initializers run

@@ -78,10 +78,11 @@ areas:
       - application.flow.loginProteinSlot must be an integer from 0 through 9
       - application.flow.globalHotkey.enabled only affects the temporary hotkey path and must not disable Enter-based progression
       - application.flow.globalHotkey.key accepts exactly one alphabetic character from A through Z, case-insensitive in YAML
-      - application.flow.globalHotkey.backend accepts exactly auto, win32, quartz, or x11
-      - auto keeps environment-based backend selection for the temporary hotkey path by choosing win32 on Windows, quartz on macOS, and x11 when an X11 display is available
+      - application.flow.globalHotkey.backend accepts exactly auto, win32, carbon, quartz, or x11
+      - auto keeps environment-based backend selection for the temporary hotkey path by choosing win32 on Windows, carbon on macOS, and x11 when an X11 display is available
       - explicit backend selection is mainly for verification, troubleshooting, or forcing a specific backend when multiple desktop environments may be present
-      - when the effective backend is quartz, Passbird verifies macOS global-listening readiness during startup before entering the command loop
+      - Carbon is the default macOS backend, works with secure input, and does not require Input Monitoring permission
+      - only an explicitly selected quartz backend verifies macOS global-listening readiness during startup before entering the command loop
       - if that macOS readiness check fails while the global hotkey is enabled, Passbird opens the Input Monitoring settings and aborts startup with a user-facing message
       - the effective guided-flow hotkey is always Ctrl+Shift+<ConfiguredKey>
   - name: password_generation_and_confirmation

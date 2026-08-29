@@ -176,4 +176,4 @@ internal fun Configuration.validate(): Configuration {
     return this
 }
 
-private fun supportedGlobalHotkeyBackends() = setOf("auto", "win32", "quartz", "x11")
+private fun supportedGlobalHotkeyBackends() = setOf("auto", "win32", "carbon", "quartz", "x11")

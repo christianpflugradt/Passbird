@@ -121,6 +121,20 @@ class ConfigurationYamlMapperTest {
     }
 
     @Test
+    fun `should accept carbon global hotkey backend`() {
+        val actual = mapper.readConfiguration(
+            """
+            application:
+              flow:
+                globalHotkey:
+                  backend: carbon
+            """.trimIndent().byteInputStream(),
+        )
+
+        expectThat(actual.application.flow.globalHotkey.backend).isEqualTo("carbon")
+    }
+
+    @Test
     fun `should reject unrecognized configuration properties`() {
         val actual = kotlin.runCatching {
             mapper.readConfiguration(
