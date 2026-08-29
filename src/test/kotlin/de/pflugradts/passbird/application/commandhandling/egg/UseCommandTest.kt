@@ -106,6 +106,7 @@ class UseCommandTest {
             "",
             "Yolk",
             " copied to clipboard.",
+            "",
         )
         verify(exactly = 1) { globalHotkeyAdapterPort.register('P') }
         verify(exactly = 1) { registeredHotkey.release() }

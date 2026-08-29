@@ -47,7 +47,9 @@ class UseCommandHandler(
                 if (!execute(step, registeredHotkey, index < steps.lastIndex)) {
                     return
                 }
-                if (step !is Step.Yolk && index < steps.lastIndex) {
+                if (step is Step.Yolk) {
+                    userInterfaceAdapterPort.sendLineBreak()
+                } else if (index < steps.lastIndex) {
                     userInterfaceAdapterPort.sendLineBreak()
                 }
             }
