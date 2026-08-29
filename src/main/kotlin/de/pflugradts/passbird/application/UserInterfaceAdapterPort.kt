@@ -10,6 +10,7 @@ interface UserInterfaceAdapterPort {
     fun receiveSecurely(output: Output): Input
     fun receiveSecurely(): Input = receiveSecurely(emptyOutput())
     fun receiveLineBreakWithin(milliseconds: Long): Boolean
+    fun receiveNextActionWithin(key: Char, milliseconds: Long): Boolean = receiveLineBreakWithin(milliseconds)
     fun send(vararg output: Output)
     fun startEphemeralLine(output: Output)
     fun updateEphemeralLine(output: Output)

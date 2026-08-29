@@ -29,6 +29,7 @@ class CommandLineInterfaceService constructor(
     }
     private var visibleStdinReadTask: Future<Char>? = null
     private var ephemeralLineLength = 0
+    private val nextActionBuffer = StringBuilder()
 
     constructor(
         terminalInputGateway: TerminalInputGateway,
@@ -102,7 +103,12 @@ class CommandLineInterfaceService constructor(
         }
     }
 
-    override fun receiveLineBreakWithin(milliseconds: Long): Boolean {
+    override fun receiveLineBreakWithin(milliseconds: Long): Boolean = receiveNextActionWithin(emptySet(), milliseconds)
+
+    override fun receiveNextActionWithin(key: Char, milliseconds: Long): Boolean =
+        receiveNextActionWithin(expectedNextActionSequences(key), milliseconds)
+
+    private fun receiveNextActionWithin(expectedSequences: Set<String>, milliseconds: Long): Boolean {
         val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(milliseconds)
         while (true) {
             if (inactivityTerminationSignal.isRequested()) {
@@ -116,8 +122,18 @@ class CommandLineInterfaceService constructor(
                 TimeUnit.NANOSECONDS.toMillis(remainingNanos).coerceAtLeast(1L),
             ) ?: return false
             if (isEndOfInput(next) || isLinebreak(next) || isCarriageReturn(next)) {
+                nextActionBuffer.clear()
                 return true
             }
+            if (expectedSequences.isEmpty()) {
+                continue
+            }
+            nextActionBuffer.append(next)
+            if (expectedSequences.any { nextActionBuffer.endsWith(it) }) {
+                nextActionBuffer.clear()
+                return true
+            }
+            trimNextActionBuffer(expectedSequences)
         }
     }
 
@@ -184,6 +200,27 @@ class CommandLineInterfaceService constructor(
     } finally {
         fill(Char.MIN_VALUE)
     }
+    private fun expectedNextActionSequences(key: Char) = setOf(
+        "\u001b[${key.lowercaseChar().code};6u",
+        "\u001b[${key.uppercaseChar().code};6u",
+    )
+    private fun trimNextActionBuffer(expectedSequences: Set<String>) {
+        val buffer = nextActionBuffer.toString()
+        val suffix = buffer.suffixMatchingAnyPrefixOf(expectedSequences)
+        nextActionBuffer.clear()
+        nextActionBuffer.append(suffix)
+    }
+
+    private fun StringBuilder.endsWith(suffix: String): Boolean = length >= suffix.length && substring(length - suffix.length) == suffix
+
+    private fun String.suffixMatchingAnyPrefixOf(expectedSequences: Set<String>): String = prefixesOf(expectedSequences)
+        .filter { endsWith(it) }
+        .maxByOrNull(String::length)
+        .orEmpty()
+
+    private fun prefixesOf(expectedSequences: Set<String>) = expectedSequences
+        .flatMap { sequence -> (1..sequence.length).map(sequence::take) }
+        .toSet()
     private fun sendChar(chr: Char) = print(chr)
     override fun warningSound() {
         if (audibleBell) sendChar('\u0007')

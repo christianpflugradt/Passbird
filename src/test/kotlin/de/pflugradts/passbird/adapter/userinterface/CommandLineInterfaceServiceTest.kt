@@ -265,6 +265,16 @@ class CommandLineInterfaceServiceTest {
         }
 
         @Test
+        fun `should detect configured ctrl shift shortcut within timeout`() {
+            val stdin = "\u001b[112;6u".iterator()
+            every { terminalInputGateway.readCharFromStdin() } answers { stdin.nextChar() }
+
+            val actual = commandLineInterfaceService.receiveNextActionWithin('P', 100L)
+
+            expectThat(actual).isTrue()
+        }
+
+        @Test
         fun `should detect stdin exhaustion as completed line break within timeout`() {
             every { terminalInputGateway.readCharFromStdin() } returns Char.MAX_VALUE
 
@@ -315,6 +325,30 @@ class CommandLineInterfaceServiceTest {
 
             expectThat(secondAttempt).isTrue()
             expectThat(readCount).isEqualTo(1)
+        }
+
+        @Test
+        fun `should detect configured ctrl shift shortcut across timeout boundaries`() {
+            val stdin = ArrayDeque(listOf('\u001b', '[', '1', '1', '2', ';', '6', 'u'))
+            var reads = 0
+            every { terminalInputGateway.readCharFromStdin() } answers {
+                reads++
+                if (reads == 5) {
+                    Thread.sleep(200)
+                }
+                if (stdin.isEmpty()) {
+                    Thread.sleep(200)
+                    'x'
+                } else {
+                    stdin.removeFirst()
+                }
+            }
+
+            val firstAttempt = commandLineInterfaceService.receiveNextActionWithin('P', 50L)
+            val secondAttempt = commandLineInterfaceService.receiveNextActionWithin('P', 200L)
+
+            expectThat(firstAttempt).isFalse()
+            expectThat(secondAttempt).isTrue()
         }
 
         @Test

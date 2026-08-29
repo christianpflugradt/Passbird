@@ -79,7 +79,7 @@ areas:
       - application.flow.globalHotkey.enabled only affects the temporary hotkey path and must not disable Enter-based progression
       - application.flow.globalHotkey.key accepts exactly one alphabetic character from A through Z, case-insensitive in YAML
       - application.flow.globalHotkey.backend accepts exactly auto, win32, quartz, x11, or wayland
-      - auto keeps environment-based backend selection for the temporary hotkey path
+      - auto keeps environment-based backend selection for the temporary hotkey path by choosing win32 on Windows, quartz on macOS, and x11 when an X11 display is available
       - explicit backend selection is mainly for verification, troubleshooting, or forcing a specific backend when multiple desktop environments may be present
       - selecting wayland before a dedicated Wayland backend exists must fail hotkey registration cleanly and preserve Enter-based progression
       - the effective guided-flow hotkey is always Ctrl+Shift+<ConfiguredKey>

@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-30
+last_reviewed: 2026-08-29
 interaction_model:
   medium: line_oriented_terminal_cli
   posture:
@@ -17,6 +17,7 @@ input_semantics:
     - if visible stdin reaches EOF after at least one character and before newline, receive returns the buffered characters as the final line
     - if visible stdin reaches EOF before any character is read, receive terminates the interactive session instead of fabricating input
     - receiveLineBreakWithin observes Enter only from the focused Passbird terminal input stream; non-terminal NEXT inputs must be modeled through explicit ports
+    - receiveNextActionWithin observes Enter and any terminal-emitted Ctrl+Shift+<ConfiguredKey> sequence from the focused Passbird terminal input stream for guided-flow NEXT handling
   secure_input:
     - if adapter.userInterface.secureInput is enabled and a console is available, receiveSecurely reads characters through the console password reader instead of standard line input
     - receiveSecurely observes inactivity termination while waiting for console password input and aborts the current flow when shutdown is requested

@@ -154,7 +154,7 @@ class UseCommandHandler(
                 registerInteraction()
                 return true
             }
-            if (userInterfaceAdapterPort.receiveLineBreakWithin(pollInterval)) {
+            if (userInterfaceAdapterPort.receiveNextActionWithin(hotkeyKeyChar(), pollInterval)) {
                 registerInteraction()
                 return true
             }

@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 flow_family: guided_use
 applies_interaction_rules_from: specs/interaction.yaml
 flows:
@@ -30,6 +30,7 @@ flows:
       continuation_inputs:
         - Enter and the optional global hotkey represent the same logical NEXT action
         - Enter advances the flow only while the Passbird terminal window has focus
+        - if the focused Passbird terminal emits Ctrl+Shift+<ConfiguredKey> as an input sequence, that sequence advances the flow as the same NEXT action
         - a hotkey NEXT event counts as user interaction for inactivity tracking
         - another NEXT action after the final effective step completes the flow and returns to normal Passbird input
       hotkey_lifecycle:

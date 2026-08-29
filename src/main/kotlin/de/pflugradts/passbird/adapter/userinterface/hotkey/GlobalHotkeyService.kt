@@ -7,6 +7,7 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.Structure
+import com.sun.jna.ptr.PointerByReference
 import de.pflugradts.passbird.application.GlobalHotkeyAdapterPort
 import de.pflugradts.passbird.application.RegisteredGlobalHotkey
 import java.util.concurrent.CountDownLatch
@@ -18,7 +19,7 @@ internal class GlobalHotkeyService(
     private val backend: String = "auto",
     private val runtimeEnvironment: RuntimeEnvironment = RuntimeEnvironment(),
     private val windowsRegistrarFactory: () -> PlatformHotkeyRegistrar = { WindowsGlobalHotkeyRegistrar() },
-    private val macOsRegistrarFactory: () -> PlatformHotkeyRegistrar = { MacOsGlobalHotkeyRegistrar() },
+    private val quartzRegistrarFactory: () -> PlatformHotkeyRegistrar = { QuartzMacOsGlobalHotkeyRegistrar() },
     private val x11RegistrarFactory: () -> PlatformHotkeyRegistrar = { X11GlobalHotkeyRegistrar() },
 ) : GlobalHotkeyAdapterPort {
     override fun register(key: Char): RegisteredGlobalHotkey? = runCatching {
@@ -28,7 +29,7 @@ internal class GlobalHotkeyService(
     private fun registrar() = when (backend) {
         "auto" -> autoRegistrar()
         "win32" -> windowsRegistrarFactory()
-        "quartz" -> macOsRegistrarFactory()
+        "quartz" -> quartzRegistrarFactory()
         "x11" -> x11RegistrarFactory()
         "wayland" -> UnsupportedGlobalHotkeyRegistrar()
         else -> UnsupportedGlobalHotkeyRegistrar()
@@ -36,7 +37,7 @@ internal class GlobalHotkeyService(
 
     private fun autoRegistrar() = when {
         runtimeEnvironment.isWindows() -> windowsRegistrarFactory()
-        runtimeEnvironment.isMacOs() -> macOsRegistrarFactory()
+        runtimeEnvironment.isMacOs() -> quartzRegistrarFactory()
         runtimeEnvironment.hasX11Display() -> x11RegistrarFactory()
         else -> UnsupportedGlobalHotkeyRegistrar()
     }
@@ -146,29 +147,115 @@ internal class WindowsGlobalHotkeyRegistrar(
 
 internal class MacOsGlobalHotkeyRegistrar(
     private val carbonKeyCodeResolver: (Char) -> Int? = ::carbonKeyCode,
+    private val carbonFactory: () -> Carbon = Carbon::instance,
+) : PlatformHotkeyRegistrar {
+    override fun register(key: Char): RegisteredGlobalHotkey? = runCatching {
+        carbonKeyCodeResolver(key)
+            ?.let { MacOsRegistration(it, carbonFactory()) }
+    }.getOrNull()
+
+    internal class MacOsRegistration private constructor(
+        private val carbon: Carbon,
+        private val target: Pointer,
+        private val eventType: CarbonEventTypeSpec,
+        private val handlerRef: Pointer?,
+        private val hotKeyRef: Pointer?,
+        @Suppress("UNUSED_PARAMETER") private val eventHandler: Carbon.EventHandlerCallback,
+        private val nextActions: Semaphore,
+    ) : RegisteredGlobalHotkey {
+        private val running = AtomicBoolean(true)
+
+        override fun awaitWithin(milliseconds: Long): Boolean {
+            if (!running.get()) {
+                return false
+            }
+            val nextEvent = PointerByReference()
+            if (carbon.ReceiveNextEvent(1, eventType.pointer, milliseconds.toDouble() / MILLISECONDS_PER_SECOND, true, nextEvent) !=
+                CARBON_NO_ERR
+            ) {
+                return false
+            }
+            nextEvent.value?.let { event ->
+                try {
+                    carbon.SendEventToEventTarget(event, target)
+                } finally {
+                    carbon.ReleaseEvent(event)
+                }
+            }
+            return nextActions.tryAcquire()
+        }
+
+        override fun release() {
+            if (running.getAndSet(false)) {
+                hotKeyRef?.let(carbon::UnregisterEventHotKey)
+                carbon.RemoveEventHandler(handlerRef)
+            }
+        }
+
+        companion object {
+            private const val MILLISECONDS_PER_SECOND = 1000.0
+
+            operator fun invoke(keyCode: Int, carbon: Carbon): MacOsRegistration? {
+                val target = carbon.GetApplicationEventTarget() ?: return null
+                val eventType = CarbonEventTypeSpec(CARBON_EVENT_CLASS_KEYBOARD, CARBON_EVENT_HOTKEY_PRESSED).apply { write() }
+                val nextActions = Semaphore(0)
+                val eventHandler = Carbon.EventHandlerCallback { _, _, _ ->
+                    nextActions.release()
+                    0
+                }
+                val handlerRef = PointerByReference()
+                if (carbon.InstallEventHandler(target, eventHandler, 1, eventType.pointer, Pointer.NULL, handlerRef) != CARBON_NO_ERR) {
+                    return null
+                }
+                val hotKeyRef = PointerByReference()
+                val hotKeyId = CarbonEventHotKeyID.ByValue(CARBON_SIGNATURE, HOTKEY_ID)
+                if (carbon.RegisterEventHotKey(
+                        keyCode,
+                        CARBON_CONTROL_KEY or CARBON_SHIFT_KEY,
+                        hotKeyId,
+                        target,
+                        0,
+                        hotKeyRef,
+                    ) != CARBON_NO_ERR
+                ) {
+                    carbon.RemoveEventHandler(handlerRef.value)
+                    return null
+                }
+                return MacOsRegistration(
+                    carbon = carbon,
+                    target = target,
+                    eventType = eventType,
+                    handlerRef = handlerRef.value,
+                    hotKeyRef = hotKeyRef.value,
+                    eventHandler = eventHandler,
+                    nextActions = nextActions,
+                )
+            }
+        }
+    }
+}
+
+internal class QuartzMacOsGlobalHotkeyRegistrar(
+    private val carbonKeyCodeResolver: (Char) -> Int? = ::carbonKeyCode,
     private val runtimeFactory: () -> MacOsHotkeyRuntime = ::QuartzMacOsHotkeyRuntime,
 ) : PlatformHotkeyRegistrar {
     override fun register(key: Char): RegisteredGlobalHotkey? = runCatching {
         carbonKeyCodeResolver(key)
-            ?.let { MacOsRegistration(it, runtimeFactory()) }
-            ?.takeIf(MacOsRegistration::awaitRegistration)
+            ?.let { QuartzMacOsRegistration(it, runtimeFactory()) }
+            ?.takeIf(QuartzMacOsRegistration::awaitRegistration)
     }.getOrNull()
 
-    internal class MacOsRegistration(
+    internal class QuartzMacOsRegistration(
         private val keyCode: Int,
         private val runtime: MacOsHotkeyRuntime,
     ) : BackgroundHotkeyRegistration() {
-        @Volatile
-        private var loop: MacOsHotkeyLoop? = null
-
         init {
-            start("passbird-hotkey-macos") {
+            start("passbird-hotkey-macos-quartz") {
                 val hotkeyLoop = runtime.open(keyCode, ::signalNextAction)
                 if (hotkeyLoop == null) {
                     markRegistered(false)
                     return@start
                 }
-                loop = hotkeyLoop
                 markRegistered(true)
                 try {
                     while (running.get()) {
@@ -248,6 +335,48 @@ internal interface Win32User32 : Library {
 
     companion object {
         fun instance(): Win32User32 = Native.load("user32", Win32User32::class.java)
+    }
+}
+
+internal interface Carbon : Library {
+    fun GetApplicationEventTarget(): Pointer?
+    fun InstallEventHandler(
+        target: Pointer,
+        handler: EventHandlerCallback,
+        eventTypeCount: Int,
+        eventTypes: Pointer,
+        userData: Pointer?,
+        handlerRef: PointerByReference,
+    ): Int
+
+    fun RemoveEventHandler(handlerRef: Pointer?): Int
+    fun RegisterEventHotKey(
+        keyCode: Int,
+        modifiers: Int,
+        hotKeyId: CarbonEventHotKeyID.ByValue,
+        target: Pointer,
+        options: Int,
+        hotKeyRef: PointerByReference,
+    ): Int
+
+    fun UnregisterEventHotKey(hotKeyRef: Pointer?): Int
+    fun ReceiveNextEvent(
+        eventTypeCount: Int,
+        eventTypes: Pointer,
+        timeoutInSeconds: Double,
+        pullEvent: Boolean,
+        eventRef: PointerByReference,
+    ): Int
+
+    fun SendEventToEventTarget(eventRef: Pointer?, target: Pointer): Int
+    fun ReleaseEvent(eventRef: Pointer?): Int
+
+    fun interface EventHandlerCallback : Callback {
+        fun callback(nextHandler: Pointer?, event: Pointer?, userData: Pointer?): Int
+    }
+
+    companion object {
+        fun instance(): Carbon = Native.load("Carbon", Carbon::class.java)
     }
 }
 
@@ -421,6 +550,28 @@ internal class Win32Message : Structure() {
     override fun getFieldOrder() = listOf("window", "message", "wParam", "lParam", "time", "point")
 }
 
+internal class CarbonEventTypeSpec(eventClass: Int = 0, eventKind: Int = 0) : Structure() {
+    @JvmField
+    var eventClass = eventClass
+
+    @JvmField
+    var eventKind = eventKind
+
+    override fun getFieldOrder() = listOf("eventClass", "eventKind")
+}
+
+internal open class CarbonEventHotKeyID(signature: Int = 0, id: Int = 0) : Structure() {
+    @JvmField
+    var signature = signature
+
+    @JvmField
+    var id = id
+
+    override fun getFieldOrder() = listOf("signature", "id")
+
+    internal class ByValue(signature: Int = 0, id: Int = 0) : CarbonEventHotKeyID(signature, id), Structure.ByValue
+}
+
 internal class XEvent : Structure() {
     @JvmField
     var type = 0
@@ -461,6 +612,12 @@ internal fun carbonKeyCode(key: Char) = mapOf(
 )[key]
 
 private const val CF_RUN_LOOP_DEFAULT_MODE = "kCFRunLoopDefaultMode"
+private const val CARBON_CONTROL_KEY = 1 shl 12
+private const val CARBON_EVENT_CLASS_KEYBOARD = 0x6B657962
+private const val CARBON_EVENT_HOTKEY_PRESSED = 5
+private const val CARBON_NO_ERR = 0
+private const val CARBON_SHIFT_KEY = 1 shl 9
+private const val CARBON_SIGNATURE = 0x50425348
 private const val CF_STRING_ENCODING_UTF8 = 0x08000100.toInt()
 private const val CG_EVENT_FLAG_MASK_CONTROL = 1L shl 18
 private const val CG_EVENT_FLAG_MASK_SHIFT = 1L shl 17

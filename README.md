@@ -368,7 +368,7 @@ application:
       backend: auto
 ```
 
-Only letters `A` through `Z` are accepted for `key`, and the effective hotkey is always `Ctrl+Shift+<key>`. `backend` defaults to `auto`, which lets Passbird choose the backend that fits the current environment. You can also force `win32`, `quartz`, `x11`, or `wayland` explicitly for verification or troubleshooting. `wayland` is reserved for an explicit Wayland backend and currently falls back to the existing Enter-only behavior if selected.
+Only letters `A` through `Z` are accepted for `key`, and the effective hotkey is always `Ctrl+Shift+<key>`. `backend` defaults to `auto`, which chooses `win32` on Windows, `quartz` on macOS, and `x11` when an X11 display is available. You can also force `win32`, `quartz`, `x11`, or `wayland` explicitly for verification or troubleshooting. `wayland` is reserved for an explicit Wayland backend and currently falls back to the existing Enter-only behavior if selected.
 
 The Yolk step reuses the normal live `y[EggId]` behavior. If `application.yolk.copyToClipboard` is enabled, the currently shown TOTP code is copied to the clipboard and refreshed automatically when the code rolls over.
 

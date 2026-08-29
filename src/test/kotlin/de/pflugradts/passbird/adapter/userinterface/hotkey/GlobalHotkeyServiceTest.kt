@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.adapter.userinterface.hotkey
 
 import com.sun.jna.Pointer
+import com.sun.jna.ptr.PointerByReference
 import de.pflugradts.passbird.application.RegisteredGlobalHotkey
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
@@ -19,7 +20,7 @@ class GlobalHotkeyServiceTest {
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Windows 11"),
             windowsRegistrarFactory = { windowsRegistrar },
-            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { error("X11 registrar must not be used") },
         )
 
@@ -37,7 +38,7 @@ class GlobalHotkeyServiceTest {
             backend = "win32",
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
             windowsRegistrarFactory = { windowsRegistrar },
-            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { error("X11 registrar must not be used") },
         )
 
@@ -48,38 +49,38 @@ class GlobalHotkeyServiceTest {
     }
 
     @Test
-    fun `should use mac os registrar on mac os`() {
+    fun `should use quartz registrar on mac os when backend is auto`() {
         val expectedRegistration = mockk<RegisteredGlobalHotkey>()
-        val macOsRegistrar = RecordingRegistrar(expectedRegistration)
+        val quartzRegistrar = RecordingRegistrar(expectedRegistration)
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Mac OS X"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
-            macOsRegistrarFactory = { macOsRegistrar },
+            quartzRegistrarFactory = { quartzRegistrar },
             x11RegistrarFactory = { error("X11 registrar must not be used") },
         )
 
         val actual = service.register('p')
 
         expectThat(actual).isSameInstanceAs(expectedRegistration)
-        expectThat(macOsRegistrar.recordedKeys.toList()).isEqualTo(listOf('P'))
+        expectThat(quartzRegistrar.recordedKeys.toList()).isEqualTo(listOf('P'))
     }
 
     @Test
-    fun `should use mac os registrar when quartz backend is forced`() {
+    fun `should use quartz registrar when quartz backend is forced`() {
         val expectedRegistration = mockk<RegisteredGlobalHotkey>()
-        val macOsRegistrar = RecordingRegistrar(expectedRegistration)
+        val quartzRegistrar = RecordingRegistrar(expectedRegistration)
         val service = GlobalHotkeyService(
             backend = "quartz",
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
-            macOsRegistrarFactory = { macOsRegistrar },
+            quartzRegistrarFactory = { quartzRegistrar },
             x11RegistrarFactory = { error("X11 registrar must not be used") },
         )
 
         val actual = service.register('p')
 
         expectThat(actual).isSameInstanceAs(expectedRegistration)
-        expectThat(macOsRegistrar.recordedKeys.toList()).isEqualTo(listOf('P'))
+        expectThat(quartzRegistrar.recordedKeys.toList()).isEqualTo(listOf('P'))
     }
 
     @Test
@@ -89,7 +90,7 @@ class GlobalHotkeyServiceTest {
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux", display = ":0"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
-            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { x11Registrar },
         )
 
@@ -107,7 +108,7 @@ class GlobalHotkeyServiceTest {
             backend = "x11",
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
-            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { x11Registrar },
         )
 
@@ -122,7 +123,7 @@ class GlobalHotkeyServiceTest {
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
-            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { error("X11 registrar must not be used") },
         )
 
@@ -137,7 +138,7 @@ class GlobalHotkeyServiceTest {
             backend = "wayland",
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux", waylandDisplay = "wayland-0"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
-            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { error("X11 registrar must not be used") },
         )
 
@@ -152,7 +153,7 @@ class GlobalHotkeyServiceTest {
             backend = "win32",
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
             windowsRegistrarFactory = { error("backend unavailable") },
-            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { error("X11 registrar must not be used") },
         )
 
@@ -166,7 +167,7 @@ class GlobalHotkeyServiceTest {
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux", display = " "),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
-            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
             x11RegistrarFactory = { error("X11 registrar must not be used") },
         )
 
@@ -210,19 +211,69 @@ class GlobalHotkeyServiceTest {
     }
 
     @Test
-    fun `should return null when mac os hotkey runtime cannot open`() {
-        val runtime = FakeMacOsHotkeyRuntime(loop = null)
+    fun `should return null when mac os event target is unavailable`() {
+        val carbon = FakeCarbon(target = null)
 
-        val actual = MacOsGlobalHotkeyRegistrar(runtimeFactory = { runtime }).register('P')
+        val actual = MacOsGlobalHotkeyRegistrar(carbonFactory = { carbon }).register('P')
 
         expectThat(actual).isEqualTo(null)
     }
 
     @Test
+    fun `should return null when mac os event handler installation fails`() {
+        val carbon = FakeCarbon(installEventHandlerResult = 1)
+
+        val actual = MacOsGlobalHotkeyRegistrar(carbonFactory = { carbon }).register('P')
+
+        expectThat(actual).isEqualTo(null)
+        expectThat(carbon.installedHandlers) isEqualTo 1
+    }
+
+    @Test
+    fun `should remove mac os event handler when hotkey registration fails`() {
+        val carbon = FakeCarbon(registerEventHotKeyResult = 1)
+
+        val actual = MacOsGlobalHotkeyRegistrar(carbonFactory = { carbon }).register('P')
+
+        expectThat(actual).isEqualTo(null)
+        expectThat(carbon.removedHandlers.toList()).isEqualTo(listOf(carbon.handlerRef))
+        expectThat(carbon.unregisteredHotKeys) isEqualTo 0
+    }
+
+    @Test
     fun `should signal and unregister mac os hotkey`() {
+        val event = Pointer(61)
+        val carbon = FakeCarbon(nextEvents = ArrayDeque(listOf(event)))
+        val registration = MacOsGlobalHotkeyRegistrar(carbonFactory = { carbon }).register('P')
+
+        expectThat(registration).isSameInstanceAs(registration)
+        expectThat(registration?.awaitWithin(250)) isEqualTo true
+
+        registration?.release()
+
+        expectThat(carbon.sentEvents.toList()).isEqualTo(listOf(event))
+        expectThat(carbon.releasedEvents.toList()).isEqualTo(listOf(event))
+        expectThat(carbon.unregisteredHotKeys) isEqualTo 1
+        expectThat(carbon.removedHandlers.toList()).isEqualTo(listOf(carbon.handlerRef))
+        expectThat(carbon.registeredHotKeySignatures.toList()).isEqualTo(listOf(0x50425348))
+        expectThat(carbon.registeredHotKeyIds.toList()).isEqualTo(listOf(1))
+        expectThat(carbon.installedEventKinds.toList()).isEqualTo(listOf(5))
+    }
+
+    @Test
+    fun `should return null when quartz mac os hotkey runtime cannot open`() {
+        val runtime = FakeMacOsHotkeyRuntime(loop = null)
+
+        val actual = QuartzMacOsGlobalHotkeyRegistrar(runtimeFactory = { runtime }).register('P')
+
+        expectThat(actual).isEqualTo(null)
+    }
+
+    @Test
+    fun `should signal and unregister quartz mac os hotkey`() {
         val loop = FakeMacOsHotkeyLoop()
         val runtime = FakeMacOsHotkeyRuntime(loop)
-        val registration = MacOsGlobalHotkeyRegistrar(runtimeFactory = { runtime }).register('P')
+        val registration = QuartzMacOsGlobalHotkeyRegistrar(runtimeFactory = { runtime }).register('P')
 
         expectThat(registration).isSameInstanceAs(registration)
         expectThat(registration?.awaitWithin(250)) isEqualTo true
@@ -420,6 +471,91 @@ private class FakeMacOsHotkeyLoop : MacOsHotkeyLoop {
 
     override fun close() {
         closed = true
+    }
+}
+
+private class FakeCarbon(
+    private val target: Pointer? = Pointer(51),
+    private val installEventHandlerResult: Int = 0,
+    private val registerEventHotKeyResult: Int = 0,
+    private val nextEvents: ArrayDeque<Pointer?> = ArrayDeque(),
+) : Carbon {
+    val handlerRef = Pointer(52)
+    private val hotKeyRef = Pointer(53)
+    private var handler: Carbon.EventHandlerCallback? = null
+    var installedHandlers = 0
+    val installedEventKinds = mutableListOf<Int>()
+    val removedHandlers = mutableListOf<Pointer?>()
+    val registeredHotKeySignatures = mutableListOf<Int>()
+    val registeredHotKeyIds = mutableListOf<Int>()
+    var unregisteredHotKeys = 0
+    val sentEvents = mutableListOf<Pointer>()
+    val releasedEvents = mutableListOf<Pointer>()
+
+    override fun GetApplicationEventTarget(): Pointer? = target
+
+    override fun InstallEventHandler(
+        target: Pointer,
+        handler: Carbon.EventHandlerCallback,
+        eventTypeCount: Int,
+        eventTypes: Pointer,
+        userData: Pointer?,
+        handlerRef: PointerByReference,
+    ): Int {
+        installedHandlers++
+        this.handler = handler
+        installedEventKinds += eventTypes.getInt(Int.SIZE_BYTES.toLong())
+        handlerRef.value = this.handlerRef
+        return installEventHandlerResult
+    }
+
+    override fun RemoveEventHandler(handlerRef: Pointer?): Int {
+        removedHandlers += handlerRef
+        return 0
+    }
+
+    override fun RegisterEventHotKey(
+        keyCode: Int,
+        modifiers: Int,
+        hotKeyId: CarbonEventHotKeyID.ByValue,
+        target: Pointer,
+        options: Int,
+        hotKeyRef: PointerByReference,
+    ): Int {
+        registeredHotKeySignatures += hotKeyId.signature
+        registeredHotKeyIds += hotKeyId.id
+        hotKeyRef.value = this.hotKeyRef
+        return registerEventHotKeyResult
+    }
+
+    override fun UnregisterEventHotKey(hotKeyRef: Pointer?): Int {
+        unregisteredHotKeys++
+        return 0
+    }
+
+    override fun ReceiveNextEvent(
+        eventTypeCount: Int,
+        eventTypes: Pointer,
+        timeoutInSeconds: Double,
+        pullEvent: Boolean,
+        eventRef: PointerByReference,
+    ): Int {
+        if (nextEvents.isEmpty()) {
+            return 1
+        }
+        eventRef.value = nextEvents.removeFirst()
+        return 0
+    }
+
+    override fun SendEventToEventTarget(eventRef: Pointer?, target: Pointer): Int {
+        eventRef?.let(sentEvents::add)
+        handler?.callback(null, eventRef, null)
+        return 0
+    }
+
+    override fun ReleaseEvent(eventRef: Pointer?): Int {
+        eventRef?.let(releasedEvents::add)
+        return 0
     }
 }
 
