@@ -94,6 +94,7 @@ import de.pflugradts.passbird.application.process.Finalizer
 import de.pflugradts.passbird.application.process.Initializer
 import de.pflugradts.passbird.application.process.backup.BackupManager
 import de.pflugradts.passbird.application.process.exchange.ExportFileChecker
+import de.pflugradts.passbird.application.process.hotkey.GlobalHotkeyStartupChecker
 import de.pflugradts.passbird.application.process.inactivity.InactivityHandler
 import de.pflugradts.passbird.application.process.inactivity.InactivityHandlerScheduler
 import de.pflugradts.passbird.application.process.inactivity.InactivityTerminationSignal
@@ -259,7 +260,14 @@ class ApplicationGraph(
     val importExportService: ImportExportService by lazy {
         PasswordImportExportService(exchangeFactory, passwordService, nestService, eventRegistry)
     }
-    val initializers: Set<Initializer> by lazy { setOf(exportFileChecker, trashCleanup, inactivityHandlerScheduler) }
+    val initializers: Set<Initializer> by lazy {
+        setOf(
+            globalHotkeyStartupChecker,
+            exportFileChecker,
+            trashCleanup,
+            inactivityHandlerScheduler,
+        )
+    }
     val inputHandler: InputHandler by lazy {
         CommandInputHandler(commandBus, commandFactory, rememberedCommandMemory, commandExecutionTracker)
     }
@@ -371,6 +379,9 @@ class ApplicationGraph(
     }
     private val exportFileChecker by lazy {
         ExportFileChecker(configuration, runContext, systemOperation, userInterfaceAdapterPort)
+    }
+    private val globalHotkeyStartupChecker by lazy {
+        GlobalHotkeyStartupChecker(configuration, globalHotkeyAdapterPort, systemOperation, userInterfaceAdapterPort)
     }
     private val trashCleanup by lazy { TrashCleanup(passwordService, userInterfaceAdapterPort) }
     private val inactivityTerminationSignal by lazy { InactivityTerminationSignal() }

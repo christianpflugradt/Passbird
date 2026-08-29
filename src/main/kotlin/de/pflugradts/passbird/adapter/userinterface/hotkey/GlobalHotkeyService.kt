@@ -7,7 +7,6 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.Structure
-import com.sun.jna.ptr.PointerByReference
 import de.pflugradts.passbird.application.GlobalHotkeyAdapterPort
 import de.pflugradts.passbird.application.RegisteredGlobalHotkey
 import java.util.concurrent.CountDownLatch
@@ -22,6 +21,10 @@ internal class GlobalHotkeyService(
     private val quartzRegistrarFactory: () -> PlatformHotkeyRegistrar = { QuartzMacOsGlobalHotkeyRegistrar() },
     private val x11RegistrarFactory: () -> PlatformHotkeyRegistrar = { X11GlobalHotkeyRegistrar() },
 ) : GlobalHotkeyAdapterPort {
+    override fun prepareOnStartup() = runCatching {
+        registrar().prepareOnStartup()
+    }.getOrDefault(true)
+
     override fun register(key: Char): RegisteredGlobalHotkey? = runCatching {
         registrar().register(key.uppercaseChar())
     }.getOrNull()
@@ -31,7 +34,6 @@ internal class GlobalHotkeyService(
         "win32" -> windowsRegistrarFactory()
         "quartz" -> quartzRegistrarFactory()
         "x11" -> x11RegistrarFactory()
-        "wayland" -> UnsupportedGlobalHotkeyRegistrar()
         else -> UnsupportedGlobalHotkeyRegistrar()
     }
 
@@ -46,7 +48,6 @@ internal class GlobalHotkeyService(
 data class RuntimeEnvironment(
     val osName: String = System.getProperty("os.name").orEmpty(),
     val display: String? = System.getenv("DISPLAY"),
-    val waylandDisplay: String? = System.getenv("WAYLAND_DISPLAY"),
 ) {
     fun isWindows() = osName.lowercase().contains("win")
     fun isMacOs() = osName.lowercase().contains("mac")
@@ -54,6 +55,7 @@ data class RuntimeEnvironment(
 }
 
 internal interface PlatformHotkeyRegistrar {
+    fun prepareOnStartup(): Boolean = true
     fun register(key: Char): RegisteredGlobalHotkey?
 }
 
@@ -145,102 +147,20 @@ internal class WindowsGlobalHotkeyRegistrar(
     }
 }
 
-internal class MacOsGlobalHotkeyRegistrar(
-    private val carbonKeyCodeResolver: (Char) -> Int? = ::carbonKeyCode,
-    private val carbonFactory: () -> Carbon = Carbon::instance,
+internal class QuartzMacOsGlobalHotkeyRegistrar(
+    private val keyCodeResolver: (Char) -> Int? = ::macOsKeyCode,
+    private val runtimeFactory: () -> MacOsHotkeyRuntime = ::QuartzMacOsHotkeyRuntime,
 ) : PlatformHotkeyRegistrar {
-    override fun register(key: Char): RegisteredGlobalHotkey? = runCatching {
-        carbonKeyCodeResolver(key)
-            ?.let { MacOsRegistration(it, carbonFactory()) }
-    }.getOrNull()
-
-    internal class MacOsRegistration private constructor(
-        private val carbon: Carbon,
-        private val target: Pointer,
-        private val eventType: CarbonEventTypeSpec,
-        private val handlerRef: Pointer?,
-        private val hotKeyRef: Pointer?,
-        @Suppress("UNUSED_PARAMETER") private val eventHandler: Carbon.EventHandlerCallback,
-        private val nextActions: Semaphore,
-    ) : RegisteredGlobalHotkey {
-        private val running = AtomicBoolean(true)
-
-        override fun awaitWithin(milliseconds: Long): Boolean {
-            if (!running.get()) {
-                return false
-            }
-            val nextEvent = PointerByReference()
-            if (carbon.ReceiveNextEvent(1, eventType.pointer, milliseconds.toDouble() / MILLISECONDS_PER_SECOND, true, nextEvent) !=
-                CARBON_NO_ERR
-            ) {
-                return false
-            }
-            nextEvent.value?.let { event ->
-                try {
-                    carbon.SendEventToEventTarget(event, target)
-                } finally {
-                    carbon.ReleaseEvent(event)
-                }
-            }
-            return nextActions.tryAcquire()
-        }
-
-        override fun release() {
-            if (running.getAndSet(false)) {
-                hotKeyRef?.let(carbon::UnregisterEventHotKey)
-                carbon.RemoveEventHandler(handlerRef)
-            }
-        }
-
-        companion object {
-            private const val MILLISECONDS_PER_SECOND = 1000.0
-
-            operator fun invoke(keyCode: Int, carbon: Carbon): MacOsRegistration? {
-                val target = carbon.GetApplicationEventTarget() ?: return null
-                val eventType = CarbonEventTypeSpec(CARBON_EVENT_CLASS_KEYBOARD, CARBON_EVENT_HOTKEY_PRESSED).apply { write() }
-                val nextActions = Semaphore(0)
-                val eventHandler = Carbon.EventHandlerCallback { _, _, _ ->
-                    nextActions.release()
-                    0
-                }
-                val handlerRef = PointerByReference()
-                if (carbon.InstallEventHandler(target, eventHandler, 1, eventType.pointer, Pointer.NULL, handlerRef) != CARBON_NO_ERR) {
-                    return null
-                }
-                val hotKeyRef = PointerByReference()
-                val hotKeyId = CarbonEventHotKeyID.ByValue(CARBON_SIGNATURE, HOTKEY_ID)
-                if (carbon.RegisterEventHotKey(
-                        keyCode,
-                        CARBON_CONTROL_KEY or CARBON_SHIFT_KEY,
-                        hotKeyId,
-                        target,
-                        0,
-                        hotKeyRef,
-                    ) != CARBON_NO_ERR
-                ) {
-                    carbon.RemoveEventHandler(handlerRef.value)
-                    return null
-                }
-                return MacOsRegistration(
-                    carbon = carbon,
-                    target = target,
-                    eventType = eventType,
-                    handlerRef = handlerRef.value,
-                    hotKeyRef = hotKeyRef.value,
-                    eventHandler = eventHandler,
-                    nextActions = nextActions,
-                )
+    override fun prepareOnStartup() = runtimeFactory().let { runtime ->
+        runtime.canListenGlobally().also { canListenGlobally ->
+            if (!canListenGlobally) {
+                runtime.openPermissionSettings()
             }
         }
     }
-}
 
-internal class QuartzMacOsGlobalHotkeyRegistrar(
-    private val carbonKeyCodeResolver: (Char) -> Int? = ::carbonKeyCode,
-    private val runtimeFactory: () -> MacOsHotkeyRuntime = ::QuartzMacOsHotkeyRuntime,
-) : PlatformHotkeyRegistrar {
     override fun register(key: Char): RegisteredGlobalHotkey? = runCatching {
-        carbonKeyCodeResolver(key)
+        keyCodeResolver(key)
             ?.let { QuartzMacOsRegistration(it, runtimeFactory()) }
             ?.takeIf(QuartzMacOsRegistration::awaitRegistration)
     }.getOrNull()
@@ -281,6 +201,8 @@ internal class X11GlobalHotkeyRegistrar(
         private val x11: XLib,
         private val sleeper: (Long) -> Unit,
     ) : BackgroundHotkeyRegistration() {
+        private val keyName = key.uppercaseChar().toString()
+
         init {
             start("passbird-hotkey-x11") {
                 val display = x11.XOpenDisplay(null)
@@ -288,7 +210,7 @@ internal class X11GlobalHotkeyRegistrar(
                     markRegistered(false)
                     return@start
                 }
-                val keySym = x11.XStringToKeysym(key.toString())
+                val keySym = x11.XStringToKeysym(keyName)
                 val keyCode = x11.XKeysymToKeycode(display, keySym)
                 if (keySym == 0L || keyCode == 0) {
                     x11.XCloseDisplay(display)
@@ -296,16 +218,16 @@ internal class X11GlobalHotkeyRegistrar(
                     return@start
                 }
                 val rootWindow = x11.XDefaultRootWindow(display)
-                x11.XGrabKey(
-                    display,
-                    keyCode,
-                    X11_CONTROL_MASK or X11_SHIFT_MASK,
-                    rootWindow,
-                    true,
-                    X11_GRAB_MODE_ASYNC,
-                    X11_GRAB_MODE_ASYNC,
-                )
-                x11.XSync(display, false)
+                val modifierMasks = modifierMasks(display)
+                if (!grabHotkey(display, keyCode, rootWindow, modifierMasks)) {
+                    modifierMasks.forEach { modifierMask ->
+                        x11.XUngrabKey(display, keyCode, modifierMask, rootWindow)
+                    }
+                    x11.XSync(display, false)
+                    x11.XCloseDisplay(display)
+                    markRegistered(false)
+                    return@start
+                }
                 markRegistered(true)
                 try {
                     val event = XEvent()
@@ -319,11 +241,73 @@ internal class X11GlobalHotkeyRegistrar(
                         sleeper(POLL_INTERVAL_MILLISECONDS)
                     }
                 } finally {
-                    x11.XUngrabKey(display, keyCode, X11_CONTROL_MASK or X11_SHIFT_MASK, rootWindow)
+                    modifierMasks.forEach { modifierMask ->
+                        x11.XUngrabKey(display, keyCode, modifierMask, rootWindow)
+                    }
                     x11.XSync(display, false)
                     x11.XCloseDisplay(display)
                 }
             }
+        }
+
+        private fun modifierMasks(display: Pointer): Set<Int> {
+            val baseModifierMask = X11_CONTROL_MASK or X11_SHIFT_MASK
+            val capsLockMask = X11_LOCK_MASK
+            val numLockMask = detectNumLockMask(display)
+            return setOf(
+                baseModifierMask,
+                baseModifierMask or capsLockMask,
+                baseModifierMask or numLockMask,
+                baseModifierMask or capsLockMask or numLockMask,
+            )
+        }
+
+        private fun detectNumLockMask(display: Pointer): Int {
+            val numLockKeySym = x11.XStringToKeysym(X11_NUM_LOCK_KEY)
+            val numLockKeyCode = x11.XKeysymToKeycode(display, numLockKeySym)
+            if (numLockKeySym == 0L || numLockKeyCode == 0) {
+                return 0
+            }
+            val modifierKeymap = x11.XGetModifierMapping(display) ?: return 0
+            return try {
+                (0 until X11_MODIFIER_COUNT).firstOrNull { modifierIndex ->
+                    (0 until modifierKeymap.maxKeysPerModifier).any { keyIndex ->
+                        modifierKeymap.modifierMap?.getByte((modifierIndex * modifierKeymap.maxKeysPerModifier + keyIndex).toLong())
+                            ?.toInt()
+                            ?.and(0xFF) == numLockKeyCode
+                    }
+                }?.let { 1 shl it } ?: 0
+            } finally {
+                x11.XFreeModifiermap(modifierKeymap)
+            }
+        }
+
+        private fun grabHotkey(display: Pointer, keyCode: Int, rootWindow: Long, modifierMasks: Set<Int>): Boolean {
+            var badAccessDetected = false
+            val errorHandler = XLib.XErrorHandler { _, errorEvent ->
+                if (errorEvent?.errorCode?.toInt() == X11_BAD_ACCESS) {
+                    badAccessDetected = true
+                }
+                0
+            }
+            val previousErrorHandler = x11.XSetErrorHandler(errorHandler)
+            try {
+                modifierMasks.forEach { modifierMask ->
+                    x11.XGrabKey(
+                        display,
+                        keyCode,
+                        modifierMask,
+                        rootWindow,
+                        true,
+                        X11_GRAB_MODE_ASYNC,
+                        X11_GRAB_MODE_ASYNC,
+                    )
+                }
+                x11.XSync(display, false)
+            } finally {
+                x11.XSetErrorHandler(previousErrorHandler)
+            }
+            return !badAccessDetected
         }
     }
 }
@@ -338,50 +322,10 @@ internal interface Win32User32 : Library {
     }
 }
 
-internal interface Carbon : Library {
-    fun GetApplicationEventTarget(): Pointer?
-    fun InstallEventHandler(
-        target: Pointer,
-        handler: EventHandlerCallback,
-        eventTypeCount: Int,
-        eventTypes: Pointer,
-        userData: Pointer?,
-        handlerRef: PointerByReference,
-    ): Int
-
-    fun RemoveEventHandler(handlerRef: Pointer?): Int
-    fun RegisterEventHotKey(
-        keyCode: Int,
-        modifiers: Int,
-        hotKeyId: CarbonEventHotKeyID.ByValue,
-        target: Pointer,
-        options: Int,
-        hotKeyRef: PointerByReference,
-    ): Int
-
-    fun UnregisterEventHotKey(hotKeyRef: Pointer?): Int
-    fun ReceiveNextEvent(
-        eventTypeCount: Int,
-        eventTypes: Pointer,
-        timeoutInSeconds: Double,
-        pullEvent: Boolean,
-        eventRef: PointerByReference,
-    ): Int
-
-    fun SendEventToEventTarget(eventRef: Pointer?, target: Pointer): Int
-    fun ReleaseEvent(eventRef: Pointer?): Int
-
-    fun interface EventHandlerCallback : Callback {
-        fun callback(nextHandler: Pointer?, event: Pointer?, userData: Pointer?): Int
-    }
-
-    companion object {
-        fun instance(): Carbon = Native.load("Carbon", Carbon::class.java)
-    }
-}
-
 internal interface MacOsHotkeyRuntime {
+    fun canListenGlobally(): Boolean
     fun open(keyCode: Int, onNextAction: () -> Unit): MacOsHotkeyLoop?
+    fun openPermissionSettings()
 }
 
 internal interface MacOsHotkeyLoop {
@@ -392,7 +336,21 @@ internal interface MacOsHotkeyLoop {
 internal class QuartzMacOsHotkeyRuntime(
     private val quartz: Quartz = Quartz.instance(),
     private val coreFoundation: CoreFoundation = CoreFoundation.instance(),
+    private val processStarter: (Array<String>) -> Process = { Runtime.getRuntime().exec(it) },
 ) : MacOsHotkeyRuntime {
+    override fun canListenGlobally(): Boolean {
+        val tap = quartz.CGEventTapCreate(
+            CG_SESSION_EVENT_TAP,
+            CG_HEAD_INSERT_EVENT_TAP,
+            CG_EVENT_TAP_LISTEN_ONLY,
+            1L shl CG_EVENT_KEY_DOWN,
+            Quartz.noopCallback,
+            Pointer.NULL,
+        ) ?: return false
+        coreFoundation.CFRelease(tap)
+        return true
+    }
+
     override fun open(keyCode: Int, onNextAction: () -> Unit): MacOsHotkeyLoop? {
         val callback = Quartz.EventTapCallback { _, type, event, _ ->
             if (type == CG_EVENT_KEY_DOWN && event != null) {
@@ -425,6 +383,12 @@ internal class QuartzMacOsHotkeyRuntime(
         coreFoundation.CFRunLoopAddSource(runLoop, source, mode)
         quartz.CGEventTapEnable(tap, true)
         return QuartzMacOsHotkeyLoop(runLoop, mode, source, tap, callback, coreFoundation)
+    }
+
+    override fun openPermissionSettings() {
+        runCatching {
+            processStarter(arrayOf("open", "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent"))
+        }
     }
 
     private fun hasRequiredModifiers(flags: Long) = flags and CG_EVENT_FLAG_MASK_CONTROL != 0L &&
@@ -475,6 +439,7 @@ internal interface Quartz : Library {
 
     companion object {
         fun instance(): Quartz = Native.load("ApplicationServices", Quartz::class.java)
+        val noopCallback = EventTapCallback { _, _, event, _ -> event }
     }
 }
 
@@ -510,8 +475,15 @@ internal interface XLib : Library {
     fun XUngrabKey(display: Pointer, keycode: Int, modifiers: Int, grabWindow: Long)
     fun XPending(display: Pointer): Int
     fun XNextEvent(display: Pointer, event: XEvent)
+    fun XSetErrorHandler(handler: XErrorHandler?): XErrorHandler?
     fun XSync(display: Pointer, discard: Boolean): Int
     fun XCloseDisplay(display: Pointer): Int
+    fun XGetModifierMapping(display: Pointer): XModifierKeymap?
+    fun XFreeModifiermap(modifiermap: XModifierKeymap): Int
+
+    fun interface XErrorHandler : Callback {
+        fun callback(display: Pointer?, errorEvent: XErrorEvent?): Int
+    }
 
     companion object {
         fun instance(): XLib = Native.load("X11", XLib::class.java)
@@ -550,28 +522,6 @@ internal class Win32Message : Structure() {
     override fun getFieldOrder() = listOf("window", "message", "wParam", "lParam", "time", "point")
 }
 
-internal class CarbonEventTypeSpec(eventClass: Int = 0, eventKind: Int = 0) : Structure() {
-    @JvmField
-    var eventClass = eventClass
-
-    @JvmField
-    var eventKind = eventKind
-
-    override fun getFieldOrder() = listOf("eventClass", "eventKind")
-}
-
-internal open class CarbonEventHotKeyID(signature: Int = 0, id: Int = 0) : Structure() {
-    @JvmField
-    var signature = signature
-
-    @JvmField
-    var id = id
-
-    override fun getFieldOrder() = listOf("signature", "id")
-
-    internal class ByValue(signature: Int = 0, id: Int = 0) : CarbonEventHotKeyID(signature, id), Structure.ByValue
-}
-
 internal class XEvent : Structure() {
     @JvmField
     var type = 0
@@ -582,7 +532,42 @@ internal class XEvent : Structure() {
     override fun getFieldOrder() = listOf("type", "padding")
 }
 
-internal fun carbonKeyCode(key: Char) = mapOf(
+internal class XErrorEvent : Structure() {
+    @JvmField
+    var type = 0
+
+    @JvmField
+    var display: Pointer? = null
+
+    @JvmField
+    var resourceId = 0L
+
+    @JvmField
+    var serial = 0L
+
+    @JvmField
+    var errorCode: Byte = 0
+
+    @JvmField
+    var requestCode: Byte = 0
+
+    @JvmField
+    var minorCode: Byte = 0
+
+    override fun getFieldOrder() = listOf("type", "display", "resourceId", "serial", "errorCode", "requestCode", "minorCode")
+}
+
+internal class XModifierKeymap : Structure() {
+    @JvmField
+    var maxKeysPerModifier = 0
+
+    @JvmField
+    var modifierMap: Pointer? = null
+
+    override fun getFieldOrder() = listOf("maxKeysPerModifier", "modifierMap")
+}
+
+internal fun macOsKeyCode(key: Char) = mapOf(
     'A' to 0x00,
     'B' to 0x0B,
     'C' to 0x08,
@@ -612,12 +597,6 @@ internal fun carbonKeyCode(key: Char) = mapOf(
 )[key]
 
 private const val CF_RUN_LOOP_DEFAULT_MODE = "kCFRunLoopDefaultMode"
-private const val CARBON_CONTROL_KEY = 1 shl 12
-private const val CARBON_EVENT_CLASS_KEYBOARD = 0x6B657962
-private const val CARBON_EVENT_HOTKEY_PRESSED = 5
-private const val CARBON_NO_ERR = 0
-private const val CARBON_SHIFT_KEY = 1 shl 9
-private const val CARBON_SIGNATURE = 0x50425348
 private const val CF_STRING_ENCODING_UTF8 = 0x08000100.toInt()
 private const val CG_EVENT_FLAG_MASK_CONTROL = 1L shl 18
 private const val CG_EVENT_FLAG_MASK_SHIFT = 1L shl 17
@@ -633,7 +612,11 @@ private const val WIN32_MOD_SHIFT = 0x0004
 private const val WIN32_PM_NOREMOVE = 0x0000
 private const val WIN32_PM_REMOVE = 0x0001
 private const val WIN32_WM_HOTKEY = 0x0312
+private const val X11_BAD_ACCESS = 10
 private const val X11_CONTROL_MASK = 1 shl 2
 private const val X11_GRAB_MODE_ASYNC = 1
 private const val X11_KEY_PRESS = 2
+private const val X11_LOCK_MASK = 1 shl 1
+private const val X11_MODIFIER_COUNT = 8
+private const val X11_NUM_LOCK_KEY = "Num_Lock"
 private const val X11_SHIFT_MASK = 1 shl 0

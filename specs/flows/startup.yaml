@@ -41,6 +41,18 @@ flows:
     observable_rules:
       - the reminder is shown at most once per startup run
       - if the file does not exist, or prompting is disabled in configuration, this flow produces no output
+  - id: macos_hotkey_permission_missing
+    trigger:
+      - application.flow.globalHotkey.enabled is true
+      - application.flow.globalHotkey.backend is quartz or auto resolves to macOS
+      - Passbird cannot create the macOS global hotkey listener because the launching terminal app lacks the required Input Monitoring permission
+    exact_sequence:
+      - the normal application boot path emits one empty line before startup initializers run
+      - Passbird opens the macOS Input Monitoring settings page
+      - Passbird emits one empty line
+      - Passbird prints Global hotkey permission is required on macOS. Allow Input Monitoring for the terminal app that starts Passbird, restart that terminal app, and then start Passbird again.
+      - Passbird emits one empty line
+      - Passbird terminates before entering the command loop
   - id: command_loop
     trigger:
       - startup initializers have completed

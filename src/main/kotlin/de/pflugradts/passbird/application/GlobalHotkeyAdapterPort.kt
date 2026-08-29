@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application
 
 interface GlobalHotkeyAdapterPort {
+    fun prepareOnStartup(): Boolean
     fun register(key: Char): RegisteredGlobalHotkey?
 }
 
