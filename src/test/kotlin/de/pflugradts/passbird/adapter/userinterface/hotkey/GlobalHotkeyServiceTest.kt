@@ -149,6 +149,95 @@ class GlobalHotkeyServiceTest {
     }
 
     @Test
+    fun `should return null when mac os quartz event tap cannot be created`() {
+        val quartz = FakeQuartz(tap = null)
+
+        val actual = QuartzMacOsHotkeyRuntime(
+            quartz = quartz,
+            coreFoundation = FakeCoreFoundation(),
+        ).open(35) { }
+
+        expectThat(actual).isEqualTo(null)
+    }
+
+    @Test
+    fun `should release tap when mac os run loop source cannot be created`() {
+        val tap = Pointer(21)
+        val coreFoundation = FakeCoreFoundation(source = null)
+        val quartz = FakeQuartz(tap = tap)
+
+        val actual = QuartzMacOsHotkeyRuntime(quartz = quartz, coreFoundation = coreFoundation).open(35) { }
+
+        expectThat(actual).isEqualTo(null)
+        expectThat(coreFoundation.releasedPointers.toList()).isEqualTo(listOf(tap))
+    }
+
+    @Test
+    fun `should release tap and source when mac os run loop mode cannot be created`() {
+        val tap = Pointer(21)
+        val source = Pointer(22)
+        val coreFoundation = FakeCoreFoundation(source = source, mode = null)
+        val quartz = FakeQuartz(tap = tap)
+
+        val actual = QuartzMacOsHotkeyRuntime(quartz = quartz, coreFoundation = coreFoundation).open(35) { }
+
+        expectThat(actual).isEqualTo(null)
+        expectThat(coreFoundation.releasedPointers.toList()).isEqualTo(listOf(source, tap))
+    }
+
+    @Test
+    fun `should signal only for matching ctrl shift mac os key down event`() {
+        val tap = Pointer(21)
+        val source = Pointer(22)
+        val mode = Pointer(23)
+        val event = Pointer(24)
+        val coreFoundation = FakeCoreFoundation(source = source, mode = mode)
+        val quartz = FakeQuartz(tap = tap)
+        var nextActions = 0
+
+        val loop = QuartzMacOsHotkeyRuntime(quartz = quartz, coreFoundation = coreFoundation).open(35) { nextActions++ }
+
+        quartz.callback?.callback(null, MAC_OS_KEY_DOWN_EVENT, event, null)
+        quartz.callback?.callback(null, MAC_OS_KEY_DOWN_EVENT, event, null)
+        quartz.callback?.callback(null, MAC_OS_KEY_DOWN_EVENT, event, null)
+        quartz.callback?.callback(null, 99, event, null)
+        quartz.callback?.callback(null, MAC_OS_KEY_DOWN_EVENT, null, null)
+
+        expectThat(loop).isSameInstanceAs(loop)
+        expectThat(quartz.enabledTap).isEqualTo(tap)
+        expectThat(quartz.enabled) isEqualTo true
+        expectThat(coreFoundation.addedRunLoop) isEqualTo coreFoundation.runLoop
+        expectThat(coreFoundation.addedSource) isEqualTo source
+        expectThat(coreFoundation.addedMode) isEqualTo mode
+        expectThat(nextActions) isEqualTo 1
+    }
+
+    @Test
+    fun `should poll and close quartz mac os hotkey loop`() {
+        val runLoop = Pointer(31)
+        val mode = Pointer(32)
+        val source = Pointer(33)
+        val tap = Pointer(34)
+        val coreFoundation = FakeCoreFoundation()
+        val loop = QuartzMacOsHotkeyLoop(
+            runLoop = runLoop,
+            mode = mode,
+            source = source,
+            tap = tap,
+            callback = FakeQuartz.noopCallback,
+            coreFoundation = coreFoundation,
+        )
+
+        loop.poll(250)
+        loop.close()
+
+        expectThat(coreFoundation.runLoopRunMode) isEqualTo mode
+        expectThat(coreFoundation.runLoopRunSeconds) isEqualTo 0.25
+        expectThat(coreFoundation.runLoopStopCalls.toList()).isEqualTo(listOf(runLoop))
+        expectThat(coreFoundation.releasedPointers.toList()).isEqualTo(listOf(source, tap, mode))
+    }
+
+    @Test
     fun `should return null when x11 display cannot be opened`() {
         val x11 = FakeXLib(display = null)
 
@@ -250,6 +339,87 @@ private class FakeMacOsHotkeyLoop : MacOsHotkeyLoop {
     }
 }
 
+private class FakeQuartz(
+    private val tap: Pointer? = Pointer(41),
+) : Quartz {
+    var callback: Quartz.EventTapCallback? = null
+    var enabledTap: Pointer? = null
+    var enabled = false
+    var keyCode = 35L
+    private val flagsByInvocation = ArrayDeque(
+        listOf(
+            MAC_OS_CONTROL_FLAG,
+            MAC_OS_CONTROL_FLAG or MAC_OS_SHIFT_FLAG,
+            0L,
+        ),
+    )
+
+    override fun CGEventTapCreate(
+        tap: Int,
+        place: Int,
+        options: Int,
+        eventsOfInterest: Long,
+        callback: Quartz.EventTapCallback,
+        userInfo: Pointer?,
+    ): Pointer? {
+        this.callback = callback
+        return this.tap
+    }
+
+    override fun CGEventTapEnable(tap: Pointer, enable: Boolean) {
+        enabledTap = tap
+        enabled = enable
+    }
+
+    override fun CGEventGetIntegerValueField(event: Pointer, field: Int): Long = keyCode
+
+    override fun CGEventGetFlags(event: Pointer): Long = flagsByInvocation.removeFirst()
+
+    companion object {
+        val noopCallback = Quartz.EventTapCallback { _, _, event, _ -> event }
+    }
+}
+
+private class FakeCoreFoundation(
+    private val source: Pointer? = Pointer(42),
+    private val mode: Pointer? = Pointer(43),
+) : CoreFoundation {
+    val releasedPointers = mutableListOf<Pointer>()
+    val runLoop = Pointer(44)
+    var addedRunLoop: Pointer? = null
+    var addedSource: Pointer? = null
+    var addedMode: Pointer? = null
+    var runLoopRunMode: Pointer? = null
+    var runLoopRunSeconds = 0.0
+    val runLoopStopCalls = mutableListOf<Pointer>()
+
+    override fun CFMachPortCreateRunLoopSource(allocator: Pointer?, port: Pointer, order: Int): Pointer? = source
+
+    override fun CFRunLoopGetCurrent(): Pointer = runLoop
+
+    override fun CFRunLoopAddSource(runLoop: Pointer, source: Pointer, mode: Pointer) {
+        addedRunLoop = runLoop
+        addedSource = source
+        addedMode = mode
+    }
+
+    override fun CFRunLoopRunInMode(mode: Pointer, seconds: Double, returnAfterSourceHandled: Boolean): Int {
+        runLoopRunMode = mode
+        runLoopRunSeconds = seconds
+        return 0
+    }
+
+    override fun CFRunLoopStop(runLoop: Pointer) {
+        runLoopStopCalls += runLoop
+    }
+
+    override fun CFStringCreateWithCString(allocator: Pointer?, value: String, encoding: Int): Pointer? = mode
+
+    override fun CFRelease(reference: Pointer?) {
+        reference?.let(releasedPointers::add)
+    }
+}
+
 private class FakeXLib(
     private val display: Pointer? = Pointer(2),
     private val keySym: Long = 42L,
@@ -303,4 +473,7 @@ private class FakeXLib(
 }
 
 private const val WIN32_HOTKEY_MESSAGE = 0x0312
+private const val MAC_OS_CONTROL_FLAG = 1L shl 18
+private const val MAC_OS_SHIFT_FLAG = 1L shl 17
+private const val MAC_OS_KEY_DOWN_EVENT = 10
 private const val X11_KEY_PRESS_EVENT = 2
