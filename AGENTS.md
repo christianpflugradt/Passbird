@@ -32,6 +32,7 @@ This repository keeps its agent-facing product specifications, design rules, and
 - Do not use `git stash`.
 - If working safely on `main` without stashing is blocked by unrelated workspace state or another Git constraint, stop, explain the blocker clearly, and wait for maintainer instructions before proceeding.
 - Before staging, committing, or pushing, run `./gradlew ktlintFormat` to auto-resolve formatting issues when possible.
+- Treat reasonable automated test coverage for every new code path as mandatory. Add or update focused tests for all new behavior and important branches before shipping; do not rely on existing global coverage headroom to carry insufficiently tested changes.
 - Once a requested task is complete and suitable for release, commit it, run `git pull -r` on the current branch, and push it immediately.
 - Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.
 - Do not run `./gradlew dependencyCheckAnalyze` locally for verification. Treat OWASP dependency scanning as CI-only unless the maintainer explicitly asks for a local run.
@@ -80,6 +81,7 @@ This repository keeps its agent-facing product specifications, design rules, and
 Use `specs/delivery.yaml` to choose the right checks. At minimum:
 
 - run only the focused tests that cover the code you changed or the tests you added
+- ensure those focused tests give reasonable coverage to every new code path and important branch introduced by the change
 - use `.agent/scripts/agent-validate.sh` for deterministic validation sequences
 - run `./gradlew architecture` only for structural or wiring changes that are not already otherwise covered
 - rely on the local `pre-commit` hook for `ktlintCheck`, `detekt`, `compileKotlin`, and `compileTestKotlin`

@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-06-07
+last_reviewed: 2026-08-29
 agent_internal_scripts:
   location: .agent/scripts
   purpose:
@@ -83,6 +83,9 @@ local_verification_policy:
     note: do not rerun these manually unless the maintainer explicitly asks for it; prePushCheck includes the hook-managed jar build and smoke pass
   focused_tests:
     default: run only tests that exercise the code you changed or the tests you added
+    coverage_expectation:
+      - add or update focused tests so every new code path and important branch introduced by the change is reasonably covered before shipping
+      - do not rely on unchanged repository-wide coverage headroom to carry insufficiently tested new code
     avoid_repetition:
       - do not rerun the same local verification during one task unless the code or environment changed in a way that makes the repeated run materially informative
       - do not poll or narrate long-running Gradle tasks or git hooks unnecessarily; a multi-minute runtime is expected for some local gates
@@ -153,6 +156,7 @@ github_cli_usage:
 change_rules:
   - keep changes small and intention-revealing in this security-sensitive codebase
   - add or update tests with behavior changes; do not rely on docs alone
+  - treat reasonable automated coverage for all newly introduced code paths and important branches as mandatory for releasable work
   - never suppress detekt or ktlint findings in source code; fix the code or adjust the shared tool configuration instead
   - update README for user-visible command, workflow, or migration changes
   - update CONFIGURATION.md for any configuration-schema or default-value change

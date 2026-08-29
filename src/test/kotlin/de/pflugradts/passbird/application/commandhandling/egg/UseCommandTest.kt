@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.commandhandling.egg
 
+import de.pflugradts.kotlinextensions.MutableOption.Companion.emptyOption
 import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.INTEGRATION
@@ -157,6 +158,37 @@ class UseCommandTest {
     }
 
     @Test
+    fun `should continue with enter when global hotkey is disabled`() {
+        fakeConfiguration(instance = configuration, withFlowGlobalHotkeyEnabled = false)
+        userInterfaceAdapterPort.lineBreakResponses += true
+        fakePasswordService(
+            instance = passwordService,
+            withEggs = listOf(
+                createEggForTesting(
+                    withEggIdShell = shellOf("egg"),
+                    withProteins = mapOf(DEFAULT to ShellPair(shellOf("login"), shellOf("alice@example.com"))),
+                ),
+            ),
+        )
+
+        inputHandler.handleInput(inputOf(shellOf("uegg")))
+
+        expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() }).containsExactly(
+            "Press Enter to continue.",
+            "",
+            "Login",
+            " copied to clipboard.",
+            "",
+            "Password",
+            " copied to clipboard.",
+        )
+        verify(exactly = 0) { globalHotkeyAdapterPort.register(any()) }
+        verify(exactly = 1) { registerInteraction.invoke() }
+        expectThat(userInterfaceAdapterPort.lineBreakPolls) isEqualTo 1
+        expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.SUCCESS
+    }
+
+    @Test
     fun `should abort when clipboard copy fails`() {
         every { clipboardAdapterPort.post(any()) } returns failure(IllegalStateException("clipboard unavailable"))
         fakePasswordService(
@@ -168,6 +200,54 @@ class UseCommandTest {
 
         expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() })
             .containsExactly("Password could not be copied to clipboard - Operation aborted.")
+        expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.ABORTED
+    }
+
+    @Test
+    fun `should abort when guided flow has no available steps`() {
+        every { passwordService.eggExists(any(), any<PasswordService.EggNotExistsAction>()) } returns true
+        every { passwordService.viewProteinStructure(any(), any()) } returns emptyOption()
+        every { passwordService.viewPassword(any()) } returns emptyOption()
+        every { passwordService.viewYolk(any()) } returns emptyOption()
+
+        inputHandler.handleInput(inputOf(shellOf("uegg")))
+
+        expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() })
+            .containsExactly("Guided flow could not be continued - Operation aborted.")
+        verify(exactly = 0) { clipboardAdapterPort.post(any()) }
+        verify(exactly = 0) { globalHotkeyAdapterPort.register(any()) }
+        expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.ABORTED
+    }
+
+    @Test
+    fun `should abort when yolk display fails`() {
+        fakeConfiguration(instance = configuration, withFlowGlobalHotkeyEnabled = false)
+        userInterfaceAdapterPort.lineBreakResponses += true
+        userInterfaceAdapterPort.ephemeralStartFailure = IllegalStateException("tty unavailable")
+        fakePasswordService(
+            instance = passwordService,
+            withEggs = listOf(
+                createEggForTesting(
+                    withEggIdShell = shellOf("egg"),
+                    withProteins = emptyMap(),
+                    withYolk = TestYolkData(shellOf("12345678901234567890")),
+                ),
+            ),
+        )
+
+        inputHandler.handleInput(inputOf(shellOf("uegg")))
+
+        expectThat(userInterfaceAdapterPort.sentOutputs.map { it.shell.asString() }).containsExactly(
+            "Press Enter to continue.",
+            "",
+            "Password",
+            " copied to clipboard.",
+            "",
+            "Yolk",
+            " copied to clipboard.",
+            "Yolk could not be displayed - Operation aborted.",
+        )
+        verify(exactly = 2) { clipboardAdapterPort.post(any()) }
         expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.ABORTED
     }
 
@@ -208,6 +288,7 @@ private class RecordingUseUserInterfaceAdapterPort : UserInterfaceAdapterPort {
     val sentOutputs = mutableListOf<Output>()
     val lineBreakResponses = ArrayDeque<Boolean>()
     var lineBreakFailure: Exception? = null
+    var ephemeralStartFailure: Exception? = null
     var lineBreakPolls = 0
     var ephemeralStarts = 0
 
@@ -215,6 +296,7 @@ private class RecordingUseUserInterfaceAdapterPort : UserInterfaceAdapterPort {
         sentOutputs.clear()
         lineBreakResponses.clear()
         lineBreakFailure = null
+        ephemeralStartFailure = null
         lineBreakPolls = 0
         ephemeralStarts = 0
     }
@@ -238,6 +320,7 @@ private class RecordingUseUserInterfaceAdapterPort : UserInterfaceAdapterPort {
     }
 
     override fun startEphemeralLine(output: Output) {
+        ephemeralStartFailure?.let { throw it }
         ephemeralStarts++
     }
 

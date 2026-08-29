@@ -45,11 +45,11 @@ internal interface PlatformHotkeyRegistrar {
     fun register(key: Char): RegisteredGlobalHotkey?
 }
 
-private class UnsupportedGlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
+internal class UnsupportedGlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
     override fun register(key: Char) = null
 }
 
-private abstract class BackgroundHotkeyRegistration : RegisteredGlobalHotkey {
+internal abstract class BackgroundHotkeyRegistration : RegisteredGlobalHotkey {
     private val nextActions = Semaphore(0)
     private val started = CountDownLatch(1)
     protected val running = AtomicBoolean(true)
@@ -95,12 +95,18 @@ private abstract class BackgroundHotkeyRegistration : RegisteredGlobalHotkey {
     }
 }
 
-private class WindowsGlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
-    override fun register(key: Char): RegisteredGlobalHotkey? = WindowsRegistration(key).takeIf(WindowsRegistration::awaitRegistration)
+internal class WindowsGlobalHotkeyRegistrar(
+    private val user32Factory: () -> Win32User32 = Win32User32::instance,
+    private val sleeper: (Long) -> Unit = Thread::sleep,
+) : PlatformHotkeyRegistrar {
+    override fun register(key: Char): RegisteredGlobalHotkey? =
+        WindowsRegistration(key, user32Factory(), sleeper).takeIf(WindowsRegistration::awaitRegistration)
 
-    private class WindowsRegistration(key: Char) : BackgroundHotkeyRegistration() {
-        private val user32 = Win32User32.instance()
-
+    internal class WindowsRegistration(
+        key: Char,
+        private val user32: Win32User32,
+        private val sleeper: (Long) -> Unit,
+    ) : BackgroundHotkeyRegistration() {
         init {
             start("passbird-hotkey-windows") {
                 val msg = Win32Message()
@@ -117,7 +123,7 @@ private class WindowsGlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
                                 signalNextAction()
                             }
                         }
-                        Thread.sleep(POLL_INTERVAL_MILLISECONDS)
+                        sleeper(POLL_INTERVAL_MILLISECONDS)
                     }
                 } finally {
                     user32.UnregisterHotKey(Pointer.NULL, HOTKEY_ID)
@@ -127,12 +133,17 @@ private class WindowsGlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
     }
 }
 
-private class MacOsGlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
+internal class MacOsGlobalHotkeyRegistrar(
+    private val carbonKeyCodeResolver: (Char) -> Int? = ::carbonKeyCode,
+    private val carbonFactory: () -> Carbon = Carbon::instance,
+) : PlatformHotkeyRegistrar {
     override fun register(key: Char): RegisteredGlobalHotkey? =
-        carbonKeyCode(key)?.let(::MacOsRegistration)?.takeIf(MacOsRegistration::awaitRegistration)
+        carbonKeyCodeResolver(key)?.let { MacOsRegistration(it, carbonFactory()) }?.takeIf(MacOsRegistration::awaitRegistration)
 
-    private class MacOsRegistration(private val keyCode: Int) : BackgroundHotkeyRegistration() {
-        private val carbon = Carbon.instance()
+    internal class MacOsRegistration(
+        private val keyCode: Int,
+        private val carbon: Carbon,
+    ) : BackgroundHotkeyRegistration() {
         private val eventHandler = Carbon.EventHandlerCallback { _, _, _ ->
             signalNextAction()
             0
@@ -179,12 +190,18 @@ private class MacOsGlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
     }
 }
 
-private class X11GlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
-    override fun register(key: Char): RegisteredGlobalHotkey? = X11Registration(key).takeIf(X11Registration::awaitRegistration)
+internal class X11GlobalHotkeyRegistrar(
+    private val x11Factory: () -> XLib = XLib::instance,
+    private val sleeper: (Long) -> Unit = Thread::sleep,
+) : PlatformHotkeyRegistrar {
+    override fun register(key: Char): RegisteredGlobalHotkey? =
+        X11Registration(key, x11Factory(), sleeper).takeIf(X11Registration::awaitRegistration)
 
-    private class X11Registration(key: Char) : BackgroundHotkeyRegistration() {
-        private val x11 = XLib.instance()
-
+    internal class X11Registration(
+        key: Char,
+        private val x11: XLib,
+        private val sleeper: (Long) -> Unit,
+    ) : BackgroundHotkeyRegistration() {
         init {
             start("passbird-hotkey-x11") {
                 val display = x11.XOpenDisplay(null)
@@ -220,7 +237,7 @@ private class X11GlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
                                 signalNextAction()
                             }
                         }
-                        Thread.sleep(POLL_INTERVAL_MILLISECONDS)
+                        sleeper(POLL_INTERVAL_MILLISECONDS)
                     }
                 } finally {
                     x11.XUngrabKey(display, keyCode, X11_CONTROL_MASK or X11_SHIFT_MASK, rootWindow)
@@ -232,7 +249,7 @@ private class X11GlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
     }
 }
 
-private interface Win32User32 : Library {
+internal interface Win32User32 : Library {
     fun RegisterHotKey(window: Pointer?, id: Int, fsModifiers: Int, virtualKey: Int): Boolean
     fun UnregisterHotKey(window: Pointer?, id: Int): Boolean
     fun PeekMessage(message: Win32Message, window: Pointer?, minFilter: Int, maxFilter: Int, removeMessage: Int): Boolean
@@ -242,7 +259,7 @@ private interface Win32User32 : Library {
     }
 }
 
-private interface Carbon : Library {
+internal interface Carbon : Library {
     fun GetApplicationEventTarget(): Pointer?
     fun InstallEventHandler(
         target: Pointer,
@@ -284,7 +301,7 @@ private interface Carbon : Library {
     }
 }
 
-private interface XLib : Library {
+internal interface XLib : Library {
     fun XOpenDisplay(displayName: String?): Pointer?
     fun XDefaultRootWindow(display: Pointer): Long
     fun XStringToKeysym(string: String): Long
@@ -310,7 +327,7 @@ private interface XLib : Library {
     }
 }
 
-private class Win32Point : Structure() {
+internal class Win32Point : Structure() {
     @JvmField
     var x = 0
 
@@ -320,7 +337,7 @@ private class Win32Point : Structure() {
     override fun getFieldOrder() = listOf("x", "y")
 }
 
-private class Win32Message : Structure() {
+internal class Win32Message : Structure() {
     @JvmField
     var window: Pointer? = Pointer.NULL
 
@@ -342,7 +359,7 @@ private class Win32Message : Structure() {
     override fun getFieldOrder() = listOf("window", "message", "wParam", "lParam", "time", "point")
 }
 
-private class CarbonEventTypeSpec(eventClass: Int = 0, eventKind: Int = 0) : Structure() {
+internal class CarbonEventTypeSpec(eventClass: Int = 0, eventKind: Int = 0) : Structure() {
     @JvmField
     var eventClass = eventClass
 
@@ -352,7 +369,7 @@ private class CarbonEventTypeSpec(eventClass: Int = 0, eventKind: Int = 0) : Str
     override fun getFieldOrder() = listOf("eventClass", "eventKind")
 }
 
-private class CarbonEventHotKeyID(signature: Int = 0, id: Int = 0) : Structure() {
+internal class CarbonEventHotKeyID(signature: Int = 0, id: Int = 0) : Structure() {
     @JvmField
     var signature = signature
 
@@ -362,7 +379,7 @@ private class CarbonEventHotKeyID(signature: Int = 0, id: Int = 0) : Structure()
     override fun getFieldOrder() = listOf("signature", "id")
 }
 
-private class XEvent : Structure() {
+internal class XEvent : Structure() {
     @JvmField
     var type = 0
 
@@ -372,7 +389,7 @@ private class XEvent : Structure() {
     override fun getFieldOrder() = listOf("type", "padding")
 }
 
-private fun carbonKeyCode(key: Char) = mapOf(
+internal fun carbonKeyCode(key: Char) = mapOf(
     'A' to 0x00,
     'B' to 0x0B,
     'C' to 0x08,
