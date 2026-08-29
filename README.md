@@ -336,46 +336,6 @@ operation is aborted.
 
 Import expects every exported Nest record in `passbird-export.json` to declare a unique Slot from `0` to `9`, every exported Nest to contain distinct valid EggIds, and every exported Protein record to declare a unique Slot from `0` to `9` within its Egg. Trashed Eggs are never serialized into the export file and therefore are never restored through import. Exported Protein records must contain both Type and Structure fields or leave both empty. If Nest or Protein slot metadata is missing, duplicated, or out of range, if one exported Nest repeats or contains an invalid EggId, or if an exported Protein record contains only one of Type or Structure, Passbird rejects the file instead of importing it into another Nest or Protein slot.
 
-### Use
-
-Use `u[EggId]` to guide a login flow through one Egg without retyping follow-up commands. The flow uses a fixed order: the configured login Protein slot first, then the password, then the optional Yolk. Empty optional values are skipped automatically, so an Egg without a login Protein starts with the password, and an Egg without a Yolk finishes after the password.
-
-For example, `uemail` can produce a flow like this:
-
-    Ctrl+Shift+P or Enter to continue
-
-    Login copied to clipboard.
-
-    Password copied to clipboard.
-
-    Yolk copied to clipboard.
-    482193 (17s)
-
-Pressing Enter advances the flow, but Enter requires the Passbird window to have focus. When the temporary global hotkey is available, `Ctrl+Shift+P` advances the same flow step without forcing you to leave the browser or application where you are entering the credentials. The hotkey exists only while a multi-step `u[EggId]` flow is active. If hotkey registration fails, Passbird keeps the flow usable and falls back to:
-
-    Global hotkey Ctrl+Shift+P could not be registered.
-    Press Enter to continue.
-
-The login value is taken from the global configuration key `application.flow.loginProteinSlot`. The hotkey behavior is configured in the same section:
-
-```yaml
-application:
-  flow:
-    loginProteinSlot: 0
-    globalHotkey:
-      enabled: true
-      key: P
-      backend: auto
-```
-
-Only letters `A` through `Z` are accepted for `key`, and the effective hotkey is always `Ctrl+Shift+<key>`. `backend` defaults to `auto`, which chooses `win32` on Windows, `quartz` on macOS, and `x11` when an X11 display is available. You can also force `win32`, `quartz`, or `x11` explicitly for verification or troubleshooting. On macOS, if `backend: quartz` is selected or `auto` resolves to macOS and the launching terminal app is missing the required Input Monitoring permission, Passbird opens the macOS settings page and terminates so you can grant that permission and restart the terminal before trying again.
-
-The Yolk step reuses the normal live `y[EggId]` behavior. If `application.yolk.copyToClipboard` is enabled, the currently shown TOTP code is copied to the clipboard and refreshed automatically when the code rolls over.
-
-Favorites and memory reuse `u` naturally through their existing delegation. For example, `f0u` runs the full guided flow for the Egg stored in Favorite slot `0`, and `m0u` does the same for the Egg stored in Memory slot `0`.
-
-If a `u[EggId]` flow aborts because a clipboard copy fails or another flow step encounters an error, `.` repeats that failed guided flow as well.
-
 ### Nests
 
 Nests are an advanced feature in Passbird, allowing you to organize passwords into categories. For example, you might create one Nest for online shopping, another for social networks, or separate Nests for personal and work-related accounts. To access Nest-specific help, press n followed by Enter.
@@ -500,6 +460,44 @@ The memory feature extends to other operations as well. For example:
 - To view the password for the third most recently accessed EggId (stored in Slot 2), input `m2v`.
 
 At any time, you can input `m` to display the contents of the EggIdMemory. This command lists the EggIds currently stored in memory, ordered from most recently used (Slot 0) to least recently used (Slot 9).
+
+### Use
+
+Use `u[EggId]` to guide a login flow through one Egg without retyping follow-up commands. The flow uses a fixed order: the configured login Protein slot first, then the password, then the optional Yolk. Empty optional values are skipped automatically, so an Egg without a login Protein starts with the password, and an Egg without a Yolk finishes after the password.
+
+For example, `uemail` can produce a flow like this:
+
+    Ctrl+Shift+P or Enter to continue
+
+    Login copied to clipboard.
+
+    Password copied to clipboard.
+
+    Yolk copied to clipboard.
+    482193 (17s)
+
+Pressing Enter advances the flow, but Enter requires the Passbird window to have focus. When the temporary global hotkey is available, `Ctrl+Shift+P` advances the same flow step without forcing you to leave the browser or application where you are entering the credentials. The hotkey exists only while a multi-step `u[EggId]` flow is active. If hotkey registration fails, Passbird keeps the flow usable and falls back to:
+
+    Global hotkey Ctrl+Shift+P could not be registered.
+    Press Enter to continue.
+
+The login value is taken from the global configuration key `application.flow.loginProteinSlot`. The hotkey behavior is configured in the same section:
+
+```yaml
+application:
+  flow:
+    loginProteinSlot: 0
+    globalHotkey:
+      enabled: true
+      key: P
+      backend: auto
+```
+
+Only letters `A` through `Z` are accepted for `key`, and the effective hotkey is always `Ctrl+Shift+<key>`. `backend` defaults to `auto`, which chooses `win32` on Windows, `quartz` on macOS, and `x11` when an X11 display is available. You can also force `win32`, `quartz`, or `x11` explicitly for verification or troubleshooting. On macOS, if `backend: quartz` is selected or `auto` resolves to macOS and the launching terminal app is missing the required Input Monitoring permission, Passbird opens the macOS settings page and terminates so you can grant that permission and restart the terminal before trying again.
+
+#### macOS secure input
+
+Some macOS password fields enable secure input, which can temporarily prevent the global hotkey from working. If a login flow moves from a username screen to a password field, press the hotkey to copy the login before selecting the button that opens the password screen. If the password field already has focus, click outside it or press Tab to move focus away before using the hotkey.
 
 ### Custom Passwords
 
