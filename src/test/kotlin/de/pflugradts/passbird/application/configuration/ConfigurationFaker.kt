@@ -23,6 +23,7 @@ fun fakeConfiguration(
     withPromptOnExportFile: Boolean = false,
     withFlowGlobalHotkeyEnabled: Boolean = true,
     withFlowGlobalHotkeyKey: String = "P",
+    withFlowGlobalHotkeyBackend: String = "auto",
     withLoginProteinSlot: Int = 0,
     withTrashRetentionDays: Int = 365,
     withYolkAlgorithm: String = "SHA1",
@@ -60,6 +61,7 @@ fun fakeConfiguration(
         withPromptOnExportFile = withPromptOnExportFile,
         withFlowGlobalHotkeyEnabled = withFlowGlobalHotkeyEnabled,
         withFlowGlobalHotkeyKey = withFlowGlobalHotkeyKey,
+        withFlowGlobalHotkeyBackend = withFlowGlobalHotkeyBackend,
         withLoginProteinSlot = withLoginProteinSlot,
         withTrashRetentionDays = withTrashRetentionDays,
         withYolkAlgorithm = withYolkAlgorithm,
@@ -128,6 +130,7 @@ private fun fakeApplication(
     withPromptOnExportFile: Boolean,
     withFlowGlobalHotkeyEnabled: Boolean,
     withFlowGlobalHotkeyKey: String,
+    withFlowGlobalHotkeyBackend: String,
     withLoginProteinSlot: Int,
     withTrashRetentionDays: Int,
     withYolkAlgorithm: String,
@@ -144,6 +147,7 @@ private fun fakeApplication(
     val globalHotkey = mockk<Configuration.GlobalHotkey>()
     every { globalHotkey.enabled } returns withFlowGlobalHotkeyEnabled
     every { globalHotkey.key } returns withFlowGlobalHotkeyKey
+    every { globalHotkey.backend } returns withFlowGlobalHotkeyBackend
     val flow = mockk<Configuration.Flow>()
     every { flow.loginProteinSlot } returns withLoginProteinSlot
     every { flow.globalHotkey } returns globalHotkey

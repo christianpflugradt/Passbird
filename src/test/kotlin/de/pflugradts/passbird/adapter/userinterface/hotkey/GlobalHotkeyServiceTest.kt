@@ -30,11 +30,47 @@ class GlobalHotkeyServiceTest {
     }
 
     @Test
+    fun `should use windows registrar when win32 backend is forced`() {
+        val expectedRegistration = mockk<RegisteredGlobalHotkey>()
+        val windowsRegistrar = RecordingRegistrar(expectedRegistration)
+        val service = GlobalHotkeyService(
+            backend = "win32",
+            runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
+            windowsRegistrarFactory = { windowsRegistrar },
+            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            x11RegistrarFactory = { error("X11 registrar must not be used") },
+        )
+
+        val actual = service.register('p')
+
+        expectThat(actual).isSameInstanceAs(expectedRegistration)
+        expectThat(windowsRegistrar.recordedKeys.toList()).isEqualTo(listOf('P'))
+    }
+
+    @Test
     fun `should use mac os registrar on mac os`() {
         val expectedRegistration = mockk<RegisteredGlobalHotkey>()
         val macOsRegistrar = RecordingRegistrar(expectedRegistration)
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Mac OS X"),
+            windowsRegistrarFactory = { error("windows registrar must not be used") },
+            macOsRegistrarFactory = { macOsRegistrar },
+            x11RegistrarFactory = { error("X11 registrar must not be used") },
+        )
+
+        val actual = service.register('p')
+
+        expectThat(actual).isSameInstanceAs(expectedRegistration)
+        expectThat(macOsRegistrar.recordedKeys.toList()).isEqualTo(listOf('P'))
+    }
+
+    @Test
+    fun `should use mac os registrar when quartz backend is forced`() {
+        val expectedRegistration = mockk<RegisteredGlobalHotkey>()
+        val macOsRegistrar = RecordingRegistrar(expectedRegistration)
+        val service = GlobalHotkeyService(
+            backend = "quartz",
+            runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
             macOsRegistrarFactory = { macOsRegistrar },
             x11RegistrarFactory = { error("X11 registrar must not be used") },
@@ -64,10 +100,58 @@ class GlobalHotkeyServiceTest {
     }
 
     @Test
+    fun `should use x11 registrar when x11 backend is forced`() {
+        val expectedRegistration = mockk<RegisteredGlobalHotkey>()
+        val x11Registrar = RecordingRegistrar(expectedRegistration)
+        val service = GlobalHotkeyService(
+            backend = "x11",
+            runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
+            windowsRegistrarFactory = { error("windows registrar must not be used") },
+            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            x11RegistrarFactory = { x11Registrar },
+        )
+
+        val actual = service.register('p')
+
+        expectThat(actual).isSameInstanceAs(expectedRegistration)
+        expectThat(x11Registrar.recordedKeys.toList()).isEqualTo(listOf('P'))
+    }
+
+    @Test
     fun `should return null when no supported runtime is available`() {
         val service = GlobalHotkeyService(
             runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
+            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            x11RegistrarFactory = { error("X11 registrar must not be used") },
+        )
+
+        val actual = service.register('p')
+
+        expectThat(actual).isEqualTo(null)
+    }
+
+    @Test
+    fun `should return null when wayland backend is forced`() {
+        val service = GlobalHotkeyService(
+            backend = "wayland",
+            runtimeEnvironment = RuntimeEnvironment(osName = "Linux", waylandDisplay = "wayland-0"),
+            windowsRegistrarFactory = { error("windows registrar must not be used") },
+            macOsRegistrarFactory = { error("macOS registrar must not be used") },
+            x11RegistrarFactory = { error("X11 registrar must not be used") },
+        )
+
+        val actual = service.register('p')
+
+        expectThat(actual).isEqualTo(null)
+    }
+
+    @Test
+    fun `should return null when forced backend throws`() {
+        val service = GlobalHotkeyService(
+            backend = "win32",
+            runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
+            windowsRegistrarFactory = { error("backend unavailable") },
             macOsRegistrarFactory = { error("macOS registrar must not be used") },
             x11RegistrarFactory = { error("X11 registrar must not be used") },
         )

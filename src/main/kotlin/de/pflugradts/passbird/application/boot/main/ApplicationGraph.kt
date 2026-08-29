@@ -133,7 +133,9 @@ class ApplicationGraph(
 ) {
     val bootable: Bootable get() = passbirdApplication
     val clipboardAdapterPort: ClipboardAdapterPort by lazy { ClipboardService(ClipboardGateway(), configuration) }
-    val globalHotkeyAdapterPort: GlobalHotkeyAdapterPort by lazy { GlobalHotkeyService() }
+    val globalHotkeyAdapterPort: GlobalHotkeyAdapterPort by lazy {
+        GlobalHotkeyService(backend = configuration.application.flow.globalHotkey.backend)
+    }
     val commandHandlers: Set<CommandHandler> by lazy {
         setOf(
             AddFavoriteCommandHandler(passwordService, userInterfaceAdapterPort, commandExecutionTracker),

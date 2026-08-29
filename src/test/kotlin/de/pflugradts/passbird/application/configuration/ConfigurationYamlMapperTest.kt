@@ -35,6 +35,7 @@ class ConfigurationYamlMapperTest {
             globalHotkey:
               enabled: false
               key: x
+              backend: x11
           inactivityLimit:
             enabled: true
             limitInMinutes: 15
@@ -114,6 +115,7 @@ class ConfigurationYamlMapperTest {
         expectThat(actual.application.flow.loginProteinSlot) isEqualTo 0
         expectThat(actual.application.flow.globalHotkey.enabled).isTrue()
         expectThat(actual.application.flow.globalHotkey.key) isEqualTo "P"
+        expectThat(actual.application.flow.globalHotkey.backend) isEqualTo "auto"
         expectThat(actual.domain.protein.templates).hasSize(1)
         expectThat(actual.domain.protein.templates.first().slots) isEqualTo mapOf(0 to "domain", 4 to "description")
     }
@@ -141,7 +143,7 @@ class ConfigurationYamlMapperTest {
                 backup = Configuration.Backup(location = "/tmp/backups"),
                 flow = Configuration.Flow(
                     loginProteinSlot = 2,
-                    globalHotkey = Configuration.GlobalHotkey(enabled = false, key = "z"),
+                    globalHotkey = Configuration.GlobalHotkey(enabled = false, key = "z", backend = "quartz"),
                 ),
             ),
             adapter = Configuration.Adapter(
@@ -168,6 +170,7 @@ class ConfigurationYamlMapperTest {
         expectThat(reloaded.application.flow.loginProteinSlot) isEqualTo 2
         expectThat(reloaded.application.flow.globalHotkey.enabled).isFalse()
         expectThat(reloaded.application.flow.globalHotkey.key) isEqualTo "z"
+        expectThat(reloaded.application.flow.globalHotkey.backend) isEqualTo "quartz"
         expectThat(reloaded.adapter.keyStore.location) isEqualTo "/tmp"
         expectThat(reloaded.adapter.passwordTree.location) isEqualTo "/tree"
         expectThat(reloaded.domain.protein.templates.first().slots) isEqualTo mapOf(0 to "domain", 1 to "user")
@@ -251,6 +254,7 @@ class ConfigurationYamlMapperTest {
         expectThat(actual.application.flow.loginProteinSlot) isEqualTo 0
         expectThat(actual.application.flow.globalHotkey.enabled).isTrue()
         expectThat(actual.application.flow.globalHotkey.key) isEqualTo "P"
+        expectThat(actual.application.flow.globalHotkey.backend) isEqualTo "auto"
         expectThat(actual.application.inactivityLimit.limitInMinutes) isEqualTo 10
         expectThat(actual.application.trash.retentionDays) isEqualTo 365
         expectThat(actual.application.password.length) isEqualTo 20
@@ -322,6 +326,15 @@ class ConfigurationYamlMapperTest {
             """
             application:
               flow:
+                globalHotkey:
+                  backend: cocoa
+            """.trimIndent(),
+            "Global hotkey backend is invalid",
+        )
+        assertInvalidConfiguration(
+            """
+            application:
+              flow:
                 loginProteinSlot: 11
             """.trimIndent(),
             "Login Protein Slot is invalid",
@@ -336,6 +349,7 @@ class ConfigurationYamlMapperTest {
         expectThat(configuration.application.flow.loginProteinSlot) isEqualTo 0
         expectThat(configuration.application.flow.globalHotkey.enabled).isTrue()
         expectThat(configuration.application.flow.globalHotkey.key) isEqualTo "P"
+        expectThat(configuration.application.flow.globalHotkey.backend) isEqualTo "auto"
         expectThat(configuration.application.inactivityLimit.enabled).isFalse()
         expectThat(configuration.application.inactivityLimit.limitInMinutes) isEqualTo 10
         expectThat(configuration.application.trash.retentionDays) isEqualTo 365
@@ -389,6 +403,7 @@ class ConfigurationYamlMapperTest {
         expectThat(configuration.application.flow.loginProteinSlot) isEqualTo 1
         expectThat(configuration.application.flow.globalHotkey.enabled).isFalse()
         expectThat(configuration.application.flow.globalHotkey.key) isEqualTo "x"
+        expectThat(configuration.application.flow.globalHotkey.backend) isEqualTo "x11"
         expectThat(configuration.application.inactivityLimit.enabled).isTrue()
         expectThat(configuration.application.inactivityLimit.limitInMinutes) isEqualTo 15
         expectThat(configuration.application.trash.retentionDays) isEqualTo 45

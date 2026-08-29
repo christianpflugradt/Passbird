@@ -40,6 +40,7 @@ interface ReadableConfiguration {
     interface GlobalHotkey {
         val enabled: Boolean
         val key: String
+        val backend: String
     }
     interface InactivityLimit {
         val enabled: Boolean

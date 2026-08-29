@@ -15,14 +15,26 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 internal class GlobalHotkeyService(
+    private val backend: String = "auto",
     private val runtimeEnvironment: RuntimeEnvironment = RuntimeEnvironment(),
     private val windowsRegistrarFactory: () -> PlatformHotkeyRegistrar = { WindowsGlobalHotkeyRegistrar() },
     private val macOsRegistrarFactory: () -> PlatformHotkeyRegistrar = { MacOsGlobalHotkeyRegistrar() },
     private val x11RegistrarFactory: () -> PlatformHotkeyRegistrar = { X11GlobalHotkeyRegistrar() },
 ) : GlobalHotkeyAdapterPort {
-    override fun register(key: Char): RegisteredGlobalHotkey? = registrar().register(key.uppercaseChar())
+    override fun register(key: Char): RegisteredGlobalHotkey? = runCatching {
+        registrar().register(key.uppercaseChar())
+    }.getOrNull()
 
-    private fun registrar() = when {
+    private fun registrar() = when (backend) {
+        "auto" -> autoRegistrar()
+        "win32" -> windowsRegistrarFactory()
+        "quartz" -> macOsRegistrarFactory()
+        "x11" -> x11RegistrarFactory()
+        "wayland" -> UnsupportedGlobalHotkeyRegistrar()
+        else -> UnsupportedGlobalHotkeyRegistrar()
+    }
+
+    private fun autoRegistrar() = when {
         runtimeEnvironment.isWindows() -> windowsRegistrarFactory()
         runtimeEnvironment.isMacOs() -> macOsRegistrarFactory()
         runtimeEnvironment.hasX11Display() -> x11RegistrarFactory()

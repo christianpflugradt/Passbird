@@ -81,6 +81,7 @@ private fun ConfigurationNode.toFlow() = Configuration.Flow(
 private fun ConfigurationNode.toGlobalHotkey() = Configuration.GlobalHotkey(
     enabled = boolean("enabled") ?: Configuration.GlobalHotkey().enabled,
     key = string("key") ?: Configuration.GlobalHotkey().key,
+    backend = string("backend") ?: Configuration.GlobalHotkey().backend,
 ).also { ensureFullyConsumed() }
 
 private fun ConfigurationNode.toInactivityLimit() = Configuration.InactivityLimit(
@@ -234,6 +235,7 @@ private fun ReadableConfiguration.Flow.toYamlValue(): Map<String, Any?> = linked
 private fun ReadableConfiguration.GlobalHotkey.toYamlValue(): Map<String, Any?> = linkedMapOf(
     "enabled" to enabled,
     "key" to key,
+    "backend" to backend,
 )
 
 private fun ReadableConfiguration.InactivityLimit.toYamlValue(): Map<String, Any?> = linkedMapOf(
