@@ -7,7 +7,6 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.Structure
-import com.sun.jna.ptr.PointerByReference
 import de.pflugradts.passbird.application.GlobalHotkeyAdapterPort
 import de.pflugradts.passbird.application.RegisteredGlobalHotkey
 import java.util.concurrent.CountDownLatch
@@ -135,55 +134,36 @@ internal class WindowsGlobalHotkeyRegistrar(
 
 internal class MacOsGlobalHotkeyRegistrar(
     private val carbonKeyCodeResolver: (Char) -> Int? = ::carbonKeyCode,
-    private val carbonFactory: () -> Carbon = Carbon::instance,
+    private val runtimeFactory: () -> MacOsHotkeyRuntime = ::QuartzMacOsHotkeyRuntime,
 ) : PlatformHotkeyRegistrar {
-    override fun register(key: Char): RegisteredGlobalHotkey? =
-        carbonKeyCodeResolver(key)?.let { MacOsRegistration(it, carbonFactory()) }?.takeIf(MacOsRegistration::awaitRegistration)
+    override fun register(key: Char): RegisteredGlobalHotkey? = runCatching {
+        carbonKeyCodeResolver(key)
+            ?.let { MacOsRegistration(it, runtimeFactory()) }
+            ?.takeIf(MacOsRegistration::awaitRegistration)
+    }.getOrNull()
 
     internal class MacOsRegistration(
         private val keyCode: Int,
-        private val carbon: Carbon,
+        private val runtime: MacOsHotkeyRuntime,
     ) : BackgroundHotkeyRegistration() {
-        private val eventHandler = Carbon.EventHandlerCallback { _, _, _ ->
-            signalNextAction()
-            0
-        }
+        @Volatile
+        private var loop: MacOsHotkeyLoop? = null
 
         init {
             start("passbird-hotkey-macos") {
-                val target = carbon.GetApplicationEventTarget() ?: return@start markRegistered(false)
-                val eventType = CarbonEventTypeSpec(CARBON_EVENT_CLASS_KEYBOARD, CARBON_EVENT_HOTKEY_PRESSED).apply { write() }
-                val handlerRef = PointerByReference()
-                if (carbon.InstallEventHandler(target, eventHandler, 1, eventType.pointer, Pointer.NULL, handlerRef) != CARBON_NO_ERR) {
+                val hotkeyLoop = runtime.open(keyCode, ::signalNextAction)
+                if (hotkeyLoop == null) {
                     markRegistered(false)
                     return@start
                 }
-                val hotKeyRef = PointerByReference()
-                val hotKeyId = CarbonEventHotKeyID(CARBON_SIGNATURE, HOTKEY_ID)
-                if (carbon.RegisterEventHotKey(keyCode, CARBON_CONTROL_KEY or CARBON_SHIFT_KEY, hotKeyId, target, 0, hotKeyRef) !=
-                    CARBON_NO_ERR
-                ) {
-                    carbon.RemoveEventHandler(handlerRef.value)
-                    markRegistered(false)
-                    return@start
-                }
+                loop = hotkeyLoop
                 markRegistered(true)
                 try {
                     while (running.get()) {
-                        val nextEvent = PointerByReference()
-                        if (carbon.ReceiveNextEvent(1, eventType.pointer, CARBON_POLL_TIMEOUT_SECONDS, true, nextEvent) == CARBON_NO_ERR) {
-                            nextEvent.value?.let { event ->
-                                try {
-                                    carbon.SendEventToEventTarget(event, target)
-                                } finally {
-                                    carbon.ReleaseEvent(event)
-                                }
-                            }
-                        }
+                        hotkeyLoop.poll(POLL_INTERVAL_MILLISECONDS)
                     }
                 } finally {
-                    hotKeyRef.value?.let(carbon::UnregisterEventHotKey)
-                    carbon.RemoveEventHandler(handlerRef.value)
+                    hotkeyLoop.close()
                 }
             }
         }
@@ -259,45 +239,115 @@ internal interface Win32User32 : Library {
     }
 }
 
-internal interface Carbon : Library {
-    fun GetApplicationEventTarget(): Pointer?
-    fun InstallEventHandler(
-        target: Pointer,
-        handler: EventHandlerCallback,
-        eventTypeCount: Int,
-        eventTypes: Pointer,
-        userData: Pointer?,
-        handlerRef: PointerByReference,
-    ): Int
+internal interface MacOsHotkeyRuntime {
+    fun open(keyCode: Int, onNextAction: () -> Unit): MacOsHotkeyLoop?
+}
 
-    fun RemoveEventHandler(handlerRef: Pointer?): Int
-    fun RegisterEventHotKey(
-        keyCode: Int,
-        modifiers: Int,
-        hotKeyId: CarbonEventHotKeyID,
-        target: Pointer,
-        options: Int,
-        hotKeyRef: PointerByReference,
-    ): Int
+internal interface MacOsHotkeyLoop {
+    fun poll(milliseconds: Long)
+    fun close()
+}
 
-    fun UnregisterEventHotKey(hotKeyRef: Pointer?): Int
-    fun ReceiveNextEvent(
-        eventTypeCount: Int,
-        eventTypes: Pointer,
-        timeoutInSeconds: Double,
-        pullEvent: Boolean,
-        eventRef: PointerByReference,
-    ): Int
+internal class QuartzMacOsHotkeyRuntime(
+    private val quartz: Quartz = Quartz.instance(),
+    private val coreFoundation: CoreFoundation = CoreFoundation.instance(),
+) : MacOsHotkeyRuntime {
+    override fun open(keyCode: Int, onNextAction: () -> Unit): MacOsHotkeyLoop? {
+        val callback = Quartz.EventTapCallback { _, type, event, _ ->
+            if (type == CG_EVENT_KEY_DOWN && event != null) {
+                val actualKeyCode = quartz.CGEventGetIntegerValueField(event, CG_KEYBOARD_EVENT_KEYCODE_FIELD).toInt()
+                val flags = quartz.CGEventGetFlags(event)
+                if (actualKeyCode == keyCode && hasRequiredModifiers(flags)) {
+                    onNextAction()
+                }
+            }
+            event
+        }
+        val tap = quartz.CGEventTapCreate(
+            CG_SESSION_EVENT_TAP,
+            CG_HEAD_INSERT_EVENT_TAP,
+            CG_EVENT_TAP_LISTEN_ONLY,
+            1L shl CG_EVENT_KEY_DOWN,
+            callback,
+            Pointer.NULL,
+        ) ?: return null
+        val source = coreFoundation.CFMachPortCreateRunLoopSource(Pointer.NULL, tap, 0) ?: run {
+            coreFoundation.CFRelease(tap)
+            return null
+        }
+        val mode = coreFoundation.CFStringCreateWithCString(Pointer.NULL, CF_RUN_LOOP_DEFAULT_MODE, CF_STRING_ENCODING_UTF8) ?: run {
+            coreFoundation.CFRelease(source)
+            coreFoundation.CFRelease(tap)
+            return null
+        }
+        val runLoop = coreFoundation.CFRunLoopGetCurrent()
+        coreFoundation.CFRunLoopAddSource(runLoop, source, mode)
+        quartz.CGEventTapEnable(tap, true)
+        return QuartzMacOsHotkeyLoop(runLoop, mode, source, tap, callback, coreFoundation)
+    }
 
-    fun SendEventToEventTarget(eventRef: Pointer?, target: Pointer): Int
-    fun ReleaseEvent(eventRef: Pointer?): Int
+    private fun hasRequiredModifiers(flags: Long) = flags and CG_EVENT_FLAG_MASK_CONTROL != 0L &&
+        flags and CG_EVENT_FLAG_MASK_SHIFT != 0L
+}
 
-    fun interface EventHandlerCallback : Callback {
-        fun callback(nextHandler: Pointer?, event: Pointer?, userData: Pointer?): Int
+internal class QuartzMacOsHotkeyLoop(
+    private val runLoop: Pointer,
+    private val mode: Pointer,
+    private val source: Pointer,
+    private val tap: Pointer,
+    @Suppress("UNUSED_PARAMETER") private val callback: Quartz.EventTapCallback,
+    private val coreFoundation: CoreFoundation,
+) : MacOsHotkeyLoop {
+    override fun poll(milliseconds: Long) {
+        coreFoundation.CFRunLoopRunInMode(mode, milliseconds.toDouble() / MILLISECONDS_PER_SECOND, true)
+    }
+
+    override fun close() {
+        coreFoundation.CFRunLoopStop(runLoop)
+        coreFoundation.CFRelease(source)
+        coreFoundation.CFRelease(tap)
+        coreFoundation.CFRelease(mode)
     }
 
     companion object {
-        fun instance(): Carbon = Native.load("Carbon", Carbon::class.java)
+        private const val MILLISECONDS_PER_SECOND = 1000.0
+    }
+}
+
+internal interface Quartz : Library {
+    fun CGEventTapCreate(
+        tap: Int,
+        place: Int,
+        options: Int,
+        eventsOfInterest: Long,
+        callback: EventTapCallback,
+        userInfo: Pointer?,
+    ): Pointer?
+
+    fun CGEventTapEnable(tap: Pointer, enable: Boolean)
+    fun CGEventGetIntegerValueField(event: Pointer, field: Int): Long
+    fun CGEventGetFlags(event: Pointer): Long
+
+    fun interface EventTapCallback : Callback {
+        fun callback(proxy: Pointer?, type: Int, event: Pointer?, userData: Pointer?): Pointer?
+    }
+
+    companion object {
+        fun instance(): Quartz = Native.load("ApplicationServices", Quartz::class.java)
+    }
+}
+
+internal interface CoreFoundation : Library {
+    fun CFMachPortCreateRunLoopSource(allocator: Pointer?, port: Pointer, order: Int): Pointer?
+    fun CFRunLoopGetCurrent(): Pointer
+    fun CFRunLoopAddSource(runLoop: Pointer, source: Pointer, mode: Pointer)
+    fun CFRunLoopRunInMode(mode: Pointer, seconds: Double, returnAfterSourceHandled: Boolean): Int
+    fun CFRunLoopStop(runLoop: Pointer)
+    fun CFStringCreateWithCString(allocator: Pointer?, value: String, encoding: Int): Pointer?
+    fun CFRelease(reference: Pointer?)
+
+    companion object {
+        fun instance(): CoreFoundation = Native.load("CoreFoundation", CoreFoundation::class.java)
     }
 }
 
@@ -359,26 +409,6 @@ internal class Win32Message : Structure() {
     override fun getFieldOrder() = listOf("window", "message", "wParam", "lParam", "time", "point")
 }
 
-internal class CarbonEventTypeSpec(eventClass: Int = 0, eventKind: Int = 0) : Structure() {
-    @JvmField
-    var eventClass = eventClass
-
-    @JvmField
-    var eventKind = eventKind
-
-    override fun getFieldOrder() = listOf("eventClass", "eventKind")
-}
-
-internal class CarbonEventHotKeyID(signature: Int = 0, id: Int = 0) : Structure() {
-    @JvmField
-    var signature = signature
-
-    @JvmField
-    var id = id
-
-    override fun getFieldOrder() = listOf("signature", "id")
-}
-
 internal class XEvent : Structure() {
     @JvmField
     var type = 0
@@ -418,13 +448,15 @@ internal fun carbonKeyCode(key: Char) = mapOf(
     'Z' to 0x06,
 )[key]
 
-private const val CARBON_CONTROL_KEY = 1 shl 12
-private const val CARBON_EVENT_CLASS_KEYBOARD = 0x6B657962
-private const val CARBON_EVENT_HOTKEY_PRESSED = 6
-private const val CARBON_NO_ERR = 0
-private const val CARBON_POLL_TIMEOUT_SECONDS = 0.05
-private const val CARBON_SHIFT_KEY = 1 shl 9
-private const val CARBON_SIGNATURE = 0x50424244
+private const val CF_RUN_LOOP_DEFAULT_MODE = "kCFRunLoopDefaultMode"
+private const val CF_STRING_ENCODING_UTF8 = 0x08000100.toInt()
+private const val CG_EVENT_FLAG_MASK_CONTROL = 1L shl 18
+private const val CG_EVENT_FLAG_MASK_SHIFT = 1L shl 17
+private const val CG_EVENT_KEY_DOWN = 10
+private const val CG_EVENT_TAP_LISTEN_ONLY = 1
+private const val CG_HEAD_INSERT_EVENT_TAP = 0
+private const val CG_KEYBOARD_EVENT_KEYCODE_FIELD = 9
+private const val CG_SESSION_EVENT_TAP = 1
 private const val HOTKEY_ID = 1
 private const val POLL_INTERVAL_MILLISECONDS = 50L
 private const val WIN32_MOD_CONTROL = 0x0002

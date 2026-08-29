@@ -1,7 +1,6 @@
 package de.pflugradts.passbird.adapter.userinterface.hotkey
 
 import com.sun.jna.Pointer
-import com.sun.jna.ptr.PointerByReference
 import de.pflugradts.passbird.application.RegisteredGlobalHotkey
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
@@ -127,48 +126,26 @@ class GlobalHotkeyServiceTest {
     }
 
     @Test
-    fun `should return null when mac os target is unavailable`() {
-        val carbon = FakeCarbon(target = null)
+    fun `should return null when mac os hotkey runtime cannot open`() {
+        val runtime = FakeMacOsHotkeyRuntime(loop = null)
 
-        val actual = MacOsGlobalHotkeyRegistrar(carbonFactory = { carbon }).register('P')
-
-        expectThat(actual).isEqualTo(null)
-    }
-
-    @Test
-    fun `should return null when mac os handler installation fails`() {
-        val carbon = FakeCarbon(installResult = 1)
-
-        val actual = MacOsGlobalHotkeyRegistrar(carbonFactory = { carbon }).register('P')
+        val actual = MacOsGlobalHotkeyRegistrar(runtimeFactory = { runtime }).register('P')
 
         expectThat(actual).isEqualTo(null)
-        expectThat(carbon.removeHandlerCalls) isEqualTo 0
-    }
-
-    @Test
-    fun `should remove handler when mac os hotkey registration fails`() {
-        val carbon = FakeCarbon(registerResult = 1)
-
-        val actual = MacOsGlobalHotkeyRegistrar(carbonFactory = { carbon }).register('P')
-
-        expectThat(actual).isEqualTo(null)
-        expectThat(carbon.removeHandlerCalls) isEqualTo 1
     }
 
     @Test
     fun `should signal and unregister mac os hotkey`() {
-        val carbon = FakeCarbon(nextEvent = Pointer(77))
-        val registration = MacOsGlobalHotkeyRegistrar(carbonFactory = { carbon }).register('P')
+        val loop = FakeMacOsHotkeyLoop()
+        val runtime = FakeMacOsHotkeyRuntime(loop)
+        val registration = MacOsGlobalHotkeyRegistrar(runtimeFactory = { runtime }).register('P')
 
         expectThat(registration).isSameInstanceAs(registration)
         expectThat(registration?.awaitWithin(250)) isEqualTo true
+        expectThat(registration?.awaitWithin(250)) isEqualTo false
 
         registration?.release()
-
-        expectThat(carbon.sentEvents) isEqualTo 1
-        expectThat(carbon.releasedEvents) isEqualTo 1
-        expectThat(carbon.unregisterHotKeyCalls) isEqualTo 1
-        expectThat(carbon.removeHandlerCalls) isEqualTo 1
+        expectThat(loop.closed) isEqualTo true
     }
 
     @Test
@@ -247,79 +224,29 @@ private class FakeWin32User32(
     }
 }
 
-private class FakeCarbon(
-    private val target: Pointer? = Pointer(1),
-    private val installResult: Int = 0,
-    private val registerResult: Int = 0,
-    private var nextEvent: Pointer? = null,
-) : Carbon {
-    private var handler: Carbon.EventHandlerCallback? = null
-    var removeHandlerCalls = 0
-    var unregisterHotKeyCalls = 0
-    var releasedEvents = 0
-    var sentEvents = 0
-
-    override fun GetApplicationEventTarget(): Pointer? = target
-
-    override fun InstallEventHandler(
-        target: Pointer,
-        handler: Carbon.EventHandlerCallback,
-        eventTypeCount: Int,
-        eventTypes: Pointer,
-        userData: Pointer?,
-        handlerRef: PointerByReference,
-    ): Int {
-        this.handler = handler
-        handlerRef.value = Pointer(11)
-        return installResult
+private class FakeMacOsHotkeyRuntime(
+    private val loop: FakeMacOsHotkeyLoop?,
+) : MacOsHotkeyRuntime {
+    override fun open(keyCode: Int, onNextAction: () -> Unit): MacOsHotkeyLoop? {
+        loop?.onNextAction = onNextAction
+        return loop
     }
+}
 
-    override fun RemoveEventHandler(handlerRef: Pointer?): Int {
-        removeHandlerCalls++
-        return 0
-    }
+private class FakeMacOsHotkeyLoop : MacOsHotkeyLoop {
+    var onNextAction: (() -> Unit)? = null
+    var closed = false
+    private var signaled = false
 
-    override fun RegisterEventHotKey(
-        keyCode: Int,
-        modifiers: Int,
-        hotKeyId: CarbonEventHotKeyID,
-        target: Pointer,
-        options: Int,
-        hotKeyRef: PointerByReference,
-    ): Int {
-        hotKeyRef.value = Pointer(12)
-        return registerResult
-    }
-
-    override fun UnregisterEventHotKey(hotKeyRef: Pointer?): Int {
-        unregisterHotKeyCalls++
-        return 0
-    }
-
-    override fun ReceiveNextEvent(
-        eventTypeCount: Int,
-        eventTypes: Pointer,
-        timeoutInSeconds: Double,
-        pullEvent: Boolean,
-        eventRef: PointerByReference,
-    ): Int {
-        nextEvent?.let {
-            eventRef.value = it
-            nextEvent = null
-            return 0
+    override fun poll(milliseconds: Long) {
+        if (!signaled) {
+            signaled = true
+            onNextAction?.invoke()
         }
-        return 1
     }
 
-    override fun SendEventToEventTarget(eventRef: Pointer?, target: Pointer): Int {
-        sentEvents++
-        handler?.callback(null, eventRef, null)
-        return 0
-    }
-
-    override fun ReleaseEvent(eventRef: Pointer?): Int {
-        releasedEvents++
-        return 0
+    override fun close() {
+        closed = true
     }
 }
 
