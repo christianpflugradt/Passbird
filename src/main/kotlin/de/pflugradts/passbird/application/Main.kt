@@ -40,7 +40,13 @@ fun mainInitialSlot(slot: String?): Slot? = when (slot) {
     }
 }
 
-fun mainBootLauncher(runContext: RunContext) = LauncherGraph(runContext).bootable.boot()
+fun mainBootLauncher(runContext: RunContext) {
+    val launcherGraph = LauncherGraph(runContext)
+    MacOsApplicationLoopGraph(
+        globalHotkeyEnabled = launcherGraph.configuration.application.flow.globalHotkey.enabled,
+        globalHotkeyBackend = launcherGraph.configuration.application.flow.globalHotkey.backend,
+    ).run { launcherGraph.bootable.boot() }
+}
 
 fun main(args: Array<String>) {
     MacOsApplicationLoopGraph().run { mainRun(args) }

@@ -7,17 +7,23 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.NativeLibrary
 import com.sun.jna.Pointer
+import java.lang.management.ManagementFactory
 import java.lang.reflect.Method
 
 internal class MacOsApplicationLoopGraph(
     private val osName: String = System.getProperty("os.name").orEmpty(),
+    private val startsOnFirstThread: Boolean = ManagementFactory.getRuntimeMXBean()
+        .inputArguments
+        .contains("-XstartOnFirstThread"),
+    private val globalHotkeyEnabled: Boolean = true,
+    private val globalHotkeyBackend: String = "auto",
     private val runtimeFactory: () -> MacOsApplicationRuntime = ::ObjectiveCMacOsApplicationRuntime,
     private val startWorker: ((() -> Unit) -> Unit) = { work ->
         Thread(work, "passbird-cli").start()
     },
 ) {
     fun run(application: () -> Unit) {
-        if (!osName.lowercase().contains("mac")) {
+        if (!requiresMacOsApplicationLoop()) {
             application()
             return
         }
@@ -36,6 +42,11 @@ internal class MacOsApplicationLoopGraph(
         }
         runtime.run(macOsApplication)
     }
+
+    private fun requiresMacOsApplicationLoop() = osName.lowercase().contains("mac") &&
+        startsOnFirstThread &&
+        globalHotkeyEnabled &&
+        globalHotkeyBackend in setOf("auto", "carbon")
 }
 
 internal interface MacOsApplicationRuntime {

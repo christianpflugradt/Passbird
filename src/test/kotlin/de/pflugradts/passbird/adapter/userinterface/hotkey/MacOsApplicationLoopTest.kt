@@ -21,12 +21,54 @@ class MacOsApplicationLoopTest {
     }
 
     @Test
+    fun `should execute application directly without mac os first thread startup`() {
+        var executions = 0
+
+        MacOsApplicationLoopGraph(
+            osName = "Mac OS X",
+            startsOnFirstThread = false,
+            runtimeFactory = { error("mac os runtime must not be created") },
+        ).run { executions++ }
+
+        expectThat(executions).isEqualTo(1)
+    }
+
+    @Test
+    fun `should execute application directly when global hotkey is disabled`() {
+        var executions = 0
+
+        MacOsApplicationLoopGraph(
+            osName = "Mac OS X",
+            startsOnFirstThread = true,
+            globalHotkeyEnabled = false,
+            runtimeFactory = { error("mac os runtime must not be created") },
+        ).run { executions++ }
+
+        expectThat(executions).isEqualTo(1)
+    }
+
+    @Test
+    fun `should execute application directly when carbon is not selected`() {
+        var executions = 0
+
+        MacOsApplicationLoopGraph(
+            osName = "Mac OS X",
+            startsOnFirstThread = true,
+            globalHotkeyBackend = "quartz",
+            runtimeFactory = { error("mac os runtime must not be created") },
+        ).run { executions++ }
+
+        expectThat(executions).isEqualTo(1)
+    }
+
+    @Test
     fun `should execute application directly when mac os application is unavailable`() {
         var executions = 0
         val runtime = FakeMacOsApplicationRuntime(application = null)
 
         MacOsApplicationLoopGraph(
             osName = "Mac OS X",
+            startsOnFirstThread = true,
             runtimeFactory = { runtime },
         ).run { executions++ }
 
@@ -41,6 +83,7 @@ class MacOsApplicationLoopTest {
 
         MacOsApplicationLoopGraph(
             osName = "Mac OS X",
+            startsOnFirstThread = true,
             runtimeFactory = { runtime },
             startWorker = { work -> work() },
         ).run { executions++ }
