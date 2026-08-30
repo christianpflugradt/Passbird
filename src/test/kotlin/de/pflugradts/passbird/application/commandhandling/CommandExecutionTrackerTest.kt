@@ -7,6 +7,27 @@ import strikt.assertions.isEqualTo
 class CommandExecutionTrackerTest {
 
     @Test
+    fun `should return default outcome when finished without active command`() {
+        val commandExecutionTracker = CommandExecutionTracker()
+
+        val outcome = commandExecutionTracker.finish(CommandExecutionOutcome.SUCCESS)
+
+        expectThat(outcome) isEqualTo CommandExecutionOutcome.SUCCESS
+        expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.SUCCESS
+    }
+
+    @Test
+    fun `should return default outcome when active command was never marked`() {
+        val commandExecutionTracker = CommandExecutionTracker()
+
+        commandExecutionTracker.begin()
+        val outcome = commandExecutionTracker.finish(CommandExecutionOutcome.SUCCESS)
+
+        expectThat(outcome) isEqualTo CommandExecutionOutcome.SUCCESS
+        expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.SUCCESS
+    }
+
+    @Test
     fun `should keep command outcomes isolated per tracker instance`() {
         val firstTracker = CommandExecutionTracker()
         val secondTracker = CommandExecutionTracker()
@@ -31,5 +52,14 @@ class CommandExecutionTrackerTest {
 
         expectThat(nestedOutcome) isEqualTo CommandExecutionOutcome.FAILURE
         expectThat(outerOutcome) isEqualTo CommandExecutionOutcome.FAILURE
+    }
+
+    @Test
+    fun `should ignore marks when no command is active`() {
+        val commandExecutionTracker = CommandExecutionTracker()
+
+        commandExecutionTracker.markAborted()
+
+        expectThat(commandExecutionTracker.lastCompletedOutcome()) isEqualTo CommandExecutionOutcome.FAILURE
     }
 }

@@ -91,6 +91,36 @@ class MacOsApplicationLoopTest {
         expectThat(executions).isEqualTo(1)
         expectThat(runtime.events).containsExactly("terminate", "run")
     }
+
+    @Test
+    fun `should return null when objective c application class is unavailable`() {
+        val objectiveC = FakeObjectiveC(applicationClass = null)
+
+        val actual = ObjectiveCMacOsApplicationRuntime(objectiveC).sharedApplication()
+
+        expectThat(actual).isEqualTo(null)
+    }
+
+    @Test
+    fun `should resolve shared application through objective c runtime`() {
+        val applicationClass = Pointer(2)
+        val selector = Pointer(3)
+        val application = Pointer(4)
+        val objectiveC = FakeObjectiveC(
+            applicationClass = applicationClass,
+            registeredSelector = selector,
+            sharedApplication = application,
+        )
+
+        val actual = ObjectiveCMacOsApplicationRuntime(objectiveC).sharedApplication()
+
+        expectThat(actual).isEqualTo(application)
+        expectThat(objectiveC.messages).containsExactly(
+            "objc_getClass:NSApplication",
+            "sel_registerName:sharedApplication",
+            "objc_msgSendPointer:2:3",
+        )
+    }
 }
 
 private class FakeMacOsApplicationRuntime(
@@ -107,4 +137,37 @@ private class FakeMacOsApplicationRuntime(
     override fun terminate(application: Pointer) {
         events += "terminate"
     }
+}
+
+private class FakeObjectiveC(
+    private val applicationClass: Pointer? = Pointer(1),
+    private val registeredSelector: Pointer = Pointer(2),
+    private val sharedApplication: Pointer? = Pointer(3),
+) : ObjectiveC {
+    val messages = mutableListOf<String>()
+
+    override fun objc_getClass(name: String): Pointer? {
+        messages += "objc_getClass:$name"
+        return applicationClass
+    }
+
+    override fun sel_registerName(name: String): Pointer {
+        messages += "sel_registerName:$name"
+        return registeredSelector
+    }
+
+    override fun objc_msgSendPointer(receiver: Pointer, selector: Pointer): Pointer? {
+        messages += "objc_msgSendPointer:${Pointer.nativeValue(receiver)}:${Pointer.nativeValue(selector)}"
+        return sharedApplication
+    }
+
+    override fun objc_msgSendVoid(receiver: Pointer, selector: Pointer) = Unit
+
+    override fun objc_msgSendVoidWithSelectorObjectAndBoolean(
+        receiver: Pointer,
+        selector: Pointer,
+        selectorArgument: Pointer,
+        objectArgument: Pointer?,
+        waitUntilDone: Boolean,
+    ) = Unit
 }
