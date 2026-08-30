@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.boot.main
 
 import com.sun.jna.Pointer
+import de.pflugradts.passbird.application.GlobalHotkeyBackend
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
@@ -54,7 +55,7 @@ class MacOsApplicationLoopTest {
         MacOsApplicationLoopGraph(
             osName = "Mac OS X",
             startsOnFirstThread = true,
-            globalHotkeyBackend = "quartz",
+            globalHotkeyBackend = GlobalHotkeyBackend.QUARTZ,
             runtimeFactory = { error("mac os runtime must not be created") },
         ).run { executions++ }
 

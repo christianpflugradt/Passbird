@@ -1,6 +1,7 @@
 package de.pflugradts.passbird.application.configuration
 
 import de.pflugradts.passbird.application.Directory
+import de.pflugradts.passbird.application.GlobalHotkeyBackend
 import de.pflugradts.passbird.application.yolk.normalizeTotpAlgorithm
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 
@@ -8,7 +9,7 @@ private const val DEFAULT_BACKUP_DIRECTORY = "backups"
 private const val DEFAULT_CLIPBOARD_RESET_DELAY_SECONDS = 10
 private const val DEFAULT_CLIPBOARD_NATIVE_TOOLING_ENABLED = true
 private const val DEFAULT_FLOW_GLOBAL_HOTKEY_ENABLED = false
-private const val DEFAULT_FLOW_GLOBAL_HOTKEY_BACKEND = "auto"
+private val DEFAULT_FLOW_GLOBAL_HOTKEY_BACKEND = GlobalHotkeyBackend.AUTO
 private const val DEFAULT_FLOW_GLOBAL_HOTKEY_KEY = "P"
 private const val DEFAULT_FLOW_LOGIN_PROTEIN_SLOT = 0
 private const val DEFAULT_PASSWORD_LENGTH = 20
@@ -71,7 +72,7 @@ data class Configuration(
     data class GlobalHotkey(
         override val enabled: Boolean = DEFAULT_FLOW_GLOBAL_HOTKEY_ENABLED,
         override val key: String = DEFAULT_FLOW_GLOBAL_HOTKEY_KEY,
-        override val backend: String = DEFAULT_FLOW_GLOBAL_HOTKEY_BACKEND,
+        override val backend: GlobalHotkeyBackend = DEFAULT_FLOW_GLOBAL_HOTKEY_BACKEND,
     ) : ReadableConfiguration.GlobalHotkey
     data class InactivityLimit(
         override val enabled: Boolean = false,
@@ -162,7 +163,6 @@ internal fun Configuration.validate(): Configuration {
     require(application.flow.globalHotkey.key.length == 1 && application.flow.globalHotkey.key[0].uppercaseChar() in 'A'..'Z') {
         "Global hotkey key is invalid"
     }
-    require(application.flow.globalHotkey.backend in supportedGlobalHotkeyBackends()) { "Global hotkey backend is invalid" }
     normalizeTotpAlgorithm(application.yolk.algorithm)
     require(application.yolk.digits == 6 || application.yolk.digits == 8) { "Yolk digits are invalid" }
     require(application.yolk.periodSeconds > 0) { "Yolk period is invalid" }
@@ -175,5 +175,3 @@ internal fun Configuration.validate(): Configuration {
     }
     return this
 }
-
-private fun supportedGlobalHotkeyBackends() = setOf("auto", "win32", "carbon", "quartz", "x11")

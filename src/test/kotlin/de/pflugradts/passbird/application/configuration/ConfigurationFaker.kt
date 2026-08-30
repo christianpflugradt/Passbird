@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.configuration
 
+import de.pflugradts.passbird.application.GlobalHotkeyBackend
 import de.pflugradts.passbird.application.configuration.Configuration.AnsiEscapeCodes
 import de.pflugradts.passbird.application.configuration.Configuration.Clipboard
 import de.pflugradts.passbird.application.configuration.Configuration.ClipboardNativeTooling
@@ -23,7 +24,7 @@ fun fakeConfiguration(
     withPromptOnExportFile: Boolean = false,
     withFlowGlobalHotkeyEnabled: Boolean = true,
     withFlowGlobalHotkeyKey: String = "P",
-    withFlowGlobalHotkeyBackend: String = "auto",
+    withFlowGlobalHotkeyBackend: GlobalHotkeyBackend = GlobalHotkeyBackend.AUTO,
     withLoginProteinSlot: Int = 0,
     withTrashRetentionDays: Int = 365,
     withYolkAlgorithm: String = "SHA1",
@@ -130,7 +131,7 @@ private fun fakeApplication(
     withPromptOnExportFile: Boolean,
     withFlowGlobalHotkeyEnabled: Boolean,
     withFlowGlobalHotkeyKey: String,
-    withFlowGlobalHotkeyBackend: String,
+    withFlowGlobalHotkeyBackend: GlobalHotkeyBackend,
     withLoginProteinSlot: Int,
     withTrashRetentionDays: Int,
     withYolkAlgorithm: String,

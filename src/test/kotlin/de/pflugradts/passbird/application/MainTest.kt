@@ -162,8 +162,11 @@ class MainTest {
 
     @ParameterizedTest
     @MethodSource("expectedLauncherHotkeyResolution")
-    fun `should run launcher with resolved global hotkey settings`(globalHotkeyEnabled: Boolean, globalHotkeyBackend: String) {
-        val recordedSettings = mutableListOf<Pair<Boolean, String>>()
+    fun `should run launcher with resolved global hotkey settings`(
+        globalHotkeyEnabled: Boolean,
+        globalHotkeyBackend: GlobalHotkeyBackend,
+    ) {
+        val recordedSettings = mutableListOf<Pair<Boolean, GlobalHotkeyBackend>>()
         var bootCount = 0
 
         mainBootLauncher(
@@ -209,10 +212,10 @@ class MainTest {
 
         @JvmStatic
         private fun expectedLauncherHotkeyResolution() = Stream.of(
-            Arguments.of(false, "auto"),
-            Arguments.of(true, "quartz"),
-            Arguments.of(true, "carbon"),
-            Arguments.of(true, "auto"),
+            Arguments.of(false, GlobalHotkeyBackend.AUTO),
+            Arguments.of(true, GlobalHotkeyBackend.QUARTZ),
+            Arguments.of(true, GlobalHotkeyBackend.CARBON),
+            Arguments.of(true, GlobalHotkeyBackend.AUTO),
         )
     }
 }

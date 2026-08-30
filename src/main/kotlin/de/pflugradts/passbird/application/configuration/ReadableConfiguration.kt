@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.configuration
 
+import de.pflugradts.passbird.application.GlobalHotkeyBackend
 import de.pflugradts.passbird.domain.model.egg.PasswordRequirements
 
 interface ReadableConfiguration {
@@ -40,7 +41,7 @@ interface ReadableConfiguration {
     interface GlobalHotkey {
         val enabled: Boolean
         val key: String
-        val backend: String
+        val backend: GlobalHotkeyBackend
     }
     interface InactivityLimit {
         val enabled: Boolean

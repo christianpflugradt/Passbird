@@ -15,7 +15,7 @@ import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 
 data class MainLauncherRuntime(
     val globalHotkeyEnabled: Boolean,
-    val globalHotkeyBackend: String,
+    val globalHotkeyBackend: GlobalHotkeyBackend,
     val boot: () -> Unit,
 )
 
@@ -61,12 +61,13 @@ fun mainBootLauncher(runContext: RunContext) {
 
 fun mainBootLauncher(
     launcherRuntime: MainLauncherRuntime,
-    macOsApplicationLoopRunner: (Boolean, String, () -> Unit) -> Unit = { globalHotkeyEnabled, globalHotkeyBackend, boot ->
-        MacOsApplicationLoopGraph(
-            globalHotkeyEnabled = globalHotkeyEnabled,
-            globalHotkeyBackend = globalHotkeyBackend,
-        ).run(boot)
-    },
+    macOsApplicationLoopRunner: (Boolean, GlobalHotkeyBackend, () -> Unit) -> Unit =
+        { globalHotkeyEnabled, globalHotkeyBackend, boot ->
+            MacOsApplicationLoopGraph(
+                globalHotkeyEnabled = globalHotkeyEnabled,
+                globalHotkeyBackend = globalHotkeyBackend,
+            ).run(boot)
+        },
 ) {
     macOsApplicationLoopRunner(
         launcherRuntime.globalHotkeyEnabled,

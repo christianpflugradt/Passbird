@@ -79,6 +79,7 @@ areas:
       - application.flow.globalHotkey.enabled only affects the temporary hotkey path and must not disable Enter-based progression
       - application.flow.globalHotkey.key accepts exactly one alphabetic character from A through Z, case-insensitive in YAML
       - application.flow.globalHotkey.backend accepts exactly auto, win32, carbon, quartz, or x11
+      - Passbird parses application.flow.globalHotkey.backend into one shared backend policy before boot and adapter wiring consult runtime-specific behavior
       - auto keeps environment-based backend selection for the temporary hotkey path by choosing win32 on Windows, carbon on macOS, and x11 when an X11 display is available
       - explicit backend selection is mainly for verification, troubleshooting, or forcing a specific backend when multiple desktop environments may be present
       - explicit backend selection only instantiates a backend when the current runtime can support it; incompatible selections are treated as unavailable for registration instead of probing the wrong platform API
