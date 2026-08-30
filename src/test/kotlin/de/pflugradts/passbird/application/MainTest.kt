@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import strikt.api.expectThat
+import strikt.assertions.containsExactly
 import strikt.assertions.isEqualTo
 import java.util.stream.Stream
 
@@ -43,6 +44,20 @@ class MainTest {
     }
 
     @Test
+    fun `should delegate main directly to main run`() {
+        val args = arrayOf("/foo")
+        val mainRunArgs = slot<Array<String>>()
+        every { main(any()) } answers { callOriginal() }
+        every { mainRun(capture(mainRunArgs)) } returns Unit
+
+        main(args)
+
+        verify(exactly = 1) { mainRun(any()) }
+        verify(exactly = 0) { mainBootLauncher(any<RunContext>()) }
+        expectThat(mainRunArgs.captured.toList()).containsExactly("/foo")
+    }
+
+    @Test
     fun `should set home to args and boot launcher`() {
         // given
         val givenHome = "/foo"
@@ -53,7 +68,7 @@ class MainTest {
         mainRun(arrayOf(givenHome))
 
         // then
-        verify(exactly = 1) { mainBootLauncher(any()) }
+        verify(exactly = 1) { mainBootLauncher(any<RunContext>()) }
         expectThat(capturedRunContext().homeDirectory) isEqualTo givenHome.toDirectory()
         expectThat(capturedRunContext().initialSlot) isEqualTo DEFAULT
     }
@@ -120,7 +135,7 @@ class MainTest {
         mainRun(arrayOf(givenHome, givenParam))
 
         // then
-        verify(exactly = 1) { mainBootLauncher(any()) }
+        verify(exactly = 1) { mainBootLauncher(any<RunContext>()) }
         expectThat(capturedRunContext().initialSlot) isEqualTo expectedInitialSlot
     }
 
@@ -141,8 +156,29 @@ class MainTest {
         // then
         expectThat(captureSystemErr.capture) isEqualTo
             "Shutting down: Specified initial Nest Slot is not supported: $givenParam\n"
-        verify(exactly = 0) { mainBootLauncher(any()) }
+        verify(exactly = 0) { mainBootLauncher(any<RunContext>()) }
         verify(exactly = 1) { systemOperation.exit() }
+    }
+
+    @ParameterizedTest
+    @MethodSource("expectedLauncherHotkeyResolution")
+    fun `should run launcher with resolved global hotkey settings`(globalHotkeyEnabled: Boolean, globalHotkeyBackend: String) {
+        val recordedSettings = mutableListOf<Pair<Boolean, String>>()
+        var bootCount = 0
+
+        mainBootLauncher(
+            MainLauncherRuntime(
+                globalHotkeyEnabled = globalHotkeyEnabled,
+                globalHotkeyBackend = globalHotkeyBackend,
+                boot = { bootCount++ },
+            ),
+        ) { enabled, backend, boot ->
+            recordedSettings += enabled to backend
+            boot()
+        }
+
+        expectThat(recordedSettings).containsExactly(globalHotkeyEnabled to globalHotkeyBackend)
+        expectThat(bootCount).isEqualTo(1)
     }
 
     private fun capturedRunContext() = runContextSlot.captured
@@ -169,6 +205,14 @@ class MainTest {
             Arguments.of("10"),
             Arguments.of("foo"),
             Arguments.of("n1"),
+        )
+
+        @JvmStatic
+        private fun expectedLauncherHotkeyResolution() = Stream.of(
+            Arguments.of(false, "auto"),
+            Arguments.of(true, "quartz"),
+            Arguments.of(true, "carbon"),
+            Arguments.of(true, "auto"),
         )
     }
 }

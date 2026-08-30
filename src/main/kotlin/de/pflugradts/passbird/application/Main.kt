@@ -13,6 +13,12 @@ import de.pflugradts.passbird.domain.model.slot.Slot
 import de.pflugradts.passbird.domain.model.slot.Slot.Companion.slotAt
 import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
 
+data class MainLauncherRuntime(
+    val globalHotkeyEnabled: Boolean,
+    val globalHotkeyBackend: String,
+    val boot: () -> Unit,
+)
+
 fun mainGetSystemOperation() = SystemOperation()
 
 fun mainHasValidHomeDirectory(dir: String?): Boolean {
@@ -40,16 +46,37 @@ fun mainInitialSlot(slot: String?): Slot? = when (slot) {
     }
 }
 
-fun mainBootLauncher(runContext: RunContext) {
+fun mainLauncherRuntime(runContext: RunContext): MainLauncherRuntime {
     val launcherGraph = LauncherGraph(runContext)
-    MacOsApplicationLoopGraph(
+    return MainLauncherRuntime(
         globalHotkeyEnabled = launcherGraph.configuration.application.flow.globalHotkey.enabled,
         globalHotkeyBackend = launcherGraph.configuration.application.flow.globalHotkey.backend,
-    ).run { launcherGraph.bootable.boot() }
+        boot = launcherGraph.bootable::boot,
+    )
+}
+
+fun mainBootLauncher(runContext: RunContext) {
+    mainBootLauncher(mainLauncherRuntime(runContext))
+}
+
+fun mainBootLauncher(
+    launcherRuntime: MainLauncherRuntime,
+    macOsApplicationLoopRunner: (Boolean, String, () -> Unit) -> Unit = { globalHotkeyEnabled, globalHotkeyBackend, boot ->
+        MacOsApplicationLoopGraph(
+            globalHotkeyEnabled = globalHotkeyEnabled,
+            globalHotkeyBackend = globalHotkeyBackend,
+        ).run(boot)
+    },
+) {
+    macOsApplicationLoopRunner(
+        launcherRuntime.globalHotkeyEnabled,
+        launcherRuntime.globalHotkeyBackend,
+        launcherRuntime.boot,
+    )
 }
 
 fun main(args: Array<String>) {
-    MacOsApplicationLoopGraph().run { mainRun(args) }
+    mainRun(args)
 }
 
 fun mainRun(args: Array<String>) {
