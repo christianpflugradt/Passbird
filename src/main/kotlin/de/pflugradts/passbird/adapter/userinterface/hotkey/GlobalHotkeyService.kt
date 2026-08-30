@@ -12,6 +12,8 @@ import de.pflugradts.passbird.application.GlobalHotkeyAdapterPort
 import de.pflugradts.passbird.application.GlobalHotkeyBackend
 import de.pflugradts.passbird.application.GlobalHotkeyBackendPolicy
 import de.pflugradts.passbird.application.GlobalHotkeyRegistrarBackend
+import de.pflugradts.passbird.application.MacOsMainThreadBridge
+import de.pflugradts.passbird.application.MacOsMainThreadExecutor
 import de.pflugradts.passbird.application.RegisteredGlobalHotkey
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Semaphore
@@ -389,10 +391,11 @@ internal interface CarbonMacOsHotkeySession {
 
 internal class CarbonMacOsHotkeyRuntime(
     private val carbon: Carbon = Carbon.instance(),
+    private val mainThreadExecutor: MacOsMainThreadExecutor = MacOsMainThreadBridge,
 ) : CarbonHotkeyRuntime {
-    override fun open(keyCode: Int, onNextAction: () -> Unit): CarbonMacOsHotkeySession? {
+    override fun open(keyCode: Int, onNextAction: () -> Unit): CarbonMacOsHotkeySession? = mainThreadExecutor.dispatch {
         val eventTarget = carbon.GetApplicationEventTarget()
-        return if (eventTarget == null) {
+        if (eventTarget == null) {
             null
         } else {
             val eventType = CarbonEventTypeSpec().apply {
@@ -434,6 +437,7 @@ internal class CarbonMacOsHotkeyRuntime(
                         hotkeyReference.value,
                         eventHandlerReference.value,
                         eventHandler,
+                        mainThreadExecutor,
                     )
                 }
             }
@@ -446,13 +450,16 @@ internal class CarbonMacOsHotkeyLoop(
     private val hotkeyReference: Pointer?,
     private val eventHandlerReference: Pointer?,
     @Suppress("UNUSED_PARAMETER") private val eventHandler: Carbon.EventHandler,
+    private val mainThreadExecutor: MacOsMainThreadExecutor,
 ) : CarbonMacOsHotkeySession {
     private val closed = AtomicBoolean(false)
 
     override fun close() {
         if (closed.compareAndSet(false, true)) {
-            hotkeyReference?.let(carbon::UnregisterEventHotKey)
-            eventHandlerReference?.let(carbon::RemoveEventHandler)
+            mainThreadExecutor.dispatch {
+                hotkeyReference?.let(carbon::UnregisterEventHotKey)
+                eventHandlerReference?.let(carbon::RemoveEventHandler)
+            }
         }
     }
 }

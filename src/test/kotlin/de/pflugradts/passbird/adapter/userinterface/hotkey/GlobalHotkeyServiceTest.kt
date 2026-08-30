@@ -4,6 +4,7 @@ import com.sun.jna.Memory
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.PointerByReference
 import de.pflugradts.passbird.application.GlobalHotkeyBackend
+import de.pflugradts.passbird.application.MacOsMainThreadExecutor
 import de.pflugradts.passbird.application.RegisteredGlobalHotkey
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
@@ -384,60 +385,84 @@ class GlobalHotkeyServiceTest {
     @Test
     fun `should remove carbon event handler when hotkey registration fails`() {
         val carbon = FakeCarbon(registerStatus = 1)
+        val executor = RecordingMacOsMainThreadExecutor()
 
-        val actual = CarbonMacOsHotkeyRuntime(carbon).open(35) { }
+        val actual = CarbonMacOsHotkeyRuntime(carbon, executor).open(35) { }
 
         expectThat(actual).isEqualTo(null)
+        expectThat(executor.dispatchCalls).isEqualTo(1)
         expectThat(carbon.removedEventHandlers).containsExactly(Pointer(52))
     }
 
     @Test
     fun `should return null when carbon event target is unavailable`() {
         val carbon = FakeCarbon(eventTarget = null)
+        val executor = RecordingMacOsMainThreadExecutor()
 
-        val actual = CarbonMacOsHotkeyRuntime(carbon).open(35) { }
+        val actual = CarbonMacOsHotkeyRuntime(carbon, executor).open(35) { }
 
         expectThat(actual).isEqualTo(null)
+        expectThat(executor.dispatchCalls).isEqualTo(1)
         expectThat(carbon.installEventHandlerCalls).isEqualTo(0)
     }
 
     @Test
     fun `should return null when carbon event handler installation fails`() {
         val carbon = FakeCarbon(installStatus = 1)
+        val executor = RecordingMacOsMainThreadExecutor()
 
-        val actual = CarbonMacOsHotkeyRuntime(carbon).open(35) { }
+        val actual = CarbonMacOsHotkeyRuntime(carbon, executor).open(35) { }
 
         expectThat(actual).isEqualTo(null)
+        expectThat(executor.dispatchCalls).isEqualTo(1)
         expectThat(carbon.registerHotkeyCalls).isEqualTo(0)
     }
 
     @Test
     fun `should signal and release carbon hotkey session`() {
         val carbon = FakeCarbon()
+        val executor = RecordingMacOsMainThreadExecutor()
         var nextActions = 0
 
-        val session = CarbonMacOsHotkeyRuntime(carbon).open(35) { nextActions++ }
+        val session = CarbonMacOsHotkeyRuntime(carbon, executor).open(35) { nextActions++ }
         carbon.eventHandler?.callback(null, null, null)
         session?.close()
 
         expectThat(nextActions).isEqualTo(1)
+        expectThat(executor.dispatchCalls).isEqualTo(2)
         expectThat(carbon.unregisteredHotkeys).containsExactly(Pointer(53))
         expectThat(carbon.removedEventHandlers).containsExactly(Pointer(52))
     }
 
     @Test
+    fun `should rethrow carbon main thread execution failure`() {
+        val carbon = FakeCarbon()
+        val executor = RecordingMacOsMainThreadExecutor(failure = IllegalStateException("boom"))
+
+        val actual = assertThrows<IllegalStateException> {
+            CarbonMacOsHotkeyRuntime(carbon, executor).open(35) { }
+        }
+
+        expectThat(actual.message).isEqualTo("boom")
+        expectThat(executor.dispatchCalls).isEqualTo(1)
+    }
+
+    @Test
     fun `should close carbon hotkey loop only once`() {
         val carbon = FakeCarbon()
+        val executor = RecordingMacOsMainThreadExecutor()
         val loop = CarbonMacOsHotkeyLoop(
             carbon = carbon,
             hotkeyReference = Pointer(53),
             eventHandlerReference = Pointer(52),
             eventHandler = Carbon.EventHandler { _, _, _ -> 0 },
+            mainThreadExecutor = executor,
         )
 
         loop.close()
         loop.close()
 
+        expectThat(executor.dispatchCalls).isEqualTo(1)
         expectThat(carbon.unregisteredHotkeys).containsExactly(Pointer(53))
         expectThat(carbon.removedEventHandlers).containsExactly(Pointer(52))
     }
@@ -445,15 +470,18 @@ class GlobalHotkeyServiceTest {
     @Test
     fun `should close carbon hotkey loop without native handles`() {
         val carbon = FakeCarbon()
+        val executor = RecordingMacOsMainThreadExecutor()
         val loop = CarbonMacOsHotkeyLoop(
             carbon = carbon,
             hotkeyReference = null,
             eventHandlerReference = null,
             eventHandler = Carbon.EventHandler { _, _, _ -> 0 },
+            mainThreadExecutor = executor,
         )
 
         loop.close()
 
+        expectThat(executor.dispatchCalls).isEqualTo(1)
         expectThat(carbon.unregisteredHotkeys).hasSize(0)
         expectThat(carbon.removedEventHandlers).hasSize(0)
     }
@@ -647,6 +675,18 @@ private class RecordingRegistrar(
     override fun register(key: Char): RegisteredGlobalHotkey? {
         recordedKeys += key
         return registration
+    }
+}
+
+private class RecordingMacOsMainThreadExecutor(
+    private val failure: Exception? = null,
+) : MacOsMainThreadExecutor {
+    var dispatchCalls = 0
+
+    override fun <T> dispatch(work: () -> T): T {
+        dispatchCalls++
+        failure?.let { throw it }
+        return work()
     }
 }
 
