@@ -2,6 +2,7 @@ package de.pflugradts.passbird.application.boot.main
 
 import com.sun.jna.Pointer
 import de.pflugradts.passbird.application.GlobalHotkeyBackend
+import de.pflugradts.passbird.application.MacOsMainThreadDispatcher
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
@@ -80,16 +81,19 @@ class MacOsApplicationLoopTest {
     @Test
     fun `should run application on worker while main thread runs mac os event loop`() {
         val runtime = FakeMacOsApplicationRuntime()
+        val dispatcher = RecordingApplicationLoopDispatcher()
         var executions = 0
 
         MacOsApplicationLoopGraph(
             osName = "Mac OS X",
             startsOnFirstThread = true,
             runtimeFactory = { runtime },
+            mainThreadDispatcherFactory = { dispatcher },
             startWorker = { work -> work() },
         ).run { executions++ }
 
         expectThat(executions).isEqualTo(1)
+        expectThat(dispatcher.closeCalls).isEqualTo(1)
         expectThat(runtime.events).containsExactly("terminate", "run")
     }
 
@@ -171,4 +175,14 @@ private class FakeObjectiveC(
         objectArgument: Pointer?,
         waitUntilDone: Boolean,
     ) = Unit
+}
+
+private class RecordingApplicationLoopDispatcher : MacOsMainThreadDispatcher {
+    var closeCalls = 0
+
+    override fun <T> dispatch(work: () -> T): T = work()
+
+    override fun close() {
+        closeCalls++
+    }
 }
