@@ -507,7 +507,7 @@ Passbird provides two hotkey backends on macOS: **Carbon** and
 
 When `backend` is set to `auto`, Passbird currently selects **Carbon**.
 
-#### Carbon
+##### Carbon
 
 Carbon is the default because it works even while macOS Secure Input is
 active and does not require Input Monitoring permission.
@@ -525,7 +525,7 @@ Carbon is based on a legacy macOS API. Although it remains functional
 today, Apple may remove it in a future macOS release. For that reason,
 Quartz remains available as an alternative.
 
-#### Quartz
+##### Quartz
 
 Quartz uses the modern macOS event APIs.
 
