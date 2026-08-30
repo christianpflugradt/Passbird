@@ -13,12 +13,10 @@ import de.pflugradts.passbird.application.GlobalHotkeyBackend
 import de.pflugradts.passbird.application.GlobalHotkeyBackendPolicy
 import de.pflugradts.passbird.application.GlobalHotkeyRegistrarBackend
 import de.pflugradts.passbird.application.RegisteredGlobalHotkey
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 
 internal class GlobalHotkeyService(
     private val backend: GlobalHotkeyBackend = GlobalHotkeyBackend.AUTO,
@@ -208,32 +206,31 @@ internal class CarbonMacOsGlobalHotkeyRegistrar(
 ) : PlatformHotkeyRegistrar {
     override fun register(key: Char): RegisteredGlobalHotkey? = runCatching {
         keyCodeResolver(key)
-            ?.let { CarbonMacOsRegistration(it, runtimeFactory()) }
-            ?.takeIf(CarbonMacOsRegistration::awaitRegistration)
+            ?.let { CarbonMacOsRegistration.open(it, runtimeFactory()) }
     }.getOrNull()
 
     internal class CarbonMacOsRegistration(
-        private val keyCode: Int,
-        private val runtime: CarbonHotkeyRuntime,
-    ) : BackgroundHotkeyRegistration() {
-        @Volatile
-        private var hotkeyLoop: CarbonMacOsHotkeySession? = null
+        private val session: CarbonMacOsHotkeySession,
+        private val nextActions: Semaphore,
+    ) : RegisteredGlobalHotkey {
+        private val released = AtomicBoolean(false)
 
-        init {
-            start("passbird-hotkey-macos-carbon") {
-                val loop = runtime.open(keyCode, ::signalNextAction)
-                if (loop == null) {
-                    markRegistered(false)
-                    return@start
-                }
-                hotkeyLoop = loop
-                markRegistered(true)
+        override fun awaitWithin(milliseconds: Long) = nextActions.tryAcquire(milliseconds, TimeUnit.MILLISECONDS)
+
+        override fun release() {
+            if (released.compareAndSet(false, true)) {
+                session.close()
             }
         }
 
-        override fun onRelease() {
-            hotkeyLoop?.close()
-            hotkeyLoop = null
+        companion object {
+            fun open(keyCode: Int, runtime: CarbonHotkeyRuntime): CarbonMacOsRegistration? {
+                val nextActions = Semaphore(0)
+                val session = runtime.open(keyCode) {
+                    nextActions.release()
+                } ?: return null
+                return CarbonMacOsRegistration(session, nextActions)
+            }
         }
     }
 }
@@ -390,17 +387,12 @@ internal interface CarbonMacOsHotkeySession {
     fun close()
 }
 
-internal interface MacOsMainThreadDispatcher {
-    fun <T> dispatch(work: () -> T): T
-}
-
 internal class CarbonMacOsHotkeyRuntime(
     private val carbon: Carbon = Carbon.instance(),
-    private val mainThreadDispatcher: MacOsMainThreadDispatcher = DispatchMacOsMainThreadDispatcher(),
 ) : CarbonHotkeyRuntime {
-    override fun open(keyCode: Int, onNextAction: () -> Unit): CarbonMacOsHotkeySession? = mainThreadDispatcher.dispatch {
+    override fun open(keyCode: Int, onNextAction: () -> Unit): CarbonMacOsHotkeySession? {
         val eventTarget = carbon.GetApplicationEventTarget()
-        if (eventTarget == null) {
+        return if (eventTarget == null) {
             null
         } else {
             val eventType = CarbonEventTypeSpec().apply {
@@ -442,7 +434,6 @@ internal class CarbonMacOsHotkeyRuntime(
                         hotkeyReference.value,
                         eventHandlerReference.value,
                         eventHandler,
-                        mainThreadDispatcher,
                     )
                 }
             }
@@ -455,67 +446,14 @@ internal class CarbonMacOsHotkeyLoop(
     private val hotkeyReference: Pointer?,
     private val eventHandlerReference: Pointer?,
     @Suppress("UNUSED_PARAMETER") private val eventHandler: Carbon.EventHandler,
-    private val mainThreadDispatcher: MacOsMainThreadDispatcher,
 ) : CarbonMacOsHotkeySession {
     private val closed = AtomicBoolean(false)
 
     override fun close() {
         if (closed.compareAndSet(false, true)) {
-            mainThreadDispatcher.dispatch {
-                hotkeyReference?.let(carbon::UnregisterEventHotKey)
-                eventHandlerReference?.let(carbon::RemoveEventHandler)
-            }
+            hotkeyReference?.let(carbon::UnregisterEventHotKey)
+            eventHandlerReference?.let(carbon::RemoveEventHandler)
         }
-    }
-}
-
-internal class DispatchMacOsMainThreadDispatcher(
-    private val dispatch: Dispatch = Dispatch.instance(),
-    private val pthread: PThread = PThread.instance(),
-) : MacOsMainThreadDispatcher {
-    private val tasks = ConcurrentHashMap<Long, MainThreadTask<*>>()
-    private val callback = Dispatch.DispatchFunction { context ->
-        tasks.remove(Pointer.nativeValue(context))?.run()
-    }
-
-    override fun <T> dispatch(work: () -> T): T {
-        if (pthread.pthread_main_np() == 1) {
-            return work()
-        }
-        val taskId = nextTaskId.getAndIncrement()
-        val task = MainThreadTask(work)
-        tasks[taskId] = task
-        try {
-            dispatch.dispatch_sync_f(
-                dispatch.dispatch_get_main_queue(),
-                Pointer.createConstant(taskId),
-                callback,
-            )
-        } finally {
-            tasks.remove(taskId)
-        }
-        return task.resultOrThrow()
-    }
-
-    private class MainThreadTask<T>(
-        private val work: () -> T,
-    ) {
-        private var completed = false
-        private var result: Result<T>? = null
-
-        fun run() {
-            result = runCatching(work)
-            completed = true
-        }
-
-        fun resultOrThrow(): T {
-            check(completed)
-            return requireNotNull(result).getOrThrow()
-        }
-    }
-
-    companion object {
-        private val nextTaskId = AtomicLong(1)
     }
 }
 
@@ -664,19 +602,6 @@ internal interface Carbon : Library {
     }
 }
 
-internal interface Dispatch : Library {
-    fun dispatch_get_main_queue(): Pointer
-    fun dispatch_sync_f(queue: Pointer, context: Pointer?, work: DispatchFunction)
-
-    fun interface DispatchFunction : Callback {
-        fun callback(context: Pointer?)
-    }
-
-    companion object {
-        fun instance(): Dispatch = Native.load("/usr/lib/system/libdispatch.dylib", Dispatch::class.java)
-    }
-}
-
 internal interface CoreFoundation : Library {
     fun CFMachPortCreateRunLoopSource(allocator: Pointer?, port: Pointer, order: Int): Pointer?
     fun CFRunLoopGetCurrent(): Pointer
@@ -688,14 +613,6 @@ internal interface CoreFoundation : Library {
 
     companion object {
         fun instance(): CoreFoundation = Native.load("CoreFoundation", CoreFoundation::class.java)
-    }
-}
-
-internal interface PThread : Library {
-    fun pthread_main_np(): Int
-
-    companion object {
-        fun instance(): PThread = Native.load("/usr/lib/libSystem.B.dylib", PThread::class.java)
     }
 }
 
