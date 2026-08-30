@@ -18,7 +18,7 @@ configuration_surface:
     - application.backup.passwordTree.enabled defaults to true
     - application.exchange.promptOnExportFile defaults to true
     - application.flow.loginProteinSlot defaults to 0
-    - application.flow.globalHotkey.enabled defaults to true
+    - application.flow.globalHotkey.enabled defaults to false
     - application.flow.globalHotkey.key defaults to P
     - application.flow.globalHotkey.backend defaults to auto
     - application.password.length defaults to 20

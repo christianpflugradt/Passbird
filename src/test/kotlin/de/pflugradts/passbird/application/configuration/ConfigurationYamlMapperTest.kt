@@ -113,7 +113,7 @@ class ConfigurationYamlMapperTest {
         expectThat(actual.application.yolk.algorithm) isEqualTo "SHA256"
         expectThat(actual.application.yolk.digits) isEqualTo 8
         expectThat(actual.application.flow.loginProteinSlot) isEqualTo 0
-        expectThat(actual.application.flow.globalHotkey.enabled).isTrue()
+        expectThat(actual.application.flow.globalHotkey.enabled).isFalse()
         expectThat(actual.application.flow.globalHotkey.key) isEqualTo "P"
         expectThat(actual.application.flow.globalHotkey.backend) isEqualTo "auto"
         expectThat(actual.domain.protein.templates).hasSize(1)
@@ -266,7 +266,7 @@ class ConfigurationYamlMapperTest {
         expectThat(actual.application.backup.location) isEqualTo "backups"
         expectThat(actual.application.exchange.promptOnExportFile).isTrue()
         expectThat(actual.application.flow.loginProteinSlot) isEqualTo 0
-        expectThat(actual.application.flow.globalHotkey.enabled).isTrue()
+        expectThat(actual.application.flow.globalHotkey.enabled).isFalse()
         expectThat(actual.application.flow.globalHotkey.key) isEqualTo "P"
         expectThat(actual.application.flow.globalHotkey.backend) isEqualTo "auto"
         expectThat(actual.application.inactivityLimit.limitInMinutes) isEqualTo 10
@@ -361,7 +361,7 @@ class ConfigurationYamlMapperTest {
         expectThat(configuration.application.backup.configuration.numberOfBackups) isEqualTo null
         expectThat(configuration.application.exchange.promptOnExportFile).isTrue()
         expectThat(configuration.application.flow.loginProteinSlot) isEqualTo 0
-        expectThat(configuration.application.flow.globalHotkey.enabled).isTrue()
+        expectThat(configuration.application.flow.globalHotkey.enabled).isFalse()
         expectThat(configuration.application.flow.globalHotkey.key) isEqualTo "P"
         expectThat(configuration.application.flow.globalHotkey.backend) isEqualTo "auto"
         expectThat(configuration.application.inactivityLimit.enabled).isFalse()
