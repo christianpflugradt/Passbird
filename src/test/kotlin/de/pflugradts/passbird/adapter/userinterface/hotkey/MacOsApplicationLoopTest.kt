@@ -1,12 +1,8 @@
 package de.pflugradts.passbird.application.boot.main
 
-import com.sun.jna.Pointer
 import de.pflugradts.passbird.application.GlobalHotkeyBackend
-import de.pflugradts.passbird.application.MacOsMainThreadDispatcher
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import strikt.assertions.containsExactly
-import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 
 class MacOsApplicationLoopTest {
@@ -16,7 +12,6 @@ class MacOsApplicationLoopTest {
 
         MacOsApplicationLoopGraph(
             osName = "Linux",
-            runtimeFactory = { error("mac os runtime must not be created") },
         ).run { executions++ }
 
         expectThat(executions).isEqualTo(1)
@@ -29,7 +24,6 @@ class MacOsApplicationLoopTest {
         MacOsApplicationLoopGraph(
             osName = "Mac OS X",
             startsOnFirstThread = false,
-            runtimeFactory = { error("mac os runtime must not be created") },
         ).run { executions++ }
 
         expectThat(executions).isEqualTo(1)
@@ -43,7 +37,6 @@ class MacOsApplicationLoopTest {
             osName = "Mac OS X",
             startsOnFirstThread = true,
             globalHotkeyEnabled = false,
-            runtimeFactory = { error("mac os runtime must not be created") },
         ).run { executions++ }
 
         expectThat(executions).isEqualTo(1)
@@ -57,132 +50,27 @@ class MacOsApplicationLoopTest {
             osName = "Mac OS X",
             startsOnFirstThread = true,
             globalHotkeyBackend = GlobalHotkeyBackend.QUARTZ,
-            runtimeFactory = { error("mac os runtime must not be created") },
         ).run { executions++ }
 
         expectThat(executions).isEqualTo(1)
     }
 
     @Test
-    fun `should execute application directly when mac os application is unavailable`() {
+    fun `should delegate to injected runner only for carbon backend`() {
         var executions = 0
-        val runtime = FakeMacOsApplicationRuntime(application = null)
+        var runnerCalls = 0
 
         MacOsApplicationLoopGraph(
             osName = "Mac OS X",
             startsOnFirstThread = true,
-            runtimeFactory = { runtime },
+            globalHotkeyBackend = GlobalHotkeyBackend.CARBON,
+            applicationLoopRunner = MacOsApplicationLoopRunner {
+                runnerCalls++
+                it()
+            },
         ).run { executions++ }
 
+        expectThat(runnerCalls).isEqualTo(1)
         expectThat(executions).isEqualTo(1)
-        expectThat(runtime.events).isEmpty()
-    }
-
-    @Test
-    fun `should run application on worker while main thread runs mac os event loop`() {
-        val runtime = FakeMacOsApplicationRuntime()
-        val dispatcher = RecordingApplicationLoopDispatcher()
-        var executions = 0
-
-        MacOsApplicationLoopGraph(
-            osName = "Mac OS X",
-            startsOnFirstThread = true,
-            runtimeFactory = { runtime },
-            mainThreadDispatcherFactory = { dispatcher },
-            startWorker = { work -> work() },
-        ).run { executions++ }
-
-        expectThat(executions).isEqualTo(1)
-        expectThat(dispatcher.closeCalls).isEqualTo(1)
-        expectThat(runtime.events).containsExactly("terminate", "run")
-    }
-
-    @Test
-    fun `should return null when objective c application class is unavailable`() {
-        val objectiveC = FakeObjectiveC(applicationClass = null)
-
-        val actual = ObjectiveCMacOsApplicationRuntime(objectiveC).sharedApplication()
-
-        expectThat(actual).isEqualTo(null)
-    }
-
-    @Test
-    fun `should resolve shared application through objective c runtime`() {
-        val applicationClass = Pointer(2)
-        val selector = Pointer(3)
-        val application = Pointer(4)
-        val objectiveC = FakeObjectiveC(
-            applicationClass = applicationClass,
-            registeredSelector = selector,
-            sharedApplication = application,
-        )
-
-        val actual = ObjectiveCMacOsApplicationRuntime(objectiveC).sharedApplication()
-
-        expectThat(actual).isEqualTo(application)
-        expectThat(objectiveC.messages).containsExactly(
-            "objc_getClass:NSApplication",
-            "sel_registerName:sharedApplication",
-            "objc_msgSendPointer:2:3",
-        )
-    }
-}
-
-private class FakeMacOsApplicationRuntime(
-    private val application: Pointer? = Pointer(1),
-) : MacOsApplicationRuntime {
-    val events = mutableListOf<String>()
-
-    override fun sharedApplication() = application
-
-    override fun run(application: Pointer) {
-        events += "run"
-    }
-
-    override fun terminate(application: Pointer) {
-        events += "terminate"
-    }
-}
-
-private class FakeObjectiveC(
-    private val applicationClass: Pointer? = Pointer(1),
-    private val registeredSelector: Pointer = Pointer(2),
-    private val sharedApplication: Pointer? = Pointer(3),
-) : ObjectiveC {
-    val messages = mutableListOf<String>()
-
-    override fun objc_getClass(name: String): Pointer? {
-        messages += "objc_getClass:$name"
-        return applicationClass
-    }
-
-    override fun sel_registerName(name: String): Pointer {
-        messages += "sel_registerName:$name"
-        return registeredSelector
-    }
-
-    override fun objc_msgSendPointer(receiver: Pointer, selector: Pointer): Pointer? {
-        messages += "objc_msgSendPointer:${Pointer.nativeValue(receiver)}:${Pointer.nativeValue(selector)}"
-        return sharedApplication
-    }
-
-    override fun objc_msgSendVoid(receiver: Pointer, selector: Pointer) = Unit
-
-    override fun objc_msgSendVoidWithSelectorObjectAndBoolean(
-        receiver: Pointer,
-        selector: Pointer,
-        selectorArgument: Pointer,
-        objectArgument: Pointer?,
-        waitUntilDone: Boolean,
-    ) = Unit
-}
-
-private class RecordingApplicationLoopDispatcher : MacOsMainThreadDispatcher {
-    var closeCalls = 0
-
-    override fun <T> dispatch(work: () -> T): T = work()
-
-    override fun close() {
-        closeCalls++
     }
 }

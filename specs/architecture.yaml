@@ -96,7 +96,7 @@ ports_and_adapters:
     concern: clipboard copy and reset behavior
   - port: GlobalHotkeyAdapterPort
     implementation: adapter.userinterface.hotkey.GlobalHotkeyService
-    concern: temporary registration of a global NEXT hotkey for guided credential flows without leaking OS-specific APIs into application handlers; a shared application-layer backend policy owns accepted backends, runtime resolution, startup preparation, and macOS app-loop requirements, and the adapter uses that policy before instantiating any platform-specific registrar
+    concern: temporary registration of a global NEXT hotkey for guided credential flows without leaking OS-specific APIs into application handlers; a shared application-layer backend policy owns accepted backends, runtime resolution, startup preparation, and macOS app-loop requirements, and the adapter uses that policy before instantiating any platform-specific registrar. Carbon-specific native runtime and AppKit-loop code stays local to adapter.userinterface.hotkey.carbon so non-Carbon backends do not pay for Carbon support outside the boot decision seam
   - port: KeyStoreAdapterPort
     implementation: adapter.keystore.KeyStoreService
     concern: load and store secret material in PKCS12, while migration boot may construct compatibility adapters for legacy JCEKS reads; JVM keystore construction stays inside adapter.keystore

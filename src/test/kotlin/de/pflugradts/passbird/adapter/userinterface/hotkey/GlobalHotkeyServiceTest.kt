@@ -3,8 +3,16 @@ package de.pflugradts.passbird.adapter.userinterface.hotkey
 import com.sun.jna.Memory
 import com.sun.jna.Pointer
 import com.sun.jna.ptr.PointerByReference
+import de.pflugradts.passbird.adapter.userinterface.hotkey.carbon.Carbon
+import de.pflugradts.passbird.adapter.userinterface.hotkey.carbon.CarbonEventHotkeyId
+import de.pflugradts.passbird.adapter.userinterface.hotkey.carbon.CarbonEventTypeSpec
+import de.pflugradts.passbird.adapter.userinterface.hotkey.carbon.CarbonHotkeyRuntime
+import de.pflugradts.passbird.adapter.userinterface.hotkey.carbon.CarbonMacOsGlobalHotkeyRegistrar
+import de.pflugradts.passbird.adapter.userinterface.hotkey.carbon.CarbonMacOsHotkeyLoop
+import de.pflugradts.passbird.adapter.userinterface.hotkey.carbon.CarbonMacOsHotkeyRuntime
+import de.pflugradts.passbird.adapter.userinterface.hotkey.carbon.CarbonMacOsHotkeySession
+import de.pflugradts.passbird.adapter.userinterface.hotkey.carbon.CarbonMacOsMainThreadExecutor
 import de.pflugradts.passbird.application.GlobalHotkeyBackend
-import de.pflugradts.passbird.application.MacOsMainThreadExecutor
 import de.pflugradts.passbird.application.RegisteredGlobalHotkey
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
@@ -680,7 +688,7 @@ private class RecordingRegistrar(
 
 private class RecordingMacOsMainThreadExecutor(
     private val failure: Exception? = null,
-) : MacOsMainThreadExecutor {
+) : CarbonMacOsMainThreadExecutor {
     var dispatchCalls = 0
 
     override fun <T> dispatch(work: () -> T): T {

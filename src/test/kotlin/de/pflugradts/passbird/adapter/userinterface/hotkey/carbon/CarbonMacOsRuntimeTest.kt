@@ -1,36 +1,37 @@
-package de.pflugradts.passbird.application.boot.main
+package de.pflugradts.passbird.adapter.userinterface.hotkey.carbon
 
 import com.sun.jna.Pointer
-import de.pflugradts.passbird.application.MacOsMainThreadBridge
-import de.pflugradts.passbird.application.MacOsMainThreadDispatcher
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
 import strikt.assertions.isEqualTo
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
-class MacOsMainThreadBridgeTest {
+class CarbonMacOsRuntimeTest {
     @Test
-    fun `should execute bridge work inline when no dispatcher is installed`() {
-        val actual = MacOsMainThreadBridge.dispatch { "inline" }
+    fun `should execute application directly when shared application is unavailable`() {
+        var executions = 0
 
-        expectThat(actual).isEqualTo("inline")
+        CarbonMacOsApplicationLoopRunner(
+            runtimeFactory = { TestCarbonMacOsApplicationRuntime(application = null) },
+        ).run { executions++ }
+
+        expectThat(executions).isEqualTo(1)
     }
 
     @Test
-    fun `should install main thread dispatcher before worker starts`() {
-        val runtime = BridgeTestMacOsApplicationRuntime()
-        val dispatcher = RecordingMacOsMainThreadDispatcher()
+    fun `should install carbon runtime context before worker starts`() {
+        val runtime = TestCarbonMacOsApplicationRuntime()
+        val dispatcher = RecordingCarbonMacOsMainThreadDispatcher()
 
-        MacOsApplicationLoopGraph(
-            osName = "Mac OS X",
-            startsOnFirstThread = true,
+        CarbonMacOsApplicationLoopRunner(
             runtimeFactory = { runtime },
             mainThreadDispatcherFactory = { dispatcher },
             startWorker = { work -> work() },
         ).run {
-            MacOsMainThreadBridge.dispatch { dispatcher.events += "worker" }
+            CarbonMacOsRuntimeContext.dispatch { dispatcher.events += "worker" }
         }
 
         expectThat(dispatcher.dispatchCalls).isEqualTo(1)
@@ -41,13 +42,13 @@ class MacOsMainThreadBridgeTest {
 
     @Test
     fun `should ignore uninstall for a different dispatcher`() {
-        val installedDispatcher = RecordingMacOsMainThreadDispatcher()
-        val otherDispatcher = RecordingMacOsMainThreadDispatcher()
+        val installedDispatcher = RecordingCarbonMacOsMainThreadDispatcher()
+        val otherDispatcher = RecordingCarbonMacOsMainThreadDispatcher()
 
-        MacOsMainThreadBridge.install(installedDispatcher)
-        MacOsMainThreadBridge.uninstall(otherDispatcher)
-        MacOsMainThreadBridge.dispatch { installedDispatcher.events += "still-installed" }
-        MacOsMainThreadBridge.uninstall(installedDispatcher)
+        CarbonMacOsRuntimeContext.install(installedDispatcher)
+        CarbonMacOsRuntimeContext.uninstall(otherDispatcher)
+        CarbonMacOsRuntimeContext.dispatch { installedDispatcher.events += "still-installed" }
+        CarbonMacOsRuntimeContext.uninstall(installedDispatcher)
 
         expectThat(installedDispatcher.dispatchCalls).isEqualTo(1)
         expectThat(installedDispatcher.closeCalls).isEqualTo(1)
@@ -57,8 +58,8 @@ class MacOsMainThreadBridgeTest {
 
     @Test
     fun `should dispatch queued work through core foundation run loop source`() {
-        val coreFoundation = FakeMacOsCoreFoundation()
-        val dispatcher = CoreFoundationMacOsMainThreadDispatcher(
+        val coreFoundation = FakeCarbonMacOsCoreFoundation()
+        val dispatcher = CoreFoundationCarbonMacOsMainThreadDispatcher(
             coreFoundation = coreFoundation,
             ownerThread = Thread.currentThread(),
         )
@@ -92,8 +93,8 @@ class MacOsMainThreadBridgeTest {
 
     @Test
     fun `should execute dispatcher work inline on owner thread`() {
-        val coreFoundation = FakeMacOsCoreFoundation()
-        val dispatcher = CoreFoundationMacOsMainThreadDispatcher(
+        val coreFoundation = FakeCarbonMacOsCoreFoundation()
+        val dispatcher = CoreFoundationCarbonMacOsMainThreadDispatcher(
             coreFoundation = coreFoundation,
             ownerThread = Thread.currentThread(),
         )
@@ -109,8 +110,8 @@ class MacOsMainThreadBridgeTest {
 
     @Test
     fun `should execute dispatcher work inline after close`() {
-        val coreFoundation = FakeMacOsCoreFoundation()
-        val dispatcher = CoreFoundationMacOsMainThreadDispatcher(
+        val coreFoundation = FakeCarbonMacOsCoreFoundation()
+        val dispatcher = CoreFoundationCarbonMacOsMainThreadDispatcher(
             coreFoundation = coreFoundation,
             ownerThread = Thread.currentThread(),
         )
@@ -130,11 +131,50 @@ class MacOsMainThreadBridgeTest {
         expectThat(coreFoundation.wokenRunLoops).containsExactly()
         expectThat(coreFoundation.invalidatedSources).containsExactly(coreFoundation.source)
     }
+
+    @Test
+    fun `should fail closed when carbon runtime context is unavailable`() {
+        val actual = assertThrows<IllegalStateException> {
+            CarbonMacOsRuntimeContextExecutor.dispatch { error("boom") }
+        }
+
+        expectThat(actual.message).isEqualTo("Carbon macOS main thread runtime is not active")
+    }
+
+    @Test
+    fun `should return null when objective c application class is unavailable`() {
+        val objectiveC = FakeCarbonObjectiveC(applicationClass = null)
+
+        val actual = ObjectiveCCarbonMacOsApplicationRuntime(objectiveC).sharedApplication()
+
+        expectThat(actual).isEqualTo(null)
+    }
+
+    @Test
+    fun `should resolve shared application through objective c runtime`() {
+        val applicationClass = Pointer(2)
+        val selector = Pointer(3)
+        val application = Pointer(4)
+        val objectiveC = FakeCarbonObjectiveC(
+            applicationClass = applicationClass,
+            registeredSelector = selector,
+            sharedApplication = application,
+        )
+
+        val actual = ObjectiveCCarbonMacOsApplicationRuntime(objectiveC).sharedApplication()
+
+        expectThat(actual).isEqualTo(application)
+        expectThat(objectiveC.messages).containsExactly(
+            "objc_getClass:NSApplication",
+            "sel_registerName:sharedApplication",
+            "objc_msgSendPointer:2:3",
+        )
+    }
 }
 
-private class BridgeTestMacOsApplicationRuntime(
+private class TestCarbonMacOsApplicationRuntime(
     private val application: Pointer? = Pointer(1),
-) : MacOsApplicationRuntime {
+) : CarbonMacOsApplicationRuntime {
     val events = mutableListOf<String>()
 
     override fun sharedApplication() = application
@@ -148,7 +188,7 @@ private class BridgeTestMacOsApplicationRuntime(
     }
 }
 
-private class RecordingMacOsMainThreadDispatcher : MacOsMainThreadDispatcher {
+private class RecordingCarbonMacOsMainThreadDispatcher : CarbonMacOsMainThreadDispatcher {
     val events = mutableListOf<String>()
     var dispatchCalls = 0
     var closeCalls = 0
@@ -163,7 +203,7 @@ private class RecordingMacOsMainThreadDispatcher : MacOsMainThreadDispatcher {
     }
 }
 
-private class FakeMacOsCoreFoundation : MacOsCoreFoundation {
+private class FakeCarbonMacOsCoreFoundation : CarbonMacOsCoreFoundation {
     val runLoop = Pointer(11)
     val mode = Pointer(12)
     val source = Pointer(13)
@@ -172,7 +212,7 @@ private class FakeMacOsCoreFoundation : MacOsCoreFoundation {
     val invalidatedSources = mutableListOf<Pointer>()
     val removedSources = mutableListOf<Triple<Pointer, Pointer, Pointer>>()
     val releasedPointers = mutableListOf<Pointer>()
-    var perform: MacOsCoreFoundation.RunLoopSourcePerformCallback? = null
+    var perform: CarbonMacOsCoreFoundation.RunLoopSourcePerformCallback? = null
 
     override fun CFRunLoopGetCurrent() = runLoop
 
@@ -182,7 +222,7 @@ private class FakeMacOsCoreFoundation : MacOsCoreFoundation {
         removedSources += Triple(runLoop, source, mode)
     }
 
-    override fun CFRunLoopSourceCreate(allocator: Pointer?, order: Int, context: MacOsRunLoopSourceContext): Pointer {
+    override fun CFRunLoopSourceCreate(allocator: Pointer?, order: Int, context: CarbonMacOsRunLoopSourceContext): Pointer {
         perform = context.perform
         return source
     }
@@ -204,4 +244,37 @@ private class FakeMacOsCoreFoundation : MacOsCoreFoundation {
     override fun CFRelease(reference: Pointer?) {
         reference?.let(releasedPointers::add)
     }
+}
+
+private class FakeCarbonObjectiveC(
+    private val applicationClass: Pointer? = Pointer(1),
+    private val registeredSelector: Pointer = Pointer(2),
+    private val sharedApplication: Pointer? = Pointer(3),
+) : CarbonObjectiveC {
+    val messages = mutableListOf<String>()
+
+    override fun objc_getClass(name: String): Pointer? {
+        messages += "objc_getClass:$name"
+        return applicationClass
+    }
+
+    override fun sel_registerName(name: String): Pointer {
+        messages += "sel_registerName:$name"
+        return registeredSelector
+    }
+
+    override fun objc_msgSendPointer(receiver: Pointer, selector: Pointer): Pointer? {
+        messages += "objc_msgSendPointer:${Pointer.nativeValue(receiver)}:${Pointer.nativeValue(selector)}"
+        return sharedApplication
+    }
+
+    override fun objc_msgSendVoid(receiver: Pointer, selector: Pointer) = Unit
+
+    override fun objc_msgSendVoidWithSelectorObjectAndBoolean(
+        receiver: Pointer,
+        selector: Pointer,
+        selectorArgument: Pointer,
+        objectArgument: Pointer?,
+        waitUntilDone: Boolean,
+    ) = Unit
 }
