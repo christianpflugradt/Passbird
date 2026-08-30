@@ -96,7 +96,7 @@ ports_and_adapters:
     concern: clipboard copy and reset behavior
   - port: GlobalHotkeyAdapterPort
     implementation: adapter.userinterface.hotkey.GlobalHotkeyService
-    concern: temporary registration of a global NEXT hotkey for guided credential flows without leaking OS-specific APIs into application handlers
+    concern: temporary registration of a global NEXT hotkey for guided credential flows without leaking OS-specific APIs into application handlers; the adapter resolves configured backend plus runtime compatibility before instantiating any platform-specific registrar
   - port: KeyStoreAdapterPort
     implementation: adapter.keystore.KeyStoreService
     concern: load and store secret material in PKCS12, while migration boot may construct compatibility adapters for legacy JCEKS reads; JVM keystore construction stays inside adapter.keystore

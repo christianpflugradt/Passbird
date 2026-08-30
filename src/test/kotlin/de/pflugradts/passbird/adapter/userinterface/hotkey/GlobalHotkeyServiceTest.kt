@@ -61,7 +61,7 @@ class GlobalHotkeyServiceTest {
         val x11Registrar = RecordingRegistrar(expectedRegistration)
         val service = GlobalHotkeyService(
             backend = "x11",
-            runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
+            runtimeEnvironment = RuntimeEnvironment(osName = "Linux", display = ":0"),
             windowsRegistrarFactory = { error("windows registrar must not be used") },
             carbonRegistrarFactory = { error("carbon registrar must not be used") },
             quartzRegistrarFactory = { error("quartz registrar must not be used") },
@@ -72,6 +72,54 @@ class GlobalHotkeyServiceTest {
 
         expectThat(actual).isSameInstanceAs(expectedRegistration)
         expectThat(x11Registrar.recordedKeys).containsExactly('P')
+    }
+
+    @Test
+    fun `should return null without touching quartz registrar when quartz backend is forced on windows`() {
+        val service = GlobalHotkeyService(
+            backend = "quartz",
+            runtimeEnvironment = RuntimeEnvironment(osName = "Windows 11"),
+            windowsRegistrarFactory = { error("windows registrar must not be used") },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
+            x11RegistrarFactory = { error("x11 registrar must not be used") },
+        )
+
+        val actual = service.register('p')
+
+        expectThat(actual).isEqualTo(null)
+    }
+
+    @Test
+    fun `should return null without touching carbon registrar when carbon backend is forced on linux`() {
+        val service = GlobalHotkeyService(
+            backend = "carbon",
+            runtimeEnvironment = RuntimeEnvironment(osName = "Linux", display = ":0"),
+            windowsRegistrarFactory = { error("windows registrar must not be used") },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
+            x11RegistrarFactory = { error("x11 registrar must not be used") },
+        )
+
+        val actual = service.register('p')
+
+        expectThat(actual).isEqualTo(null)
+    }
+
+    @Test
+    fun `should return null without touching win32 registrar when win32 backend is forced on mac os`() {
+        val service = GlobalHotkeyService(
+            backend = "win32",
+            runtimeEnvironment = RuntimeEnvironment(osName = "Mac OS X"),
+            windowsRegistrarFactory = { error("windows registrar must not be used") },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
+            x11RegistrarFactory = { error("x11 registrar must not be used") },
+        )
+
+        val actual = service.register('p')
+
+        expectThat(actual).isEqualTo(null)
     }
 
     @Test
@@ -93,7 +141,7 @@ class GlobalHotkeyServiceTest {
     fun `should return null when forced backend throws`() {
         val service = GlobalHotkeyService(
             backend = "win32",
-            runtimeEnvironment = RuntimeEnvironment(osName = "Linux"),
+            runtimeEnvironment = RuntimeEnvironment(osName = "Windows 11"),
             windowsRegistrarFactory = { error("backend unavailable") },
             carbonRegistrarFactory = { error("carbon registrar must not be used") },
             quartzRegistrarFactory = { error("quartz registrar must not be used") },
@@ -136,6 +184,22 @@ class GlobalHotkeyServiceTest {
 
         expectThat(actual).isEqualTo(false)
         expectThat(quartzRegistrar.prepareCalls).isEqualTo(1)
+    }
+
+    @Test
+    fun `should not prepare startup through quartz registrar when quartz backend is forced on windows`() {
+        val service = GlobalHotkeyService(
+            backend = "quartz",
+            runtimeEnvironment = RuntimeEnvironment(osName = "Windows 11"),
+            windowsRegistrarFactory = { error("windows registrar must not be used") },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
+            x11RegistrarFactory = { error("x11 registrar must not be used") },
+        )
+
+        val actual = service.prepareOnStartup()
+
+        expectThat(actual).isEqualTo(true)
     }
 
     @Test

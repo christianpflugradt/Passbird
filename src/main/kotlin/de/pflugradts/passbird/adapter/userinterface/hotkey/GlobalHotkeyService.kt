@@ -23,30 +23,36 @@ internal class GlobalHotkeyService(
     private val quartzRegistrarFactory: () -> PlatformHotkeyRegistrar = { QuartzMacOsGlobalHotkeyRegistrar() },
     private val x11RegistrarFactory: () -> PlatformHotkeyRegistrar = { X11GlobalHotkeyRegistrar() },
 ) : GlobalHotkeyAdapterPort {
-    override fun prepareOnStartup() = if (backend == "quartz") {
-        runCatching { quartzRegistrarFactory().prepareOnStartup() }.getOrDefault(true)
+    private val resolvedBackend by lazy(::resolveBackend)
+
+    override fun prepareOnStartup() = resolvedBackend.prepareOnStartup()
+
+    override fun register(key: Char): RegisteredGlobalHotkey? = resolvedBackend.register(key.uppercaseChar())
+
+    private fun resolveBackend() = when (backend) {
+        "auto" -> autoBackend()
+        "win32" -> supportedBackend(runtimeEnvironment.isWindows(), windowsRegistrarFactory)
+        "carbon" -> supportedBackend(runtimeEnvironment.isMacOs(), carbonRegistrarFactory)
+        "quartz" -> supportedBackend(runtimeEnvironment.isMacOs(), quartzRegistrarFactory, preparesOnStartup = true)
+        "x11" -> supportedBackend(runtimeEnvironment.hasX11Display(), x11RegistrarFactory)
+        else -> ResolvedGlobalHotkeyBackend.Unsupported
+    }
+
+    private fun autoBackend() = when {
+        runtimeEnvironment.isWindows() -> ResolvedGlobalHotkeyBackend.Supported(windowsRegistrarFactory)
+        runtimeEnvironment.isMacOs() -> ResolvedGlobalHotkeyBackend.Supported(carbonRegistrarFactory)
+        runtimeEnvironment.hasX11Display() -> ResolvedGlobalHotkeyBackend.Supported(x11RegistrarFactory)
+        else -> ResolvedGlobalHotkeyBackend.Unsupported
+    }
+
+    private fun supportedBackend(
+        isCompatible: Boolean,
+        registrarFactory: () -> PlatformHotkeyRegistrar,
+        preparesOnStartup: Boolean = false,
+    ) = if (isCompatible) {
+        ResolvedGlobalHotkeyBackend.Supported(registrarFactory, preparesOnStartup)
     } else {
-        true
-    }
-
-    override fun register(key: Char): RegisteredGlobalHotkey? = runCatching {
-        registrar().register(key.uppercaseChar())
-    }.getOrNull()
-
-    private fun registrar() = when (backend) {
-        "auto" -> autoRegistrar()
-        "win32" -> windowsRegistrarFactory()
-        "carbon" -> carbonRegistrarFactory()
-        "quartz" -> quartzRegistrarFactory()
-        "x11" -> x11RegistrarFactory()
-        else -> UnsupportedGlobalHotkeyRegistrar()
-    }
-
-    private fun autoRegistrar() = when {
-        runtimeEnvironment.isWindows() -> windowsRegistrarFactory()
-        runtimeEnvironment.isMacOs() -> carbonRegistrarFactory()
-        runtimeEnvironment.hasX11Display() -> x11RegistrarFactory()
-        else -> UnsupportedGlobalHotkeyRegistrar()
+        ResolvedGlobalHotkeyBackend.Unsupported
     }
 }
 
@@ -66,6 +72,33 @@ internal interface PlatformHotkeyRegistrar {
 
 internal class UnsupportedGlobalHotkeyRegistrar : PlatformHotkeyRegistrar {
     override fun register(key: Char) = null
+}
+
+private sealed interface ResolvedGlobalHotkeyBackend {
+    fun prepareOnStartup(): Boolean
+
+    fun register(key: Char): RegisteredGlobalHotkey?
+
+    data class Supported(
+        private val registrarFactory: () -> PlatformHotkeyRegistrar,
+        private val preparesOnStartup: Boolean = false,
+    ) : ResolvedGlobalHotkeyBackend {
+        override fun prepareOnStartup() = if (preparesOnStartup) {
+            runCatching { registrarFactory().prepareOnStartup() }.getOrDefault(true)
+        } else {
+            true
+        }
+
+        override fun register(key: Char): RegisteredGlobalHotkey? = runCatching {
+            registrarFactory().register(key)
+        }.getOrNull()
+    }
+
+    data object Unsupported : ResolvedGlobalHotkeyBackend {
+        override fun prepareOnStartup() = true
+
+        override fun register(key: Char): RegisteredGlobalHotkey? = null
+    }
 }
 
 internal abstract class BackgroundHotkeyRegistration : RegisteredGlobalHotkey {

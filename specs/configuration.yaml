@@ -81,8 +81,9 @@ areas:
       - application.flow.globalHotkey.backend accepts exactly auto, win32, carbon, quartz, or x11
       - auto keeps environment-based backend selection for the temporary hotkey path by choosing win32 on Windows, carbon on macOS, and x11 when an X11 display is available
       - explicit backend selection is mainly for verification, troubleshooting, or forcing a specific backend when multiple desktop environments may be present
+      - explicit backend selection only instantiates a backend when the current runtime can support it; incompatible selections are treated as unavailable for registration instead of probing the wrong platform API
       - Carbon is the default macOS backend, works with secure input, and does not require Input Monitoring permission
-      - only an explicitly selected quartz backend verifies macOS global-listening readiness during startup before entering the command loop
+      - only an explicitly selected quartz backend on macOS verifies global-listening readiness during startup before entering the command loop
       - if that macOS readiness check fails while the global hotkey is enabled, Passbird opens the Input Monitoring settings and aborts startup with a user-facing message
       - the effective guided-flow hotkey is always Ctrl+Shift+<ConfiguredKey>
   - name: password_generation_and_confirmation
