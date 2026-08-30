@@ -59,6 +59,24 @@ class GlobalHotkeyServiceTest {
     }
 
     @Test
+    fun `should prefer carbon registrar over x11 on mac os when backend is auto and display is present`() {
+        val expectedRegistration = mockk<RegisteredGlobalHotkey>()
+        val carbonRegistrar = RecordingRegistrar(expectedRegistration)
+        val service = GlobalHotkeyService(
+            runtimeEnvironment = RuntimeEnvironment(osName = "Mac OS X", display = ":0"),
+            windowsRegistrarFactory = { error("windows registrar must not be used") },
+            carbonRegistrarFactory = { carbonRegistrar },
+            quartzRegistrarFactory = { error("quartz registrar must not be used") },
+            x11RegistrarFactory = { error("x11 registrar must not be used") },
+        )
+
+        val actual = service.register('p')
+
+        expectThat(actual).isSameInstanceAs(expectedRegistration)
+        expectThat(carbonRegistrar.recordedKeys).containsExactly('P')
+    }
+
+    @Test
     fun `should use x11 registrar when x11 backend is forced`() {
         val expectedRegistration = mockk<RegisteredGlobalHotkey>()
         val x11Registrar = RecordingRegistrar(expectedRegistration)
@@ -203,6 +221,22 @@ class GlobalHotkeyServiceTest {
 
         expectThat(actual).isEqualTo(false)
         expectThat(quartzRegistrar.prepareCalls).isEqualTo(1)
+    }
+
+    @Test
+    fun `should keep startup preparation permissive when forced quartz preparation throws`() {
+        val service = GlobalHotkeyService(
+            backend = GlobalHotkeyBackend.QUARTZ,
+            runtimeEnvironment = RuntimeEnvironment(osName = "Mac OS X"),
+            windowsRegistrarFactory = { error("windows registrar must not be used") },
+            carbonRegistrarFactory = { error("carbon registrar must not be used") },
+            quartzRegistrarFactory = { error("backend unavailable") },
+            x11RegistrarFactory = { error("x11 registrar must not be used") },
+        )
+
+        val actual = service.prepareOnStartup()
+
+        expectThat(actual).isEqualTo(true)
     }
 
     @Test
