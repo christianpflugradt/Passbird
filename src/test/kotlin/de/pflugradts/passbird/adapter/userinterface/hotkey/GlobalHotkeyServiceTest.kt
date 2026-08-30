@@ -16,7 +16,6 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.util.ArrayDeque
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CountDownLatch
 
 class GlobalHotkeyServiceTest {
 
@@ -256,11 +255,12 @@ class GlobalHotkeyServiceTest {
         val runtime = FakeCarbonMacOsHotkeyRuntime(session)
         val registration = CarbonMacOsGlobalHotkeyRegistrar(runtimeFactory = { runtime }).register('P')
 
+        session.onNextAction?.invoke()
+
         expectThat(registration?.awaitWithin(250)).isEqualTo(true)
 
         registration?.release()
 
-        expectThat(session.stopped).isEqualTo(true)
         expectThat(session.closed).isEqualTo(true)
     }
 
@@ -301,11 +301,9 @@ class GlobalHotkeyServiceTest {
 
         val session = CarbonMacOsHotkeyRuntime(carbon).open(35) { nextActions++ }
         carbon.eventHandler?.callback(null, null, null)
-        session?.stop()
         session?.close()
 
         expectThat(nextActions).isEqualTo(1)
-        expectThat(carbon.quitApplicationEventLoopCalls).isEqualTo(1)
         expectThat(carbon.unregisteredHotkeys).containsExactly(Pointer(53))
         expectThat(carbon.removedEventHandlers).containsExactly(Pointer(52))
     }
@@ -574,19 +572,7 @@ private class FakeCarbonMacOsHotkeyRuntime(
 
 private class FakeCarbonMacOsHotkeySession : CarbonMacOsHotkeySession {
     var onNextAction: (() -> Unit)? = null
-    var stopped = false
     var closed = false
-    private val stoppedSignal = CountDownLatch(1)
-
-    override fun run() {
-        onNextAction?.invoke()
-        stoppedSignal.await()
-    }
-
-    override fun stop() {
-        stopped = true
-        stoppedSignal.countDown()
-    }
 
     override fun close() {
         closed = true
@@ -601,7 +587,6 @@ private class FakeCarbon(
     var eventHandler: Carbon.EventHandler? = null
     val unregisteredHotkeys = mutableListOf<Pointer>()
     val removedEventHandlers = mutableListOf<Pointer>()
-    var quitApplicationEventLoopCalls = 0
     var installEventHandlerCalls = 0
     var registerHotkeyCalls = 0
 
@@ -642,12 +627,6 @@ private class FakeCarbon(
     override fun RemoveEventHandler(eventHandlerRef: Pointer): Int {
         removedEventHandlers += eventHandlerRef
         return 0
-    }
-
-    override fun RunApplicationEventLoop() = Unit
-
-    override fun QuitApplicationEventLoop() {
-        quitApplicationEventLoopCalls++
     }
 }
 

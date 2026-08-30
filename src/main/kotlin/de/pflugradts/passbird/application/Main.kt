@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application
 
+import de.pflugradts.passbird.adapter.userinterface.hotkey.MacOsApplicationLoop
 import de.pflugradts.passbird.application.boot.launcher.LauncherGraph
 import de.pflugradts.passbird.application.failure.HomeDirectoryFailure
 import de.pflugradts.passbird.application.failure.HomeDirectoryFailureCase.DOES_NOT_EXIST
@@ -41,7 +42,17 @@ fun mainInitialSlot(slot: String?): Slot? = when (slot) {
 
 fun mainBootLauncher(runContext: RunContext) = LauncherGraph(runContext).bootable.boot()
 
+fun mainUseMacOsApplicationLoop() = System.getProperty("os.name").orEmpty().lowercase().contains("mac")
+
 fun main(args: Array<String>) {
+    if (mainUseMacOsApplicationLoop()) {
+        MacOsApplicationLoop().run { mainRun(args) }
+    } else {
+        mainRun(args)
+    }
+}
+
+fun mainRun(args: Array<String>) {
     if (mainHasValidHomeDirectory(args.getOrNull(0))) {
         val initialSlot = mainInitialSlot(args.getOrNull(1))
         if (initialSlot != null) {

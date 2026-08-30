@@ -1,0 +1,67 @@
+package de.pflugradts.passbird.adapter.userinterface.hotkey
+
+import com.sun.jna.Pointer
+import org.junit.jupiter.api.Test
+import strikt.api.expectThat
+import strikt.assertions.containsExactly
+import strikt.assertions.isEmpty
+import strikt.assertions.isEqualTo
+
+class MacOsApplicationLoopTest {
+    @Test
+    fun `should execute application directly outside mac os`() {
+        var executions = 0
+
+        MacOsApplicationLoop(
+            osName = "Linux",
+            runtimeFactory = { error("mac os runtime must not be created") },
+        ).run { executions++ }
+
+        expectThat(executions).isEqualTo(1)
+    }
+
+    @Test
+    fun `should execute application directly when mac os application is unavailable`() {
+        var executions = 0
+        val runtime = FakeMacOsApplicationRuntime(application = null)
+
+        MacOsApplicationLoop(
+            osName = "Mac OS X",
+            runtimeFactory = { runtime },
+        ).run { executions++ }
+
+        expectThat(executions).isEqualTo(1)
+        expectThat(runtime.events).isEmpty()
+    }
+
+    @Test
+    fun `should run application on worker while main thread runs mac os event loop`() {
+        val runtime = FakeMacOsApplicationRuntime()
+        var executions = 0
+
+        MacOsApplicationLoop(
+            osName = "Mac OS X",
+            runtimeFactory = { runtime },
+            startWorker = { work -> work() },
+        ).run { executions++ }
+
+        expectThat(executions).isEqualTo(1)
+        expectThat(runtime.events).containsExactly("terminate", "run")
+    }
+}
+
+private class FakeMacOsApplicationRuntime(
+    private val application: Pointer? = Pointer(1),
+) : MacOsApplicationRuntime {
+    val events = mutableListOf<String>()
+
+    override fun sharedApplication() = application
+
+    override fun run(application: Pointer) {
+        events += "run"
+    }
+
+    override fun terminate(application: Pointer) {
+        events += "terminate"
+    }
+}

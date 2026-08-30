@@ -220,17 +220,12 @@ internal class CarbonMacOsGlobalHotkeyRegistrar(
                 }
                 hotkeyLoop = loop
                 markRegistered(true)
-                try {
-                    loop.run()
-                } finally {
-                    loop.close()
-                    hotkeyLoop = null
-                }
             }
         }
 
         override fun onRelease() {
-            hotkeyLoop?.stop()
+            hotkeyLoop?.close()
+            hotkeyLoop = null
         }
     }
 }
@@ -384,8 +379,6 @@ internal interface CarbonHotkeyRuntime {
 }
 
 internal interface CarbonMacOsHotkeySession {
-    fun run()
-    fun stop()
     fun close()
 }
 
@@ -437,14 +430,6 @@ internal class CarbonMacOsHotkeyLoop(
     @Suppress("UNUSED_PARAMETER") private val eventHandler: Carbon.EventHandler,
 ) : CarbonMacOsHotkeySession {
     private val closed = AtomicBoolean(false)
-
-    override fun run() {
-        carbon.RunApplicationEventLoop()
-    }
-
-    override fun stop() {
-        carbon.QuitApplicationEventLoop()
-    }
 
     override fun close() {
         if (closed.compareAndSet(false, true)) {
@@ -586,8 +571,6 @@ internal interface Carbon : Library {
 
     fun UnregisterEventHotKey(hotkeyRef: Pointer): Int
     fun RemoveEventHandler(eventHandlerRef: Pointer): Int
-    fun RunApplicationEventLoop()
-    fun QuitApplicationEventLoop()
 
     fun interface EventHandler : Callback {
         fun callback(nextHandler: Pointer?, event: Pointer?, userData: Pointer?): Int

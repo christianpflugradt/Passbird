@@ -17,6 +17,7 @@ fun mockMain(
     mockkStatic(MAIN_KT)
     every { mainBootLauncher(if (runContextSlot != null) capture(runContextSlot) else any()) } returns Unit
     every { mainGetSystemOperation() } returns systemOperationMock
+    every { mainUseMacOsApplicationLoop() } returns false
     if (withMockedFileCheck) {
         every { mainHasValidHomeDirectory(any()) } returns true
     }
