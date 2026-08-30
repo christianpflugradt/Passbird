@@ -12,6 +12,13 @@ import java.util.concurrent.TimeUnit
 
 class MacOsMainThreadBridgeTest {
     @Test
+    fun `should execute bridge work inline when no dispatcher is installed`() {
+        val actual = MacOsMainThreadBridge.dispatch { "inline" }
+
+        expectThat(actual).isEqualTo("inline")
+    }
+
+    @Test
     fun `should install main thread dispatcher before worker starts`() {
         val runtime = BridgeTestMacOsApplicationRuntime()
         val dispatcher = RecordingMacOsMainThreadDispatcher()
@@ -30,6 +37,22 @@ class MacOsMainThreadBridgeTest {
         expectThat(dispatcher.closeCalls).isEqualTo(1)
         expectThat(dispatcher.events).containsExactly("worker")
         expectThat(runtime.events).containsExactly("terminate", "run")
+    }
+
+    @Test
+    fun `should ignore uninstall for a different dispatcher`() {
+        val installedDispatcher = RecordingMacOsMainThreadDispatcher()
+        val otherDispatcher = RecordingMacOsMainThreadDispatcher()
+
+        MacOsMainThreadBridge.install(installedDispatcher)
+        MacOsMainThreadBridge.uninstall(otherDispatcher)
+        MacOsMainThreadBridge.dispatch { installedDispatcher.events += "still-installed" }
+        MacOsMainThreadBridge.uninstall(installedDispatcher)
+
+        expectThat(installedDispatcher.dispatchCalls).isEqualTo(1)
+        expectThat(installedDispatcher.closeCalls).isEqualTo(1)
+        expectThat(installedDispatcher.events).containsExactly("still-installed")
+        expectThat(otherDispatcher.closeCalls).isEqualTo(0)
     }
 
     @Test
@@ -65,6 +88,47 @@ class MacOsMainThreadBridgeTest {
             Triple(coreFoundation.runLoop, coreFoundation.source, coreFoundation.mode),
         )
         expectThat(coreFoundation.releasedPointers).containsExactly(coreFoundation.source, coreFoundation.mode)
+    }
+
+    @Test
+    fun `should execute dispatcher work inline on owner thread`() {
+        val coreFoundation = FakeMacOsCoreFoundation()
+        val dispatcher = CoreFoundationMacOsMainThreadDispatcher(
+            coreFoundation = coreFoundation,
+            ownerThread = Thread.currentThread(),
+        )
+
+        val actual = dispatcher.dispatch { "owner-thread" }
+
+        expectThat(actual).isEqualTo("owner-thread")
+        expectThat(coreFoundation.signaledSources).containsExactly()
+        expectThat(coreFoundation.wokenRunLoops).containsExactly()
+
+        dispatcher.close()
+    }
+
+    @Test
+    fun `should execute dispatcher work inline after close`() {
+        val coreFoundation = FakeMacOsCoreFoundation()
+        val dispatcher = CoreFoundationMacOsMainThreadDispatcher(
+            coreFoundation = coreFoundation,
+            ownerThread = Thread.currentThread(),
+        )
+        dispatcher.close()
+
+        val result = CompletableFuture<String>()
+        val worker = Thread({
+            result.complete(
+                dispatcher.dispatch { "closed" },
+            )
+        }, "worker")
+        worker.start()
+        worker.join(TimeUnit.SECONDS.toMillis(1))
+
+        expectThat(result.get()).isEqualTo("closed")
+        expectThat(coreFoundation.signaledSources).containsExactly()
+        expectThat(coreFoundation.wokenRunLoops).containsExactly()
+        expectThat(coreFoundation.invalidatedSources).containsExactly(coreFoundation.source)
     }
 }
 
