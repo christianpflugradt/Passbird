@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:function-naming")
 
-package de.pflugradts.passbird.adapter.userinterface.hotkey
+package de.pflugradts.passbird.application.boot.main
 
 import com.sun.jna.FunctionMapper
 import com.sun.jna.Library
@@ -9,7 +9,7 @@ import com.sun.jna.NativeLibrary
 import com.sun.jna.Pointer
 import java.lang.reflect.Method
 
-internal class MacOsApplicationLoop(
+internal class MacOsApplicationLoopGraph(
     private val osName: String = System.getProperty("os.name").orEmpty(),
     private val runtimeFactory: () -> MacOsApplicationRuntime = ::ObjectiveCMacOsApplicationRuntime,
     private val startWorker: ((() -> Unit) -> Unit) = { work ->

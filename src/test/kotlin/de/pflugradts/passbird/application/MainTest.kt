@@ -50,7 +50,7 @@ class MainTest {
         every { systemOperation.isDirectory(givenHome.toDirectory()) } returns true
 
         // when
-        main(arrayOf(givenHome))
+        mainRun(arrayOf(givenHome))
 
         // then
         verify(exactly = 1) { mainBootLauncher(any()) }
@@ -65,7 +65,7 @@ class MainTest {
 
         // when
         captureSystemErr.during {
-            main(emptyArray())
+            mainRun(emptyArray())
         }
 
         // then
@@ -82,7 +82,7 @@ class MainTest {
 
         // when
         captureSystemErr.during {
-            main(arrayOf(givenHome))
+            mainRun(arrayOf(givenHome))
         }
 
         // then
@@ -100,7 +100,7 @@ class MainTest {
 
         // when
         captureSystemErr.during {
-            main(arrayOf(givenHome))
+            mainRun(arrayOf(givenHome))
         }
 
         // then
@@ -117,7 +117,7 @@ class MainTest {
         every { systemOperation.isDirectory(givenHome.toDirectory()) } returns true
 
         // when
-        main(arrayOf(givenHome, givenParam))
+        mainRun(arrayOf(givenHome, givenParam))
 
         // then
         verify(exactly = 1) { mainBootLauncher(any()) }
@@ -135,7 +135,7 @@ class MainTest {
 
         // when
         captureSystemErr.during {
-            main(arrayOf(givenHome, givenParam))
+            mainRun(arrayOf(givenHome, givenParam))
         }
 
         // then

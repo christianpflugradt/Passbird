@@ -1,4 +1,4 @@
-package de.pflugradts.passbird.adapter.userinterface.hotkey
+package de.pflugradts.passbird.application.boot.main
 
 import com.sun.jna.Pointer
 import org.junit.jupiter.api.Test
@@ -12,7 +12,7 @@ class MacOsApplicationLoopTest {
     fun `should execute application directly outside mac os`() {
         var executions = 0
 
-        MacOsApplicationLoop(
+        MacOsApplicationLoopGraph(
             osName = "Linux",
             runtimeFactory = { error("mac os runtime must not be created") },
         ).run { executions++ }
@@ -25,7 +25,7 @@ class MacOsApplicationLoopTest {
         var executions = 0
         val runtime = FakeMacOsApplicationRuntime(application = null)
 
-        MacOsApplicationLoop(
+        MacOsApplicationLoopGraph(
             osName = "Mac OS X",
             runtimeFactory = { runtime },
         ).run { executions++ }
@@ -39,7 +39,7 @@ class MacOsApplicationLoopTest {
         val runtime = FakeMacOsApplicationRuntime()
         var executions = 0
 
-        MacOsApplicationLoop(
+        MacOsApplicationLoopGraph(
             osName = "Mac OS X",
             runtimeFactory = { runtime },
             startWorker = { work -> work() },
