@@ -89,8 +89,11 @@ internal class CoreFoundationCarbonMacOsMainThreadDispatcher(
         }
     }
     private val runLoop = coreFoundation.CFRunLoopGetCurrent()
-    private val mode = checkNotNull(
+    private val defaultMode = checkNotNull(
         coreFoundation.CFStringCreateWithCString(Pointer.NULL, CF_RUN_LOOP_DEFAULT_MODE, CF_STRING_ENCODING_UTF8),
+    )
+    private val commonModes = checkNotNull(
+        coreFoundation.CFStringCreateWithCString(Pointer.NULL, CF_RUN_LOOP_COMMON_MODES, CF_STRING_ENCODING_UTF8),
     )
     private val sourceContext = CarbonMacOsRunLoopSourceContext().apply {
         version = 0
@@ -103,7 +106,8 @@ internal class CoreFoundationCarbonMacOsMainThreadDispatcher(
     )
 
     init {
-        coreFoundation.CFRunLoopAddSource(runLoop, source, mode)
+        coreFoundation.CFRunLoopAddSource(runLoop, source, defaultMode)
+        coreFoundation.CFRunLoopAddSource(runLoop, source, commonModes)
     }
 
     override fun <T> dispatch(work: () -> T): T {
@@ -120,9 +124,11 @@ internal class CoreFoundationCarbonMacOsMainThreadDispatcher(
     override fun close() {
         if (closed.compareAndSet(false, true)) {
             coreFoundation.CFRunLoopSourceInvalidate(source)
-            coreFoundation.CFRunLoopRemoveSource(runLoop, source, mode)
+            coreFoundation.CFRunLoopRemoveSource(runLoop, source, defaultMode)
+            coreFoundation.CFRunLoopRemoveSource(runLoop, source, commonModes)
             coreFoundation.CFRelease(source)
-            coreFoundation.CFRelease(mode)
+            coreFoundation.CFRelease(defaultMode)
+            coreFoundation.CFRelease(commonModes)
         }
     }
 
@@ -262,4 +268,5 @@ internal interface CarbonObjectiveC : Library {
 }
 
 private const val CF_RUN_LOOP_DEFAULT_MODE = "kCFRunLoopDefaultMode"
+private const val CF_RUN_LOOP_COMMON_MODES = "kCFRunLoopCommonModes"
 private const val CF_STRING_ENCODING_UTF8 = 0x08000100

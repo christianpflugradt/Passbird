@@ -42,10 +42,8 @@ class GlobalHotkeyBackendTest {
         expectThat(quartzPolicy.registrarBackend).isEqualTo(GlobalHotkeyRegistrarBackend.QUARTZ)
         expectThat(quartzPolicy.preparesOnStartup).isEqualTo(true)
         expectThat(unsupportedQuartzPolicy.isSupported).isEqualTo(false)
-        expectThat(quartzPolicy.requiresMacOsApplicationLoop(startsOnFirstThread = true)).isEqualTo(false)
-        expectThat(quartzPolicy.requiresMacOsApplicationLoop(startsOnFirstThread = false)).isEqualTo(false)
-        expectThat(carbonPolicy.requiresMacOsApplicationLoop(startsOnFirstThread = true)).isEqualTo(true)
-        expectThat(carbonPolicy.requiresMacOsApplicationLoop(startsOnFirstThread = false)).isEqualTo(false)
+        expectThat(quartzPolicy.requiresMacOsApplicationLoop()).isEqualTo(false)
+        expectThat(carbonPolicy.requiresMacOsApplicationLoop()).isEqualTo(true)
         expectThat(unsupportedCarbonPolicy.isSupported).isEqualTo(false)
     }
 

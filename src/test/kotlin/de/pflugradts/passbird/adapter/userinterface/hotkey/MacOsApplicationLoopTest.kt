@@ -18,24 +18,11 @@ class MacOsApplicationLoopTest {
     }
 
     @Test
-    fun `should execute application directly without mac os first thread startup`() {
-        var executions = 0
-
-        MacOsApplicationLoopGraph(
-            osName = "Mac OS X",
-            startsOnFirstThread = false,
-        ).run { executions++ }
-
-        expectThat(executions).isEqualTo(1)
-    }
-
-    @Test
     fun `should execute application directly when global hotkey is disabled`() {
         var executions = 0
 
         MacOsApplicationLoopGraph(
             osName = "Mac OS X",
-            startsOnFirstThread = true,
             globalHotkeyEnabled = false,
         ).run { executions++ }
 
@@ -48,7 +35,6 @@ class MacOsApplicationLoopTest {
 
         MacOsApplicationLoopGraph(
             osName = "Mac OS X",
-            startsOnFirstThread = true,
             globalHotkeyBackend = GlobalHotkeyBackend.QUARTZ,
         ).run { executions++ }
 
@@ -62,7 +48,6 @@ class MacOsApplicationLoopTest {
 
         MacOsApplicationLoopGraph(
             osName = "Mac OS X",
-            startsOnFirstThread = true,
             globalHotkeyBackend = GlobalHotkeyBackend.CARBON,
             applicationLoopRunner = MacOsApplicationLoopRunner {
                 runnerCalls++

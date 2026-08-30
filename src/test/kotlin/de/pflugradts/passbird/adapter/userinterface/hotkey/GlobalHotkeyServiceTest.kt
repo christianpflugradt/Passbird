@@ -393,11 +393,13 @@ class GlobalHotkeyServiceTest {
     @Test
     fun `should remove carbon event handler when hotkey registration fails`() {
         val carbon = FakeCarbon(registerStatus = 1)
+        val applicationRuntime = FakeCarbonMacOsApplicationRuntime()
         val executor = RecordingMacOsMainThreadExecutor()
 
-        val actual = CarbonMacOsHotkeyRuntime(carbon, executor).open(35) { }
+        val actual = CarbonMacOsHotkeyRuntime(carbon, applicationRuntime, executor).open(35) { }
 
         expectThat(actual).isEqualTo(null)
+        expectThat(applicationRuntime.sharedApplicationCalls).isEqualTo(1)
         expectThat(executor.dispatchCalls).isEqualTo(1)
         expectThat(carbon.removedEventHandlers).containsExactly(Pointer(52))
     }
@@ -405,11 +407,13 @@ class GlobalHotkeyServiceTest {
     @Test
     fun `should return null when carbon event target is unavailable`() {
         val carbon = FakeCarbon(eventTarget = null)
+        val applicationRuntime = FakeCarbonMacOsApplicationRuntime()
         val executor = RecordingMacOsMainThreadExecutor()
 
-        val actual = CarbonMacOsHotkeyRuntime(carbon, executor).open(35) { }
+        val actual = CarbonMacOsHotkeyRuntime(carbon, applicationRuntime, executor).open(35) { }
 
         expectThat(actual).isEqualTo(null)
+        expectThat(applicationRuntime.sharedApplicationCalls).isEqualTo(1)
         expectThat(executor.dispatchCalls).isEqualTo(1)
         expectThat(carbon.installEventHandlerCalls).isEqualTo(0)
     }
@@ -417,11 +421,13 @@ class GlobalHotkeyServiceTest {
     @Test
     fun `should return null when carbon event handler installation fails`() {
         val carbon = FakeCarbon(installStatus = 1)
+        val applicationRuntime = FakeCarbonMacOsApplicationRuntime()
         val executor = RecordingMacOsMainThreadExecutor()
 
-        val actual = CarbonMacOsHotkeyRuntime(carbon, executor).open(35) { }
+        val actual = CarbonMacOsHotkeyRuntime(carbon, applicationRuntime, executor).open(35) { }
 
         expectThat(actual).isEqualTo(null)
+        expectThat(applicationRuntime.sharedApplicationCalls).isEqualTo(1)
         expectThat(executor.dispatchCalls).isEqualTo(1)
         expectThat(carbon.registerHotkeyCalls).isEqualTo(0)
     }
@@ -429,14 +435,16 @@ class GlobalHotkeyServiceTest {
     @Test
     fun `should signal and release carbon hotkey session`() {
         val carbon = FakeCarbon()
+        val applicationRuntime = FakeCarbonMacOsApplicationRuntime()
         val executor = RecordingMacOsMainThreadExecutor()
         var nextActions = 0
 
-        val session = CarbonMacOsHotkeyRuntime(carbon, executor).open(35) { nextActions++ }
+        val session = CarbonMacOsHotkeyRuntime(carbon, applicationRuntime, executor).open(35) { nextActions++ }
         carbon.eventHandler?.callback(null, null, null)
         session?.close()
 
         expectThat(nextActions).isEqualTo(1)
+        expectThat(applicationRuntime.sharedApplicationCalls).isEqualTo(1)
         expectThat(executor.dispatchCalls).isEqualTo(2)
         expectThat(carbon.unregisteredHotkeys).containsExactly(Pointer(53))
         expectThat(carbon.removedEventHandlers).containsExactly(Pointer(52))
@@ -445,14 +453,29 @@ class GlobalHotkeyServiceTest {
     @Test
     fun `should rethrow carbon main thread execution failure`() {
         val carbon = FakeCarbon()
+        val applicationRuntime = FakeCarbonMacOsApplicationRuntime()
         val executor = RecordingMacOsMainThreadExecutor(failure = IllegalStateException("boom"))
 
         val actual = assertThrows<IllegalStateException> {
-            CarbonMacOsHotkeyRuntime(carbon, executor).open(35) { }
+            CarbonMacOsHotkeyRuntime(carbon, applicationRuntime, executor).open(35) { }
         }
 
         expectThat(actual.message).isEqualTo("boom")
         expectThat(executor.dispatchCalls).isEqualTo(1)
+    }
+
+    @Test
+    fun `should return null when shared application is unavailable for carbon registration`() {
+        val carbon = FakeCarbon()
+        val applicationRuntime = FakeCarbonMacOsApplicationRuntime(sharedApplication = null)
+        val executor = RecordingMacOsMainThreadExecutor()
+
+        val actual = CarbonMacOsHotkeyRuntime(carbon, applicationRuntime, executor).open(35) { }
+
+        expectThat(actual).isEqualTo(null)
+        expectThat(applicationRuntime.sharedApplicationCalls).isEqualTo(1)
+        expectThat(executor.dispatchCalls).isEqualTo(1)
+        expectThat(carbon.installEventHandlerCalls).isEqualTo(0)
     }
 
     @Test
@@ -775,6 +798,21 @@ private class FakeCarbonMacOsHotkeySession : CarbonMacOsHotkeySession {
     override fun close() {
         closed = true
     }
+}
+
+private class FakeCarbonMacOsApplicationRuntime(
+    private val sharedApplication: Pointer? = Pointer(54),
+) : de.pflugradts.passbird.adapter.userinterface.hotkey.carbon.CarbonMacOsApplicationRuntime {
+    var sharedApplicationCalls = 0
+
+    override fun sharedApplication(): Pointer? {
+        sharedApplicationCalls++
+        return sharedApplication
+    }
+
+    override fun run(application: Pointer) = Unit
+
+    override fun terminate(application: Pointer) = Unit
 }
 
 private class FakeCarbon(

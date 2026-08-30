@@ -81,14 +81,23 @@ class CarbonMacOsRuntimeTest {
         expectThat(result.get()).isEqualTo("ok")
         expectThat(coreFoundation.signaledSources).containsExactly(coreFoundation.source)
         expectThat(coreFoundation.wokenRunLoops).containsExactly(coreFoundation.runLoop)
+        expectThat(coreFoundation.addedSources).containsExactly(
+            Triple(coreFoundation.runLoop, coreFoundation.source, coreFoundation.defaultMode),
+            Triple(coreFoundation.runLoop, coreFoundation.source, coreFoundation.commonModes),
+        )
 
         dispatcher.close()
 
         expectThat(coreFoundation.invalidatedSources).containsExactly(coreFoundation.source)
         expectThat(coreFoundation.removedSources).containsExactly(
-            Triple(coreFoundation.runLoop, coreFoundation.source, coreFoundation.mode),
+            Triple(coreFoundation.runLoop, coreFoundation.source, coreFoundation.defaultMode),
+            Triple(coreFoundation.runLoop, coreFoundation.source, coreFoundation.commonModes),
         )
-        expectThat(coreFoundation.releasedPointers).containsExactly(coreFoundation.source, coreFoundation.mode)
+        expectThat(coreFoundation.releasedPointers).containsExactly(
+            coreFoundation.source,
+            coreFoundation.defaultMode,
+            coreFoundation.commonModes,
+        )
     }
 
     @Test
@@ -205,8 +214,10 @@ private class RecordingCarbonMacOsMainThreadDispatcher : CarbonMacOsMainThreadDi
 
 private class FakeCarbonMacOsCoreFoundation : CarbonMacOsCoreFoundation {
     val runLoop = Pointer(11)
-    val mode = Pointer(12)
+    val defaultMode = Pointer(12)
     val source = Pointer(13)
+    val commonModes = Pointer(14)
+    val addedSources = mutableListOf<Triple<Pointer, Pointer, Pointer>>()
     val signaledSources = mutableListOf<Pointer>()
     val wokenRunLoops = mutableListOf<Pointer>()
     val invalidatedSources = mutableListOf<Pointer>()
@@ -216,7 +227,9 @@ private class FakeCarbonMacOsCoreFoundation : CarbonMacOsCoreFoundation {
 
     override fun CFRunLoopGetCurrent() = runLoop
 
-    override fun CFRunLoopAddSource(runLoop: Pointer, source: Pointer, mode: Pointer) = Unit
+    override fun CFRunLoopAddSource(runLoop: Pointer, source: Pointer, mode: Pointer) {
+        addedSources += Triple(runLoop, source, mode)
+    }
 
     override fun CFRunLoopRemoveSource(runLoop: Pointer, source: Pointer, mode: Pointer) {
         removedSources += Triple(runLoop, source, mode)
@@ -239,7 +252,11 @@ private class FakeCarbonMacOsCoreFoundation : CarbonMacOsCoreFoundation {
         wokenRunLoops += runLoop
     }
 
-    override fun CFStringCreateWithCString(allocator: Pointer?, value: String, encoding: Int) = mode
+    override fun CFStringCreateWithCString(allocator: Pointer?, value: String, encoding: Int) = when (value) {
+        "kCFRunLoopDefaultMode" -> defaultMode
+        "kCFRunLoopCommonModes" -> commonModes
+        else -> error("unexpected CFString value $value")
+    }
 
     override fun CFRelease(reference: Pointer?) {
         reference?.let(releasedPointers::add)

@@ -45,7 +45,6 @@ internal class GlobalHotkeyService(
             null
         }
     }.getOrNull()
-
     private fun registrarFactory(backendPolicy: GlobalHotkeyBackendPolicy) = when (backendPolicy.registrarBackend) {
         GlobalHotkeyRegistrarBackend.WIN32 -> windowsRegistrarFactory()
         GlobalHotkeyRegistrarBackend.CARBON -> carbonRegistrarFactory()

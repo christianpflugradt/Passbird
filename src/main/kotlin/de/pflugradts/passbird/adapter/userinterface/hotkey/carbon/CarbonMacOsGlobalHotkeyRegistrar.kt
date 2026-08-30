@@ -31,7 +31,6 @@ internal class CarbonMacOsGlobalHotkeyRegistrar(
         keyCodeResolver(key)
             ?.let { CarbonMacOsRegistration.open(it, runtimeFactory()) }
     }.getOrNull()
-
     internal class CarbonMacOsRegistration(
         private val session: CarbonMacOsHotkeySession,
         private val nextActions: Semaphore,
@@ -60,9 +59,11 @@ internal class CarbonMacOsGlobalHotkeyRegistrar(
 
 internal class CarbonMacOsHotkeyRuntime(
     private val carbon: Carbon = Carbon.instance(),
+    private val applicationRuntime: CarbonMacOsApplicationRuntime = ObjectiveCCarbonMacOsApplicationRuntime(),
     private val mainThreadExecutor: CarbonMacOsMainThreadExecutor = CarbonMacOsRuntimeContextExecutor,
 ) : CarbonHotkeyRuntime {
     override fun open(keyCode: Int, onNextAction: () -> Unit): CarbonMacOsHotkeySession? = mainThreadExecutor.dispatch {
+        applicationRuntime.sharedApplication() ?: return@dispatch null
         val eventTarget = carbon.GetApplicationEventTarget() ?: return@dispatch null
         val eventType = CarbonEventTypeSpec().apply {
             eventClass = CARBON_EVENT_CLASS_KEYBOARD

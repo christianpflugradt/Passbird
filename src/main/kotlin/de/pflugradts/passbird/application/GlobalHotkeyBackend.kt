@@ -36,8 +36,7 @@ class GlobalHotkeyBackendPolicy(
     val registrarBackend: GlobalHotkeyRegistrarBackend?,
     val preparesOnStartup: Boolean = false,
 ) {
-    fun requiresMacOsApplicationLoop(startsOnFirstThread: Boolean) =
-        startsOnFirstThread && registrarBackend == GlobalHotkeyRegistrarBackend.CARBON
+    fun requiresMacOsApplicationLoop() = registrarBackend == GlobalHotkeyRegistrarBackend.CARBON
 
     val isSupported get() = registrarBackend != null
 
