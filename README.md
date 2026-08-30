@@ -12,12 +12,12 @@
     + [Custom Password Configuration](#custom-password-configuration)
 * [Usage](#usage)
     + [General Usage](#general-usage)
-    + [Use](#use)
     + [Nests](#nests)
     + [Proteins](#proteins)
     + [Yolks](#yolks)
     + [Favorites](#favorites)
     + [Memory](#memory)
+    + [Use](#use)
     + [Custom Passwords](#custom-passwords)
 * [Development](#development)
     + [Dependency Verification](#dependency-verification)
@@ -463,41 +463,97 @@ At any time, you can input `m` to display the contents of the EggIdMemory. This 
 
 ### Use
 
-Use `u[EggId]` to guide a login flow through one Egg without retyping follow-up commands. The flow uses a fixed order: the configured login Protein slot first, then the password, then the optional Yolk. Empty optional values are skipped automatically, so an Egg without a login Protein starts with the password, and an Egg without a Yolk finishes after the password.
+The `use` command guides you through the values required for signing in
+without requiring repeated command execution.
 
-For example, `uemail` can produce a flow like this:
+Start the flow with:
 
-    Ctrl+Shift+P or Enter to continue
+``` text
+u[EggId]
+```
 
-    Login copied to clipboard.
+The flow always follows the same order:
 
-    Password copied to clipboard.
+1.  Login (configured Protein slot, if not empty)
+2.  Password
+3.  Yolk (if available)
 
-    Yolk copied to clipboard.
-    482193 (17s)
+`Enter` always advances to the next step. If the global hotkey is
+enabled, `Ctrl+Shift+<key>` performs the same action. Enter requires the terminal window to have focus, the hotkey instead can be used while another window, e.g. a web browser, has the focus.
 
-Pressing Enter advances the flow, but Enter requires the Passbird window to have focus. When the temporary global hotkey is available, `Ctrl+Shift+P` advances the same flow step without forcing you to leave the browser or application where you are entering the credentials. The hotkey exists only while a multi-step `u[EggId]` flow is active. If hotkey registration fails, Passbird keeps the flow usable and falls back to:
+Example:
 
-    Global hotkey Ctrl+Shift+P could not be registered.
-    Press Enter to continue.
+``` text
+Ctrl+Shift+P or Enter to continue
 
-The login value is taken from the global configuration key `application.flow.loginProteinSlot`. The hotkey behavior is configured in the same section:
+Login copied to clipboard.
 
-```yaml
+Password copied to clipboard.
+
+Yolk copied to clipboard.
+482193 · 17s
+```
+
+During the Yolk step, Passbird reuses the normal live Yolk behavior. The
+displayed token updates automatically whenever a new TOTP period begins
+and, if clipboard updates are enabled, the new token is copied
+automatically. Press `Ctrl+Shift+<key>` or `Enter` once more to return
+to the normal Passbird prompt.
+
+#### macOS
+
+Passbird provides two hotkey backends on macOS: **Carbon** and
+**Quartz**.
+
+When `backend` is set to `auto`, Passbird currently selects **Carbon**.
+
+#### Carbon
+
+Carbon is the default because it works even while macOS Secure Input is
+active and does not require Input Monitoring permission.
+
+Carbon requires the JVM to be started on the first thread:
+
+``` bash
+java -XstartOnFirstThread -jar passbird.jar ...
+```
+
+Without `-XstartOnFirstThread`, the Carbon backend cannot be initialized
+correctly.
+
+Carbon is based on a legacy macOS API. Although it remains functional
+today, Apple may remove it in a future macOS release. For that reason,
+Quartz remains available as an alternative.
+
+#### Quartz
+
+Quartz uses the modern macOS event APIs.
+
+Unlike Carbon, Quartz cannot receive the global hotkey while macOS
+Secure Input is active. Secure Input is enabled by some applications
+while sensitive text fields are focused.
+
+Quartz also requires **Input Monitoring** permission for the terminal
+application that launches Passbird. If the permission is missing,
+Passbird opens the corresponding macOS Privacy & Security settings and
+terminates. After granting permission, simply start Passbird again.
+
+### Configuration
+
+Global hotkeys are disabled by default to avoid introducing additional
+platform-specific startup requirements for users who do not use the
+guided flow.
+
+``` yaml
 application:
   flow:
     loginProteinSlot: 0
     globalHotkey:
-      enabled: true
+      enabled: false
       key: P
       backend: auto
 ```
 
-Only letters `A` through `Z` are accepted for `key`, and the effective hotkey is always `Ctrl+Shift+<key>`. `backend` defaults to `auto`, which chooses `win32` on Windows, `carbon` on macOS, and `x11` when an X11 display is available. You can also force `win32`, `carbon`, `quartz`, or `x11` explicitly for verification or troubleshooting. Carbon works with macOS secure input and does not require Input Monitoring permission. On macOS, Passbird opens the Input Monitoring settings page and terminates only when `backend: quartz` is explicitly selected and the launching terminal app lacks the required permission.
-
-#### macOS secure input
-
-The default macOS Carbon backend continues to receive the temporary global hotkey while secure input is active. The optional Quartz backend does not have this property and requires Input Monitoring permission.
 
 ### Custom Passwords
 
