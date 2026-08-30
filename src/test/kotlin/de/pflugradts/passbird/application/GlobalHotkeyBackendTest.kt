@@ -26,14 +26,26 @@ class GlobalHotkeyBackendTest {
 
     @Test
     fun `should resolve explicit backend lifecycle requirements from one policy`() {
+        val win32Policy = GlobalHotkeyBackend.WIN32.resolvePolicy(osName = "Windows 11")
+        val unsupportedWin32Policy = GlobalHotkeyBackend.WIN32.resolvePolicy(osName = "Linux")
+        val supportedX11Policy = GlobalHotkeyBackend.X11.resolvePolicy(osName = "Linux", display = ":0")
+        val unsupportedX11Policy = GlobalHotkeyBackend.X11.resolvePolicy(osName = "Linux")
         val quartzPolicy = GlobalHotkeyBackend.QUARTZ.resolvePolicy(osName = "Mac OS X")
+        val unsupportedQuartzPolicy = GlobalHotkeyBackend.QUARTZ.resolvePolicy(osName = "Windows 11")
         val carbonPolicy = GlobalHotkeyBackend.CARBON.resolvePolicy(osName = "Mac OS X")
         val unsupportedCarbonPolicy = GlobalHotkeyBackend.CARBON.resolvePolicy(osName = "Linux")
 
+        expectThat(win32Policy.registrarBackend).isEqualTo(GlobalHotkeyRegistrarBackend.WIN32)
+        expectThat(unsupportedWin32Policy.isSupported).isEqualTo(false)
+        expectThat(supportedX11Policy.registrarBackend).isEqualTo(GlobalHotkeyRegistrarBackend.X11)
+        expectThat(unsupportedX11Policy.isSupported).isEqualTo(false)
         expectThat(quartzPolicy.registrarBackend).isEqualTo(GlobalHotkeyRegistrarBackend.QUARTZ)
         expectThat(quartzPolicy.preparesOnStartup).isEqualTo(true)
+        expectThat(unsupportedQuartzPolicy.isSupported).isEqualTo(false)
         expectThat(quartzPolicy.requiresMacOsApplicationLoop(startsOnFirstThread = true)).isEqualTo(false)
+        expectThat(quartzPolicy.requiresMacOsApplicationLoop(startsOnFirstThread = false)).isEqualTo(false)
         expectThat(carbonPolicy.requiresMacOsApplicationLoop(startsOnFirstThread = true)).isEqualTo(true)
+        expectThat(carbonPolicy.requiresMacOsApplicationLoop(startsOnFirstThread = false)).isEqualTo(false)
         expectThat(unsupportedCarbonPolicy.isSupported).isEqualTo(false)
     }
 
