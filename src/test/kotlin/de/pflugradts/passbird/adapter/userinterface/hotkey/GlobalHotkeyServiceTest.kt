@@ -7,11 +7,13 @@ import de.pflugradts.passbird.application.GlobalHotkeyBackend
 import de.pflugradts.passbird.application.RegisteredGlobalHotkey
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isGreaterThanOrEqualTo
+import strikt.assertions.isNotNull
 import strikt.assertions.isSameInstanceAs
 import java.io.InputStream
 import java.io.OutputStream
@@ -348,45 +350,141 @@ class GlobalHotkeyServiceTest {
     @Test
     fun `should remove carbon event handler when hotkey registration fails`() {
         val carbon = FakeCarbon(registerStatus = 1)
+        val dispatcher = RecordingMacOsMainThreadDispatcher()
 
-        val actual = CarbonMacOsHotkeyRuntime(carbon).open(35) { }
+        val actual = CarbonMacOsHotkeyRuntime(carbon, dispatcher).open(35) { }
 
         expectThat(actual).isEqualTo(null)
+        expectThat(dispatcher.dispatchCalls).isEqualTo(1)
         expectThat(carbon.removedEventHandlers).containsExactly(Pointer(52))
     }
 
     @Test
     fun `should return null when carbon event target is unavailable`() {
         val carbon = FakeCarbon(eventTarget = null)
+        val dispatcher = RecordingMacOsMainThreadDispatcher()
 
-        val actual = CarbonMacOsHotkeyRuntime(carbon).open(35) { }
+        val actual = CarbonMacOsHotkeyRuntime(carbon, dispatcher).open(35) { }
 
         expectThat(actual).isEqualTo(null)
+        expectThat(dispatcher.dispatchCalls).isEqualTo(1)
         expectThat(carbon.installEventHandlerCalls).isEqualTo(0)
     }
 
     @Test
     fun `should return null when carbon event handler installation fails`() {
         val carbon = FakeCarbon(installStatus = 1)
+        val dispatcher = RecordingMacOsMainThreadDispatcher()
 
-        val actual = CarbonMacOsHotkeyRuntime(carbon).open(35) { }
+        val actual = CarbonMacOsHotkeyRuntime(carbon, dispatcher).open(35) { }
 
         expectThat(actual).isEqualTo(null)
+        expectThat(dispatcher.dispatchCalls).isEqualTo(1)
         expectThat(carbon.registerHotkeyCalls).isEqualTo(0)
     }
 
     @Test
     fun `should signal and release carbon hotkey session`() {
         val carbon = FakeCarbon()
+        val dispatcher = RecordingMacOsMainThreadDispatcher()
         var nextActions = 0
 
-        val session = CarbonMacOsHotkeyRuntime(carbon).open(35) { nextActions++ }
+        val session = CarbonMacOsHotkeyRuntime(carbon, dispatcher).open(35) { nextActions++ }
         carbon.eventHandler?.callback(null, null, null)
         session?.close()
 
         expectThat(nextActions).isEqualTo(1)
+        expectThat(dispatcher.dispatchCalls).isEqualTo(2)
         expectThat(carbon.unregisteredHotkeys).containsExactly(Pointer(53))
         expectThat(carbon.removedEventHandlers).containsExactly(Pointer(52))
+    }
+
+    @Test
+    fun `should execute mac os main thread dispatch immediately on main thread`() {
+        val dispatch = FakeDispatch()
+        val pthread = FakePThread(isMainThread = true)
+        var executions = 0
+
+        val actual = DispatchMacOsMainThreadDispatcher(dispatch, pthread).dispatch {
+            executions++
+            "ok"
+        }
+
+        expectThat(actual).isEqualTo("ok")
+        expectThat(executions).isEqualTo(1)
+        expectThat(dispatch.dispatchCalls).isEqualTo(0)
+    }
+
+    @Test
+    fun `should execute mac os main thread dispatch through main queue when off main thread`() {
+        val dispatch = FakeDispatch()
+        val pthread = FakePThread(isMainThread = false)
+        var executions = 0
+
+        val actual = DispatchMacOsMainThreadDispatcher(dispatch, pthread).dispatch {
+            executions++
+            "ok"
+        }
+
+        expectThat(actual).isEqualTo("ok")
+        expectThat(executions).isEqualTo(1)
+        expectThat(dispatch.dispatchCalls).isEqualTo(1)
+        expectThat(dispatch.recordedQueue).isEqualTo(dispatch.mainQueue)
+        expectThat(dispatch.recordedContext).isNotNull()
+    }
+
+    @Test
+    fun `should rethrow failure from mac os main thread dispatch`() {
+        val dispatch = FakeDispatch()
+        val pthread = FakePThread(isMainThread = false)
+
+        val actual = assertThrows<IllegalStateException> {
+            DispatchMacOsMainThreadDispatcher(dispatch, pthread).dispatch {
+                error("boom")
+            }
+        }
+
+        expectThat(actual.message).isEqualTo("boom")
+        expectThat(dispatch.dispatchCalls).isEqualTo(1)
+    }
+
+    @Test
+    fun `should close carbon hotkey loop only once`() {
+        val carbon = FakeCarbon()
+        val dispatcher = RecordingMacOsMainThreadDispatcher()
+        val loop = CarbonMacOsHotkeyLoop(
+            carbon = carbon,
+            hotkeyReference = Pointer(53),
+            eventHandlerReference = Pointer(52),
+            eventHandler = Carbon.EventHandler { _, _, _ -> 0 },
+            mainThreadDispatcher = dispatcher,
+        )
+
+        loop.close()
+        loop.close()
+
+        expectThat(dispatcher.dispatchCalls).isEqualTo(1)
+        expectThat(carbon.unregisteredHotkeys).containsExactly(Pointer(53))
+        expectThat(carbon.removedEventHandlers).containsExactly(Pointer(52))
+    }
+
+    @Test
+    fun `should close carbon hotkey loop without native handles`() {
+        val carbon = FakeCarbon()
+        val dispatcher = RecordingMacOsMainThreadDispatcher()
+        val loop = CarbonMacOsHotkeyLoop(
+            carbon = carbon,
+            hotkeyReference = null,
+            eventHandlerReference = null,
+            eventHandler = Carbon.EventHandler { _, _, _ -> 0 },
+            mainThreadDispatcher = dispatcher,
+        )
+
+        loop.close()
+
+        expectThat(dispatcher.dispatchCalls).isEqualTo(1)
+        expectThat(carbon.unregisteredHotkeys).hasSize(0)
+        expectThat(carbon.removedEventHandlers).hasSize(0)
     }
 
     @Test
@@ -579,6 +677,37 @@ private class RecordingRegistrar(
         recordedKeys += key
         return registration
     }
+}
+
+private class RecordingMacOsMainThreadDispatcher : MacOsMainThreadDispatcher {
+    var dispatchCalls = 0
+
+    override fun <T> dispatch(work: () -> T): T {
+        dispatchCalls++
+        return work()
+    }
+}
+
+private class FakeDispatch : Dispatch {
+    val mainQueue = Pointer(61)
+    var dispatchCalls = 0
+    var recordedQueue: Pointer? = null
+    var recordedContext: Pointer? = null
+
+    override fun dispatch_get_main_queue(): Pointer = mainQueue
+
+    override fun dispatch_sync_f(queue: Pointer, context: Pointer?, work: Dispatch.DispatchFunction) {
+        dispatchCalls++
+        recordedQueue = queue
+        recordedContext = context
+        work.callback(context)
+    }
+}
+
+private class FakePThread(
+    private val isMainThread: Boolean,
+) : PThread {
+    override fun pthread_main_np() = if (isMainThread) 1 else 0
 }
 
 private class FakeWin32User32(
