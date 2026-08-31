@@ -4,7 +4,7 @@ run-name: "Semantic release (${{ github.event_name }})"
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 3 * * 1"
+    - cron: "23 13 * * 1"
       timezone: "Europe/Berlin"
 
 permissions:
@@ -134,6 +134,8 @@ jobs:
         run: |
           mkdir -p verified-release-jar
           gh run download "${{ needs.require-verified-main.outputs.build-run-id }}" --repo "$GITHUB_REPOSITORY" --name release-jar --dir verified-release-jar
+      - name: disable local git hooks for release tag push
+        run: git config --local core.hooksPath /dev/null
       - name: run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
