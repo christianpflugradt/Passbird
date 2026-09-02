@@ -79,6 +79,36 @@ class ExportCommandHandlerTest {
     }
 
     @Test
+    fun exportsWithMatchingManualPasswordWithoutDisplayingIt() {
+        fakeUserInterfaceAdapterPort(
+            userInterface,
+            withTheseInputs = listOf(inputOf(shellOf("n"))),
+            withTheseSecureInputs = listOf(inputOf(shellOf("manual")), inputOf(shellOf("manual"))),
+        )
+        var capturedPassword = charArrayOf()
+        every { exchange.exportEggs(any<CharArray>()) } answers {
+            capturedPassword = firstArg<CharArray>().copyOf()
+            true
+        }
+
+        inputHandler.handleInput(inputOf(shellOf("e")))
+
+        expectThat(capturedPassword.concatToString()) isEqualTo "manual"
+        verify(exactly = 0) { userInterface.send(match { it.shell.asString().startsWith("Your export password:") }) }
+    }
+
+    @Test
+    fun doesNotDisplayGeneratedPasswordWhenExportFails() {
+        fakeUserInterfaceAdapterPort(userInterface, withTheseInputs = listOf(inputOf(shellOf(""))))
+        fakePasswordProvider(passwordProvider, shellOf("generated"))
+        every { exchange.exportEggs(any<CharArray>()) } returns false
+
+        inputHandler.handleInput(inputOf(shellOf("e")))
+
+        verify(exactly = 0) { userInterface.send(match { it.shell.asString().startsWith("Your export password:") }) }
+    }
+
+    @Test
     fun abortsForAnInvalidPasswordChoice() {
         fakeUserInterfaceAdapterPort(userInterface, withTheseInputs = listOf(inputOf(shellOf("invalid"))))
 

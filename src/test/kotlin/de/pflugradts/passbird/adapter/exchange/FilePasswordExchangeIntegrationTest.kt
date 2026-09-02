@@ -82,6 +82,12 @@ class FilePasswordExchangeIntegrationTest {
     }
 
     @Test
+    fun rejectsEmptyExportAndImportPasswords() {
+        expectThat(exchange.send(emptyMap(), charArrayOf()).failure).isTrue()
+        expectThat(exchange.receive(charArrayOf()).failure).isTrue()
+    }
+
+    @Test
     fun rejectsArchivesWithInvalidStructure() {
         listOf(
             baseEntries() - "manifest.txt",
@@ -124,14 +130,25 @@ class FilePasswordExchangeIntegrationTest {
     }
 
     @Test
-    fun parsesQuotedCsvFieldsWithEscapedQuotesAndCarriageReturns() {
+    fun importsQuotedCsvFieldsWithEscapedQuotesAndCarriageReturns() {
         writeArchive(
             baseEntries().entries.map { (name, content) ->
-                if (name == "eggs.csv") name to "email,0,\"password \"\"quoted\"\"\"\r\n" else name to content
+                if (name == "eggs.csv") {
+                    name to "egg_id,nest_slot,password\r\nemail,0,\"password \"\"quoted\"\"\"\r\n"
+                } else {
+                    name to content
+                }
             },
         )
 
-        expectThat(exchange.receive(password).failure).isTrue()
+        expectThat(exchange.receive(password).getOrNull()) isEqualTo mapOf(
+            createNest(shellOf("home"), Slot.DEFAULT) to listOf(
+                PasswordInfo(
+                    ShellPair(shellOf("email"), shellOf("password \"quoted\"")),
+                    List(Slot.entries.size) { ShellPair(emptyShell(), emptyShell()) },
+                ),
+            ),
+        )
     }
 
     private fun baseEntries() = linkedMapOf(
