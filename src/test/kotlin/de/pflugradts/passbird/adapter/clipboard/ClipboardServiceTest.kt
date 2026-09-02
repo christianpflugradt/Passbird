@@ -5,26 +5,28 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.configuration.fakeConfiguration
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.transfer.Output.Companion.outputOf
-import io.kotest.assertions.nondeterministic.eventually
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import kotlin.time.Duration.Companion.seconds
 
 class ClipboardServiceTest {
 
     private val clipboardGateway = mockk<ClipboardGateway>()
     private val configuration = mockk<Configuration>()
-    private val clipboardService = ClipboardService(clipboardGateway, configuration)
+    private val scheduledTasks = mutableListOf<() -> Unit>()
+    private val resetScheduler = ClipboardResetScheduler { delayMillis, task, onFailure ->
+        if (delayMillis < 0) onFailure(IllegalArgumentException("timeout value is negative")) else scheduledTasks.add(task)
+    }
+    private val clipboardService = ClipboardService(clipboardGateway, configuration, resetScheduler)
 
     @BeforeEach
     fun setup() {
         every { clipboardGateway.copy(any(), any()) } returns Unit
+        scheduledTasks.clear()
     }
 
     @Test
@@ -63,55 +65,47 @@ class ClipboardServiceTest {
 
     @Test
     fun `should clear clipboard`() {
-        runBlocking {
-            // given
-            val message = "write this to clipboard"
-            val delaySeconds = 1
-            fakeConfiguration(
-                instance = configuration,
-                withClipboardResetEnabled = true,
-                withClipboardResetDelaySeconds = delaySeconds,
-            )
+        // given
+        val message = "write this to clipboard"
+        fakeConfiguration(
+            instance = configuration,
+            withClipboardResetEnabled = true,
+        )
 
-            // when
-            clipboardService.post(outputOf(shellOf(message)))
+        // when
+        clipboardService.post(outputOf(shellOf(message)))
+        scheduledTasks.single().invoke()
 
-            // then
-            verify(exactly = 1) { clipboardGateway.copy(message, true) }
-            eventually(2.seconds) {
-                verify(exactly = 1) { clipboardGateway.copy("", true) }
-            }
-        }
+        // then
+        verify(exactly = 1) { clipboardGateway.copy(message, true) }
+        verify(exactly = 1) { clipboardGateway.copy("", true) }
     }
 
     @Test
     fun `should reset clear timer`() {
-        runBlocking {
-            // given
-            val message = "write this to clipboard"
-            val anotherMessage = "write this next"
-            val delaySeconds = 1
-            val almostASecond = 800
-            fakeConfiguration(
-                instance = configuration,
-                withClipboardResetEnabled = true,
-                withClipboardResetDelaySeconds = delaySeconds,
-            )
+        // given
+        val message = "write this to clipboard"
+        val anotherMessage = "write this next"
+        fakeConfiguration(
+            instance = configuration,
+            withClipboardResetEnabled = true,
+        )
 
-            // when
-            clipboardService.post(outputOf(shellOf(message)))
-            Thread.sleep(almostASecond.toLong())
-            clipboardService.post(outputOf(shellOf(anotherMessage)))
-            Thread.sleep(almostASecond.toLong())
+        // when
+        clipboardService.post(outputOf(shellOf(message)))
+        clipboardService.post(outputOf(shellOf(anotherMessage)))
+        scheduledTasks.first().invoke()
 
-            // then
-            verify(exactly = 1) { clipboardGateway.copy(message, true) }
-            verify(exactly = 0) { clipboardGateway.copy("", true) }
-            verify(exactly = 1) { clipboardGateway.copy(anotherMessage, true) }
-            eventually(2.seconds) {
-                verify(exactly = 1) { clipboardGateway.copy("", true) }
-            }
-        }
+        // then
+        verify(exactly = 1) { clipboardGateway.copy(message, true) }
+        verify(exactly = 0) { clipboardGateway.copy("", true) }
+        verify(exactly = 1) { clipboardGateway.copy(anotherMessage, true) }
+
+        // when
+        scheduledTasks.last().invoke()
+
+        // then
+        verify(exactly = 1) { clipboardGateway.copy("", true) }
     }
 
     @Test
@@ -131,7 +125,7 @@ class ClipboardServiceTest {
         // when
         captureSystemErr.during {
             clipboardService.post(outputOf(shellOf(message)))
-            waitForError(captureSystemErr, expectedError)
+            scheduledTasks.single().invoke()
         }
 
         // then
@@ -153,7 +147,6 @@ class ClipboardServiceTest {
         // when
         captureSystemErr.during {
             clipboardService.post(outputOf(shellOf(message)))
-            waitForError(captureSystemErr, expectedError)
         }
 
         // then
@@ -170,12 +163,5 @@ class ClipboardServiceTest {
 
         expectThat(actual.success) isEqualTo true
         verify(exactly = 1) { clipboardGateway.copy(message, false) }
-    }
-
-    private fun waitForError(captureSystemErr: CapturedOutputPrintStream, expectedError: String) {
-        val deadline = System.nanoTime() + 2.seconds.inWholeNanoseconds
-        while (captureSystemErr.capture != expectedError && System.nanoTime() < deadline) {
-            Thread.sleep(10)
-        }
     }
 }

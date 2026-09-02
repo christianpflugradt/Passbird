@@ -9,6 +9,7 @@ private const val MILLI_SECONDS = 1000L
 class ClipboardService constructor(
     private val clipboardGateway: ClipboardGateway,
     private val configuration: ReadableConfiguration,
+    private val resetScheduler: ClipboardResetScheduler = ThreadClipboardResetScheduler(),
 ) : ClipboardAdapterPort {
     private val cleanerLock = Any()
     private var cleanerGeneration = 0L
@@ -25,11 +26,9 @@ class ClipboardService constructor(
     }
     private fun scheduleCleaner(generation: Long) {
         if (isResetEnabled) {
-            Thread {
-                sleep()
-                    .onSuccess { clearClipboard(generation) }
-                    .onFailure { reportFailure(ClipboardFailure(it)) }
-            }.start()
+            resetScheduler.schedule(delaySeconds * MILLI_SECONDS, { clearClipboard(generation) }) { error ->
+                reportFailure(ClipboardFailure(error))
+            }
         }
     }
 
@@ -41,8 +40,26 @@ class ClipboardService constructor(
         }
     }
 
-    private fun sleep() = tryCatching { Thread.sleep(delaySeconds * MILLI_SECONDS) }
     private val nativeToolingEnabled: Boolean get() = configuration.adapter.clipboard.nativeTooling.enabled
     private val isResetEnabled: Boolean get() = configuration.adapter.clipboard.reset.enabled
     private val delaySeconds: Int get() = configuration.adapter.clipboard.reset.delaySeconds
+}
+
+fun interface ClipboardResetScheduler {
+    fun schedule(delayMillis: Long, task: () -> Unit, onFailure: (Exception) -> Unit)
+}
+
+class ThreadClipboardResetScheduler : ClipboardResetScheduler {
+    override fun schedule(delayMillis: Long, task: () -> Unit, onFailure: (Exception) -> Unit) {
+        Thread {
+            try {
+                Thread.sleep(delayMillis)
+                task()
+            } catch (error: InterruptedException) {
+                onFailure(error)
+            } catch (error: IllegalArgumentException) {
+                onFailure(error)
+            }
+        }.start()
+    }
 }
