@@ -42,7 +42,7 @@ class CommitMessageHookTest {
         val messageFile = Files.createTempFile("commit-message", ".txt")
         return try {
             Files.writeString(messageFile, "$firstLine\n")
-            val process = ProcessBuilder("bash", hookPath.toString(), messageFile.toString())
+            val process = ProcessBuilder("/bin/bash", hookPath.toString(), messageFile.toString())
                 .directory(projectDirectory.toFile())
                 .redirectErrorStream(true)
                 .start()
