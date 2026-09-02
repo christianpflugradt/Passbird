@@ -220,10 +220,13 @@ sessions:
     inputs:
       - <master-password>
       - e
+      - n
+      - <export-password>
+      - <export-password>
       - q
     checks:
       - export success message reports two eggs
-      - passbird-export.json exists
+      - passbird-export.zip exists
   - id: imported-setup
     home: imported
     inputs:
@@ -238,12 +241,13 @@ sessions:
   - id: imported-copy-export
     home: imported
     checks:
-      - passbird-export.json is copied from source to imported home
+      - passbird-export.zip is copied from source to imported home
   - id: imported-import
     home: imported
     inputs:
       - <master-password>
       - i
+      - <export-password>
       - q
     checks:
       - import success message reports two eggs

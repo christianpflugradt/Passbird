@@ -9,6 +9,7 @@ ARTIFACT_DIR="$TMP_ROOT/artifacts"
 SOURCE_HOME="$TMP_ROOT/source-home"
 IMPORT_HOME="$TMP_ROOT/import-home"
 MASTER_PASSWORD="${PASSBIRD_SMOKE_MASTER_PASSWORD:-smokemasterpass}"
+EXPORT_PASSWORD="${PASSBIRD_SMOKE_EXPORT_PASSWORD:-smokeexportpass}"
 CUSTOM_PASSWORD="${PASSBIRD_SMOKE_CUSTOM_PASSWORD:-smokeCustomPass42}"
 PROTEIN_TYPE="username"
 PROTEIN_STRUCTURE="alice@example.com"
@@ -130,9 +131,14 @@ prompt_suffixes = [
     "or just press enter to keep it: ",
 ]
 recent_output = ""
+deadline = time.monotonic() + 30
 
 with open(output_path, "wb") as output:
     while True:
+        if time.monotonic() >= deadline:
+            process.terminate()
+            process.wait(timeout=5)
+            raise SystemExit("Passbird did not exit within 30 seconds")
         poll = process.poll()
         read_ready, _, _ = select.select([master_fd], [], [], 0.05)
         if master_fd in read_ready:
@@ -567,9 +573,9 @@ assert_matches "$PIN_PASSWORD" '^[0-9]{4}$' "custom configuration pin"
 pass "$CURRENT_STEP"
 
 CURRENT_STEP="source-export"
-run_session "$CURRENT_STEP" "$SOURCE_HOME" "$MASTER_PASSWORD" "e" "q"
+run_session "$CURRENT_STEP" "$SOURCE_HOME" "$MASTER_PASSWORD" "e" "n" "$EXPORT_PASSWORD" "$EXPORT_PASSWORD" "q"
 assert_contains "$LAST_OUTPUT" "2 eggs successfully exported."
-assert_file_exists "$SOURCE_HOME/passbird-export.json"
+assert_file_exists "$SOURCE_HOME/passbird-export.zip"
 pass "$CURRENT_STEP"
 
 CURRENT_STEP="imported-setup"
@@ -582,12 +588,12 @@ assert_smoke_config "$IMPORT_HOME"
 pass "$CURRENT_STEP"
 
 CURRENT_STEP="imported-copy-export"
-cp "$SOURCE_HOME/passbird-export.json" "$IMPORT_HOME/passbird-export.json"
-assert_file_exists "$IMPORT_HOME/passbird-export.json"
+cp "$SOURCE_HOME/passbird-export.zip" "$IMPORT_HOME/passbird-export.zip"
+assert_file_exists "$IMPORT_HOME/passbird-export.zip"
 pass "$CURRENT_STEP"
 
 CURRENT_STEP="imported-import"
-run_session "$CURRENT_STEP" "$IMPORT_HOME" "$MASTER_PASSWORD" "i" "q"
+run_session "$CURRENT_STEP" "$IMPORT_HOME" "$MASTER_PASSWORD" "i" "$EXPORT_PASSWORD" "q"
 assert_contains "$LAST_OUTPUT" "2 eggs successfully imported."
 pass "$CURRENT_STEP"
 
