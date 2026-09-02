@@ -9,6 +9,8 @@ import de.pflugradts.passbird.domain.model.egg.EggIdMemory
 import de.pflugradts.passbird.domain.model.egg.FavoriteMap
 import de.pflugradts.passbird.domain.model.egg.MemoryMap
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
+import de.pflugradts.passbird.domain.model.shell.MAX_ASCII_VALUE
+import de.pflugradts.passbird.domain.model.shell.MIN_ASCII_VALUE
 import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -21,9 +23,11 @@ import de.pflugradts.passbird.domain.service.password.tree.EggStreamSupplier
 import de.pflugradts.passbird.domain.service.password.tree.emptyMemory
 import io.kotest.property.Arb
 import io.kotest.property.arbitrary.bind
+import io.kotest.property.arbitrary.boolean
 import io.kotest.property.arbitrary.byte
 import io.kotest.property.arbitrary.element
 import io.kotest.property.arbitrary.flatMap
+import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.set
@@ -34,6 +38,16 @@ data class PlainEggData(
     val eggId: String,
     val password: String,
     val proteins: Map<Slot, Pair<String, String>>,
+    val yolk: PlainYolkData?,
+    val trashed: Boolean,
+    val deletionEpochDay: Int,
+)
+
+data class PlainYolkData(
+    val secret: String,
+    val algorithm: String,
+    val digits: Int,
+    val periodSeconds: Int,
 )
 
 data class MemoryCell(val nestSlot: Slot, val memorySlot: Slot)
@@ -121,6 +135,16 @@ fun normalizeEggs(eggs: List<Egg>, cryptoProvider: CryptoProvider): List<PlainEg
                     (cryptoProvider.decrypt(protein.viewType()).asString() to cryptoProvider.decrypt(protein.viewStructure()).asString())
             }
         }.toMap().toSortedMap(compareBy(Slot::index)),
+        yolk = egg.viewYolk().orNull()?.let { yolk ->
+            PlainYolkData(
+                secret = cryptoProvider.decrypt(yolk.viewSecret()).asString(),
+                algorithm = yolk.algorithm,
+                digits = yolk.digits,
+                periodSeconds = yolk.periodSeconds,
+            )
+        },
+        trashed = egg.isTrashed(),
+        deletionEpochDay = egg.deletionEpochDay(),
     )
 }
 
@@ -193,10 +217,13 @@ private fun plainEggs(slots: List<Slot>): Arb<List<PlainEggData>> = Arb.list(pla
 private fun plainEggData(slots: List<Slot>): Arb<PlainEggData> = Arb.bind(
     Arb.element(slots),
     textValues(),
-    textValues(),
+    passwordValues(),
     proteinEntries(),
-) { slot, eggId, password, proteins ->
-    PlainEggData(slot, eggId, password, proteins)
+    yolkEntries(),
+    Arb.boolean(),
+    Arb.int(1..30_000),
+) { slot, eggId, password, proteins, yolk, trashed, deletionEpochDay ->
+    PlainEggData(slot, eggId, password, proteins, yolk, trashed, if (trashed) deletionEpochDay else 0)
 }
 
 private fun memoryEntries(): Arb<Map<MemoryCell, String>> = Arb.set(Arb.element(allMemoryCells), 0..12).flatMap { generatedCells ->
@@ -239,12 +266,26 @@ private fun PasswordTreeFixture.toNestShells() = Slot.entries
 
 private fun nonEmptyProteinPairs(): Arb<Pair<String, String>> = Arb.bind(nonEmptyTextValues(), nonEmptyTextValues(), ::Pair)
 
+private fun yolkEntries(): Arb<PlainYolkData?> = Arb.bind(
+    Arb.boolean(),
+    nonEmptyTextValues(),
+    Arb.element("SHA1", "SHA256", "SHA512"),
+    Arb.element(6, 8),
+    Arb.element(30, 45, 60),
+) { present, secret, algorithm, digits, periodSeconds ->
+    if (present) PlainYolkData(secret, algorithm, digits, periodSeconds) else null
+}
+
 private fun nonBlankTextValues(): Arb<String> = Arb.bind(
     Arb.string(0..15, ALLOWED_TEXT_CHARACTERS),
     Arb.element(NON_BLANK_TEXT_CHARACTERS.toList()),
 ) { prefix, marker -> prefix + marker }
 
 private fun nonEmptyTextValues(): Arb<String> = Arb.string(1..16, ALLOWED_TEXT_CHARACTERS)
+
+private fun passwordValues(): Arb<String> = Arb.int(1..10).flatMap { roll ->
+    if (roll <= 8) Arb.string(4..24, ALLOWED_TEXT_CHARACTERS) else Arb.string(2..128, ALLOWED_TEXT_CHARACTERS)
+}
 
 private fun eggIdValues(): Arb<String> = Arb.bind(
     Arb.element(EGG_ID_FIRST_CHARACTERS.toList()),
@@ -255,9 +296,19 @@ private fun PlainEggData.toEgg(cryptoProvider: CryptoProvider): Egg = createEgg(
     slot = nestSlot,
     eggIdShell = cryptoProvider.encrypt(shellOf(eggId)),
     passwordShell = cryptoProvider.encrypt(shellOf(password)),
+    trashed = trashed,
+    deletionEpochDay = deletionEpochDay,
 ).apply {
     this@toEgg.proteins.forEach { (slot, protein) ->
         updateProtein(slot, cryptoProvider.encrypt(shellOf(protein.first)), cryptoProvider.encrypt(shellOf(protein.second)))
+    }
+    this@toEgg.yolk?.let { yolk ->
+        updateYolk(
+            cryptoProvider.encrypt(shellOf(yolk.secret)),
+            yolk.algorithm,
+            yolk.digits,
+            yolk.periodSeconds,
+        )
     }
 }
 
@@ -298,7 +349,7 @@ private fun PlainPasswordInfoData.toPasswordInfo() = PasswordInfo(
     },
 )
 
-private val ALLOWED_TEXT_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !@#\$%^&*()_-+=[]{}:;,.?/|~\t\n"
+private val ALLOWED_TEXT_CHARACTERS = (MIN_ASCII_VALUE..MAX_ASCII_VALUE).map(Int::toChar).joinToString("")
 private val NON_BLANK_TEXT_CHARACTERS = ALLOWED_TEXT_CHARACTERS.filterNot(Char::isWhitespace)
 private val EGG_ID_FIRST_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 private val EGG_ID_REMAINING_CHARACTERS = EGG_ID_FIRST_CHARACTERS + "0123456789"

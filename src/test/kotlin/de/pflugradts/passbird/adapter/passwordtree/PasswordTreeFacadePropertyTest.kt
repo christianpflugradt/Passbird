@@ -37,7 +37,7 @@ class PasswordTreeFacadePropertyTest {
     @Test
     fun preservesPasswordTreeStateAcrossSyncAndRestore() {
         runBlocking {
-            checkAll(20, passwordTreeFixtures()) { fixture ->
+            checkAll(100, passwordTreeFixtures()) { fixture ->
                 val passwordTreeDirectory = Files.createTempDirectory("passbird-tree-property")
 
                 try {
