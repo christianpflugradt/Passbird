@@ -7,6 +7,8 @@ import de.pflugradts.passbird.application.PasswordYolkInfo
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
+import de.pflugradts.passbird.application.yolk.TotpGenerator
+import de.pflugradts.passbird.application.yolk.YolkInputParser
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
@@ -28,6 +30,9 @@ import strikt.assertions.isTrue
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 
 @Tag(INTEGRATION)
 class FilePasswordExchangeIntegrationTest {
@@ -54,11 +59,11 @@ class FilePasswordExchangeIntegrationTest {
                     ShellPair(emptyShell(), emptyShell())
                 }
             },
-            PasswordYolkInfo(shellOf("JBSWY3DPEHPK3PXP"), "SHA256", 8, 45),
+            yolk("JBSWY3DPEHPK3PXP", "SHA256", 8, 45),
         )
         val workInfo = info.copy(
             first = ShellPair(shellOf("email"), shellOf("WorkPassword")),
-            yolk = PasswordYolkInfo(shellOf("KRUGS4ZANFZSAYJA"), "SHA1", 6, 30),
+            yolk = yolk("KRUGS4ZANFZSAYJA", "SHA1", 6, 30),
         )
         val data = mapOf(
             createNest(shellOf("personal"), Slot.DEFAULT) to listOf(info),
@@ -73,6 +78,31 @@ class FilePasswordExchangeIntegrationTest {
         expectThat(zip.fileHeaders.map { it.encryptionMethod }.toSet()) isEqualTo setOf(EncryptionMethod.AES)
         expectThat(home.toFile().list()?.toSet()) isEqualTo setOf(ReadableConfiguration.EXCHANGE_FILENAME)
         expectThat(exchange.receive(password).getOrNull()) isEqualTo data
+    }
+
+    @Test
+    fun exportsDecodedYolkSecretsAsCanonicalBase32AndRestoresTheirRawBytes() {
+        val parsed = YolkInputParser().parse(shellOf("otpauth://totp/example?secret=mzxw6ytboi======&algorithm=SHA256&digits=8&period=45"))
+        val yolk = PasswordYolkInfo(parsed.secret, parsed.algorithm, parsed.digits, parsed.periodSeconds)
+        val data = mapOf(
+            createNest(shellOf("personal"), Slot.DEFAULT) to listOf(
+                PasswordInfo(ShellPair(shellOf("email"), shellOf("SecretPassword")), emptyProteins(), yolk),
+            ),
+        )
+
+        expectThat(exchange.send(data, password).failure).isFalse()
+
+        expectThat(decryptedEntries().getValue("yolks.csv")) isEqualTo
+            "\"egg_id\",\"nest_slot\",\"secret\",\"algorithm\",\"digits\",\"period\"\n" +
+            "\"email\",\"0\",\"MZXW6YTBOI\",\"SHA256\",\"8\",\"45\"\n"
+        val restored = exchange.receive(password).getOrNull()
+        expectThat(restored) isEqualTo data
+        val restoredYolk = restored!!.values.single().single().yolk!!
+        val generator = TotpGenerator(Clock.fixed(Instant.ofEpochSecond(1_700_000_000), ZoneOffset.UTC))
+        expectThat(
+            generator.generate(restoredYolk.secret.toByteArray(), restoredYolk.algorithm, restoredYolk.digits, restoredYolk.periodSeconds),
+        ) isEqualTo
+            generator.generate(yolk.secret.toByteArray(), yolk.algorithm, yolk.digits, yolk.periodSeconds)
     }
 
     @Test
@@ -171,6 +201,7 @@ class FilePasswordExchangeIntegrationTest {
             baseEntries() +
                 ("yolks.csv" to "egg_id,nest_slot,secret,algorithm,digits,period\nemail,0,secret,SHA1,6,30\nemail,0,other,SHA1,6,30\n"),
             baseEntries() + ("yolks.csv" to "egg_id,nest_slot,secret,algorithm,digits,period\nemail,0,,SHA1,6,30\n"),
+            baseEntries() + ("yolks.csv" to "egg_id,nest_slot,secret,algorithm,digits,period\nemail,0,NOT-BASE32,SHA1,6,30\n"),
         ).forEach { entries ->
             writeArchive(entries.entries.map { it.toPair() })
 
@@ -222,6 +253,13 @@ class FilePasswordExchangeIntegrationTest {
         "proteins.csv" to "egg_id,nest_slot,slot,type,structure\n",
         "yolks.csv" to "egg_id,nest_slot,secret,algorithm,digits,period\n",
     )
+
+    private fun yolk(secret: String, algorithm: String, digits: Int, period: Int): PasswordYolkInfo {
+        val parsed = YolkInputParser().parse(shellOf(secret))
+        return PasswordYolkInfo(parsed.secret, algorithm, digits, period)
+    }
+
+    private fun emptyProteins() = List(Slot.entries.size) { ShellPair(emptyShell(), emptyShell()) }
 
     private fun decryptedEntries() = ZipFile(exchangeFile.toFile(), password).use { zip ->
         zip.fileHeaders.associate { header ->
