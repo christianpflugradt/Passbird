@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-30
+last_reviewed: 2026-09-02
 issue_task:
   syntax: issue
   purpose:
@@ -17,6 +17,8 @@ issue_task:
     - when creating or relabeling issues, add the migration label to work that exists to preserve end-user compatibility across otherwise breaking changes
     - when creating a new GitHub issue through gh, use a create-once-then-verify flow: if the create attempt returns ambiguous output or fails unclearly, verify first whether the issue already exists before considering any retry
     - load task-relevant files under specs/ based on the issue scope before making changes
+    - before committing, review the issue acceptance criteria and explicitly account for the normal flow, expected user mistakes, malformed or unavailable external state, and security or persistence invariants
+    - if an acceptance criterion cannot be expressed as an automated assertion, explain why and obtain maintainer direction before shipping
     - implement the fix, add focused tests, and run the minimum validation required by specs/delivery.yaml
     - update matching files under specs/ if the change affects behavior, architecture, security, persistence, configuration, or delivery guidance
     - when the resolving commit closes the selected issue, add a Closes #<issue-number> footer line to the commit message

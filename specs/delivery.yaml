@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-02
 agent_internal_scripts:
   location: .agent/scripts
   purpose:
@@ -86,6 +86,23 @@ local_verification_policy:
     coverage_expectation:
       - add or update focused tests so every new code path and important branch introduced by the change is reasonably covered before shipping
       - do not rely on unchanged repository-wide coverage headroom to carry insufficiently tested new code
+    behavioral_test_design:
+      before_implementation:
+        - identify the changed happy path, expected failure modes, and security or persistence invariants
+        - choose the lowest test level that can prove each behavior; use integration tests for adapter, filesystem, crypto, archive, and prompt boundaries
+      required_coverage:
+        - each changed happy path has at least one explicit outcome assertion
+        - each new conditional has tests for every meaningful outcome
+        - validate credible user-input errors, malformed external data, I/O failures, authentication failures, conflicts, and empty-input behavior when relevant
+        - persistence and exchange changes verify round-trip fidelity, invalid-input rejection, and that sensitive temporary artifacts are not left behind
+        - secret-handling changes verify secrets are requested through the intended secure path and are not exposed in output, logs, or returned diagnostics
+      assertion_quality:
+        - assert observable behavior, not implementation detail alone
+        - name tests after the business or safety guarantee they prove
+        - a generic operation-failed assertion is acceptable only when the contract intentionally exposes no more detail; otherwise assert the specific rejection or outcome
+      prohibited:
+        - do not add unreachable or duplicate tests merely to raise a coverage percentage
+        - do not replace a missing behavior test with broad mocking or an aggregate coverage argument
     avoid_repetition:
       - do not rerun the same local verification during one task unless the code or environment changed in a way that makes the repeated run materially informative
       - do not poll or narrate long-running Gradle tasks or git hooks unnecessarily; a multi-minute runtime is expected for some local gates
