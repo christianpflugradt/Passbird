@@ -52,14 +52,16 @@ class FilePasswordExchange(
                     listOf(PROTEIN_HEADER) +
                         data.flatMap { (nest, eggs) ->
                             eggs.flatMap { egg ->
-                                egg.second.mapIndexed { slot, protein ->
-                                    listOf(
-                                        egg.first.first.asString(),
-                                        nest.slot.index().toString(),
-                                        slot.toString(),
-                                        protein.first.asString(),
-                                        protein.second.asString(),
-                                    )
+                                egg.second.mapIndexedNotNull { slot, protein ->
+                                    protein.takeIf { it.first.isNotEmpty && it.second.isNotEmpty }?.let {
+                                        listOf(
+                                            egg.first.first.asString(),
+                                            nest.slot.index().toString(),
+                                            slot.toString(),
+                                            protein.first.asString(),
+                                            protein.second.asString(),
+                                        )
+                                    }
                                 }
                             }
                         },
@@ -180,12 +182,13 @@ private fun Map<String, List<List<String>>>.records(name: String, header: List<S
 
 private fun List<List<String>>?.toProteins(): List<ShellPair> {
     val records = this ?: emptyList()
-    val bySlot = records.associate { row ->
+    val presentRecords = records.map { row ->
         val slot = row[2].toInt().also { require(it in Slot.entries.indices) { "Invalid protein slot" } }
         require(row[3].isEmpty() == row[4].isEmpty()) { "Partial protein record" }
         slot to ShellPair(shellOf(row[3]), shellOf(row[4]))
-    }
-    require(bySlot.size == records.size) { "Duplicate protein slot" }
+    }.filter { (_, protein) -> protein.first.isNotEmpty }
+    val bySlot = presentRecords.toMap()
+    require(bySlot.size == presentRecords.size) { "Duplicate protein slot" }
     return Slot.entries.indices.map { bySlot[it] ?: ShellPair(emptyShell(), emptyShell()) }
 }
 

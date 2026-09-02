@@ -159,6 +159,8 @@ observable_rules:
   - favorites remain local password-tree metadata and are not serialized into passbird-export.zip
   - import flows do not create, clear, or otherwise directly edit Favorite slots
   - exported eggs may include one optional yolk record containing the secret plus TOTP metadata
+  - proteins.csv contains records only for Protein slots whose type and structure are both present; imports treat legacy records with both fields empty as absent while rejecting partial Protein records
+  - nests.csv contains every deployed exported Nest, including deployed Nests without Eggs, and never contains undeployed Nest slots
   - import accepts only the current AES-encrypted CSV ZIP exchange format
   - proteins.csv and yolks.csv use nest_slot plus egg_id as their combined key
   - trashed Eggs are excluded from export and cannot be recreated through import

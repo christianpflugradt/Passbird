@@ -25,6 +25,7 @@ import strikt.assertions.contains
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
+import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 
@@ -72,6 +73,69 @@ class FilePasswordExchangeIntegrationTest {
         expectThat(zip.fileHeaders.map { it.encryptionMethod }.toSet()) isEqualTo setOf(EncryptionMethod.AES)
         expectThat(home.toFile().list()?.toSet()) isEqualTo setOf(ReadableConfiguration.EXCHANGE_FILENAME)
         expectThat(exchange.receive(password).getOrNull()) isEqualTo data
+    }
+
+    @Test
+    fun exportsOnlyStoredProteinsAndDeployedNests() {
+        val data = linkedMapOf(
+            createNest(shellOf("personal"), Slot.DEFAULT) to listOf(
+                PasswordInfo(
+                    ShellPair(shellOf("email"), shellOf("SecretPassword")),
+                    List(Slot.entries.size) { slot ->
+                        if (slot == Slot.S2.index()) {
+                            ShellPair(shellOf("username"), shellOf("alice"))
+                        } else {
+                            ShellPair(emptyShell(), emptyShell())
+                        }
+                    },
+                ),
+                PasswordInfo(
+                    ShellPair(shellOf("empty"), shellOf("OtherPassword")),
+                    List(Slot.entries.size) { ShellPair(emptyShell(), emptyShell()) },
+                ),
+            ),
+            createNest(shellOf("work"), Slot.S2) to emptyList(),
+        )
+
+        expectThat(exchange.send(data, password).failure).isFalse()
+
+        expectThat(decryptedEntries()) isEqualTo mapOf(
+            "manifest.txt" to
+                "format=passbird-export\nversion=1\nencryption=zip-aes-256\n" +
+                "files=nests.csv,eggs.csv,proteins.csv,yolks.csv\n",
+            "nests.csv" to "\"nest_slot\",\"nest_name\"\n" + "\"0\",\"personal\"\n\"2\",\"work\"\n",
+            "eggs.csv" to
+                "\"egg_id\",\"nest_slot\",\"password\"\n" +
+                "\"email\",\"0\",\"SecretPassword\"\n\"empty\",\"0\",\"OtherPassword\"\n",
+            "proteins.csv" to
+                "\"egg_id\",\"nest_slot\",\"slot\",\"type\",\"structure\"\n" +
+                "\"email\",\"0\",\"2\",\"username\",\"alice\"\n",
+            "yolks.csv" to
+                "\"egg_id\",\"nest_slot\",\"secret\",\"algorithm\",\"digits\",\"period\"\n",
+        )
+        expectThat(exchange.receive(password).getOrNull()) isEqualTo data
+    }
+
+    @Test
+    fun importsLegacyBlankProteinRowsAsEmptySlots() {
+        writeArchive(
+            baseEntries().entries.map { (name, content) ->
+                if (name == "proteins.csv") {
+                    name to "egg_id,nest_slot,slot,type,structure\nemail,0,0,,\nemail,0,2,,\n"
+                } else {
+                    name to content
+                }
+            },
+        )
+
+        expectThat(exchange.receive(password).getOrNull()) isEqualTo mapOf(
+            createNest(shellOf("home"), Slot.DEFAULT) to listOf(
+                PasswordInfo(
+                    ShellPair(shellOf("email"), shellOf("password")),
+                    List(Slot.entries.size) { ShellPair(emptyShell(), emptyShell()) },
+                ),
+            ),
+        )
     }
 
     @Test
@@ -158,6 +222,12 @@ class FilePasswordExchangeIntegrationTest {
         "proteins.csv" to "egg_id,nest_slot,slot,type,structure\n",
         "yolks.csv" to "egg_id,nest_slot,secret,algorithm,digits,period\n",
     )
+
+    private fun decryptedEntries() = ZipFile(exchangeFile.toFile(), password).use { zip ->
+        zip.fileHeaders.associate { header ->
+            header.fileName to zip.getInputStream(header).use { it.readBytes().toString(UTF_8) }
+        }
+    }
 
     private fun writeArchive(entries: List<Pair<String, String>>) {
         ZipOutputStream(
