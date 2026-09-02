@@ -35,6 +35,7 @@ coverage:
     - r[EggId]
     - d[EggId]
     - e
+    - e*
     - i
     - l
     - m
@@ -226,6 +227,21 @@ sessions:
       - q
     checks:
       - export success message reports two eggs
+      - passbird-export.zip exists
+  - id: source-selective-export
+    home: source
+    inputs:
+      - <master-password>
+      - e*
+      - n
+      - <export-password>
+      - <export-password>
+      - 1
+      - q
+    checks:
+      - available Nests are shown before selected Nest Slots are requested
+      - no include or exclude selection-mode prompt is shown
+      - selective export success message reports two eggs
       - passbird-export.zip exists
   - id: imported-setup
     home: imported

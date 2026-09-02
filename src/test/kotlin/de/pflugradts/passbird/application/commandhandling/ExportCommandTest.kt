@@ -69,7 +69,7 @@ class ExportCommandTest {
         nestService.place(shellOf("work"), S2)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseInputs = listOf(inputOf(shellOf("y")), inputOf(shellOf("1")), inputOf(shellOf("0,2"))),
+            withTheseInputs = listOf(inputOf(shellOf("y")), inputOf(shellOf("0,2"))),
         )
 
         // when
@@ -77,39 +77,6 @@ class ExportCommandTest {
 
         // then
         verify(exactly = 1) { importExportService.exportEggs(setOf(DEFAULT, S2), any()) }
-    }
-
-    @Test
-    fun `should handle selective export command for all except selected nests`() {
-        // given
-        nestService.place(shellOf("work"), S2)
-        nestService.place(shellOf("archive"), S5)
-        fakeUserInterfaceAdapterPort(
-            instance = userInterfaceAdapterPort,
-            withTheseInputs = listOf(inputOf(shellOf("y")), inputOf(shellOf("2")), inputOf(shellOf("2"))),
-        )
-
-        // when
-        inputHandler.handleInput(inputOf(shellOf("e*")))
-
-        // then
-        verify(exactly = 1) { importExportService.exportEggs(setOf(DEFAULT, S5), any()) }
-    }
-
-    @Test
-    fun `should abort selective export when selection resolves to no nests`() {
-        // given
-        nestService.place(shellOf("work"), S2)
-        fakeUserInterfaceAdapterPort(
-            instance = userInterfaceAdapterPort,
-            withTheseInputs = listOf(inputOf(shellOf("y")), inputOf(shellOf("2")), inputOf(shellOf("0,2"))),
-        )
-
-        // when
-        inputHandler.handleInput(inputOf(shellOf("e*")))
-
-        // then
-        verify(exactly = 0) { importExportService.exportEggs(any<Set<de.pflugradts.passbird.domain.model.slot.Slot>>(), any()) }
     }
 
     @Test

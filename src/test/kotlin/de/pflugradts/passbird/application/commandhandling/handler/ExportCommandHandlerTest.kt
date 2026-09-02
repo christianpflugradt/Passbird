@@ -7,6 +7,9 @@ import de.pflugradts.passbird.application.configuration.Configuration
 import de.pflugradts.passbird.application.exchange.ImportExportService
 import de.pflugradts.passbird.application.fakeUserInterfaceAdapterPort
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
+import de.pflugradts.passbird.domain.model.slot.Slot
+import de.pflugradts.passbird.domain.model.slot.Slot.DEFAULT
+import de.pflugradts.passbird.domain.model.slot.Slot.S2
 import de.pflugradts.passbird.domain.model.transfer.Input.Companion.inputOf
 import de.pflugradts.passbird.domain.service.nest.createNestServiceForTesting
 import de.pflugradts.passbird.domain.service.password.provider.PasswordProvider
@@ -146,16 +149,64 @@ class ExportCommandHandlerTest {
     }
 
     @Test
-    fun abortsSelectiveExportWithAnInvalidSelection() {
+    fun abortsSelectiveExportWithANonNumericSelection() {
+        assertSelectiveExportIsRejected("x")
+    }
+
+    @Test
+    fun abortsSelectiveExportWithAnEmptySelection() {
+        assertSelectiveExportIsRejected("")
+    }
+
+    @Test
+    fun abortsSelectiveExportWithAMultiCharacterSlot() {
+        assertSelectiveExportIsRejected("10")
+    }
+
+    @Test
+    fun abortsSelectiveExportWithDuplicateSlots() {
+        assertSelectiveExportIsRejected("0,0")
+    }
+
+    @Test
+    fun abortsSelectiveExportWithAnUnavailableSlot() {
+        assertSelectiveExportIsRejected("2")
+    }
+
+    @Test
+    fun exportsExactlyTheSelectedNestsWithoutAskingForASelectionMode() {
+        nestService.place(shellOf("work"), S2)
         fakeUserInterfaceAdapterPort(
             userInterface,
-            withTheseInputs = listOf(inputOf(shellOf("y")), inputOf(shellOf("invalid"))),
+            withTheseInputs = listOf(inputOf(shellOf("y")), inputOf(shellOf("0,2"))),
+        )
+        fakePasswordProvider(passwordProvider, shellOf("generated"))
+        every { exchange.exportEggs(any<Set<Slot>>(), any<CharArray>()) } returns true
+
+        inputHandler.handleInput(inputOf(shellOf("e*")))
+
+        verify { exchange.exportEggs(setOf(DEFAULT, S2), any<CharArray>()) }
+        verify { userInterface.receive(match { it.shell.asString() == "Specify Nest Slots separated by ','.\nYour input: " }) }
+        verify(exactly = 0) {
+            userInterface.receive(
+                match {
+                    it.shell.asString() ==
+                        "\nInput 1 to export only selected Nests or 2 to export all Nests except selected Nests.\nYour input: "
+                },
+            )
+        }
+    }
+
+    private fun assertSelectiveExportIsRejected(selection: String) {
+        fakeUserInterfaceAdapterPort(
+            userInterface,
+            withTheseInputs = listOf(inputOf(shellOf("y")), inputOf(shellOf(selection))),
         )
         fakePasswordProvider(passwordProvider, shellOf("generated"))
 
         inputHandler.handleInput(inputOf(shellOf("e*")))
 
-        verify(exactly = 0) { exchange.exportEggs(any<Set<de.pflugradts.passbird.domain.model.slot.Slot>>(), any<CharArray>()) }
+        verify(exactly = 0) { exchange.exportEggs(any<Set<Slot>>(), any<CharArray>()) }
         verify { userInterface.send(match { it.shell.asString() == "Operation aborted." }) }
     }
 }

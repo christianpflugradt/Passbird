@@ -34,13 +34,6 @@ flows:
     nest_list_template:
       - "\t0: <DefaultNestId>"
       - "\t<SlotIndex>: <NestId>"
-    exact_selection_mode_prompt: "\nInput 1 to export only selected Nests or 2 to export all Nests except selected Nests.\nYour input: "
-    accepted_selection_mode_inputs:
-      - "1"
-      - "2"
-    rejected_selection_mode_inputs:
-      - empty input
-      - any input other than the single-character strings 1 or 2
     exact_nest_slot_prompt: "Specify Nest Slots separated by ','.\nYour input: "
     accepted_nest_slot_input_shape:
       - one or more single-digit slot indices separated by commas
@@ -50,13 +43,11 @@ flows:
       - empty input
       - any non-digit entry
       - any multi-character slot token
+      - any duplicate slot token
       - any slot not currently available for export
     exact_branches:
-      - selection mode 1 exports exactly the specified Nest Slots
-      - selection mode 2 exports every available Nest Slot except the specified ones
-      - if selection mode input is invalid, Passbird prints Operation aborted.
       - if the Nest Slot input is invalid, Passbird prints Operation aborted.
-      - if the resulting export set is empty, Passbird prints Operation aborted.
+      - valid Nest Slot input exports exactly the specified Nest Slots.
     exact_success_output:
       - on successful selective export, Passbird prints <EggCount> eggs successfully exported.
       - after the success message, Passbird emits one empty line

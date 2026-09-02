@@ -52,7 +52,7 @@ class HelpCommandHandler constructor(
 
     private fun secondaryCommands() = listOf(
         Triple("e", "(export)", "Exports the Password Tree to an AES-encrypted CSV ZIP file."),
-        Triple("e*", "(selective export)", "Exports selected Nests or all Nests except selected Nests."),
+        Triple("e*", "(selective export)", "Exports selected Nests."),
         Triple("i", "(import)", "Imports passwords from an AES-encrypted CSV ZIP file into the Password Tree."),
         Triple("i*", "(selective import)", "Imports one Nest from an AES-encrypted CSV ZIP file into a selected Nest Slot."),
         Triple("k", "(keystore)", "Changes the master password of the keystore."),

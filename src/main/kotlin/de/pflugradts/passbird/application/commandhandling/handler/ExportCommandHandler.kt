@@ -60,40 +60,23 @@ class ExportCommandHandler constructor(
         val availableNestSlots = availableNestSlots()
         userInterfaceAdapterPort.send(outputOf(shellOf("\nAvailable Nests:\n"), HIGHLIGHT))
         userInterfaceAdapterPort.send(outputOf(shellOf(canListAvailableNests.getAvailableNests(includeCurrent = true))))
-        val selectionMode = receiveSelectionMode() ?: return abortExport()
         val selectedNestSlots = receiveSelectedNestSlots(availableNestSlots) ?: return abortExport()
-        val exportedNestSlots = when (selectionMode) {
-            ExportSelectionMode.SELECTED -> selectedNestSlots
-            ExportSelectionMode.EXCEPT_SELECTED -> availableNestSlots - selectedNestSlots
-        }
-        if (exportedNestSlots.isEmpty()) {
-            sendAbortMessage()
-            return false
-        }
-        return importExportService.exportEggs(exportedNestSlots, password)
+        return importExportService.exportEggs(selectedNestSlots, password)
     }
     private fun availableNestSlots() = nestService.all(includeDefault = true)
         .filter { it.isPresent }
         .map { it.get().slot }
         .toList()
         .toSet()
-    private fun receiveSelectionMode() = userInterfaceAdapterPort.receive(
-        outputOf(shellOf("\nInput 1 to export only selected Nests or 2 to export all Nests except selected Nests.\nYour input: ")),
-    ).shell.asString().let {
-        when (it) {
-            "1" -> ExportSelectionMode.SELECTED
-            "2" -> ExportSelectionMode.EXCEPT_SELECTED
-            else -> null
-        }
-    }
     private fun receiveSelectedNestSlots(availableNestSlots: Set<Slot>) = userInterfaceAdapterPort.receive(
         outputOf(shellOf("Specify Nest Slots separated by ','.\nYour input: ")),
     ).shell.asString().split(',')
         .map { it.trim() }
         .takeIf { parts -> parts.isNotEmpty() && parts.all { part -> part.length == 1 && part[0].isDigit() } }
         ?.map { part -> slotAt(part) }
-        ?.toSet()
+        ?.takeIf { selectedSlots -> selectedSlots.distinct().size == selectedSlots.size }
         ?.takeIf { selectedSlots -> selectedSlots.all(availableNestSlots::contains) }
+        ?.toSet()
     private fun sendAbortMessage() {
         commandExecutionTracker.markAborted()
         userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
@@ -138,7 +121,6 @@ class ExportCommandHandler constructor(
         }
     }
 }
-private enum class ExportSelectionMode { SELECTED, EXCEPT_SELECTED }
 private data class ExportPassword(val value: CharArray, val generated: String? = null)
 private sealed interface PasswordPromptResult {
     data class Provided(val password: ExportPassword) : PasswordPromptResult

@@ -270,7 +270,7 @@ Enter `h*` to view password-tree statistics before the same usage information.
         d (trash)             Displays trashed Eggs and allows restoring them.
 
         e (export)            Exports the Password Tree to an AES-encrypted CSV ZIP file.
-        e* (selective export) Exports selected Nests or all Nests except selected Nests.
+        e* (selective export) Exports selected Nests.
         i (import)            Imports passwords from an AES-encrypted CSV ZIP file into the Password Tree.
         i* (selective import) Imports one Nest from an AES-encrypted CSV ZIP file into a selected Nest Slot.
         k (keystore)          Changes the master password of the keystore.
@@ -328,7 +328,7 @@ operation is aborted.
 
 `e` exports all non-trashed Eggs to an AES-encrypted `passbird-export.zip` file in the directory specified during program start. It asks whether to generate a random export password; enter `Y` to use a password generated with the default `s` criteria, or `n` to enter and repeat a password yourself.
 
-`e*` previews deployed Nests and lets you export only selected Nest Slots or all Nests except selected Nest Slots. Trashed Eggs are excluded.
+`e*` previews deployed Nests and lets you export selected Nest Slots. Trashed Eggs are excluded.
 
 `i` imports all Eggs from a `passbird-export.zip` file located in the directory specified during program start.
 
