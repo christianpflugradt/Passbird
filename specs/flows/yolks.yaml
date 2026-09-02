@@ -38,4 +38,3 @@ flows:
     observable_rules:
       - the current password-tree format persists at most one yolk per Egg
       - import and export include yolks when present
-      - older current-format password trees without yolk support are migrated once at startup before the normal application boot path continues

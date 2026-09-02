@@ -36,14 +36,6 @@ class PasswordTreePayloadReaderMalformedPayloadTest {
     }
 
     @Test
-    fun `legacy reader rejects invalid egg nest slots`() {
-        val payload = legacyPayloadBytes()
-        val malformed = payload.withPayloadInt(eggOffsets(payload, legacyEggOffset(payload), hasTrashMetadata = false).nestSlot, 99)
-
-        assertMalformedLegacy(malformed)
-    }
-
-    @Test
     fun `current reader rejects negative size fields`() {
         val payload = currentPayloadBytes()
 
@@ -62,31 +54,8 @@ class PasswordTreePayloadReaderMalformedPayloadTest {
     }
 
     @Test
-    fun `legacy reader rejects negative size fields`() {
-        val payload = legacyPayloadBytes()
-
-        legacySizeOffsets(payload).forEach {
-            assertMalformedLegacy(payload.withPayloadInt(it, -1))
-        }
-    }
-
-    @Test
-    fun `legacy reader rejects overlong size fields`() {
-        val payload = legacyPayloadBytes()
-
-        legacySizeOffsets(payload).forEach {
-            assertMalformedLegacy(payload.withPayloadInt(it, payload.size))
-        }
-    }
-
-    @Test
     fun `current reader rejects trailing partial egg records`() {
         assertMalformedCurrent(currentPayloadBytes(PasswordTreeSnapshot()).withTrailingPartialRecord())
-    }
-
-    @Test
-    fun `legacy reader rejects trailing partial egg records`() {
-        assertMalformedLegacy(legacyPayloadBytes(PasswordTreeSnapshot()).withTrailingPartialRecord())
     }
 
     private fun assertMalformedCurrent(payload: ByteArray) {
@@ -95,17 +64,8 @@ class PasswordTreePayloadReaderMalformedPayloadTest {
         }
     }
 
-    private fun assertMalformedLegacy(payload: ByteArray) {
-        assertThrows<IllegalStateException> {
-            LegacyPasswordTreePayloadReader(configuration, systemOperation).read(shellOf(payload))
-        }
-    }
-
     private fun currentPayloadBytes(snapshot: PasswordTreeSnapshot = snapshotWithEgg()) =
         PasswordTreePayloadWriter().write(snapshot).toByteArray()
-
-    private fun legacyPayloadBytes(snapshot: PasswordTreeSnapshot = snapshotWithEgg()) =
-        LegacyPasswordTreePayloadWriter().write(snapshot).toByteArray()
 
     private fun snapshotWithEgg() = PasswordTreeSnapshot(
         eggs = listOf(
@@ -130,18 +90,6 @@ class PasswordTreePayloadReaderMalformedPayloadTest {
         )
     }
 
-    private fun legacySizeOffsets(payload: ByteArray): List<Int> {
-        val eggOffsets = eggOffsets(payload, legacyEggOffset(payload), hasTrashMetadata = false)
-        return listOf(
-            signatureSize(),
-            legacyNestOffset(payload),
-            eggOffsets.eggIdSize,
-            eggOffsets.passwordSize,
-            eggOffsets.firstProteinTypeSize,
-            eggOffsets.firstProteinStructureSize,
-        )
-    }
-
     private fun currentFavoriteOffset(payload: ByteArray) = skipEntries(
         payload,
         signatureSize() + 2 * Integer.BYTES,
@@ -151,10 +99,6 @@ class PasswordTreePayloadReaderMalformedPayloadTest {
     private fun currentNestOffset(payload: ByteArray) = skipEntries(payload, currentFavoriteOffset(payload), PERSISTED_SLOT_ENTRIES)
 
     private fun currentEggOffset(payload: ByteArray) = skipEntries(payload, currentNestOffset(payload), Slot.CAPACITY)
-
-    private fun legacyNestOffset(payload: ByteArray) = skipEntries(payload, signatureSize(), PERSISTED_SLOT_ENTRIES)
-
-    private fun legacyEggOffset(payload: ByteArray) = skipEntries(payload, legacyNestOffset(payload), Slot.CAPACITY)
 
     private fun skipEntries(payload: ByteArray, offset: Int, entries: Int): Int {
         var incrementedOffset = offset

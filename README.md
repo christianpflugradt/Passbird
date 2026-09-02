@@ -685,11 +685,7 @@ Passbird has not been reviewed by security experts. It operates entirely offline
 No. Many programs do not support Unicode characters in passwords, and some even restrict special characters like backslashes or spaces. Passbird translates every byte into an ASCII character. Inputting Unicode characters will result in multiple ASCII characters, which may cause inconsistencies and make certain Eggs undeletable. It is advised to avoid Unicode inputs.
 
 ### How do I update Passbird?
-Passbird follows semantic versioning (`x.y.z`, where `x` is the major version, `y` the minor version, and `z` the patch level). To update to a minor or patch version, download the latest JAR file and use it as usual. For major updates, review the release notes carefully before upgrading so you can catch any migration or compatibility guidance.
-
-Some releases may require a one-time migration before Passbird can start normally. When that happens, Passbird will stop before entering the main application, prompt for confirmation, run the migration, and then ask you to start Passbird again. Keep an up-to-date backup before upgrading so you can revert safely if a migration or upgrade fails. This includes compatibility migrations for password-tree format extensions such as yolk persistence and trash metadata.
-
-Versions up to `6.2.0` created `passbird.sec` as a JCEKS keystore. Current releases create PKCS12 keystores instead and automatically route legacy `passbird.sec` files through the migration boot path before normal startup.
+Passbird follows semantic versioning (`x.y.z`, where `x` is the major version, `y` the minor version, and `z` the patch level). To update to a minor or patch version, download the latest JAR file and use it as usual. For major updates, review the release notes carefully before upgrading for compatibility guidance.
 
 You can find current and historical Passbird versions [on GitHub Releases](https://github.com/christianpflugradt/Passbird/releases). Official stable releases use plain semantic versions such as `6.4.0`. Manual publish runs create development prereleases with versions such as `6.4.0-dev.20260525.1`. Each release publishes the `passbird.jar` asset used by [Passbird-Updater](https://github.com/christianpflugradt/Passbird-Updater), which defaults to official stable releases and can opt into development prereleases with `--channel dev`, though manual updates are still the more conservative option.
 

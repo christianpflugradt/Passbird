@@ -3,8 +3,6 @@ package de.pflugradts.passbird.adapter.keystore
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.application.keystore.KeyStoreFormat
-import de.pflugradts.passbird.application.keystore.KeyStoreFormatDetector
 import de.pflugradts.passbird.application.util.SystemOperation
 import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
 import de.pflugradts.passbird.domain.model.shell.PlainShell.Companion.plainShellOf
@@ -19,7 +17,6 @@ import strikt.assertions.isNotEqualTo
 import strikt.assertions.isTrue
 import strikt.java.exists
 import java.io.File
-import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.attribute.PosixFilePermission.OWNER_READ
 import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
@@ -29,7 +26,6 @@ import java.util.UUID
 class KeyStoreServiceIntegrationTest {
 
     private var keyStoreService: KeyStoreService? = null
-    private val keyStoreFormatDetector = KeyStoreFormatDetector()
     private var tempKeyStoreDirectory: String? = null
     private var keyStoreFile: String? = null
 
@@ -70,7 +66,6 @@ class KeyStoreServiceIntegrationTest {
         expectThat(actualStoreResult.success).isTrue()
         expectThat(actualLoadResult.success).isTrue()
         expectThat(actualLoadResult.getOrNull()?.size) isEqualTo expectedByteArraySize
-        expectThat(keyStoreFormatDetector.detect(Files.readAllBytes(path))) isEqualTo KeyStoreFormat.PKCS12
         expectThat(oneTimePasswordPlainShell1.toCharArray()) isNotEqualTo password.toCharArray()
         expectThat(oneTimePasswordPlainShell2.toCharArray()) isNotEqualTo password.toCharArray()
     }

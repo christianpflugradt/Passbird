@@ -2,14 +2,18 @@ schema_version: 1
 last_reviewed: 2026-05-30
 flow_family: migration
 applies_interaction_rules_from: specs/interaction.yaml
+current_registration:
+  pre_launch_detectors: []
+  authenticated_detectors: []
+  migrations: []
 flows:
   - id: migration_boot_reroute
     trigger:
-      - startup detects state that requires a compatibility-preserving migration before the normal application boot path can continue
+      - a future compatibility-preserving migration is registered before the normal application boot path can continue
     user_experience:
       - migration is a boot-time reroute, not a command-loop feature
-      - if the keystore does not exist or no pre-launch migration is required, Passbird does not enter the migration boot path
-      - if the keystore exists and pre-launch migration detection returns at least one pending migration, Passbird launches the dedicated migration graph instead of the normal application graph
+      - no migration is currently registered, so Passbird does not enter the migration boot path
+      - a future pre-launch detector can route startup into the dedicated migration graph instead of the normal application graph
       - migration boot happens after the normal launcher license/banner output, not before it
       - the migration boot path never reaches the normal interactive command prompt in the same run
   - id: migration_consent
@@ -35,62 +39,6 @@ flows:
       - after the first successful migration authentication in a run, Passbird caches the resulting credentials for reuse
       - later authenticated migrations in the same migration run reuse those cached credentials without prompting again
       - when multiple authenticated migrations are pending together, the user is prompted only once for the whole migration session
-  - id: keystore_format_migration
-    trigger:
-      - the keystore file exists and its leading bytes identify the legacy JCEKS format
-    user_experience:
-      - this migration contributes the pending migration id keystore-format
-      - it is a pre-launch migration and therefore participates in the shared migration boot path rather than the normal command loop
-      - it runs before password-tree-key-derivation when both migrations are pending in the same run
-      - after successful shared migration authentication, Passbird rewrites the existing keystore file in place using the current keystore writer
-      - the migrated keystore is stored in the current PKCS12 format rather than the legacy JCEKS format
-      - the master password the user entered for migration continues to unlock the migrated keystore after migration
-      - the stored secret inside the keystore is preserved across the format migration
-      - after successful migration, future startup detection no longer requests keystore-format migration for that keystore file
-      - this migration produces no dedicated user-visible success line beyond the shared overall migration success message
-  - id: password_tree_key_derivation_migration
-    trigger:
-      - the password tree file exists, is non-empty, and is still in the legacy pre-envelope format
-    user_experience:
-      - this migration contributes the pending migration id password-tree-key-derivation
-      - it is a pre-launch migration and therefore participates in the shared migration boot path rather than the normal command loop
-      - it runs after keystore-format when both migrations are pending in the same run
-      - after successful shared migration authentication, Passbird decrypts the legacy password tree with the legacy key-derivation path and rewrites it directly in the latest password-tree format
-      - the migrated password tree is wrapped in the current password-tree envelope format after migration
-      - the stored eggs, passwords, proteins, nest assignments, and persisted EggId memory entries are preserved across the migration
-      - Favorite slots are initialized empty because the legacy source format predates Favorite persistence
-      - because this migration rewrites directly into the latest password-tree format, no follow-up password-tree migration is required for the same file
-      - the migrated password tree remains readable with the current crypto path after migration
-      - after successful migration, future startup detection no longer requests password-tree-key-derivation migration for that password tree file
-      - this migration produces no dedicated user-visible success line beyond the shared overall migration success message
-  - id: password_tree_yolk_migration
-    trigger:
-      - the password tree file exists, is non-empty, and still uses the older current-format envelope from before yolk persistence was added
-    user_experience:
-      - this migration contributes the pending migration id password-tree-yolk
-      - it is a pre-launch migration and therefore participates in the shared migration boot path rather than the normal command loop
-      - it runs after password-tree-key-derivation when both migrations are pending in the same run
-      - after successful shared migration authentication, Passbird decrypts the older current-format password tree with the current crypto path and rewrites it directly in the latest password-tree format
-      - the migrated password tree is wrapped in the current password-tree envelope format after migration
-      - the stored eggs, passwords, proteins, yolks, favorites, nest assignments, and persisted EggId memory entries are preserved across the migration
-      - because this migration rewrites directly into the latest password-tree format, no follow-up password-tree migration is required for the same file
-      - the migrated password tree remains readable with the normal current restore path after migration
-      - after successful migration, future startup detection no longer requests password-tree-yolk migration for that password tree file
-      - this migration produces no dedicated user-visible success line beyond the shared overall migration success message
-  - id: password_tree_trash_migration
-    trigger:
-      - the password tree file exists, is non-empty, and still uses the older current-format envelope from before the trash payload marker update
-    user_experience:
-      - this migration contributes the pending migration id password-tree-trash
-      - it is a pre-launch migration and therefore participates in the shared migration boot path rather than the normal command loop
-      - it runs after password-tree-yolk when both migrations are pending in the same run
-      - after successful shared migration authentication, Passbird decrypts the older current-format password tree with the current crypto path and rewrites it directly in the latest password-tree format
-      - the migrated password tree is wrapped in the current password-tree envelope format after migration
-      - the stored eggs, passwords, proteins, yolks, favorites, nest assignments, persisted EggId memory entries, and trash metadata are preserved across the migration
-      - because this migration rewrites directly into the latest password-tree format, no follow-up password-tree migration is required for the same file
-      - the migrated password tree remains readable with the normal current restore path after migration
-      - after successful migration, future startup detection no longer requests password-tree-trash migration for that password tree file
-      - this migration produces no dedicated user-visible success line beyond the shared overall migration success message
   - id: migration_completion
     trigger:
       - pending migrations finish successfully

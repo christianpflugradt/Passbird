@@ -67,11 +67,9 @@ runtime_design:
   boot_sequence:
     - Main.kt validates the home directory argument and constructs the RunContext
     - LauncherGraph constructs the launcher boot path with the RunContext
-    - launcher, migration, or setup boot path is selected through explicit graph factories that carry the same RunContext
-    - pre-launch migration detectors may route startup into a dedicated migration boot path before the main application may continue
-    - migration boot may construct compatibility adapters that can read legacy persistence formats without widening the normal runtime path
-    - shared password-tree format helpers live under application.passwordtree so migration and backup orchestration can use them without depending on adapter internals
-    - shared keystore format helpers live under application.keystore so launcher detection and migration-only adapters can classify passbird.sec without guessing from release history
+    - launcher or setup boot path is selected through explicit graph factories that carry the same RunContext
+    - migration composition remains available for future compatibility work but no migration detectors or implementations are registered
+    - shared password-tree format helpers live under application.passwordtree so adapters and backup orchestration can use them without depending on adapter internals
     - password-tree restore and sync move eggs, favorites, memory, and nest shells as a single snapshot rather than repopulating nests through a service callback
     - PasswordTreeSyncService mediates repository sync for domain services that must not depend on EggRepository directly
     - password-tree mutations are staged against live aggregates but sync failure restores a deep last-synced snapshot before the command reports failure
@@ -99,7 +97,7 @@ ports_and_adapters:
     concern: temporary registration of a global NEXT hotkey for guided credential flows without leaking OS-specific APIs into application handlers; a shared application-layer backend policy owns accepted backends, runtime resolution, startup preparation, and macOS app-loop requirements, and the adapter uses that policy before instantiating any platform-specific registrar. Carbon-specific native runtime and AppKit-loop code stays local to adapter.userinterface.hotkey.carbon so non-Carbon backends do not pay for Carbon support outside the boot decision seam
   - port: KeyStoreAdapterPort
     implementation: adapter.keystore.KeyStoreService
-    concern: load and store secret material in PKCS12, while migration boot may construct compatibility adapters for legacy JCEKS reads; JVM keystore construction stays inside adapter.keystore
+    concern: load and store secret material in PKCS12; JVM keystore construction stays inside adapter.keystore
   - port: PasswordTreeAdapterPort
     implementation: adapter.passwordtree.PasswordTreeFacade
     concern: encrypted persistence of eggs, favorites, memory, and nests as one snapshot
@@ -132,8 +130,8 @@ important_extension_paths:
       - treat as security-sensitive and compatibility-sensitive
       - inspect PasswordTreeReader, PasswordTreeWriter, and application.passwordtree together
       - verify signatures, checksum handling, memory layout, nest layout, and egg layout end to end
-      - preserve or add explicit migration detection before the main boot path when the on-disk format changes
-      - update migration docs if user data compatibility changes
+      - decide whether a compatibility migration is required before changing the on-disk format
+      - add and document a migration before release if user data compatibility requires one
 high_risk_files:
   - src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationGraph.kt
   - src/main/kotlin/de/pflugradts/passbird/application/commandhandling

@@ -1,9 +1,7 @@
 package de.pflugradts.passbird.application.boot.migration
 
-import de.pflugradts.passbird.adapter.keystore.JceksKeyStoreService
 import de.pflugradts.passbird.adapter.keystore.KeyStoreFactory
 import de.pflugradts.passbird.adapter.keystore.KeyStoreService
-import de.pflugradts.passbird.adapter.keystore.MigrationKeyStoreService
 import de.pflugradts.passbird.adapter.userinterface.CommandLineInterfaceService
 import de.pflugradts.passbird.adapter.userinterface.TerminalInputGateway
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
@@ -12,25 +10,12 @@ import de.pflugradts.passbird.application.UserInterfaceAdapterPort
 import de.pflugradts.passbird.application.boot.Bootable
 import de.pflugradts.passbird.application.configuration.ConfigurationFactory
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
-import de.pflugradts.passbird.application.keystore.KeyStoreFormatDetector
-import de.pflugradts.passbird.application.passwordtree.LegacyCurrentPasswordTreePayloadReader
-import de.pflugradts.passbird.application.passwordtree.LegacyPasswordTreePayloadReader
-import de.pflugradts.passbird.application.passwordtree.PasswordTreeEnvelope
-import de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadWriter
 import de.pflugradts.passbird.application.process.migration.AuthenticatedMigrationDetector
 import de.pflugradts.passbird.application.process.migration.AuthenticatedMigrationLocator
 import de.pflugradts.passbird.application.process.migration.Migration
 import de.pflugradts.passbird.application.process.migration.MigrationAuthenticationService
 import de.pflugradts.passbird.application.process.migration.MigrationRequest
 import de.pflugradts.passbird.application.process.migration.MigrationRunner
-import de.pflugradts.passbird.application.process.migration.keystore.KeyStoreFormatMigration
-import de.pflugradts.passbird.application.process.migration.keystore.KeyStoreFormatMigrationService
-import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigration
-import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeKeyDerivationMigrationService
-import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeTrashMigration
-import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeTrashMigrationService
-import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeYolkMigration
-import de.pflugradts.passbird.application.process.migration.passwordtree.PasswordTreeYolkMigrationService
 import de.pflugradts.passbird.application.util.SystemOperation
 
 class MigrationGraph(
@@ -40,17 +25,8 @@ class MigrationGraph(
     val bootable: Bootable get() = passbirdMigration
     val authenticatedMigrationDetectors: Set<AuthenticatedMigrationDetector> = emptySet()
     val configuration: ReadableConfiguration by lazy { configurationFactory.loadConfiguration() }
-    val keyStoreAdapterPort: KeyStoreAdapterPort by lazy {
-        MigrationKeyStoreService(keyStoreService, jceksKeyStoreService, KeyStoreFormatDetector(), systemOperation)
-    }
-    val migrations: Set<Migration> by lazy {
-        setOf(
-            KeyStoreFormatMigration(keyStoreFormatMigrationService, migrationAuthenticationService, systemOperation),
-            PasswordTreeKeyDerivationMigration(migrationAuthenticationService, passwordTreeKeyDerivationMigrationService, systemOperation),
-            PasswordTreeYolkMigration(migrationAuthenticationService, passwordTreeYolkMigrationService, systemOperation),
-            PasswordTreeTrashMigration(migrationAuthenticationService, passwordTreeTrashMigrationService, systemOperation),
-        )
-    }
+    val keyStoreAdapterPort: KeyStoreAdapterPort by lazy { keyStoreService }
+    val migrations: Set<Migration> = emptySet()
     val userInterfaceAdapterPort: UserInterfaceAdapterPort by lazy {
         CommandLineInterfaceService(TerminalInputGateway(), configuration)
     }
@@ -59,46 +35,11 @@ class MigrationGraph(
     private val configurationFactory by lazy { ConfigurationFactory(systemOperation, runContext) }
     private val keyStoreFactory by lazy { KeyStoreFactory() }
     private val keyStoreService by lazy { KeyStoreService(systemOperation, keyStoreFactory) }
-    private val jceksKeyStoreService by lazy { JceksKeyStoreService(systemOperation, keyStoreFactory) }
-    private val passwordTreeEnvelope by lazy { PasswordTreeEnvelope() }
-    private val legacyPasswordTreePayloadReader by lazy { LegacyPasswordTreePayloadReader(configuration, systemOperation) }
-    private val passwordTreePayloadWriter by lazy { PasswordTreePayloadWriter() }
     private val authenticatedMigrationLocator by lazy { AuthenticatedMigrationLocator(authenticatedMigrationDetectors) }
     private val migrationAuthenticationService by lazy {
         MigrationAuthenticationService(configuration, keyStoreAdapterPort, userInterfaceAdapterPort, systemOperation)
     }
     private val migrationRunner by lazy { MigrationRunner(migrations) }
-    private val keyStoreFormatMigrationService by lazy {
-        KeyStoreFormatMigrationService(configuration, keyStoreAdapterPort, systemOperation)
-    }
-    private val passwordTreeKeyDerivationMigrationService by lazy {
-        PasswordTreeKeyDerivationMigrationService(
-            configuration = configuration,
-            passwordTreeEnvelope = passwordTreeEnvelope,
-            legacyPasswordTreePayloadReader = legacyPasswordTreePayloadReader,
-            passwordTreePayloadWriter = passwordTreePayloadWriter,
-            systemOperation = systemOperation,
-        )
-    }
-    private val passwordTreeYolkMigrationService by lazy {
-        PasswordTreeYolkMigrationService(
-            configuration = configuration,
-            legacyCurrentPasswordTreePayloadReader = LegacyCurrentPasswordTreePayloadReader(configuration, systemOperation),
-            passwordTreePayloadWriter = passwordTreePayloadWriter,
-            systemOperation = systemOperation,
-        )
-    }
-    private val passwordTreeTrashMigrationService by lazy {
-        PasswordTreeTrashMigrationService(
-            configuration = configuration,
-            passwordTreePayloadReader = de.pflugradts.passbird.application.passwordtree.PasswordTreePayloadReader(
-                configuration,
-                systemOperation,
-            ),
-            passwordTreePayloadWriter = passwordTreePayloadWriter,
-            systemOperation = systemOperation,
-        )
-    }
     private val passbirdMigration by lazy {
         PassbirdMigration(
             authenticatedMigrationLocator = authenticatedMigrationLocator,

@@ -9,7 +9,6 @@ import de.pflugradts.passbird.application.boot.implementationClasses
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.process.migration.Migration
 import de.pflugradts.passbird.application.process.migration.MigrationRequest
-import de.pflugradts.passbird.application.process.migration.PendingMigration
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.domain.model.slot.Slot
 import org.junit.jupiter.api.Tag
@@ -25,7 +24,7 @@ class PassbirdMigrationGraphTest {
     fun `should resolve all dependencies`() {
         // given / when
         val runContext = PassbirdRunContext("/tmp".toDirectory(), Slot.DEFAULT)
-        val migrationRequest = MigrationRequest(setOf(PendingMigration("keystore-format")))
+        val migrationRequest = MigrationRequest.empty()
         val actual = MigrationGraph(runContext, migrationRequest)
 
         // then

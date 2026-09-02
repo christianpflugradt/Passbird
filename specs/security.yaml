@@ -27,10 +27,9 @@ current_security_relevant_implementation:
       - src/main/kotlin/de/pflugradts/passbird/application/boot/migration/PassbirdMigration.kt
       - src/main/kotlin/de/pflugradts/passbird/application/process/migration/MigrationProcessing.kt
     facts:
-      - startup may be routed into a dedicated migration boot path before the main application boot path starts
-      - migration routing exists for compatibility-sensitive persistence changes such as keystore work, password-tree key-derivation updates, and password-tree format extensions
-      - migration authentication may reuse one successful keystore unlock across multiple migrations within the same migration boot run
-      - migration boot may require a separate authenticated session from the normal application startup and exits after reporting success instead of continuing into the main loop
+      - migration composition remains available for future compatibility-sensitive persistence changes
+      - no migration detector or migration implementation is currently registered
+      - a future authenticated migration can reuse one successful keystore unlock across its migration boot run
   crypto_provider_factory:
     file: src/main/kotlin/de/pflugradts/passbird/application/security/CryptoProviderFactory.kt
     facts:
@@ -77,7 +76,6 @@ current_security_relevant_implementation:
       - uses PKCS12 via adapter.keystore.KeyStoreFactory for the current runtime keystore format
       - stores a generated AES secret key under alias PwMan3Secret
       - can re-protect the existing AES secret under a new master password without regenerating the secret
-      - keeps legacy JCEKS read compatibility limited to the migration boot path instead of the normal runtime path
       - scrambles password material, temporary char arrays, and loaded key-byte copies after use, including exception paths
   local_persistence:
     files:
@@ -101,8 +99,7 @@ current_security_relevant_implementation:
       - uses a 12-byte IV generated from SecureRandom
       - uses the loaded keystore secret bytes directly as the AES key material for the current password tree format
       - scrambles transient cipher input byte clones and Cipher.doFinal output arrays after copying them into the returned Shell representation
-      - scrambles temporary current-format key bytes and legacy-derived key bytes after creating SecretKeySpecs
-      - keeps the former PBKDF2WithHmacSHA256 static-salt 100-iteration derivation only as a legacy migration path for pre-migration password trees
+      - scrambles temporary current-format key bytes after creating SecretKeySpecs
   password_tree_integrity:
     files:
       - src/main/kotlin/de/pflugradts/passbird/domain/service/password/tree/NestingGround.kt
@@ -122,10 +119,9 @@ current_security_relevant_implementation:
       - stores eggs, nests, per-nest Favorite slots, and optionally persisted memory in a custom binary layout before encryption
       - stores at most one encrypted yolk secret plus its TOTP metadata per Egg in the current password-tree payload format
       - stores per-Egg trash state plus a day-precision deletion timestamp in the current password-tree payload format
-      - scrubs full decrypted password-tree payload Shells after restore and migration parsing, and scrubs full plaintext payload Shells after sync and migration encryption
+      - scrubs full decrypted password-tree payload Shells after restore and full plaintext payload Shells after sync
       - scrubs temporary password-tree checksum ranges, per-entry read buffers, per-entry serialization buffers, and full payload assembly buffers after copying them into their destination owners
-      - validates current and legacy password-tree payload field boundaries and stored egg nest slots before constructing restore snapshots
-      - detects legacy pre-envelope password tree files, older current-format trees without yolk persistence, and older current-format trees without the trash payload marker before main startup, then routes them through the dedicated migration boot path
+      - validates current password-tree payload field boundaries and stored egg nest slots before constructing restore snapshots
   secret_output_paths:
     files:
       - src/main/kotlin/de/pflugradts/passbird/application/commandhandling/handler

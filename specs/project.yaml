@@ -53,9 +53,7 @@ repository_layout:
   - path: src/main/kotlin/de/pflugradts/passbird/application
     role: application boot, command handling, configuration, process orchestration, security factories
   - path: src/main/kotlin/de/pflugradts/passbird/application/passwordtree
-    role: shared password-tree envelope and payload format helpers used by adapters, backup comparison, and migrations
-  - path: src/main/kotlin/de/pflugradts/passbird/application/keystore
-    role: shared keystore format detection helpers used by migration routing and migration-only compatibility adapters
+    role: shared password-tree envelope and payload format helpers used by adapters and backup comparison
   - path: src/main/kotlin/de/pflugradts/passbird/domain/model
     role: domain entities, value objects, events, transfer primitives
   - path: src/main/kotlin/de/pflugradts/passbird/domain/service
@@ -76,7 +74,7 @@ key_entrypoints:
   - file: src/main/kotlin/de/pflugradts/passbird/application/Main.kt
     purpose: CLI entrypoint, argument validation, boot selection
   - file: src/main/kotlin/de/pflugradts/passbird/application/boot/migration/MigrationGraph.kt
-    purpose: dedicated startup path for persistence migrations that must complete before the main application boot path can proceed
+    purpose: composition root for future persistence migrations
   - file: src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationGraph.kt
     purpose: explicit runtime wiring for the main interactive application graph
   - file: src/main/kotlin/de/pflugradts/passbird/application/boot/main/PassbirdApplication.kt
