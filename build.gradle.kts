@@ -42,7 +42,6 @@ detekt {
     source.setFrom("src/main/kotlin", "src/test/kotlin")
 }
 
-val jacksonVersion = "2.22.2"
 val jnaVersion = "5.19.1"
 val snakeYamlEngineVersion = "3.1.1"
 val zip4jVersion = "2.11.6"
@@ -57,7 +56,6 @@ val striktVersion = "0.35.1"
 
 dependencies {
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     implementation("net.java.dev.jna:jna:$jnaVersion")
     implementation("org.snakeyaml:snakeyaml-engine:$snakeYamlEngineVersion")
     implementation("net.lingala.zip4j:zip4j:$zip4jVersion")
