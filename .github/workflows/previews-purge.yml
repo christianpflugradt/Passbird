@@ -1,0 +1,39 @@
+name: Purge Development Releases
+
+run-name: "Purge development releases (${{ github.event_name }})"
+
+on:
+  schedule:
+    - cron: "37 4 1 * *"
+      timezone: "Europe/Berlin"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  purge-development-releases:
+    runs-on: ubuntu-latest
+    steps:
+      - name: delete prereleases older than 30 days
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cutoff_epoch="$(date -u -d '30 days ago' +%s)"
+
+          gh release list \
+            --repo "$GITHUB_REPOSITORY" \
+            --limit 1000 \
+            --json tagName,isPrerelease,publishedAt,createdAt \
+            --jq '.[] | select(.isPrerelease == true) | [.tagName, (.publishedAt // .createdAt)] | @tsv' |
+          while IFS=$'\t' read -r tag_name release_date; do
+            release_epoch="$(date -u -d "$release_date" +%s)"
+
+            if (( release_epoch < cutoff_epoch )); then
+              echo "Deleting prerelease $tag_name ($release_date)"
+              gh release delete "$tag_name" \
+                --repo "$GITHUB_REPOSITORY" \
+                --cleanup-tag \
+                --yes
+            fi
+          done
