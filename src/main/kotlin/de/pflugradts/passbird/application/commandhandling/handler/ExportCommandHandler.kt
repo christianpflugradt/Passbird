@@ -107,25 +107,26 @@ class ExportCommandHandler constructor(
             outputOf(shellOf("Generate a random password to encrypt the export file? Y/n\nYour input: ")),
         ).shell.asString()
     ) {
-        "", "y", "Y" -> passwordProvider.createNewPassword(configuration.parsePasswordRequirements()).let {
+        "y", "Y" -> passwordProvider.createNewPassword(configuration.parsePasswordRequirements()).let {
             PasswordPromptResult.Provided(ExportPassword(it.toChars(), it.asString()))
         }
 
-        "n", "N" -> manualPassword()
-
-        else -> PasswordPromptResult.Aborted
+        else -> manualPassword()
     }
     private fun manualPassword(): PasswordPromptResult {
         val password = userInterfaceAdapterPort.receiveSecurely(
             outputOf(shellOf("Input a password to encrypt the export file.\nYour input: ")),
         ).shell.toChars()
+        if (password.isEmpty()) {
+            Arrays.fill(password, '\u0000')
+            return PasswordPromptResult.Aborted
+        }
         val repeated = userInterfaceAdapterPort.receiveSecurely(
             outputOf(shellOf("Repeat the export password.\nYour input: ")),
         ).shell.toChars()
         val passwordsMatch = password.contentEquals(repeated)
         return try {
             when {
-                password.isEmpty() && repeated.isEmpty() -> PasswordPromptResult.Aborted
                 passwordsMatch -> PasswordPromptResult.Provided(ExportPassword(password))
                 else -> PasswordPromptResult.Mismatched
             }

@@ -12,9 +12,9 @@ flows:
     command: e
     preconditions:
       - Passbird prompts "Generate a random password to encrypt the export file? Y/n\nYour input: "
-      - empty input, Y, or y generates a password with the default s criteria and prints "Your export password: <GeneratedPassword>" after a successful export
-      - N or n prompts "Input a password to encrypt the export file.\nYour input: " and "Repeat the export password.\nYour input: "
-      - two empty manual password inputs abort the operation because AES ZIP encryption requires a non-empty password
+      - only Y or y generates a password with the default s criteria and prints "Your export password: <GeneratedPassword>" after a successful export
+      - empty input, N, n, or any other input prompts "Input a password to encrypt the export file.\nYour input: "; a non-empty password then prompts "Repeat the export password.\nYour input: "
+      - an empty first manual password input aborts the operation because AES ZIP encryption requires a non-empty password
     exact_success_output:
       - on successful export, Passbird prints <EggCount> eggs successfully exported.
       - after the success message, Passbird emits one empty line

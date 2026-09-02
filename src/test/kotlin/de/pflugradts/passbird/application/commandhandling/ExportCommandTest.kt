@@ -30,7 +30,7 @@ class ExportCommandTest {
     @BeforeEach
     fun setup() {
         fakePasswordProvider(passwordProvider, shellOf("generated"))
-        fakeUserInterfaceAdapterPort(userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(shellOf(""))))
+        fakeUserInterfaceAdapterPort(userInterfaceAdapterPort, withTheseInputs = listOf(inputOf(shellOf("y"))))
     }
 
     private val importExportService = mockk<ImportExportService>(relaxed = true)
@@ -69,7 +69,7 @@ class ExportCommandTest {
         nestService.place(shellOf("work"), S2)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseInputs = listOf(inputOf(shellOf("")), inputOf(shellOf("1")), inputOf(shellOf("0,2"))),
+            withTheseInputs = listOf(inputOf(shellOf("y")), inputOf(shellOf("1")), inputOf(shellOf("0,2"))),
         )
 
         // when
@@ -86,7 +86,7 @@ class ExportCommandTest {
         nestService.place(shellOf("archive"), S5)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseInputs = listOf(inputOf(shellOf("")), inputOf(shellOf("2")), inputOf(shellOf("2"))),
+            withTheseInputs = listOf(inputOf(shellOf("y")), inputOf(shellOf("2")), inputOf(shellOf("2"))),
         )
 
         // when
@@ -102,7 +102,7 @@ class ExportCommandTest {
         nestService.place(shellOf("work"), S2)
         fakeUserInterfaceAdapterPort(
             instance = userInterfaceAdapterPort,
-            withTheseInputs = listOf(inputOf(shellOf("")), inputOf(shellOf("2")), inputOf(shellOf("0,2"))),
+            withTheseInputs = listOf(inputOf(shellOf("y")), inputOf(shellOf("2")), inputOf(shellOf("0,2"))),
         )
 
         // when

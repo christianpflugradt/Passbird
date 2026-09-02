@@ -36,7 +36,7 @@ class ExportCommandHandlerTest {
 
     @Test
     fun exportsWithGeneratedPassword() {
-        fakeUserInterfaceAdapterPort(userInterface, withTheseInputs = listOf(inputOf(shellOf(""))))
+        fakeUserInterfaceAdapterPort(userInterface, withTheseInputs = listOf(inputOf(shellOf("y"))))
         fakePasswordProvider(passwordProvider, shellOf("generated"))
         var capturedPassword = charArrayOf()
         every { exchange.exportEggs(any<CharArray>()) } answers {
@@ -55,12 +55,13 @@ class ExportCommandHandlerTest {
         fakeUserInterfaceAdapterPort(
             userInterface,
             withTheseInputs = listOf(inputOf(shellOf("n"))),
-            withTheseSecureInputs = listOf(inputOf(shellOf("")), inputOf(shellOf(""))),
+            withTheseSecureInputs = listOf(inputOf(shellOf(""))),
         )
 
         inputHandler.handleInput(inputOf(shellOf("e")))
 
         verify(exactly = 0) { exchange.exportEggs(any<CharArray>()) }
+        verify(exactly = 1) { userInterface.receiveSecurely(any()) }
         verify { userInterface.send(match { it.shell.asString() == "Operation aborted." }) }
     }
 
@@ -99,7 +100,7 @@ class ExportCommandHandlerTest {
 
     @Test
     fun doesNotDisplayGeneratedPasswordWhenExportFails() {
-        fakeUserInterfaceAdapterPort(userInterface, withTheseInputs = listOf(inputOf(shellOf(""))))
+        fakeUserInterfaceAdapterPort(userInterface, withTheseInputs = listOf(inputOf(shellOf("y"))))
         fakePasswordProvider(passwordProvider, shellOf("generated"))
         every { exchange.exportEggs(any<CharArray>()) } returns false
 
@@ -109,18 +110,47 @@ class ExportCommandHandlerTest {
     }
 
     @Test
-    fun abortsForAnInvalidPasswordChoice() {
-        fakeUserInterfaceAdapterPort(userInterface, withTheseInputs = listOf(inputOf(shellOf("invalid"))))
+    fun usesManualPasswordForAnInvalidPasswordChoice() {
+        fakeUserInterfaceAdapterPort(
+            userInterface,
+            withTheseInputs = listOf(inputOf(shellOf("invalid"))),
+            withTheseSecureInputs = listOf(inputOf(shellOf("manual")), inputOf(shellOf("manual"))),
+        )
+        var capturedPassword = charArrayOf()
+        every { exchange.exportEggs(any<CharArray>()) } answers {
+            capturedPassword = firstArg<CharArray>().copyOf()
+            true
+        }
 
         inputHandler.handleInput(inputOf(shellOf("e")))
 
-        verify(exactly = 0) { exchange.exportEggs(any<CharArray>()) }
-        verify { userInterface.send(match { it.shell.asString() == "Operation aborted." }) }
+        expectThat(capturedPassword.concatToString()) isEqualTo "manual"
+    }
+
+    @Test
+    fun usesManualPasswordForAnEmptyPasswordChoice() {
+        fakeUserInterfaceAdapterPort(
+            userInterface,
+            withTheseInputs = listOf(inputOf(shellOf(""))),
+            withTheseSecureInputs = listOf(inputOf(shellOf("manual")), inputOf(shellOf("manual"))),
+        )
+        var capturedPassword = charArrayOf()
+        every { exchange.exportEggs(any<CharArray>()) } answers {
+            capturedPassword = firstArg<CharArray>().copyOf()
+            true
+        }
+
+        inputHandler.handleInput(inputOf(shellOf("e")))
+
+        expectThat(capturedPassword.concatToString()) isEqualTo "manual"
     }
 
     @Test
     fun abortsSelectiveExportWithAnInvalidSelection() {
-        fakeUserInterfaceAdapterPort(userInterface, withTheseInputs = listOf(inputOf(shellOf("")), inputOf(shellOf("invalid"))))
+        fakeUserInterfaceAdapterPort(
+            userInterface,
+            withTheseInputs = listOf(inputOf(shellOf("y")), inputOf(shellOf("invalid"))),
+        )
         fakePasswordProvider(passwordProvider, shellOf("generated"))
 
         inputHandler.handleInput(inputOf(shellOf("e*")))
