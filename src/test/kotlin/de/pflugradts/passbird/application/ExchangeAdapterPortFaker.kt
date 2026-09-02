@@ -19,10 +19,10 @@ fun fakeExchangeAdapterPort(
     withSendFailure: Exception? = null,
 ): ExchangeAdapterPort {
     val instance = mockk<ExchangeAdapterPort>()
-    every { instance.send(any()) } answers {
+    every { instance.send(any(), any()) } answers {
         withSendFailure?.let { failure(it) } ?: success(Unit)
     }
-    every { instance.receive() } answers {
+    every { instance.receive(any()) } answers {
         withReceiveFailure?.let {
             return@answers failure(it)
         }

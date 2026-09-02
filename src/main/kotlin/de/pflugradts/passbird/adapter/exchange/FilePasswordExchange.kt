@@ -1,5 +1,5 @@
 package de.pflugradts.passbird.adapter.exchange
-import com.fasterxml.jackson.databind.json.JsonMapper
+
 import de.pflugradts.kotlinextensions.tryCatching
 import de.pflugradts.passbird.application.ExchangeAdapterPort
 import de.pflugradts.passbird.application.PasswordInfo
@@ -12,7 +12,6 @@ import de.pflugradts.passbird.application.failure.ImportFailure
 import de.pflugradts.passbird.application.failure.reportFailure
 import de.pflugradts.passbird.application.toFileName
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.application.yolk.defaultTotpAlgorithm
 import de.pflugradts.passbird.application.yolk.normalizeTotpAlgorithm
 import de.pflugradts.passbird.domain.model.egg.requireValidEggId
 import de.pflugradts.passbird.domain.model.nest.Nest
@@ -21,131 +20,274 @@ import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
+import net.lingala.zip4j.io.inputstream.ZipInputStream
+import net.lingala.zip4j.io.outputstream.ZipOutputStream
+import net.lingala.zip4j.model.ZipParameters
+import net.lingala.zip4j.model.enums.AesKeyStrength
+import net.lingala.zip4j.model.enums.EncryptionMethod
+import java.io.InputStream
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
-class FilePasswordExchange constructor(
+
+class FilePasswordExchange(
     private val systemOperation: SystemOperation,
     private val runContext: RunContext,
 ) : ExchangeAdapterPort {
-    private val mapper = JsonMapper()
-    override fun send(data: PasswordInfoMap) = tryCatching {
-        systemOperation.writeToSensitiveFile(
-            systemOperation.resolvePath(runContext.homeDirectory, EXCHANGE_FILENAME.toFileName()),
-        ) { outputStream ->
-            mapper.writerWithDefaultPrettyPrinter().writeValue(outputStream, ExchangeWrapper(data.toSerializable()))
+    override fun send(data: PasswordInfoMap, password: CharArray) = tryCatching {
+        require(password.isNotEmpty()) { "Export password must not be empty" }
+        systemOperation.writeToSensitiveFile(path()) { output ->
+            ZipOutputStream(output, password).use { zip ->
+                zip.entryText(MANIFEST, MANIFEST_CONTENT)
+                zip.entry(NESTS, listOf(NEST_HEADER) + data.keys.map { listOf(it.slot.index().toString(), it.viewNestId().asString()) })
+                zip.entry(
+                    EGGS,
+                    listOf(EGG_HEADER) +
+                        data.flatMap { (nest, eggs) ->
+                            eggs.map { listOf(it.first.first.asString(), nest.slot.index().toString(), it.first.second.asString()) }
+                        },
+                )
+                zip.entry(
+                    PROTEINS,
+                    listOf(PROTEIN_HEADER) +
+                        data.flatMap { (nest, eggs) ->
+                            eggs.flatMap { egg ->
+                                egg.second.mapIndexed { slot, protein ->
+                                    listOf(
+                                        egg.first.first.asString(),
+                                        nest.slot.index().toString(),
+                                        slot.toString(),
+                                        protein.first.asString(),
+                                        protein.second.asString(),
+                                    )
+                                }
+                            }
+                        },
+                )
+                zip.entry(
+                    YOLKS,
+                    listOf(YOLK_HEADER) +
+                        data.flatMap { (nest, eggs) ->
+                            eggs.mapNotNull { egg ->
+                                egg.yolk?.let {
+                                    listOf(
+                                        egg.first.first.asString(),
+                                        nest.slot.index().toString(),
+                                        it.secret.asString(),
+                                        it.algorithm,
+                                        it.digits.toString(),
+                                        it.periodSeconds.toString(),
+                                    )
+                                }
+                            }
+                        },
+                )
+            }
         }
         Unit
     }.onFailure { reportFailure(ExportFailure(it)) }
-    override fun receive() = tryCatching {
-        mapper.readValue(
-            Files.readString(systemOperation.resolvePath(runContext.homeDirectory, EXCHANGE_FILENAME.toFileName())),
-            ExchangeWrapper::class.java,
-        ).exportedContent.toPasswordInfoMap()
-    }.onFailure { reportFailure(ImportFailure(it)) }
-    private fun PasswordInfoMap.toSerializable() = entries.map { nest ->
-        EggsPerNest(
-            exportedNest = ExportedNest(nest.key.viewNestId().asString(), nest.key.slot.index()),
-            exportedEggs = nest.value.map {
-                ExportedEgg(
-                    eggId = it.first.first.asString(),
-                    password = it.first.second.asString(),
-                    proteins = it.second.mapIndexed { index, protein ->
-                        ExportedProtein(
-                            proteinType = protein.first.asString(),
-                            proteinStructure = protein.second.asString(),
-                            slot = index,
-                        )
-                    },
-                    yolk = it.yolk?.let { yolk ->
-                        ExportedYolk(
-                            secret = yolk.secret.asString(),
-                            algorithm = yolk.algorithm,
-                            digits = yolk.digits,
-                            period = yolk.periodSeconds,
-                        )
-                    },
-                )
-            },
-        )
-    }
-    private fun List<EggsPerNest>.toPasswordInfoMap() = associate { entry ->
-        entry.exportedNest.toValidatedNest() to
-            entry.exportedEggs.toValidatedPasswordInfos()
-    }.also { passwordInfoMap ->
-        require(passwordInfoMap.size == size) { "Duplicate nest slot in import file" }
-    }
-    private fun List<ExportedEgg>.toValidatedPasswordInfos(): List<PasswordInfo> {
-        val eggIds = mutableSetOf<String>()
-        forEach {
-            it.validateEggId(eggIds)
+
+    override fun receive(password: CharArray) = tryCatching {
+        require(password.isNotEmpty()) { "Import password must not be empty" }
+        Files.newInputStream(path()).use { input ->
+            ZipInputStream(input, password).use { zip ->
+                val entries = mutableMapOf<String, List<List<String>>>()
+                while (true) {
+                    val entry = zip.nextEntry ?: break
+                    require(
+                        entries.put(
+                            entry.fileName,
+                            if (entry.fileName == MANIFEST) listOf(listOf(zip.readBytes().toString(UTF_8))) else Csv.read(zip),
+                        ) == null,
+                    ) { "Duplicate ZIP entry: " + entry.fileName }
+                }
+                entries.toPasswordInfoMap()
+            }
         }
-        return map {
+    }.onFailure { reportFailure(ImportFailure(it)) }
+
+    private fun path() = systemOperation.resolvePath(runContext.homeDirectory, EXCHANGE_FILENAME.toFileName())
+}
+
+private fun ZipOutputStream.entry(name: String, rows: List<List<String>>) {
+    putNextEntry(
+        ZipParameters().apply {
+            fileNameInZip = name
+            isEncryptFiles = true
+            encryptionMethod = EncryptionMethod.AES
+            aesKeyStrength = AesKeyStrength.KEY_STRENGTH_256
+        },
+    )
+    OutputStreamWriter(this, UTF_8).run {
+        rows.forEach { write(it.joinToString(",") { value -> "\"" + value.replace("\"", "\"\"") + "\"" } + "\n") }
+        flush()
+    }
+    closeEntry()
+}
+
+private fun ZipOutputStream.entryText(name: String, content: String) {
+    putNextEntry(
+        ZipParameters().apply {
+            fileNameInZip = name
+            isEncryptFiles = true
+            encryptionMethod = EncryptionMethod.AES
+            aesKeyStrength = AesKeyStrength.KEY_STRENGTH_256
+        },
+    )
+    write(content.toByteArray(UTF_8))
+    closeEntry()
+}
+
+private fun Map<String, List<List<String>>>.toPasswordInfoMap(): PasswordInfoMap {
+    require(get(MANIFEST)?.singleOrNull()?.singleOrNull() == MANIFEST_CONTENT) { "Unsupported export manifest" }
+    val nestRows = records(NESTS, NEST_HEADER)
+    val nests = nestRows.associate { row ->
+        val slot = row[0].toInt().toSlot()
+        slot to createNest(shellOf(row[1].also { require(it.isNotBlank()) }), slot)
+    }
+    require(nests.size == nestRows.size) { "Duplicate nest slot in import file" }
+    val eggs = records(EGGS, EGG_HEADER).map { row ->
+        val slot = row[1].toInt().toSlot()
+        requireValidEggId(shellOf(row[0]))
+        require(slot in nests) { "Egg references missing nest" }
+        EggRow(row[0], slot, row[2])
+    }
+    require(eggs.map { it.eggId to it.slot }.toSet().size == eggs.size) { "Duplicate eggId in import file" }
+    val eggKeys = eggs.map { it.slot to it.eggId }.toSet()
+    val proteins = records(PROTEINS, PROTEIN_HEADER).groupBy { row ->
+        row[1].toInt().toSlot() to row[0]
+    }
+    val yolkRows = records(YOLKS, YOLK_HEADER)
+    val yolks = yolkRows.associateBy { row -> row[1].toInt().toSlot() to row[0] }
+    require(yolks.size == yolkRows.size) { "Duplicate yolk record" }
+    require(proteins.keys.all(eggKeys::contains) && yolks.keys.all(eggKeys::contains)) { "Record references missing egg" }
+    return nests.values.associateWith { nest ->
+        eggs.filter { it.slot == nest.slot }.map { egg ->
             PasswordInfo(
-                first = ShellPair(shellOf(it.eggId), shellOf(it.password)),
-                second = it.proteins.toShellPairsBySlot(),
-                yolk = it.yolk?.toValidatedPasswordYolkInfo(),
+                ShellPair(shellOf(egg.eggId), shellOf(egg.password)),
+                proteins[nest.slot to egg.eggId].toProteins(),
+                yolks[nest.slot to egg.eggId]?.toYolk(),
             )
         }
     }
-    private fun ExportedEgg.validateEggId(eggIds: MutableSet<String>) {
-        val eggIdShell = shellOf(eggId)
-        requireValidEggId(eggIdShell)
-        eggIdShell.scramble()
-        require(eggIds.add(eggId)) { "Duplicate eggId in import file" }
+}
+
+private fun Map<String, List<List<String>>>.records(name: String, header: List<String>): List<List<String>> {
+    val rows = requireNotNull(get(name)) { "Missing " + name }
+    require(rows.firstOrNull() == header) { "Invalid " + name + " header" }
+    return rows.drop(1).onEach { require(it.size == header.size) { "Invalid " + name + " row" } }
+}
+
+private fun List<List<String>>?.toProteins(): List<ShellPair> {
+    val records = this ?: emptyList()
+    val bySlot = records.associate { row ->
+        val slot = row[2].toInt().also { require(it in Slot.entries.indices) { "Invalid protein slot" } }
+        require(row[3].isEmpty() == row[4].isEmpty()) { "Partial protein record" }
+        slot to ShellPair(shellOf(row[3]), shellOf(row[4]))
     }
-    private fun ExportedNest.toValidatedSlot(): Slot {
-        val slot = requireNotNull(slot) { "Missing nest slot in import file" }
-        require(slot in Slot.entries.indices) { "Invalid nest slot $slot" }
-        return Slot.entries[slot]
-    }
-    private fun ExportedNest.toValidatedNest(): Nest {
-        require(nestId.isNotBlank()) { "Missing nestId in import file" }
-        return createNest(shellOf(nestId), toValidatedSlot())
-    }
-    private fun List<ExportedProtein>.toShellPairsBySlot(): List<ShellPair> {
-        val proteinsBySlot = mutableMapOf<Int, ShellPair>()
-        forEach { protein ->
-            val slot = requireNotNull(protein.slot) { "Missing protein slot in import file" }
-            require(slot in Slot.entries.indices) { "Invalid protein slot $slot" }
-            require(protein.proteinType.isEmpty() == protein.proteinStructure.isEmpty()) {
-                "Partial protein record in import file"
+    require(bySlot.size == records.size) { "Duplicate protein slot" }
+    return Slot.entries.indices.map { bySlot[it] ?: ShellPair(emptyShell(), emptyShell()) }
+}
+
+private fun List<String>.toYolk() = PasswordYolkInfo(
+    shellOf(
+        this[2].also {
+            require(it.isNotBlank())
+        },
+    ),
+    normalizeTotpAlgorithm(this[3]),
+    this[4].toInt(),
+    this[5].toInt(),
+)
+private fun Int.toSlot(): Slot = Slot.entries.getOrNull(this) ?: error("Invalid nest slot")
+private data class EggRow(val eggId: String, val slot: Slot, val password: String)
+
+private object Csv {
+    fun read(input: InputStream) = Parser(input.readBytes().toString(UTF_8)).parse()
+
+    private class Parser(private val content: String) {
+        private val rows = mutableListOf<List<String>>()
+        private val fields = mutableListOf<String>()
+        val field = StringBuilder()
+        private var quoted = false
+
+        fun parse(): List<List<String>> {
+            var index = 0
+            while (index < content.length) {
+                index += consume(index)
             }
-            require(
-                proteinsBySlot.putIfAbsent(
-                    slot,
-                    ShellPair(shellOf(protein.proteinType), shellOf(protein.proteinStructure)),
-                ) == null,
-            ) { "Duplicate protein slot $slot" }
+            require(!quoted) { "Unterminated CSV field" }
+            if (fields.isNotEmpty() || field.isNotEmpty()) {
+                addRow()
+            }
+            return rows
         }
-        return Slot.entries.indices.map { slot ->
-            proteinsBySlot[slot] ?: ShellPair(emptyShell(), emptyShell())
+
+        private fun consume(index: Int): Int = when (val current = content[index]) {
+            '"' -> quote(index)
+            ',' -> delimiter(current)
+            '\n' -> newline(current)
+            '\r' -> carriageReturn(current)
+            else -> append(current)
         }
-    }
-    private fun ExportedYolk.toValidatedPasswordYolkInfo(): PasswordYolkInfo {
-        require(secret.isNotBlank()) { "Missing yolk secret in import file" }
-        val algorithmName = algorithm?.takeIf { it.isNotBlank() } ?: defaultTotpAlgorithm()
-        val actualDigits = digits ?: 6
-        val actualPeriod = period ?: 30
-        return PasswordYolkInfo(
-            secret = shellOf(secret),
-            algorithm = normalizeTotpAlgorithm(algorithmName),
-            digits = actualDigits.also { require(it == 6 || it == 8) { "Unsupported yolk digits" } },
-            periodSeconds = actualPeriod.also { require(it > 0) { "Unsupported yolk period" } },
-        )
+
+        private fun quote(index: Int) = if (quoted && index + 1 < content.length && content[index + 1] == '"') {
+            field.append('"')
+            2
+        } else {
+            quoted = !quoted
+            1
+        }
+
+        private fun delimiter(current: Char): Int {
+            if (quoted) {
+                field.append(current)
+            } else {
+                fields += field.toString()
+                field.clear()
+            }
+            return 1
+        }
+
+        private fun newline(current: Char): Int {
+            if (quoted) {
+                field.append(current)
+            } else {
+                addRow()
+            }
+            return 1
+        }
+
+        private fun carriageReturn(current: Char): Int {
+            if (quoted) {
+                field.append(current)
+            }
+            return 1
+        }
+
+        private fun append(current: Char): Int {
+            field.append(current)
+            return 1
+        }
+
+        private fun addRow() {
+            fields += field.toString()
+            rows += fields.toList()
+            fields.clear()
+            field.clear()
+        }
     }
 }
-private class ExportedProtein(var proteinType: String = "", var proteinStructure: String = "", var slot: Int? = null)
-private class ExportedYolk(
-    var secret: String = "",
-    var algorithm: String? = null,
-    var digits: Int? = null,
-    var period: Int? = null,
-)
-private class ExportedEgg(
-    var eggId: String = "",
-    var password: String = "",
-    var proteins: List<ExportedProtein> = emptyList(),
-    var yolk: ExportedYolk? = null,
-)
-private class ExportedNest(var nestId: String = "", var slot: Int? = null)
-private class EggsPerNest(var exportedNest: ExportedNest = ExportedNest(), var exportedEggs: List<ExportedEgg> = emptyList())
-private class ExchangeWrapper(val exportedContent: List<EggsPerNest> = emptyList())
+
+private const val MANIFEST = "manifest.txt"
+private const val NESTS = "nests.csv"
+private const val EGGS = "eggs.csv"
+private const val PROTEINS = "proteins.csv"
+private const val YOLKS = "yolks.csv"
+private const val MANIFEST_CONTENT =
+    "format=passbird-export\nversion=1\nencryption=zip-aes-256\n" +
+        "files=nests.csv,eggs.csv,proteins.csv,yolks.csv\n"
+private val NEST_HEADER = listOf("nest_slot", "nest_name")
+private val EGG_HEADER = listOf("egg_id", "nest_slot", "password")
+private val PROTEIN_HEADER = listOf("egg_id", "nest_slot", "slot", "type", "structure")
+private val YOLK_HEADER = listOf("egg_id", "nest_slot", "secret", "algorithm", "digits", "period")

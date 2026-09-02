@@ -14,6 +14,7 @@ import strikt.assertions.isTrue
 
 class FilePasswordExchangeTest {
 
+    private val password = "password".toCharArray()
     private val systemOperation = mockk<SystemOperation>()
     private val runContext = PassbirdRunContext("/tmp".toDirectory(), Slot.DEFAULT)
     private fun setupFilePasswordExchange() = FilePasswordExchange(systemOperation, runContext)
@@ -25,7 +26,7 @@ class FilePasswordExchangeTest {
 
         // when
         val captureSystemErr = captureSystemErr()
-        val actual = captureSystemErr.during { setupFilePasswordExchange().send(emptyMap()) }
+        val actual = captureSystemErr.during { setupFilePasswordExchange().send(emptyMap(), password) }
 
         // then
         expectThat(actual.failure).isTrue()
@@ -39,7 +40,7 @@ class FilePasswordExchangeTest {
 
         // when
         val captureSystemErr = captureSystemErr()
-        val actual = captureSystemErr.during { setupFilePasswordExchange().receive() }
+        val actual = captureSystemErr.during { setupFilePasswordExchange().receive(password) }
 
         // then
         expectThat(actual.failure).isTrue()

@@ -6,8 +6,8 @@ import de.pflugradts.passbird.domain.model.shell.Shell
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 
 interface ExchangeAdapterPort {
-    fun send(data: PasswordInfoMap): TryResult<Unit>
-    fun receive(): TryResult<PasswordInfoMap>
+    fun send(data: PasswordInfoMap, password: CharArray): TryResult<Unit>
+    fun receive(password: CharArray): TryResult<PasswordInfoMap>
 }
 
 data class PasswordYolkInfo(

@@ -21,6 +21,8 @@ import java.nio.file.Files
 @Tag(PROPERTY)
 class FilePasswordExchangePropertyTest {
 
+    private val password = "password".toCharArray()
+
     @Test
     fun preservesExchangeDataAcrossExportAndImport() {
         runBlocking {
@@ -33,8 +35,8 @@ class FilePasswordExchangePropertyTest {
                         PassbirdRunContext(homeDirectory.toString().toDirectory(), Slot.DEFAULT),
                     )
 
-                    filePasswordExchange.send(fixture.toPasswordInfoMap()).orThrow("password export")
-                    val received = filePasswordExchange.receive().orThrow("password import")
+                    filePasswordExchange.send(fixture.toPasswordInfoMap(), password).orThrow("password export")
+                    val received = filePasswordExchange.receive(password).orThrow("password import")
 
                     expectThat(normalizePasswordInfoMap(received)) isEqualTo fixture
                 } finally {

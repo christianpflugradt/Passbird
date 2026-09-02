@@ -47,8 +47,8 @@ runtime_files:
       purpose: PKCS12 keystore containing secret material used as the current crypto provider key material
     - name: passbird.tree
       purpose: versioned password tree persistence file containing an encrypted password tree payload
-    - name: passbird-export.json
-      purpose: human-readable import and export format
+  - name: passbird-export.zip
+    purpose: AES-encrypted ZIP containing portable CSV import and export data
 repository_layout:
   - path: src/main/kotlin/de/pflugradts/passbird/application
     role: application boot, command handling, configuration, process orchestration, security factories

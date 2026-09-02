@@ -8,7 +8,7 @@ configuration_surface:
     - passbird.yml is the configuration filename resolved from the run home directory
     - passbird.sec is the keystore filename wherever adapter.keyStore.location points
     - passbird.tree is the password-tree filename wherever adapter.passwordTree.location points
-    - passbird-export.json is the fixed exchange filename in the run home directory
+- passbird-export.zip is the fixed exchange filename in the run home directory
   user_visible_defaults:
     - template configuration mode defaults to true only when passbird.yml is missing from the run home directory
     - application.backup.location defaults to backups before setup rewrites it into a concrete directory path
@@ -63,7 +63,7 @@ areas:
       - application.inactivityLimit.enabled
       - application.inactivityLimit.limitInMinutes
     visible_effects:
-      - controls whether startup reminds about an existing passbird-export.json file
+- controls whether startup reminds about an existing passbird-export.zip file
       - controls whether inactivity can terminate an otherwise running session
   - name: guided_use_flow
     keys:

@@ -24,7 +24,7 @@ flows:
       - Passbird terminates without entering the application boot path or command loop
   - id: export_file_reminder
     trigger:
-      - application.exchange.promptOnExportFile is enabled and passbird-export.json exists at startup
+      - application.exchange.promptOnExportFile is enabled and passbird-export.zip exists at startup
     exact_prompt: "An password export file has been detected. Should this file be deleted? Y/n "
     accepted_inputs:
       - y
@@ -34,8 +34,8 @@ flows:
       - n
       - any other non-y input
     exact_branches:
-      - on explicit y or Y, Passbird deletes passbird-export.json and then prints Export file has been successfully deleted.
-      - on any non-affirmative input, Passbird keeps passbird-export.json and then prints Export file has not been deleted but prompt for deletion will be repeated upon next program start.
+      - on explicit y or Y, Passbird deletes passbird-export.zip and then prints Export file has been successfully deleted.
+      - on any non-affirmative input, Passbird keeps passbird-export.zip and then prints Export file has not been deleted but prompt for deletion will be repeated upon next program start.
     spacing_rules:
       - after either branch, Passbird emits one empty line before the next output or command prompt
     observable_rules:

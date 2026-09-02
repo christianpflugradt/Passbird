@@ -202,7 +202,7 @@ capabilities:
       - f-[0-9]
   - name: import_export
     user_outcomes:
-      - export all Eggs or selected Nests into passbird-export.json
+      - export all Eggs or selected Nests into passbird-export.zip
       - import all exported Eggs or selectively restore one exported Nest into a chosen slot
     commands:
       - e

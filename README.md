@@ -269,10 +269,10 @@ Enter `h*` to view password-tree statistics before the same usage information.
         d![EggId] (force)     Permanently deletes the specified Egg.
         d (trash)             Displays trashed Eggs and allows restoring them.
 
-        e (export)            Exports the Password Tree to a human-readable JSON file.
+        e (export)            Exports the Password Tree to an AES-encrypted CSV ZIP file.
         e* (selective export) Exports selected Nests or all Nests except selected Nests.
-        i (import)            Imports passwords from a JSON file into the Password Tree.
-        i* (selective import) Imports one Nest from a JSON file into a selected Nest Slot.
+        i (import)            Imports passwords from an AES-encrypted CSV ZIP file into the Password Tree.
+        i* (selective import) Imports one Nest from an AES-encrypted CSV ZIP file into a selected Nest Slot.
         k (keystore)          Changes the master password of the keystore.
         l (list)              Lists all EggIds in the current Nest.
         l[filter]             Lists EggIds in the current Nest whose name contains filter.
@@ -326,15 +326,15 @@ operation is aborted.
 
 `remail` prompts you to rename the Egg identified by email. The new EggId must be unique (not already in use).
 
-`e` exports all non-trashed Eggs to a file named `passbird-export.json` in the directory specified during program start.
+`e` exports all non-trashed Eggs to an AES-encrypted `passbird-export.zip` file in the directory specified during program start. It asks whether to generate a random export password; enter `Y` to use a password generated with the default `s` criteria, or `n` to enter and repeat a password yourself.
 
 `e*` previews deployed Nests and lets you export only selected Nest Slots or all Nests except selected Nest Slots. Trashed Eggs are excluded.
 
-`i` imports all Eggs from a `passbird-export.json` file located in the directory specified during program start.
+`i` imports all Eggs from a `passbird-export.zip` file located in the directory specified during program start.
 
-`i*` previews the Nests in `passbird-export.json`, imports one selected Nest, and lets you restore it into a chosen Nest Slot.
+`i*` previews the Nests in `passbird-export.zip`, imports one selected Nest, and lets you restore it into a chosen Nest Slot.
 
-Import expects every exported Nest record in `passbird-export.json` to declare a unique Slot from `0` to `9`, every exported Nest to contain distinct valid EggIds, and every exported Protein record to declare a unique Slot from `0` to `9` within its Egg. Trashed Eggs are never serialized into the export file and therefore are never restored through import. Exported Protein records must contain both Type and Structure fields or leave both empty. If Nest or Protein slot metadata is missing, duplicated, or out of range, if one exported Nest repeats or contains an invalid EggId, or if an exported Protein record contains only one of Type or Structure, Passbird rejects the file instead of importing it into another Nest or Protein slot.
+Import expects an AES-encrypted `passbird-export.zip` containing `manifest.txt`, `nests.csv`, `eggs.csv`, `proteins.csv`, and `yolks.csv`. The export file is encrypted with the password you provide. Keep this password safe: Passbird cannot recover it. After decryption, the export contains passwords and TOTP/MFA secrets; handle the extracted CSV files as highly sensitive data.
 
 ### Nests
 
@@ -412,7 +412,7 @@ By default, Passbird also copies the currently displayed Yolk code to the clipbo
 
 Use `y-[EggId]` to discard the stored yolk again.
 
-Yolks are persisted in the password tree, included in `passbird-export.json` when present, and restored again through normal startup and migration handling.
+Yolks are persisted in the password tree, included in `passbird-export.zip` when present, and restored again through normal startup and migration handling.
 
 ### Favorites
 

@@ -1,6 +1,5 @@
 package de.pflugradts.passbird.adapter.exchange
 
-import de.pflugradts.kotlinextensions.CapturedOutputPrintStream.Companion.captureSystemErr
 import de.pflugradts.passbird.INTEGRATION
 import de.pflugradts.passbird.application.PassbirdRunContext
 import de.pflugradts.passbird.application.PasswordInfo
@@ -8,689 +7,158 @@ import de.pflugradts.passbird.application.PasswordYolkInfo
 import de.pflugradts.passbird.application.configuration.ReadableConfiguration
 import de.pflugradts.passbird.application.toDirectory
 import de.pflugradts.passbird.application.util.SystemOperation
-import de.pflugradts.passbird.application.util.posixPermissionsIfSupported
-import de.pflugradts.passbird.domain.model.egg.InvalidEggIdException
 import de.pflugradts.passbird.domain.model.nest.Nest.Companion.createNest
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.emptyShell
 import de.pflugradts.passbird.domain.model.shell.Shell.Companion.shellOf
 import de.pflugradts.passbird.domain.model.shell.ShellPair
 import de.pflugradts.passbird.domain.model.slot.Slot
+import net.lingala.zip4j.ZipFile
+import net.lingala.zip4j.io.outputstream.ZipOutputStream
+import net.lingala.zip4j.model.ZipParameters
+import net.lingala.zip4j.model.enums.AesKeyStrength
+import net.lingala.zip4j.model.enums.EncryptionMethod
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import strikt.api.expectThat
 import strikt.assertions.contains
-import strikt.assertions.containsExactlyInAnyOrder
-import strikt.assertions.containsKey
-import strikt.assertions.hasSize
-import strikt.assertions.isA
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
-import java.io.File
 import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.attribute.PosixFilePermission.OWNER_READ
-import java.nio.file.attribute.PosixFilePermission.OWNER_WRITE
+import java.nio.file.StandardOpenOption
 
 @Tag(INTEGRATION)
 class FilePasswordExchangeIntegrationTest {
-
-    private val tempExchangeDirectory = Files.createTempDirectory("passbird-exchange-integration").toString()
-    private val exchangeFile = tempExchangeDirectory + File.separator + ReadableConfiguration.EXCHANGE_FILENAME
-    private val filePasswordExchange = FilePasswordExchange(
-        SystemOperation(),
-        PassbirdRunContext(tempExchangeDirectory.toDirectory(), Slot.DEFAULT),
-    )
+    private val home = Files.createTempDirectory("passbird-exchange")
+    private val password = "correct horse battery staple".toCharArray()
+    private val exchange = FilePasswordExchange(SystemOperation(), PassbirdRunContext(home.toString().toDirectory(), Slot.DEFAULT))
+    private val exchangeFile = home.resolve(ReadableConfiguration.EXCHANGE_FILENAME)
 
     @AfterEach
     fun cleanup() {
-        expectThat(File(tempExchangeDirectory).deleteRecursively()).isTrue()
+        home.toFile().deleteRecursively()
     }
 
     @Test
-    fun `should export and re-import passwords across multiple nests`() {
-        // given
-        val givenEgg1 = PasswordInfo(
-            ShellPair(shellOf("EggId1"), shellOf("Password1")),
-            proteinShellPairs(
-                Slot.DEFAULT to ShellPair(shellOf("type0"), shellOf("structure0")),
-                Slot.S3 to ShellPair(shellOf("type3"), shellOf("structure3")),
-            ),
+    fun exportsAesEncryptedCsvZipAndRestoresData() {
+        val info = PasswordInfo(
+            ShellPair(shellOf("email"), shellOf("SecretPassword")),
+            List(Slot.entries.size) {
+                if (it ==
+                    Slot.S2.index()
+                ) {
+                    ShellPair(shellOf("username"), shellOf("alice"))
+                } else {
+                    ShellPair(emptyShell(), emptyShell())
+                }
+            },
+            PasswordYolkInfo(shellOf("JBSWY3DPEHPK3PXP"), "SHA256", 8, 45),
         )
-        val givenEgg2 = PasswordInfo(ShellPair(shellOf("EggId2"), shellOf("Password2")), proteinShellPairs())
-        val givenEgg3 = PasswordInfo(ShellPair(shellOf("EggId3"), shellOf("Password3")), proteinShellPairs())
-        val givenEgg4 = PasswordInfo(
-            ShellPair(shellOf("EggId4"), shellOf("Password4")),
-            proteinShellPairs(Slot.S9 to ShellPair(shellOf("type9"), shellOf("structure9"))),
+        val workInfo = info.copy(
+            first = ShellPair(shellOf("email"), shellOf("WorkPassword")),
+            yolk = PasswordYolkInfo(shellOf("KRUGS4ZANFZSAYJA"), "SHA1", 6, 30),
         )
-        val givenEgg5 = PasswordInfo(ShellPair(shellOf("EggId5"), shellOf("Password5")), proteinShellPairs())
+        val data = mapOf(
+            createNest(shellOf("personal"), Slot.DEFAULT) to listOf(info),
+            createNest(shellOf("work"), Slot.S2) to listOf(workInfo),
+        )
 
-        // whe
-        filePasswordExchange.send(
-            mapOf(
-                Slot.DEFAULT.toNest() to listOf(givenEgg1, givenEgg2),
-                Slot.S2.toNest() to listOf(givenEgg3),
-                Slot.S9.toNest() to listOf(givenEgg4, givenEgg5),
-            ),
-        ).getOrNull()
-        posixPermissionsIfSupported(Paths.get(exchangeFile))?.let {
-            expectThat(it) isEqualTo setOf(OWNER_READ, OWNER_WRITE)
+        expectThat(exchange.send(data, password).failure).isFalse()
+
+        val zip = ZipFile(exchangeFile.toFile(), password)
+        expectThat(zip.isEncrypted).isTrue()
+        expectThat(zip.fileHeaders.map { it.fileName }).contains("manifest.txt", "nests.csv", "eggs.csv", "proteins.csv", "yolks.csv")
+        expectThat(zip.fileHeaders.map { it.encryptionMethod }.toSet()) isEqualTo setOf(EncryptionMethod.AES)
+        expectThat(home.toFile().list()?.toSet()) isEqualTo setOf(ReadableConfiguration.EXCHANGE_FILENAME)
+        expectThat(exchange.receive(password).getOrNull()) isEqualTo data
+    }
+
+    @Test
+    fun rejectsIncorrectZipPassword() {
+        exchange.send(emptyMap(), password)
+
+        expectThat(exchange.receive("wrong password".toCharArray()).failure).isTrue()
+    }
+
+    @Test
+    fun rejectsArchivesWithInvalidStructure() {
+        listOf(
+            baseEntries() - "manifest.txt",
+            baseEntries() + ("manifest.txt" to "format=unsupported\n"),
+            baseEntries() - "nests.csv",
+            baseEntries() + ("nests.csv" to "wrong,header\n"),
+            baseEntries() + ("nests.csv" to "nest_slot,nest_name\n0,home\n0,work\n"),
+            baseEntries() + ("nests.csv" to "nest_slot,nest_name\n10,home\n"),
+            baseEntries() + ("eggs.csv" to "egg_id,nest_slot,password\n,0,password\n"),
+            baseEntries() + ("eggs.csv" to "egg_id,nest_slot,password\nemail,1,password\n"),
+            baseEntries() + ("eggs.csv" to "egg_id,nest_slot,password\nemail,0,password\nemail,0,other\n"),
+            baseEntries() + ("proteins.csv" to "egg_id,nest_slot,slot,type,structure\nmissing,0,0,type,structure\n"),
+            baseEntries() + ("proteins.csv" to "egg_id,nest_slot,slot,type,structure\nemail,0,0,type,\n"),
+            baseEntries() + ("proteins.csv" to "egg_id,nest_slot,slot,type,structure\nemail,0,0,type,structure\nemail,0,0,other,value\n"),
+            baseEntries() + ("proteins.csv" to "egg_id,nest_slot,slot,type,structure\nemail,0,10,type,structure\n"),
+            baseEntries() + ("yolks.csv" to "egg_id,nest_slot,secret,algorithm,digits,period\nmissing,0,secret,SHA1,6,30\n"),
+            baseEntries() +
+                ("yolks.csv" to "egg_id,nest_slot,secret,algorithm,digits,period\nemail,0,secret,SHA1,6,30\nemail,0,other,SHA1,6,30\n"),
+            baseEntries() + ("yolks.csv" to "egg_id,nest_slot,secret,algorithm,digits,period\nemail,0,,SHA1,6,30\n"),
+        ).forEach { entries ->
+            writeArchive(entries.entries.map { it.toPair() })
+
+            expectThat(exchange.receive(password).failure).isTrue()
         }
-        val actual = filePasswordExchange.receive().getOrNull()!!
-
-        // then
-        expectThat(actual) hasSize 3 containsKey Slot.DEFAULT.toNest() containsKey Slot.S2.toNest() containsKey Slot.S9.toNest()
-        expectThat(actual[Slot.DEFAULT.toNest()]!!).containsExactlyInAnyOrder(givenEgg1, givenEgg2)
-        expectThat(actual[Slot.S2.toNest()]!!).containsExactlyInAnyOrder(givenEgg3)
-        expectThat(actual[Slot.S9.toNest()]!!).containsExactlyInAnyOrder(givenEgg4, givenEgg5)
     }
 
     @Test
-    fun `should export and re import yolk data`() {
-        val givenEgg = PasswordInfo(
-            first = ShellPair(shellOf("EggId1"), shellOf("Password1")),
-            second = proteinShellPairs(),
-            yolk = PasswordYolkInfo(shellOf("JBSWY3DPEHPK3PXP"), "SHA256", 8, 45),
+    fun rejectsDuplicateEntriesAndUnterminatedCsvFields() {
+        writeArchive(baseEntries().entries.map { it.toPair() } + ("nests.csv" to "nest_slot,nest_name\n0,home\n"))
+
+        expectThat(exchange.receive(password).failure).isTrue()
+
+        writeArchive(
+            baseEntries().entries.map { it.toPair() }.map { (name, content) ->
+                if (name == "nests.csv") name to "nest_slot,nest_name\n\"0\",\"home" else name to content
+            },
         )
 
-        filePasswordExchange.send(mapOf(Slot.DEFAULT.toNest() to listOf(givenEgg))).getOrNull()
-        val actual = filePasswordExchange.receive().getOrNull()!!
-
-        expectThat(actual[Slot.DEFAULT.toNest()]!!.single().yolk!!) isEqualTo
-            PasswordYolkInfo(shellOf("JBSWY3DPEHPK3PXP"), "SHA256", 8, 45)
+        expectThat(exchange.receive(password).failure).isTrue()
     }
 
     @Test
-    fun `should receive proteins according to explicit slot values when json is sparse and reordered`() {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": [
-                        {
-                          "proteinType": "type9",
-                          "proteinStructure": "structure9",
-                          "slot": 9
-                        },
-                        {
-                          "proteinType": "type2",
-                          "proteinStructure": "structure2",
-                          "slot": 2
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
+    fun parsesQuotedCsvFieldsWithEscapedQuotesAndCarriageReturns() {
+        writeArchive(
+            baseEntries().entries.map { (name, content) ->
+                if (name == "eggs.csv") name to "email,0,\"password \"\"quoted\"\"\"\r\n" else name to content
+            },
         )
 
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isFalse()
-        expectThat(actual.getOrNull()!![Slot.DEFAULT.toNest()]!!.single().second).isEqualTo(
-            proteinShellPairs(
-                Slot.S2 to ShellPair(shellOf("type2"), shellOf("structure2")),
-                Slot.S9 to ShellPair(shellOf("type9"), shellOf("structure9")),
-            ),
-        )
+        expectThat(exchange.receive(password).failure).isTrue()
     }
 
-    @Test
-    fun `should receive explicit empty protein slots when type and structure are empty`() {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": [
-                        {
-                          "proteinType": "",
-                          "proteinStructure": "",
-                          "slot": 0
-                        },
-                        {
-                          "proteinType": "type8",
-                          "proteinStructure": "structure8",
-                          "slot": 8
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
+    private fun baseEntries() = linkedMapOf(
+        "manifest.txt" to "format=passbird-export\nversion=1\nencryption=zip-aes-256\nfiles=nests.csv,eggs.csv,proteins.csv,yolks.csv\n",
+        "nests.csv" to "nest_slot,nest_name\n0,home\n",
+        "eggs.csv" to "egg_id,nest_slot,password\nemail,0,password\n",
+        "proteins.csv" to "egg_id,nest_slot,slot,type,structure\n",
+        "yolks.csv" to "egg_id,nest_slot,secret,algorithm,digits,period\n",
+    )
 
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isFalse()
-        expectThat(actual.getOrNull()!![Slot.DEFAULT.toNest()]!!.single().second).isEqualTo(
-            proteinShellPairs(
-                Slot.S8 to ShellPair(shellOf("type8"), shellOf("structure8")),
-            ),
-        )
-    }
-
-    @Test
-    fun `should fail receive when protein slot values are duplicated`() {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": [
-                        {
-                          "proteinType": "type1",
-                          "proteinStructure": "structure1",
-                          "slot": 1
-                        },
-                        {
-                          "proteinType": "type1b",
-                          "proteinStructure": "structure1b",
-                          "slot": 1
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isTrue()
-    }
-
-    @Test
-    fun `should default missing yolk parameters on import`() {
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": [],
-                      "yolk": {
-                        "secret": "JBSWY3DPEHPK3PXP"
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-
-        val actual = filePasswordExchange.receive().getOrNull()!!
-
-        expectThat(actual[Slot.DEFAULT.toNest()]!!.single().yolk!!) isEqualTo
-            PasswordYolkInfo(shellOf("JBSWY3DPEHPK3PXP"), "SHA1", 6, 30)
-    }
-
-    @Test
-    fun `should fail receive on invalid yolk parameters`() {
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": [],
-                      "yolk": {
-                        "secret": "JBSWY3DPEHPK3PXP",
-                        "digits": 7
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-
-        val captureSystemErr = captureSystemErr()
-        val actual = captureSystemErr.during { filePasswordExchange.receive() }
-
-        expectThat(actual.failure).isTrue()
-        expectThat(captureSystemErr.capture) contains "Password Tree could not be imported."
-    }
-
-    @Test
-    fun `should fail receive when protein slot value is missing`() {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": [
-                        {
-                          "proteinType": "type0",
-                          "proteinStructure": "structure0"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
-    }
-
-    @Test
-    fun `should fail receive when protein type is missing from populated protein record`() {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": [
-                        {
-                          "proteinStructure": "structure0",
-                          "slot": 0
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
-    }
-
-    @Test
-    fun `should fail receive when protein structure is missing from populated protein record`() {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": [
-                        {
-                          "proteinType": "type0",
-                          "slot": 0
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
-    }
-
-    @Test
-    fun `should fail receive when egg ids are duplicated within one nest`() {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": []
+    private fun writeArchive(entries: List<Pair<String, String>>) {
+        ZipOutputStream(
+            Files.newOutputStream(exchangeFile, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING),
+            password,
+        ).use { zip ->
+            entries.forEach { (name, content) ->
+                zip.putNextEntry(
+                    ZipParameters().apply {
+                        fileNameInZip = name
+                        isEncryptFiles = true
+                        encryptionMethod = EncryptionMethod.AES
+                        aesKeyStrength = AesKeyStrength.KEY_STRENGTH_256
                     },
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password2",
-                      "proteins": []
-                    }
-                  ]
-                }
-              ]
+                )
+                zip.write(content.toByteArray())
+                zip.closeEntry()
             }
-            """,
-        )
-
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
+        }
     }
-
-    @Test
-    fun `should fail receive when protein slot values are out of range`() {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": [
-                        {
-                          "proteinType": "type10",
-                          "proteinStructure": "structure10",
-                          "slot": 10
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isTrue()
-    }
-
-    @Test
-    fun `should fail receive when nest slot value is missing`() {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT"
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": []
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = ["\"\"", "\"   \"", "\"\\t\"", "\"\\n\""])
-    fun `should fail receive when custom nest id is empty or blank`(givenNestIdJson: String) {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": $givenNestIdJson,
-                    "slot": 2
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": []
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
-    }
-
-    @Test
-    fun `should fail receive when nest slot value is duplicated`() {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "Default",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": []
-                    }
-                  ]
-                },
-                {
-                  "exportedNest": {
-                    "nestId": "Other",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId2",
-                      "password": "Password2",
-                      "proteins": []
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = ["", "1EggId", "EggId!"])
-    fun `should fail receive when an egg id is invalid`(givenEggId: String) {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 0
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "$givenEggId",
-                      "password": "Password1",
-                      "proteins": []
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-        val captureSystemErr = captureSystemErr()
-
-        // when
-        val actual = captureSystemErr.during { filePasswordExchange.receive() }
-
-        // then
-        expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isA<InvalidEggIdException>()
-        expectThat(captureSystemErr.capture) contains "Erroneous eggId: $givenEggId"
-    }
-
-    @Test
-    fun `should fail receive when nest slot value is out of range`() {
-        // given
-        writeExchangeFile(
-            """
-            {
-              "exportedContent": [
-                {
-                  "exportedNest": {
-                    "nestId": "DEFAULT",
-                    "slot": 10
-                  },
-                  "exportedEggs": [
-                    {
-                      "eggId": "EggId1",
-                      "password": "Password1",
-                      "proteins": []
-                    }
-                  ]
-                }
-              ]
-            }
-            """,
-        )
-
-        // when
-        val actual = filePasswordExchange.receive()
-
-        // then
-        expectThat(actual.failure).isTrue()
-        expectThat(actual.exceptionOrNull()).isA<IllegalArgumentException>()
-    }
-
-    private fun writeExchangeFile(content: String) {
-        File(exchangeFile).writeText(content.trimIndent())
-    }
-}
-
-private fun Slot.toNest() = createNest(shellOf(this.name), this)
-
-private fun proteinShellPairs(vararg proteins: Pair<Slot, ShellPair>) = MutableList(Slot.entries.size) {
-    ShellPair(emptyShell(), emptyShell())
-}.apply {
-    proteins.forEach { (slot, shells) -> this[slot.index()] = shells }
 }

@@ -16,6 +16,7 @@ import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.HIGHLIGHT
 import de.pflugradts.passbird.domain.model.transfer.OutputFormatting.OPERATION_ABORTED
 import de.pflugradts.passbird.domain.service.nest.NestService
 import de.pflugradts.passbird.domain.service.password.PasswordService
+import java.util.Arrays
 class ImportCommandHandler constructor(
     private val configuration: ReadableConfiguration,
     private val importExportService: ImportExportService,
@@ -25,28 +26,35 @@ class ImportCommandHandler constructor(
     private val commandExecutionTracker: CommandExecutionTracker,
 ) : TypedCommandHandler<ImportCommand>(ImportCommand::class.java) {
     override fun handleCommand(command: ImportCommand) {
-        when (if (command.selective) selectiveCommandConfirmed() else commandConfirmed()) {
-            ImportCommandConfirmation.CONFIRMED -> if (command.selective) {
-                val selectedNest = selectedNest ?: return
-                importExportService.importEggs(selectedNest.slot, selectedNest.targetSlot)
-            } else {
-                importExportService.importEggs()
-            }
+        val password = userInterfaceAdapterPort.receiveSecurely(
+            outputOf(shellOf("Input the password for the export file.\nYour input: ")),
+        ).shell.toChars()
+        try {
+            when (if (command.selective) selectiveCommandConfirmed(password) else commandConfirmed(password)) {
+                ImportCommandConfirmation.CONFIRMED -> if (command.selective) {
+                    val selectedNest = selectedNest ?: return
+                    importExportService.importEggs(selectedNest.slot, selectedNest.targetSlot, password)
+                } else {
+                    importExportService.importEggs(password)
+                }
 
-            ImportCommandConfirmation.ABORTED -> {
-                commandExecutionTracker.markAborted()
-                userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
-            }
+                ImportCommandConfirmation.ABORTED -> {
+                    commandExecutionTracker.markAborted()
+                    userInterfaceAdapterPort.send(outputOf(shellOf("Operation aborted."), OPERATION_ABORTED))
+                }
 
-            ImportCommandConfirmation.FAILED -> commandExecutionTracker.markFailure()
+                ImportCommandConfirmation.FAILED -> commandExecutionTracker.markFailure()
+            }
+        } finally {
+            Arrays.fill(password, '\u0000')
         }
         userInterfaceAdapterPort.sendLineBreak()
     }
     private var selectedNest: SelectedNest? = null
-    private fun commandConfirmed(): ImportCommandConfirmation {
+    private fun commandConfirmed(password: CharArray): ImportCommandConfirmation {
         selectedNest = null
         if (configuration.application.password.promptOnRemoval) {
-            val importedEggIds = importExportService.peekImportEggIdShells()
+            val importedEggIds = importExportService.peekImportEggIdShells(password)
             if (importedEggIds.failure) {
                 return ImportCommandConfirmation.FAILED
             }
@@ -65,9 +73,9 @@ class ImportCommandHandler constructor(
         }
         return ImportCommandConfirmation.CONFIRMED
     }
-    private fun selectiveCommandConfirmed(): ImportCommandConfirmation {
+    private fun selectiveCommandConfirmed(password: CharArray): ImportCommandConfirmation {
         selectedNest = null
-        val importedNests = importExportService.peekImportNests()
+        val importedNests = importExportService.peekImportNests(password)
         if (importedNests.failure) {
             return ImportCommandConfirmation.FAILED
         }
@@ -141,6 +149,7 @@ class ImportCommandHandler constructor(
 }
 private enum class ImportCommandConfirmation { CONFIRMED, ABORTED, FAILED }
 private data class SelectedNest(val slot: Slot, val targetSlot: Slot)
+private fun Shell.toChars() = CharArray(size) { getChar(it) }
 private inline fun <T> ShellMap.useScrambled(block: (ShellMap) -> T): T = try {
     block(this)
 } finally {

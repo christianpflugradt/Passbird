@@ -169,8 +169,10 @@ class ApplicationGraph(
             DiscardProteinCommandHandler(configuration, passwordService, userInterfaceAdapterPort, commandExecutionTracker),
             ExportCommandHandler(
                 canListAvailableNests,
+                configuration,
                 importExportService,
                 nestService,
+                passwordProvider,
                 userInterfaceAdapterPort,
                 commandExecutionTracker,
             ),

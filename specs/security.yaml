@@ -18,7 +18,7 @@ sensitive_assets:
   - decrypted password and protein content
   - decrypted yolk secrets and generated TOTP codes
   - password tree bytes in passbird.tree
-  - exported plaintext-equivalent password data in passbird-export.json
+- decrypted CSV data from passbird-export.zip, including passwords and MFA secrets
 current_security_relevant_implementation:
   migration_boot_path:
     files:

@@ -23,14 +23,14 @@ class PasswordImportExportService constructor(
     private val nestService: NestService,
     private val eventRegistry: EventRegistry,
 ) : ImportExportService {
-    override fun peekImportEggIdShells(): TryResult<ShellMap> = receiveImportData().map { eggsByNest ->
+    override fun peekImportEggIdShells(password: CharArray): TryResult<ShellMap> = receiveImportData(password).map { eggsByNest ->
         try {
             toShellMap(eggsByNest)
         } finally {
             eggsByNest.scrambleShells()
         }
     }
-    override fun peekImportNests(): TryResult<List<ImportNestPreview>> = receiveImportData().map { eggsByNest ->
+    override fun peekImportNests(password: CharArray): TryResult<List<ImportNestPreview>> = receiveImportData(password).map { eggsByNest ->
         try {
             eggsByNest.entries.map { (nest, passwordInfos) ->
                 ImportNestPreview(
@@ -43,8 +43,8 @@ class PasswordImportExportService constructor(
             eggsByNest.scrambleShells()
         }
     }
-    override fun importEggs() {
-        receiveImportData().onSuccess { eggsByNest ->
+    override fun importEggs(password: CharArray) {
+        receiveImportData(password).onSuccess { eggsByNest ->
             try {
                 importEggs(eggsByNest)
             } finally {
@@ -52,8 +52,8 @@ class PasswordImportExportService constructor(
             }
         }
     }
-    override fun importEggs(sourceSlot: Slot, targetSlot: Slot) {
-        receiveImportData().onSuccess { eggsByNest ->
+    override fun importEggs(sourceSlot: Slot, targetSlot: Slot, password: CharArray) {
+        receiveImportData(password).onSuccess { eggsByNest ->
             try {
                 eggsByNest.entries.firstOrNull { (nest, _) -> nest.slot == sourceSlot }?.let { (nest, passwordInfos) ->
                     importEggs(listOf(Triple(nest, targetSlot, passwordInfos)))
@@ -63,10 +63,10 @@ class PasswordImportExportService constructor(
             }
         }
     }
-    override fun exportEggs() = exportEggs(allNestSlots())
-    override fun exportEggs(slots: Set<Slot>) {
+    override fun exportEggs(password: CharArray) = exportEggs(allNestSlots(), password)
+    override fun exportEggs(slots: Set<Slot>, password: CharArray): Boolean {
         if (slots.isEmpty()) {
-            return
+            return false
         }
         val currentNest = nestService.currentNest()
         val eggsByNest = mutableMapOf<Nest, List<PasswordInfo>>()
@@ -93,10 +93,13 @@ class PasswordImportExportService constructor(
             } finally {
                 nestService.moveToNestAt(currentNest.slot)
             }
-            exchangeFactory.createPasswordExchange().send(eggsByNest).onSuccess {
+            var exported = false
+            exchangeFactory.createPasswordExchange().send(eggsByNest, password).onSuccess {
                 eventRegistry.register(EggsExported(eggsByNest.values.sumOf { it.size }))
                 eventRegistry.processEvents()
+                exported = true
             }
+            return exported
         } finally {
             eggsByNest.scrambleShells()
         }
@@ -112,7 +115,7 @@ class PasswordImportExportService constructor(
             it.yolk?.secret?.scramble()
         }
     }
-    private fun receiveImportData() = exchangeFactory.createPasswordExchange().receive()
+    private fun receiveImportData(password: CharArray) = exchangeFactory.createPasswordExchange().receive(password)
     private fun toShellMap(eggsByNest: Map<Nest, List<PasswordInfo>>) = eggsByNest.entries.associate { (nest, passwordInfos) ->
         nest.slot to passwordInfos.map { passwordInfo -> passwordInfo.first.first.copy() }
     }

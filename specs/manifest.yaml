@@ -48,7 +48,7 @@ task_specific_specs:
       - touching startup, initializers, session boot, inactivity, quit handling, or export-file reminders
   - file: specs/flows/exchange.yaml
     read_when:
-      - touching import, export, or passbird-export.json handling
+      - touching import, export, or passbird-export.zip handling
   - file: specs/flows/passwords.yaml
     read_when:
       - touching password, clipboard, overwrite, rename, discard, or master-password rotation flows

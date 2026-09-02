@@ -3,7 +3,7 @@ last_reviewed: 2026-05-30
 flow_family: exchange
 applies_interaction_rules_from: specs/interaction.yaml
 shared_artifact:
-  filename: passbird-export.json
+  filename: passbird-export.zip
   role:
     - export target
     - import source
@@ -11,7 +11,10 @@ flows:
   - id: export_all
     command: e
     preconditions:
-      - no additional interactive input is requested by the command handler itself
+      - Passbird prompts "Generate a random password to encrypt the export file? Y/n\nYour input: "
+      - empty input, Y, or y generates a password with the default s criteria and prints "Your export password: <GeneratedPassword>" after a successful export
+      - N or n prompts "Input a password to encrypt the export file.\nYour input: " and "Repeat the export password.\nYour input: "
+      - two empty manual password inputs abort the operation because AES ZIP encryption requires a non-empty password
     exact_success_output:
       - on successful export, Passbird prints <EggCount> eggs successfully exported.
       - after the success message, Passbird emits one empty line
@@ -19,8 +22,8 @@ flows:
       - on export failure, Passbird prints Password Tree could not be exported: <ExceptionMessage> to standard error
       - after the failure report, Passbird still emits one empty line from the command handler
     observable_rules:
-      - the export target is passbird-export.json in the startup home directory
-      - the command handler itself does not print a banner, prompt, or summary before starting the export
+      - the export target is passbird-export.zip in the startup home directory
+      - every ZIP entry is AES-256 encrypted and no plaintext CSV file is written beside the export ZIP
   - id: export_selective
     command: e*
     exact_menu_intro:
@@ -66,7 +69,7 @@ flows:
   - id: import_all
     command: i
     preconditions:
-      - import always reads from passbird-export.json in the startup home directory
+      - import always reads from passbird-export.zip in the startup home directory
     confirmation_rules:
       - if application.password.promptOnRemoval is disabled, the handler does not ask for overwrite confirmation
       - if application.password.promptOnRemoval is enabled, Passbird first previews imported EggIds and checks for overlaps against the target Nest of each imported Egg
@@ -92,7 +95,7 @@ flows:
       - if import parsing or reading fails with a generic import failure, Passbird prints Password Tree could not be imported. to standard error
       - if a full import targets an occupied Nest Slot whose local NestId differs from the exported NestId, Passbird treats it as a generic import failure before writing any imported Eggs
       - if placing a missing target Nest or persisting an imported egg or protein fails after import starts, Passbird stops importing remaining entries, preserves the existing password-tree sync failure output, and does not emit the final success summary
-      - Passbird treats missing, duplicate, or out-of-range exportedNest.slot metadata, empty or blank exportedNest.nestId metadata, duplicate EggIds within one exported Nest, missing, duplicate, or out-of-range ExportedProtein.slot metadata, or any ExportedProtein record with exactly one empty proteinType/proteinStructure field as a generic import failure rather than coercing it to another Nest or Protein slot
+      - Passbird treats invalid CSV headers, duplicate ZIP entries, duplicate Nest Slots, duplicate EggIds within one Nest, missing referenced Nests or Eggs, duplicate yolk records, or invalid Protein slots as a generic import failure rather than coercing records
       - Passbird validates every imported EggId before preview or mutation begins
       - if import parsing fails because an eggId contains digits or special characters, Passbird prints Password Tree could not be imported because at least one eggId contains digits or special characters. Please correct invalid eggIds and try again. Erroneous eggId: <EggId> to standard error
       - after a FAILED path, the command handler still emits one empty line
@@ -139,7 +142,7 @@ flows:
       - if previewing or parsing the import file fails before a selectable preview is available, the import handler prints no Operation aborted. message
       - generic import read or parse failures are reported to standard error as Password Tree could not be imported.
       - if placing a missing target Nest or persisting an imported egg or protein fails after selective import starts, Passbird stops importing remaining entries, preserves the existing password-tree sync failure output, and does not emit the final success summary
-      - Passbird treats missing, duplicate, or out-of-range exportedNest.slot metadata, empty or blank exportedNest.nestId metadata, duplicate EggIds within one exported Nest, missing, duplicate, or out-of-range ExportedProtein.slot metadata, or any ExportedProtein record with exactly one empty proteinType/proteinStructure field as a generic import failure before any preview list or local mutation is produced
+      - Passbird validates the encrypted ZIP manifest and every CSV header before any preview list or local mutation is produced
       - Passbird validates every imported EggId before any preview list or local mutation is produced
       - invalid eggId import failures are reported to standard error with the longer invalid-eggId message
       - after a FAILED path, the command handler still emits one empty line
@@ -162,8 +165,9 @@ command_parse_rules:
 observable_rules:
   - the exchange filename is fixed unless the product specification is explicitly changed
   - import and export behavior must stay aligned with README and startup reminder behavior
-  - favorites remain local password-tree metadata and are not serialized into passbird-export.json
+  - favorites remain local password-tree metadata and are not serialized into passbird-export.zip
   - import flows do not create, clear, or otherwise directly edit Favorite slots
   - exported eggs may include one optional yolk record containing the secret plus TOTP metadata
-  - import accepts both legacy exchange files without yolks and newer exchange files with yolks
+  - import accepts only the current AES-encrypted CSV ZIP exchange format
+  - proteins.csv and yolks.csv use nest_slot plus egg_id as their combined key
   - trashed Eggs are excluded from export and cannot be recreated through import

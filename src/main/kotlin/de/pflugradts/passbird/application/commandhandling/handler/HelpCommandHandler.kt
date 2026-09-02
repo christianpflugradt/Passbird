@@ -51,10 +51,10 @@ class HelpCommandHandler constructor(
     )
 
     private fun secondaryCommands() = listOf(
-        Triple("e", "(export)", "Exports the Password Tree to a human-readable JSON file."),
+        Triple("e", "(export)", "Exports the Password Tree to an AES-encrypted CSV ZIP file."),
         Triple("e*", "(selective export)", "Exports selected Nests or all Nests except selected Nests."),
-        Triple("i", "(import)", "Imports passwords from a JSON file into the Password Tree."),
-        Triple("i*", "(selective import)", "Imports one Nest from a JSON file into a selected Nest Slot."),
+        Triple("i", "(import)", "Imports passwords from an AES-encrypted CSV ZIP file into the Password Tree."),
+        Triple("i*", "(selective import)", "Imports one Nest from an AES-encrypted CSV ZIP file into a selected Nest Slot."),
         Triple("k", "(keystore)", "Changes the master password of the keystore."),
         Triple("l", "(list)", "Lists all EggIds in the current Nest."),
         Triple("l[filter]", null, "Lists EggIds in the current Nest whose name contains filter."),

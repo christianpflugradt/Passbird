@@ -57,6 +57,8 @@ import java.util.function.Supplier
 
 class PasswordImportExportServiceTest {
 
+    private val exchangePassword = "exchange password".toCharArray()
+
     private val exchangeFactory = mockk<ExchangeFactory>()
     private val passwordService = mockk<PasswordService>()
     private val eventRegistry = mockk<EventRegistry>(relaxed = true)
@@ -77,7 +79,7 @@ class PasswordImportExportServiceTest {
         fakeExchangeAdapterPort(forExchangeFactory = exchangeFactory, withEggs = eggs)
 
         // when
-        val actual = importExportServiceSupplier.get().peekImportEggIdShells()
+        val actual = importExportServiceSupplier.get().peekImportEggIdShells(exchangePassword)
 
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
@@ -90,7 +92,7 @@ class PasswordImportExportServiceTest {
     fun `should peek import nest previews`() {
         // given
         val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
-        every { exchangeAdapterPort.receive() } returns success(
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(
             linkedMapOf(
                 createNest(shellOf("Default"), DEFAULT) to listOf(
                     passwordInfo("EggId1", "Password1"),
@@ -104,7 +106,7 @@ class PasswordImportExportServiceTest {
         every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
 
         // when
-        val actual = importExportServiceSupplier.get().peekImportNests()
+        val actual = importExportServiceSupplier.get().peekImportNests(exchangePassword)
 
         // then
         expectThat(actual.failure).isFalse()
@@ -123,7 +125,7 @@ class PasswordImportExportServiceTest {
         val password = spyk(shellOf("Password"))
         val proteinType = spyk(shellOf("ProteinType"))
         val proteinStructure = spyk(shellOf("ProteinStructure"))
-        every { exchangeAdapterPort.receive() } returns success(
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
                     PasswordInfo(
@@ -136,7 +138,7 @@ class PasswordImportExportServiceTest {
         every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
 
         // when
-        val actual = importExportServiceSupplier.get().peekImportEggIdShells()
+        val actual = importExportServiceSupplier.get().peekImportEggIdShells(exchangePassword)
 
         // then
         expectThat(actual.failure).isFalse()
@@ -153,7 +155,7 @@ class PasswordImportExportServiceTest {
         val givenCurrentNestSlot = S2
         val eggs = testData()
         val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
-        every { exchangeAdapterPort.receive() } returns success(importDataMatchingExistingNests(eggs))
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(importDataMatchingExistingNests(eggs))
         every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
         fakePasswordService(instance = passwordService)
         nestService.place(shellOf(S2.name), S2)
@@ -163,7 +165,7 @@ class PasswordImportExportServiceTest {
         val eggCountSlot = slot<EggsImported>()
 
         // when
-        importExportServiceSupplier.get().importEggs()
+        importExportServiceSupplier.get().importEggs(exchangePassword)
 
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
@@ -188,7 +190,7 @@ class PasswordImportExportServiceTest {
         val password = spyk(shellOf("Password"))
         val proteinType = spyk(shellOf("ProteinType"))
         val proteinStructure = spyk(shellOf("ProteinStructure"))
-        every { exchangeAdapterPort.receive() } returns success(
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
                     PasswordInfo(
@@ -202,7 +204,7 @@ class PasswordImportExportServiceTest {
         fakePasswordService(instance = passwordService)
 
         // when
-        importExportServiceSupplier.get().importEggs()
+        importExportServiceSupplier.get().importEggs(exchangePassword)
 
         // then
         verify(exactly = 1) { eggId.scramble() }
@@ -216,7 +218,7 @@ class PasswordImportExportServiceTest {
         // given
         val givenCurrentNestSlot = S2
         val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
-        every { exchangeAdapterPort.receive() } returns success(
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(
             linkedMapOf(
                 createNest(shellOf("imported"), S2) to listOf(
                     passwordInfo("EggId", "Password"),
@@ -230,7 +232,7 @@ class PasswordImportExportServiceTest {
 
         // when
         captureSystemErr.during {
-            importExportServiceSupplier.get().importEggs()
+            importExportServiceSupplier.get().importEggs(exchangePassword)
         }
 
         // then
@@ -247,7 +249,7 @@ class PasswordImportExportServiceTest {
         val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
         val givenEggId = shellOf("EggId")
         val givenPassword = shellOf("Password")
-        every { exchangeAdapterPort.receive() } returns success(
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
                     PasswordInfo(
@@ -268,7 +270,7 @@ class PasswordImportExportServiceTest {
         passwordService.capturePutProteinCalls(putProteinCalls)
 
         // when
-        importExportServiceSupplier.get().importEggs()
+        importExportServiceSupplier.get().importEggs(exchangePassword)
 
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
@@ -284,7 +286,7 @@ class PasswordImportExportServiceTest {
         val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
         val givenEggId = shellOf("EggId")
         val givenPassword = shellOf("Password")
-        every { exchangeAdapterPort.receive() } returns success(
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(
             linkedMapOf(
                 createNest(shellOf("work"), S2) to listOf(
                     PasswordInfo(
@@ -307,7 +309,7 @@ class PasswordImportExportServiceTest {
         val importedCount = slot<EggsImported>()
 
         // when
-        importExportServiceSupplier.get().importEggs(S2, S9)
+        importExportServiceSupplier.get().importEggs(S2, S9, exchangePassword)
 
         // then
         expectThat(putEggCalls.single()) isEqualTo PutEggCall(shellOf("EggId"), shellOf("Password"))
@@ -331,7 +333,7 @@ class PasswordImportExportServiceTest {
         nestService.moveToNestAt(givenCurrentNestSlot)
 
         // when
-        importExportServiceSupplier.get().importEggs()
+        importExportServiceSupplier.get().importEggs(exchangePassword)
 
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
@@ -381,9 +383,9 @@ class PasswordImportExportServiceTest {
 
         try {
             // when
-            val fullPreview = captureSystemErr().during { importExportService.peekImportEggIdShells() }
-            val selectivePreview = captureSystemErr().during { importExportService.peekImportNests() }
-            captureSystemErr().during { importExportService.importEggs() }
+            val fullPreview = captureSystemErr().during { importExportService.peekImportEggIdShells(exchangePassword) }
+            val selectivePreview = captureSystemErr().during { importExportService.peekImportNests(exchangePassword) }
+            captureSystemErr().during { importExportService.importEggs(exchangePassword) }
 
             // then
             expectThat(fullPreview.failure).isTrue()
@@ -442,10 +444,10 @@ class PasswordImportExportServiceTest {
 
         try {
             // when
-            val fullPreview = captureSystemErr().during { importExportService.peekImportEggIdShells() }
-            val selectivePreview = captureSystemErr().during { importExportService.peekImportNests() }
-            captureSystemErr().during { importExportService.importEggs() }
-            captureSystemErr().during { importExportService.importEggs(DEFAULT, DEFAULT) }
+            val fullPreview = captureSystemErr().during { importExportService.peekImportEggIdShells(exchangePassword) }
+            val selectivePreview = captureSystemErr().during { importExportService.peekImportNests(exchangePassword) }
+            captureSystemErr().during { importExportService.importEggs(exchangePassword) }
+            captureSystemErr().during { importExportService.importEggs(DEFAULT, DEFAULT, exchangePassword) }
 
             // then
             expectThat(fullPreview.failure).isTrue()
@@ -466,7 +468,7 @@ class PasswordImportExportServiceTest {
         val firstPassword = shellOf("Password1")
         val secondEggId = shellOf("EggId2")
         val secondPassword = shellOf("Password2")
-        every { exchangeAdapterPort.receive() } returns success(
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
                     PasswordInfo(ShellPair(firstEggId, firstPassword), emptyList()),
@@ -482,7 +484,7 @@ class PasswordImportExportServiceTest {
         }
 
         // when
-        importExportServiceSupplier.get().importEggs()
+        importExportServiceSupplier.get().importEggs(exchangePassword)
 
         // then
         expectThat(putEggCalls.single()) isEqualTo PutEggCall(shellOf("EggId1"), shellOf("Password1"))
@@ -500,7 +502,7 @@ class PasswordImportExportServiceTest {
         val firstPassword = shellOf("Password1")
         val secondEggId = shellOf("EggId2")
         val secondPassword = shellOf("Password2")
-        every { exchangeAdapterPort.receive() } returns success(
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
                     PasswordInfo(
@@ -521,7 +523,7 @@ class PasswordImportExportServiceTest {
         }
 
         // when
-        importExportServiceSupplier.get().importEggs()
+        importExportServiceSupplier.get().importEggs(exchangePassword)
 
         // then
         expectThat(putEggCalls.single()) isEqualTo PutEggCall(shellOf("EggId1"), shellOf("Password1"))
@@ -543,17 +545,17 @@ class PasswordImportExportServiceTest {
         nestService.moveToNestAt(givenCurrentNestSlot)
         val exportNestSlot = slot<PasswordInfoMap>()
         val eggCountSlot = slot<EggsExported>()
-        every { exchangeAdapterPort.send(capture(exportNestSlot)) } answers {
+        every { exchangeAdapterPort.send(capture(exportNestSlot), any()) } answers {
             expectThatActualBytePairsMatchExpected(exportNestSlot.captured, eggs)
             success(Unit)
         }
 
         // when
-        importExportServiceSupplier.get().exportEggs()
+        importExportServiceSupplier.get().exportEggs(exchangePassword)
 
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
-        verify { exchangeAdapterPort.send(any()) }
+        verify { exchangeAdapterPort.send(any(), any()) }
         val actual = exportNestSlot.captured
         expectThat(actual) hasSize 3 containsKey DEFAULT.toNest() containsKey S2.toNest() containsKey S9.toNest()
         expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
@@ -577,10 +579,10 @@ class PasswordImportExportServiceTest {
         val eggCountSlot = slot<EggsExported>()
 
         // when
-        importExportServiceSupplier.get().exportEggs(setOf(DEFAULT, S9))
+        importExportServiceSupplier.get().exportEggs(setOf(DEFAULT, S9), exchangePassword)
 
         // then
-        verify { exchangeAdapterPort.send(capture(exportNestSlot)) }
+        verify { exchangeAdapterPort.send(capture(exportNestSlot), any()) }
         expectThat(exportNestSlot.captured) hasSize 2 containsKey DEFAULT.toNest() containsKey S9.toNest()
         expectThat(exportNestSlot.captured.containsKey(S2.toNest())).isFalse()
         expectThat(nestService.currentNest().slot) isEqualTo givenCurrentNestSlot
@@ -590,7 +592,7 @@ class PasswordImportExportServiceTest {
 
     @Test
     fun `should not export when no slots are selected`() {
-        importExportServiceSupplier.get().exportEggs(emptySet())
+        importExportServiceSupplier.get().exportEggs(emptySet(), exchangePassword)
 
         verify { exchangeFactory wasNot Called }
         verify { passwordService wasNot Called }
@@ -600,7 +602,7 @@ class PasswordImportExportServiceTest {
     @Test
     fun `should import yolk when present`() {
         val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
-        every { exchangeAdapterPort.receive() } returns success(
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
                     PasswordInfo(
@@ -632,7 +634,7 @@ class PasswordImportExportServiceTest {
             success(Unit)
         }
 
-        importExportServiceSupplier.get().importEggs()
+        importExportServiceSupplier.get().importEggs(exchangePassword)
 
         expectThat(putYolkCalls.single()) isEqualTo PutYolkCall(shellOf("EggId"), shellOf("MZXW6YTB"), "SHA256", 8, 45)
         verify(exactly = 1) { eventRegistry.register(any<EggsImported>()) }
@@ -642,7 +644,7 @@ class PasswordImportExportServiceTest {
     @Test
     fun `should clear events when importing yolk fails`() {
         val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
-        every { exchangeAdapterPort.receive() } returns success(
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(
             mapOf(
                 nestService.currentNest() to listOf(
                     PasswordInfo(
@@ -662,7 +664,7 @@ class PasswordImportExportServiceTest {
         fakePasswordService(instance = passwordService)
         every { passwordService.putYolk(any(), any(), any(), any(), any()) } returns failure(IllegalStateException("disk full"))
 
-        importExportServiceSupplier.get().importEggs()
+        importExportServiceSupplier.get().importEggs(exchangePassword)
 
         verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
         verify(exactly = 0) { eventRegistry.processEvents() }
@@ -679,12 +681,12 @@ class PasswordImportExportServiceTest {
         )
         val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
         val exportNestSlot = slot<PasswordInfoMap>()
-        every { exchangeAdapterPort.send(capture(exportNestSlot)) } returns success(Unit)
+        every { exchangeAdapterPort.send(capture(exportNestSlot), any()) } returns success(Unit)
         every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
         fakePasswordService(instance = passwordService, withEggs = listOf(exportedEgg), withNestService = nestService)
 
         // when
-        importExportServiceSupplier.get().exportEggs(setOf(DEFAULT))
+        importExportServiceSupplier.get().exportEggs(setOf(DEFAULT), exchangePassword)
 
         // then
         val exportedPasswordInfo = exportNestSlot.captured.values.single().single()
@@ -709,7 +711,7 @@ class PasswordImportExportServiceTest {
         nestService.moveToNestAt(givenCurrentNestSlot)
 
         // when
-        importExportServiceSupplier.get().exportEggs()
+        importExportServiceSupplier.get().exportEggs(exchangePassword)
 
         // then
         verify(exactly = 1) { exchangeFactory.createPasswordExchange() }
@@ -721,7 +723,7 @@ class PasswordImportExportServiceTest {
     @Test
     fun `should ignore selective imports for missing source slots`() {
         val exchangeAdapterPort = mockk<ExchangeAdapterPort>()
-        every { exchangeAdapterPort.receive() } returns success(
+        every { exchangeAdapterPort.receive(exchangePassword) } returns success(
             linkedMapOf(
                 createNest(shellOf("Default"), DEFAULT) to listOf(
                     passwordInfo("EggId1", "Password1"),
@@ -731,7 +733,7 @@ class PasswordImportExportServiceTest {
         every { exchangeFactory.createPasswordExchange() } returns exchangeAdapterPort
         fakePasswordService(instance = passwordService)
 
-        importExportServiceSupplier.get().importEggs(S2, S9)
+        importExportServiceSupplier.get().importEggs(S2, S9, exchangePassword)
 
         verify(exactly = 0) { passwordService.putEgg(any(), any()) }
         verify(exactly = 0) { eventRegistry.register(any<DomainEvent>()) }
