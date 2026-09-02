@@ -11,6 +11,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class PassbirdMigrationTest {
 
@@ -70,6 +71,22 @@ class PassbirdMigrationTest {
         // then
         verify(exactly = 0) { authenticatedMigrationLocator.detect() }
         verify(exactly = 0) { migrationRunner.run(any()) }
+        verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
+        verify(exactly = 1) { migrationAuthenticationService.invalidate() }
+        verify(exactly = 1) { systemOperation.exit() }
+    }
+
+    @Test
+    fun `should invalidate credentials and exit when a migration fails`() {
+        // given
+        every { userInterfaceAdapterPort.receiveYes(any()) } returns true
+        every { authenticatedMigrationLocator.detect() } returns MigrationRequest.empty()
+        every { migrationRunner.run(any()) } throws IllegalStateException("migration failed")
+
+        // when / then
+        assertThrows<IllegalStateException> {
+            passbirdMigration.boot()
+        }
         verify(exactly = 0) { userInterfaceAdapterPort.send(any()) }
         verify(exactly = 1) { migrationAuthenticationService.invalidate() }
         verify(exactly = 1) { systemOperation.exit() }

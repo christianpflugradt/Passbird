@@ -43,6 +43,22 @@ class MigrationRunnerTest {
         }
     }
 
+    @Test
+    fun `should fail if registered migrations have duplicate ids`() {
+        // given
+        val migrationRunner = MigrationRunner(
+            setOf(
+                testMigration(id = "duplicate", order = 1, calls = mutableListOf()),
+                testMigration(id = "duplicate", order = 2, calls = mutableListOf()),
+            ),
+        )
+
+        // when / then
+        assertThrows<IllegalStateException> {
+            migrationRunner.run(MigrationRequest.empty())
+        }
+    }
+
     private fun testMigration(id: String, order: Int, calls: MutableList<String>) = object : Migration {
         override val id = id
         override val order = order

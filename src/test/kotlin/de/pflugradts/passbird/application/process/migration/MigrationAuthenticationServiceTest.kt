@@ -1,5 +1,6 @@
 package de.pflugradts.passbird.application.process.migration
 
+import de.pflugradts.kotlinextensions.TryResult.Companion.failure
 import de.pflugradts.kotlinextensions.TryResult.Companion.success
 import de.pflugradts.passbird.application.KeyStoreAdapterPort
 import de.pflugradts.passbird.application.SecureInputUnavailableException
@@ -90,5 +91,68 @@ class MigrationAuthenticationServiceTest {
         // then
         verify(exactly = 0) { userInterfaceAdapterPort.receiveSecurely(any()) }
         verify(exactly = 0) { keyStoreAdapterPort.loadKey(any(), any()) }
+    }
+
+    @Test
+    fun `should retry a failed keystore unlock and cache the successful credentials`() {
+        // given
+        val keyStoreDirectory = "tmp"
+        val keyStoreFilePath = fakePath()
+        fakeSystemOperation(
+            instance = systemOperation,
+            withDirectoryResolvingToFileName = Triple(
+                keyStoreDirectory.toDirectory(),
+                KEYSTORE_FILENAME.toFileName(),
+                keyStoreFilePath,
+            ),
+        )
+        fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectory)
+        every { userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter key: "))) } returnsMany listOf(
+            inputOf(shellOf("incorrect")),
+            inputOf(shellOf("correct")),
+        )
+        every { keyStoreAdapterPort.loadKey(any(), eq(keyStoreFilePath)) } returnsMany listOf(
+            failure(IllegalArgumentException("incorrect password")),
+            success(shellOf("migration-key")),
+        )
+
+        // when
+        val authentication = migrationAuthenticationService.authenticate(maxAttempts = 2)
+        val cachedAuthentication = migrationAuthenticationService.authenticate(maxAttempts = 2)
+
+        // then
+        expectThat(authentication.failure).isFalse()
+        expectThat(cachedAuthentication.failure).isFalse()
+        verify(exactly = 2) { userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter key: "))) }
+        verify(exactly = 2) { keyStoreAdapterPort.loadKey(any(), eq(keyStoreFilePath)) }
+    }
+
+    @Test
+    fun `should stop retrying after the configured number of failed keystore unlocks`() {
+        // given
+        val keyStoreDirectory = "tmp"
+        val keyStoreFilePath = fakePath()
+        fakeSystemOperation(
+            instance = systemOperation,
+            withDirectoryResolvingToFileName = Triple(
+                keyStoreDirectory.toDirectory(),
+                KEYSTORE_FILENAME.toFileName(),
+                keyStoreFilePath,
+            ),
+        )
+        fakeConfiguration(instance = configuration, withKeyStoreLocation = keyStoreDirectory)
+        every { userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter key: "))) } returnsMany listOf(
+            inputOf(shellOf("incorrect-1")),
+            inputOf(shellOf("incorrect-2")),
+        )
+        every { keyStoreAdapterPort.loadKey(any(), eq(keyStoreFilePath)) } returns failure(IllegalArgumentException("incorrect password"))
+
+        // when
+        val authentication = migrationAuthenticationService.authenticate(maxAttempts = 2)
+
+        // then
+        expectThat(authentication.failure).isTrue()
+        verify(exactly = 2) { userInterfaceAdapterPort.receiveSecurely(outputOf(shellOf("Enter key: "))) }
+        verify(exactly = 2) { keyStoreAdapterPort.loadKey(any(), eq(keyStoreFilePath)) }
     }
 }
