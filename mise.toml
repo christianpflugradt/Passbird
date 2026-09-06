@@ -1,0 +1,12 @@
+[tools]
+java = "temurin-25"
+
+[tasks.format]
+run = "./gradlew ktlintFormat"
+
+[tasks.verify]
+run = "./gradlew preCommitCheck prePushCheck"
+
+[tasks.preview]
+run = "./gradlew publishPreview"
+

@@ -311,3 +311,77 @@ tasks.register("prePushCheck") {
         prePushSmokeTest,
     )
 }
+
+tasks.register("publishPreview") {
+    group = "publishing"
+    description = "Publishes a preview release via GitHub Actions (requires authenticated GitHub CLI)"
+
+    notCompatibleWithConfigurationCache("Depends on live GitHub Actions state")
+
+    doLast {
+        fun gh(vararg args: String): String {
+            val process =
+                ProcessBuilder("gh", *args)
+                    .redirectError(ProcessBuilder.Redirect.INHERIT)
+                    .start()
+
+            val output = process.inputStream.bufferedReader().use { it.readText().trim() }
+
+            if (process.waitFor() != 0) {
+                throw GradleException("GitHub CLI command failed.")
+            }
+
+            return output
+        }
+
+        val mainSha =
+            gh(
+                "api",
+                "repos/{owner}/{repo}/commits/main",
+                "--jq",
+                ".sha",
+            )
+
+        while (true) {
+            val status =
+                gh(
+                    "run", "list",
+                    "--workflow", "build.yml",
+                    "--branch", "main",
+                    "--commit", mainSha,
+                    "--limit", "1",
+                    "--json", "status",
+                    "--jq", ".[0].status // \"\"",
+                )
+
+            if (status == "completed") {
+                break
+            }
+
+            Thread.sleep(15_000)
+        }
+
+        val conclusion =
+            gh(
+                "run", "list",
+                "--workflow", "build.yml",
+                "--branch", "main",
+                "--commit", mainSha,
+                "--limit", "1",
+                "--json", "conclusion",
+                "--jq", ".[0].conclusion // \"\"",
+            )
+
+        if (conclusion != "success") {
+            throw GradleException("Latest main build is not successful.")
+        }
+
+        gh(
+            "workflow",
+            "run",
+            "publish.yml",
+            "--ref",
+            "main",
+        )
+    }
+}
