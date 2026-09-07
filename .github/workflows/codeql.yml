@@ -64,7 +64,7 @@ jobs:
         # postponing Kotlin upgrades until stable CodeQL catches up.
         tools: nightly
 
-    - uses: actions/setup-java@v5
+    - uses: actions/setup-java@v6
       with:
           java-version: '25'
           distribution: 'temurin'
