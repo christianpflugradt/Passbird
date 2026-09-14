@@ -24,7 +24,7 @@ plugins {
     id("info.solidsoft.pitest") version "1.19.0"
     jacoco
     java
-    kotlin("jvm") version "2.4.10"
+    kotlin("jvm") version "2.4.20"
     id("com.github.jk1.dependency-license-report") version "3.1.4"
     id("org.owasp.dependencycheck") version "12.2.2"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
