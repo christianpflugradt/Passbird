@@ -1,5 +1,5 @@
 plugins {
-    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.23"
+    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.24"
 }
 
 val conventionalCommitTypes = listOf(
