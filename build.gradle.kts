@@ -46,7 +46,7 @@ val jnaVersion = "5.19.1"
 val snakeYamlEngineVersion = "3.1.1"
 val zip4jVersion = "2.11.6"
 
-val archunitVersion = "1.5.0"
+val archunitVersion = "1.5.1"
 val junitPlatformVersion = "6.1.3"
 val kotestPropertyVersion = "6.2.5"
 val mockkVersion = "1.14.11"
