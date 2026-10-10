@@ -43,7 +43,7 @@ detekt {
 }
 
 val jnaVersion = "5.19.1"
-val snakeYamlEngineVersion = "3.1.1"
+val snakeYamlEngineVersion = "3.2"
 val zip4jVersion = "2.11.6"
 
 val archunitVersion = "1.5.1"
