@@ -473,6 +473,10 @@ jobs:
 
   deploy-pages:
     runs-on: ubuntu-latest
+    concurrency:
+      group: coverage-pages
+      cancel-in-progress: false
+      queue: max
     needs: pages-site
     if: github.ref == 'refs/heads/main'
     permissions:
