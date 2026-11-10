@@ -119,6 +119,7 @@ local_verification_policy:
     note: only run locally when the maintainer explicitly asks for it
     scan_scope:
       - Gradle runtimeClasspath and the existing src/main/resources and src/main/webapp resource roots
+      - generated .dependency-check database files are ignored by Git and excluded from source snapshots; tracked source coverage is unchanged
       - repository-local npm release tooling is not part of the shipped JVM runtime scan
     suppressions:
       - keep `owasp-suppressions.xml` limited to confirmed false positives, verified unreachable runtime findings, or verified build-time-only findings that do not affect shipped runtime artifacts

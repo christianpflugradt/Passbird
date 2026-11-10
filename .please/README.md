@@ -34,7 +34,10 @@ Gradle-generated hooks, preserves copies under ignored `.tools/retired-gradle-ho
 and installs Please Behave wrappers at Git's effective hook path. Custom hooks
 remain untouched and require explicit integration. Gradle no longer generates
 hooks. Synchronization resolves external packages; normal execution uses their
-immutable cache. Reports under `.please/reports/` remain ignored.
+immutable cache. Reports under `.please/reports/` remain ignored. The generated
+OWASP database under `.dependency-check/` is also ignored, so restoring it before
+CI checks does not add a large database to the source snapshot. Tracked and
+nonignored source files remain covered.
 
 Git hooks are the final local gates. Pre-commit checks formatting, Detekt,
 compilation and agent-spec wiring (implemented in portable Python); pre-push runs the complete local gate.

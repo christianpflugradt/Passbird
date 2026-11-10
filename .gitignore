@@ -9,6 +9,9 @@
 .gradle/*
 gradlew.bat
 
+# Generated OWASP vulnerability database
+/.dependency-check/
+
 # Build
 build/*
 out/*
