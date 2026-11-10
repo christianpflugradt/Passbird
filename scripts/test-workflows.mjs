@@ -41,7 +41,26 @@ test("trusted CI proof names the complete Check job and all Java smoke jobs", ()
   assert.ok(!("owasp" in ci.jobs));
   assert.ok(!("mutation-tests" in ci.jobs));
   const check = ci.jobs.check.steps.find(step => step.name === "Run quality checks");
-  assert.equal(check.run, "xvfb-run -a please run --at check --checks-only");
+  assert.match(check.uses, /^please-behave\/action@[a-f0-9]{40}$/);
+  assert.equal(check.run, undefined);
+  assert.deepEqual(check.with, { version: "${{ steps.governor.outputs.version }}",
+    "execution-point": "check", "checks-only": "true", summary: "true" });
+  for (const [job, point] of [[ci.jobs.check, "check"],
+    [workflow("publish.yml").jobs["release-readiness"], "release-readiness"],
+    [workflow("publish.yml").jobs["release-candidate"], "release-candidate"]]) {
+    const execution = job.steps.find(step => step.with?.["execution-point"] === point);
+    assert.equal(execution.uses, check.uses);
+    assert.deepEqual(execution.with, { ...check.with, "execution-point": point });
+    assert.ok(job.steps.every(step => !/\bplease run\b/.test(step.run ?? "")));
+    const sync = job.steps.findIndex(step => step.run === "please sync --yes");
+    assert.ok(sync >= 0 && sync < job.steps.indexOf(execution));
+    if (point !== "release-readiness") {
+      const display = job.steps.find(step => step.name === "Start virtual display");
+      assert.ok(job.steps.indexOf(display) < job.steps.indexOf(execution));
+      assert.match(display.run, /Xvfb -displayfd/);
+      assert.match(display.run, /GITHUB_ENV/);
+    }
+  }
   assert.ok(check.env.NVD_API_KEY);
   assert.ok(!workflow("publish.yml").jobs["release-readiness"].steps.some(step => step.run?.includes("dependencyCheckAnalyze")));
   assert.ok("pull_request" in ci.on && "workflow_dispatch" in ci.on);

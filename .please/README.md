@@ -107,9 +107,14 @@ isolated environment; they never execute the installed live commit hook.
 
 ## CI, badges and security automation
 
+CI, Release Readiness and Release Candidate execute through the published
+Action, with the CLI version from `.please-version`, `checks-only: 'true'` and
+`summary: 'true'`. Install-only mode precedes explicit synchronization.
+
 `build.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
 manual dispatch. Check runs all deterministic governance checks, mutation tests
-and OWASP in one Please Behave invocation under Xvfb and uploads
+and OWASP through the SHA-pinned Please Behave Action v1.2.0 with checks-only
+execution and a Job Summary. Xvfb starts before the Action; Check uploads
 the source/attempt-bound `release-jar` artifact. The unchanged Java 17/21/25 smoke
 matrix tests that same JAR. Native test diagnostics are consolidated into
 `test-reports`; lint, Detekt, dependency-license, OWASP, PIT and smoke diagnostics

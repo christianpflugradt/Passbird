@@ -146,6 +146,8 @@ local_verification_policy:
         - .github/workflows/publish.yml
     notes:
       - build.yml uses check / Check with the published governor, preserving main pushes, Renovate PRs and manual dispatch
+      - CI, Readiness and Candidate execute through SHA-pinned Please Behave Action v1.2.0 with checks-only and Job Summaries enabled; the CLI pin remains .please-version
+      - CI and Candidate prepare Xvfb before invoking the Action; DISPLAY is exported only after the virtual display becomes ready
       - preparation downloads locked dependencies and prepares tools before checks; governed tests remain offline with synthetic credentials and mocked services
       - preparation explicitly resolves runtime POM artifacts for offline license discovery; license report tasks bypass the build cache and rerun to reject stale incomplete reports
       - preparation resolves the native task graph online with --dry-run to cache signature metadata before offline checks without executing build or test tasks
