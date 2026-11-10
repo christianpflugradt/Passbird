@@ -1,0 +1,53 @@
+project = "Passbird"
+max_display_files = 5
+
+[execution]
+fail_fast_terminate_running_instances = false
+
+[execution_points]
+custom = ["release-readiness", "release-candidate"]
+
+[[imports]]
+git = "https://github.com/christianpflugradt/please-behave-rulesets.git"
+path = "commit-msg/conventional-commits"
+ref = "0432837bb42e230f53cd52b64b2292948382e5b2"
+
+[imports.rule_parameters.commit-message]
+scopes_file = ".please/commit-scopes.txt"
+
+[[imports]]
+git = "https://github.com/christianpflugradt/please-behave-rulesets.git"
+path = "multi-point/security"
+ref = "0432837bb42e230f53cd52b64b2292948382e5b2"
+
+[[imports]]
+git = "https://github.com/christianpflugradt/please-behave-rulesets.git"
+path = "repository-conventions"
+ref = "0432837bb42e230f53cd52b64b2292948382e5b2"
+
+[imports.rule_parameters.license]
+target = "LICENSE"
+
+[[imports]]
+git = "https://github.com/christianpflugradt/please-behave-rulesets.git"
+path = "release/readiness"
+ref = "0432837bb42e230f53cd52b64b2292948382e5b2"
+
+[imports.rule_parameters.github-ci-success]
+policy = ".please/release-ci.json"
+
+[imports.rule_parameters.sensitive-files]
+snapshot = "head"
+
+[imports.rule_parameters.secret-scan]
+snapshot = "head"
+
+[imports.rule_parameters.license]
+snapshot = "head"
+target = "LICENSE"
+
+[[provider_imports]]
+id = "gemini-flash-lite"
+git = "https://github.com/christianpflugradt/please-behave-rulesets.git"
+path = "providers/gemini-flash-lite"
+ref = "0432837bb42e230f53cd52b64b2292948382e5b2"

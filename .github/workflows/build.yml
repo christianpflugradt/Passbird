@@ -1,90 +1,104 @@
-name: Build and Verify
-
+name: CI
 on:
-    push:
-      branches-ignore:
-        - gh-pages
-    pull_request:
-      branches:
-        - main
-    workflow_dispatch:
-
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
 env:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
   DEPENDENCY_CHECK_DATA_LOCATION: "${{ github.workspace }}/.dependency-check"
-  DEPENDENCY_CHECK_CACHE_KEY_PREFIX: "linux-dependency-check-v1-"
-
+  DEPENDENCY_CHECK_CACHE_KEY_PREFIX: linux-dependency-check-v1-
 jobs:
-
-  compile:
+  check:
+    name: Check
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-java@v6
         with:
           java-version: '25'
-          distribution: 'temurin'
+          distribution: temurin
       - uses: gradle/actions/setup-gradle@v6
-      - name: compile code
-        run: ./gradlew compileKotlin compileTestKotlin compileJava compileTestJava
-      - uses: actions/upload-artifact@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          name: compile
-          path: build
-
-  ktlint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
+          node-version: '26'
+          package-manager-cache: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
         with:
-          java-version: '25'
-          distribution: 'temurin'
-      - name: lint code
-        run: ./gradlew ktlintCheck
-      - uses: actions/upload-artifact@v7
+          go-version: stable
+          cache: false
+      - name: Prepare validation tools and project dependencies
+        run: |
+          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+          go install github.com/zricethezav/gitleaks/v8@v8.30.1
+          sudo apt-get update
+          sudo apt-get install --yes shellcheck xauth xclip xvfb
+          bash scripts/prepare.sh check
+      - name: Read governor pin
+        id: governor
+        run: echo "version=$(cat .please-version)" >> "$GITHUB_OUTPUT"
+      - uses: please-behave/action@3f726664f6a18193ac1bfa0f542e34ba76f24523 # v1.1.1
+        with:
+          version: ${{ steps.governor.outputs.version }}
+          run: 'false'
+      - run: please sync --yes
+      - name: Run quality checks
+        run: xvfb-run -a please run --at check --checks-only
+      - name: Bind CI JAR to source and producing attempt
+        run: python3 scripts/release-artifacts.py ci-receipt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: release-jar
+          path: build/ci-release-jar
+          if-no-files-found: error
+          overwrite: true
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: quality-check
+          path: .please/reports/last.json
+          include-hidden-files: true
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: test-reports
+          path: |
+            build/reports/tests/
+            build/test-results/
+            build/jacoco/
+            build/reports/jacoco/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
         with:
           name: ktlint-reports
-          path: build/reports/ktlint/*
-
-  detekt:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
-      - name: run detekt
-        run: ./gradlew detekt
-      - uses: actions/upload-artifact@v7
+          path: build/reports/ktlint/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: detekt-reports
-          path: build/reports/detekt/*
-
-  license-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - name: check licenses
-        run: ./gradlew checkLicense
-      - name: upload failed license check report
+          path: build/reports/detekt/
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
-        uses: actions/upload-artifact@v7
         with:
           name: dependencies-without-allowed-license
           path: build/reports/dependency-license/dependencies-without-allowed-license.json
-
+          if-no-files-found: ignore
   owasp:
+    name: OWASP
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-java@v6
         with:
           java-version: '25'
@@ -97,159 +111,60 @@ jobs:
           key: ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}build-${{ github.run_id }}
           restore-keys: |
             ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}
+      - name: Prepare dependency inputs
+        run: ./gradlew --no-configuration-cache prepareValidationDependencies
       - name: check dependencies for vulnerabilities
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
           DEPENDENCY_CHECK_DATA_LOCATION: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
           OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
           OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
-        run: ./gradlew dependencyCheckAnalyze --stacktrace
-      - uses: actions/upload-artifact@v7
+        run: ./gradlew --no-configuration-cache dependencyCheckAnalyze --stacktrace
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: dependency-check-report
           path: build/reports/dependency-check-report.html
 
-  unit-tests:
-    runs-on: ubuntu-latest
-    needs: [ compile ]
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
-      - uses: actions/download-artifact@v8
-        with:
-          name: compile
-          path: build
-      - name: run unit tests
-        run: ./gradlew test
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: unit-test-report
-          path: build/reports/tests/test/*
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: unit-test-execution-data
-          path: build/jacoco/test.exec
-          if-no-files-found: ignore
-
-  integration-tests:
-    runs-on: ubuntu-latest
-    needs: [ compile ]
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
-      - uses: actions/download-artifact@v8
-        with:
-          name: compile
-          path: build
-      - name: run integration tests
-        run: ./gradlew integration
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: integration-test-report
-          path: build/reports/tests/integration/*
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: integration-test-execution-data
-          path: build/jacoco/integration.exec
-          if-no-files-found: ignore
-
-  property-tests:
-    runs-on: ubuntu-latest
-    needs: [ compile ]
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
-      - uses: actions/download-artifact@v8
-        with:
-          name: compile
-          path: build
-      - name: run property tests
-        run: ./gradlew property
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: property-test-report
-          path: build/reports/tests/property/*
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: property-test-execution-data
-          path: build/jacoco/property.exec
-          if-no-files-found: ignore
   mutation-tests:
+    name: Mutation Tests
     runs-on: ubuntu-latest
-    needs: [ compile ]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@v6
         with:
           java-version: '25'
-          distribution: 'temurin'
+          distribution: temurin
       - uses: gradle/actions/setup-gradle@v6
-      - uses: actions/download-artifact@v8
-        with:
-          name: compile
-          path: build
-      - name: run mutation tests
-        run: ./gradlew mutation --stacktrace --console=plain
-      - uses: actions/upload-artifact@v7
+      - name: Prepare dependencies
+        run: ./gradlew --no-configuration-cache prepareValidationDependencies
+      - name: Run mutation tests
+        run: ./gradlew --offline mutation --stacktrace --console=plain
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: mutation-report
           path: build/reports/pitest/*
           if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: mutation-line-coverage
           path: build/reports/pitest/linecoverage.xml
           if-no-files-found: ignore
-  release-jar:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
-      - name: build release jar
-        run: ./gradlew -PcreatedBy="GitHub Actions" --no-build-cache clean jar
-      - uses: actions/upload-artifact@v7
-        with:
-          name: release-jar
-          path: build/libs/passbird.jar
 
   artifact-smoke-test:
     name: artifact-smoke-test (Java ${{ matrix.java-version }})
     runs-on: ubuntu-latest
-    needs: [ release-jar ]
+    needs: [ check ]
     strategy:
       fail-fast: false
       matrix:
         java-version: [ '17', '21', '25' ]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: actions/setup-java@v6
         with:
           java-version: ${{ matrix.java-version }}
@@ -258,7 +173,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y xauth xclip xvfb
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: release-jar
           path: build/libs
@@ -266,227 +181,9 @@ jobs:
         run: |
           rm -rf "build/smoke-test-ci-java-${{ matrix.java-version }}"
           xvfb-run -a env PASSBIRD_JAR="$GITHUB_WORKSPACE/build/libs/passbird.jar" PASSBIRD_SMOKE_TMPDIR="$GITHUB_WORKSPACE/build/smoke-test-ci-java-${{ matrix.java-version }}" PASSBIRD_SMOKE_KEEP_TMP=1 ./smoke-test/run.sh
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: jar-smoke-test-artifacts-java-${{ matrix.java-version }}
           path: build/smoke-test-ci-java-${{ matrix.java-version }}
           if-no-files-found: ignore
-
-  architecture-tests:
-    runs-on: ubuntu-latest
-    needs: [ compile ]
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
-      - uses: actions/download-artifact@v8
-        with:
-          name: compile
-          path: build
-      - name: run architecture tests
-        run: ./gradlew architecture
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: architecture-test-report
-          path: build/reports/tests/architecture/*
-          if-no-files-found: ignore
-
-  test-coverage-verification:
-    runs-on: ubuntu-latest
-    needs:
-      - unit-tests
-      - integration-tests
-      - property-tests
-      - architecture-tests
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
-      - uses: actions/download-artifact@v8
-        with:
-          name: compile
-          path: build
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: "*-test-execution-data"
-          path: build/jacoco
-          merge-multiple: true
-      - name: verify code coverage
-        run: ./gradlew --no-build-cache jacocoTestCoverageVerification
-
-  test-coverage-report:
-    runs-on: ubuntu-latest
-    needs:
-      - unit-tests
-      - integration-tests
-      - property-tests
-      - architecture-tests
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
-      - uses: actions/download-artifact@v8
-        with:
-          name: compile
-          path: build
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: "*-test-execution-data"
-          path: build/jacoco
-          merge-multiple: true
-      - name: create code coverage report
-        run: ./gradlew --no-build-cache jacocoTestReport
-      - uses: actions/upload-artifact@v7
-        with:
-          name: test-coverage-report
-          path: build/reports/jacoco/test
-
-  pages-site:
-    runs-on: ubuntu-latest
-    needs:
-      - test-coverage-verification
-      - test-coverage-report
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v7
-      - name: prepare Pages source
-        run: |
-          rm -rf .pages _site site
-          mkdir -p .pages
-          cp -R .github/pages/. .pages/
-          cp README.md CONFIGURATION.md .pages/
-      - name: configure GitHub Pages
-        uses: actions/configure-pages@v6
-      - name: build GitHub Pages site
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./.pages
-          destination: ./_site
-      - name: prepare writable Pages directory
-        run: |
-          mkdir -p site
-          cp -R _site/. site/
-      - uses: actions/download-artifact@v8
-        with:
-          name: test-coverage-report
-          path: build/reports/jacoco/test
-      - name: add coverage assets to Pages site
-        run: |
-          report_xml="build/reports/jacoco/test/jacocoTestReport.xml"
-          set_coverage_metrics() {
-            counter_type="$1"
-            counter="$(grep -o "<counter type=\"$counter_type\" missed=\"[0-9]*\" covered=\"[0-9]*\"/>" "$report_xml" | tail -n1)"
-            missed="$(printf '%s\n' "$counter" | sed -E 's/.*missed=\"([0-9]+)\".*/\1/')"
-            covered="$(printf '%s\n' "$counter" | sed -E 's/.*covered=\"([0-9]+)\".*/\1/')"
-            total=$((missed + covered))
-            percentage_tenths="$(awk -v covered="$covered" -v total="$total" 'BEGIN { if (total == 0) print 0; else printf "%.0f", (covered * 1000) / total }')"
-            if [ $((percentage_tenths % 10)) -eq 0 ]; then
-              percentage="$((percentage_tenths / 10))%"
-            else
-              percentage="$((percentage_tenths / 10)).$((percentage_tenths % 10))%"
-            fi
-
-            if [ "$percentage_tenths" -lt 500 ]; then
-              color="#e05d44"
-            elif [ "$percentage_tenths" -lt 700 ]; then
-              color="#fe7d37"
-            elif [ "$percentage_tenths" -lt 850 ]; then
-              color="#dfb317"
-            elif [ "$percentage_tenths" -lt 900 ]; then
-              color="#97ca00"
-            else
-              color="#4c1"
-            fi
-          }
-
-          render_badge() {
-            file_stem="$1"
-            label="$2"
-            label_width="$3"
-            total_width="$4"
-            value_width="$((total_width - label_width))"
-            label_center="$(awk -v width="$label_width" 'BEGIN { printf "%.1f", width / 2 }')"
-            value_center="$(awk -v label_width="$label_width" -v value_width="$value_width" 'BEGIN { printf "%.1f", label_width + (value_width / 2) }')"
-
-            cat > "site/coverage/${file_stem}.svg" <<EOF
-          <svg xmlns="http://www.w3.org/2000/svg" width="${total_width}" height="20" role="img" aria-label="${label}: ${percentage}">
-            <title>${label}: ${percentage}</title>
-            <defs>
-              <linearGradient id="smooth" x2="0" y2="100%">
-                <stop offset="0" stop-color="#fff" stop-opacity=".7"/>
-                <stop offset=".1" stop-color="#aaa" stop-opacity=".1"/>
-                <stop offset=".9" stop-opacity=".3"/>
-                <stop offset="1" stop-opacity=".5"/>
-              </linearGradient>
-              <clipPath id="clip">
-                <rect width="${total_width}" height="20" rx="3" fill="#fff"/>
-              </clipPath>
-            </defs>
-            <g clip-path="url(#clip)">
-              <rect width="${label_width}" height="20" fill="#555"/>
-              <rect x="${label_width}" width="${value_width}" height="20" fill="${color}"/>
-              <rect width="${total_width}" height="20" fill="url(#smooth)"/>
-            </g>
-            <g fill="#fff" text-anchor="middle" font-family="Verdana, DejaVu Sans, sans-serif" font-size="11">
-              <text x="${label_center}" y="15" fill="#010101" fill-opacity=".3">${label}</text>
-              <text x="${label_center}" y="14">${label}</text>
-              <text x="${value_center}" y="15" fill="#010101" fill-opacity=".3">${percentage}</text>
-              <text x="${value_center}" y="14">${percentage}</text>
-            </g>
-          </svg>
-          EOF
-            cat > "site/coverage/${file_stem}.json" <<EOF
-          {
-            "schemaVersion": 1,
-            "label": "${label}",
-            "message": "${percentage}",
-            "color": "${color#\#}"
-          }
-          EOF
-          }
-
-          mkdir -p site/coverage
-          rm -rf site/coverage/report
-          cp -R build/reports/jacoco/test/html site/coverage/report
-          set_coverage_metrics "BRANCH"
-          render_badge "branch-coverage" "branch coverage" 101 148
-          set_coverage_metrics "INSTRUCTION"
-          render_badge "instruction-coverage" "instruction coverage" 118 165
-      - name: upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: ./site
-
-  deploy-pages:
-    runs-on: ubuntu-latest
-    concurrency:
-      group: coverage-pages
-      cancel-in-progress: false
-      queue: max
-    needs: pages-site
-    if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5

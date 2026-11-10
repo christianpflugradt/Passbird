@@ -1,214 +1,203 @@
-name: Publish Release
-run-name: "Semantic release (${{ github.event_name }})"
-
+name: Release
 on:
   workflow_dispatch:
   schedule:
-    - cron: "23 3 * * 1"
-      timezone: "Europe/Berlin"
-
+    - cron: '23 3 * * 1'
+      timezone: Europe/Berlin
 permissions:
-  actions: read
-  contents: write
-
+  contents: read
 concurrency:
   group: publish
   cancel-in-progress: false
-
 env:
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-
+  GRADLE_OPTS: '-Dorg.gradle.daemon=false'
 jobs:
-  require-verified-main:
+  plan:
+    name: Plan
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
-      build-run-id: ${{ steps.require-build.outputs.build-run-id }}
+      release: ${{ steps.plan.outputs.release }}
+      version: ${{ steps.plan.outputs.version }}
+      source_sha: ${{ steps.plan.outputs.source_sha }}
+      mode: ${{ steps.plan.outputs.mode }}
     steps:
-      - id: require-build
-        uses: actions/github-script@v9
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          script: |
-            const workflowId = "build.yml";
-            const branch = "main";
-            const sha = context.sha;
-            const requiredJobNames = [
-              "release-jar",
-              "artifact-smoke-test (Java 17)",
-              "artifact-smoke-test (Java 21)",
-              "artifact-smoke-test (Java 25)",
-            ];
-
-            const workflow = await github.rest.actions.getWorkflow({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: workflowId,
-            });
-
-            const workflowRunsResponse = await github.request("GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs", {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: workflow.data.id,
-              branch,
-              head_sha: sha,
-              status: "completed",
-              per_page: 50,
-            });
-
-            const candidateRuns = workflowRunsResponse.data.workflow_runs.filter((run) =>
-              run.conclusion === "success"
-            );
-
-            if (candidateRuns.length === 0) {
-              core.setFailed(
-                `No successful Build and Verify run found for ${sha} on ${branch}. Publish runs are gated on a green build workflow for the current main commit.`
-              );
-              return;
-            }
-
-            for (const run of candidateRuns) {
-              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: run.id,
-                per_page: 100,
-              });
-              const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: run.id,
-                per_page: 100,
-              });
-
-              const missingRequiredJobs = requiredJobNames.filter((jobName) =>
-                !jobs.some((job) =>
-                  job.name === jobName &&
-                  job.status === "completed" &&
-                  job.conclusion === "success"
-                )
-              );
-              const releaseJarArtifact = artifacts.find((artifact) =>
-                artifact.name === "release-jar" && !artifact.expired
-              );
-
-              if (missingRequiredJobs.length === 0 && releaseJarArtifact) {
-                core.setOutput("build-run-id", run.id.toString());
-                core.notice(`Found verified Build and Verify run: ${run.html_url}`);
-                core.notice(`Found non-expired release-jar artifact: ${releaseJarArtifact.archive_download_url}`);
-                return;
-              }
-
-              const reasons = [];
-              if (missingRequiredJobs.length > 0) {
-                reasons.push(`missing successful jobs: ${missingRequiredJobs.join(", ")}`);
-              }
-              if (!releaseJarArtifact) {
-                reasons.push("missing non-expired release-jar artifact");
-              }
-              core.notice(`Build and Verify run ${run.html_url} does not satisfy the publish artifact contract: ${reasons.join("; ")}.`);
-            }
-
-            core.setFailed(
-              `No Build and Verify run for ${sha} on ${branch} provides the required release-jar artifact and successful artifact smoke validation jobs.`
-            );
-
-  publish-stable:
-    needs: [ require-verified-main ]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '26'
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - name: Plan without tagging or publishing
+        id: plan
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: npm run release:plan
+
+  release-readiness:
+    name: Release Readiness
+    needs: plan
+    if: needs.plan.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      ci_run_id: ${{ steps.evidence.outputs.ci_run_id }}
+      ci_attempt: ${{ steps.evidence.outputs.ci_attempt }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.plan.outputs.source_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: stable
+          cache: false
+      - name: Prepare security scanner
+        run: |
+          go install github.com/zricethezav/gitleaks/v8@v8.30.1
+      - name: Read governor pin
+        id: governor
+        run: echo "version=$(cat .please-version)" >> "$GITHUB_OUTPUT"
+      - uses: please-behave/action@3f726664f6a18193ac1bfa0f542e34ba76f24523 # v1.1.1
+        with:
+          version: ${{ steps.governor.outputs.version }}
+          run: 'false'
+      - run: please sync --yes
+      - name: Verify exact-source CI and release readiness
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: please run --at release-readiness --checks-only
+      - name: Read trusted CI artifact identity from the external proof
+        id: evidence
+        run: python3 scripts/release-artifacts.py ci-evidence
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: release-readiness-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .please/reports/last.json
+          include-hidden-files: true
+          if-no-files-found: warn
+
+  release-candidate:
+    name: Release Candidate
+    needs: plan
+    if: needs.plan.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.plan.outputs.source_sha }}
+          fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-java@v6
         with:
-          java-version: "25"
-          distribution: "temurin"
+          java-version: '25'
+          distribution: temurin
       - uses: gradle/actions/setup-gradle@v6
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          node-version: "26"
-      - name: download verified release jar
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          node-version: '26'
+          package-manager-cache: false
+      - name: Prepare candidate dependencies
         run: |
-          mkdir -p verified-release-jar
-          gh run download "${{ needs.require-verified-main.outputs.build-run-id }}" --repo "$GITHUB_REPOSITORY" --name release-jar --dir verified-release-jar
-      - name: disable local git hooks for release tag push
-        run: git config --local core.hooksPath /dev/null
-      - name: run semantic-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx --yes --package semantic-release@24.2.5 --package conventional-changelog-conventionalcommits@9.0.0 --package @semantic-release/exec@7.1.0 semantic-release
-  publish-dev:
-    needs: [ require-verified-main ]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
+          sudo apt-get update
+          sudo apt-get install --yes xauth xclip xvfb
+          bash scripts/prepare.sh candidate
+      - name: Read governor pin
+        id: governor
+        run: echo "version=$(cat .please-version)" >> "$GITHUB_OUTPUT"
+      - uses: please-behave/action@3f726664f6a18193ac1bfa0f542e34ba76f24523 # v1.1.1
         with:
-          fetch-depth: 0
-      - id: compute-dev-version
-        uses: actions/github-script@v9
-        with:
-          script: |
-            const berlinDate = new Intl.DateTimeFormat("en-CA", {
-              timeZone: "Europe/Berlin",
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-            }).format(new Date()).replaceAll("-", "");
-
-            const { owner, repo } = context.repo;
-            const latestRelease = await github.rest.repos.getLatestRelease({ owner, repo });
-            const baseVersion = latestRelease.data.tag_name;
-            const prefix = `dev-${baseVersion}-dev.${berlinDate}.`;
-            const releases = await github.paginate(github.rest.repos.listReleases, {
-              owner,
-              repo,
-              per_page: 100,
-            });
-
-            const sequence = releases
-              .map((release) => release.tag_name)
-              .filter((tagName) => tagName.startsWith(prefix))
-              .map((tagName) => Number(tagName.substring(prefix.length)))
-              .filter((value) => Number.isInteger(value))
-              .reduce((currentMax, value) => Math.max(currentMax, value), 0) + 1;
-
-            const version = `${baseVersion}-dev.${berlinDate}.${sequence}`;
-            core.setOutput("base_version", baseVersion);
-            core.setOutput("version", version);
-            core.setOutput("tag_name", `dev-${version}`);
-      - name: download verified release jar
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p verified-release-jar
-          gh run download "${{ needs.require-verified-main.outputs.build-run-id }}" --repo "$GITHUB_REPOSITORY" --name release-jar --dir verified-release-jar
+          version: ${{ steps.governor.outputs.version }}
+          run: 'false'
+      - run: please sync --yes
+      - name: Validate, smoke on Java 25 and package candidate
+        run: xvfb-run -a please run --at release-candidate --checks-only
       - uses: actions/setup-java@v6
         with:
-          java-version: "25"
-          distribution: "temurin"
-      - uses: gradle/actions/setup-gradle@v6
-      - name: build release jar
-        run: ./gradlew -PcreatedBy="GitHub Actions" -PreleaseVersion="${{ steps.compute-dev-version.outputs.version }}" jar
-      - name: verify release jar manifest
+          java-version: '17'
+          distribution: temurin
+      - name: Smoke exact candidate on Java 17
+        run: xvfb-run -a bash scripts/smoke-candidate.sh 17
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '21'
+          distribution: temurin
+      - name: Smoke exact candidate on Java 21
+        run: xvfb-run -a bash scripts/smoke-candidate.sh 21
+      - name: Verify complete candidate and smoke evidence
+        run: python3 scripts/release-artifacts.py verify
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: passbird-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: release-candidate-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .please/reports/last.json
+            build/reports/
+            build/test-results/
+            build/smoke-test-candidate-java-*/
+          include-hidden-files: true
+          if-no-files-found: warn
+
+  publish:
+    name: Publish
+    needs: [plan, release-readiness, release-candidate]
+    if: >-
+      needs.plan.outputs.release == 'true' &&
+      needs.release-readiness.result == 'success' &&
+      needs.release-candidate.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    env:
+      EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
+      RELEASE_MODE: ${{ needs.plan.outputs.mode }}
+      VERIFIED_CI_RUN_ID: ${{ needs.release-readiness.outputs.ci_run_id }}
+      VERIFIED_CI_ATTEMPT: ${{ needs.release-readiness.outputs.ci_attempt }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.plan.outputs.source_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '26'
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: passbird-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: release-jar
+          path: verified-release-jar
+          run-id: ${{ needs.release-readiness.outputs.ci_run_id }}
+          github-token: ${{ github.token }}
+      - name: Publish exact verified candidate without rebuilding
         env:
-          EXPECTED_VERSION: ${{ steps.compute-dev-version.outputs.version }}
-        run: .github/scripts/verify-release-jar-manifest.sh build/libs/passbird.jar "$EXPECTED_VERSION"
-      - name: verify release jar payload
-        run: .github/scripts/verify-release-jar-payload.sh verified-release-jar/passbird.jar build/libs/passbird.jar
-      - name: create GitHub prerelease
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BASE_VERSION: ${{ steps.compute-dev-version.outputs.base_version }}
-          VERSION: ${{ steps.compute-dev-version.outputs.version }}
-          TAG_NAME: ${{ steps.compute-dev-version.outputs.tag_name }}
-        run: |
-          gh release create "$TAG_NAME" build/libs/passbird.jar \
-            --repo "$GITHUB_REPOSITORY" \
-            --target "$GITHUB_SHA" \
-            --title "$VERSION" \
-            --notes "Development prerelease based on official Passbird release $BASE_VERSION." \
-            --prerelease
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: npm run release

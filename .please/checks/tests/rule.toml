@@ -1,0 +1,8 @@
+id = "tests"
+description = "Run all unit, property, integration, architecture and clipboard tests"
+run_at = ["pre-push", "check", "release-candidate"]
+
+[check]
+command = "bash scripts/gradle-check.sh allTests"
+timeout_seconds = 1800
+resource = "gradle"

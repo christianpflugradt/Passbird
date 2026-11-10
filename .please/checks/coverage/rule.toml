@@ -1,0 +1,9 @@
+id = "coverage"
+description = "Enforce instruction and branch coverage and retain diagnostic reports"
+run_at = ["pre-push", "check", "release-candidate"]
+depends_on = ["tests"]
+
+[check]
+command = "bash scripts/check-coverage.sh"
+timeout_seconds = 1800
+resource = "gradle"

@@ -605,12 +605,18 @@ While working locally, prefer focused manual checks for the behavior you changed
 - `./gradlew integration` runs tagged integration tests.
 - `./gradlew architecture` runs the ArchUnit-based architecture suite.
 
-The generated local git hooks run the broader release gate automatically:
+The published Please Behave governor pinned in `.please-version` manages local Git hooks:
 
-- `./gradlew preCommitCheck`, which runs `ktlintCheck`, `detekt`, `compileKotlin`, and `compileTestKotlin`
-- `./gradlew prePushCheck`, which runs `checkLicense`, `jacocoTestCoverageVerification`, `allTests`, `jar`, and `./smoke-test/run.sh`
+- pre-commit runs formatting, Detekt, production/test compilation and agent-spec consistency checks
+- pre-push runs the complete `allTests` suite, dependency-license and coverage checks, JAR build and interactive smoke flow, workflow/release-helper tests and shared security/license checks
 
-GitHub Actions enforces the same verification model in CI and also runs dedicated workflow jobs for `ktlintCheck`, `detekt`, `checkLicense`, and OWASP dependency scanning.
+Prepare the tools in `mise.toml`, Python 3.11+, Bash, actionlint, Gitleaks and ShellCheck, then run `bash scripts/prepare.sh` and `sh scripts/setup-git-hooks.sh --yes`. A desktop session is required locally; Linux CI prepares Xvfb, xauth and xclip. The optional `python3 scripts/install-governor.py` installs the exact published governor under ignored `.tools/please/bin` with checksum and version verification; prepend that directory to PATH when invoking Git.
+
+Hooks are the final local gates. Do not repeat the complete gate manually before Git; inspect stored results with `please status --details`, fix failures and retry. `mise run verify` remains the manual governor entrypoint. Native `preCommitCheck` and `prePushCheck` Gradle convenience tasks remain available.
+
+CI retains Renovate PRs, main pushes, manual dispatch, Java 17/21/25 JAR smoke tests and separate PIT mutation testing. OWASP remains CI-only locally, with daily cache refresh and weekly purge/rebuild workflows. CodeQL retains its nightly Kotlin toolchain. Tests run offline with synthetic data; advisory/audit services are separate.
+
+The independent Coverage Badges workflow recalculates coverage, creates both SVG and Shields JSON badges and deploys the complete documentation/coverage Pages site. Normal checks retain the 90% instruction and 85% branch coverage gates without creating badge files. See [repository governance](.please/README.md) for execution points, report artifacts and release contracts.
 
 ### Dependency Verification
 
@@ -624,7 +630,7 @@ Review the diff before committing. If Gradle still reports key-download failures
 
 ### Commit Messages
 
-Passbird uses Conventional Commits and validates them in the local `commit-msg` hook before a commit is accepted.
+Passbird imports its Conventional Commits check and advisory Gemini Flash-Lite header review from the shared rulesets. The review receives only the header; FAIL and ERROR stay visible without blocking commits. Export GEMINI_API_KEY in the shell invoking Git. Use `!` or a BREAKING CHANGE footer for breaking changes; the legacy `major` type remains supported only in historical release analysis.
 
 Supported commit types are:
 - `fix`
@@ -638,7 +644,7 @@ Supported commit types are:
 - `revert`
 - `style`
 - `test`
-- `major`
+- `config`
 
 Scopes are optional. When a scope is used, it must be one of:
 - `backup`
@@ -687,7 +693,11 @@ No. Many programs do not support Unicode characters in passwords, and some even 
 ### How do I update Passbird?
 Passbird follows semantic versioning (`x.y.z`, where `x` is the major version, `y` the minor version, and `z` the patch level). To update to a minor or patch version, download the latest JAR file and use it as usual. For major updates, review the release notes carefully before upgrading for compatibility guidance.
 
-You can find current and historical Passbird versions [on GitHub Releases](https://github.com/christianpflugradt/Passbird/releases). Official stable releases use plain semantic versions such as `6.4.0`. Manual publish runs create development prereleases with versions such as `6.4.0-dev.20260525.1`. Each release publishes the `passbird.jar` asset used by [Passbird-Updater](https://github.com/christianpflugradt/Passbird-Updater), which defaults to official stable releases and can opt into development prereleases with `--channel dev`, though manual updates are still the more conservative option.
+You can find current and historical Passbird versions [on GitHub Releases](https://github.com/christianpflugradt/Passbird/releases). Official stable releases use plain semantic versions such as `7.0.8`. Manual publish runs create development prereleases with versions such as `7.0.8-dev.20261110.1`. Each release publishes the `passbird.jar` asset used by [Passbird-Updater](https://github.com/christianpflugradt/Passbird-Updater), which defaults to official stable releases and can opt into development prereleases with `--channel dev`, though manual updates are still the more conservative option.
+
+Stable publication remains scheduled for Monday 03:23 Europe/Berlin; manual `publish.yml` dispatch, `./gradlew publishPreview` and `mise run preview` create development prereleases. Plan determines a version without publishing, then Readiness and Candidate run in parallel. Readiness requires trusted successful CI for the exact main source. Candidate builds and smoke-tests the versioned JAR on Java 17, 21 and 25. Publish verifies and uploads those same bytes without rebuilding, with source/version/run/attempt metadata and checksums.
+
+Stable releases use minor for feat, patch for fix/perf/chore/refactor/build/effective revert, and major for breaking changes. Test/ci/config/docs/style alone do not release. Scoped reverts cancel unreleased originals. Tags stay unprefixed for stable releases and use `dev-` for development prereleases. Monthly cleanup retains its 30-day prerelease policy. Partial CI reruns may retain successful jobs; Release reruns without the current attempt's complete candidate must rerun all jobs. Tag, release and asset publication are not atomic.
 
 ### What happens if I lose my master password or keystore file?
 Losing your master password or keystore file results in permanent data loss. The master password is required to decrypt the database, and the keystore file stores the encryption key. Even recreating the keystore with the same master password will not regenerate the same encryption key.

@@ -55,7 +55,6 @@ done
 agent_require_file .github/scripts/verify-release-jar-manifest.sh
 agent_require_file .github/scripts/verify-release-jar-payload.sh
 
-agent_run_or_print "$run" ./gradlew "-PreleaseVersion=$release_version" jar
 agent_run_or_print "$run" .github/scripts/verify-release-jar-manifest.sh build/libs/passbird.jar "$release_version"
 
 if [[ -n "$verified_jar" ]]; then

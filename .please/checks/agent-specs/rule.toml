@@ -1,0 +1,7 @@
+id = "agent-specs"
+description = "Check agent helper and specification wiring"
+run_at = ["pre-commit", "pre-push", "check", "release-candidate"]
+
+[check]
+command = "zsh .agent/scripts/check-agent-specs.sh"
+timeout_seconds = 900

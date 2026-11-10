@@ -1,0 +1,5 @@
+# Exact current-snapshot false positives; see .please/README.md.
+src/main/kotlin/de/pflugradts/passbird/adapter/exchange/FilePasswordExchange.kt:generic-api-key:156
+src/test/kotlin/de/pflugradts/passbird/adapter/exchange/FilePasswordExchangeIntegrationTest.kt:generic-api-key:281
+src/test/kotlin/de/pflugradts/passbird/adapter/keystore/KeyStorePersistenceTest.kt:generic-api-key:34
+src/test/kotlin/de/pflugradts/passbird/application/yolk/TotpSupportTest.kt:generic-api-key:15

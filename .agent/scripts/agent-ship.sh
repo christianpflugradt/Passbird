@@ -91,7 +91,9 @@ if [[ -n "$issue" && "$message" != *"Closes #$issue"* ]]; then
 fi
 
 for requested_path in "${paths[@]}"; do
-  [[ -e "$requested_path" ]] || agent_die "Path does not exist: $requested_path"
+  if [[ ! -e "$requested_path" ]] && ! git ls-files --error-unmatch -- "$requested_path" >/dev/null 2>&1; then
+    agent_die "Path is neither present nor a tracked deletion: $requested_path"
+  fi
 done
 
 outside_allowed_paths() {
@@ -163,6 +165,7 @@ trap 'rm -f "$message_tmp"' EXIT
 print -rn -- "$message" > "$message_tmp"
 
 git commit -F "$message_tmp"
+unset GEMINI_API_KEY
 git pull --rebase
 git push
 

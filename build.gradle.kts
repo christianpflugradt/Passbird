@@ -213,7 +213,7 @@ tasks.withType<Test>().configureEach {
     doLast { println("\nTotal Tests: $testCount") }
 }
 
-val testExecutionData: PatternFilterable = fileTree(project.rootDir.path).include("build/jacoco/*.exec")
+val testExecutionData = layout.buildDirectory.file("jacoco/allTests.exec")
 
 tasks.jacocoTestReport {
     executionData(testExecutionData)
@@ -272,6 +272,15 @@ dependencyCheck {
 
 licenseReport {
     allowedLicensesFile = file("$projectDir/allowed-licenses.json")
+}
+
+tasks.register("prepareValidationDependencies") {
+    group = "build setup"
+    description = "Downloads verification dependencies before offline checks."
+    notCompatibleWithConfigurationCache("Resolves dependency configurations explicitly")
+    doLast {
+        configurations.filter { it.isCanBeResolved }.forEach { it.resolve() }
+    }
 }
 
 val cleanPrePushSmokeDirectory = tasks.register<Delete>("cleanPrePushSmokeDirectory") {

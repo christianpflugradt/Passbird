@@ -1,0 +1,22 @@
+{
+  "name": "passbird-release",
+  "private": true,
+  "description": "Repository-local Passbird governance and release tooling",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=24.10.0 <27"
+  },
+  "devDependencies": {
+    "@semantic-release/commit-analyzer": "13.0.1",
+    "@semantic-release/github": "12.0.10",
+    "@semantic-release/release-notes-generator": "14.1.1",
+    "conventional-changelog-conventionalcommits": "9.3.1",
+    "js-yaml": "5.5.0",
+    "semantic-release": "25.0.9"
+  },
+  "scripts": {
+    "test": "node --test scripts/test-release.mjs scripts/test-workflows.mjs && node scripts/test-offline-lifecycle.mjs && python3 -B -m unittest discover -s scripts -p 'test_*.py'",
+    "release:plan": "node scripts/release-plan.mjs",
+    "release": "node scripts/publish-release.mjs"
+  }
+}

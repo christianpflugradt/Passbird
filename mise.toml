@@ -1,12 +1,19 @@
 [tools]
 java = "temurin-25"
+node = "26"
 
 [tasks.format]
 run = "./gradlew ktlintFormat"
 
 [tasks.verify]
-run = "./gradlew preCommitCheck prePushCheck"
+run = "please run --at pre-push --checks-only"
 
 [tasks.preview]
 run = "./gradlew publishPreview"
 
+
+[tasks.prepare]
+run = "bash scripts/prepare.sh"
+
+[tasks.install-git-hooks]
+run = "sh scripts/setup-git-hooks.sh --yes"

@@ -58,7 +58,7 @@ case "$area" in
     hotspots=(specs/interaction.yaml specs/capabilities.yaml specs/flows src/main/kotlin/de/pflugradts/passbird/application/commandhandling src/main/kotlin/de/pflugradts/passbird/application/boot src/main/kotlin/de/pflugradts/passbird/application/process src/main/kotlin/de/pflugradts/passbird/adapter/userinterface README.md CONFIGURATION.md)
     ;;
   delivery)
-    hotspots=(.github/workflows .releaserc.json build.gradle.kts settings.gradle.kts .agent/scripts README.md)
+    hotspots=(.github/workflows release.config.mjs build.gradle.kts settings.gradle.kts .agent/scripts README.md)
     ;;
   *)
     usage

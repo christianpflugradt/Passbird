@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "repository": "christianpflugradt/Passbird",
+  "workflow": ".github/workflows/build.yml",
+  "event": "push",
+  "branch": "main",
+  "required_jobs": [
+    "Check",
+    "Mutation Tests",
+    "OWASP",
+    "artifact-smoke-test (Java 17)",
+    "artifact-smoke-test (Java 21)",
+    "artifact-smoke-test (Java 25)"
+  ]
+}

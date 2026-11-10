@@ -9,10 +9,12 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   purge-development-releases:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - name: delete prereleases older than 30 days

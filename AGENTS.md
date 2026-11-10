@@ -70,11 +70,23 @@ This repository keeps its agent-facing product specifications, design rules, and
 
 ## Commit Messages
 
-- Commits use Conventional Commits and are validated by the local `commit-msg` hook.
-- Supported types are `fix`, `feat`, `build`, `chore`, `ci`, `docs`, `perf`, `refactor`, `revert`, `style`, `test`, and `major`.
+- Commits use the external Conventional Commits Check and advisory header-only Gemini Flash-Lite Review. Review FAIL and ERROR remain visible without blocking commits.
+- Use `!` or a BREAKING CHANGE footer for new breaking changes. The former `major` type remains understood by historical release analysis only.
+- Supported types are `fix`, `feat`, `build`, `chore`, `ci`, `docs`, `perf`, `refactor`, `revert`, `style`, `test`, and `config`.
 - Scopes are optional. When used, they must be one of `backup`, `boot`, `clipboard`, `commands`, `configuration`, `deps`, `egg`, `events`, `exchange`, `gradle`, `inactivity`, `keystore`, `memory`, `nest`, `password`, `passwordtree`, `protein`, `release`, `security`, or `userinterface`.
 - Prefer no scope for broad changes. Prefer a scope for localized software changes, especially adapter-specific work.
 - The `ci` type is usually scope-less.
+
+## Repository Governance
+
+- Use the independently published governor pinned in `.please-version`; never use a candidate as governor.
+- Shared rules and provider adapters stay in immutable external packages. Local rules contain Passbird-specific requirements only.
+- Prepare tools through the developer's existing toolchain and run `bash scripts/prepare.sh` explicitly before checks; checks do not install tools.
+- Install managed hooks with `sh scripts/setup-git-hooks.sh --yes`. Setup preserves custom hooks; Gradle no longer generates hooks.
+- Git hooks are the final validation gates. Inspect stored failures with `please status --details`, fix and retry Git without bypassing checks.
+- Pre-push additionally covers workflow syntax, offline release-tool tests and shared security/license checks. Tests never call real models or paid services; only the advisory commit hook may call its provider.
+- Stop after successful push. Do not monitor or repair remote workflows, trigger Release or publish releases without explicit authorization.
+- See `.please/README.md` for execution points, preparation, badge ownership and release artifact contracts.
 
 ## Minimum Validation
 

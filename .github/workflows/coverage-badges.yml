@@ -1,0 +1,170 @@
+name: Coverage Badges
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: temurin
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Prepare dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes xauth xclip xvfb
+          bash scripts/prepare.sh badges
+      - name: Calculate and verify coverage independently
+        run: xvfb-run -a bash scripts/gradle-check.sh allTests jacocoTestCoverageVerification jacocoTestReport
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: test-coverage-report
+          path: build/reports/jacoco/test
+          if-no-files-found: error
+
+  pages-site:
+    runs-on: ubuntu-latest
+    needs:
+      - coverage
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: prepare Pages source
+        run: |
+          rm -rf .pages _site site
+          mkdir -p .pages
+          cp -R .github/pages/. .pages/
+          cp README.md CONFIGURATION.md .pages/
+      - name: configure GitHub Pages
+        uses: actions/configure-pages@v6
+      - name: build GitHub Pages site
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./.pages
+          destination: ./_site
+      - name: prepare writable Pages directory
+        run: |
+          mkdir -p site
+          cp -R _site/. site/
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: test-coverage-report
+          path: build/reports/jacoco/test
+      - name: add coverage assets to Pages site
+        run: |
+          report_xml="build/reports/jacoco/test/jacocoTestReport.xml"
+          set_coverage_metrics() {
+            counter_type="$1"
+            counter="$(grep -o "<counter type=\"$counter_type\" missed=\"[0-9]*\" covered=\"[0-9]*\"/>" "$report_xml" | tail -n1)"
+            missed="$(printf '%s\n' "$counter" | sed -E 's/.*missed=\"([0-9]+)\".*/\1/')"
+            covered="$(printf '%s\n' "$counter" | sed -E 's/.*covered=\"([0-9]+)\".*/\1/')"
+            total=$((missed + covered))
+            percentage_tenths="$(awk -v covered="$covered" -v total="$total" 'BEGIN { if (total == 0) print 0; else printf "%.0f", (covered * 1000) / total }')"
+            if [ $((percentage_tenths % 10)) -eq 0 ]; then
+              percentage="$((percentage_tenths / 10))%"
+            else
+              percentage="$((percentage_tenths / 10)).$((percentage_tenths % 10))%"
+            fi
+
+            if [ "$percentage_tenths" -lt 500 ]; then
+              color="#e05d44"
+            elif [ "$percentage_tenths" -lt 700 ]; then
+              color="#fe7d37"
+            elif [ "$percentage_tenths" -lt 850 ]; then
+              color="#dfb317"
+            elif [ "$percentage_tenths" -lt 900 ]; then
+              color="#97ca00"
+            else
+              color="#4c1"
+            fi
+          }
+
+          render_badge() {
+            file_stem="$1"
+            label="$2"
+            label_width="$3"
+            total_width="$4"
+            value_width="$((total_width - label_width))"
+            label_center="$(awk -v width="$label_width" 'BEGIN { printf "%.1f", width / 2 }')"
+            value_center="$(awk -v label_width="$label_width" -v value_width="$value_width" 'BEGIN { printf "%.1f", label_width + (value_width / 2) }')"
+
+            cat > "site/coverage/${file_stem}.svg" <<EOF
+          <svg xmlns="http://www.w3.org/2000/svg" width="${total_width}" height="20" role="img" aria-label="${label}: ${percentage}">
+            <title>${label}: ${percentage}</title>
+            <defs>
+              <linearGradient id="smooth" x2="0" y2="100%">
+                <stop offset="0" stop-color="#fff" stop-opacity=".7"/>
+                <stop offset=".1" stop-color="#aaa" stop-opacity=".1"/>
+                <stop offset=".9" stop-opacity=".3"/>
+                <stop offset="1" stop-opacity=".5"/>
+              </linearGradient>
+              <clipPath id="clip">
+                <rect width="${total_width}" height="20" rx="3" fill="#fff"/>
+              </clipPath>
+            </defs>
+            <g clip-path="url(#clip)">
+              <rect width="${label_width}" height="20" fill="#555"/>
+              <rect x="${label_width}" width="${value_width}" height="20" fill="${color}"/>
+              <rect width="${total_width}" height="20" fill="url(#smooth)"/>
+            </g>
+            <g fill="#fff" text-anchor="middle" font-family="Verdana, DejaVu Sans, sans-serif" font-size="11">
+              <text x="${label_center}" y="15" fill="#010101" fill-opacity=".3">${label}</text>
+              <text x="${label_center}" y="14">${label}</text>
+              <text x="${value_center}" y="15" fill="#010101" fill-opacity=".3">${percentage}</text>
+              <text x="${value_center}" y="14">${percentage}</text>
+            </g>
+          </svg>
+          EOF
+            cat > "site/coverage/${file_stem}.json" <<EOF
+          {
+            "schemaVersion": 1,
+            "label": "${label}",
+            "message": "${percentage}",
+            "color": "${color#\#}"
+          }
+          EOF
+          }
+
+          mkdir -p site/coverage
+          rm -rf site/coverage/report
+          cp -R build/reports/jacoco/test/html site/coverage/report
+          set_coverage_metrics "BRANCH"
+          render_badge "branch-coverage" "branch coverage" 101 148
+          set_coverage_metrics "INSTRUCTION"
+          render_badge "instruction-coverage" "instruction coverage" 118 165
+      - name: upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: ./site
+
+  deploy-pages:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: coverage-pages
+      cancel-in-progress: false
+      queue: max
+    needs: pages-site
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

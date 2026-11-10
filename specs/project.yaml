@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-05-30
+last_reviewed: 2026-11-10
 project:
   name: Passbird
   synopsis: >
@@ -47,8 +47,8 @@ runtime_files:
       purpose: PKCS12 keystore containing secret material used as the current crypto provider key material
     - name: passbird.tree
       purpose: versioned password tree persistence file containing an encrypted password tree payload
-  - name: passbird-export.zip
-    purpose: AES-encrypted ZIP containing portable CSV import and export data
+    - name: passbird-export.zip
+      purpose: AES-encrypted ZIP containing portable CSV import and export data
 repository_layout:
   - path: src/main/kotlin/de/pflugradts/passbird/application
     role: application boot, command handling, configuration, process orchestration, security factories
@@ -101,23 +101,28 @@ commands:
   coverage_gate: ./gradlew jacocoTestCoverageVerification
   license_gate: ./gradlew checkLicense
   owasp: GitHub Actions OWASP dependency-check workflows
-  pre_commit: ./gradlew preCommitCheck
-  pre_push: ./gradlew prePushCheck
+  pre_commit: please run --at pre-commit --checks-only
+  pre_push: please run --at pre-push --checks-only
 release_model:
   versioning: semantic_versioning
   primary_branch: main
+  governor: .please-version
+  governance_contract: .please/README.md
   automation:
-    - GitHub Actions build, CodeQL, and OWASP workflows verify the repository
-    - GitHub Actions build workflow builds the releasable passbird.jar and smoke-validates it under Xvfb before a main commit can satisfy the publish gate
-    - GitHub Actions build workflow runs dependency-check analysis on push and publishes the GitHub Pages site on main from a temporary Jekyll source assembled from repository documentation and workflow-owned Pages config under .github/pages
-    - GitHub Actions build workflow runs a dedicated PIT mutation-testing job for high-risk persistence, exchange, backup, and security code and uploads mutation reports plus line-coverage data as artifacts
-    - GitHub Actions refresh the dependency-check cache daily and purge then rebuild it during the Sunday-to-Monday overnight window
-    - GitHub Actions build workflow refreshes the branch and instruction coverage badges plus the coverage report on main
-    - GitHub Actions publish workflow creates development prereleases on manual dispatch and runs semantic-release every Monday at 09:23 UTC for official stable releases
-    - GitHub Actions publish workflow requires the current main commit's Build and Verify run to provide the non-expired release-jar artifact plus successful artifact smoke validation jobs, then stamps passbird.jar manifests through the explicit Gradle -PreleaseVersion input and verifies manifest version plus payload equivalence before publishing release assets
-    - official stable releases use plain semantic versions and semantic-release publishes their GitHub tags and GitHub releases with the passbird.jar asset when commit history requires a release
-    - the scheduled stable publish job disables repository-local Git hooks before semantic-release pushes its release tag so the headless release runner does not rerun local pre-push checks
-    - manual development prereleases use the latest official stable version as their base and publish passbird.jar assets under GitHub prerelease tags prefixed with dev-
+    - build.yml runs deterministic Please Behave checks, a separate PIT job and Java 17/21/25 smoke tests of one source-bound JAR
+    - CodeQL retains security-extended queries and the nightly Kotlin toolchain
+    - OWASP analysis remains CI-only locally; daily refresh and weekly purge/rebuild maintain its database
+    - coverage-badges.yml independently calculates coverage, generates badges and publishes the complete Jekyll documentation and coverage site
+    - publish.yml retains manual development prereleases and Monday 03:23 Europe/Berlin stable releases
+    - Plan does not publish; Readiness and Candidate run in parallel; Publish requires both
+    - Readiness checks committed source and trusted exact-source push CI including OWASP and all required Java smoke jobs
+    - Candidate builds once with the planned version and checks the exact JAR on Java 17, 21 and 25
+    - Publish verifies source/version/checksums/run/attempt and CI payload equivalence without rebuilding
+    - stable 7.x releases retain plain semantic tags and passbird.jar; development tags retain dev- and use the latest stable base plus Berlin date and sequence
+    - checksums and metadata accompany the existing JAR asset; Passbird-Updater stable and opt-in development contracts remain intact
+    - monthly prerelease cleanup retains its 30-day retention and tag cleanup
+    - partial CI reruns retain successful jobs from the same run; Release reruns require current-attempt candidates
+    - release publication is not atomic across tags, releases and assets
 agent_notes:
   - this repo values long-term maintenance, not only passing tests
   - security claims in docs should remain modest; README explicitly says the project is not externally audited
@@ -137,7 +142,7 @@ agent_notes:
   - if unrelated workspace state or another git constraint blocks working safely on main without stashing, stop, explain the blocker, and wait for maintainer instructions
   - before pushing committed work, run git pull -r on the current branch to integrate remote updates without a merge commit
   - do not run OWASP dependency-check locally for routine verification; use the GitHub Actions workflows unless the maintainer explicitly asks for a local run
-  - use smoke-test/run.sh when the maintainer explicitly asks for a manual jar-level interactive smoke pass; it is complementary to Gradle tests rather than part of the default local gate
+  - use smoke-test/run.sh when the maintainer explicitly asks for a manual jar-level interactive smoke pass; it is also part of the default governor pre-push gate
   - do not rerun the same local verification during one task unless the code or environment changed in a way that makes the repeated run materially informative
   - when a verification is already covered by the local pre-commit hook, do not run that same verification explicitly beforehand unless the maintainer asks for it or a non-hook reason makes it necessary
   - gradle tasks and git hooks may legitimately take multiple minutes; do not poll or narrate their status unnecessarily

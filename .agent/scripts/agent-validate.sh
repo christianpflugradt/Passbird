@@ -104,17 +104,12 @@ case "$change_type" in
     run_gradle_focused
     ;;
   ci_or_release_workflow|ci|release)
-    agent_run_or_print "$run" ./gradlew jar
+    print -r -- "Final workflow/release validation is managed by Git hooks."
     if [[ -n "$release_version" ]]; then
-      agent_run_or_print "$run" ./gradlew "-PreleaseVersion=$release_version" jar
-      agent_run_or_print "$run" .github/scripts/verify-release-jar-manifest.sh build/libs/passbird.jar "$release_version"
-    else
-      print -r -- "No --release-version supplied; manifest stamping check skipped."
-    fi
-    if [[ -n "$verified_jar" ]]; then
-      agent_run_or_print "$run" .github/scripts/verify-release-jar-payload.sh "$verified_jar" build/libs/passbird.jar
-    else
-      print -r -- "No --verified-jar supplied; payload comparison skipped."
+      args=(--version "$release_version")
+      [[ -z "$verified_jar" ]] || args+=(--verified-jar "$verified_jar")
+      [[ "$run" == "0" ]] || args+=(--run)
+      .agent/scripts/agent-release-artifact-check.sh "${args[@]}"
     fi
     ;;
   security_or_persistence|security|persistence)

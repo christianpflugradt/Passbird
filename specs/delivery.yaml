@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-09-02
+last_reviewed: 2026-11-10
 agent_internal_scripts:
   location: .agent/scripts
   purpose:
@@ -29,6 +29,7 @@ quality_gates:
     - pre-commit hook runs ./gradlew detekt
     - pre-commit hook runs ./gradlew compileKotlin
     - pre-commit hook runs ./gradlew compileTestKotlin
+    - pre-commit hook verifies .agent/scripts and specification wiring
   warning_enforcement:
     - Kotlin compilation treats warnings as errors across main and test sources
     - Gradle deprecations are monitored through build output and CI logs, but they do not fail the build by default because third-party plugins may emit warnings outside repository control
@@ -47,7 +48,7 @@ quality_gates:
   dependency_and_license:
     - Gradle Wrapper pins the distribution URL and official SHA-256 checksum in gradle/wrapper/gradle-wrapper.properties
     - pre-push hook runs ./gradlew checkLicense
-    - the generated pre-push hook intentionally runs ./gradlew --no-configuration-cache prePushCheck because dependency-license-report tasks retain Gradle Project state and otherwise force configuration-cache discard at the end of the hook run
+    - the dependency-license Rule intentionally runs ./gradlew --offline --no-configuration-cache checkLicense because dependency-license-report tasks retain Gradle Project state and otherwise force configuration-cache discard at the end of the hook run
     - Gradle dependency verification uses gradle/verification-metadata.xml and the armored gradle/verification-keyring.keys file
     - GitHub Actions OWASP dependency check workflows
   dependency_maintenance:
@@ -63,8 +64,8 @@ quality_gates:
     - ./gradlew preCommitCheck
     - ./gradlew prePushCheck
   hook_managed_checks:
-    - the generated .git/hooks/pre-commit script runs ./gradlew preCommitCheck
-    - the generated .git/hooks/pre-push script runs ./gradlew prePushCheck
+    - the managed pre-commit wrapper runs please run --at pre-commit
+    - the managed pre-push wrapper runs please run --at pre-push
 local_verification_policy:
   pre_commit_hook:
     covers:
@@ -80,7 +81,7 @@ local_verification_policy:
       - ./gradlew allTests
       - ./gradlew jar
       - ./smoke-test/run.sh
-    note: do not rerun these manually unless the maintainer explicitly asks for it; prePushCheck includes the hook-managed jar build and smoke pass
+    note: do not rerun these manually; the governor also runs shared security/license checks, workflow validation and offline release-helper tests
   focused_tests:
     default: run only tests that exercise the code you changed or the tests you added
     coverage_expectation:
@@ -132,30 +133,34 @@ local_verification_policy:
   ci_landscape:
     github:
       workflows:
+        - .github/workflows/coverage-badges.yml
         - .github/workflows/build.yml
         - .github/workflows/codeql.yml
         - .github/workflows/owasp-update.yml
         - .github/workflows/owasp-purge.yml
         - .github/workflows/publish.yml
     notes:
-      - ordinary branch pushes prove the always-on compile, lint, static-analysis, license, OWASP, LTS jar-smoke matrix, and non-conditional test jobs; they skip architecture-tests, test-coverage-verification, test-coverage-report, pages-site, and deploy-pages
-      - the build workflow installs Xvfb and xclip, builds the releasable passbird.jar once with the GitHub Actions manifest metadata on Temurin 25 LTS, and runs smoke-test/run.sh against that same artifact under xvfb-run on Java 17, 21, and 25
-      - architecture tests and coverage jobs run only on pull requests and direct pushes to main, while GitHub Pages publication stays main-only
-      - the build workflow runs dependency-check analysis on push and restores its local database from the default-branch GitHub Actions cache when available
-      - the dedicated OWASP cache refresh and purge workflows must invoke dependency-check maintenance tasks with `--no-configuration-cache` because the OWASP Gradle plugin still stores unsupported `Project` state under Gradle 9.7.1 and otherwise fails after completing the maintenance work
-      - single-run Java-based GitHub Actions workflow jobs use Temurin 25 LTS while the Gradle build enforces a Java 17 API floor for compilation and the build workflow proves runtime compatibility for the current LTS line
-      - the build workflow runs detekt as a dedicated static-analysis job and uploads its reports as artifacts
-      - unit, integration, property, architecture, and PIT mutation diagnostic artifacts are uploaded when present even after their owning test steps fail, so test reports, generated-test failures, and mutation context remain inspectable after CI failures
-      - a daily OWASP workflow refreshes the dependency-check cache from the Gradle plugin update task
-      - a weekly OWASP workflow purges and rebuilds the dependency-check cache during the Sunday-to-Monday overnight window
-      - the CodeQL workflow runs the broader built-in security-extended query suite while staying on the nightly toolchain for Kotlin compatibility
-      - CodeQL intentionally uses the nightly toolchain because stable CodeQL can lag behind current Kotlin support, and this repository prefers not to delay Kotlin upgrades for that gap
-      - the GitHub Pages site builds from a temporary Jekyll source assembled in the workflow from repository documentation plus workflow-owned Pages config under .github/pages so the product root stays free of Pages-only files
-      - the build workflow publishes the GitHub Pages site for coverage assets and refreshes the branch-coverage badge, instruction-coverage badge, and report on main
-      - the deploy-pages job serializes Pages deployments through the coverage-pages concurrency group with cancel-in-progress disabled and queue set to max; up to 100 deployments can wait, preparation and quality jobs remain parallel, and deployment order follows queue arrival rather than commit order
-      - publish workflow creates manual GitHub prereleases from the latest official stable base version and runs semantic-release only on the Monday 09:23 UTC schedule, but only after the current main commit already has a Build and Verify workflow run with the release-jar artifact and successful artifact smoke validation jobs
-      - manual publish runs compute the development release version before building passbird.jar, scheduled stable publish runs build passbird.jar during semantic-release prepare with the stable nextRelease.version, disable repository-local Git hooks before semantic-release pushes the release tag, and verify the jar manifest plus payload equivalence against the verified release-jar artifact before release publication
-      - scheduled stable publish runs are expected to succeed even when no release is due, while manual publish runs are expected to produce a new development prerelease
+      - build.yml uses check / Check with the published governor, preserving main pushes, Renovate PRs and manual dispatch
+      - preparation downloads locked dependencies and prepares tools before checks; governed tests remain offline with synthetic credentials and mocked services
+      - allTests covers unit, property, integration, architecture and desktop clipboard tests in one Rule; CI prepares Xvfb, xauth and xclip
+      - coverage consumes nonempty allTests.exec only and retains 90 percent instruction and 85 percent branch thresholds plus HTML/XML diagnostics
+      - native test diagnostics are consolidated into test-reports; lint, Detekt, license, OWASP, mutation and smoke diagnostics remain available after failures
+      - CI builds one source/run/attempt-bound release-jar and smoke-tests it on Java 17, 21 and 25 with fail-fast disabled
+      - PIT remains a separate job with unchanged high-risk targets, target tests, timeouts and report/line-coverage outputs
+      - OWASP analysis remains a blocking CI-only job with the existing secret names and cache prefix; it does not run in local Rules or again at release-readiness
+      - daily OWASP refresh and weekly purge/rebuild retain manual dispatch and the shared maintenance lock; maintenance and analysis disable configuration caching
+      - CodeQL keeps security-extended queries and the nightly Kotlin toolchain
+      - coverage-badges.yml repeats coverage independently and owns all badge files, artifact transfer and complete Jekyll documentation/coverage Pages publication
+      - badge endpoints, SVG and JSON formats, rounding, colors, HTML report and thresholds remain unchanged
+      - Pages retains coverage-pages concurrency, cancel-in-progress false and queue max; ordering follows queue arrival
+      - actionlint 1.7.12 supports timezone; a separately tested checker validates queue values before suppressing only its unknown-queue diagnostic
+      - publish.yml retains Monday 03:23 Europe/Berlin stable releases, manual development prereleases and the existing preview entrypoints
+      - Plan does not prepare or publish; Readiness and Candidate run in parallel; Publish requires both successful
+      - Candidate builds with the planned version and checks exact JAR bytes on Java 25, 17 and 21; Publish never rebuilds
+      - readiness requires trusted exact-source push CI and propagates the external proof's retained Check attempt for CI artifact binding
+      - artifacts, metadata, checksums and smoke receipts bind version, source, repository and workflow run/attempt; incomplete or foreign sets fail
+      - partial CI reruns may retain successful jobs; Release reruns require the current attempt's complete candidate
+      - monthly development-release purge retains its 30-day policy and tag cleanup
 github_cli_usage:
   when_remote_state_matters:
     - inspect local workflow YAML first for static behavior, then use gh for live GitHub-side workflow registration, runs, jobs, and logs
@@ -188,7 +193,7 @@ change_rules:
 commit_messages:
   standard: conventional_commits
   enforced_by:
-    - local commit-msg hook generated from settings.gradle.kts
+    - external Conventional Commits Check imported by .please/config.toml
   supported_types:
     - fix
     - feat
@@ -201,7 +206,7 @@ commit_messages:
     - revert
     - style
     - test
-    - major
+    - config
   optional_scopes:
     - backup
     - boot
@@ -247,14 +252,10 @@ recommended_validation_by_change_type:
       - run only the focused unit, property, and integration tests that cover the changed workflow
   ci_or_release_workflow:
     run:
-      - .agent/scripts/agent-validate.sh ci_or_release_workflow for ordinary CI workflow changes
-      - .agent/scripts/agent-release-artifact-check.sh when release jar manifest stamping or artifact payload binding changes
-      - ./gradlew jar
-      - when release jar manifest stamping changes, build with an explicit -PreleaseVersion value and run .github/scripts/verify-release-jar-manifest.sh against build/libs/passbird.jar
-      - when publish artifact binding changes, compare the rebuilt release jar with the verified release-jar artifact using .github/scripts/verify-release-jar-payload.sh
-      - review workflow and release config for consistency
-      - inspect relevant GitHub Actions runs or workflow metadata with gh when the question depends on GitHub-side state
-      - run semantic-release in dry-run mode when credentials and tags are available for scheduled stable-release behavior
+      - review workflow, release config and artifact binding against .please/README.md
+      - use targeted offline helper tests for diagnosis; final full validation belongs to Git hooks
+      - .agent/scripts/agent-release-artifact-check.sh verifies an already built JAR without rebuilding
+      - inspect GitHub metadata with gh when remote facts matter, without triggering Release
   security_or_persistence:
     run:
       - .agent/scripts/agent-validate.sh security_or_persistence -- focused Gradle args chosen by the agent
@@ -268,23 +269,25 @@ recommended_validation_by_change_type:
       - ./smoke-test/run.sh
     notes:
       - use when the maintainer explicitly asks to validate the built passbird.jar end to end through its interactive terminal flow
-      - treat smoke-test/run.sh as complementary manual verification rather than a replacement for focused Gradle tests
+      - smoke-test/run.sh is also part of the governor pre-push gate; do not repeat it manually before Git
 release_and_history_notes:
-  versioning: semantic versioning
-  commit_patterns_observed:
-    - conventional commit style for automation and release tooling
-    - dependency updates are frequent and usually automated
+  versioning: stable 7.x semantic versioning
+  contract: .please/README.md
   automation:
-    - semantic-release now publishes scheduled stable releases on GitHub rather than GitLab
-    - manual publish runs create GitHub prereleases whose tags are prefixed with dev- while their visible versions remain updater-compatible
-    - release jars are stamped through the explicit Gradle -PreleaseVersion input; development jars use the unprefixed dev version shown in the prerelease title and stable jars use the semantic-release nextRelease.version
-    - release assets are expected to include passbird.jar for updater compatibility on both stable and development channels
-    - publish runs stay gated on a fully successful Build and Verify workflow for the same main commit, including the non-expired release-jar artifact and jar-level smoke validation jobs for that artifact
+    - stable tags remain plain versions; development tags have dev- and visible/JAR versions omit that prefix
+    - feat releases minor; fix, perf, chore, refactor, build and effective revert release patch; breaking changes release major
+    - test, ci, config, docs and style do not release unless breaking; historical major commits remain major
+    - scoped reverts cancel unreleased originals in analysis and notes; historical build(release) version commits are ignored
+    - no generated version commit is created
+    - release assets retain passbird.jar for stable and opt-in development updater compatibility and add SHA256SUMS and metadata.json
+    - Build-Date, Created-By, executable entrypoint, vendor/title and implementation/specification version attributes remain intact
   release_guardrail:
-    - if a change impacts persistence format or migration behavior, document it before release
-    - publish workflow release paths must fail before creating or publishing a GitHub release when passbird.jar has a missing, unspecified, or mismatched Implementation-Version manifest value
-    - publish workflow release paths must fail before creating or publishing a GitHub release when the version-stamped release jar payload differs from the verified release-jar artifact
-    - agents should not push partial or unreleasable states simply to satisfy the default commit-and-push rule
+    - persistence or migration changes must be documented before release
+    - missing or mismatched manifests, unsafe JAR entries, incomplete smoke evidence and foreign source/version/run/attempt metadata fail before publication
+    - Publish compares candidate payload with the trusted CI JAR allowing only manifest differences and never rebuilds
+    - publication rechecks planned version, checkout source and unchanged remote main
+    - tag, GitHub release and asset publication are not atomic; partial failures must be reported
+    - agents do not publish releases, trigger Release or monitor remote workflows without explicit authorization
 escalation_rules:
   - escalate when a change has hidden compatibility risk for stored data
   - escalate when a request conflicts with offline-only posture

@@ -134,7 +134,7 @@ areas:
     review_question: Is the project still verifiable and releasable, with trustworthy automation, coverage, dependency checks, and updater-compatible assets?
     hotspots:
       - .github/workflows
-      - .releaserc.json
+      - release.config.mjs
       - build.gradle.kts
       - settings.gradle.kts
       - scripts

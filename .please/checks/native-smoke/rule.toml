@@ -1,0 +1,9 @@
+id = "native-smoke"
+description = "Verify the interactive JAR workflow"
+run_at = ["pre-push", "check", "release-candidate"]
+depends_on = ["native-build"]
+
+[check]
+command = "bash scripts/native-smoke.sh"
+timeout_seconds = 900
+resource = "gradle"

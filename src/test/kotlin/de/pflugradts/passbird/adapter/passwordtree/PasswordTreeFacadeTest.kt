@@ -398,11 +398,9 @@ class PasswordTreeFacadeTest {
             every { systemOperation.exit(any()) } returns Unit
             fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifyChecksum = true)
 
-            mockkStatic(::checksum)
-            every { checksum(any()) } returns 0
             passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream()}))
             expectThat(File(passwordTreeFilename)).exists()
-            unmockkAll()
+            corruptStoredChecksum()
 
             val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
 
@@ -425,11 +423,9 @@ class PasswordTreeFacadeTest {
             every { systemOperation.exit(any()) } returns Unit
             fakeConfiguration(instance = configuration, withPasswordTreeLocation = tempPasswordTreeDirectory, withVerifyChecksum = false)
 
-            mockkStatic(::checksum)
-            every { checksum(any()) } returns 0
             passwordTreeFacade.sync(EggStreamSupplier({ eggs.stream()}))
             expectThat(File(passwordTreeFilename)).exists()
-            unmockkAll()
+            corruptStoredChecksum()
 
             val captureSystemErr = CapturedOutputPrintStream.captureSystemErr()
 
@@ -473,6 +469,14 @@ class PasswordTreeFacadeTest {
             expectThat(actual) contains "Shutting down due to checksum failure."
             verify(exactly = 1) { systemOperation.exit(FAILURE_EXIT_STATUS) }
         }
+    }
+
+    private fun corruptStoredChecksum() {
+        val payload = cryptoProvider.decrypt(
+            encryptedShellOf(passwordTreeEnvelope.unwrap(File(passwordTreeFilename).readBytes())),
+        ).toByteArray()
+        payload[payload.lastIndex] = (payload.last() + 1).toByte()
+        File(passwordTreeFilename).writeBytes(passwordTreeEnvelope.wrap(cryptoProvider.encrypt(shellOf(payload)).toByteArray()))
     }
 
     private fun someEggs() = listOf(
