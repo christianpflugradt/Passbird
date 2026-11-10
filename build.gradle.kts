@@ -247,6 +247,7 @@ tasks.jacocoTestCoverageVerification {
 
 dependencyCheck {
     scanConfigurations = listOf("runtimeClasspath")
+    scanSet = files("src/main/resources", "src/main/webapp")
     failBuildOnCVSS = 0.0f
     nvd.apiKey = envOrNull("NVD_API_KEY")
     envOrNull("DEPENDENCY_CHECK_NVD_DATAFEED_URL")?.let { nvd.datafeedUrl = it }

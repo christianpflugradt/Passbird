@@ -3,5 +3,5 @@ description = "Check agent helper and specification wiring"
 run_at = ["pre-commit", "pre-push", "check", "release-candidate"]
 
 [check]
-command = "zsh .agent/scripts/check-agent-specs.sh"
+command = "python3 scripts/check-agent-specs.py"
 timeout_seconds = 900

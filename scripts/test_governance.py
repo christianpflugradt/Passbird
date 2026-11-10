@@ -2,6 +2,8 @@ import hashlib
 import importlib.util
 import os
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import tomllib
 import unittest
@@ -15,6 +17,13 @@ spec.loader.exec_module(retire)
 
 
 class GovernanceTest(unittest.TestCase):
+    def test_agent_spec_check_runs_without_any_shell_on_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = subprocess.run([sys.executable, str(ROOT / "scripts/check-agent-specs.py")],
+                                    cwd=ROOT, env={"PATH": directory}, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("governor wiring checks passed", result.stdout)
+
     def test_custom_hook_is_preserved_and_no_known_hook_is_removed_on_conflict(self):
         with tempfile.TemporaryDirectory() as directory:
             hooks = Path(directory)
@@ -58,6 +67,7 @@ class GovernanceTest(unittest.TestCase):
         self.assertEqual(rules["coverage"]["depends_on"], ["tests"])
         self.assertEqual(rules["native-smoke"]["depends_on"], ["native-build"])
         self.assertIn("allTests", rules["tests"]["check"]["command"])
+        self.assertEqual(rules["agent-specs"]["check"]["command"], "python3 scripts/check-agent-specs.py")
         self.assertNotIn("owasp", rules)
         self.assertNotIn("npm-audit", rules)
         self.assertEqual(rules["release-package-verify"]["depends_on"], ["release-package"])
@@ -66,6 +76,16 @@ class GovernanceTest(unittest.TestCase):
         self.assertIn("build/jacoco/allTests.exec", (ROOT / "scripts/check-coverage.sh").read_text())
         self.assertIn('minimum = 0.9.toBigDecimal()', (ROOT / "build.gradle.kts").read_text())
         self.assertIn('minimum = 0.85.toBigDecimal()', (ROOT / "build.gradle.kts").read_text())
+        self.assertIn('scanConfigurations = listOf("runtimeClasspath")', (ROOT / "build.gradle.kts").read_text())
+        self.assertIn('scanSet = files("src/main/resources", "src/main/webapp")', (ROOT / "build.gradle.kts").read_text())
+        self.assertIn('failBuildOnCVSS = 0.0f', (ROOT / "build.gradle.kts").read_text())
+
+    def test_dependency_preparation_warms_signatures_without_running_checks(self):
+        preparation = (ROOT / "scripts/prepare.sh").read_text()
+        self.assertIn("--no-configuration-cache prepareValidationDependencies", preparation)
+        self.assertIn("--no-configuration-cache --dry-run jar allTests", preparation)
+        self.assertNotIn("--write-verification-metadata", preparation)
+        self.assertNotIn("--dependency-verification", preparation)
 
     def test_security_ignores_are_four_exact_reviewed_matches_without_path_exclusions(self):
         rows = [line for line in (ROOT / ".gitleaksignore").read_text().splitlines() if line and not line.startswith("#")]

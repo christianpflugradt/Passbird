@@ -75,6 +75,7 @@ jobs:
             build/test-results/
             build/jacoco/
             build/reports/jacoco/
+            build/reports/dependency-verification/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
@@ -112,7 +113,7 @@ jobs:
           restore-keys: |
             ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}
       - name: Prepare dependency inputs
-        run: ./gradlew --no-configuration-cache prepareValidationDependencies
+        run: bash scripts/prepare.sh gradle
       - name: check dependencies for vulnerabilities
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
@@ -139,7 +140,7 @@ jobs:
           distribution: temurin
       - uses: gradle/actions/setup-gradle@v6
       - name: Prepare dependencies
-        run: ./gradlew --no-configuration-cache prepareValidationDependencies
+        run: bash scripts/prepare.sh gradle
       - name: Run mutation tests
         run: ./gradlew --offline mutation --stacktrace --console=plain
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7

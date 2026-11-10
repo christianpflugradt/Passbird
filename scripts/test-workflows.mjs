@@ -56,6 +56,9 @@ test("trusted CI proof names all quality, mutation and Java smoke jobs", () => {
 test("only the independent badge workflow creates badges and deploys the complete documentation site", () => {
   const badges = workflow("coverage-badges.yml");
   const deploy = badges.jobs["deploy-pages"];
+  const diagnostics = badges.jobs.coverage.steps.find(step => step.with?.name === "coverage-diagnostics");
+  assert.equal(diagnostics.if, "always()");
+  assert.ok(diagnostics.with.path.includes("dependency-verification"));
   assert.deepEqual(deploy.concurrency, { group: "coverage-pages", "cancel-in-progress": false, queue: "max" });
   assert.equal(deploy.permissions.pages, "write");
   const coverage = badges.jobs.coverage.steps.map(step => step.run ?? "").join("\n");

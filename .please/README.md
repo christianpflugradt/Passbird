@@ -14,7 +14,10 @@ repository checks do not install them. Linux desktop tests and smoke tests also
 need Xvfb, xauth and xclip. Local macOS checks require a desktop session.
 
 Run `bash scripts/prepare.sh` explicitly before validation. It installs the locked
-release-tool dependencies and resolves Gradle verification dependencies. Gradle
+release-tool dependencies and resolves Gradle verification dependencies. It then
+resolves the native task graph online with `--dry-run` to cache signature metadata
+before offline checks; this executes no build or test tasks. The `gradle` mode
+prepares only Gradle inputs for CI's mutation and OWASP jobs. Gradle
 Wrapper and signed/checksummed dependency verification remain in use. Refresh
 preparation after dependency or toolchain changes. CI performs this preparation
 before checks. The separate CI OWASP job deliberately accesses current advisory
@@ -34,7 +37,7 @@ hooks. Synchronization resolves external packages; normal execution uses their
 immutable cache. Reports under `.please/reports/` remain ignored.
 
 Git hooks are the final local gates. Pre-commit checks formatting, Detekt,
-compilation and agent-spec wiring; pre-push runs the complete local gate.
+compilation and agent-spec wiring (implemented in portable Python); pre-push runs the complete local gate.
 Do not manually repeat those gates before Git operations. Targeted diagnosis and
 `./gradlew ktlintFormat` remain available. Fix failures and retry Git; inspect
 saved results with `please status --details`. Normal checks collect complete
@@ -102,7 +105,7 @@ manual dispatch. Check runs deterministic governance checks under Xvfb and uploa
 the source/attempt-bound `release-jar` artifact. The unchanged Java 17/21/25 smoke
 matrix tests that same JAR. Native test diagnostics are consolidated into
 `test-reports`; lint, Detekt, dependency-license, OWASP, PIT and smoke diagnostics
-remain available after failures.
+remain available after failures, including dependency-verification diagnostics.
 
 `coverage-badges.yml` is independent and repeats full-suite coverage calculation,
 verification, HTML/XML reporting, SVG/Shields-JSON rendering and artifact transfer.
@@ -117,7 +120,9 @@ cancellation contract, then ignoring only the unknown-queue diagnostic.
 
 OWASP remains a blocking job in build.yml, outside local Please Behave execution
 points. Release Readiness relies on that exact-source CI proof without scanning
-again.
+again. Its explicit scan set retains the two runtime resource roots alongside
+Gradle runtimeClasspath. Repository-local npm release tooling is outside that
+shipped-runtime scope; no vulnerability suppression or threshold is changed.
 
 CodeQL retains its security-extended queries, nightly Kotlin toolchain and weekly
 schedule. Daily OWASP cache refresh and weekly purge/rebuild retain their manual

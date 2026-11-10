@@ -117,6 +117,9 @@ local_verification_policy:
     local_runs: discouraged
     default: rely_on_ci
     note: only run locally when the maintainer explicitly asks for it
+    scan_scope:
+      - Gradle runtimeClasspath and the existing src/main/resources and src/main/webapp resource roots
+      - repository-local npm release tooling is not part of the shipped JVM runtime scan
     suppressions:
       - keep `owasp-suppressions.xml` limited to confirmed false positives, verified unreachable runtime findings, or verified build-time-only findings that do not affect shipped runtime artifacts
   dependency_verification:
@@ -142,6 +145,8 @@ local_verification_policy:
     notes:
       - build.yml uses check / Check with the published governor, preserving main pushes, Renovate PRs and manual dispatch
       - preparation downloads locked dependencies and prepares tools before checks; governed tests remain offline with synthetic credentials and mocked services
+      - preparation resolves the native task graph online with --dry-run to cache signature metadata before offline checks without executing build or test tasks
+      - agent-spec validation uses portable Python directly on both macOS and Linux; the zsh helper remains an optional local entrypoint
       - allTests covers unit, property, integration, architecture and desktop clipboard tests in one Rule; CI prepares Xvfb, xauth and xclip
       - coverage consumes nonempty allTests.exec only and retains 90 percent instruction and 85 percent branch thresholds plus HTML/XML diagnostics
       - native test diagnostics are consolidated into test-reports; lint, Detekt, license, OWASP, mutation and smoke diagnostics remain available after failures
