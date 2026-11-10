@@ -1,4 +1,6 @@
 
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+import org.gradle.api.artifacts.result.ResolvedArtifactResult
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.compile.JavaCompile
@@ -9,6 +11,8 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import org.gradle.language.base.plugins.LifecycleBasePlugin.VERIFICATION_GROUP
+import org.gradle.maven.MavenModule
+import org.gradle.maven.MavenPomArtifact
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType.HTML
@@ -247,7 +251,7 @@ tasks.jacocoTestCoverageVerification {
 
 dependencyCheck {
     scanConfigurations = listOf("runtimeClasspath")
-    scanSet = files("src/main/resources", "src/main/webapp")
+    setScanSet(listOf(file("src/main/resources"), file("src/main/webapp")))
     failBuildOnCVSS = 0.0f
     nvd.apiKey = envOrNull("NVD_API_KEY")
     envOrNull("DEPENDENCY_CHECK_NVD_DATAFEED_URL")?.let { nvd.datafeedUrl = it }
@@ -281,6 +285,21 @@ tasks.register("prepareValidationDependencies") {
     notCompatibleWithConfigurationCache("Resolves dependency configurations explicitly")
     doLast {
         configurations.filter { it.isCanBeResolved }.forEach { it.resolve() }
+        val runtimeModules = configurations.runtimeClasspath.get().incoming.resolutionResult.allComponents
+            .mapNotNull { it.id as? ModuleComponentIdentifier }
+        runtimeModules.forEach { module ->
+            val poms = dependencies.createArtifactResolutionQuery()
+                .forModule(module.group, module.module, module.version)
+                .withArtifacts(MavenModule::class.java, MavenPomArtifact::class.java)
+                .execute()
+            check(poms.resolvedComponents.size == 1) { "Cannot prepare license metadata for $module" }
+            poms.resolvedComponents.forEach { component ->
+                val artifacts = component.getArtifacts(MavenPomArtifact::class.java)
+                check(artifacts.isNotEmpty() && artifacts.all { it is ResolvedArtifactResult && it.file.isFile }) {
+                    "Cannot prepare license POM for $module"
+                }
+            }
+        }
     }
 }
 

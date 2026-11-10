@@ -6,8 +6,6 @@
   "branch": "main",
   "required_jobs": [
     "Check",
-    "Mutation Tests",
-    "OWASP",
     "artifact-smoke-test (Java 17)",
     "artifact-smoke-test (Java 21)",
     "artifact-smoke-test (Java 25)"

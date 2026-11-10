@@ -49,7 +49,18 @@ jobs:
           version: ${{ steps.governor.outputs.version }}
           run: 'false'
       - run: please sync --yes
+      - id: dependency-check-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
+          key: ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}build-${{ github.run_id }}
+          restore-keys: |
+            ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}
       - name: Run quality checks
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
+          OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
         run: xvfb-run -a please run --at check --checks-only
       - name: Bind CI JAR to source and producing attempt
         run: python3 scripts/release-artifacts.py ci-receipt
@@ -93,56 +104,13 @@ jobs:
         if: always()
         with:
           name: dependencies-without-allowed-license
-          path: build/reports/dependency-license/dependencies-without-allowed-license.json
+          path: build/reports/dependency-license/
           if-no-files-found: ignore
-  owasp:
-    name: OWASP
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v6
-      - id: dependency-check-cache
-        uses: actions/cache/restore@v6
-        with:
-          path: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
-          key: ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}build-${{ github.run_id }}
-          restore-keys: |
-            ${{ env.DEPENDENCY_CHECK_CACHE_KEY_PREFIX }}
-      - name: Prepare dependency inputs
-        run: bash scripts/prepare.sh gradle
-      - name: check dependencies for vulnerabilities
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-          DEPENDENCY_CHECK_DATA_LOCATION: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
-          OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
-          OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
-        run: ./gradlew --no-configuration-cache dependencyCheckAnalyze --stacktrace
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: dependency-check-report
           path: build/reports/dependency-check-report.html
-
-  mutation-tests:
-    name: Mutation Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-      - uses: actions/setup-java@v6
-        with:
-          java-version: '25'
-          distribution: temurin
-      - uses: gradle/actions/setup-gradle@v6
-      - name: Prepare dependencies
-        run: bash scripts/prepare.sh gradle
-      - name: Run mutation tests
-        run: ./gradlew --offline mutation --stacktrace --console=plain
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:

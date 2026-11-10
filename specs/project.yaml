@@ -109,9 +109,9 @@ release_model:
   governor: .please-version
   governance_contract: .please/README.md
   automation:
-    - build.yml runs deterministic Please Behave checks, a separate PIT job and Java 17/21/25 smoke tests of one source-bound JAR
+    - build.yml runs all deterministic Please Behave checks including PIT and OWASP in one Check invocation, plus Java 17/21/25 smoke tests of one source-bound JAR
     - CodeQL retains security-extended queries and the nightly Kotlin toolchain
-    - OWASP analysis remains CI-only locally; daily refresh and weekly purge/rebuild maintain its database
+    - OWASP and PIT run at check but not local hooks; an explicit manual check runs both; daily refresh and weekly purge/rebuild maintain the OWASP database
     - coverage-badges.yml independently calculates coverage, generates badges and publishes the complete Jekyll documentation and coverage site
     - publish.yml retains manual development prereleases and Monday 03:23 Europe/Berlin stable releases
     - Plan does not publish; Readiness and Candidate run in parallel; Publish requires both

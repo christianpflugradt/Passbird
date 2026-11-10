@@ -48,7 +48,7 @@ quality_gates:
   dependency_and_license:
     - Gradle Wrapper pins the distribution URL and official SHA-256 checksum in gradle/wrapper/gradle-wrapper.properties
     - pre-push hook runs ./gradlew checkLicense
-    - the dependency-license Rule intentionally runs ./gradlew --offline --no-configuration-cache checkLicense because dependency-license-report tasks retain Gradle Project state and otherwise force configuration-cache discard at the end of the hook run
+    - the dependency-license Rule intentionally runs ./gradlew --offline --no-configuration-cache --no-build-cache --rerun-tasks checkLicense because dependency-license-report tasks retain Gradle Project state and otherwise force configuration-cache discard at the end of the hook run
     - Gradle dependency verification uses gradle/verification-metadata.xml and the armored gradle/verification-keyring.keys file
     - GitHub Actions OWASP dependency check workflows
   dependency_maintenance:
@@ -145,14 +145,15 @@ local_verification_policy:
     notes:
       - build.yml uses check / Check with the published governor, preserving main pushes, Renovate PRs and manual dispatch
       - preparation downloads locked dependencies and prepares tools before checks; governed tests remain offline with synthetic credentials and mocked services
+      - preparation explicitly resolves runtime POM artifacts for offline license discovery; license report tasks bypass the build cache and rerun to reject stale incomplete reports
       - preparation resolves the native task graph online with --dry-run to cache signature metadata before offline checks without executing build or test tasks
       - agent-spec validation uses portable Python directly on both macOS and Linux; the zsh helper remains an optional local entrypoint
       - allTests covers unit, property, integration, architecture and desktop clipboard tests in one Rule; CI prepares Xvfb, xauth and xclip
       - coverage consumes nonempty allTests.exec only and retains 90 percent instruction and 85 percent branch thresholds plus HTML/XML diagnostics
       - native test diagnostics are consolidated into test-reports; lint, Detekt, license, OWASP, mutation and smoke diagnostics remain available after failures
       - CI builds one source/run/attempt-bound release-jar and smoke-tests it on Java 17, 21 and 25 with fail-fast disabled
-      - PIT remains a separate job with unchanged high-risk targets, target tests, timeouts and report/line-coverage outputs
-      - OWASP analysis remains a blocking CI-only job with the existing secret names and cache prefix; it does not run in local Rules or again at release-readiness
+      - PIT is the mutation Rule in the same Check invocation with unchanged high-risk targets, target tests, timeouts and report/line-coverage outputs
+      - OWASP is a blocking Rule at check with the existing secret names and cache prefix; neither OWASP nor mutation runs in local hooks or again at release-readiness; explicit manual check runs both
       - daily OWASP refresh and weekly purge/rebuild retain manual dispatch and the shared maintenance lock; maintenance and analysis disable configuration caching
       - CodeQL keeps security-extended queries and the nightly Kotlin toolchain
       - coverage-badges.yml repeats coverage independently and owns all badge files, artifact transfer and complete Jekyll documentation/coverage Pages publication

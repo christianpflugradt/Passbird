@@ -31,6 +31,7 @@ import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.set
+import io.kotest.property.arbitrary.shuffle
 import io.kotest.property.arbitrary.string
 
 data class PlainEggData(
@@ -205,12 +206,14 @@ private fun explicitNests(): Arb<Map<Slot, String>> = nonDefaultSlots().flatMap 
     }
 }
 
-private fun nonDefaultSlots(): Arb<List<Slot>> = Arb.set(Arb.element(nonDefaultSlotEntries), 0..nonDefaultSlotEntries.size).map { slots ->
-    slots.sortedBy(Slot::index)
-}
+internal fun slotSubsets(entries: List<Slot>, sizes: IntRange = 0..entries.size): Arb<List<Slot>> =
+    Arb.bind(Arb.shuffle(entries), Arb.int(sizes)) { shuffled, size ->
+        shuffled.take(size).sortedBy(Slot::index)
+    }
 
-private fun exchangeSlots(): Arb<List<Slot>> =
-    Arb.set(Arb.element(Slot.entries), 1..Slot.entries.size).map { slots -> slots.sortedBy(Slot::index) }
+private fun nonDefaultSlots(): Arb<List<Slot>> = slotSubsets(nonDefaultSlotEntries)
+
+private fun exchangeSlots(): Arb<List<Slot>> = slotSubsets(Slot.entries, 1..Slot.entries.size)
 
 private fun plainEggs(slots: List<Slot>): Arb<List<PlainEggData>> = Arb.list(plainEggData(slots), 0..12)
 
@@ -252,13 +255,11 @@ private fun plainPasswordInfoData(): Arb<PlainPasswordInfoData> = Arb.bind(
     PlainPasswordInfoData(eggId, password, proteins)
 }
 
-private fun proteinEntries(): Arb<Map<Slot, Pair<String, String>>> =
-    Arb.set(Arb.element(Slot.entries), 0..Slot.entries.size).flatMap { generatedSlots ->
-        val slots = generatedSlots.sortedBy(Slot::index)
-        Arb.list(nonEmptyProteinPairs(), slots.size..slots.size).map { proteins ->
-            slots.zip(proteins).toMap().toSortedMap(compareBy(Slot::index))
-        }
+private fun proteinEntries(): Arb<Map<Slot, Pair<String, String>>> = slotSubsets(Slot.entries).flatMap { slots ->
+    Arb.list(nonEmptyProteinPairs(), slots.size..slots.size).map { proteins ->
+        slots.zip(proteins).toMap().toSortedMap(compareBy(Slot::index))
     }
+}
 
 private fun PasswordTreeFixture.toNestShells() = Slot.entries
     .filterNot { it == Slot.DEFAULT }

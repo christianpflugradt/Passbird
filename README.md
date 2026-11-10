@@ -614,7 +614,7 @@ Prepare the tools in `mise.toml`, Python 3.11+, Bash, actionlint, Gitleaks and S
 
 Hooks are the final local gates. Do not repeat the complete gate manually before Git; inspect stored results with `please status --details`, fix failures and retry. `mise run verify` remains the manual governor entrypoint. Native `preCommitCheck` and `prePushCheck` Gradle convenience tasks remain available.
 
-CI retains Renovate PRs, main pushes, manual dispatch, Java 17/21/25 JAR smoke tests and separate PIT mutation testing. OWASP remains CI-only locally, with daily cache refresh and weekly purge/rebuild workflows. CodeQL retains its nightly Kotlin toolchain. Tests run offline with synthetic data; advisory/audit services are separate.
+CI retains Renovate PRs, main pushes, manual dispatch and Java 17/21/25 JAR smoke tests. Its single Check invocation runs the normal rules together with PIT and OWASP. Local hooks exclude PIT and OWASP; an explicit `please run --at check` also runs them. OWASP requires network access, with daily cache refresh and weekly purge/rebuild workflows. CodeQL retains its nightly Kotlin toolchain. Tests run offline with synthetic data; advisory/audit services are separate.
 
 The independent Coverage Badges workflow recalculates coverage, creates both SVG and Shields JSON badges and deploys the complete documentation/coverage Pages site. Normal checks retain the 90% instruction and 85% branch coverage gates without creating badge files. See [repository governance](.please/README.md) for execution points, report artifacts and release contracts.
 

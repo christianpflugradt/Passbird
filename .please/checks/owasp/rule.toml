@@ -1,0 +1,8 @@
+id = "owasp"
+description = "Scan JVM runtime dependencies for vulnerabilities"
+run_at = ["check"]
+
+[check]
+command = "bash scripts/gradle-check.sh dependencyCheckAnalyze --stacktrace"
+timeout_seconds = 3600
+resource = "gradle"

@@ -68,7 +68,10 @@ class GovernanceTest(unittest.TestCase):
         self.assertEqual(rules["native-smoke"]["depends_on"], ["native-build"])
         self.assertIn("allTests", rules["tests"]["check"]["command"])
         self.assertEqual(rules["agent-specs"]["check"]["command"], "python3 scripts/check-agent-specs.py")
-        self.assertNotIn("owasp", rules)
+        self.assertEqual(rules["owasp"]["run_at"], ["check"])
+        self.assertEqual(rules["mutation"]["run_at"], ["check"])
+        self.assertEqual(rules["owasp"]["check"]["resource"], "gradle")
+        self.assertEqual(rules["mutation"]["check"]["resource"], "gradle")
         self.assertNotIn("npm-audit", rules)
         self.assertEqual(rules["release-package-verify"]["depends_on"], ["release-package"])
         for name in ["format", "static-analysis", "compile", "tests", "coverage", "dependency-license", "native-build", "native-smoke"]:
@@ -77,7 +80,7 @@ class GovernanceTest(unittest.TestCase):
         self.assertIn('minimum = 0.9.toBigDecimal()', (ROOT / "build.gradle.kts").read_text())
         self.assertIn('minimum = 0.85.toBigDecimal()', (ROOT / "build.gradle.kts").read_text())
         self.assertIn('scanConfigurations = listOf("runtimeClasspath")', (ROOT / "build.gradle.kts").read_text())
-        self.assertIn('scanSet = files("src/main/resources", "src/main/webapp")', (ROOT / "build.gradle.kts").read_text())
+        self.assertIn('setScanSet(listOf(file("src/main/resources"), file("src/main/webapp")))', (ROOT / "build.gradle.kts").read_text())
         self.assertIn('failBuildOnCVSS = 0.0f', (ROOT / "build.gradle.kts").read_text())
 
     def test_dependency_preparation_warms_signatures_without_running_checks(self):

@@ -35,11 +35,14 @@ test("release readiness and candidate run after plan in parallel and both gate p
     < candidate.findIndex(step => step.with?.name === artifact.with.name));
 });
 
-test("trusted CI proof names all quality, mutation and Java smoke jobs", () => {
+test("trusted CI proof names the complete Check job and all Java smoke jobs", () => {
   const ci = workflow("build.yml");
   assert.equal(ci.jobs.check.name, "Check");
-  assert.equal(ci.jobs.owasp.name, "OWASP");
-  assert.ok(!ci.jobs.owasp.steps.some(step => step["continue-on-error"]));
+  assert.ok(!("owasp" in ci.jobs));
+  assert.ok(!("mutation-tests" in ci.jobs));
+  const check = ci.jobs.check.steps.find(step => step.name === "Run quality checks");
+  assert.equal(check.run, "xvfb-run -a please run --at check --checks-only");
+  assert.ok(check.env.NVD_API_KEY);
   assert.ok(!workflow("publish.yml").jobs["release-readiness"].steps.some(step => step.run?.includes("dependencyCheckAnalyze")));
   assert.ok("pull_request" in ci.on && "workflow_dispatch" in ci.on);
   const policy = JSON.parse(readFileSync(".please/release-ci.json", "utf8"));
@@ -47,7 +50,7 @@ test("trusted CI proof names all quality, mutation and Java smoke jobs", () => {
   assert.equal(policy.workflow, ".github/workflows/build.yml");
   assert.equal(policy.event, "push");
   assert.equal(policy.branch, "main");
-  assert.deepEqual(policy.required_jobs, ["Check", "Mutation Tests", "OWASP", "artifact-smoke-test (Java 17)",
+  assert.deepEqual(policy.required_jobs, ["Check", "artifact-smoke-test (Java 17)",
     "artifact-smoke-test (Java 21)", "artifact-smoke-test (Java 25)"]);
   assert.deepEqual(ci.jobs["artifact-smoke-test"].strategy.matrix["java-version"], ["17", "21", "25"]);
   assert.equal(ci.jobs["artifact-smoke-test"].strategy["fail-fast"], false);

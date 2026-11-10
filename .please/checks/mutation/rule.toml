@@ -1,0 +1,8 @@
+id = "mutation"
+description = "Run PIT mutation testing for high-risk code"
+run_at = ["check"]
+
+[check]
+command = "bash scripts/gradle-check.sh mutation --stacktrace --console=plain"
+timeout_seconds = 3600
+resource = "gradle"

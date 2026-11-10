@@ -17,10 +17,10 @@ Run `bash scripts/prepare.sh` explicitly before validation. It installs the lock
 release-tool dependencies and resolves Gradle verification dependencies. It then
 resolves the native task graph online with `--dry-run` to cache signature metadata
 before offline checks; this executes no build or test tasks. The `gradle` mode
-prepares only Gradle inputs for CI's mutation and OWASP jobs. Gradle
+prepares only Gradle inputs when npm release dependencies are not needed. Gradle
 Wrapper and signed/checksummed dependency verification remain in use. Refresh
 preparation after dependency or toolchain changes. CI performs this preparation
-before checks. The separate CI OWASP job deliberately accesses current advisory
+before checks. The OWASP Rule at check deliberately accesses current advisory
 data; tests and governed compilation/build commands run offline.
 
 If necessary, `python3 scripts/install-governor.py` installs the exact published
@@ -51,6 +51,7 @@ workflow monitoring belongs to the maintainer.
 | format, static-analysis, compile, agent-specs | pre-commit, pre-push, check, release-candidate |
 | tests, coverage, dependency-license, native-build, native-smoke | pre-push, check, release-candidate |
 | workflows, release-rules | pre-push, check |
+| mutation, owasp | check |
 | release-package, release-package-verify | release-candidate |
 
 `allTests` is the single complete native test suite, including unit, property,
@@ -60,10 +61,12 @@ nonempty `allTests.exec`, and enforces 90% instructions and 85% branches. It als
 retains HTML/XML diagnostics. Only full-suite coverage is consumed, so stale
 execution data from focused tests cannot satisfy the gate. Dependency-license
 checks disable Gradle configuration caching because that plugin retains Project
-state. Gradle commands share a resource lock for common build outputs. Smoke
+state. Preparation explicitly caches runtime POMs used for license discovery.
+The license command bypasses the build cache and reruns its report tasks so an
+incomplete report cannot be restored from another machine. Gradle commands share a resource lock for common build outputs. Smoke
 depends on the JAR build; packaging depends on all candidate checks.
 
-PIT remains a separate CI job with the same high-risk classes, target tests,
+PIT runs as the mutation Rule in the same Check invocation, with the same high-risk classes, target tests,
 timeout settings, reports and line-coverage export. Local hooks do not add mutation
 testing or OWASP analysis. Native `preCommitCheck` and `prePushCheck` convenience
 tasks remain; `mise run verify` selects the complete governor pre-push gate.
@@ -73,7 +76,8 @@ tasks remain; `mise run verify` selects the complete governor pre-push gate.
 External security and repository conventions run at check and pre-push. Check
 reads the worktree; pre-push reads HEAD. Readiness explicitly checks committed
 source and requires successful trusted push CI for the exact SHA, repository,
-workflow, main branch, Check, Mutation Tests, OWASP and all three Java smoke jobs.
+workflow, main branch, the complete Check invocation (including mutation and
+OWASP) and all three Java smoke jobs.
 
 Apache-2.0 remains the license. LICENSE matches the external reference byte-for-byte;
 the original terms are retained with normalized whitespace and the standard
@@ -101,7 +105,8 @@ isolated environment; they never execute the installed live commit hook.
 ## CI, badges and security automation
 
 `build.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
-manual dispatch. Check runs deterministic governance checks under Xvfb and uploads
+manual dispatch. Check runs all deterministic governance checks, mutation tests
+and OWASP in one Please Behave invocation under Xvfb and uploads
 the source/attempt-bound `release-jar` artifact. The unchanged Java 17/21/25 smoke
 matrix tests that same JAR. Native test diagnostics are consolidated into
 `test-reports`; lint, Detekt, dependency-license, OWASP, PIT and smoke diagnostics
@@ -118,10 +123,13 @@ commit order. Actionlint 1.7.12 already supports schedule timezones; its missing
 queue support is handled by independently validating queue values and the
 cancellation contract, then ignoring only the unknown-queue diagnostic.
 
-OWASP remains a blocking job in build.yml, outside local Please Behave execution
-points. Release Readiness relies on that exact-source CI proof without scanning
-again. Its explicit scan set retains the two runtime resource roots alongside
-Gradle runtimeClasspath. Repository-local npm release tooling is outside that
+OWASP and mutation testing are blocking Rules at check, with no assignments to
+pre-commit or pre-push. CI invokes check once; a deliberate local invocation of
+that same point also runs both Rules and requires OWASP credentials/network
+access. Release Readiness relies on exact-source CI proof without scanning again. Its explicit scan set retains the two runtime resource roots alongside
+Gradle runtimeClasspath. The plugin's explicit setScanSet setter marks that configuration
+as intentional; assigning the file collection alone leaves its default scan active.
+Repository-local npm release tooling is outside that
 shipped-runtime scope; no vulnerability suppression or threshold is changed.
 
 CodeQL retains its security-extended queries, nightly Kotlin toolchain and weekly
