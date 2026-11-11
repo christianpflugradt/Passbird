@@ -1,6 +1,6 @@
 id = "tests"
 description = "Run all unit, property, integration, architecture and clipboard tests"
-run_at = ["pre-push", "check", "release-candidate"]
+run_at = ["pre-push", "check"]
 
 [check]
 command = "bash scripts/gradle-check.sh allTests"

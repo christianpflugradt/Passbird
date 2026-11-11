@@ -105,7 +105,6 @@ def package(directory=Path("dist")):
     sums = "".join(f"{digest(directory / name)}  {name}\n" for name in ("passbird.jar", "metadata.json"))
     (directory / "SHA256SUMS").write_text(sums)
     (directory / "smoke").mkdir()
-    shutil.copyfile("build/release-smoke-25.json", directory / "smoke/25.json")
     verify(directory, without_smokes=True)
 
 
@@ -127,7 +126,6 @@ def verify(directory=Path("dist"), without_smokes=False):
     names = {p.name for p in smoke.iterdir()}
     allowed = {f"{v}.json" for v in JAVA_VERSIONS}
     require(names <= allowed and (without_smokes or names == allowed), "Incomplete or unexpected Java smoke set")
-    require("25.json" in names, "Build runtime smoke evidence is missing")
     for name in names:
         path = smoke / name
         digest(path)
@@ -167,7 +165,7 @@ def ci_evidence(path=Path(".please/reports/last.json")):
     report = json.loads(path.read_text())
     require(report.get("schema_version") == 4 and report.get("overall") == "PASS"
             and report.get("snapshot", {}).get("head") == os.environ["GITHUB_SHA"], "Readiness report did not pass for source")
-    matches = [r for r in report["results"] if r["id"].endswith(":github-ci-success")]
+    matches = [r for r in report["results"] if r["id"].endswith(":release-contract")]
     require(len(matches) == 1, "Missing unique external CI proof")
     result = matches[0]
     require(result["status"] == "PASS" and result["exit_code"] == 0 and not result["stdout"]["truncated"],
@@ -176,7 +174,7 @@ def ci_evidence(path=Path(".please/reports/last.json")):
     require(text.startswith("PASS: "), "Malformed external CI proof")
     data = json.loads(text.removeprefix("PASS: "))
     require(data["source_sha"] == os.environ["GITHUB_SHA"] and data["repository"] == REPOSITORY
-            and data["workflow"] == ".github/workflows/build.yml", "CI proof source differs")
+            and data["workflow"] == ".github/workflows/ci.yml", "CI proof source differs")
     run, attempt = str(data["run_id"]), str(data["jobs"]["Check"]["attempt"])
     require(re.fullmatch(r"[1-9][0-9]*", run) and re.fullmatch(r"[1-9][0-9]*", attempt), "Invalid CI artifact identity")
     with open(os.environ["GITHUB_OUTPUT"], "a") as output:

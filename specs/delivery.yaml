@@ -139,15 +139,15 @@ local_verification_policy:
     github:
       workflows:
         - .github/workflows/coverage-badges.yml
-        - .github/workflows/build.yml
+        - .github/workflows/ci.yml
         - .github/workflows/codeql.yml
         - .github/workflows/owasp-update.yml
         - .github/workflows/owasp-purge.yml
-        - .github/workflows/publish.yml
+        - .github/workflows/release.yml
     notes:
-      - build.yml uses check / Check with the published governor, preserving main pushes, Renovate PRs and manual dispatch
+      - ci.yml uses check / Check with the published governor, preserving main pushes, Renovate PRs and manual dispatch
       - CI, Readiness and Candidate execute through SHA-pinned Please Behave Action v1.2.0 with checks-only and Job Summaries enabled; the CLI pin remains .please-version
-      - CI and Candidate prepare Xvfb before invoking the Action; DISPLAY is exported only after the virtual display becomes ready
+      - CI prepares Xvfb before source checks; release runtime matrix jobs use xvfb-run for candidate smoke tests
       - preparation downloads locked dependencies and prepares tools before checks; governed tests remain offline with synthetic credentials and mocked services
       - preparation explicitly resolves runtime POM artifacts for offline license discovery; license report tasks bypass the build cache and rerun to reject stale incomplete reports
       - preparation resolves the native task graph online with --dry-run to cache signature metadata before offline checks without executing build or test tasks
@@ -155,7 +155,7 @@ local_verification_policy:
       - allTests covers unit, property, integration, architecture and desktop clipboard tests in one Rule; CI prepares Xvfb, xauth and xclip
       - coverage consumes nonempty allTests.exec only and retains 90 percent instruction and 85 percent branch thresholds plus HTML/XML diagnostics
       - native test diagnostics are consolidated into test-reports; lint, Detekt, license, OWASP, mutation and smoke diagnostics remain available after failures
-      - CI builds one source/run/attempt-bound release-jar and smoke-tests it on Java 17, 21 and 25 with fail-fast disabled
+      - CI builds one source/run/attempt-bound release-jar for payload comparison; Release Candidate builds the versioned JAR once and tests it on a Java 17/21/25 matrix with fail-fast disabled
       - PIT is the mutation Rule in the same Check invocation with unchanged high-risk targets, target tests, timeouts and report/line-coverage outputs
       - OWASP is a blocking Rule at check with the existing secret names and cache prefix; neither OWASP nor mutation runs in local hooks or again at release-readiness; explicit manual check runs both
       - daily OWASP refresh and weekly purge/rebuild retain manual dispatch and the shared maintenance lock; maintenance and analysis disable configuration caching
@@ -164,8 +164,8 @@ local_verification_policy:
       - badge endpoints, SVG and JSON formats, rounding, colors, HTML report and thresholds remain unchanged
       - Pages retains coverage-pages concurrency, cancel-in-progress false and queue max; ordering follows queue arrival
       - actionlint 1.7.12 supports timezone; a separately tested checker validates queue values before suppressing only its unknown-queue diagnostic
-      - publish.yml retains Monday 03:23 Europe/Berlin stable releases, manual development prereleases and the existing preview entrypoints
-      - Plan does not prepare or publish; Readiness and Candidate run in parallel; Publish requires both successful
+      - release.yml retains Monday 03:23 Europe/Berlin stable releases, manual development prereleases and the existing preview entrypoints
+      - Plan does not prepare or publish; Readiness and Candidate build run in parallel; Publish requires both and the complete candidate runtime matrix
       - Candidate builds with the planned version and checks exact JAR bytes on Java 25, 17 and 21; Publish never rebuilds
       - readiness requires trusted exact-source push CI and propagates the external proof's retained Check attempt for CI artifact binding
       - artifacts, metadata, checksums and smoke receipts bind version, source, repository and workflow run/attempt; incomplete or foreign sets fail

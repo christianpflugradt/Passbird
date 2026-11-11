@@ -60,6 +60,7 @@ class ReleaseArtifactsTest(unittest.TestCase):
         artifacts.package()
         self.write_receipt("17")
         self.write_receipt("21")
+        self.write_receipt("25")
 
     def test_packages_and_verifies_the_same_jar_bytes_and_all_smoke_receipts(self):
         self.package()
@@ -186,9 +187,9 @@ class ReleaseArtifactsTest(unittest.TestCase):
 
     def test_readiness_bridge_uses_the_retained_check_attempt(self):
         proof = dict(source_sha=ENV["GITHUB_SHA"], repository=artifacts.REPOSITORY,
-                     workflow=".github/workflows/build.yml", run_id=456, run_attempt=3,
+                     workflow=".github/workflows/ci.yml", run_id=456, run_attempt=3,
                      jobs={"Check": {"attempt": 1}})
-        result = dict(id="git:external:release/readiness:1:github-ci-success", status="PASS", exit_code=0,
+        result = dict(id="git:external:release/releasable-project:1:release-contract", status="PASS", exit_code=0,
                       stdout=dict(text="PASS: " + json.dumps(proof), truncated=False))
         report = dict(schema_version=4, overall="PASS", snapshot=dict(head=ENV["GITHUB_SHA"]), results=[result])
         artifacts.write_json(Path("report.json"), report)

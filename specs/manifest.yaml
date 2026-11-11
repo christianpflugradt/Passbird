@@ -119,11 +119,11 @@ sources_reviewed:
     - .please/config.toml
     - .please/README.md
     - .github/workflows/coverage-badges.yml
-    - .github/workflows/build.yml
+    - .github/workflows/ci.yml
     - .github/workflows/codeql.yml
     - .github/workflows/owasp-update.yml
     - .github/workflows/owasp-purge.yml
-    - .github/workflows/publish.yml
+    - .github/workflows/release.yml
   code:
     - src/main/kotlin/de/pflugradts/passbird/application/Main.kt
     - src/main/kotlin/de/pflugradts/passbird/application/UserInterfaceAdapterPort.kt

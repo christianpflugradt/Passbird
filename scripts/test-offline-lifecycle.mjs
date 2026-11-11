@@ -1,3 +1,4 @@
+import { releaseGuardEnvironment } from "./release-guard-fixture.mjs";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
@@ -13,7 +14,7 @@ import { verifyRelease } from "./semantic-release-plugin.mjs";
   const directory = mkdtempSync(join(tmpdir(), "passbird-lifecycle-"));
   const cwd = join(directory, "checkout");
   const remote = join(directory, "remote.git");
-  const env = { PATH: process.env.PATH, HOME: directory, GIT_CONFIG_NOSYSTEM: "1",
+  const env = { ...releaseGuardEnvironment, PATH: process.env.PATH, HOME: directory, GIT_CONFIG_NOSYSTEM: "1",
     GIT_CONFIG_GLOBAL: join(directory, "empty-config"), GIT_TERMINAL_PROMPT: "0" };
   const git = (...args) => execFileSync("git", args, { cwd, env, encoding: "utf8", stdio: "pipe" }).trim();
   const sink = new Writable({ write(_chunk, _encoding, done) { done(); } });

@@ -1,6 +1,6 @@
 id = "native-smoke"
 description = "Verify the interactive JAR workflow"
-run_at = ["pre-push", "check", "release-candidate"]
+run_at = ["pre-push", "check"]
 depends_on = ["native-build"]
 
 [check]

@@ -18,25 +18,31 @@ test("queue compatibility accepts supported values and rejects cancellation or u
 });
 
 test("release readiness and candidate run after plan in parallel and both gate publication", () => {
-  const jobs = workflow("publish.yml").jobs;
+  const jobs = workflow("release.yml").jobs;
   assert.equal(jobs.plan.name, "Plan");
   assert.equal(jobs["release-readiness"].needs, "plan");
   assert.equal(jobs["release-candidate"].needs, "plan");
-  assert.deepEqual(jobs.publish.needs, ["plan", "release-readiness", "release-candidate"]);
+  assert.deepEqual(jobs.publish.needs, ["plan", "release-readiness", "release-candidate", "release-smoke"]);
   assert.match(jobs.publish.if, /needs.release-readiness.result == 'success'/);
   assert.match(jobs.publish.if, /needs.release-candidate.result == 'success'/);
   const publication = jobs.publish.steps.map(step => step.run ?? "").join("\n");
-  assert.ok(!/gradlew|please|jar\b|build/.test(publication));
+  assert.ok(!/gradlew|jar\b/.test(publication));
+  assert.ok(jobs.publish.steps.some(step => step.with?.["execution-point"] === "release-verify"));
+  assert.match(jobs.publish.if, /needs.release-smoke.result/);
   const artifact = jobs.publish.steps.find(step => step.uses?.startsWith("actions/download-artifact") && step.with.path === "dist");
-  assert.equal(artifact.with.name, "passbird-${{ github.run_id }}-${{ github.run_attempt }}");
+  assert.equal(artifact.with.name, "passbird-build-${{ github.run_id }}-${{ github.run_attempt }}");
   const candidate = jobs["release-candidate"].steps;
-  assert.deepEqual(candidate.filter(step => step.uses?.startsWith("actions/setup-java")).map(step => step.with["java-version"]), ["25", "17", "21"]);
-  assert.ok(candidate.findIndex(step => step.run === "python3 scripts/release-artifacts.py verify")
-    < candidate.findIndex(step => step.with?.name === artifact.with.name));
+  assert.deepEqual(candidate.filter(step => step.uses?.startsWith("actions/setup-java")).map(step => step.with["java-version"]), ["25"]);
+  const smoke = jobs["release-smoke"];
+  assert.deepEqual(smoke.needs, ["plan", "release-candidate"]);
+  assert.deepEqual(smoke.strategy.matrix.java, ["17", "21", "25"]);
+  assert.equal(smoke.strategy["fail-fast"], false);
+  assert.ok(smoke.steps.some(step => step.with?.["execution-point"] === "release-record"));
+  assert.ok(smoke.steps.some(step => step.run?.includes('scripts/smoke-candidate.sh')));
 });
 
-test("trusted CI proof names the complete Check job and all Java smoke jobs", () => {
-  const ci = workflow("build.yml");
+test("trusted CI proof requires Check while compatibility belongs to Release", () => {
+  const ci = workflow("ci.yml");
   assert.equal(ci.jobs.check.name, "Check");
   assert.ok(!("owasp" in ci.jobs));
   assert.ok(!("mutation-tests" in ci.jobs));
@@ -46,15 +52,15 @@ test("trusted CI proof names the complete Check job and all Java smoke jobs", ()
   assert.deepEqual(check.with, { version: "${{ steps.governor.outputs.version }}",
     "execution-point": "check", "checks-only": "true", summary: "true" });
   for (const [job, point] of [[ci.jobs.check, "check"],
-    [workflow("publish.yml").jobs["release-readiness"], "release-readiness"],
-    [workflow("publish.yml").jobs["release-candidate"], "release-candidate"]]) {
+    [workflow("release.yml").jobs["release-readiness"], "release-readiness"],
+    [workflow("release.yml").jobs["release-candidate"], "release-candidate"]]) {
     const execution = job.steps.find(step => step.with?.["execution-point"] === point);
     assert.equal(execution.uses, check.uses);
     assert.deepEqual(execution.with, { ...check.with, "execution-point": point });
     assert.ok(job.steps.every(step => !/\bplease run\b/.test(step.run ?? "")));
     const sync = job.steps.findIndex(step => step.run === "please sync --yes");
     assert.ok(sync >= 0 && sync < job.steps.indexOf(execution));
-    if (point !== "release-readiness") {
+    if (point === "check") {
       const display = job.steps.find(step => step.name === "Start virtual display");
       assert.ok(job.steps.indexOf(display) < job.steps.indexOf(execution));
       assert.match(display.run, /Xvfb -displayfd/);
@@ -62,17 +68,15 @@ test("trusted CI proof names the complete Check job and all Java smoke jobs", ()
     }
   }
   assert.ok(check.env.NVD_API_KEY);
-  assert.ok(!workflow("publish.yml").jobs["release-readiness"].steps.some(step => step.run?.includes("dependencyCheckAnalyze")));
+  assert.ok(!workflow("release.yml").jobs["release-readiness"].steps.some(step => step.run?.includes("dependencyCheckAnalyze")));
   assert.ok("pull_request" in ci.on && "workflow_dispatch" in ci.on);
   const policy = JSON.parse(readFileSync(".please/release-ci.json", "utf8"));
   assert.equal(policy.repository, "christianpflugradt/Passbird");
-  assert.equal(policy.workflow, ".github/workflows/build.yml");
+  assert.equal(policy.workflow, ".github/workflows/ci.yml");
   assert.equal(policy.event, "push");
   assert.equal(policy.branch, "main");
-  assert.deepEqual(policy.required_jobs, ["Check", "artifact-smoke-test (Java 17)",
-    "artifact-smoke-test (Java 21)", "artifact-smoke-test (Java 25)"]);
-  assert.deepEqual(ci.jobs["artifact-smoke-test"].strategy.matrix["java-version"], ["17", "21", "25"]);
-  assert.equal(ci.jobs["artifact-smoke-test"].strategy["fail-fast"], false);
+  assert.deepEqual(policy.required_jobs, ["Check"]);
+  assert.deepEqual(Object.keys(ci.jobs), ["check"]);
 });
 
 test("only the independent badge workflow creates badges and deploys the complete documentation site", () => {
@@ -88,13 +92,13 @@ test("only the independent badge workflow creates badges and deploys the complet
   const pages = badges.jobs["pages-site"].steps.map(step => step.run ?? "").join("\n");
   assert.match(pages, /cp README.md CONFIGURATION.md/);
   for (const endpoint of ["branch-coverage", "instruction-coverage"]) assert.ok(pages.includes(endpoint));
-  for (const name of ["build.yml", "publish.yml"]) {
+  for (const name of ["ci.yml", "release.yml"]) {
     assert.ok(!readFileSync(`.github/workflows/${name}`, "utf8").includes("deploy-pages@"));
   }
 });
 
 test("release and cleanup schedules preserve Berlin time and all manual entrypoints", () => {
-  const release = workflow("publish.yml");
+  const release = workflow("release.yml");
   assert.deepEqual(release.on.schedule, [{ cron: "23 3 * * 1", timezone: "Europe/Berlin" }]);
   assert.ok("workflow_dispatch" in release.on);
   for (const file of ["owasp-update.yml", "owasp-purge.yml", "previews-purge.yml"]) {

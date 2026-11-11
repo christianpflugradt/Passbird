@@ -5,7 +5,7 @@ max_display_files = 5
 fail_fast_terminate_running_instances = false
 
 [execution_points]
-custom = ["release-readiness", "release-candidate"]
+custom = ["release-readiness", "release-candidate", "release-record", "release-verify"]
 
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-rulesets.git"
@@ -30,21 +30,12 @@ target = "LICENSE"
 
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-rulesets.git"
-path = "release/readiness"
-ref = "0432837bb42e230f53cd52b64b2292948382e5b2"
+path = "release/releasable-project"
+ref = "cfb862fdc0f2594f615dffbba16840f4d84758f3"
 
-[imports.rule_parameters.github-ci-success]
-policy = ".please/release-ci.json"
-
-[imports.rule_parameters.sensitive-files]
-snapshot = "head"
-
-[imports.rule_parameters.secret-scan]
-snapshot = "head"
-
-[imports.rule_parameters.license]
-snapshot = "head"
-target = "LICENSE"
+[imports.rule_parameters.release-contract]
+ci_policy = ".please/release-ci.json"
+artifacts_policy = ".please/release-artifacts.json"
 
 [[provider_imports]]
 id = "gemini-flash-lite"

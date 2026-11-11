@@ -1,7 +1,7 @@
 id = "release-package"
 description = "Package the versioned and tested JAR"
 run_at = ["release-candidate"]
-depends_on = ["format", "static-analysis", "compile", "tests", "coverage", "dependency-license", "native-smoke", "agent-specs"]
+depends_on = ["native-build"]
 
 [check]
 command = "python3 scripts/release-artifacts.py package"

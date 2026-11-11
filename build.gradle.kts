@@ -375,7 +375,7 @@ tasks.register("publishPreview") {
             val status =
                 gh(
                     "run", "list",
-                    "--workflow", "build.yml",
+                    "--workflow", "ci.yml",
                     "--branch", "main",
                     "--commit", mainSha,
                     "--limit", "1",
@@ -393,7 +393,7 @@ tasks.register("publishPreview") {
         val conclusion =
             gh(
                 "run", "list",
-                "--workflow", "build.yml",
+                "--workflow", "ci.yml",
                 "--branch", "main",
                 "--commit", mainSha,
                 "--limit", "1",
@@ -408,7 +408,7 @@ tasks.register("publishPreview") {
         gh(
             "workflow",
             "run",
-            "publish.yml",
+            "release.yml",
             "--ref",
             "main",
         )

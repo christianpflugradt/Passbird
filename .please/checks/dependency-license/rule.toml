@@ -1,6 +1,6 @@
 id = "dependency-license"
 description = "Check the dependency license allowlist"
-run_at = ["pre-push", "check", "release-candidate"]
+run_at = ["pre-push", "check"]
 
 [check]
 command = "bash scripts/gradle-check.sh checkLicense"

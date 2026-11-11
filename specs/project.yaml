@@ -109,15 +109,15 @@ release_model:
   governor: .please-version
   governance_contract: .please/README.md
   automation:
-    - build.yml runs all deterministic Please Behave checks including PIT and OWASP in one Check invocation, plus Java 17/21/25 smoke tests of one source-bound JAR
+    - ci.yml runs all deterministic Please Behave checks including PIT and OWASP in one Check invocation, with compatibility smoke tests reserved for Release Candidate
     - CodeQL retains security-extended queries and the nightly Kotlin toolchain
     - OWASP and PIT run at check but not local hooks; an explicit manual check runs both; daily refresh and weekly purge/rebuild maintain the OWASP database
     - coverage-badges.yml independently calculates coverage, generates badges and publishes the complete Jekyll documentation and coverage site
-    - publish.yml retains manual development prereleases and Monday 03:23 Europe/Berlin stable releases
+    - release.yml retains manual development prereleases and Monday 03:23 Europe/Berlin stable releases
     - Plan does not publish; Readiness and Candidate run in parallel; Publish requires both
-    - Readiness checks committed source and trusted exact-source push CI including OWASP and all required Java smoke jobs
+    - Readiness checks committed source and trusted exact-source push CI including OWASP and the complete Check job
     - Candidate builds once with the planned version and checks the exact JAR on Java 17, 21 and 25
-    - Publish verifies source/version/checksums/run/attempt and CI payload equivalence without rebuilding
+    - Publish verifies shared internal release evidence, source/version/checksums/run/attempt and CI payload equivalence without rebuilding
     - stable 7.x releases retain plain semantic tags and passbird.jar; development tags retain dev- and use the latest stable base plus Berlin date and sequence
     - checksums and metadata accompany the existing JAR asset; Passbird-Updater stable and opt-in development contracts remain intact
     - monthly prerelease cleanup retains its 30-day retention and tag cleanup

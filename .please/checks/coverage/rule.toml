@@ -1,6 +1,6 @@
 id = "coverage"
 description = "Enforce instruction and branch coverage and retain diagnostic reports"
-run_at = ["pre-push", "check", "release-candidate"]
+run_at = ["pre-push", "check"]
 depends_on = ["tests"]
 
 [check]

@@ -1,8 +1,8 @@
 # Repository governance
 
 The independently published governor in `.please-version` governs Passbird.
-Candidate binaries never govern their own validation. The four external Rule
-Sets and the independent Gemini Flash-Lite provider use immutable revision
+Candidate binaries never govern their own validation. The three baseline Rule Sets
+and the independent Gemini Flash-Lite provider use immutable revision
 `0432837bb42e230f53cd52b64b2292948382e5b2`, shared with Passing By, PumpBuddy,
 Please Behave CLI and Action. Local Rules contain Passbird requirements only.
 
@@ -27,7 +27,7 @@ If necessary, `python3 scripts/install-governor.py` installs the exact published
 governor into ignored `.tools/please/bin`, verifying the archive checksum and
 executable version. Prepend that directory to PATH in the shell invoking Git;
 the global installation is not replaced. CI uses the published Please Behave
-Action pinned to v1.1.1's immutable commit.
+Action pinned to v1.2.0's immutable commit.
 
 Run `sh scripts/setup-git-hooks.sh --yes`. Setup retires only byte-identical known
 Gradle-generated hooks, preserves copies under ignored `.tools/retired-gradle-hooks`,
@@ -51,8 +51,9 @@ workflow monitoring belongs to the maintainer.
 
 | Rule | Execution points |
 | --- | --- |
-| format, static-analysis, compile, agent-specs | pre-commit, pre-push, check, release-candidate |
-| tests, coverage, dependency-license, native-build, native-smoke | pre-push, check, release-candidate |
+| format, static-analysis, compile, agent-specs | pre-commit, pre-push, check |
+| tests, coverage, dependency-license, native-smoke | pre-push, check |
+| native-build | pre-push, check, release-candidate |
 | workflows, release-rules | pre-push, check |
 | mutation, owasp | check |
 | release-package, release-package-verify | release-candidate |
@@ -67,7 +68,7 @@ checks disable Gradle configuration caching because that plugin retains Project
 state. Preparation explicitly caches runtime POMs used for license discovery.
 The license command bypasses the build cache and reruns its report tasks so an
 incomplete report cannot be restored from another machine. Gradle commands share a resource lock for common build outputs. Smoke
-depends on the JAR build; packaging depends on all candidate checks.
+depends on the JAR build; packaging depends on the versioned JAR build.
 
 PIT runs as the mutation Rule in the same Check invocation, with the same high-risk classes, target tests,
 timeout settings, reports and line-coverage export. Local hooks do not add mutation
@@ -77,10 +78,7 @@ tasks remain; `mise run verify` selects the complete governor pre-push gate.
 ## Shared checks and commit messages
 
 External security and repository conventions run at check and pre-push. Check
-reads the worktree; pre-push reads HEAD. Readiness explicitly checks committed
-source and requires successful trusted push CI for the exact SHA, repository,
-workflow, main branch, the complete Check invocation (including mutation and
-OWASP) and all three Java smoke jobs.
+reads the worktree; pre-push reads HEAD. Readiness requires successful trusted push CI for the exact SHA, repository, workflow, main branch and complete Check invocation, including mutation and OWASP. It reuses source-security results from CI.
 
 Apache-2.0 remains the license. LICENSE matches the external reference byte-for-byte;
 the original terms are retained with normalized whitespace and the standard
@@ -111,12 +109,11 @@ CI, Release Readiness and Release Candidate execute through the published
 Action, with the CLI version from `.please-version`, `checks-only: 'true'` and
 `summary: 'true'`. Install-only mode precedes explicit synchronization.
 
-`build.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
+`ci.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
 manual dispatch. Check runs all deterministic governance checks, mutation tests
 and OWASP through the SHA-pinned Please Behave Action v1.2.0 with checks-only
 execution and a Job Summary. Xvfb starts before the Action; Check uploads
-the source/attempt-bound `release-jar` artifact. The unchanged Java 17/21/25 smoke
-matrix tests that same JAR. Native test diagnostics are consolidated into
+the source/attempt-bound `release-jar` artifact. Java compatibility is tested only on the versioned release candidate. Native test diagnostics are consolidated into
 `test-reports`; lint, Detekt, dependency-license, OWASP, PIT and smoke diagnostics
 remain available after failures, including dependency-verification diagnostics.
 
@@ -148,7 +145,7 @@ Gradle metadata-refresh automation remain unchanged.
 
 ## Release contract
 
-`publish.yml` retains Monday 03:23 Europe/Berlin stable publication and manual
+`release.yml` retains Monday 03:23 Europe/Berlin stable publication and manual
 development prereleases. `publishPreview` and `mise run preview` still wait for
 successful main CI before dispatching that workflow. Plan determines the version
 without preparing, tagging or publishing. Readiness and Candidate depend only on
@@ -164,8 +161,7 @@ official stable base, Berlin date and increasing sequence, with `dev-` tags and
 unprefixed visible/JAR versions. Monthly cleanup still removes prereleases older
 than 30 days and their tags.
 
-Candidate builds once with the planned version, validates the manifest, runs the
-complete native suite and smoke-tests the exact JAR on Java 25, 17 and 21. Metadata,
+Candidate builds once with the planned version and validates the manifest. A dependent Java 17/21/25 matrix smoke-tests that exact JAR. The native suite and other source checks are reused from CI. Metadata,
 checksums and smoke receipts bind JAR bytes, payload, source, repository, version
 and workflow run/attempt. Verification rejects missing/foreign artifacts, unsafe
 or duplicate ZIP entries, symlinks, altered manifests and incomplete smoke sets.
@@ -175,8 +171,7 @@ Release reruns missing that attempt's candidate fail; rerun all jobs.
 The external readiness proof accepts retained successful jobs from partial reruns
 of the same CI run. Its report supplies the producing Check attempt, so Publish
 can verify the trusted CI artifact's identity and compare payloads. Only manifest
-differences from the CI JAR are allowed. Publish never builds or invokes the
-governor. It verifies the complete candidate again and rechecks planned version,
+differences from the CI JAR are allowed. Publish never builds; it invokes the published governor to verify common release evidence. It verifies the complete candidate again and rechecks planned version,
 checkout SHA and remote main before publication.
 
 The platform-independent `passbird.jar`, executable-JAR metadata, asset name/label,
@@ -191,3 +186,22 @@ Release serialization prevents competing workflow publications but cannot lock
 main pushes atomically with Git tag, release and asset publication. Service
 failures may leave partial publication and must be reported. Agents do not trigger
 Release, publish artifacts or monitor remote runs without an explicit request.
+
+## Shared release evidence
+
+The separate external `release/releasable-project` Rule Set is pinned independently
+from the repository baseline. Its `release-contract` Check uses
+`release-ci.json` and `release-artifacts.json`. Readiness trusts exact-source CI
+without an age limit or repeated source/security checks. Candidate builds and
+artifact-specific tests remain local. After they pass, `release-record` writes
+internal `release-evidence/TARGET.json` manifests. Publish collects every expected
+target and invokes `release-verify` before publication. The shared Check verifies
+repository, workflow, source, version, current run/attempt and artifact hashes.
+Missing or altered evidence blocks publication; partial release reruns require
+rerunning all jobs. Evidence is transferred separately and is not a public asset.
+
+Before tagging, thin local Semantic Release adapters load the cached external
+publication guard exported by `release-verify`. The shared implementation checks
+the recalculated version, checkout, dispatched SHA, repository, main branch and
+current remote main. Custom prerelease/image publication reuses that source guard.
+Offline lifecycle fixtures exercise the actual pinned external module from cache.
