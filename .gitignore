@@ -16,9 +16,6 @@ gradlew.bat
 build/*
 out/*
 
-# macOS
-.DS_Store
-
 # Governance and release tooling
 .tools/
 node_modules/
