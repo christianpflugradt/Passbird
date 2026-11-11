@@ -54,7 +54,7 @@ class CommitConventionTest(unittest.TestCase):
     def test_migration_uses_central_types_and_standard_breaking_markers(self):
         self.assertEqual(self.run_header("major: change behavior").returncode, 1)
         self.assertEqual(self.run_header("config: update tooling").returncode, 0)
-        self.assertEqual(self.run_header("fix(passwordtree)!: change compatibility contract").returncode, 0)
+        self.assertEqual(self.run_header("fix(storage)!: change compatibility contract").returncode, 0)
 
 
 if __name__ == "__main__":

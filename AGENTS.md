@@ -73,8 +73,8 @@ This repository keeps its agent-facing product specifications, design rules, and
 - Commits use the external Conventional Commits Check and advisory header-only Gemini Flash-Lite Review. Review FAIL and ERROR remain visible without blocking commits.
 - Use `!` or a BREAKING CHANGE footer for new breaking changes. The former `major` type remains understood by historical release analysis only.
 - Supported types are `fix`, `feat`, `build`, `chore`, `ci`, `docs`, `perf`, `refactor`, `revert`, `style`, `test`, and `config`.
-- Scopes are optional. When used, they must be one of `backup`, `boot`, `clipboard`, `commands`, `configuration`, `deps`, `egg`, `events`, `exchange`, `gradle`, `inactivity`, `keystore`, `memory`, `nest`, `password`, `passwordtree`, `protein`, `release`, `security`, or `userinterface`.
-- Prefer no scope for broad changes. Prefer a scope for localized software changes, especially adapter-specific work.
+- Scopes are optional. When used, they must be one of `build`, `clipboard`, `config`, `deps`, `exchange`, `favorites`, `memory`, `nests`, `passwords`, `proteins`, `release`, `security`, `session`, `storage`, `ui`, or `yolks`.
+- Prefer no scope for broad changes. Prefer a scope for localized product features or technical areas.
 - The `ci` type is usually scope-less.
 
 ## Repository Governance

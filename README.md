@@ -649,35 +649,33 @@ Supported commit types are:
 - `config`
 
 Scopes are optional. When a scope is used, it must be one of:
-- `backup`
-- `boot`
+
+- `build`
 - `clipboard`
-- `commands`
-- `configuration`
+- `config`
 - `deps`
-- `egg`
-- `events`
 - `exchange`
-- `gradle`
-- `inactivity`
-- `keystore`
+- `favorites`
 - `memory`
-- `nest`
-- `password`
-- `passwordtree`
-- `protein`
+- `nests`
+- `passwords`
+- `proteins`
 - `release`
 - `security`
-- `userinterface`
+- `session`
+- `storage`
+- `ui`
+- `yolks`
 
-Use scopes primarily for software areas, especially when a change is focused on one adapter or one part of the application or domain model. If a change is broad or cross-cutting, omit the scope. The `ci` type is usually scope-less.
+Use scopes for localized product features or technical areas. Use `session` for startup and inactivity, `storage` for password-tree persistence and backups, `security` for encryption and keystore handling, and `build` for build tooling. If a change is broad or cross-cutting, omit the scope. Documentation, tests and CI use their commit types with an optional feature scope; the `ci` type is usually scope-less.
 
 Examples:
-- `fix(passwordtree): preserve checksum verification on restore`
-- `feat(protein): add update confirmation message`
-- `refactor(commands): simplify memory command dispatch`
-- `test(keystore): cover failed key loading`
-- `docs(configuration): explain verifySignature behavior`
+
+- `fix(storage): preserve checksum verification on restore`
+- `feat(proteins): add update confirmation message`
+- `refactor(memory): simplify memory command dispatch`
+- `test(security): cover failed key loading`
+- `docs(config): explain verifySignature behavior`
 - `chore(deps): update dependency gradle to v9.5.1`
 - `ci: refresh dependency-check cache`
 

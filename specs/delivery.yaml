@@ -1,5 +1,5 @@
 schema_version: 1
-last_reviewed: 2026-11-10
+last_reviewed: 2026-11-11
 agent_internal_scripts:
   location: .agent/scripts
   purpose:
@@ -224,28 +224,29 @@ commit_messages:
     - test
     - config
   optional_scopes:
-    - backup
-    - boot
+    - build
     - clipboard
-    - commands
-    - configuration
+    - config
     - deps
-    - egg
-    - events
     - exchange
-    - gradle
-    - inactivity
-    - keystore
+    - favorites
     - memory
-    - nest
-    - password
-    - passwordtree
-    - protein
+    - nests
+    - passwords
+    - proteins
     - release
     - security
-    - userinterface
+    - session
+    - storage
+    - ui
+    - yolks
   guidance:
-    - use scopes for localized software changes, especially adapter-focused work
+    - use scopes for localized product features or technical areas
+    - session covers startup and inactivity
+    - storage covers password-tree persistence and backups
+    - security covers encryption and keystore handling
+    - build covers build tooling
+    - documentation, tests and CI use their commit types with an optional feature scope
     - omit the scope for broad or cross-cutting changes
     - prefer scope-less ci commits unless a scoped ci commit is clearly more readable
 recommended_validation_by_change_type:
