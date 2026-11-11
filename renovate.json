@@ -107,6 +107,6 @@
         }
     ],
     "extends": [
-        "github>christianpflugradt/please-behave-rulesets:renovate-governor"
+        "github>christianpflugradt/please-behave-governance:renovate-governor"
     ]
 }

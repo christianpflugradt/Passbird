@@ -189,7 +189,7 @@ class ReleaseArtifactsTest(unittest.TestCase):
         proof = dict(source_sha=ENV["GITHUB_SHA"], repository=artifacts.REPOSITORY,
                      workflow=".github/workflows/ci.yml", run_id=456, run_attempt=3,
                      jobs={"Check": {"attempt": 1}})
-        result = dict(id="git:external:release/releasable-project:1:release-contract", status="PASS", exit_code=0,
+        result = dict(id="git:external:rulesets/multi-point/releasable-open-source-software:1:release-contract", status="PASS", exit_code=0,
                       stdout=dict(text="PASS: " + json.dumps(proof), truncated=False))
         report = dict(schema_version=4, overall="PASS", snapshot=dict(head=ENV["GITHUB_SHA"]), results=[result])
         artifacts.write_json(Path("report.json"), report)

@@ -24,6 +24,7 @@ agent_internal_scripts:
       use_for: running the release jar manifest and payload verification sequence
 quality_gates:
   tool_preparation:
+    - shared conventions, security, open-source license and release policies use full-commit pins from please-behave-governance in .please/config.toml
     - mise.toml pins Java, Node, Python, actionlint, Gitleaks and ShellCheck for local validation
     - run mise install and mise run prepare explicitly before offline Git hooks; preparation does not run validation
     - use mise exec for manual Please Behave and Git commands without shell activation so hooks inherit the configured tool PATH
