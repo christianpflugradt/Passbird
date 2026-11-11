@@ -35,7 +35,10 @@
             "groupName": "github-actions",
             "separateMajorMinor": false,
             "minimumReleaseAge": "14 days",
-            "automerge": true
+            "automerge": true,
+            "matchPackageNames": [
+                "!please-behave/cli"
+            ]
         },
         {
             "description": [
@@ -55,7 +58,10 @@
             "matchUpdateTypes": [
                 "major"
             ],
-            "minimumReleaseAge": "14 days"
+            "minimumReleaseAge": "14 days",
+            "matchPackageNames": [
+                "!please-behave/cli"
+            ]
         },
         {
             "matchPackageNames": [
@@ -81,7 +87,10 @@
                     "gradle/verification-keyring.keys"
                 ],
                 "executionMode": "branch"
-            }
+            },
+            "matchPackageNames": [
+                "!please-behave/cli"
+            ]
         }
     ],
     "customManagers": [
@@ -96,5 +105,8 @@
             "depNameTemplate": "pinterest/ktlint",
             "datasourceTemplate": "github-releases"
         }
+    ],
+    "extends": [
+        "github>christianpflugradt/please-behave-rulesets:renovate-governor"
     ]
 }

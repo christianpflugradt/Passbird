@@ -205,3 +205,13 @@ publication guard exported by `release-verify`. The shared implementation checks
 the recalculated version, checkout, dispatched SHA, repository, main branch and
 current remote main. Custom prerelease/image publication reuses that source guard.
 Offline lifecycle fixtures exercise the actual pinned external module from cache.
+
+## Published governor updates
+
+`.please-version` records the exact latest stable published governor. The shared
+`renovate-governor` preset in the external ruleset repository tracks GitHub
+Releases and auto-merges newer stable versions, including major updates, after
+checks pass. Governor updates have no dependency cooldown; ordinary dependency
+policies remain unchanged. CI installs the proposed pin before running checks.
+Renovate runs determine update timing. Local governor preparation uses the same
+pin; candidate binaries never become the governor.
