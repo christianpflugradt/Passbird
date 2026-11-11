@@ -8,12 +8,12 @@ Please Behave CLI and Action. Local Rules contain Passbird requirements only.
 
 ## Preparation and hooks
 
-Prepare Java and Node from `mise.toml`, Python 3.11+, Bash, actionlint 1.7.12,
-Gitleaks 8.30.1 and ShellCheck. Machine-level tools are managed by the developer;
-repository checks do not install them. Linux desktop tests and smoke tests also
-need Xvfb, xauth and xclip. Local macOS checks require a desktop session.
+Run `mise trust` and `mise install` to prepare the exact Java, Node, Python,
+actionlint, Gitleaks and ShellCheck versions in `mise.toml`. Git and Bash remain
+host prerequisites. Linux desktop tests and smoke tests also need Xvfb, xauth
+and xclip. Local macOS checks require a desktop session.
 
-Run `bash scripts/prepare.sh` explicitly before validation. It installs the locked
+Run `mise run prepare` explicitly before validation. It installs the locked
 release-tool dependencies and resolves Gradle verification dependencies. It then
 resolves the native task graph online with `--dry-run` to cache signature metadata
 before offline checks; this executes no build or test tasks. The `gradle` mode
@@ -22,6 +22,14 @@ Wrapper and signed/checksummed dependency verification remain in use. Refresh
 preparation after dependency or toolchain changes. CI performs this preparation
 before checks. The OWASP Rule at check deliberately accesses current advisory
 data; tests and governed compilation/build commands run offline.
+
+Use `mise run install-git-hooks` for hook setup. For manual checks without shell
+activation, use `mise exec -- please run --at pre-commit` or
+`mise exec -- please run --at pre-push`. Run Git as `mise exec -- git commit` and
+`mise exec -- git push` so hooks inherit the same configured tools. Plain commands
+require mise shell activation or equivalent PATH setup; `mise install` alone does
+not activate tools. The separately installed published governor must remain on
+PATH, and credentials are supplied externally.
 
 If necessary, `python3 scripts/install-governor.py` installs the exact published
 governor into ignored `.tools/please/bin`, verifying the archive checksum and

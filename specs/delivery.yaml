@@ -23,6 +23,11 @@ agent_internal_scripts:
     - name: agent-release-artifact-check.sh
       use_for: running the release jar manifest and payload verification sequence
 quality_gates:
+  tool_preparation:
+    - mise.toml pins Java, Node, Python, actionlint, Gitleaks and ShellCheck for local validation
+    - run mise install and mise run prepare explicitly before offline Git hooks; preparation does not run validation
+    - use mise exec for manual Please Behave and Git commands without shell activation so hooks inherit the configured tool PATH
+    - Git, Bash, desktop support, the published governor and credentials remain external prerequisites
   formatting_and_style:
     - run ./gradlew ktlintFormat before staging, committing, or pushing to auto-resolve formatting issues when possible
     - pre-commit hook runs ./gradlew ktlintCheck

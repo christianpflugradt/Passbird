@@ -610,7 +610,9 @@ The published Please Behave governor pinned in `.please-version` manages local G
 - pre-commit runs formatting, Detekt, production/test compilation and agent-spec consistency checks
 - pre-push runs the complete `allTests` suite, dependency-license and coverage checks, JAR build and interactive smoke flow, workflow/release-helper tests and shared security/license checks
 
-Prepare the tools in `mise.toml`, Python 3.11+, Bash, actionlint, Gitleaks and ShellCheck, then run `bash scripts/prepare.sh` and `sh scripts/setup-git-hooks.sh --yes`. A desktop session is required locally; Linux CI prepares Xvfb, xauth and xclip. The optional `python3 scripts/install-governor.py` installs the exact published governor under ignored `.tools/please/bin` with checksum and version verification; prepend that directory to PATH when invoking Git.
+Run `mise trust`, `mise install`, `mise run prepare` and `mise run install-git-hooks` to prepare the pinned validation tools, locked dependencies and managed hooks. Git and Bash remain host prerequisites. A desktop session is required locally; Linux CI prepares Xvfb, xauth and xclip. The optional `python3 scripts/install-governor.py` installs the exact published governor under ignored `.tools/please/bin` with checksum and version verification; prepend that directory to PATH when invoking Git.
+
+Use `mise exec -- please run --at pre-commit` or `mise exec -- please run --at pre-push` for manual checks, and `mise exec -- git commit` / `mise exec -- git push` so hooks inherit the configured tools. Plain commands require mise shell activation or equivalent PATH setup; installing tools alone does not activate them. The published governor and credentials remain separate prerequisites.
 
 Hooks are the final local gates. Do not repeat the complete gate manually before Git; inspect stored results with `please status --details`, fix failures and retry. `mise run verify` remains the manual governor entrypoint. Native `preCommitCheck` and `prePushCheck` Gradle convenience tasks remain available.
 
