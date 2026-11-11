@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import tomllib
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
@@ -107,6 +108,6 @@ def deploy(tag=None, prefix=None):
 
 if __name__ == "__main__":
     try:
-        deploy(tag=Path(".please-version").read_text().strip())
+        deploy(tag="v" + tomllib.loads(Path("mise.toml").read_text())["tools"]["github:please-behave/cli"])
     except (OSError, ValueError, KeyError, TypeError, tarfile.TarError) as error:
         sys.exit(f"Please Behave deploy failed: {error}")

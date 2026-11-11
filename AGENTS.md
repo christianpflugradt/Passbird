@@ -79,7 +79,7 @@ This repository keeps its agent-facing product specifications, design rules, and
 
 ## Repository Governance
 
-- Use the independently published governor pinned in `.please-version`; never use a candidate as governor.
+- Use the independently published governor pinned in `mise.toml`; never use a candidate as governor.
 - Shared rules and provider adapters stay in immutable external packages. Local rules contain Passbird-specific requirements only.
 - Prepare tools through the developer's existing toolchain and run `bash scripts/prepare.sh` explicitly before checks; checks do not install tools.
 - Install managed hooks with `sh scripts/setup-git-hooks.sh --yes`. Setup preserves custom hooks; Gradle no longer generates hooks.

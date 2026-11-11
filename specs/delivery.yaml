@@ -61,7 +61,7 @@ quality_gates:
     - Renovate groups the semantic-release changelog toolchain so its preset and writer update together
     - Renovate dependency dashboard stays enabled for pending and grouped dependency work
     - Renovate standard dependency updates require a 7-day minimum release age before branch or pull-request creation
-    - the shared external renovate-governor preset updates .please-version to stable published Please Behave releases, including major versions, without a cooldown and auto-merges after green CI
+    - the shared external renovate-governor preset updates mise.toml to stable published Please Behave releases, including major versions, without a cooldown and auto-merges after green CI
     - Renovate GitHub Actions updates and major-version updates require a 14-day minimum release age
     - Renovate internal checks use strict filtering so updates blocked by minimum release age stay visible through the dashboard without early branch or pull-request creation
     - Renovate auto-merges patch, minor, and digest updates through GitHub once required CI checks succeed
@@ -153,7 +153,7 @@ local_verification_policy:
         - .github/workflows/release.yml
     notes:
       - ci.yml uses check / Check with the published governor, preserving main pushes, Renovate PRs and manual dispatch
-      - CI, Readiness and Candidate execute through SHA-pinned Please Behave Action v1.2.0 with checks-only and Job Summaries enabled; the CLI pin remains .please-version
+      - CI, Readiness and Candidate execute through SHA-pinned Please Behave Action v1.2.0 with checks-only and Job Summaries enabled; the CLI pin remains mise.toml
       - CI prepares Xvfb before source checks; release runtime matrix jobs use xvfb-run for candidate smoke tests
       - preparation downloads locked dependencies and prepares tools before checks; governed tests remain offline with synthetic credentials and mocked services
       - preparation explicitly resolves runtime POM artifacts for offline license discovery; license report tasks bypass the build cache and rerun to reject stale incomplete reports

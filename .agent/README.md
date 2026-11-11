@@ -14,4 +14,4 @@
 - `.agent/scripts/agent-release-artifact-check.sh`: verify existing release JAR manifest and payload without rebuilding.
 
 
-Git hooks are managed by the published governor in `.please-version`. Prepare explicitly with `bash scripts/prepare.sh`, install with `sh scripts/setup-git-hooks.sh --yes`, and inspect failures through `please status --details`. Do not repeat complete gates manually. See `.please/README.md` for the release and badge contracts.
+Git hooks are managed by the published governor in `mise.toml`. Prepare explicitly with `bash scripts/prepare.sh`, install with `sh scripts/setup-git-hooks.sh --yes`, and inspect failures through `please status --details`. Do not repeat complete gates manually. See `.please/README.md` for the release and badge contracts.

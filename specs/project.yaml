@@ -106,7 +106,7 @@ commands:
 release_model:
   versioning: semantic_versioning
   primary_branch: main
-  governor: .please-version
+  governor: mise.toml
   governance_contract: .please/README.md
   automation:
     - ci.yml runs all deterministic Please Behave checks including PIT and OWASP in one Check invocation, with compatibility smoke tests reserved for Release Candidate

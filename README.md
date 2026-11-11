@@ -605,7 +605,7 @@ While working locally, prefer focused manual checks for the behavior you changed
 - `./gradlew integration` runs tagged integration tests.
 - `./gradlew architecture` runs the ArchUnit-based architecture suite.
 
-The published Please Behave governor pinned in `.please-version` manages local Git hooks:
+The published Please Behave governor pinned in `mise.toml` manages local Git hooks:
 
 - pre-commit runs formatting, Detekt, production/test compilation and agent-spec consistency checks
 - pre-push runs the complete `allTests` suite, dependency-license and coverage checks, JAR build and interactive smoke flow, workflow/release-helper tests and shared security/license checks

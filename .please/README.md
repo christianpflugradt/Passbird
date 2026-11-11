@@ -1,6 +1,6 @@
 # Repository governance
 
-The independently published governor in `.please-version` governs Passbird.
+The independently published governor in `mise.toml` governs Passbird.
 Candidate binaries never govern their own validation. The three baseline Rule Sets
 and the independent Gemini Flash-Lite provider use immutable revision
 `c4d4c60eff8fc5d32641f5fe33b5cfa9e337e1f3`, shared with Passing By, PumpBuddy,
@@ -114,7 +114,7 @@ isolated environment; they never execute the installed live commit hook.
 ## CI, badges and security automation
 
 CI, Release Readiness and Release Candidate execute through the published
-Action, with the CLI version from `.please-version`, `checks-only: 'true'` and
+Action, with the CLI version from `mise.toml`, `checks-only: 'true'` and
 `summary: 'true'`. Install-only mode precedes explicit synchronization.
 
 `ci.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
@@ -216,10 +216,18 @@ Offline lifecycle fixtures exercise the actual pinned external module from cache
 
 ## Published governor updates
 
-`.please-version` records the exact latest stable published governor. The shared
+`mise.toml` records the exact latest stable published governor. The shared
 `renovate-governor` preset in the external ruleset repository tracks GitHub
 Releases and auto-merges newer stable versions, including major updates, after
 checks pass. Governor updates have no dependency cooldown; ordinary dependency
 policies remain unchanged. CI installs the proposed pin before running checks.
 Renovate runs determine update timing. Local governor preparation uses the same
 pin; candidate binaries never become the governor.
+
+## Governor version source
+
+The exact published governor version is the `github:please-behave/cli` tool entry
+in `mise.toml`. `mise install` installs the released executable through the GitHub
+backend with checksum and available artifact-attestation verification. Run
+`mise exec -- please --version` to inspect it. CI reads this same entry for the
+published Action. Candidate binaries never become the governor.
