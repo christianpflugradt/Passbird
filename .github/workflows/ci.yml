@@ -8,6 +8,7 @@ on:
 permissions:
   contents: read
 env:
+  MISE_AUTO_INSTALL: 'false'
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
   DEPENDENCY_CHECK_DATA_LOCATION: "${{ github.workspace }}/.dependency-check"
   DEPENDENCY_CHECK_CACHE_KEY_PREFIX: linux-dependency-check-v1-
@@ -21,35 +22,15 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
-        with:
-          java-version: '25'
-          distribution: temurin
+      - name: Install project tools
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
       - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
-        with:
-          node-version: '26'
-          package-manager-cache: false
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
-        with:
-          go-version: stable
-          cache: false
-      - name: Prepare validation tools and project dependencies
+      - name: Prepare desktop dependencies
         run: |
-          go install github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
-          go install github.com/zricethezav/gitleaks/v8@v8.30.1
           sudo apt-get update
-          sudo apt-get install --yes shellcheck xauth xclip xvfb
-          bash scripts/prepare.sh check
-      - name: Read pinned governor version
-        id: governor
-        run: echo "version=$(python3 -c 'import pathlib, tomllib; print("v" + tomllib.loads(pathlib.Path("mise.toml").read_text())["tools"]["github:please-behave/cli"])')" >> "$GITHUB_OUTPUT"
-      - uses: please-behave/action@722d5967c094e5ac4bfe25e9f82b020ff34e9487 # v1.2.0
-        with:
-          version: ${{ steps.governor.outputs.version }}
-          run: 'false'
-      - name: Synchronize governance
-        run: please sync --yes
+          sudo apt-get install --yes xauth xclip xvfb
+      - name: Fetch locked dependencies
+        run: mise run ci:prepare
       - id: dependency-check-cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
@@ -75,9 +56,10 @@ jobs:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
           OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
           OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
-        uses: please-behave/action@722d5967c094e5ac4bfe25e9f82b020ff34e9487 # v1.2.0
+        uses: please-behave/action@196e1d61f898e0cb77c58ab3dd6667f021321d5e # v1.3.0
         with:
-          version: ${{ steps.governor.outputs.version }}
+          install: 'false'
+          sync: 'true'
           execution-point: check
           checks-only: 'true'
           summary: 'true'

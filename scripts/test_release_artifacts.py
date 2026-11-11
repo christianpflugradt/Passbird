@@ -185,22 +185,6 @@ class ReleaseArtifactsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "payload differs"):
             artifacts.verify_ci()
 
-    def test_readiness_bridge_uses_the_retained_check_attempt(self):
-        proof = dict(source_sha=ENV["GITHUB_SHA"], repository=artifacts.REPOSITORY,
-                     workflow=".github/workflows/ci.yml", run_id=456, run_attempt=3,
-                     jobs={"Check": {"attempt": 1}})
-        result = dict(id="git:external:rulesets/multi-point/releasable-open-source-software:1:release-contract", status="PASS", exit_code=0,
-                      stdout=dict(text="PASS: " + json.dumps(proof), truncated=False))
-        report = dict(schema_version=4, overall="PASS", snapshot=dict(head=ENV["GITHUB_SHA"]), results=[result])
-        artifacts.write_json(Path("report.json"), report)
-        os.environ["GITHUB_OUTPUT"] = str(Path("output.txt").resolve())
-        artifacts.ci_evidence(Path("report.json"))
-        self.assertEqual(Path("output.txt").read_text(), "ci_run_id=456\nci_attempt=1\n")
-        for status, truncated in [("FAIL", False), ("ERROR", False), ("PASS", True)]:
-            result["status"], result["stdout"]["truncated"] = status, truncated
-            artifacts.write_json(Path("report.json"), report)
-            with self.subTest(status=status, truncated=truncated), self.assertRaises(ValueError):
-                artifacts.ci_evidence(Path("report.json"))
 
 
 if __name__ == "__main__":

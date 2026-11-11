@@ -27,17 +27,23 @@ test("release readiness and candidate run after plan in parallel and both gate p
   assert.match(jobs.publish.if, /needs.release-candidate.result == 'success'/);
   const publication = jobs.publish.steps.map(step => step.run ?? "").join("\n");
   assert.ok(!/gradlew|jar\b/.test(publication));
-  assert.ok(jobs.publish.steps.some(step => step.with?.["execution-point"] === "release-verify"));
+  assert.ok(jobs.publish.steps.some(step => step.run === "python3 scripts/release-evidence.py verify"));
+  for (const job of [jobs.plan, jobs.publish]) {
+    assert.ok(job.steps.every(step => !step.uses?.startsWith("please-behave/action@")
+      && !/\bplease\b/.test(step.run ?? "")));
+  }
+  assert.ok(jobs["release-readiness"].steps.some(step => step.id === "evidence"
+    && step.run === "python3 scripts/check-release-ci.py"));
   assert.match(jobs.publish.if, /needs.release-smoke.result/);
   const artifact = jobs.publish.steps.find(step => step.uses?.startsWith("actions/download-artifact") && step.with.path === "dist");
   assert.equal(artifact.with.name, "passbird-build-${{ github.run_id }}-${{ github.run_attempt }}");
   const candidate = jobs["release-candidate"].steps;
-  assert.deepEqual(candidate.filter(step => step.uses?.startsWith("actions/setup-java")).map(step => step.with["java-version"]), ["25"]);
+  assert.ok(candidate.some(step => step.uses?.startsWith("jdx/mise-action@") && step.with.install_args.includes("java")));
   const smoke = jobs["release-smoke"];
   assert.deepEqual(smoke.needs, ["plan", "release-candidate"]);
   assert.deepEqual(smoke.strategy.matrix.java, ["17", "21", "25"]);
   assert.equal(smoke.strategy["fail-fast"], false);
-  assert.ok(smoke.steps.some(step => step.with?.["execution-point"] === "release-record"));
+  assert.ok(smoke.steps.some(step => step.run === "python3 scripts/release-evidence.py record"));
   assert.ok(smoke.steps.some(step => step.run?.includes('scripts/smoke-candidate.sh')));
 });
 
@@ -49,17 +55,16 @@ test("trusted CI proof requires Check while compatibility belongs to Release", (
   const check = ci.jobs.check.steps.find(step => step.name === "Run quality checks");
   assert.match(check.uses, /^please-behave\/action@[a-f0-9]{40}$/);
   assert.equal(check.run, undefined);
-  assert.deepEqual(check.with, { version: "${{ steps.governor.outputs.version }}",
+  assert.deepEqual(check.with, { install: "false", sync: "true",
     "execution-point": "check", "checks-only": "true", summary: "true" });
   for (const [job, point] of [[ci.jobs.check, "check"],
-    [workflow("release.yml").jobs["release-readiness"], "release-readiness"],
-    [workflow("release.yml").jobs["release-candidate"], "release-candidate"]]) {
+    [workflow("release.yml").jobs["release-candidate"], "release"]]) {
     const execution = job.steps.find(step => step.with?.["execution-point"] === point);
     assert.equal(execution.uses, check.uses);
     assert.deepEqual(execution.with, { ...check.with, "execution-point": point });
     assert.ok(job.steps.every(step => !/\bplease run\b/.test(step.run ?? "")));
-    const sync = job.steps.findIndex(step => step.run === "please sync --yes");
-    assert.ok(sync >= 0 && sync < job.steps.indexOf(execution));
+    assert.equal(execution.with.sync, "true");
+    assert.ok(job.steps.every(step => !step.run?.includes("please sync")));
     if (point === "check") {
       const display = job.steps.find(step => step.name === "Start virtual display");
       assert.ok(job.steps.indexOf(display) < job.steps.indexOf(execution));
@@ -70,7 +75,7 @@ test("trusted CI proof requires Check while compatibility belongs to Release", (
   assert.ok(check.env.NVD_API_KEY);
   assert.ok(!workflow("release.yml").jobs["release-readiness"].steps.some(step => step.run?.includes("dependencyCheckAnalyze")));
   assert.ok("pull_request" in ci.on && "workflow_dispatch" in ci.on);
-  const policy = JSON.parse(readFileSync(".please/release-ci.json", "utf8"));
+  const policy = JSON.parse(readFileSync(".github/release-ci.json", "utf8"));
   assert.equal(policy.repository, "christianpflugradt/Passbird");
   assert.equal(policy.workflow, ".github/workflows/ci.yml");
   assert.equal(policy.event, "push");

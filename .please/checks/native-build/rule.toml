@@ -1,6 +1,6 @@
 id = "native-build"
 description = "Build the executable platform-independent JAR"
-run_at = ["pre-push", "check", "release-candidate"]
+run_at = ["pre-push", "check", "release"]
 
 [check]
 command = "bash scripts/gradle-check.sh jar"

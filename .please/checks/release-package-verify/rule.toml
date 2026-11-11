@@ -1,8 +1,0 @@
-id = "release-package-verify"
-description = "Verify candidate metadata and exact JAR bytes"
-run_at = ["release-candidate"]
-depends_on = ["release-package"]
-
-[check]
-command = "python3 scripts/release-artifacts.py verify --without-smokes"
-timeout_seconds = 900

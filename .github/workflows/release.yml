@@ -10,6 +10,7 @@ concurrency:
   group: release-main
   cancel-in-progress: false
 env:
+  MISE_AUTO_INSTALL: 'false'
   GRADLE_OPTS: '-Dorg.gradle.daemon=false'
 jobs:
   plan:
@@ -29,10 +30,10 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+      - name: Install project tools
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          node-version: '26'
-          package-manager-cache: false
+          install_args: node
       - run: npm ci --ignore-scripts
       - name: Plan without tagging or publishing
         id: plan
@@ -59,37 +60,15 @@ jobs:
           ref: ${{ needs.plan.outputs.source_sha }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+      - name: Install project tools
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          python-version: '3.15'
-      - name: Read pinned governor version
-        id: governor
-        run: echo "version=$(python3 -c 'import pathlib, tomllib; print("v" + tomllib.loads(pathlib.Path("mise.toml").read_text())["tools"]["github:please-behave/cli"])')" >> "$GITHUB_OUTPUT"
-      - uses: please-behave/action@722d5967c094e5ac4bfe25e9f82b020ff34e9487 # v1.2.0
-        with:
-          version: ${{ steps.governor.outputs.version }}
-          run: 'false'
-      - name: Synchronize governance
-        run: please sync --yes
-      - name: Verify release readiness
+          install_args: python
+      - name: Verify exact-source CI prerequisites
+        id: evidence
+        run: python3 scripts/check-release-ci.py
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        uses: please-behave/action@722d5967c094e5ac4bfe25e9f82b020ff34e9487 # v1.2.0
-        with:
-          version: ${{ steps.governor.outputs.version }}
-          execution-point: release-readiness
-          checks-only: 'true'
-          summary: 'true'
-      - name: Read trusted CI artifact identity from the external proof
-        id: evidence
-        run: python3 scripts/release-artifacts.py ci-evidence
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        if: always()
-        with:
-          name: release-readiness-report-${{ github.run_id }}-${{ github.run_attempt }}
-          path: .please/reports/last.json
-          include-hidden-files: true
-          if-no-files-found: warn
 
   release-candidate:
     name: Release Candidate
@@ -105,36 +84,25 @@ jobs:
           ref: ${{ needs.plan.outputs.source_sha }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+      - name: Install project tools
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          python-version: '3.15'
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
-        with:
-          java-version: '25'
-          distribution: temurin
+          install_args: python java node github:please-behave/cli
       - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+      - name: Fetch candidate dependencies
+        run: mise run ci:prepare candidate
+      - name: Build versioned candidate
+        uses: please-behave/action@196e1d61f898e0cb77c58ab3dd6667f021321d5e # v1.3.0
         with:
-          node-version: '26'
-          package-manager-cache: false
-      - name: Prepare candidate dependencies
-        run: bash scripts/prepare.sh candidate
-      - name: Read pinned governor version
-        id: governor
-        run: echo "version=$(python3 -c 'import pathlib, tomllib; print("v" + tomllib.loads(pathlib.Path("mise.toml").read_text())["tools"]["github:please-behave/cli"])')" >> "$GITHUB_OUTPUT"
-      - uses: please-behave/action@722d5967c094e5ac4bfe25e9f82b020ff34e9487 # v1.2.0
-        with:
-          version: ${{ steps.governor.outputs.version }}
-          run: 'false'
-      - name: Synchronize governance
-        run: please sync --yes
-      - name: Build and package versioned candidate
-        uses: please-behave/action@722d5967c094e5ac4bfe25e9f82b020ff34e9487 # v1.2.0
-        with:
-          version: ${{ steps.governor.outputs.version }}
-          execution-point: release-candidate
+          install: 'false'
+          sync: 'true'
+          execution-point: release
           checks-only: 'true'
           summary: 'true'
+      - name: Package verified candidate
+        run: mise run package
+      - name: Verify candidate archive
+        run: python3 scripts/release-artifacts.py verify --without-smokes
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: passbird-build-${{ github.run_id }}-${{ github.run_attempt }}
@@ -170,40 +138,22 @@ jobs:
         with:
           ref: ${{ needs.plan.outputs.source_sha }}
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+      - name: Install project tools
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          python-version: '3.15'
-      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
-        with:
-          java-version: ${{ matrix.java }}
-          distribution: temurin
-      - name: Prepare smoke test dependencies
+          install_args: python java@temurin-${{ matrix.java }}
+      - name: Prepare smoke desktop dependencies
         run: |
           sudo apt-get update
           sudo apt-get install --yes xauth xclip xvfb
-      - name: Read pinned governor version
-        id: governor
-        run: echo "version=$(python3 -c 'import pathlib, tomllib; print("v" + tomllib.loads(pathlib.Path("mise.toml").read_text())["tools"]["github:please-behave/cli"])')" >> "$GITHUB_OUTPUT"
-      - name: Install published governor
-        uses: please-behave/action@722d5967c094e5ac4bfe25e9f82b020ff34e9487 # v1.2.0
-        with:
-          version: ${{ steps.governor.outputs.version }}
-          run: 'false'
-      - name: Synchronize governance
-        run: please sync --yes
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: passbird-build-${{ github.run_id }}-${{ github.run_attempt }}
           path: dist
       - name: Smoke exact versioned candidate
-        run: xvfb-run -a bash scripts/smoke-candidate.sh "${{ matrix.java }}"
+        run: mise exec java@temurin-${{ matrix.java }} -- xvfb-run -a bash scripts/smoke-candidate.sh "${{ matrix.java }}"
       - name: Record release candidate evidence
-        uses: please-behave/action@722d5967c094e5ac4bfe25e9f82b020ff34e9487 # v1.2.0
-        with:
-          version: ${{ steps.governor.outputs.version }}
-          execution-point: release-record
-          checks-only: 'true'
-          summary: 'true'
+        run: python3 scripts/release-evidence.py record
         env:
           EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
           RELEASE_TARGET: java-${{ matrix.java }}
@@ -253,13 +203,10 @@ jobs:
           ref: ${{ needs.plan.outputs.source_sha }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+      - name: Install project tools
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          python-version: '3.15'
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
-        with:
-          node-version: '26'
-          package-manager-cache: false
+          install_args: python node
       - run: npm ci --ignore-scripts
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
@@ -277,16 +224,6 @@ jobs:
           path: verified-release-jar
           run-id: ${{ needs.release-readiness.outputs.ci_run_id }}
           github-token: ${{ github.token }}
-      - name: Read pinned governor version
-        id: governor
-        run: echo "version=$(python3 -c 'import pathlib, tomllib; print("v" + tomllib.loads(pathlib.Path("mise.toml").read_text())["tools"]["github:please-behave/cli"])')" >> "$GITHUB_OUTPUT"
-      - name: Install published governor
-        uses: please-behave/action@722d5967c094e5ac4bfe25e9f82b020ff34e9487 # v1.2.0
-        with:
-          version: ${{ steps.governor.outputs.version }}
-          run: 'false'
-      - name: Synchronize governance
-        run: please sync --yes
       - name: Download release candidate evidence
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
@@ -294,12 +231,7 @@ jobs:
           path: release-evidence
           merge-multiple: true
       - name: Verify complete release candidate evidence
-        uses: please-behave/action@722d5967c094e5ac4bfe25e9f82b020ff34e9487 # v1.2.0
-        with:
-          version: ${{ steps.governor.outputs.version }}
-          execution-point: release-verify
-          checks-only: 'true'
-          summary: 'true'
+        run: python3 scripts/release-evidence.py verify
         env:
           EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
       - name: Publish exact verified candidate without rebuilding
@@ -307,3 +239,4 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ github.token }}
         run: npm run release
+

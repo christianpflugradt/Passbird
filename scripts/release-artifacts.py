@@ -161,29 +161,9 @@ def verify_ci(directory=Path("verified-release-jar")):
     require(payload == baseline, "Candidate payload differs from the trusted CI JAR")
 
 
-def ci_evidence(path=Path(".please/reports/last.json")):
-    report = json.loads(path.read_text())
-    require(report.get("schema_version") == 4 and report.get("overall") == "PASS"
-            and report.get("snapshot", {}).get("head") == os.environ["GITHUB_SHA"], "Readiness report did not pass for source")
-    matches = [r for r in report["results"] if r["id"].endswith(":release-contract")]
-    require(len(matches) == 1, "Missing unique external CI proof")
-    result = matches[0]
-    require(result["status"] == "PASS" and result["exit_code"] == 0 and not result["stdout"]["truncated"],
-            "External CI proof failed or was truncated")
-    text = result["stdout"]["text"].strip()
-    require(text.startswith("PASS: "), "Malformed external CI proof")
-    data = json.loads(text.removeprefix("PASS: "))
-    require(data["source_sha"] == os.environ["GITHUB_SHA"] and data["repository"] == REPOSITORY
-            and data["workflow"] == ".github/workflows/ci.yml", "CI proof source differs")
-    run, attempt = str(data["run_id"]), str(data["jobs"]["Check"]["attempt"])
-    require(re.fullmatch(r"[1-9][0-9]*", run) and re.fullmatch(r"[1-9][0-9]*", attempt), "Invalid CI artifact identity")
-    with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-        output.write(f"ci_run_id={run}\nci_attempt={attempt}\n")
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["package", "verify", "receipt", "ci-receipt", "verify-ci", "ci-evidence"])
+    parser.add_argument("command", choices=["package", "verify", "receipt", "ci-receipt", "verify-ci"])
     parser.add_argument("args", nargs="*")
     parser.add_argument("--without-smokes", action="store_true")
     args = parser.parse_args()
@@ -194,6 +174,6 @@ if __name__ == "__main__":
         elif args.command == "verify":
             verify(without_smokes=args.without_smokes)
         else:
-            {"package": package, "ci-receipt": ci_receipt, "verify-ci": verify_ci, "ci-evidence": ci_evidence}[args.command]()
+            {"package": package, "ci-receipt": ci_receipt, "verify-ci": verify_ci}[args.command]()
     except (ValueError, OSError, KeyError, TypeError, zipfile.BadZipFile, subprocess.SubprocessError) as error:
         raise SystemExit(f"Release artifact verification failed: {error}") from None

@@ -13,7 +13,7 @@ actionlint, Gitleaks and ShellCheck versions in `mise.toml`. Git and Bash remain
 host prerequisites. Linux desktop tests and smoke tests also need Xvfb, xauth
 and xclip. Local macOS checks require a desktop session.
 
-Run `mise run prepare` explicitly before validation. It installs the locked
+Run `mise run ci:prepare` explicitly before validation. It installs the locked
 release-tool dependencies and resolves Gradle verification dependencies. It then
 resolves the native task graph online with `--dry-run` to cache signature metadata
 before offline checks; this executes no build or test tasks. The `gradle` mode
@@ -23,7 +23,7 @@ preparation after dependency or toolchain changes. CI performs this preparation
 before checks. The OWASP Rule at check deliberately accesses current advisory
 data; tests and governed compilation/build commands run offline.
 
-Use `mise run install-git-hooks` for hook setup. For manual checks without shell
+Use `mise run hooks:install` for hook setup. For manual checks without shell
 activation, use `mise exec -- please run --at pre-commit` or
 `mise exec -- please run --at pre-push`. Run Git as `mise exec -- git commit` and
 `mise exec -- git push` so hooks inherit the same configured tools. Plain commands
@@ -35,7 +35,7 @@ If necessary, `python3 scripts/install-governor.py` installs the exact published
 governor into ignored `.tools/please/bin`, verifying the archive checksum and
 executable version. Prepend that directory to PATH in the shell invoking Git;
 the global installation is not replaced. CI uses the published Please Behave
-Action pinned to v1.2.0's immutable commit.
+Action v1.3.0 with install false and sync true; mise owns installation.
 
 Run `sh scripts/setup-git-hooks.sh --yes`. Setup retires only byte-identical known
 Gradle-generated hooks, preserves copies under ignored `.tools/retired-gradle-hooks`,
@@ -61,10 +61,9 @@ workflow monitoring belongs to the maintainer.
 | --- | --- |
 | format, static-analysis, compile, agent-specs | pre-commit, pre-push, check |
 | tests, coverage, dependency-license, native-smoke | pre-push, check |
-| native-build | pre-push, check, release-candidate |
+| native-build | pre-push, check, release |
 | workflows, release-rules | pre-push, check |
 | mutation, owasp | check |
-| release-package, release-package-verify | release-candidate |
 
 `allTests` is the single complete native test suite, including unit, property,
 integration, architecture and desktop clipboard tests. Focused Gradle task
@@ -113,13 +112,20 @@ isolated environment; they never execute the installed live commit hook.
 
 ## CI, badges and security automation
 
-CI, Release Readiness and Release Candidate execute through the published
-Action, with the CLI version from `mise.toml`, `checks-only: 'true'` and
-`summary: 'true'`. Install-only mode precedes explicit synchronization.
+CI and Candidate use the published Action with install false, sync true,
+checks-only and summaries. The CLI pin remains solely in mise.toml. Readiness
+verifies exact-source CI through scripts/check-release-ci.py; Plan and Publish
+never install or invoke governance or Git hooks. The only custom point is release.
+Python and the default build JDK are exactly pinned in mise. Java 17/21/25 in the
+compatibility matrix intentionally select their latest supported patch versions;
+mise exec selects each runtime explicitly. Xvfb, xauth and xclip remain runner
+OS dependencies installed by Actions. Preparation resolves dependencies and warms
+the Gradle task graph without executing build or quality tasks. The old prepare
+and install-git-hooks names remain aliases for ci:prepare and hooks:install.
 
 `ci.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
 manual dispatch. Check runs all deterministic governance checks, mutation tests
-and OWASP through the SHA-pinned Please Behave Action v1.2.0 with checks-only
+and OWASP through the SHA-pinned Please Behave Action v1.3.0 with checks-only
 execution and a Job Summary. Xvfb starts before the Action; Check uploads
 the source/attempt-bound `release-jar` artifact. Java compatibility is tested only on the versioned release candidate. Native test diagnostics are consolidated into
 `test-reports`; lint, Detekt, dependency-license, OWASP, PIT and smoke diagnostics
@@ -176,7 +182,7 @@ or duplicate ZIP entries, symlinks, altered manifests and incomplete smoke sets.
 Publish downloads only the current run/attempt's complete candidate. Partial
 Release reruns missing that attempt's candidate fail; rerun all jobs.
 
-The external readiness proof accepts retained successful jobs from partial reruns
+The workflow readiness proof accepts retained successful jobs from partial reruns
 of the same CI run. Its report supplies the producing Check attempt, so Publish
 can verify the trusted CI artifact's identity and compare payloads. Only manifest
 differences from the CI JAR are allowed. Publish never builds; it invokes the published governor to verify common release evidence. It verifies the complete candidate again and rechecks planned version,
@@ -197,22 +203,16 @@ Release, publish artifacts or monitor remote runs without an explicit request.
 
 ## Shared release evidence
 
-The separate external `rulesets/multi-point/releasable-open-source-software` Rule Set shares the reviewed
-immutable revision with the other imports. Its `release-contract` Check uses
-`release-ci.json` and `release-artifacts.json`. Readiness trusts exact-source CI
-without an age limit or repeated source/security checks. Candidate builds and
-artifact-specific tests remain local. After they pass, `release-record` writes
-internal `release-evidence/TARGET.json` manifests. Publish collects every expected
-target and invokes `release-verify` before publication. The shared Check verifies
-repository, workflow, source, version, current run/attempt and artifact hashes.
-Missing or altered evidence blocks publication; partial release reruns require
-rerunning all jobs. Evidence is transferred separately and is not a public asset.
-
-Before tagging, thin local Semantic Release adapters load the cached external
-publication guard exported by `release-verify`. The shared implementation checks
-the recalculated version, checkout, dispatched SHA, repository, main branch and
-current remote main. Custom prerelease/image publication reuses that source guard.
-Offline lifecycle fixtures exercise the actual pinned external module from cache.
+Workflow policies live in .github/release-ci.json and .github/release-artifacts.json.
+The CI proof preserves retained successful jobs from partial reruns and exports
+the selected Check attempt for the trusted CI JAR download. Candidate packaging,
+JAR payload verification, Java runtime receipts and evidence recording run directly
+in Actions; scripts/release-evidence.py verifies the complete current-attempt
+manifest set before publication. Native build remains governance at release,
+with explicit build/smoke dependencies retained at ordinary points.
+The local Semantic Release plugin checks the version, source and current remote
+main without relying on imported caches. Stable and development publication retain
+their existing triggers, CI payload binding and runtime compatibility gates.
 
 ## Published governor updates
 
@@ -229,5 +229,5 @@ pin; candidate binaries never become the governor.
 The exact published governor version is the `github:please-behave/cli` tool entry
 in `mise.toml`. `mise install` installs the released executable through the GitHub
 backend with checksum and available artifact-attestation verification. Run
-`mise exec -- please --version` to inspect it. CI reads this same entry for the
-published Action. Candidate binaries never become the governor.
+`mise exec -- please --version` to inspect it. CI installs it through mise; the published Action reuses it
+without a second installation or workflow version extraction. Candidate binaries never become the governor.

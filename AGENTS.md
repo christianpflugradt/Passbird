@@ -81,7 +81,7 @@ This repository keeps its agent-facing product specifications, design rules, and
 
 - Use the independently published governor pinned in `mise.toml`; never use a candidate as governor.
 - Shared rules and provider adapters stay in immutable external packages. Local rules contain Passbird-specific requirements only.
-- Prepare tools through the developer's existing toolchain and run `bash scripts/prepare.sh` explicitly before checks; checks do not install tools.
+- Prepare tools with mise install and run mise run ci:prepare explicitly before checks; checks do not install tools. The prepare alias remains supported.
 - Install managed hooks with `sh scripts/setup-git-hooks.sh --yes`. Setup preserves custom hooks; Gradle no longer generates hooks.
 - Git hooks are the final validation gates. Inspect stored failures with `please status --details`, fix and retry Git without bypassing checks.
 - Pre-push additionally covers workflow syntax, offline release-tool tests and shared security/license checks. Tests never call real models or paid services; only the advisory commit hook may call its provider.

@@ -1,4 +1,3 @@
-import { releaseGuardEnvironment } from "./release-guard-fixture.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
@@ -13,7 +12,7 @@ import { verifySource, verifyRelease } from "./semantic-release-plugin.mjs";
 
 const logger = { log() {}, error() {} };
 const sha = "a".repeat(40);
-const env = { ...process.env, ...releaseGuardEnvironment, GITHUB_REF: "refs/heads/main", GITHUB_REPOSITORY: "christianpflugradt/Passbird",
+const env = { ...process.env, GITHUB_REPOSITORY: "christianpflugradt/Passbird", GITHUB_REF: "refs/heads/main", GITHUB_REF: "refs/heads/main", GITHUB_REPOSITORY: "christianpflugradt/Passbird",
   GITHUB_SHA: sha, GITHUB_EVENT_NAME: "schedule", EXPECTED_RELEASE_VERSION: "7.1.0", RELEASE_MODE: "stable" };
 const commit = (message, hash = "b".repeat(40)) => ({ message, hash });
 const analyze = commits => analyzeCommits(config.plugins[0][1], { commits: [...commits].reverse(), logger, cwd: process.cwd() });

@@ -17,8 +17,22 @@ run = "please run --at pre-push --checks-only"
 run = "./gradlew publishPreview"
 
 
-[tasks.prepare]
+[tasks."ci:prepare"]
+alias = "prepare"
 run = "bash scripts/prepare.sh"
 
-[tasks.install-git-hooks]
+[tasks."hooks:install"]
+alias = "install-git-hooks"
 run = "sh scripts/setup-git-hooks.sh --yes"
+
+[tasks.build]
+description = "Build the executable JAR with prepared dependencies"
+run = "bash scripts/gradle-check.sh jar"
+
+[tasks.package]
+description = "Package the verified versioned JAR without rebuilding"
+run = "python3 scripts/release-artifacts.py package"
+
+[tasks.release]
+description = "Start the Release workflow for remote main"
+run = "gh workflow run release.yml --ref main"

@@ -113,7 +113,7 @@ class GovernanceTest(unittest.TestCase):
         self.assertEqual(rules["owasp"]["check"]["resource"], "gradle")
         self.assertEqual(rules["mutation"]["check"]["resource"], "gradle")
         self.assertNotIn("npm-audit", rules)
-        self.assertEqual(rules["release-package-verify"]["depends_on"], ["release-package"])
+        self.assertNotIn("release-package-verify", rules)
         for name in ["format", "static-analysis", "compile", "tests", "coverage", "dependency-license", "native-build", "native-smoke"]:
             self.assertEqual(rules[name]["check"]["resource"], "gradle")
         self.assertIn("build/jacoco/allTests.exec", (ROOT / "scripts/check-coverage.sh").read_text())

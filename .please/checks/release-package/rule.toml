@@ -1,9 +1,0 @@
-id = "release-package"
-description = "Package the versioned and tested JAR"
-run_at = ["release-candidate"]
-depends_on = ["native-build"]
-
-[check]
-command = "python3 scripts/release-artifacts.py package"
-timeout_seconds = 900
-resource = "gradle"
