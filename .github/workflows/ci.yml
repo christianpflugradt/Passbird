@@ -10,8 +10,8 @@ permissions:
 env:
   MISE_AUTO_INSTALL: 'false'
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-  DEPENDENCY_CHECK_DATA_LOCATION: "${{ github.workspace }}/.dependency-check"
-  DEPENDENCY_CHECK_CACHE_KEY_PREFIX: linux-dependency-check-v1-
+  DEPENDENCY_CHECK_DATA_LOCATION: /home/runner/.gradle/dependency-check-data
+  DEPENDENCY_CHECK_CACHE_KEY_PREFIX: linux-dependency-check-v2-
 jobs:
   check:
     name: Check
