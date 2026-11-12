@@ -1,101 +1,44 @@
 # AGENTS.md
 
-Use `AGENTS.md` as the repository entrypoint. The plural form is the established convention and is the filename toolchains are most likely to discover automatically.
+Repository entrypoint for Passbird, an offline terminal password manager. Agent-facing specifications live in `specs/` as structured YAML. Start with `specs/manifest.yaml` and `specs/project.yaml`, then read only the files the task needs.
 
-This repository keeps its agent-facing product specifications, design rules, and delivery guardrails in `specs/` as structured YAML. Start with `specs/manifest.yaml`, then read only the files relevant to the task.
+## Read first
 
-## Read Order
+- `specs/interaction.yaml` before touching prompts, confirmations, CLI input parsing, blank-line layout or user-interaction defaults.
+- `specs/security.yaml` before touching crypto, keystore handling, password tree persistence, backup, import/export, secure input or configuration defaults.
+- `specs/delivery.yaml` to choose validation, `specs/issue.yaml` for the `issue` task and `specs/review.yaml` for `review <area>`.
+- Code, tests and build configuration are the source of truth if a document drifts. When behavior, architecture, security posture, persistence, configuration or verification rules change, update the matching `specs/` files in the same change.
 
-1. `specs/manifest.yaml`
-2. `specs/project.yaml`
-3. Task-specific files named in `specs/manifest.yaml`
+## Working agreement
 
-## Working Agreement
+- Preserve the onion architecture enforced by `src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt` and the offline-first posture. Add no network or browser integration unless the maintainer asks.
+- Prefer additive, backward-conscious changes. Escalate before changing persistence formats, cryptographic parameters or user-visible security defaults.
+- Add no fallbacks the maintainer did not ask for. If an important decision is not answered by the project documents, ask the maintainer.
+- Add no code comments unless the maintainer asks or an existing convention requires them. Never leave design commentary or agent-style annotations.
+- Get maintainer approval for the exact wording before changing any user-visible text.
+- Source `~/.zprofile` and `~/.zshrc` before shell commands, then prefer the `rtk` wrapper (`rtk gh` where supported).
+- Prefer the deterministic helpers in `.agent/scripts` (see `.agent/README.md`) over composing multi-step operations by hand.
+- Use GitHub CLI for GitHub-hosted work: issues, pull requests, workflow runs, releases and repository metadata. When creating an issue, apply the most specific existing type label, add `migration` for compatibility-preserving work and verify before retrying `gh issue create`.
+- Work directly on `main`. Create, switch to or push no other branch, and never use `git stash`. If unrelated workspace state blocks this, stop and explain.
+- Run `./gradlew ktlintFormat` before staging, committing or pushing.
+- Tests assert the observable contract (returned data, persisted artifact, emitted event, state change, approved output). They cover the happy path, each decision outcome and credible failures such as invalid or malformed input, I/O, authentication and conflicts, plus sensitive-data and cleanup guarantees where relevant. Never add tests only to raise coverage.
+- When a task is complete and suitable for release, commit, run `git pull -r` and push at once. Leave work uncommitted only when maintainer input is needed, the task is incomplete or it should not be released yet.
+- Never run `./gradlew dependencyCheckAnalyze` locally; OWASP runs in CI unless the maintainer asks.
+- Hooks cover their own checks: do not run them beforehand or repeat unchanged verification. Run only focused tests for the changed behavior.
+- Hooks and Gradle tasks may take minutes. Do not poll or narrate them; after 5 minutes, check at most once every 5 minutes.
 
-- Code, tests, and build configuration are the source of truth if a document ever drifts.
-- When changing behavior, architecture, security posture, persistence, configuration, or verification rules, update the matching files under `specs/` in the same change.
-- Read `specs/interaction.yaml` before touching prompts, confirmations, CLI input parsing, blank-line layout, or user-interaction defaults.
-- Read `specs/security.yaml` before touching crypto, keystore handling, password tree persistence, backup behavior, import/export, secure input, or configuration defaults.
-- Preserve the onion architecture enforced by `src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt`.
-- Preserve the offline-first product posture. Do not add network or browser integration unless explicitly requested by the maintainer.
-- Prefer additive, backward-conscious changes. Escalate before changing persistence formats, cryptographic parameters, or user-visible security defaults.
-- Do not add fallbacks the maintainer did not ask for. If a fallback might be needed, pause and get clarification before introducing it.
-- Do not add code comments unless the maintainer explicitly asks for them or an existing project convention clearly requires them. Never leave design commentary, temporary notes, "version 1" phrasing, or other agent-style annotations.
-- Before changing any user-visible text shown by the password manager, get maintainer approval for the exact wording. Do not introduce wording changes without approval.
-- Before running shell commands, source `~/.zprofile` and `~/.zshrc` so repo-local tooling such as `rtk`, `gh`, and SDKMAN-managed runtimes are available.
-- After sourcing the shell environment, prefer the local `rtk` wrapper for shell commands; otherwise use direct commands.
-- Use deterministic helper workflows under `.agent/scripts` instead of manually composing the same multi-step operations. Prefer `.agent/scripts/agent-context.sh`, `.agent/scripts/agent-pick-issue.sh`, `.agent/scripts/agent-validate.sh`, `.agent/scripts/agent-ship.sh`, `.agent/scripts/agent-review-preflight.sh`, `.agent/scripts/agent-review-finding.sh`, `.agent/scripts/check-agent-specs.sh`, and `.agent/scripts/agent-release-artifact-check.sh` when their purpose matches the task.
-- For GitHub-hosted repository work where local files are not enough, use GitHub CLI rather than browser-only workflows. Inspect workflow registration, runs, jobs, and logs with `gh`; inspect and update issues, pull requests, releases, and repository metadata with `gh`. Prefer `rtk gh` for supported subcommands and otherwise use direct `gh` commands after sourcing the shell environment.
-- When creating a GitHub issue through `gh`, treat issue creation as create-once-then-verify. Do not rerun `gh issue create` just because the first attempt had ambiguous output or a transient CLI failure. First verify whether the issue was already created by checking the returned identifier when available or by searching the live issue list for the intended title and context. Only create again when that verification confirms no matching issue exists.
-- When creating an ordinary GitHub issue outside the review-finding workflow, apply the most specific existing type label that matches the issue, such as `bug` or `enhancement`. Do not invent new labels. If compatibility-preserving work needs labeling, also add `migration` where applicable.
-- Work directly on `main`. Do not create, switch to, or push any other local or remote branch.
-- Do not use `git stash`.
-- If working safely on `main` without stashing is blocked by unrelated workspace state or another Git constraint, stop, explain the blocker clearly, and wait for maintainer instructions before proceeding.
-- Before staging, committing, or pushing, run `./gradlew ktlintFormat` to auto-resolve formatting issues when possible.
-- Before implementation is considered complete, define and cover the changed behavior at the appropriate level. For each user-visible workflow, adapter operation, persistence format, or security-sensitive path, tests must cover the intended happy path; every meaningful decision outcome introduced by the change; credible invalid input, malformed data, I/O, authentication, and conflict failures; and sensitive-data or cleanup guarantees where applicable. Tests must assert the observable contract—returned data, persisted artifact, emitted event, state change, or approved user-visible output—not merely that execution fails or that a mock was called. Do not add tests solely to increase JaCoCo coverage; repository-wide coverage is a safety net, never a substitute for behavior-focused tests.
-- Once a requested task is complete and suitable for release, commit it, run `git pull -r` on the current branch, and push it immediately.
-- Do not leave work uncommitted only when you still need maintainer input, the task is incomplete, or the current state should not be released yet.
-- Do not run `./gradlew dependencyCheckAnalyze` locally for verification. Treat OWASP dependency scanning as CI-only unless the maintainer explicitly asks for a local run.
-- Do not manually run verification tasks that are already covered by the local git hooks. Do not rerun the same verification during a task unless the code or environment changed in a way that makes the repeated run materially informative. Before committing, rely on the hook-managed checks for their covered tasks and run only focused tests for the behavior you changed or the tests you added, plus any extra checks that are not part of the hooks but are truly needed for the change.
-- Gradle tasks and git hooks may legitimately take multiple minutes to finish. Let them run without repeated status checks or speculative analysis. If a task has been running for more than 5 minutes, you may check its status, but not more than once every 5 minutes after that. Do not spend unnecessary tokens narrating or polling long-running work.
+## Tasks
 
-## Issue Task
+- `issue`: resolve one open GitHub issue end to end as `specs/issue.yaml` describes. Never select issue `#22` (Dependency Dashboard). Add a `Closes #<issue-number>` footer to the resolving commit.
+- `review <area>` with `security`, `architecture`, `integrity`, `behavior` or `delivery`: follow `specs/review.yaml`, report findings as `P0` to `P3` with a proposed fix each, and create or update one issue per unique finding with `.agent/scripts/agent-review-finding.sh`.
 
-- Use `issue` to resolve one open GitHub issue end-to-end.
-- Read `specs/issue.yaml` before performing this task.
-- Use `.agent/scripts/agent-pick-issue.sh` to choose from the live open issue list.
-- Ignore issue `#22` (`Dependency Dashboard`); it is a standing automation tracker and must never be selected for the `issue` task.
-- If one or more remaining open issues are labeled `bug` and it is simple to determine which one is oldest, resolve the oldest open `bug` issue.
-- If no remaining open `bug` issues exist and it is simple to determine which remaining open issue is oldest, resolve the oldest open issue.
-- If the ordering is ambiguous or otherwise not simple to determine, resolve any open issue and proceed.
-- If no eligible open issues exist after excluding issue `#22`, say so explicitly.
-- If creating a new GitHub issue is part of the work, apply the most specific existing type label that matches the issue, such as `bug` or `enhancement`, and also add `migration` when compatibility-preserving work needs that label.
-- If creating a new GitHub issue is part of the work, never retry `gh issue create` blindly. Verify first whether the earlier attempt already succeeded, and only retry after confirming that no matching issue exists.
-- When the resolving commit closes the selected issue, add a `Closes #<issue-number>` footer line to the commit message.
-- If an important decision is not clearly answered by the project documents, return to the maintainer before deciding.
+## Commits
 
-## Review Commands
+The imported Conventional Commits Check enforces types and `.please/commit-scopes.txt` enforces scopes. An advisory Gemini header review reports FAIL and ERROR without blocking. Use `!` or a `BREAKING CHANGE` footer for breaking changes. Prefer no scope for broad changes and for `ci`.
 
-- Use `review <area>` for standing workspace reviews.
-- Supported review areas are `security`, `architecture`, `integrity`, `behavior`, and `delivery`.
-- Read `specs/review.yaml` before performing one of these reviews.
-- Use `.agent/scripts/agent-review-preflight.sh <area>` before drawing conclusions.
-- Reviews use the current task, diff, or concern as the trigger, but they must assess the full workspace rather than only the touched files.
-- Review findings must be reported as `P0` to `P3`, ordered by severity, and every finding must include a proposed fix.
-- Before concluding a review, inspect relevant GitHub context with `gh` when it can change the conclusion or fix, especially existing issues and GitHub Actions workflow or run state.
-- Turn every unique actionable finding into a GitHub issue using `.github/ISSUE_TEMPLATE/review_finding.md`. Create or update the issue through `gh`, avoid duplicates when an existing issue already captures the finding, and include the resulting issue reference in the review report.
-- Use `.agent/scripts/agent-review-finding.sh` to create or update review-finding issues.
-- Populate each review-finding issue with enough context for another agent to continue without re-discovery: review area and trigger, priority, evidence with file or workflow references, impact, proposed fix, acceptance criteria, and handoff notes.
-- If no actionable findings are discovered for the selected area, say so explicitly.
+## Governance
 
-## Commit Messages
-
-- Commits use the external Conventional Commits Check and advisory header-only Gemini Flash-Lite Review. Review FAIL and ERROR remain visible without blocking commits.
-- Use `!` or a BREAKING CHANGE footer for new breaking changes. The former `major` type remains understood by historical release analysis only.
-- Supported types are `fix`, `feat`, `build`, `chore`, `ci`, `docs`, `perf`, `refactor`, `revert`, `style`, `test`, and `config`.
-- Scopes are optional. When used, they must be one of `build`, `clipboard`, `config`, `deps`, `exchange`, `favorites`, `memory`, `nests`, `passwords`, `proteins`, `release`, `security`, `session`, `storage`, `ui`, or `yolks`.
-- Prefer no scope for broad changes. Prefer a scope for localized product features or technical areas.
-- The `ci` type is usually scope-less.
-
-## Repository Governance
-
-- Use the independently published governor pinned in `mise.toml`; never use a candidate as governor.
-- Shared rules and provider adapters stay in immutable external packages. Local rules contain Passbird-specific requirements only.
-- Prepare tools with mise install and run mise run ci:prepare explicitly before checks; checks do not install tools. The prepare alias remains supported.
-- Install managed hooks with `sh scripts/setup-git-hooks.sh --yes`. Setup preserves custom hooks; Gradle no longer generates hooks.
-- Git hooks are the final validation gates. Inspect stored failures with `please status --details`, fix and retry Git without bypassing checks.
-- Pre-push additionally covers workflow syntax, offline release-tool tests and shared security/license checks. Tests never call real models or paid services; only the advisory commit hook may call its provider.
-- Stop after successful push. Do not monitor or repair remote workflows, trigger Release or publish releases without explicit authorization.
-- See `.please/README.md` for execution points, preparation, badge ownership and release artifact contracts.
-
-## Minimum Validation
-
-Use `specs/delivery.yaml` to choose the right checks. At minimum:
-
-- run only the focused tests that cover the code you changed or the tests you added
-- ensure those focused tests give reasonable coverage to every new code path and important branch introduced by the change
-- use `.agent/scripts/agent-validate.sh` for deterministic validation sequences
-- run `./gradlew architecture` only for structural or wiring changes that are not already otherwise covered
-- rely on the local `pre-commit` hook for `ktlintCheck`, `detekt`, `compileKotlin`, and `compileTestKotlin`
-- rely on the local `pre-push` hook for `checkLicense`, `jacocoTestCoverageVerification`, `allTests`, `jar`, and `./smoke-test/run.sh`
-- rely on GitHub Actions for OWASP dependency scanning unless the maintainer explicitly requests a local run
+- The independently published governor pinned in `mise.toml` governs; never use a candidate. Shared rules and provider adapters are immutable external packages. Local rules hold Passbird-specific requirements only.
+- Prepare tools with `mise install` and `mise run ci:prepare` before checks; checks never install tools. Install hooks with `sh scripts/setup-git-hooks.sh --yes`.
+- Git hooks are the final validation gates (see `specs/delivery.yaml` and `.please/README.md`). Inspect failures with `please status --details`, fix and retry without bypassing. Tests never call real models or paid services.
+- Stop after a successful push. Do not monitor or repair remote workflows, trigger a release or publish one without explicit authorization.

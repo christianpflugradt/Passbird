@@ -30,11 +30,9 @@ for match in re.finditer(r"file:\s+(specs/[^\s]+)", read("specs/manifest.yaml"))
         failures.append(f"Missing manifest reference: {match[1]}")
 
 scopes = read(".please/commit-scopes.txt").splitlines()
-agent_match = re.search(r"must be one of (.*?)\.", read("AGENTS.md"), re.S)
-agent_scopes = re.findall(r"`([^`]+)`", agent_match[1]) if agent_match else []
 delivery_match = re.search(r"optional_scopes:\n((?:    - .+\n)+)", read("specs/delivery.yaml"))
 delivery_scopes = [line.split("- ", 1)[1].strip() for line in delivery_match[1].splitlines()] if delivery_match else []
-if scopes != agent_scopes or scopes != delivery_scopes:
+if scopes != delivery_scopes:
     failures.append("Documented commit scopes differ from .please/commit-scopes.txt")
 if "gitHooks" in read("settings.gradle.kts") or "gradle-pre-commit-git-hooks" in read("settings.gradle.kts"):
     failures.append("Gradle must not generate competing hooks")
