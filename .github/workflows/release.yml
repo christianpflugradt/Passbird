@@ -97,7 +97,6 @@ jobs:
           install: 'false'
           sync: 'true'
           execution-point: release
-          checks-only: 'true'
           summary: 'true'
       - name: Package verified candidate
         run: mise run package

@@ -112,8 +112,8 @@ isolated environment; they never execute the installed live commit hook.
 
 ## CI, badges and security automation
 
-CI and Candidate use the published Action with install false, sync true,
-checks-only and summaries. The CLI pin remains solely in mise.toml. Readiness
+CI and Candidate use the published Action with install false, sync true
+and summaries. The CLI pin remains solely in mise.toml. Readiness
 verifies exact-source CI through scripts/check-release-ci.py; Plan and Publish
 never install or invoke governance or Git hooks. The only custom point is release.
 Python and the default build JDK are exactly pinned in mise. Java 17/21/25 in the
@@ -125,8 +125,8 @@ and install-git-hooks names remain aliases for ci:prepare and hooks:install.
 
 `ci.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
 manual dispatch. Check runs all deterministic governance checks, mutation tests
-and OWASP through the SHA-pinned Please Behave Action with checks-only
-execution and a Job Summary. Xvfb starts before the Action; Check uploads
+and OWASP through the SHA-pinned Please Behave Action with
+reviews and a Job Summary. Xvfb starts before the Action; Check uploads
 the source/attempt-bound `release-jar` artifact. Java compatibility is tested only on the versioned release candidate. Native test diagnostics are consolidated into
 `test-reports`; lint, Detekt, dependency-license, OWASP, PIT and smoke diagnostics
 remain available after failures, including dependency-verification diagnostics.
