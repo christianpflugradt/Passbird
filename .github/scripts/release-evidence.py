@@ -125,7 +125,7 @@ def main():
     try:
         require(sys.argv[1:] in (["record"], ["verify"]), "Usage: release-evidence.py record|verify")
         operation = sys.argv[1]
-        policy = policy_from(Path(__file__).resolve().parents[1] / ".github/release-artifacts.json")
+        policy = policy_from(Path(__file__).resolve().parents[2] / ".github/release-artifacts.json")
         head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True, timeout=15).strip()
         {"record": record, "verify": verify}[operation](policy, os.environ, head)
         print(f"PASS: {operation} verified source, version, workflow attempt and artifact hashes")

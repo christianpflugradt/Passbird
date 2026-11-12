@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { Writable } from "node:stream";
 import semanticRelease from "semantic-release";
 import { generateNotes } from "@semantic-release/release-notes-generator";
-import config from "../release.config.mjs";
+import config from "../../release.config.mjs";
 import { verifyRelease } from "./semantic-release-plugin.mjs";
 
 {

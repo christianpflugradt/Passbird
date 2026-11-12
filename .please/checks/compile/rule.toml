@@ -3,6 +3,6 @@ description = "Compile production and test sources against Java 17 APIs"
 run_at = ["pre-commit", "pre-push", "check"]
 
 [check]
-command = "bash scripts/gradle-check.sh compileKotlin compileTestKotlin compileJava compileTestJava"
+command = "bash tools/gradle-check.sh compileKotlin compileTestKotlin compileJava compileTestJava"
 timeout_seconds = 1800
 resource = "gradle"

@@ -3,6 +3,6 @@ description = "Check Kotlin formatting"
 run_at = ["pre-commit", "pre-push", "check"]
 
 [check]
-command = "bash scripts/gradle-check.sh ktlintCheck"
+command = "bash tools/gradle-check.sh ktlintCheck"
 timeout_seconds = 1800
 resource = "gradle"

@@ -9,8 +9,8 @@ from unittest.mock import patch
 import zipfile
 
 
-ROOT = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("artifacts", ROOT / "scripts/release-artifacts.py")
+ROOT = Path(__file__).resolve().parents[2]
+spec = importlib.util.spec_from_file_location("artifacts", ROOT / ".github/scripts/release-artifacts.py")
 artifacts = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(artifacts)
 ENV = dict(EXPECTED_RELEASE_VERSION="7.1.0", GITHUB_SHA="a" * 40,

@@ -610,7 +610,7 @@ The published Please Behave governor pinned in `mise.toml` manages local Git hoo
 - pre-commit runs formatting, Detekt, production/test compilation and agent-spec consistency checks
 - pre-push runs the complete `allTests` suite, dependency-license and coverage checks, JAR build and interactive smoke flow, workflow/release-helper tests and shared security/license checks
 
-Run `mise trust`, `mise install`, `mise run ci:prepare` and `mise run install-git-hooks` to prepare the pinned validation tools, locked dependencies and managed hooks. Git and Bash remain host prerequisites. A desktop session is required locally; Linux CI prepares Xvfb, xauth and xclip. The optional `python3 scripts/install-governor.py` installs the exact published governor under ignored `.tools/please/bin` with checksum and version verification; prepend that directory to PATH when invoking Git.
+Run `mise trust`, `mise install`, `mise run ci:prepare` and `mise exec -- please sync --yes` to prepare the pinned validation tools, locked dependencies and managed hooks. Git and Bash remain host prerequisites. A desktop session is required locally; Linux CI prepares Xvfb, xauth and xclip.
 
 Use `mise exec -- please run --at pre-commit` or `mise exec -- please run --at pre-push` for manual checks, and `mise exec -- git commit` / `mise exec -- git push` so hooks inherit the configured tools. Plain commands require mise shell activation or equivalent PATH setup; installing tools alone does not activate them. The published governor and credentials remain separate prerequisites.
 

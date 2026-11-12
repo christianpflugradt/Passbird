@@ -37,7 +37,7 @@ export default {
         ],
       },
     }],
-    "./scripts/semantic-release-plugin.mjs",
+    "./.github/scripts/semantic-release-plugin.mjs",
     ["@semantic-release/github", {
       assets: [
         { path: "dist/passbird.jar", name: "passbird.jar", label: "Passbird executable JAR" },

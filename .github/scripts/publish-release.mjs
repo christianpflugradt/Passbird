@@ -1,14 +1,14 @@
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import semanticRelease from "semantic-release";
-import config from "../release.config.mjs";
+import config from "../../release.config.mjs";
 import { developmentVersion } from "./release-plan.mjs";
 import { verifySource } from "./semantic-release-plugin.mjs";
 
 export async function publish(env = process.env, release = semanticRelease, run = execFileSync) {
   if (!env.EXPECTED_RELEASE_VERSION) throw new Error("Planned version is required");
   verifySource(env, undefined, run);
-  run("python3", ["scripts/release-artifacts.py", "verify-ci"], { env, stdio: "inherit" });
+  run("python3", [".github/scripts/release-artifacts.py", "verify-ci"], { env, stdio: "inherit" });
   if (env.RELEASE_MODE === "stable" && env.GITHUB_EVENT_NAME === "schedule") {
     const result = await release(config);
     if (!result || result.nextRelease.version !== env.EXPECTED_RELEASE_VERSION) throw new Error("Planned stable release disappeared");

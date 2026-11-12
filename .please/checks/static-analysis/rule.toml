@@ -3,6 +3,6 @@ description = "Run Detekt over production and test sources"
 run_at = ["pre-commit", "pre-push", "check"]
 
 [check]
-command = "bash scripts/gradle-check.sh detekt"
+command = "bash tools/gradle-check.sh detekt"
 timeout_seconds = 1800
 resource = "gradle"

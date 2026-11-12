@@ -64,7 +64,7 @@ jobs:
           execution-point: check
           summary: 'true'
       - name: Bind CI JAR to source and producing attempt
-        run: python3 scripts/release-artifacts.py ci-receipt
+        run: python3 .github/scripts/release-artifacts.py ci-receipt
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-jar

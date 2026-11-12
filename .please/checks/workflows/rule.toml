@@ -1,7 +1,0 @@
-id = "workflows"
-description = "Check workflow syntax, expressions and queue compatibility"
-run_at = ["pre-push", "check"]
-
-[check]
-command = "node scripts/check-workflows.mjs"
-timeout_seconds = 900

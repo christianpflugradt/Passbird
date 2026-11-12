@@ -4,6 +4,6 @@ run_at = ["pre-push", "check"]
 depends_on = ["native-build"]
 
 [check]
-command = "bash scripts/native-smoke.sh"
+command = "bash @rule/smoke.sh"
 timeout_seconds = 900
 resource = "gradle"

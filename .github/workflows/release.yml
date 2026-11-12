@@ -66,7 +66,7 @@ jobs:
           install_args: python
       - name: Verify exact-source CI prerequisites
         id: evidence
-        run: python3 scripts/check-release-ci.py
+        run: python3 .github/scripts/check-release-ci.py
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -101,7 +101,7 @@ jobs:
       - name: Package verified candidate
         run: mise run package
       - name: Verify candidate archive
-        run: python3 scripts/release-artifacts.py verify --without-smokes
+        run: python3 .github/scripts/release-artifacts.py verify --without-smokes
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: passbird-build-${{ github.run_id }}-${{ github.run_attempt }}
@@ -150,9 +150,9 @@ jobs:
           name: passbird-build-${{ github.run_id }}-${{ github.run_attempt }}
           path: dist
       - name: Smoke exact versioned candidate
-        run: mise exec java@temurin-${{ matrix.java }} -- xvfb-run -a bash scripts/smoke-candidate.sh "${{ matrix.java }}"
+        run: mise exec java@temurin-${{ matrix.java }} -- xvfb-run -a bash .github/scripts/smoke-candidate.sh "${{ matrix.java }}"
       - name: Record release candidate evidence
-        run: python3 scripts/release-evidence.py record
+        run: python3 .github/scripts/release-evidence.py record
         env:
           EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
           RELEASE_TARGET: java-${{ matrix.java }}
@@ -230,7 +230,7 @@ jobs:
           path: release-evidence
           merge-multiple: true
       - name: Verify complete release candidate evidence
-        run: python3 scripts/release-evidence.py verify
+        run: python3 .github/scripts/release-evidence.py verify
         env:
           EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
       - name: Publish exact verified candidate without rebuilding

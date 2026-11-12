@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import semanticRelease from "semantic-release";
-import config from "../release.config.mjs";
+import config from "../../release.config.mjs";
 
 export function developmentVersion(stable, releases, now = new Date()) {
   if (!/^[1-9][0-9]*\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)$/.test(stable)) {

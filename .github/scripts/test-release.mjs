@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { analyzeCommits } from "@semantic-release/commit-analyzer";
 import { generateNotes } from "@semantic-release/release-notes-generator";
-import config from "../release.config.mjs";
+import config from "../../release.config.mjs";
 import { developmentVersion, plan } from "./release-plan.mjs";
 import { publish } from "./publish-release.mjs";
 import { verifySource, verifyRelease } from "./semantic-release-plugin.mjs";

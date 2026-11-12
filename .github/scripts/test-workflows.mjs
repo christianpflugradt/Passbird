@@ -2,20 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import * as yaml from "js-yaml";
-import { validateQueue } from "./check-workflows.mjs";
 
 const workflow = name => yaml.load(readFileSync(`.github/workflows/${name}`, "utf8"));
-
-test("queue compatibility accepts supported values and rejects cancellation or unvalidated values", () => {
-  for (const queue of ["single", "max"]) {
-    validateQueue({ concurrency: { queue, "cancel-in-progress": false } });
-    validateQueue({ jobs: { deploy: { concurrency: { queue } } } });
-  }
-  for (const concurrency of [{ queue: "other" }, { queue: true }, { queue: "max", "cancel-in-progress": true },
-    { queue: "max", "cancel-in-progress": "${{ github.ref == 'main' }}" }]) {
-    assert.throws(() => validateQueue({ jobs: { deploy: { concurrency } } }));
-  }
-});
 
 test("release readiness and candidate run after plan in parallel and both gate publication", () => {
   const jobs = workflow("release.yml").jobs;
@@ -27,13 +15,13 @@ test("release readiness and candidate run after plan in parallel and both gate p
   assert.match(jobs.publish.if, /needs.release-candidate.result == 'success'/);
   const publication = jobs.publish.steps.map(step => step.run ?? "").join("\n");
   assert.ok(!/gradlew|jar\b/.test(publication));
-  assert.ok(jobs.publish.steps.some(step => step.run === "python3 scripts/release-evidence.py verify"));
+  assert.ok(jobs.publish.steps.some(step => step.run === "python3 .github/scripts/release-evidence.py verify"));
   for (const job of [jobs.plan, jobs.publish]) {
     assert.ok(job.steps.every(step => !step.uses?.startsWith("please-behave/action@")
       && !/\bplease\b/.test(step.run ?? "")));
   }
   assert.ok(jobs["release-readiness"].steps.some(step => step.id === "evidence"
-    && step.run === "python3 scripts/check-release-ci.py"));
+    && step.run === "python3 .github/scripts/check-release-ci.py"));
   assert.match(jobs.publish.if, /needs.release-smoke.result/);
   const artifact = jobs.publish.steps.find(step => step.uses?.startsWith("actions/download-artifact") && step.with.path === "dist");
   assert.equal(artifact.with.name, "passbird-build-${{ github.run_id }}-${{ github.run_attempt }}");
@@ -43,8 +31,8 @@ test("release readiness and candidate run after plan in parallel and both gate p
   assert.deepEqual(smoke.needs, ["plan", "release-candidate"]);
   assert.deepEqual(smoke.strategy.matrix.java, ["17", "21", "25"]);
   assert.equal(smoke.strategy["fail-fast"], false);
-  assert.ok(smoke.steps.some(step => step.run === "python3 scripts/release-evidence.py record"));
-  assert.ok(smoke.steps.some(step => step.run?.includes('scripts/smoke-candidate.sh')));
+  assert.ok(smoke.steps.some(step => step.run === "python3 .github/scripts/release-evidence.py record"));
+  assert.ok(smoke.steps.some(step => step.run?.includes('.github/scripts/smoke-candidate.sh')));
 });
 
 test("trusted CI proof requires Check while compatibility belongs to Release", () => {

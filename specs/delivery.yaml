@@ -178,7 +178,7 @@ local_verification_policy:
       - release policies live under .github; local scripts verify source CI, artifact evidence and publication without cached governance modules
       - Plan does not prepare or publish; Readiness and Candidate build run in parallel; Publish requires both and the complete candidate runtime matrix
       - Candidate builds with the planned version and checks exact JAR bytes on Java 25, 17 and 21; Publish never rebuilds
-      - readiness runs scripts/check-release-ci.py directly and exports its retained Check attempt for CI artifact binding
+      - readiness runs .github/scripts/check-release-ci.py directly and exports its retained Check attempt for CI artifact binding
       - artifacts, metadata, checksums and smoke receipts bind version, source, repository and workflow run/attempt; incomplete or foreign sets fail
       - partial CI reruns may retain successful jobs; Release reruns require the current attempt's complete candidate
       - monthly development-release purge retains its 30-day policy and tag cleanup

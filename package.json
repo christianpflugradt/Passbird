@@ -15,8 +15,8 @@
     "semantic-release": "25.0.9"
   },
   "scripts": {
-    "test": "node --test scripts/test-release.mjs scripts/test-workflows.mjs && node scripts/test-offline-lifecycle.mjs && python3 -B -m unittest discover -s scripts -p 'test_*.py'",
-    "release:plan": "node scripts/release-plan.mjs",
-    "release": "node scripts/publish-release.mjs"
+    "test": "node --test .github/scripts/test-release.mjs .github/scripts/test-workflows.mjs && node .github/scripts/test-offline-lifecycle.mjs && python3 -B -m unittest discover -s .github/scripts -p 'test_*.py'",
+    "release:plan": "node .github/scripts/release-plan.mjs",
+    "release": "node .github/scripts/publish-release.mjs"
   }
 }

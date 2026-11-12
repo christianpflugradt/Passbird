@@ -23,7 +23,7 @@ preparation after dependency or toolchain changes. CI performs this preparation
 before checks. The OWASP Rule at check deliberately accesses current advisory
 data; tests and governed compilation/build commands run offline.
 
-Use `mise run hooks:install` for hook setup. For manual checks without shell
+Use `mise exec -- please sync --yes` for hook setup. For manual checks without shell
 activation, use `mise exec -- please run --at pre-commit` or
 `mise exec -- please run --at pre-push`. Run Git as `mise exec -- git commit` and
 `mise exec -- git push` so hooks inherit the same configured tools. Plain commands
@@ -31,17 +31,11 @@ require mise shell activation or equivalent PATH setup; `mise install` alone doe
 not activate tools. The separately installed published governor must remain on
 PATH, and credentials are supplied externally.
 
-If necessary, `python3 scripts/install-governor.py` installs the exact published
-governor into ignored `.tools/please/bin`, verifying the archive checksum and
-executable version. Prepend that directory to PATH in the shell invoking Git;
-the global installation is not replaced. CI uses the published Please Behave
+CI uses the published Please Behave
 Action with install false and sync true; mise owns installation.
 
-Run `sh scripts/setup-git-hooks.sh --yes`. Setup retires only byte-identical known
-Gradle-generated hooks, preserves copies under ignored `.tools/retired-gradle-hooks`,
-and installs Please Behave wrappers at Git's effective hook path. Custom hooks
-remain untouched and require explicit integration. Gradle no longer generates
-hooks. Synchronization resolves external packages; normal execution uses their
+Run `please sync --yes`. It installs Please Behave wrappers at Git's effective hook path.
+Custom hooks remain untouched and require explicit integration. Synchronization resolves external packages; normal execution uses their
 immutable cache. Reports under `.please/reports/` remain ignored. The generated
 OWASP database under `.dependency-check/` is also ignored, so restoring it before
 CI checks does not add a large database to the source snapshot. Tracked and
@@ -62,7 +56,7 @@ workflow monitoring belongs to the maintainer.
 | format, static-analysis, compile, agent-specs | pre-commit, pre-push, check |
 | tests, coverage, dependency-license, native-smoke | pre-push, check |
 | native-build | pre-push, check, release |
-| workflows, release-rules | pre-push, check |
+| release-rules | pre-push, check |
 | mutation, owasp | check |
 
 `allTests` is the single complete native test suite, including unit, property,
@@ -114,14 +108,14 @@ isolated environment; they never execute the installed live commit hook.
 
 CI and Candidate use the published Action with install false, sync true
 and summaries. The CLI pin remains solely in mise.toml. Readiness
-verifies exact-source CI through scripts/check-release-ci.py; Plan and Publish
+verifies exact-source CI through .github/scripts/check-release-ci.py; Plan and Publish
 never install or invoke governance or Git hooks. The only custom point is release.
 Python and the default build JDK are exactly pinned in mise. Java 17/21/25 in the
 compatibility matrix intentionally select their latest supported patch versions;
 mise exec selects each runtime explicitly. Xvfb, xauth and xclip remain runner
 OS dependencies installed by Actions. Preparation resolves dependencies and warms
 the Gradle task graph without executing build or quality tasks. The old prepare
-and install-git-hooks names remain aliases for ci:prepare and hooks:install.
+name remains an alias for ci:prepare.
 
 `ci.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
 manual dispatch. Check runs all deterministic governance checks, mutation tests
@@ -138,9 +132,8 @@ URLs, formatting, colors, thresholds and HTML report remain. The complete Jekyll
 site still includes README and CONFIGURATION documentation. Deployment retains
 `coverage-pages`, `cancel-in-progress: false`, `queue: max` and `github-pages`.
 Only deployment receives Pages/OIDC writes. Queue order follows arrival, not
-commit order. Actionlint 1.7.12 already supports schedule timezones; its missing
-queue support is handled by independently validating queue values and the
-cancellation contract, then ignoring only the unknown-queue diagnostic.
+commit order. Actionlint 1.7.12 already supports schedule timezones; `.github/actionlint.yaml`
+ignores only its unknown-queue diagnostic for the shared `workflows` rule.
 
 OWASP and mutation testing are blocking Rules at check, with no assignments to
 pre-commit or pre-push. CI invokes check once; a deliberate local invocation of
@@ -207,7 +200,7 @@ Workflow policies live in .github/release-ci.json and .github/release-artifacts.
 The CI proof preserves retained successful jobs from partial reruns and exports
 the selected Check attempt for the trusted CI JAR download. Candidate packaging,
 JAR payload verification, Java runtime receipts and evidence recording run directly
-in Actions; scripts/release-evidence.py verifies the complete current-attempt
+in Actions; .github/scripts/release-evidence.py verifies the complete current-attempt
 manifest set before publication. Native build remains governance at release,
 with explicit build/smoke dependencies retained at ordinary points.
 The local Semantic Release plugin checks the version, source and current remote

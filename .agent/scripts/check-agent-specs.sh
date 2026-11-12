@@ -6,4 +6,4 @@ agent_source_shell_env
 agent_cd_repo_root
 agent_require_command python3
 
-exec python3 scripts/check-agent-specs.py
+exec python3 .please/checks/agent-specs/check.py

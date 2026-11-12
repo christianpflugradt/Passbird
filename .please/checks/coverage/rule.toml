@@ -4,6 +4,6 @@ run_at = ["pre-push", "check"]
 depends_on = ["tests"]
 
 [check]
-command = "bash scripts/check-coverage.sh"
+command = "bash @rule/check.sh"
 timeout_seconds = 1800
 resource = "gradle"

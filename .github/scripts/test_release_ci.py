@@ -8,8 +8,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-ROOT = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("ci_proof", ROOT / "scripts/check-release-ci.py")
+ROOT = Path(__file__).resolve().parents[2]
+spec = importlib.util.spec_from_file_location("ci_proof", ROOT / ".github/scripts/check-release-ci.py")
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 SHA = "a" * 40

@@ -3,6 +3,6 @@ description = "Build the executable platform-independent JAR"
 run_at = ["pre-push", "check", "release"]
 
 [check]
-command = "bash scripts/gradle-check.sh jar"
+command = "bash tools/gradle-check.sh jar"
 timeout_seconds = 1800
 resource = "gradle"

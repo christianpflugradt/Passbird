@@ -178,7 +178,7 @@ def verify(policy, env, head, api):
 
 def main():
     try:
-        policy = policy_from(Path(__file__).resolve().parents[1] / ".github/release-ci.json")
+        policy = policy_from(Path(__file__).resolve().parents[2] / ".github/release-ci.json")
         result = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=15, check=True)
         evidence = verify(policy, os.environ, result.stdout.strip(), GitHub(os.environ.get("GITHUB_TOKEN")))
         if os.environ.get("GITHUB_OUTPUT"):
