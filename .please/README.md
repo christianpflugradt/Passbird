@@ -1,10 +1,10 @@
 # Repository governance
 
 The independently published governor in `mise.toml` governs Passbird.
-Candidate binaries never govern their own validation. The three baseline Rule Sets
-and the independent Gemini Flash-Lite provider use immutable revision
-`c4d4c60eff8fc5d32641f5fe33b5cfa9e337e1f3`, shared with Passing By, PumpBuddy,
-Please Behave CLI and Action. Local Rules contain Passbird requirements only.
+Candidate binaries never govern their own validation. The baseline Rule Sets
+and the independent Gemini Flash-Lite provider share one immutable revision pinned in
+`config.toml`. The imported repository-conventions set limits AGENTS.md to 1500
+approximate tokens at pre-commit and check. Local Rules contain Passbird requirements only.
 
 ## Preparation and hooks
 
@@ -35,7 +35,7 @@ If necessary, `python3 scripts/install-governor.py` installs the exact published
 governor into ignored `.tools/please/bin`, verifying the archive checksum and
 executable version. Prepend that directory to PATH in the shell invoking Git;
 the global installation is not replaced. CI uses the published Please Behave
-Action v1.3.0 with install false and sync true; mise owns installation.
+Action with install false and sync true; mise owns installation.
 
 Run `sh scripts/setup-git-hooks.sh --yes`. Setup retires only byte-identical known
 Gradle-generated hooks, preserves copies under ignored `.tools/retired-gradle-hooks`,
@@ -125,7 +125,7 @@ and install-git-hooks names remain aliases for ci:prepare and hooks:install.
 
 `ci.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
 manual dispatch. Check runs all deterministic governance checks, mutation tests
-and OWASP through the SHA-pinned Please Behave Action v1.3.0 with checks-only
+and OWASP through the SHA-pinned Please Behave Action with checks-only
 execution and a Job Summary. Xvfb starts before the Action; Check uploads
 the source/attempt-bound `release-jar` artifact. Java compatibility is tested only on the versioned release candidate. Native test diagnostics are consolidated into
 `test-reports`; lint, Detekt, dependency-license, OWASP, PIT and smoke diagnostics

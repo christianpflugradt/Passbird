@@ -15,7 +15,7 @@ class CommitConventionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         config = tomllib.loads((ROOT / ".please/config.toml").read_text())
-        imported = next(entry for entry in config["imports"] if entry["path"] == "rulesets/commit-msg/repository-conventions")
+        imported = next(entry for entry in config["imports"] if entry["path"] == "rulesets/multi-point/repository-conventions")
         state_path = subprocess.check_output(["git", "rev-parse", "--git-path", "please/external-rule-sets.json"],
                                              cwd=ROOT, text=True).strip()
         state = json.loads((ROOT / state_path).read_text())
