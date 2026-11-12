@@ -56,12 +56,12 @@ jobs:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
           OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
           OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         uses: please-behave/action@196e1d61f898e0cb77c58ab3dd6667f021321d5e # v1.3.0
         with:
           install: 'false'
           sync: 'true'
           execution-point: check
-          checks-only: 'true'
           summary: 'true'
       - name: Bind CI JAR to source and producing attempt
         run: python3 scripts/release-artifacts.py ci-receipt

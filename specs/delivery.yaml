@@ -153,7 +153,7 @@ local_verification_policy:
         - .github/workflows/release.yml
     notes:
       - ci.yml uses check / Check with the published governor, preserving main pushes, Renovate PRs and manual dispatch
-      - CI and Candidate execute through SHA-pinned Please Behave Action with install false, sync true, checks-only and summaries; mise.toml owns the CLI pin
+      - CI and Candidate execute through SHA-pinned Please Behave Action with install false, sync true and summaries; CI runs reviews, Candidate runs checks only; mise.toml owns the CLI pin
       - CI prepares Xvfb before source checks; release runtime matrix jobs use xvfb-run for candidate smoke tests
       - preparation downloads locked dependencies and prepares tools before checks; governed tests remain offline with synthetic credentials and mocked services
       - preparation explicitly resolves runtime POM artifacts for offline license discovery; license report tasks bypass the build cache and rerun to reject stale incomplete reports

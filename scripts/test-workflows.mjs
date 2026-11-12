@@ -56,12 +56,13 @@ test("trusted CI proof requires Check while compatibility belongs to Release", (
   assert.match(check.uses, /^please-behave\/action@[a-f0-9]{40}$/);
   assert.equal(check.run, undefined);
   assert.deepEqual(check.with, { install: "false", sync: "true",
-    "execution-point": "check", "checks-only": "true", summary: "true" });
+    "execution-point": "check", summary: "true" });
   for (const [job, point] of [[ci.jobs.check, "check"],
     [workflow("release.yml").jobs["release-candidate"], "release"]]) {
     const execution = job.steps.find(step => step.with?.["execution-point"] === point);
     assert.equal(execution.uses, check.uses);
-    assert.deepEqual(execution.with, { ...check.with, "execution-point": point });
+    assert.deepEqual(execution.with, { ...check.with, "execution-point": point,
+      ...(point === "release" ? { "checks-only": "true" } : {}) });
     assert.ok(job.steps.every(step => !/\bplease run\b/.test(step.run ?? "")));
     assert.equal(execution.with.sync, "true");
     assert.ok(job.steps.every(step => !step.run?.includes("please sync")));
