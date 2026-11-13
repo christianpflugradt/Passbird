@@ -31,6 +31,10 @@ run = "./gradlew publishPreview"
 description = "Fetch locked dependencies and warm the Gradle task graph for offline Git hooks and CI"
 run = "bash tools/prepare.sh"
 
+[tasks."prepare:candidate"]
+description = "Fetch locked dependencies for the release candidate build"
+run = "bash tools/prepare.sh candidate"
+
 [tasks.build]
 description = "Build the executable JAR with prepared dependencies"
 run = "bash tools/gradle-check.sh jar"
