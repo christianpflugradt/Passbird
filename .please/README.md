@@ -13,7 +13,7 @@ actionlint, Gitleaks and ShellCheck versions in `mise.toml`. Git and Bash remain
 host prerequisites. Linux desktop tests and smoke tests also need Xvfb, xauth
 and xclip. Local macOS checks require a desktop session.
 
-Run `mise run ci:prepare` explicitly before validation. It installs the locked
+Run `mise run prepare` explicitly before validation. It installs the locked
 release-tool dependencies and resolves Gradle verification dependencies. It then
 resolves the native task graph online with `--dry-run` to cache signature metadata
 before offline checks; this executes no build or test tasks. The `gradle` mode
@@ -74,7 +74,7 @@ depends on the JAR build; packaging depends on the versioned JAR build.
 PIT runs as the mutation Rule in the same Check invocation, with the same high-risk classes, target tests,
 timeout settings, reports and line-coverage export. Local hooks do not add mutation
 testing or OWASP analysis. Native `preCommitCheck` and `prePushCheck` convenience
-tasks remain; `mise run verify` selects the complete governor pre-push gate.
+tasks remain; `mise run verify` runs the deterministic pre-push checks and stops at the first failure.
 
 ## Shared checks and commit messages
 
@@ -113,8 +113,7 @@ Python and the default build JDK are exactly pinned in mise. Java 17/21/25 in th
 compatibility matrix intentionally select their latest supported patch versions;
 mise exec selects each runtime explicitly. Xvfb, xauth and xclip remain runner
 OS dependencies installed by Actions. Preparation resolves dependencies and warms
-the Gradle task graph without executing build or quality tasks. The old prepare
-name remains an alias for ci:prepare.
+the Gradle task graph without executing build or quality tasks.
 
 `ci.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
 manual dispatch. Check runs all deterministic governance checks, mutation tests

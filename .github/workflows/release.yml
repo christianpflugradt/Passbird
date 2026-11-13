@@ -90,7 +90,7 @@ jobs:
           install_args: python java node github:please-behave/cli
       - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
       - name: Fetch candidate dependencies
-        run: mise run ci:prepare candidate
+        run: mise run prepare candidate
       - name: Build versioned candidate
         uses: please-behave/action@196e1d61f898e0cb77c58ab3dd6667f021321d5e # v1.3.0
         with:

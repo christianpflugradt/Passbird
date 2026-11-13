@@ -20,7 +20,7 @@ Repository entrypoint for Passbird, an offline terminal password manager. Agent-
 - Prefer the deterministic helpers in `.agent/scripts` (see `.agent/README.md`) over composing multi-step operations by hand.
 - Use GitHub CLI for GitHub-hosted work: issues, pull requests, workflow runs, releases and repository metadata. When creating an issue, apply the most specific existing type label, add `migration` for compatibility-preserving work and verify before retrying `gh issue create`.
 - Work directly on `main`. Create, switch to or push no other branch, and never use `git stash`. If unrelated workspace state blocks this, stop and explain.
-- Run `./gradlew ktlintFormat` before staging, committing or pushing.
+- Run `mise run format` before staging, committing or pushing.
 - Tests assert the observable contract (returned data, persisted artifact, emitted event, state change, approved output). They cover the happy path, each decision outcome and credible failures such as invalid or malformed input, I/O, authentication and conflicts, plus sensitive-data and cleanup guarantees where relevant. Never add tests only to raise coverage.
 - When a task is complete and suitable for release, commit, run `git pull -r` and push at once. Leave work uncommitted only when maintainer input is needed, the task is incomplete or it should not be released yet.
 - Never run `./gradlew dependencyCheckAnalyze` locally; OWASP runs in CI unless the maintainer asks.
@@ -39,7 +39,7 @@ The imported Conventional Commits Check enforces types and `.please/commit-scope
 ## Governance
 
 - The independently published governor pinned in `mise.toml` governs; never use a candidate. Shared rules and provider adapters are immutable external packages. Local rules hold Passbird-specific requirements only.
-- Prepare tools with `mise install` and `mise run ci:prepare` before checks; checks never install tools. Install hooks with `please sync --yes`.
+- Prepare tools with `mise install` and `mise run prepare` before checks; checks never install tools. Install hooks with `please sync --yes`.
 - Git hooks are the final validation gates (see `specs/delivery.yaml` and `.please/README.md`). Inspect failures with `please status --details`, fix and retry without bypassing. Tests never call real models or paid services.
 - Rule scripts live in `.please/checks/<rule>/`, workflow and release scripts in `.github/scripts/`, developer tools in `tools/`, each with its tests.
 - Stop after a successful push. Do not monitor or repair remote workflows, trigger a release or publish one without explicit authorization.

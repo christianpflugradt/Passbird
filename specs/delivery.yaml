@@ -26,7 +26,7 @@ quality_gates:
   tool_preparation:
     - shared conventions, security, open-source license and release policies use full-commit pins from please-behave-governance in .please/config.toml
     - mise.toml pins Java, Node, Python, actionlint, Gitleaks and ShellCheck for local validation
-    - run mise install and mise run ci:prepare explicitly before offline Git hooks; preparation does not run validation
+    - run mise install and mise run prepare explicitly before offline Git hooks; preparation does not run validation
     - use mise exec for manual Please Behave and Git commands without shell activation so hooks inherit the configured tool PATH
     - Git, Bash, desktop support, the published governor and credentials remain external prerequisites
   formatting_and_style:
@@ -173,7 +173,7 @@ local_verification_policy:
       - actionlint 1.7.12 supports timezone; a separately tested checker validates queue values before suppressing only its unknown-queue diagnostic
       - release.yml retains Monday 03:23 Europe/Berlin stable releases, manual development prereleases and the existing preview entrypoints
       - mise installs exactly pinned Python and the default Java build toolchain; the Java 17/21/25 compatibility matrix explicitly selects its runtime through mise exec
-      - ci:prepare resolves dependencies and dry-run task metadata only; packaging and release integrity belong to Actions
+      - prepare resolves dependencies and dry-run task metadata only; packaging and release integrity belong to Actions
       - release is the only custom governance point and validates the versioned native build; Plan and Publish never install or invoke governance or Git hooks
       - release policies live under .github; local scripts verify source CI, artifact evidence and publication without cached governance modules
       - Plan does not prepare or publish; Readiness and Candidate build run in parallel; Publish requires both and the complete candidate runtime matrix

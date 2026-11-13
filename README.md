@@ -610,11 +610,11 @@ The published Please Behave governor pinned in `mise.toml` manages local Git hoo
 - pre-commit runs formatting, Detekt, production/test compilation and agent-spec consistency checks
 - pre-push runs the complete `allTests` suite, dependency-license and coverage checks, JAR build and interactive smoke flow, workflow/release-helper tests and shared security/license checks
 
-Run `mise trust`, `mise install`, `mise run ci:prepare` and `mise exec -- please sync --yes` to prepare the pinned validation tools, locked dependencies and managed hooks. Git and Bash remain host prerequisites. A desktop session is required locally; Linux CI prepares Xvfb, xauth and xclip.
+Run `mise trust`, `mise install`, `mise run prepare` and `mise exec -- please sync --yes` to prepare the pinned validation tools, locked dependencies and managed hooks. Git and Bash remain host prerequisites. A desktop session is required locally; Linux CI prepares Xvfb, xauth and xclip.
 
 Use `mise exec -- please run --at pre-commit` or `mise exec -- please run --at pre-push` for manual checks, and `mise exec -- git commit` / `mise exec -- git push` so hooks inherit the configured tools. Plain commands require mise shell activation or equivalent PATH setup; installing tools alone does not activate them. The published governor and credentials remain separate prerequisites.
 
-Hooks are the final local gates. Do not repeat the complete gate manually before Git; inspect stored results with `please status --details`, fix failures and retry. `mise run verify` remains the manual governor entrypoint. Native `preCommitCheck` and `prePushCheck` Gradle convenience tasks remain available.
+Hooks are the final local gates. Do not repeat the complete gate manually before Git; inspect stored results with `please status --details`, fix failures and retry. `mise run verify` runs the deterministic pre-push checks and stops at the first failure. Native `preCommitCheck` and `prePushCheck` Gradle convenience tasks remain available.
 
 CI retains Renovate PRs, main pushes and manual dispatch. Java 17/21/25 compatibility smoke tests run only in Release Candidate. Its single Check invocation runs the normal rules together with PIT and OWASP. Local hooks exclude PIT and OWASP; an explicit `please run --at check` also runs them. OWASP requires network access, with daily cache refresh and weekly purge/rebuild workflows. CodeQL retains its nightly Kotlin toolchain. Tests run offline with synthetic data; advisory/audit services are separate.
 
