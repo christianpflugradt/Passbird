@@ -136,7 +136,7 @@ if (( run == 1 && ahead_before > 0 && allow_existing_ahead == 0 )); then
 fi
 
 if [[ "$run" == "0" ]]; then
-  print -r -- "Dry run only. Re-run with --run to format, stage, commit, pull --rebase, and push."
+  print -r -- "Dry run only. Re-run with --run to stage, commit, pull --rebase, and push."
   print -r -- "Commit message:"
   print -r -- "$message"
   print -r -- "Paths:"
@@ -145,17 +145,6 @@ if [[ "$run" == "0" ]]; then
     print -r -- "Current branch is already ahead of ${upstream:-its upstream} by $ahead_before commit(s)."
   fi
   exit 0
-fi
-
-[[ -x ./gradlew ]] || agent_die "./gradlew is not executable"
-
-agent_run_or_print 1 ./gradlew ktlintFormat
-
-outside_after_format="$(outside_allowed_paths)"
-if [[ -n "$outside_after_format" ]]; then
-  print -u2 -- "ktlintFormat changed files outside the requested paths:"
-  print -u2 -- "$outside_after_format"
-  exit 1
 fi
 
 git add -- "${paths[@]}"

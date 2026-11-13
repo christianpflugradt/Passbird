@@ -13,7 +13,7 @@ agent_internal_scripts:
     - name: agent-validate.sh
       use_for: previewing or running the validation sequence for a known change type
     - name: agent-ship.sh
-      use_for: formatting, staging exact paths, committing, rebase-pulling, and pushing releasable work
+      use_for: staging exact paths, committing, rebase-pulling, and pushing releasable work
     - name: agent-review-preflight.sh
       use_for: gathering deterministic review-area context and GitHub triage state
     - name: agent-review-finding.sh
@@ -208,7 +208,7 @@ change_rules:
   - update specs docs whenever agent-facing guidance would otherwise become stale
   - update AGENTS.md and matching specs when adding, renaming, or changing deterministic helper workflows under .agent/scripts
   - preserve backward compatibility unless the maintainer explicitly chooses a breaking change
-  - use .agent/scripts/agent-ship.sh for the deterministic format, stage, commit, pull --rebase, and push sequence when shipping completed releasable work
+  - use .agent/scripts/agent-ship.sh for the deterministic stage, commit, pull --rebase, and push sequence when shipping completed releasable work
   - delay commit and push only when maintainer input is still required or the current state is incomplete or not ready to release
   - work directly on main; do not create, switch to, or push any other local or remote branch
   - do not use git stash; if main-only work is blocked by unrelated workspace state or another git constraint, stop and wait for maintainer instructions
