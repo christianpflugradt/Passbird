@@ -57,7 +57,7 @@ workflow monitoring belongs to the maintainer.
 | format-kotlin, static-analysis, compile, tests, coverage, dependency-license, native-smoke | pre-push, check |
 | native-build | pre-push, check, release |
 | python-tests | pre-push, check |
-| mutation, owasp | check |
+| mutation, jvm-audit | check |
 
 `allTests` is the single complete native test suite, including unit, property,
 integration, architecture and desktop clipboard tests. Focused Gradle task

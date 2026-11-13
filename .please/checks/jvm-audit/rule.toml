@@ -1,4 +1,4 @@
-id = "owasp"
+id = "jvm-audit"
 description = "Scan JVM runtime dependencies for vulnerabilities"
 run_at = ["check"]
 
