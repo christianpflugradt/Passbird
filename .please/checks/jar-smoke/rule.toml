@@ -1,5 +1,6 @@
 id = "jar-smoke"
-description = "Verify the interactive JAR workflow"
+name = "JAR smoke test"
+description = "The built JAR completes its interactive workflow"
 run_at = ["pre-push", "check"]
 depends_on = ["jar-build"]
 

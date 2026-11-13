@@ -1,5 +1,6 @@
 id = "format-shell"
-description = "Check shell script formatting with shfmt, skipping zsh scripts"
+name = "Shell formatting"
+description = "Shell scripts are formatted with shfmt"
 run_at = ["pre-commit", "pre-push", "check"]
 
 [check]

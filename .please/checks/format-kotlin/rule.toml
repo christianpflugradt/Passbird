@@ -1,5 +1,6 @@
 id = "format-kotlin"
-description = "Check Kotlin formatting"
+name = "Kotlin formatting"
+description = "Kotlin sources pass ktlint"
 run_at = ["pre-push", "check"]
 
 [check]

@@ -1,5 +1,6 @@
 id = "format-python"
-description = "Check Python formatting with Ruff"
+name = "Python formatting"
+description = "Python sources are formatted with Ruff"
 run_at = ["pre-commit", "pre-push", "check"]
 
 [check]

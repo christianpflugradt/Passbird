@@ -1,5 +1,6 @@
 id = "mutation"
-description = "Run PIT mutation testing for high-risk code"
+name = "Mutation tests"
+description = "High-risk code meets the mutation testing threshold"
 run_at = ["check"]
 
 [check]

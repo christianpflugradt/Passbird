@@ -1,5 +1,6 @@
 id = "static-analysis"
-description = "Run Detekt over production and test sources"
+name = "Static analysis"
+description = "Production and test sources have no Detekt findings"
 run_at = ["pre-push", "check"]
 
 [check]

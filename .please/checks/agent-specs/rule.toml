@@ -1,5 +1,6 @@
 id = "agent-specs"
-description = "Check agent helper and specification wiring"
+name = "Agent specifications"
+description = "Agent helpers and specifications exist and reference each other"
 run_at = ["pre-commit", "pre-push", "check"]
 
 [check]

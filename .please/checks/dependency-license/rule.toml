@@ -1,5 +1,6 @@
 id = "dependency-license"
-description = "Check the dependency license allowlist"
+name = "Dependency licenses"
+description = "All dependencies use allowed licenses"
 run_at = ["pre-push", "check"]
 
 [check]

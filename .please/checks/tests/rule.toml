@@ -1,5 +1,6 @@
 id = "tests"
-description = "Run all unit, property, integration, architecture and clipboard tests"
+name = "Tests"
+description = "All unit, property, integration, architecture and clipboard tests pass"
 run_at = ["pre-push", "check"]
 
 [check]

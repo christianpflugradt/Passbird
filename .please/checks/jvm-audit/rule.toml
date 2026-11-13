@@ -1,5 +1,6 @@
 id = "jvm-audit"
-description = "Scan JVM runtime dependencies for vulnerabilities"
+name = "JVM dependency audit"
+description = "No JVM runtime dependency has a known vulnerability"
 run_at = ["check"]
 
 [check]

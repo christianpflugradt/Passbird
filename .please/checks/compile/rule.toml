@@ -1,5 +1,6 @@
 id = "compile"
-description = "Compile production and test sources against Java 17 APIs"
+name = "Compilation"
+description = "Production and test sources compile against the Java 17 APIs"
 run_at = ["pre-push", "check"]
 
 [check]
