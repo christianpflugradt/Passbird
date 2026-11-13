@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "repository": "christianpflugradt/Passbird",
+  "workflow": ".github/workflows/ci.yml",
+  "event": "push",
+  "branch": "main",
+  "required_jobs": [
+    "Check"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "repository": "christianpflugradt/Passbird",
+  "workflow": ".github/workflows/release.yml",
+  "root": "dist",
+  "targets": {
+    "java-17": [
+      "passbird.jar",
+      "metadata.json",
+      "SHA256SUMS",
+      "smoke/17.json"
+    ],
+    "java-21": [
+      "passbird.jar",
+      "metadata.json",
+      "SHA256SUMS",
+      "smoke/21.json"
+    ],
+    "java-25": [
+      "passbird.jar",
+      "metadata.json",
+      "SHA256SUMS",
+      "smoke/25.json"
+    ]
+  }
+}

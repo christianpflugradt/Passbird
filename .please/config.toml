@@ -5,12 +5,12 @@ max_display_files = 5
 fail_fast_terminate_running_instances = false
 
 [execution_points]
-custom = ["release"]
+custom = ["release", "release-readiness", "release-record", "release-verify"]
 
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
-path = "rulesets/multi-point/repository-conventions"
-ref = "11ba2129c2bf68f47761d3d11f56f5bfabdaedcd"
+path = "rulesets/repository-conventions"
+ref = "382e2128bfd8df998079fa34a71fcb0d72063106"
 
 [imports.rule_parameters.agents-size]
 max_tokens = "1500"
@@ -20,25 +20,37 @@ scopes_file = ".please/commit-scopes.txt"
 
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
-path = "rulesets/multi-point/security"
-ref = "11ba2129c2bf68f47761d3d11f56f5bfabdaedcd"
+path = "rulesets/security"
+ref = "382e2128bfd8df998079fa34a71fcb0d72063106"
 
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
-path = "rulesets/multi-point/open-source-software"
-ref = "11ba2129c2bf68f47761d3d11f56f5bfabdaedcd"
+path = "rulesets/open-source-software"
+ref = "382e2128bfd8df998079fa34a71fcb0d72063106"
 
 [imports.rule_parameters.license]
 target = "LICENSE"
+
+[[imports]]
+git = "https://github.com/christianpflugradt/please-behave-governance.git"
+path = "rulesets/releasable-open-source-software"
+ref = "382e2128bfd8df998079fa34a71fcb0d72063106"
+
+[imports.rule_parameters.release-contract]
+ci_policy = ".please/release-ci.json"
+artifacts_policy = ".please/release-artifacts.json"
+
+[imports.rule_parameters.semantic-release]
+tag_format = "${version}"
 
 [[provider_imports]]
 id = "gemini-flash-lite"
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "providers/gemini-flash-lite"
-ref = "11ba2129c2bf68f47761d3d11f56f5bfabdaedcd"
+ref = "382e2128bfd8df998079fa34a71fcb0d72063106"
 
 [[provider_imports]]
 id = "gemini-flash"
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "providers/gemini-flash"
-ref = "11ba2129c2bf68f47761d3d11f56f5bfabdaedcd"
+ref = "382e2128bfd8df998079fa34a71fcb0d72063106"
