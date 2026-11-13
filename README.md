@@ -632,7 +632,7 @@ Review the diff before committing. If Gradle still reports key-download failures
 
 ### Commit Messages
 
-Passbird imports its Conventional Commits check and advisory Gemini Flash-Lite header review from the shared rulesets. The review receives only the header; FAIL and ERROR stay visible without blocking commits. Export GEMINI_API_KEY in the shell invoking Git. Use `!` or a BREAKING CHANGE footer for breaking changes; the legacy `major` type remains supported only in historical release analysis.
+Passbird imports its Conventional Commits check and advisory Gemini Flash-Lite header review from the shared rulesets. The review receives only the header; FAIL and ERROR stay visible without blocking commits. Export GEMINI_API_KEY in the shell invoking Git. Use `!` or a BREAKING CHANGE footer for breaking changes.
 
 Supported commit types are:
 - `fix`
@@ -697,7 +697,7 @@ You can find current and historical Passbird versions [on GitHub Releases](https
 
 Stable publication remains scheduled for Monday 03:23 Europe/Berlin; manual `release.yml` dispatch, `./gradlew publishPreview` and `mise run preview` create development prereleases. Plan determines a version without publishing, then Readiness and Candidate run in parallel. Readiness requires trusted successful CI for the exact main source. Candidate builds and smoke-tests the versioned JAR on Java 17, 21 and 25. Publish verifies and uploads those same bytes without rebuilding, with source/version/run/attempt metadata and checksums.
 
-Stable releases use minor for feat, patch for fix/perf/chore/refactor/build/effective revert, and major for breaking changes. Test/ci/config/docs/style alone do not release. Scoped reverts cancel unreleased originals. Tags stay unprefixed for stable releases and use `dev-` for development prereleases. Monthly cleanup retains its 30-day prerelease policy. Partial CI reruns may retain successful jobs; Release reruns without the current attempt's complete candidate must rerun all jobs. Tag, release and asset publication are not atomic.
+Stable releases use minor for feat, patch for fix/perf/chore/refactor/build/config/effective revert, and major for breaking changes. Test/ci/docs/style alone do not release. Scoped reverts cancel unreleased originals. Tags stay unprefixed for stable releases and use `dev-` for development prereleases. Monthly cleanup retains its 30-day prerelease policy. Partial CI reruns may retain successful jobs; Release reruns without the current attempt's complete candidate must rerun all jobs. Tag, release and asset publication are not atomic.
 
 ### What happens if I lose my master password or keystore file?
 Losing your master password or keystore file results in permanent data loss. The master password is required to decrypt the database, and the keystore file stores the encryption key. Even recreating the keystore with the same master password will not regenerate the same encryption key.

@@ -297,8 +297,8 @@ release_and_history_notes:
   contract: .please/README.md
   automation:
     - stable tags remain plain versions; development tags have dev- and visible/JAR versions omit that prefix
-    - feat releases minor; fix, perf, chore, refactor, build and effective revert release patch; breaking changes release major
-    - test, ci, config, docs and style do not release unless breaking; historical major commits remain major
+    - feat releases minor; fix, perf, chore, refactor, build, config and effective revert release patch; breaking changes release major
+    - test, ci, docs and style do not release unless breaking
     - scoped reverts cancel unreleased originals in analysis and notes; historical build(release) version commits are ignored
     - no generated version commit is created
     - release assets retain passbird.jar for stable and opt-in development updater compatibility and add SHA256SUMS and metadata.json

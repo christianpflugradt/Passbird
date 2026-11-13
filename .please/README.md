@@ -95,8 +95,7 @@ are outside the shared scanner's current-snapshot contract.
 Commit-msg uses only the external Conventional Commits Check and advisory
 header-only wording Review. Scopes come from `commit-scopes.txt`; the independent
 provider import supplies the adapter. No local header, commit-range or PR-title
-checks are added. Use `!` or a BREAKING CHANGE footer for new breaking commits;
-the legacy `major` type remains understood only by historical release analysis.
+checks are added. Use `!` or a BREAKING CHANGE footer for breaking commits.
 Export GEMINI_API_KEY in the shell invoking Git. Review FAIL/ERROR stays visible
 without blocking commits. Offline tests use synthetic data and mocked APIs;
 only the normal advisory commit hook may call its provider. The shipping helper
@@ -159,10 +158,9 @@ without preparing, tagging or publishing. Readiness and Candidate depend only on
 Plan and run in parallel; Publish requires both to succeed.
 
 Stable releases retain plain tags in the existing 7.x series. Feat is minor;
-fix, perf, chore, refactor, build and effective revert are patch; breaking changes
-are major. Test, ci, config, docs and style do not release unless breaking.
-Historical `major` commits remain major and generated `build(release)` commits
-are ignored. Scoped reverts cancel unreleased originals in analysis and notes.
+fix, perf, chore, refactor, build, config and effective revert are patch; breaking changes
+are major. Test, ci, docs and style do not release unless breaking.
+Generated `build(release)` commits are ignored. Scoped reverts cancel unreleased originals in analysis and notes.
 There are no generated version commits. Development versions retain the latest
 official stable base, Berlin date and increasing sequence, with `dev-` tags and
 unprefixed visible/JAR versions. Monthly cleanup still removes prereleases older

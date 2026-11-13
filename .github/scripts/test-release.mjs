@@ -17,14 +17,14 @@ const env = { ...process.env, GITHUB_REPOSITORY: "christianpflugradt/Passbird", 
 const commit = (message, hash = "b".repeat(40)) => ({ message, hash });
 const analyze = commits => analyzeCommits(config.plugins[0][1], { commits: [...commits].reverse(), logger, cwd: process.cwd() });
 
-test("stable release policy includes legacy major and breaking changes but excludes test-only releases", async () => {
+test("stable release policy releases breaking changes and maintenance types but not test-only changes", async () => {
   for (const [message, expected] of [
-    ["feat: add capability", "minor"], ["major: historical breaking change", "major"],
+    ["feat: add capability", "minor"],
     ["fix!: change persistence", "major"], ["test!: remove compatibility guarantee", "major"],
     ["fix: preserve backup", "patch"], ["perf: speed up parsing", "patch"],
     ["chore(deps): update dependency", "patch"], ["refactor: simplify parsing", "patch"],
     ["build: update wrapper", "patch"], ["build(gradle): update wrapper", "patch"],
-    ["build(release): 7.0.8", null], ["test: cover parsing", null], ["config: change tooling", null],
+    ["build(release): 7.0.8", null], ["test: cover parsing", null], ["config: change tooling", "patch"],
     ["ci: update workflow", null], ["docs: update guide", null], ["style: format sources", null],
   ]) assert.equal(await analyze([commit(message)]), expected, message);
 });
