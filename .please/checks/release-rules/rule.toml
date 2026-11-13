@@ -1,7 +1,0 @@
-id = "release-rules"
-description = "Test release policy, artifact rejection and workflow contracts offline"
-run_at = ["pre-push", "check"]
-
-[check]
-command = "npm --offline test"
-timeout_seconds = 900

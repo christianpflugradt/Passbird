@@ -56,7 +56,7 @@ workflow monitoring belongs to the maintainer.
 | format-python, format-shell, agent-specs | pre-commit, pre-push, check |
 | format-kotlin, static-analysis, compile, tests, coverage, dependency-license, native-smoke | pre-push, check |
 | native-build | pre-push, check, release |
-| release-rules | pre-push, check |
+| python-tests | pre-push, check |
 | mutation, owasp | check |
 
 `allTests` is the single complete native test suite, including unit, property,
