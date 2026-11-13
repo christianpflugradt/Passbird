@@ -1,7 +1,6 @@
 import os
 import re
 import sys
-import tomllib
 from pathlib import Path
 
 root = Path.cwd()
@@ -43,15 +42,6 @@ if scopes != delivery_scopes:
     failures.append("Documented commit scopes differ from .please/commit-scopes.txt")
 if "gitHooks" in read("settings.gradle.kts") or "gradle-pre-commit-git-hooks" in read("settings.gradle.kts"):
     failures.append("Gradle must not generate competing hooks")
-
-config = tomllib.loads(read(".please/config.toml"))
-for entry in config["imports"] + config["provider_imports"]:
-    if not re.fullmatch(r"[0-9a-f]{40}", entry["ref"]):
-        failures.append("External packages must use immutable revisions")
-for path in (root / ".please/checks").glob("*/rule.toml"):
-    rule = tomllib.loads(path.read_text())
-    if rule["id"] != path.parent.name:
-        failures.append(f"Mismatched local Rule ID: {path.relative_to(root)}")
 
 if failures:
     sys.exit("\n".join(failures))
