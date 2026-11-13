@@ -10,8 +10,8 @@ if [[ ! -f "$jar_path" ]]; then
 fi
 
 manifest="$(unzip -p "$jar_path" META-INF/MANIFEST.MF | tr -d '\r')"
-implementation_version="$(awk -F': ' '$1 == "Implementation-Version" { print $2 }' <<< "$manifest")"
-specification_version="$(awk -F': ' '$1 == "Specification-Version" { print $2 }' <<< "$manifest")"
+implementation_version="$(awk -F': ' '$1 == "Implementation-Version" { print $2 }' <<<"$manifest")"
+specification_version="$(awk -F': ' '$1 == "Specification-Version" { print $2 }' <<<"$manifest")"
 expected_specification_version="${expected_version%%.*}"
 
 if [[ -z "$implementation_version" || "$implementation_version" == "unspecified" ]]; then

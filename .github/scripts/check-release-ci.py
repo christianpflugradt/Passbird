@@ -1,4 +1,5 @@
 """Verify push CI evidence within one trusted GitHub workflow run, including reruns."""
+
 import json
 import os
 from pathlib import Path
@@ -39,12 +40,15 @@ class GitHub:
         url = "https://api.github.com" + path
         if parameters:
             url += "?" + urlencode(parameters)
-        request = Request(url, headers={
-            "Authorization": "Bearer " + self.token,
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": "please-behave-ci-proof",
-        })
+        request = Request(
+            url,
+            headers={
+                "Authorization": "Bearer " + self.token,
+                "Accept": "application/vnd.github+json",
+                "X-GitHub-Api-Version": "2022-11-28",
+                "User-Agent": "please-behave-ci-proof",
+            },
+        )
         try:
             with self.opener.open(request, timeout=15) as response:
                 raw = response.read(4 * 1024 * 1024 + 1)
@@ -79,21 +83,38 @@ class GitHub:
 
 def policy_from(path):
     policy = json.loads(Path(path).read_text())
-    require(isinstance(policy, dict) and set(policy) == {
-        "schema_version", "repository", "workflow", "event", "branch", "required_jobs",
-    }, "invalid CI policy fields")
+    require(
+        isinstance(policy, dict)
+        and set(policy)
+        == {
+            "schema_version",
+            "repository",
+            "workflow",
+            "event",
+            "branch",
+            "required_jobs",
+        },
+        "invalid CI policy fields",
+    )
     require(type(policy["schema_version"]) is int and policy["schema_version"] == 1, "unsupported CI policy schema")
     repo = policy["repository"]
-    require(isinstance(repo, str) and re.fullmatch(r"(?:please-behave|christianpflugradt)/[A-Za-z0-9_.-]+", repo),
-            "repository must belong to please-behave or christianpflugradt")
-    require(isinstance(policy["workflow"], str) and re.fullmatch(r"\.github/workflows/[A-Za-z0-9_-]+\.ya?ml", policy["workflow"]),
-            "expected a GitHub workflow file path")
+    require(
+        isinstance(repo, str) and re.fullmatch(r"(?:please-behave|christianpflugradt)/[A-Za-z0-9_.-]+", repo),
+        "repository must belong to please-behave or christianpflugradt",
+    )
+    require(
+        isinstance(policy["workflow"], str) and re.fullmatch(r"\.github/workflows/[A-Za-z0-9_-]+\.ya?ml", policy["workflow"]),
+        "expected a GitHub workflow file path",
+    )
     require(policy["event"] == "push", "release CI proof supports push workflows only")
     require(isinstance(policy["branch"], str) and re.fullmatch(r"[A-Za-z0-9_./-]+", policy["branch"]), "invalid expected branch")
     jobs = policy["required_jobs"]
-    require(isinstance(jobs, list) and 1 <= len(jobs) <= 64 and all(
-        isinstance(job, str) and job.strip() == job and job and not any(ord(c) < 32 for c in job) for job in jobs
-    ), "required_jobs must list explicit job names, including every required matrix entry")
+    require(
+        isinstance(jobs, list)
+        and 1 <= len(jobs) <= 64
+        and all(isinstance(job, str) and job.strip() == job and job and not any(ord(c) < 32 for c in job) for job in jobs),
+        "required_jobs must list explicit job names, including every required matrix entry",
+    )
     require(len(set(jobs)) == len(jobs), "duplicate required job names")
     return policy
 
@@ -125,12 +146,19 @@ def verify(policy, env, head, api):
         return max(runs, key=lambda run: (run["run_number"], run["id"]))
 
     def identity(run):
-        require(run.get("head_sha") == sha and run.get("workflow_id") == workflow_id
-                and run.get("event") == policy["event"] and run.get("head_branch") == policy["branch"]
-                and run.get("path") == workflow, "CI run does not match the expected source/workflow/event/branch")
+        require(
+            run.get("head_sha") == sha
+            and run.get("workflow_id") == workflow_id
+            and run.get("event") == policy["event"]
+            and run.get("head_branch") == policy["branch"]
+            and run.get("path") == workflow,
+            "CI run does not match the expected source/workflow/event/branch",
+        )
         for key in ("repository", "head_repository"):
-            require(isinstance(run.get(key), dict) and run[key].get("id") == repository["id"]
-                    and run[key].get("full_name") == repo, "CI run belongs to an untrusted repository")
+            require(
+                isinstance(run.get(key), dict) and run[key].get("id") == repository["id"] and run[key].get("full_name") == repo,
+                "CI run belongs to an untrusted repository",
+            )
         require(str(run.get("id")) != env["GITHUB_RUN_ID"], "CI proof cannot use the current release run")
         require(integer(run.get("run_attempt")) and run["run_attempt"] <= 100, "unsupported or missing run attempt")
         if run.get("status") != "completed" or run.get("conclusion") != "success":
@@ -147,8 +175,7 @@ def verify(policy, env, head, api):
         jobs = api.pages(run_path + f"/attempts/{attempt}/jobs", "jobs")
         names = set()
         for job in jobs:
-            require(job.get("run_id") == run["id"] and job.get("head_sha") == sha,
-                    "job does not belong to the selected source/run")
+            require(job.get("run_id") == run["id"] and job.get("head_sha") == sha, "job does not belong to the selected source/run")
             require(job.get("run_attempt", attempt) == attempt, "job attempt does not match its API endpoint")
             name = job.get("name")
             if name not in required:
@@ -165,15 +192,27 @@ def verify(policy, env, head, api):
         raise NotReady("Missing required CI jobs: " + ", ".join(sorted(required - set(selected))))
     after = api.get(run_path)
     identity(after)
-    require(all(after.get(key) == run.get(key) for key in ("id", "run_attempt", "updated_at", "status", "conclusion")),
-            "CI evidence changed while verifying jobs")
+    require(
+        all(after.get(key) == run.get(key) for key in ("id", "run_attempt", "updated_at", "status", "conclusion")),
+        "CI evidence changed while verifying jobs",
+    )
     newest = latest()
     identity(newest)
-    require(all(newest.get(key) == after.get(key) for key in ("id", "run_attempt", "updated_at", "status", "conclusion")),
-            "a newer matching CI run or attempt appeared during verification")
-    return dict(repository=repo, repository_id=repository["id"], workflow=workflow, workflow_id=workflow_id,
-                source_sha=sha, run_id=run["id"], run_attempt=run["run_attempt"], jobs=selected,
-                url=f"https://github.com/{repo}/actions/runs/{run['id']}")
+    require(
+        all(newest.get(key) == after.get(key) for key in ("id", "run_attempt", "updated_at", "status", "conclusion")),
+        "a newer matching CI run or attempt appeared during verification",
+    )
+    return dict(
+        repository=repo,
+        repository_id=repository["id"],
+        workflow=workflow,
+        workflow_id=workflow_id,
+        source_sha=sha,
+        run_id=run["id"],
+        run_attempt=run["run_attempt"],
+        jobs=selected,
+        url=f"https://github.com/{repo}/actions/runs/{run['id']}",
+    )
 
 
 def main():
@@ -190,7 +229,9 @@ def main():
         print(f"FAIL: {exc}")
         return 1
     except (KeyError, ValueError, TypeError, OSError, subprocess.SubprocessError):
-        print("ERROR: CI proof could not be established; check policy, GitHub context, API availability and read permissions", file=sys.stderr)
+        print(
+            "ERROR: CI proof could not be established; check policy, GitHub context, API availability and read permissions", file=sys.stderr
+        )
         return 2
 
 

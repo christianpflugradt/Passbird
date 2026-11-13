@@ -13,17 +13,27 @@ ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("artifacts", ROOT / ".github/scripts/release-artifacts.py")
 artifacts = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(artifacts)
-ENV = dict(EXPECTED_RELEASE_VERSION="7.1.0", GITHUB_SHA="a" * 40,
-           GITHUB_REPOSITORY="christianpflugradt/Passbird", GITHUB_RUN_ID="123", GITHUB_RUN_ATTEMPT="2")
+ENV = dict(
+    EXPECTED_RELEASE_VERSION="7.1.0",
+    GITHUB_SHA="a" * 40,
+    GITHUB_REPOSITORY="christianpflugradt/Passbird",
+    GITHUB_RUN_ID="123",
+    GITHUB_RUN_ATTEMPT="2",
+)
 
 
 def make_jar(path, version="7.1.0", payload=b"compiled-entrypoint", extra=None):
     path.parent.mkdir(parents=True, exist_ok=True)
     manifest = {
-        "Manifest-Version": "1.0", "Build-Date": "2026-11-10", "Created-By": "GitHub Actions",
-        "Main-Class": "de.pflugradts.passbird.application.MainKt", "Implementation-Title": "Passbird",
-        "Implementation-Version": version, "Implementation-Vendor": "Christian Pflugradt",
-        "Specification-Title": "Secure Offline Password Management CLI", "Specification-Version": "7",
+        "Manifest-Version": "1.0",
+        "Build-Date": "2026-11-10",
+        "Created-By": "GitHub Actions",
+        "Main-Class": "de.pflugradts.passbird.application.MainKt",
+        "Implementation-Title": "Passbird",
+        "Implementation-Version": version,
+        "Implementation-Vendor": "Christian Pflugradt",
+        "Specification-Title": "Secure Offline Password Management CLI",
+        "Specification-Version": "7",
         "Specification-Vendor": "Independent | Christian Pflugradt",
     }
     with zipfile.ZipFile(path, "w") as jar:
@@ -52,9 +62,10 @@ class ReleaseArtifactsTest(unittest.TestCase):
         self.temp.cleanup()
 
     def write_receipt(self, version, path=None):
-        artifacts.write_json(path or Path(f"dist/smoke/{version}.json"),
-                             dict(artifacts.context(), schema_version=1, java=version,
-                                  jar_sha256=artifacts.digest(Path("build/libs/passbird.jar"))))
+        artifacts.write_json(
+            path or Path(f"dist/smoke/{version}.json"),
+            dict(artifacts.context(), schema_version=1, java=version, jar_sha256=artifacts.digest(Path("build/libs/passbird.jar"))),
+        )
 
     def package(self):
         artifacts.package()
@@ -81,15 +92,20 @@ class ReleaseArtifactsTest(unittest.TestCase):
         data = json.loads(path.read_text())
         data["schema_version"] = True
         artifacts.write_json(path, data)
-        Path("dist/SHA256SUMS").write_text("".join(
-            f"{artifacts.digest(Path('dist') / name)}  {name}\n" for name in ("passbird.jar", "metadata.json")))
+        Path("dist/SHA256SUMS").write_text(
+            "".join(f"{artifacts.digest(Path('dist') / name)}  {name}\n" for name in ("passbird.jar", "metadata.json"))
+        )
         with self.assertRaisesRegex(ValueError, "schema"):
             artifacts.verify()
 
     def test_rejects_other_sources_versions_runs_and_attempts(self):
         self.package()
-        for key, value in [("GITHUB_SHA", "b" * 40), ("EXPECTED_RELEASE_VERSION", "7.2.0"),
-                           ("GITHUB_RUN_ID", "124"), ("GITHUB_RUN_ATTEMPT", "3")]:
+        for key, value in [
+            ("GITHUB_SHA", "b" * 40),
+            ("EXPECTED_RELEASE_VERSION", "7.2.0"),
+            ("GITHUB_RUN_ID", "124"),
+            ("GITHUB_RUN_ATTEMPT", "3"),
+        ]:
             with self.subTest(key=key), patch.dict(os.environ, {key: value}), self.assertRaises(ValueError):
                 artifacts.verify()
 
@@ -150,6 +166,7 @@ class ReleaseArtifactsTest(unittest.TestCase):
     def test_rejects_duplicate_jar_entries(self):
         make_jar(Path("bad.jar"))
         import warnings
+
         with warnings.catch_warnings(), zipfile.ZipFile("bad.jar", "a") as jar:
             warnings.simplefilter("ignore")
             jar.writestr("META-INF/MANIFEST.MF", "duplicate")
@@ -170,8 +187,14 @@ class ReleaseArtifactsTest(unittest.TestCase):
         os.environ.update(VERIFIED_CI_RUN_ID="456", VERIFIED_CI_ATTEMPT="1")
         directory = Path("verified-release-jar")
         make_jar(directory / "passbird.jar", version="unspecified")
-        data = dict(schema_version=1, repository=artifacts.REPOSITORY, source_sha=ENV["GITHUB_SHA"],
-                    run_id="456", run_attempt="1", jar_sha256=artifacts.digest(directory / "passbird.jar"))
+        data = dict(
+            schema_version=1,
+            repository=artifacts.REPOSITORY,
+            source_sha=ENV["GITHUB_SHA"],
+            run_id="456",
+            run_attempt="1",
+            jar_sha256=artifacts.digest(directory / "passbird.jar"),
+        )
         artifacts.write_json(directory / "ci.json", data)
         artifacts.verify_ci()
         data["run_attempt"] = "2"
@@ -184,7 +207,6 @@ class ReleaseArtifactsTest(unittest.TestCase):
         artifacts.write_json(directory / "ci.json", data)
         with self.assertRaisesRegex(ValueError, "payload differs"):
             artifacts.verify_ci()
-
 
 
 if __name__ == "__main__":

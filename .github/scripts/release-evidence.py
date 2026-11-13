@@ -1,4 +1,5 @@
 """Release candidate evidence used directly by GitHub Actions."""
+
 import hashlib
 import json
 import os
@@ -28,11 +29,12 @@ def read_json(path):
 
 
 def relative(value, *, root=False):
-    require(isinstance(value, str) and value and "\\" not in value
-            and not any(ord(char) < 32 for char in value), "Invalid relative path")
+    require(isinstance(value, str) and value and "\\" not in value and not any(ord(char) < 32 for char in value), "Invalid relative path")
     path = PurePosixPath(value)
-    require(not path.is_absolute() and ".." not in path.parts
-            and (value == "." and root or str(path) == value and value != "."), "Unsafe relative path")
+    require(
+        not path.is_absolute() and ".." not in path.parts and (value == "." and root or str(path) == value and value != "."),
+        "Unsafe relative path",
+    )
     return Path(value)
 
 
@@ -49,12 +51,23 @@ def digest(path):
 
 def policy_from(path):
     data = read_json(Path(path))
-    require(isinstance(data, dict) and set(data) == {
-        "schema_version", "repository", "workflow", "root", "targets",
-    }, "Invalid artifact policy fields")
+    require(
+        isinstance(data, dict)
+        and set(data)
+        == {
+            "schema_version",
+            "repository",
+            "workflow",
+            "root",
+            "targets",
+        },
+        "Invalid artifact policy fields",
+    )
     require(type(data["schema_version"]) is int and data["schema_version"] == 1, "Unsupported artifact policy")
-    require(isinstance(data["repository"], str) and re.fullmatch(
-        r"(?:please-behave|christianpflugradt)/[A-Za-z0-9_.-]+", data["repository"]), "Invalid repository")
+    require(
+        isinstance(data["repository"], str) and re.fullmatch(r"(?:please-behave|christianpflugradt)/[A-Za-z0-9_.-]+", data["repository"]),
+        "Invalid repository",
+    )
     require(data["workflow"] == ".github/workflows/release.yml", "Expected release.yml")
     relative(data["root"], root=True)
     targets = data["targets"]
@@ -65,24 +78,37 @@ def policy_from(path):
         require(len(files) == len(set(files)), "Duplicate artifact paths")
         for file in files:
             relative(file.replace("{version}", "1.2.3"))
-            require("{" not in file.replace("{version}", "") and "}" not in file.replace("{version}", ""),
-                    "Unsupported artifact path substitution")
+            require(
+                "{" not in file.replace("{version}", "") and "}" not in file.replace("{version}", ""),
+                "Unsupported artifact path substitution",
+            )
     return data
 
 
 def identity(policy, env, head):
     version = env.get("EXPECTED_RELEASE_VERSION", "")
-    require(re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?", version),
-            "Invalid planned release version")
+    require(
+        re.fullmatch(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?", version),
+        "Invalid planned release version",
+    )
     require(re.fullmatch(r"[0-9a-f]{40}", head) and head == env.get("GITHUB_SHA"), "Checkout differs from planned source")
     require(env.get("GITHUB_REF") == "refs/heads/main", "Release requires main")
     require(env.get("GITHUB_REPOSITORY") == policy["repository"], "Unexpected repository")
-    require(env.get("GITHUB_WORKFLOW_REF") == policy["repository"] + "/" + policy["workflow"] + "@refs/heads/main",
-            "Unexpected release workflow")
+    require(
+        env.get("GITHUB_WORKFLOW_REF") == policy["repository"] + "/" + policy["workflow"] + "@refs/heads/main",
+        "Unexpected release workflow",
+    )
     run, attempt = env.get("GITHUB_RUN_ID", ""), env.get("GITHUB_RUN_ATTEMPT", "")
     require(re.fullmatch(r"[1-9][0-9]*", run) and re.fullmatch(r"[1-9][0-9]*", attempt), "Invalid run or attempt")
-    return dict(schema_version=1, repository=policy["repository"], workflow=policy["workflow"],
-                source_sha=head, version=version, run_id=run, run_attempt=attempt)
+    return dict(
+        schema_version=1,
+        repository=policy["repository"],
+        workflow=policy["workflow"],
+        source_sha=head,
+        version=version,
+        run_id=run,
+        run_attempt=attempt,
+    )
 
 
 def artifact_hashes(policy, target, version):
@@ -112,8 +138,10 @@ def verify(policy, env, head):
     context = identity(policy, env, head)
     directory = Path("release-evidence")
     require(directory.is_dir() and not directory.is_symlink(), "Missing evidence directory")
-    require({path.name for path in directory.iterdir()} == {f"{target}.json" for target in policy["targets"]},
-            "Incomplete or unexpected candidate evidence set")
+    require(
+        {path.name for path in directory.iterdir()} == {f"{target}.json" for target in policy["targets"]},
+        "Incomplete or unexpected candidate evidence set",
+    )
     for target in policy["targets"]:
         data = read_json(directory / f"{target}.json")
         require(isinstance(data, dict) and type(data.get("schema_version")) is int, "Invalid evidence schema")

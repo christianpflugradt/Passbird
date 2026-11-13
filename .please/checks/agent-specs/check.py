@@ -7,12 +7,19 @@ from pathlib import Path
 root = Path.cwd()
 failures = []
 
+
 def read(path):
     return (root / path).read_text()
 
+
 public_scripts = [
-    "agent-context.sh", "agent-pick-issue.sh", "agent-validate.sh", "agent-ship.sh",
-    "agent-review-preflight.sh", "agent-review-finding.sh", "check-agent-specs.sh",
+    "agent-context.sh",
+    "agent-pick-issue.sh",
+    "agent-validate.sh",
+    "agent-ship.sh",
+    "agent-review-preflight.sh",
+    "agent-review-finding.sh",
+    "check-agent-specs.sh",
     "agent-release-artifact-check.sh",
 ]
 for name in public_scripts:

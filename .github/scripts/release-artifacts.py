@@ -1,4 +1,5 @@
 """Bind the tested Passbird JAR to its source, version and workflow attempt."""
+
 import argparse
 import hashlib
 import json
@@ -33,8 +34,7 @@ def context(env=os.environ):
     require(re.fullmatch(r"[0-9a-f]{40}", source), "Invalid source SHA")
     require(env.get("GITHUB_REPOSITORY") == REPOSITORY, "Unexpected repository")
     run, attempt = env.get("GITHUB_RUN_ID", ""), env.get("GITHUB_RUN_ATTEMPT", "")
-    require(re.fullmatch(r"[1-9][0-9]*", run) and re.fullmatch(r"[1-9][0-9]*", attempt),
-            "Missing workflow run or attempt")
+    require(re.fullmatch(r"[1-9][0-9]*", run) and re.fullmatch(r"[1-9][0-9]*", attempt), "Missing workflow run or attempt")
     return dict(repository=REPOSITORY, version=version, source_sha=source, run_id=run, run_attempt=attempt)
 
 
@@ -45,8 +45,7 @@ def jar_contents(path):
         require(len(names) == len(set(names)), "Duplicate JAR entries")
         for info in jar.infolist():
             name = info.filename
-            require(not name.startswith("/") and "\\" not in name and ".." not in PurePosixPath(name).parts,
-                    "Unsafe JAR path")
+            require(not name.startswith("/") and "\\" not in name and ".." not in PurePosixPath(name).parts, "Unsafe JAR path")
             require(not stat.S_ISLNK(info.external_attr >> 16), "JAR symlinks are forbidden")
         require("META-INF/MANIFEST.MF" in names, "JAR manifest is missing")
         text = jar.read("META-INF/MANIFEST.MF").decode("utf-8").replace("\r\n", "\n").replace("\n ", "")
@@ -56,8 +55,11 @@ def jar_contents(path):
             key, value = line.split(": ", 1)
             require(key not in manifest, "Duplicate manifest attribute")
             manifest[key] = value
-        payload = {name: hashlib.sha256(jar.read(name)).hexdigest() for name in sorted(names)
-                   if not name.endswith("/") and name != "META-INF/MANIFEST.MF"}
+        payload = {
+            name: hashlib.sha256(jar.read(name)).hexdigest()
+            for name in sorted(names)
+            if not name.endswith("/") and name != "META-INF/MANIFEST.MF"
+        }
         require("de/pflugradts/passbird/application/MainKt.class" in payload, "JAR entrypoint is missing")
         return manifest, payload
 
@@ -65,9 +67,11 @@ def jar_contents(path):
 def verify_jar(path, version):
     manifest, payload = jar_contents(path)
     expected = {
-        "Manifest-Version": "1.0", "Created-By": "GitHub Actions",
+        "Manifest-Version": "1.0",
+        "Created-By": "GitHub Actions",
         "Main-Class": "de.pflugradts.passbird.application.MainKt",
-        "Implementation-Title": "Passbird", "Implementation-Version": version,
+        "Implementation-Title": "Passbird",
+        "Implementation-Version": version,
         "Implementation-Vendor": "Christian Pflugradt",
         "Specification-Title": "Secure Offline Password Management CLI",
         "Specification-Version": version.split(".", 1)[0],
@@ -86,7 +90,7 @@ def write_json(path, data):
 def receipt(jar, java, output):
     require(java in JAVA_VERSIONS, "Unsupported Java smoke runtime")
     result = subprocess.run(["java", "-version"], capture_output=True, text=True, check=True)
-    require(re.search(r'version "' + java + r'(?:\.|\")', result.stderr + result.stdout), "Wrong Java smoke runtime")
+    require(re.search(r'version "' + java + r"(?:\.|\")", result.stderr + result.stdout), "Wrong Java smoke runtime")
     data = context()
     verify_jar(jar, data["version"])
     write_json(output, dict(data, schema_version=1, java=java, jar_sha256=digest(jar)))
@@ -111,16 +115,19 @@ def package(directory=Path("dist")):
 def verify(directory=Path("dist"), without_smokes=False):
     expected = context()
     require(directory.is_dir() and not directory.is_symlink(), "Candidate directory is missing")
-    require({p.name for p in directory.iterdir()} == {"passbird.jar", "metadata.json", "SHA256SUMS", "smoke"},
-            "Unexpected or incomplete candidate file set")
+    require(
+        {p.name for p in directory.iterdir()} == {"passbird.jar", "metadata.json", "SHA256SUMS", "smoke"},
+        "Unexpected or incomplete candidate file set",
+    )
     data = json.loads((directory / "metadata.json").read_text())
     require(isinstance(data, dict) and type(data.get("schema_version")) is int, "Invalid candidate schema")
     payload = verify_jar(directory / "passbird.jar", expected["version"])
-    require(data == dict(expected, schema_version=1, jar_sha256=digest(directory / "passbird.jar"), payload_sha256=payload),
-            "Candidate metadata, source, version, run or attempt mismatch")
+    require(
+        data == dict(expected, schema_version=1, jar_sha256=digest(directory / "passbird.jar"), payload_sha256=payload),
+        "Candidate metadata, source, version, run or attempt mismatch",
+    )
     sums = "".join(f"{digest(directory / name)}  {name}\n" for name in ("passbird.jar", "metadata.json"))
-    require(not (directory / "SHA256SUMS").is_symlink() and (directory / "SHA256SUMS").read_text() == sums,
-            "Candidate checksums differ")
+    require(not (directory / "SHA256SUMS").is_symlink() and (directory / "SHA256SUMS").read_text() == sums, "Candidate checksums differ")
     smoke = directory / "smoke"
     require(smoke.is_dir() and not smoke.is_symlink(), "Smoke evidence is missing")
     names = {p.name for p in smoke.iterdir()}
@@ -130,10 +137,11 @@ def verify(directory=Path("dist"), without_smokes=False):
         path = smoke / name
         digest(path)
         evidence = json.loads(path.read_text())
-        require(isinstance(evidence, dict) and type(evidence.get("schema_version")) is int,
-                "Invalid smoke receipt schema")
-        require(evidence == dict(expected, schema_version=1, java=path.stem,
-                                 jar_sha256=data["jar_sha256"]), "Smoke evidence differs from candidate")
+        require(isinstance(evidence, dict) and type(evidence.get("schema_version")) is int, "Invalid smoke receipt schema")
+        require(
+            evidence == dict(expected, schema_version=1, java=path.stem, jar_sha256=data["jar_sha256"]),
+            "Smoke evidence differs from candidate",
+        )
     return data
 
 
@@ -141,21 +149,36 @@ def ci_receipt(directory=Path("build/ci-release-jar")):
     directory.mkdir(parents=True, exist_ok=True)
     jar = Path("build/libs/passbird.jar")
     shutil.copyfile(jar, directory / "passbird.jar")
-    write_json(directory / "ci.json", dict(schema_version=1, repository=REPOSITORY,
-               source_sha=os.environ["GITHUB_SHA"], run_id=os.environ["GITHUB_RUN_ID"],
-               run_attempt=os.environ["GITHUB_RUN_ATTEMPT"], jar_sha256=digest(jar)))
+    write_json(
+        directory / "ci.json",
+        dict(
+            schema_version=1,
+            repository=REPOSITORY,
+            source_sha=os.environ["GITHUB_SHA"],
+            run_id=os.environ["GITHUB_RUN_ID"],
+            run_attempt=os.environ["GITHUB_RUN_ATTEMPT"],
+            jar_sha256=digest(jar),
+        ),
+    )
 
 
 def verify_ci(directory=Path("verified-release-jar")):
     candidate = verify()
     require({p.name for p in directory.iterdir()} == {"passbird.jar", "ci.json"}, "Unexpected CI artifact file set")
     digest(directory / "ci.json")
-    expected = dict(schema_version=1, repository=REPOSITORY, source_sha=candidate["source_sha"],
-                    run_id=os.environ["VERIFIED_CI_RUN_ID"], run_attempt=os.environ["VERIFIED_CI_ATTEMPT"],
-                    jar_sha256=digest(directory / "passbird.jar"))
+    expected = dict(
+        schema_version=1,
+        repository=REPOSITORY,
+        source_sha=candidate["source_sha"],
+        run_id=os.environ["VERIFIED_CI_RUN_ID"],
+        run_attempt=os.environ["VERIFIED_CI_ATTEMPT"],
+        jar_sha256=digest(directory / "passbird.jar"),
+    )
     data = json.loads((directory / "ci.json").read_text())
-    require(isinstance(data, dict) and type(data.get("schema_version")) is int and data == expected,
-            "CI artifact identity differs from trusted evidence")
+    require(
+        isinstance(data, dict) and type(data.get("schema_version")) is int and data == expected,
+        "CI artifact identity differs from trusted evidence",
+    )
     _, baseline = jar_contents(directory / "passbird.jar")
     _, payload = jar_contents(Path("dist/passbird.jar"))
     require(payload == baseline, "Candidate payload differs from the trusted CI JAR")

@@ -21,65 +21,65 @@ PIN_PASSWORD=""
 CAPTURED_CLIPBOARD=""
 
 cleanup() {
-    local status=$?
-    trap - EXIT
-    if [[ $status -eq 0 && "${PASSBIRD_SMOKE_KEEP_TMP:-0}" != "1" ]]; then
-        rm -rf "$TMP_ROOT"
-    else
-        printf '[INFO] Smoke artifacts kept at %s\n' "$TMP_ROOT"
-    fi
-    exit "$status"
+  local status=$?
+  trap - EXIT
+  if [[ $status -eq 0 && "${PASSBIRD_SMOKE_KEEP_TMP:-0}" != "1" ]]; then
+    rm -rf "$TMP_ROOT"
+  else
+    printf '[INFO] Smoke artifacts kept at %s\n' "$TMP_ROOT"
+  fi
+  exit "$status"
 }
 
 trap cleanup EXIT
 
 pass() {
-    printf '[PASS] %s\n' "$1"
+  printf '[PASS] %s\n' "$1"
 }
 
 fail() {
-    printf '[FAIL] %s\n' "$1" >&2
-    if [[ -n "$LAST_OUTPUT" && -f "$LAST_OUTPUT" ]]; then
-        printf '[FAIL] Last session log: %s\n' "$LAST_OUTPUT" >&2
-        sed -n '1,220p' "$LAST_OUTPUT" >&2
-    fi
-    exit 1
+  printf '[FAIL] %s\n' "$1" >&2
+  if [[ -n "$LAST_OUTPUT" && -f "$LAST_OUTPUT" ]]; then
+    printf '[FAIL] Last session log: %s\n' "$LAST_OUTPUT" >&2
+    sed -n '1,220p' "$LAST_OUTPUT" >&2
+  fi
+  exit 1
 }
 
 require_tool() {
-    command -v "$1" >/dev/null 2>&1 || fail "Missing required tool '$1'."
+  command -v "$1" >/dev/null 2>&1 || fail "Missing required tool '$1'."
 }
 
 slugify() {
-    printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-'
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-'
 }
 
 reject_unexpected_errors() {
-    local step_name="$1"
-    local file="$2"
-    local markers=(
-        "SEVERE:"
-        "AEADBadTagException"
-        "Exception thrown by subscriber method"
-        "Command execution failed:"
-        "Operation aborted."
-        "could not be decrypted"
-    )
+  local step_name="$1"
+  local file="$2"
+  local markers=(
+    "SEVERE:"
+    "AEADBadTagException"
+    "Exception thrown by subscriber method"
+    "Command execution failed:"
+    "Operation aborted."
+    "could not be decrypted"
+  )
 
-    for marker in "${markers[@]}"; do
-        if grep -Fq "$marker" "$file"; then
-            fail "$step_name: unexpected output marker '$marker' found."
-        fi
-    done
+  for marker in "${markers[@]}"; do
+    if grep -Fq "$marker" "$file"; then
+      fail "$step_name: unexpected output marker '$marker' found."
+    fi
+  done
 }
 
 run_session() {
-    local step_name="$1"
-    local home="$2"
-    shift 2
-    SESSION_INDEX=$((SESSION_INDEX + 1))
-    LAST_OUTPUT="$ARTIFACT_DIR/$(printf '%02d' "$SESSION_INDEX")-$(slugify "$step_name").log"
-    if ! python3 - "$JAR_PATH" "$home" "$LAST_OUTPUT" "$@" <<'PY'
+  local step_name="$1"
+  local home="$2"
+  shift 2
+  SESSION_INDEX=$((SESSION_INDEX + 1))
+  LAST_OUTPUT="$ARTIFACT_DIR/$(printf '%02d' "$SESSION_INDEX")-$(slugify "$step_name").log"
+  if ! python3 - "$JAR_PATH" "$home" "$LAST_OUTPUT" "$@" <<'PY'
 import errno
 import os
 import pty
@@ -178,16 +178,16 @@ with open(output_path, "wb") as output:
 os.close(master_fd)
 raise SystemExit(process.returncode)
 PY
-    then
-        fail "$step_name: Passbird exited with a non-zero status."
-    fi
-    reject_unexpected_errors "$step_name" "$LAST_OUTPUT"
+  then
+    fail "$step_name: Passbird exited with a non-zero status."
+  fi
+  reject_unexpected_errors "$step_name" "$LAST_OUTPUT"
 }
 
 ensure_java_clipboard_reader() {
-    local reader="$TMP_ROOT/ReadClipboard.java"
-    if [[ ! -f "$reader" ]]; then
-        cat > "$reader" <<'EOF'
+  local reader="$TMP_ROOT/ReadClipboard.java"
+  if [[ ! -f "$reader" ]]; then
+    cat >"$reader" <<'EOF'
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 
@@ -198,22 +198,22 @@ class ReadClipboard {
     }
 }
 EOF
-    fi
-    printf '%s' "$reader"
+  fi
+  printf '%s' "$reader"
 }
 
 run_clipboard_session() {
-    local step_name="$1"
-    local home="$2"
-    local clipboard_output=""
-    local clipboard_reader=""
-    shift 2
-    CAPTURED_CLIPBOARD=""
-    SESSION_INDEX=$((SESSION_INDEX + 1))
-    LAST_OUTPUT="$ARTIFACT_DIR/$(printf '%02d' "$SESSION_INDEX")-$(slugify "$step_name").log"
-    clipboard_output="$ARTIFACT_DIR/$(printf '%02d' "$SESSION_INDEX")-$(slugify "$step_name").clipboard"
-    clipboard_reader="$(ensure_java_clipboard_reader)"
-    if ! python3 - "$JAR_PATH" "$home" "$LAST_OUTPUT" "$clipboard_output" "$clipboard_reader" "$@" <<'PY'
+  local step_name="$1"
+  local home="$2"
+  local clipboard_output=""
+  local clipboard_reader=""
+  shift 2
+  CAPTURED_CLIPBOARD=""
+  SESSION_INDEX=$((SESSION_INDEX + 1))
+  LAST_OUTPUT="$ARTIFACT_DIR/$(printf '%02d' "$SESSION_INDEX")-$(slugify "$step_name").log"
+  clipboard_output="$ARTIFACT_DIR/$(printf '%02d' "$SESSION_INDEX")-$(slugify "$step_name").clipboard"
+  clipboard_reader="$(ensure_java_clipboard_reader)"
+  if ! python3 - "$JAR_PATH" "$home" "$LAST_OUTPUT" "$clipboard_output" "$clipboard_reader" "$@" <<'PY'
 import errno
 import os
 import pty
@@ -326,62 +326,62 @@ if not clipboard_captured:
     raise SystemExit(1)
 raise SystemExit(process.returncode)
 PY
-    then
-        fail "$step_name: Passbird exited with a non-zero status."
-    fi
-    [[ -f "$clipboard_output" ]] || fail "$step_name: expected clipboard capture at '$clipboard_output'."
-    CAPTURED_CLIPBOARD="$(<"$clipboard_output")"
-    reject_unexpected_errors "$step_name" "$LAST_OUTPUT"
+  then
+    fail "$step_name: Passbird exited with a non-zero status."
+  fi
+  [[ -f "$clipboard_output" ]] || fail "$step_name: expected clipboard capture at '$clipboard_output'."
+  CAPTURED_CLIPBOARD="$(<"$clipboard_output")"
+  reject_unexpected_errors "$step_name" "$LAST_OUTPUT"
 }
 
 assert_file_exists() {
-    local path="$1"
-    [[ -f "$path" ]] || fail "$CURRENT_STEP: expected file '$path' to exist."
+  local path="$1"
+  [[ -f "$path" ]] || fail "$CURRENT_STEP: expected file '$path' to exist."
 }
 
 assert_contains() {
-    local file="$1"
-    local needle="$2"
-    grep -Fq "$needle" "$file" || fail "$CURRENT_STEP: expected to find '$needle' in '$file'."
+  local file="$1"
+  local needle="$2"
+  grep -Fq "$needle" "$file" || fail "$CURRENT_STEP: expected to find '$needle' in '$file'."
 }
 
 assert_not_contains() {
-    local file="$1"
-    local needle="$2"
-    if grep -Fq "$needle" "$file"; then
-        fail "$CURRENT_STEP: did not expect to find '$needle' in '$file'."
-    fi
+  local file="$1"
+  local needle="$2"
+  if grep -Fq "$needle" "$file"; then
+    fail "$CURRENT_STEP: did not expect to find '$needle' in '$file'."
+  fi
 }
 
 assert_nonempty() {
-    local value="$1"
-    local label="$2"
-    [[ -n "$value" ]] || fail "$CURRENT_STEP: expected non-empty $label."
+  local value="$1"
+  local label="$2"
+  [[ -n "$value" ]] || fail "$CURRENT_STEP: expected non-empty $label."
 }
 
 assert_equals() {
-    local actual="$1"
-    local expected="$2"
-    local label="$3"
-    [[ "$actual" == "$expected" ]] || fail "$CURRENT_STEP: $label mismatch. Expected '$expected' but got '$actual'."
+  local actual="$1"
+  local expected="$2"
+  local label="$3"
+  [[ "$actual" == "$expected" ]] || fail "$CURRENT_STEP: $label mismatch. Expected '$expected' but got '$actual'."
 }
 
 assert_matches() {
-    local value="$1"
-    local regex="$2"
-    local label="$3"
-    if [[ ! "$value" =~ $regex ]]; then
-        fail "$CURRENT_STEP: $label mismatch. Value '$value' does not match '$regex'."
-    fi
+  local value="$1"
+  local regex="$2"
+  local label="$3"
+  if [[ ! "$value" =~ $regex ]]; then
+    fail "$CURRENT_STEP: $label mismatch. Value '$value' does not match '$regex'."
+  fi
 }
 
 assert_occurrence_at_least() {
-    local file="$1"
-    local literal="$2"
-    local minimum="$3"
-    local count
-    count="$(
-        python3 - "$file" "$literal" "$minimum" <<'PY'
+  local file="$1"
+  local literal="$2"
+  local minimum="$3"
+  local count
+  count="$(
+    python3 - "$file" "$literal" "$minimum" <<'PY'
 from pathlib import Path
 import sys
 
@@ -393,14 +393,14 @@ if count < minimum:
     raise SystemExit(1)
 print(count)
 PY
-    )" || fail "$CURRENT_STEP: expected '$literal' to appear at least $minimum times in '$file'."
-    [[ -n "$count" ]] || fail "$CURRENT_STEP: could not count occurrences in '$file'."
+  )" || fail "$CURRENT_STEP: expected '$literal' to appear at least $minimum times in '$file'."
+  [[ -n "$count" ]] || fail "$CURRENT_STEP: could not count occurrences in '$file'."
 }
 
 extract_inline_result() {
-    local file="$1"
-    local index="${2:-1}"
-    python3 - "$file" "$index" <<'PY'
+  local file="$1"
+  local index="${2:-1}"
+  python3 - "$file" "$index" <<'PY'
 from pathlib import Path
 import sys
 
@@ -421,8 +421,8 @@ PY
 }
 
 patch_config() {
-    local config_path="$1/passbird.yml"
-    python3 - "$config_path" <<'PY'
+  local config_path="$1/passbird.yml"
+  python3 - "$config_path" <<'PY'
 from pathlib import Path
 import sys
 
@@ -460,16 +460,16 @@ PY
 }
 
 assert_smoke_config() {
-    local config_path="$1/passbird.yml"
-    assert_contains "$config_path" "promptOnExportFile: false"
-    assert_contains "$config_path" "enabled: false"
-    assert_contains "$config_path" "name: pin4"
-    assert_contains "$config_path" "length: 4"
+  local config_path="$1/passbird.yml"
+  assert_contains "$config_path" "promptOnExportFile: false"
+  assert_contains "$config_path" "enabled: false"
+  assert_contains "$config_path" "name: pin4"
+  assert_contains "$config_path" "length: 4"
 }
 
 prepare_home() {
-    local home="$1"
-    mkdir -p "$home"
+  local home="$1"
+  mkdir -p "$home"
 }
 
 CURRENT_STEP="preflight"

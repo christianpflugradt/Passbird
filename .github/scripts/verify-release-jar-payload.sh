@@ -27,8 +27,8 @@ payload_manifest() {
   )
 }
 
-payload_manifest "$tmp_dir/verified" > "$tmp_dir/verified.sha256"
-payload_manifest "$tmp_dir/candidate" > "$tmp_dir/candidate.sha256"
+payload_manifest "$tmp_dir/verified" >"$tmp_dir/verified.sha256"
+payload_manifest "$tmp_dir/candidate" >"$tmp_dir/candidate.sha256"
 
 if ! cmp -s "$tmp_dir/verified.sha256" "$tmp_dir/candidate.sha256"; then
   echo "Release jar payload differs from the verified release-jar artifact." >&2
