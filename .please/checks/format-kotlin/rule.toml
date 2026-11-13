@@ -1,6 +1,6 @@
 id = "format-kotlin"
 description = "Check Kotlin formatting"
-run_at = ["pre-commit", "pre-push", "check"]
+run_at = ["pre-push", "check"]
 
 [check]
 command = "bash tools/gradle-check.sh ktlintCheck"

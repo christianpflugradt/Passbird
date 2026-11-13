@@ -20,7 +20,7 @@ Repository entrypoint for Passbird, an offline terminal password manager. Agent-
 - Prefer the deterministic helpers in `.agent/scripts` (see `.agent/README.md`) over composing multi-step operations by hand.
 - Use GitHub CLI for GitHub-hosted work: issues, pull requests, workflow runs, releases and repository metadata. When creating an issue, apply the most specific existing type label, add `migration` for compatibility-preserving work and verify before retrying `gh issue create`.
 - Work directly on `main`. Create, switch to or push no other branch, and never use `git stash`. If unrelated workspace state blocks this, stop and explain.
-- Run `mise run format` before staging, committing or pushing.
+- Hooks only check formatting. When a formatting check fails, run `mise run format` and retry.
 - Tests assert the observable contract (returned data, persisted artifact, emitted event, state change, approved output). They cover the happy path, each decision outcome and credible failures such as invalid or malformed input, I/O, authentication and conflicts, plus sensitive-data and cleanup guarantees where relevant. Never add tests only to raise coverage.
 - When a task is complete and suitable for release, commit, run `git pull -r` and push at once. Leave work uncommitted only when maintainer input is needed, the task is incomplete or it should not be released yet.
 - Never run `./gradlew dependencyCheckAnalyze` locally; OWASP runs in CI unless the maintainer asks.

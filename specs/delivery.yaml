@@ -30,10 +30,10 @@ quality_gates:
     - use mise exec for manual Please Behave and Git commands without shell activation so hooks inherit the configured tool PATH
     - Git, Bash, desktop support, the published governor and credentials remain external prerequisites
   formatting_and_style:
-    - run mise run format before staging, committing, or pushing; it rewrites Kotlin, Python and shell sources and is not part of the governor
-    - pre-commit hook enforces formatting through the separate format-kotlin (./gradlew ktlintCheck), format-python (ruff format --check) and format-shell (shfmt -d) rules
+    - Please Behave only checks formatting and never rewrites files; after a failed formatting check run mise run format, which rewrites Kotlin, Python and shell sources
+    - pre-commit hook checks Python and shell formatting through the separate format-python (ruff format --check) and format-shell (shfmt -d) rules; pre-push and check also run format-kotlin (./gradlew ktlintCheck)
     - pre-commit hook verifies .agent/scripts and specification wiring
-    - pre-commit rules stay fast (about two seconds in total); slower gradle rules run at pre-push and check
+    - pre-commit rules stay fast (about two seconds in total); slower gradle rules, including format-kotlin, run at pre-push and check
     - pre-push hook runs ./gradlew detekt, compileKotlin and compileTestKotlin
   warning_enforcement:
     - Kotlin compilation treats warnings as errors across main and test sources

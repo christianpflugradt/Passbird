@@ -53,8 +53,8 @@ workflow monitoring belongs to the maintainer.
 
 | Rule | Execution points |
 | --- | --- |
-| format-kotlin, format-python, format-shell, agent-specs | pre-commit, pre-push, check |
-| static-analysis, compile, tests, coverage, dependency-license, native-smoke | pre-push, check |
+| format-python, format-shell, agent-specs | pre-commit, pre-push, check |
+| format-kotlin, static-analysis, compile, tests, coverage, dependency-license, native-smoke | pre-push, check |
 | native-build | pre-push, check, release |
 | release-rules | pre-push, check |
 | mutation, owasp | check |
