@@ -607,7 +607,7 @@ While working locally, prefer focused manual checks for the behavior you changed
 
 The published Please Behave governor pinned in `mise.toml` manages local Git hooks:
 
-- pre-commit runs formatting, Detekt, production/test compilation and agent-spec consistency checks
+- pre-commit runs Kotlin, Python and shell formatting checks, Detekt, production/test compilation and agent-spec consistency checks
 - pre-push runs the complete `allTests` suite, dependency-license and coverage checks, JAR build and interactive smoke flow, workflow/release-helper tests and shared security/license checks
 
 Run `mise trust`, `mise install`, `mise run prepare` and `mise exec -- please sync --yes` to prepare the pinned validation tools, locked dependencies and managed hooks. Git and Bash remain host prerequisites. A desktop session is required locally; Linux CI prepares Xvfb, xauth and xclip.

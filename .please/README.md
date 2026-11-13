@@ -41,10 +41,10 @@ OWASP database under `.dependency-check/` is also ignored, so restoring it befor
 CI checks does not add a large database to the source snapshot. Tracked and
 nonignored source files remain covered.
 
-Git hooks are the final local gates. Pre-commit checks formatting, Detekt,
+Git hooks are the final local gates. Pre-commit checks formatting (separate Kotlin, Python and shell rules), Detekt,
 compilation and agent-spec wiring (implemented in portable Python); pre-push runs the complete local gate.
 Do not manually repeat those gates before Git operations. Targeted diagnosis and
-`./gradlew ktlintFormat` remain available. Fix failures and retry Git; inspect
+`mise run format` (the rewriting counterpart of the formatting rules) remain available. Fix failures and retry Git; inspect
 saved results with `please status --details`. Normal checks collect complete
 results without cancelling running work. Stop after successful push; remote
 workflow monitoring belongs to the maintainer.
@@ -53,7 +53,7 @@ workflow monitoring belongs to the maintainer.
 
 | Rule | Execution points |
 | --- | --- |
-| format, static-analysis, compile, agent-specs | pre-commit, pre-push, check |
+| format-kotlin, format-python, format-shell, static-analysis, compile, agent-specs | pre-commit, pre-push, check |
 | tests, coverage, dependency-license, native-smoke | pre-push, check |
 | native-build | pre-push, check, release |
 | release-rules | pre-push, check |

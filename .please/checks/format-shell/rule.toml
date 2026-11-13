@@ -1,0 +1,7 @@
+id = "format-shell"
+description = "Check shell script formatting with shfmt, skipping zsh scripts"
+run_at = ["pre-commit", "pre-push", "check"]
+
+[check]
+command = "bash @rule/check.sh"
+timeout_seconds = 120

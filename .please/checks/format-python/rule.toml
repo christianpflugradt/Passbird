@@ -1,0 +1,7 @@
+id = "format-python"
+description = "Check Python formatting with Ruff"
+run_at = ["pre-commit", "pre-push", "check"]
+
+[check]
+command = "ruff format --check"
+timeout_seconds = 120

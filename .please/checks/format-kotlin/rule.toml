@@ -1,4 +1,4 @@
-id = "format"
+id = "format-kotlin"
 description = "Check Kotlin formatting"
 run_at = ["pre-commit", "pre-push", "check"]
 

@@ -68,6 +68,27 @@ class GovernanceTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("governor wiring checks passed", result.stdout)
 
+    @unittest.skipUnless(shutil.which("shfmt") and shutil.which("git"), "shfmt and git required")
+    def test_shell_format_check_skips_zsh_and_reports_unformatted_scripts(self):
+        script = ROOT / ".please/checks/format-shell/check.sh"
+
+        def run(files):
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                subprocess.run(["git", "init", "--quiet"], cwd=root, check=True)
+                (root / ".editorconfig").write_text("root = true\n[*]\nindent_style = space\nindent_size = 2\n")
+                for name, content in files.items():
+                    (root / name).write_text(content)
+                subprocess.run(["git", "add", "."], cwd=root, check=True)
+                return subprocess.run(["bash", str(script)], cwd=root, capture_output=True, text=True).returncode
+
+        formatted = "#!/usr/bin/env bash\nif true; then\n  echo ok\nfi\n"
+        unformatted = "#!/usr/bin/env bash\nif true; then\necho ok\nfi\n"
+        self.assertEqual(run({}), 0)
+        self.assertEqual(run({"a.sh": formatted}), 0)
+        self.assertEqual(run({"a.sh": unformatted}), 1)
+        self.assertEqual(run({"a.sh": formatted, "z.sh": unformatted.replace("bash", "zsh")}), 0)
+
     def test_rules_retain_full_native_checks_and_real_prerequisites_without_installations(self):
         rules = {}
         for path in (ROOT / ".please/checks").glob("*/rule.toml"):
@@ -85,7 +106,16 @@ class GovernanceTest(unittest.TestCase):
         self.assertEqual(rules["mutation"]["check"]["resource"], "gradle")
         self.assertNotIn("npm-audit", rules)
         self.assertNotIn("release-package-verify", rules)
-        for name in ["format", "static-analysis", "compile", "tests", "coverage", "dependency-license", "native-build", "native-smoke"]:
+        for name in [
+            "format-kotlin",
+            "static-analysis",
+            "compile",
+            "tests",
+            "coverage",
+            "dependency-license",
+            "native-build",
+            "native-smoke",
+        ]:
             self.assertEqual(rules[name]["check"]["resource"], "gradle")
         self.assertIn("build/jacoco/allTests.exec", (ROOT / ".please/checks/coverage/check.sh").read_text())
         self.assertIn("minimum = 0.9.toBigDecimal()", (ROOT / "build.gradle.kts").read_text())
