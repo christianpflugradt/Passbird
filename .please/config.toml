@@ -37,8 +37,8 @@ path = "rulesets/releasable-open-source-software"
 ref = "382e2128bfd8df998079fa34a71fcb0d72063106"
 
 [imports.rule_parameters.release-contract]
-ci_policy = ".please/release-ci.json"
-artifacts_policy = ".please/release-artifacts.json"
+ci_policy = ".github/release-ci.json"
+artifacts_policy = ".github/release-artifacts.json"
 
 [imports.rule_parameters.semantic-release]
 tag_format = "${version}"
