@@ -17,6 +17,7 @@ jobs:
     name: Plan
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
       contents: write
     outputs:
@@ -188,6 +189,7 @@ jobs:
       needs.release-candidate.result == 'success' &&
       needs.release-smoke.result == 'success'
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     permissions:
       contents: write
       actions: read
