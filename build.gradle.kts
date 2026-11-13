@@ -319,7 +319,7 @@ val prePushSmokeTest = tasks.register<Exec>("prePushSmokeTest") {
 
 tasks.register("preCommitCheck") {
     group = VERIFICATION_GROUP
-    description = "Runs the fast local verification tasks used in the pre-commit hook."
+    description = "Runs the fast local verification tasks: formatting, static analysis and compilation."
 
     dependsOn(
         "ktlintCheck",
