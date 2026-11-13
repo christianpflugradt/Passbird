@@ -88,6 +88,8 @@ class GovernanceTest(unittest.TestCase):
         self.assertEqual(run({"a.sh": formatted}), 0)
         self.assertEqual(run({"a.sh": unformatted}), 1)
         self.assertEqual(run({"a.sh": formatted, "z.sh": unformatted.replace("bash", "zsh")}), 0)
+        self.assertEqual(run({"a.sh": "#!/usr/bin/env bash\nif true; then\n"}), 2)
+        self.assertEqual(run({"a.sh": unformatted, "b.sh": "#!/usr/bin/env bash\nif true; then\n"}), 1)
 
     def test_rules_retain_full_native_checks_and_real_prerequisites_without_installations(self):
         rules = {}
