@@ -1,7 +1,7 @@
-id = "native-smoke"
+id = "jar-smoke"
 description = "Verify the interactive JAR workflow"
 run_at = ["pre-push", "check"]
-depends_on = ["native-build"]
+depends_on = ["jar-build"]
 
 [check]
 command = "bash @rule/smoke.sh"

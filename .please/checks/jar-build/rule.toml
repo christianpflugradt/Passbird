@@ -1,4 +1,4 @@
-id = "native-build"
+id = "jar-build"
 description = "Build the executable platform-independent JAR"
 run_at = ["pre-push", "check", "release"]
 
