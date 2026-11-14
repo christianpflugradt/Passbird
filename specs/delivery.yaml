@@ -26,7 +26,7 @@ quality_gates:
   tool_preparation:
     - shared conventions, security, open-source license and release policies use full-commit pins from please-behave-governance in .please/config.toml
     - mise.toml pins Java, Node, Python, actionlint, Gitleaks, ShellCheck, GitHub CLI, Ruff and shfmt for local validation
-    - run mise install and mise run prepare explicitly before offline Git hooks; preparation does not run validation
+    - run mise install and mise run setup explicitly before offline Git hooks; preparation does not run validation
     - use mise exec for manual Please Behave and Git commands without shell activation so hooks inherit the configured tool PATH
     - Git, Bash, desktop support, the published governor and credentials remain external prerequisites
   formatting_and_style:

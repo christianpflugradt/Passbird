@@ -13,7 +13,7 @@ actionlint, Gitleaks and ShellCheck versions in `mise.toml`. Git and Bash remain
 host prerequisites. Linux desktop tests and smoke tests also need Xvfb, xauth
 and xclip. Local macOS checks require a desktop session.
 
-Run `mise run prepare` explicitly before validation. It installs the locked
+Run `mise run setup` explicitly before validation. It installs the locked
 release-tool dependencies and resolves Gradle verification dependencies. It then
 resolves the native task graph online with `--dry-run` to cache signature metadata
 before offline checks; this executes no build or test tasks. The `gradle` mode

@@ -39,7 +39,7 @@ The imported Conventional Commits Check enforces types and `.please/commit-scope
 ## Governance
 
 - The independently published governor pinned in `mise.toml` governs; never use a candidate. Shared rules and provider adapters are immutable external packages. Local rules hold Passbird-specific requirements only.
-- Prepare tools with `mise install` and `mise run prepare` before checks; checks never install tools. Install hooks with `please sync --yes`.
+- Prepare tools with `mise install` and `mise run setup` before checks; checks never install tools. Install hooks with `please sync --yes`.
 - Git hooks are the final validation gates (see `specs/delivery.yaml` and `.please/README.md`). Inspect failures with `please status --details`, fix and retry without bypassing. Tests never call real models or paid services.
 - Rule scripts live in `.please/checks/<rule>/`, workflow and release scripts in `.github/scripts/`, developer tools in `tools/`, each with its tests.
 - Stop after a successful push. Do not monitor or repair remote workflows, trigger a release or publish one without explicit authorization.

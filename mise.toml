@@ -27,11 +27,11 @@ run = "please run --at pre-push --checks-only --fail-fast"
 description = "Publish a preview build"
 run = "./gradlew publishPreview"
 
-[tasks.prepare]
+[tasks.setup]
 description = "Fetch locked dependencies and warm the Gradle task graph for offline Git hooks and CI"
 run = "bash tools/prepare.sh"
 
-[tasks."prepare:candidate"]
+[tasks."setup:candidate"]
 description = "Fetch locked dependencies for the release candidate build"
 run = "bash tools/prepare.sh candidate"
 
