@@ -16,7 +16,7 @@ jobs:
   plan:
     name: Plan
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       contents: write
@@ -47,7 +47,7 @@ jobs:
     name: Release Readiness
     needs: plan
     if: needs.plan.outputs.release == 'true'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     permissions:
       contents: read
@@ -75,7 +75,7 @@ jobs:
     name: Release Candidate
     needs: plan
     if: needs.plan.outputs.release == 'true'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
       EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
@@ -125,7 +125,7 @@ jobs:
     name: Release Candidate (Java ${{ matrix.java }})
     needs: [plan, release-candidate]
     if: needs.plan.outputs.release == 'true'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -188,7 +188,7 @@ jobs:
       needs.release-readiness.result == 'success' &&
       needs.release-candidate.result == 'success' &&
       needs.release-smoke.result == 'success'
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
       contents: write

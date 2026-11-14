@@ -15,7 +15,7 @@ jobs:
   purge-development-releases:
     permissions:
       contents: write
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     steps:
       - name: delete prereleases older than 30 days
         env:
