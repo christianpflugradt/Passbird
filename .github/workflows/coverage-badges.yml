@@ -11,7 +11,7 @@ env:
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
 jobs:
   coverage:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -46,7 +46,7 @@ jobs:
           if-no-files-found: ignore
 
   pages-site:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs:
       - coverage
     if: github.ref == 'refs/heads/main'
@@ -161,7 +161,7 @@ jobs:
           path: ./site
 
   deploy-pages:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     concurrency:
       group: coverage-pages
       cancel-in-progress: false
