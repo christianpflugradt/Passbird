@@ -1,6 +1,6 @@
 # Passbird
 
-[![release](https://img.shields.io/github/v/release/christianpflugradt/Passbird?display_name=tag&sort=semver)](https://github.com/christianpflugradt/Passbird/releases) [![build](https://github.com/christianpflugradt/Passbird/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/christianpflugradt/Passbird/actions/workflows/ci.yml) [![branch coverage](https://img.shields.io/endpoint?url=https://christianpflugradt.github.io/Passbird/coverage/branch-coverage.json)](https://christianpflugradt.github.io/Passbird/coverage/report/) [![instruction coverage](https://img.shields.io/endpoint?url=https://christianpflugradt.github.io/Passbird/coverage/instruction-coverage.json)](https://christianpflugradt.github.io/Passbird/coverage/report/) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![release](https://img.shields.io/github/v/release/christianpflugradt/Passbird?display_name=tag&sort=semver)](https://github.com/christianpflugradt/Passbird/releases) [![build](https://github.com/christianpflugradt/Passbird/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/christianpflugradt/Passbird/actions/workflows/ci.yml) [![branch coverage](https://christianpflugradt.github.io/badges-and-stuff/passbird/branch-coverage.svg)](https://christianpflugradt.github.io/badges-and-stuff/) [![instruction coverage](https://christianpflugradt.github.io/badges-and-stuff/passbird/instruction-coverage.svg)](https://christianpflugradt.github.io/badges-and-stuff/) [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 * [Agentic AI Disclaimer](#agentic-ai-disclaimer)
 * [Getting started](#getting-started)
@@ -618,7 +618,7 @@ Hooks are the final local gates. Do not repeat the complete gate manually before
 
 CI retains Renovate PRs, main pushes and manual dispatch. Java 17/21/25 compatibility smoke tests run only in Release Candidate. Its single Check invocation runs the normal rules together with PIT and OWASP. Local hooks exclude PIT and OWASP; an explicit `please run --at check` also runs them. OWASP requires network access, with daily cache refresh and weekly purge/rebuild workflows. CodeQL retains its nightly Kotlin toolchain. Tests run offline with synthetic data; advisory/audit services are separate.
 
-The independent Coverage Badges workflow recalculates coverage, creates both SVG and Shields JSON badges and deploys the complete documentation/coverage Pages site. Normal checks retain the 90% instruction and 85% branch coverage gates without creating badge files. See [repository governance](.please/README.md) for execution points, report artifacts and release contracts.
+The independent Statistics workflow recalculates coverage and sends the metrics to [badges-and-stuff](https://github.com/christianpflugradt/badges-and-stuff), which renders the badges; it needs the repository secret `STATISTICS_TOKEN`. Normal checks retain the 90% instruction and 85% branch coverage gates without publishing anything. See [repository governance](.please/README.md) for execution points, report artifacts and release contracts.
 
 ### Dependency Verification
 

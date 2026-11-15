@@ -4,7 +4,7 @@ cd "$(git rev-parse --show-toplevel)"
 mode="${1:-check}"
 case "$mode" in
 check | candidate) npm ci --ignore-scripts ;;
-badges | gradle) ;;
+statistics | gradle) ;;
 *) exit 2 ;;
 esac
 ./gradlew --no-configuration-cache prepareValidationDependencies

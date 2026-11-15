@@ -68,8 +68,6 @@ repository_layout:
     role: GitHub CI, security checks, and release automation
   - path: .agent/scripts
     role: deterministic internal helper workflows for agents, covering spec context loading, issue selection, validation, shipping, review preflight, review-finding issue creation, agent-spec consistency checks, and release artifact verification
-  - path: .github/pages
-    role: GitHub Pages configuration and layouts used when publishing the repository documentation and coverage site
 key_entrypoints:
   - file: src/main/kotlin/de/pflugradts/passbird/application/Main.kt
     purpose: CLI entrypoint, argument validation, boot selection
@@ -112,7 +110,7 @@ release_model:
     - ci.yml runs all deterministic Please Behave checks including PIT in one Check invocation, with compatibility smoke tests reserved for Release Candidate
     - CodeQL retains security-extended queries and the nightly Kotlin toolchain
     - PIT runs at check but not local hooks; owasp-audit.yml refreshes the OWASP database and audits main daily, and a weekly purge/rebuild maintains the database
-    - coverage-badges.yml independently calculates coverage, generates badges and publishes the complete Jekyll documentation and coverage site
+    - statistics.yml independently calculates coverage and sends the metrics to badges-and-stuff, which renders the badges
     - release.yml retains manual development prereleases and Monday 03:23 Europe/Berlin stable releases
     - Plan does not publish; Readiness and Candidate run in parallel; Publish requires both
     - Readiness checks committed source and trusted exact-source push CI including the complete Check job
