@@ -169,7 +169,7 @@ local_verification_policy:
       - OWASP is not a Rule; owasp-audit.yml refreshes the database and analyzes main daily, keeping the existing secret names and cache prefix
       - daily OWASP audit and weekly purge/rebuild retain manual dispatch and the shared maintenance lock; maintenance and analysis disable configuration caching
       - CodeQL keeps security-extended queries and the nightly Kotlin toolchain
-      - statistics.yml repeats coverage independently and sends the coverage metrics to badges-and-stuff with the STATISTICS_TOKEN secret; badges-and-stuff renders the badges and owns GitHub Pages
+      - statistics.yml repeats coverage independently, counts production Kotlin lines of code with scc and tests from the allTests results, and sends these metrics to badges-and-stuff with the STATISTICS_TOKEN secret; badges-and-stuff renders the badges and owns GitHub Pages
       - coverage thresholds remain unchanged; the JaCoCo HTML report stays available as the test-coverage-report workflow artifact
       - actionlint 1.7.12 supports timezone; a separately tested checker validates queue values before suppressing only its unknown-queue diagnostic
       - release.yml retains Monday 03:23 Europe/Berlin stable releases, manual development prereleases and the existing preview entrypoints

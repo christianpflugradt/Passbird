@@ -10,6 +10,7 @@ shellcheck = "0.11.0"
 gh = "2.103.3"
 ruff = "0.17.4"
 shfmt = "3.14.1"
+"aqua:boyter/scc" = "4.1.0"
 
 [tasks.format]
 description = "Format Kotlin, Python and shell sources"
