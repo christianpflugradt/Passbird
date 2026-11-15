@@ -100,7 +100,7 @@ commands:
   static_analysis: ./gradlew detekt
   coverage_gate: ./gradlew jacocoTestCoverageVerification
   license_gate: ./gradlew checkLicense
-  owasp: GitHub Actions OWASP dependency-check workflows
+  owasp: scheduled GitHub Actions OWASP audit workflow
   pre_commit: please run --at pre-commit --checks-only
   pre_push: please run --at pre-push --checks-only
 release_model:
@@ -109,13 +109,13 @@ release_model:
   governor: mise.toml
   governance_contract: .please/README.md
   automation:
-    - ci.yml runs all deterministic Please Behave checks including PIT and OWASP in one Check invocation, with compatibility smoke tests reserved for Release Candidate
+    - ci.yml runs all deterministic Please Behave checks including PIT in one Check invocation, with compatibility smoke tests reserved for Release Candidate
     - CodeQL retains security-extended queries and the nightly Kotlin toolchain
-    - OWASP and PIT run at check but not local hooks; an explicit manual check runs both; daily refresh and weekly purge/rebuild maintain the OWASP database
+    - PIT runs at check but not local hooks; owasp-audit.yml refreshes the OWASP database and audits main daily, and a weekly purge/rebuild maintains the database
     - coverage-badges.yml independently calculates coverage, generates badges and publishes the complete Jekyll documentation and coverage site
     - release.yml retains manual development prereleases and Monday 03:23 Europe/Berlin stable releases
     - Plan does not publish; Readiness and Candidate run in parallel; Publish requires both
-    - Readiness checks committed source and trusted exact-source push CI including OWASP and the complete Check job
+    - Readiness checks committed source and trusted exact-source push CI including the complete Check job
     - Candidate builds once with the planned version and checks the exact JAR on Java 17, 21 and 25
     - Publish verifies shared internal release evidence, source/version/checksums/run/attempt and CI payload equivalence without rebuilding
     - stable 7.x releases retain plain semantic tags and passbird.jar; development tags retain dev- and use the latest stable base plus Berlin date and sequence

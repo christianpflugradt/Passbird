@@ -180,14 +180,14 @@ validation_matrix:
       - run the focused tests that cover the changed persistence or secret-handling behavior
       - ./gradlew architecture
     recommended:
-      - review the latest CI OWASP dependency-check result if dependency risk is part of the change
+      - review the latest scheduled OWASP audit result if dependency risk is part of the change
   dependency_or_build_change:
     required:
       - run only the focused tests relevant to the dependency or build change
     recommended:
       - refresh and review dependency verification metadata when third-party dependencies or Gradle plugins change
       - rely on the pre-push hook for license, coverage, full-test, and jar smoke enforcement
-      - rely on GitHub Actions OWASP dependency-check workflows instead of local runs unless the maintainer explicitly asks otherwise
+      - rely on the scheduled GitHub Actions OWASP audit instead of local runs unless the maintainer explicitly asks otherwise
   ui_or_command_change_touching_secrets:
     required:
       - run the focused unit and integration tests that cover the changed command or secret-handling path

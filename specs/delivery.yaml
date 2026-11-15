@@ -124,7 +124,7 @@ local_verification_policy:
       - after the first status check on a long-running task, do not check again more than once every 5 minutes
   owasp_dependency_check:
     local_runs: discouraged
-    default: rely_on_ci
+    default: rely_on_scheduled_audit
     note: only run locally when the maintainer explicitly asks for it
     scan_scope:
       - Gradle runtimeClasspath and the existing src/main/resources and src/main/webapp resource roots
@@ -149,7 +149,7 @@ local_verification_policy:
         - .github/workflows/coverage-badges.yml
         - .github/workflows/ci.yml
         - .github/workflows/codeql.yml
-        - .github/workflows/owasp-update.yml
+        - .github/workflows/owasp-audit.yml
         - .github/workflows/owasp-purge.yml
         - .github/workflows/release.yml
     notes:
@@ -162,11 +162,12 @@ local_verification_policy:
       - agent-spec validation uses portable Python directly on both macOS and Linux; the zsh helper remains an optional local entrypoint
       - allTests covers unit, property, integration, architecture and desktop clipboard tests in one Rule; CI prepares Xvfb, xauth and xclip
       - coverage consumes nonempty allTests.exec only and retains 90 percent instruction and 85 percent branch thresholds plus HTML/XML diagnostics
-      - native test diagnostics are consolidated into test-reports; lint, Detekt, license, OWASP, mutation and smoke diagnostics remain available after failures
+      - native test diagnostics are consolidated into test-reports; lint, Detekt, license, mutation and smoke diagnostics remain available after failures
       - CI builds one source/run/attempt-bound release-jar for payload comparison; Release Candidate builds the versioned JAR once and tests it on a Java 17/21/25 matrix with fail-fast disabled
       - PIT is the mutation Rule in the same Check invocation with unchanged high-risk targets, target tests, timeouts and report/line-coverage outputs
-      - OWASP is a blocking Rule at check with the existing secret names and cache prefix; neither OWASP nor mutation runs in local hooks or again at release-readiness; explicit manual check runs both
-      - daily OWASP refresh and weekly purge/rebuild retain manual dispatch and the shared maintenance lock; maintenance and analysis disable configuration caching
+      - mutation runs at check but neither in local hooks nor again at release-readiness
+      - OWASP is not a Rule; owasp-audit.yml refreshes the database and analyzes main daily, keeping the existing secret names and cache prefix
+      - daily OWASP audit and weekly purge/rebuild retain manual dispatch and the shared maintenance lock; maintenance and analysis disable configuration caching
       - CodeQL keeps security-extended queries and the nightly Kotlin toolchain
       - coverage-badges.yml repeats coverage independently and owns all badge files, artifact transfer and complete Jekyll documentation/coverage Pages publication
       - badge endpoints, SVG and JSON formats, rounding, colors, HTML report and thresholds remain unchanged

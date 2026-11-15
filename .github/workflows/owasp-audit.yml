@@ -1,5 +1,5 @@
-name: Refresh OWASP Cache
-run-name: "Refresh OWASP cache (${{ github.event_name }})"
+name: OWASP Audit
+run-name: "OWASP audit (${{ github.event_name }})"
 
 on:
     # GitHub Actions cron uses UTC. 02:00 UTC is 04:00 in Europe/Berlin during DST.
@@ -15,7 +15,7 @@ env:
 
 jobs:
 
-  update-cache:
+  audit:
     concurrency:
       group: dependency-check-maintenance
       cancel-in-progress: false
@@ -46,3 +46,16 @@ jobs:
         with:
           path: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
           key: ${{ steps.dependency-check-cache.outputs.cache-primary-key }}
+      - name: audit runtime dependencies
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          DEPENDENCY_CHECK_DATA_LOCATION: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
+          OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
+          OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
+        run: ./gradlew --no-configuration-cache dependencyCheckAnalyze --stacktrace
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: dependency-check-report
+          path: build/reports/dependency-check-report.html
+          if-no-files-found: ignore

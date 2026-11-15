@@ -20,8 +20,7 @@ before offline checks; this executes no build or test tasks. The `gradle` mode
 prepares only Gradle inputs when npm release dependencies are not needed. Gradle
 Wrapper and signed/checksummed dependency verification remain in use. Refresh
 preparation after dependency or toolchain changes. CI performs this preparation
-before checks. The OWASP Rule at check deliberately accesses current advisory
-data; tests and governed compilation/build commands run offline.
+before checks. Tests and governed compilation/build commands run offline.
 
 Use `mise exec -- please sync --yes` for hook setup. For manual checks without shell
 activation, use `mise exec -- please run --at pre-commit` or
@@ -57,7 +56,7 @@ workflow monitoring belongs to the maintainer.
 | format-kotlin, static-analysis, compile, tests, coverage, dependency-license, jar-smoke | pre-push, check |
 | jar-build | pre-push, check, release |
 | python-tests | pre-push, check |
-| mutation, jvm-audit | check |
+| mutation | check |
 
 `allTests` is the single complete native test suite, including unit, property,
 integration, architecture and desktop clipboard tests. Focused Gradle task
@@ -73,13 +72,13 @@ depends on the JAR build; packaging depends on the versioned JAR build.
 
 PIT runs as the mutation Rule in the same Check invocation, with the same high-risk classes, target tests,
 timeout settings, reports and line-coverage export. Local hooks do not add mutation
-testing or OWASP analysis. Native `preCommitCheck` and `prePushCheck` convenience
+testing. Native `preCommitCheck` and `prePushCheck` convenience
 tasks remain; `mise run verify` runs the deterministic pre-push checks and stops at the first failure.
 
 ## Shared checks and commit messages
 
 External security and repository conventions run at check and pre-push. Check
-reads the worktree; pre-push reads HEAD. Readiness requires successful trusted push CI for the exact SHA, repository, workflow, main branch and complete Check invocation, including mutation and OWASP. It reuses source-security results from CI.
+reads the worktree; pre-push reads HEAD. Readiness requires successful trusted push CI for the exact SHA, repository, workflow, main branch and complete Check invocation, including mutation. It reuses source-security results from CI.
 
 Apache-2.0 remains the license. LICENSE matches the external reference byte-for-byte;
 the original terms are retained with normalized whitespace and the standard
@@ -116,11 +115,11 @@ OS dependencies installed by Actions. Preparation resolves dependencies and warm
 the Gradle task graph without executing build or quality tasks.
 
 `ci.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
-manual dispatch. Check runs all deterministic governance checks, mutation tests
-and OWASP through the SHA-pinned Please Behave Action with
+manual dispatch. Check runs all deterministic governance checks and mutation tests
+through the SHA-pinned Please Behave Action with
 reviews and a Job Summary. Xvfb starts before the Action; Check uploads
 the source/attempt-bound `release-jar` artifact. Java compatibility is tested only on the versioned release candidate. Native test diagnostics are consolidated into
-`test-reports`; lint, Detekt, dependency-license, OWASP, PIT and smoke diagnostics
+`test-reports`; lint, Detekt, dependency-license, PIT and smoke diagnostics
 remain available after failures, including dependency-verification diagnostics.
 
 `coverage-badges.yml` is independent and repeats full-suite coverage calculation,
@@ -133,19 +132,19 @@ Only deployment receives Pages/OIDC writes. Queue order follows arrival, not
 commit order. Actionlint 1.7.12 already supports schedule timezones; `.github/actionlint.yaml`
 ignores only its unknown-queue diagnostic for the shared `workflows` rule.
 
-OWASP and mutation testing are blocking Rules at check, with no assignments to
-pre-commit or pre-push. CI invokes check once; a deliberate local invocation of
-that same point also runs both Rules and requires OWASP credentials/network
-access. Release Readiness relies on exact-source CI proof without scanning again. Its explicit scan set retains the two runtime resource roots alongside
+Mutation testing is a blocking Rule at check, with no assignments to
+pre-commit or pre-push. CI invokes check once. Release Readiness relies on exact-source CI proof without scanning again.
+
+OWASP is not a Rule: its result depends on the day's advisory data, not on the commit. The scheduled `owasp-audit.yml` refreshes the advisory database daily and analyzes the default branch; a finding fails that workflow and uploads the report. Its explicit scan set retains the two runtime resource roots alongside
 Gradle runtimeClasspath. The plugin's explicit setScanSet setter marks that configuration
 as intentional; assigning the file collection alone leaves its default scan active.
 Repository-local npm release tooling is outside that
 shipped-runtime scope; no vulnerability suppression or threshold is changed.
 
 CodeQL retains its security-extended queries, nightly Kotlin toolchain and weekly
-schedule. Daily OWASP cache refresh and weekly purge/rebuild retain their manual
+schedule. The daily OWASP audit and weekly purge/rebuild retain their manual
 dispatch, shared maintenance lock and existing secret names. OWASP maintenance
-continues without configuration caching. Renovate cooldowns, automerge policy and
+and analysis run without configuration caching. Renovate cooldowns, automerge policy and
 Gradle metadata-refresh automation remain unchanged.
 
 ## Release contract

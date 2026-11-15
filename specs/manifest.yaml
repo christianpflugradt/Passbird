@@ -121,7 +121,7 @@ sources_reviewed:
     - .github/workflows/coverage-badges.yml
     - .github/workflows/ci.yml
     - .github/workflows/codeql.yml
-    - .github/workflows/owasp-update.yml
+    - .github/workflows/owasp-audit.yml
     - .github/workflows/owasp-purge.yml
     - .github/workflows/release.yml
   code:
