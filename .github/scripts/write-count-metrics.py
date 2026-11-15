@@ -19,12 +19,12 @@ def test_count(results_dir):
 
 def write_metrics(scc_path, results_dir, output_dir):
     metrics = {
-        "loc": ("lines of code", lines_of_code(json.loads(scc_path.read_text(encoding="utf-8")))),
-        "tests": ("tests", test_count(results_dir)),
+        "loc": ("LOC", "loc", lines_of_code(json.loads(scc_path.read_text(encoding="utf-8")))),
+        "tests": ("tests", "tests", test_count(results_dir)),
     }
     output_dir.mkdir(parents=True, exist_ok=True)
-    for metric_id, (label, value) in metrics.items():
-        metric = {"id": metric_id, "label": label, "value": value, "kind": "count", "badge": True}
+    for metric_id, (label, kind, value) in metrics.items():
+        metric = {"id": metric_id, "label": label, "value": value, "kind": kind, "badge": True}
         (output_dir / f"{metric_id}.json").write_text(json.dumps(metric, indent=2) + "\n", encoding="utf-8")
 
 

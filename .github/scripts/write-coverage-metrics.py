@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ElementTree
 
 METRICS = (
     ("BRANCH", "branch-coverage", "branch coverage"),
-    ("INSTRUCTION", "instruction-coverage", "instruction coverage"),
+    ("INSTRUCTION", "instruction-coverage", "instr. coverage"),
 )
 
 

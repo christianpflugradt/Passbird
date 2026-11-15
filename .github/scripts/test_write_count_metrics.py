@@ -27,8 +27,8 @@ class WriteCountMetricsTest(unittest.TestCase):
             count_metrics.write_metrics(root / "scc.json", root / "results", root / "out")
             loc = json.loads((root / "out" / "loc.json").read_text())
             tests = json.loads((root / "out" / "tests.json").read_text())
-        self.assertEqual(loc, {"id": "loc", "label": "lines of code", "value": 1234, "kind": "count", "badge": True})
-        self.assertEqual(tests["value"], 12)
+        self.assertEqual(loc, {"id": "loc", "label": "LOC", "value": 1234, "kind": "loc", "badge": True})
+        self.assertEqual(tests, {"id": "tests", "label": "tests", "value": 12, "kind": "tests", "badge": True})
 
     def test_rejects_missing_test_results(self):
         with tempfile.TemporaryDirectory() as directory:
