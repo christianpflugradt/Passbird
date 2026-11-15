@@ -122,15 +122,11 @@ the source/attempt-bound `release-jar` artifact. Java compatibility is tested on
 `test-reports`; lint, Detekt, dependency-license, PIT and smoke diagnostics
 remain available after failures, including dependency-verification diagnostics.
 
-`coverage-badges.yml` is independent and repeats full-suite coverage calculation,
-verification, HTML/XML reporting, SVG/Shields-JSON rendering and artifact transfer.
-Only this workflow writes badges or deploys Pages. Existing branch/instruction
-URLs, formatting, colors, thresholds and HTML report remain. The complete Jekyll
-site still includes README and CONFIGURATION documentation. Deployment retains
-`coverage-pages`, `cancel-in-progress: false`, `queue: max` and `github-pages`.
-Only deployment receives Pages/OIDC writes. Queue order follows arrival, not
-commit order. Actionlint 1.7.12 already supports schedule timezones; `.github/actionlint.yaml`
-ignores only its unknown-queue diagnostic for the shared `workflows` rule.
+`statistics.yml` is independent. Its `collect` job repeats full-suite coverage calculation and
+verification, counts production Kotlin lines with scc and tests from the `allTests` results, and
+keeps the HTML report as a workflow artifact. Its `publish` job sends these metrics to
+badges-and-stuff, which renders the badges and owns GitHub Pages. Only `publish` receives the
+`STATISTICS_TOKEN` secret. Coverage thresholds remain unchanged.
 
 Mutation testing is a blocking Rule at check, with no assignments to
 pre-commit or pre-push. CI invokes check once. Release Readiness relies on exact-source CI proof without scanning again.
