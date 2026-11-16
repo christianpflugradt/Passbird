@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 version="${1:?Java version is required}"
+# upload-artifact drops the empty smoke directory created by packaging
+mkdir -p dist/smoke
 python3 .github/scripts/release-artifacts.py verify --without-smokes
 export PASSBIRD_JAR="$PWD/dist/passbird.jar"
 export PASSBIRD_SMOKE_TMPDIR="$PWD/build/smoke-test-candidate-java-$version"
