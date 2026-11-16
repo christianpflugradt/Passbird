@@ -27,15 +27,18 @@
         },
         {
             "description": [
-                "GitHub Actions updates use a 14-day cooldown while preserving grouped PRs."
+                "Non-major GitHub Actions updates are grouped and use a 14-day cooldown."
             ],
             "matchFileNames": [
                 ".github/**"
             ],
+            "matchUpdateTypes": [
+                "patch",
+                "minor",
+                "digest"
+            ],
             "groupName": "github-actions",
-            "separateMajorMinor": false,
             "minimumReleaseAge": "14 days",
-            "automerge": true,
             "matchPackageNames": [
                 "!please-behave/cli"
             ]
@@ -53,7 +56,7 @@
         },
         {
             "description": [
-                "Major-version updates stay manual unless another more specific rule enables automerge."
+                "Major-version updates, including GitHub Actions, stay manual."
             ],
             "matchUpdateTypes": [
                 "major"
