@@ -40,7 +40,8 @@
             "groupName": "github-actions",
             "minimumReleaseAge": "14 days",
             "matchPackageNames": [
-                "!please-behave/cli"
+                "!please-behave/cli",
+                "!please-behave/action"
             ]
         },
         {
@@ -63,7 +64,8 @@
             ],
             "minimumReleaseAge": "14 days",
             "matchPackageNames": [
-                "!please-behave/cli"
+                "!please-behave/cli",
+                "!please-behave/action"
             ]
         },
         {
