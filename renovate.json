@@ -111,6 +111,7 @@
         }
     ],
     "extends": [
-        "github>christianpflugradt/please-behave-governance:renovate-governor"
+        "github>christianpflugradt/please-behave-governance:renovate-governor",
+        "github>christianpflugradt/please-behave-governance:renovate-content-aware"
     ]
 }
