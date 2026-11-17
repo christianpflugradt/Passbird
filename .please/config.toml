@@ -43,10 +43,10 @@ tag_format = "${version}"
 id = "gemini-flash-lite"
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "providers/gemini-flash-lite"
-ref = "a65baa4daaa8229bdcd342636b4f5606967548c5"
+ref = "5c47f1ad0c87faf004f269161b4285914ae499a6"
 
 [[provider_imports]]
 id = "gemini-flash"
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "providers/gemini-flash"
-ref = "a65baa4daaa8229bdcd342636b4f5606967548c5"
+ref = "5c47f1ad0c87faf004f269161b4285914ae499a6"
