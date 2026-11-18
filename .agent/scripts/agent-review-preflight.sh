@@ -1,15 +1,16 @@
-#!/usr/bin/env zsh
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-source "${0:A:h}/agent-common.zsh"
+# shellcheck source=/dev/null
+. "$(cd "$(dirname "$0")" && pwd)/agent-common.sh"
 agent_source_shell_env
 agent_cd_repo_root
 
 usage() {
-  print -r -- "Usage: .agent/scripts/agent-review-preflight.sh <security|architecture|integrity|behavior|delivery> [--trigger TEXT] [--skip-gh]"
+  printf '%s\n' "Usage: .agent/scripts/agent-review-preflight.sh <security|architecture|integrity|behavior|delivery> [--trigger TEXT] [--skip-gh]"
 }
 
-if (( $# < 1 )); then
+if [ "$#" -lt 1 ]; then
   usage
   exit 2
 fi
@@ -19,88 +20,86 @@ shift
 trigger="current task"
 skip_gh=0
 
-while (( $# > 0 )); do
+while [ "$#" -gt 0 ]; do
   case "$1" in
-    --trigger)
-      shift
-      (( $# > 0 )) || agent_die "--trigger requires a value"
-      trigger="$1"
-      shift
-      ;;
-    --skip-gh)
-      skip_gh=1
-      shift
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      usage
-      agent_die "Unknown argument: $1"
-      ;;
-  esac
-done
-
-typeset -a hotspots
-
-case "$area" in
-  security)
-    hotspots=(src/main/kotlin/de/pflugradts/passbird/application/security src/main/kotlin/de/pflugradts/passbird/adapter/keystore src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree src/main/kotlin/de/pflugradts/passbird/adapter/exchange src/main/kotlin/de/pflugradts/passbird/adapter/userinterface CONFIGURATION.md README.md)
+  --trigger)
+    shift
+    [ "$#" -gt 0 ] || agent_die "--trigger requires a value"
+    trigger="$1"
+    shift
     ;;
-  architecture)
-    hotspots=(src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationGraph.kt src/main/kotlin/de/pflugradts/passbird/application/commandhandling src/main/kotlin/de/pflugradts/passbird/domain src/main/kotlin/de/pflugradts/passbird/adapter)
+  --skip-gh)
+    skip_gh=1
+    shift
     ;;
-  integrity)
-    hotspots=(src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree src/main/kotlin/de/pflugradts/passbird/adapter/exchange src/main/kotlin/de/pflugradts/passbird/application/configuration src/main/kotlin/de/pflugradts/passbird/application/process/backup CONFIGURATION.md README.md)
-    ;;
-  behavior)
-    hotspots=(specs/interaction.yaml specs/capabilities.yaml specs/flows src/main/kotlin/de/pflugradts/passbird/application/commandhandling src/main/kotlin/de/pflugradts/passbird/application/boot src/main/kotlin/de/pflugradts/passbird/application/process src/main/kotlin/de/pflugradts/passbird/adapter/userinterface README.md CONFIGURATION.md)
-    ;;
-  delivery)
-    hotspots=(.github/workflows release.config.mjs build.gradle.kts settings.gradle.kts .agent/scripts README.md)
+  --help | -h)
+    usage
+    exit 0
     ;;
   *)
     usage
-    agent_die "Unsupported review area: $area"
+    agent_die "Unknown argument: $1"
     ;;
-esac
-
-print -r -- "Review area: $area"
-print -r -- "Review trigger: $trigger"
-print -r -- "Date: $(date +%F)"
-print -r -- "Branch: $(git rev-parse --abbrev-ref HEAD)"
-print -r -- "Commit: $(git rev-parse --short HEAD)"
-print -r -- "===== Hotspots ====="
-for hotspot in "${hotspots[@]}"; do
-  print -r -- "$hotspot"
+  esac
 done
 
-print -r -- "===== Workspace Status ====="
+case "$area" in
+security)
+  set -- src/main/kotlin/de/pflugradts/passbird/application/security src/main/kotlin/de/pflugradts/passbird/adapter/keystore src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree src/main/kotlin/de/pflugradts/passbird/adapter/exchange src/main/kotlin/de/pflugradts/passbird/adapter/userinterface CONFIGURATION.md README.md
+  ;;
+architecture)
+  set -- src/test/kotlin/de/pflugradts/passbird/PassbirdTest.kt src/main/kotlin/de/pflugradts/passbird/application/boot/main/ApplicationGraph.kt src/main/kotlin/de/pflugradts/passbird/application/commandhandling src/main/kotlin/de/pflugradts/passbird/domain src/main/kotlin/de/pflugradts/passbird/adapter
+  ;;
+integrity)
+  set -- src/main/kotlin/de/pflugradts/passbird/adapter/passwordtree src/main/kotlin/de/pflugradts/passbird/adapter/exchange src/main/kotlin/de/pflugradts/passbird/application/configuration src/main/kotlin/de/pflugradts/passbird/application/process/backup CONFIGURATION.md README.md
+  ;;
+behavior)
+  set -- specs/interaction.yaml specs/capabilities.yaml specs/flows src/main/kotlin/de/pflugradts/passbird/application/commandhandling src/main/kotlin/de/pflugradts/passbird/application/boot src/main/kotlin/de/pflugradts/passbird/application/process src/main/kotlin/de/pflugradts/passbird/adapter/userinterface README.md CONFIGURATION.md
+  ;;
+delivery)
+  set -- .github/workflows release.config.mjs build.gradle.kts settings.gradle.kts .agent/scripts README.md
+  ;;
+*)
+  usage
+  agent_die "Unsupported review area: $area"
+  ;;
+esac
+
+printf '%s\n' "Review area: $area"
+printf '%s\n' "Review trigger: $trigger"
+printf '%s\n' "Date: $(date +%F)"
+printf '%s\n' "Branch: $(git rev-parse --abbrev-ref HEAD)"
+printf '%s\n' "Commit: $(git rev-parse --short HEAD)"
+printf '%s\n' "===== Hotspots ====="
+for hotspot in "$@"; do
+  printf '%s\n' "$hotspot"
+done
+
+printf '%s\n' "===== Workspace Status ====="
 git status --short --branch
 
-if [[ "$skip_gh" == "1" ]]; then
-  print -r -- "GitHub preflight skipped by --skip-gh."
+if [ "$skip_gh" = "1" ]; then
+  printf '%s\n' "GitHub preflight skipped by --skip-gh."
   exit 0
 fi
 
 if ! command -v gh >/dev/null 2>&1; then
-  print -r -- "GitHub CLI not found; remote review context unavailable."
+  printf '%s\n' "GitHub CLI not found; remote review context unavailable."
   exit 0
 fi
 
-print -r -- "===== Existing Finding Issues ====="
+printf '%s\n' "===== Existing Finding Issues ====="
 if ! gh issue list --state all --label finding --search "$area" --limit 50; then
-  print -u2 -- "Could not list existing finding issues."
+  printf '%s\n' "Could not list existing finding issues." >&2
 fi
 
-if [[ "$area" == "delivery" ]]; then
-  print -r -- "===== GitHub Workflows ====="
+if [ "$area" = "delivery" ]; then
+  printf '%s\n' "===== GitHub Workflows ====="
   if ! gh workflow list; then
-    print -u2 -- "Could not list workflows."
+    printf '%s\n' "Could not list workflows." >&2
   fi
-  print -r -- "===== Recent Runs ====="
+  printf '%s\n' "===== Recent Runs ====="
   if ! gh run list --limit 10; then
-    print -u2 -- "Could not list recent workflow runs."
+    printf '%s\n' "Could not list recent workflow runs." >&2
   fi
 fi

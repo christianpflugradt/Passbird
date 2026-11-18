@@ -1,7 +1,8 @@
-#!/usr/bin/env zsh
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-source "${0:A:h}/agent-common.zsh"
+# shellcheck source=/dev/null
+. "$(cd "$(dirname "$0")" && pwd)/agent-common.sh"
 agent_source_shell_env
 agent_cd_repo_root
 agent_require_command python3
