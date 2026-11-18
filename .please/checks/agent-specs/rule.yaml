@@ -1,0 +1,22 @@
+purpose: "Keep agent helper scripts and specifications wired to each other."
+problem: "Documentation and scripts drift apart, so agents work from stale or missing guidance."
+value: "Agents find complete, referenced helpers and specifications."
+conditions:
+  - statement: ".agent/scripts contains the eight listed helper scripts, each executable and mentioned in .agent/README.md."
+    rationale: "A helper that is missing or undocumented cannot be used reliably."
+  - statement: "AGENTS.md and specs/project.yaml, delivery.yaml, issue.yaml and review.yaml reference .agent/scripts."
+    rationale: "The specifications must point agents to the helpers."
+  - statement: "Every file referenced in specs/manifest.yaml exists."
+    rationale: "A dangling reference sends agents to nothing."
+  - statement: "settings.gradle.kts does not generate Git hooks."
+    rationale: "Hooks are installed by please sync, and a second generator would compete with them."
+success_criteria:
+  - "A fully wired repository passes and any missing, unreferenced or non-executable item fails with a message."
+  - "A Gradle hook generator in settings.gradle.kts fails."
+out_of_scope:
+  - description: "The content of the specifications."
+  - description: "What the helper scripts do."
+limitations:
+  - "The list of helper scripts is fixed in the check."
+  - "Existence and references are checked, not correctness."
+placement: "Local, because it checks this repository's own layout."

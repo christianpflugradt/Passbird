@@ -1,0 +1,14 @@
+purpose: "Prove that the built JAR completes its interactive workflow."
+problem: "A JAR that builds but does not run would be shipped."
+value: "The artifact is known to work before it is released."
+conditions:
+  - statement: "smoke-test/run.sh passes against the JAR built by jar-build."
+    rationale: "The smoke test drives the real artifact, not the sources."
+success_criteria:
+  - "A failing workflow step fails and a complete run passes."
+out_of_scope:
+  - description: "Unit tests."
+  - description: "Other Java versions, which the release candidate matrix covers."
+limitations:
+  - "Only the workflow defined in smoke-test/flow.yaml is exercised."
+placement: "Local, because the workflow belongs to this application."

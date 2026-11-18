@@ -1,0 +1,12 @@
+purpose: "Keep Python sources formatted with Ruff."
+problem: "Unformatted code fills diffs with noise and causes style discussions."
+value: "Formatting is uniform and no longer reviewed by hand."
+conditions:
+  - statement: "ruff format --check reports no differences."
+    rationale: "It is the Python formatter used for the rule scripts and release scripts."
+success_criteria:
+  - "Unformatted code fails and formatted code passes."
+out_of_scope:
+  - description: "Formatting of other languages."
+  - description: "Rewriting files, which mise run format does."
+placement: "Local, because the formatter belongs to this repository's technology stack."

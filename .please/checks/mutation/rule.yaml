@@ -1,0 +1,13 @@
+purpose: "Keep high-risk code protected by tests that detect faults."
+problem: "Tests can run green and cover code without noticing changed behavior."
+value: "The tests of the high-risk classes demonstrably detect faults."
+conditions:
+  - statement: "The PIT mutation threshold is met for the configured high-risk classes."
+    rationale: "Line coverage alone does not show whether tests detect faults."
+success_criteria:
+  - "A mutation score below the threshold fails and a score at or above passes."
+out_of_scope:
+  - description: "Classes outside the configured high-risk set."
+limitations:
+  - "It is slow, so it does not run in local hooks."
+placement: "Local, because mutation testing is part of this repository's technology stack and runs only at check, not in hooks."

@@ -1,0 +1,12 @@
+purpose: "Keep the complete native test suite green."
+problem: "Regressions and violations of the architecture rules go unnoticed."
+value: "One complete suite answers whether the behavior still holds."
+conditions:
+  - statement: "The Gradle task allTests succeeds."
+    rationale: "allTests is the single complete suite and covers unit, property, integration, architecture and clipboard tests."
+success_criteria:
+  - "A failing test fails the rule and a green suite passes."
+out_of_scope:
+  - description: "Python tests, which python-tests runs."
+  - description: "Coverage thresholds, which coverage enforces."
+placement: "Local, because the tool belongs to this repository's technology stack."

@@ -1,0 +1,16 @@
+purpose: "Keep shell scripts formatted with shfmt."
+problem: "Unformatted code fills diffs with noise and causes style discussions."
+value: "Formatting is uniform and no longer reviewed by hand."
+conditions:
+  - statement: "shfmt -d reports no differences for every tracked *.sh file."
+    rationale: "It is the standard formatter for POSIX shell scripts."
+  - statement: "Without tracked scripts the rule passes."
+    rationale: "There is nothing to check."
+success_criteria:
+  - "Unformatted scripts fail and formatted scripts pass."
+  - "A shfmt failure is an ERROR and not a formatting verdict."
+out_of_scope:
+  - description: "Linting, which the shell-scripts rule covers."
+  - description: "Scripts without a .sh extension."
+  - description: "Rewriting files, which mise run format does."
+placement: "Local, because the formatter belongs to this repository's technology stack."

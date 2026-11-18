@@ -1,0 +1,11 @@
+purpose: "Keep production and test sources free of Detekt findings."
+problem: "Defects and style problems that static analysis detects reach the code unnoticed."
+value: "Static analysis findings are fixed instead of accumulating."
+conditions:
+  - statement: "The Gradle task detekt reports no findings."
+    rationale: "Detekt is the static analyzer configured in detekt.yml."
+success_criteria:
+  - "A finding fails and a clean source set passes."
+out_of_scope:
+  - description: "Formatting, which the format rules verify."
+placement: "Local, because the tool belongs to this repository's technology stack."

@@ -1,0 +1,20 @@
+purpose: "Verify code coverage from the complete test suite only."
+problem: "Stale execution data from focused test runs could satisfy the gate."
+value: "The coverage verdict always describes the full suite."
+conditions:
+  - statement: "build/jacoco/allTests.exec exists and is not empty."
+    rationale: "Only the complete allTests run produces data that counts."
+  - statement: "The Gradle tasks jacocoTestCoverageVerification and jacocoTestReport succeed."
+    rationale: "The thresholds live in the Gradle build and the report stays as a diagnostic."
+  - statement: "The rule runs after tests."
+    rationale: "Coverage is meaningless when the suite did not pass."
+success_criteria:
+  - "Missing or empty data fails."
+  - "Coverage below the configured thresholds fails."
+  - "Sufficient coverage from the full suite passes."
+out_of_scope:
+  - description: "Running the tests, which tests does."
+  - description: "The threshold values, which are configured in Gradle."
+limitations:
+  - "The rule cannot tell whether the coverage data is current beyond it coming from allTests."
+placement: "Local, because JaCoCo belongs to this repository's technology stack."

@@ -1,0 +1,11 @@
+purpose: "Keep the executable, platform-independent JAR buildable."
+problem: "A JAR that cannot be built is noticed only when a release is attempted."
+value: "The release artifact builds on every pushed commit."
+conditions:
+  - statement: "The Gradle task jar succeeds."
+    rationale: "The JAR is the distributed artifact."
+success_criteria:
+  - "A failing build fails and a successful build passes."
+out_of_scope:
+  - description: "Running the JAR, which jar-smoke does."
+placement: "Local, because the packaging belongs to this repository's technology stack. It also runs at release."

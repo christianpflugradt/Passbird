@@ -1,0 +1,16 @@
+purpose: "Run the Python tests of the release scripts and the local rules."
+problem: "Errors in these scripts would only be noticed when the release workflow runs, which is an avoidable surprise."
+value: "Script errors are visible before a release is attempted."
+conditions:
+  - statement: "Every test_*.py in .github/scripts and in each directory under .please/checks passes under unittest."
+    rationale: "These directories hold all Python scripts of the repository."
+  - statement: "A crash of the runner is an ERROR."
+    rationale: "A technical failure is not a verdict about the tests."
+success_criteria:
+  - "A failing test fails and a green suite passes."
+  - "A runner crash is an ERROR."
+out_of_scope:
+  - description: "Kotlin tests, which tests runs."
+limitations:
+  - "Only directories directly below .github/scripts and .please/checks are discovered."
+placement: "Local, because the scripts belong to this repository."

@@ -1,0 +1,11 @@
+purpose: "Keep production and test sources compiling against the Java 17 APIs."
+problem: "A state that does not compile, or uses APIs newer than Java 17, is noticed late."
+value: "Every commit that passes is buildable on the supported Java baseline."
+conditions:
+  - statement: "Kotlin and Java production and test sources compile against the Java 17 APIs."
+    rationale: "Java 17 is the oldest supported runtime."
+success_criteria:
+  - "A compilation error fails and compiling sources pass."
+out_of_scope:
+  - description: "Running tests or building the JAR."
+placement: "Local, because the tool belongs to this repository's technology stack."

@@ -1,0 +1,12 @@
+purpose: "Allow only dependencies with approved licenses."
+problem: "A dependency with an unapproved license enters the project unnoticed."
+value: "The licenses of all dependencies are known and approved."
+conditions:
+  - statement: "The Gradle task checkLicense finds only licenses allowed in allowed-licenses.json."
+    rationale: "The allowlist is kept in the repository next to the build."
+success_criteria:
+  - "A dependency with an unapproved license fails and approved licenses pass."
+out_of_scope:
+  - description: "The license of this repository itself."
+  - description: "Vulnerabilities in dependencies."
+placement: "Local, because dependency resolution belongs to this repository's technology stack."
