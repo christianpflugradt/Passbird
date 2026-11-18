@@ -17,7 +17,7 @@ description = "Format Kotlin, Python and shell sources"
 run = [
   "./gradlew ktlintFormat",
   "ruff format",
-  "git ls-files -z '*.sh' | xargs -0 shfmt -w",
+  "git ls-files -z '*.sh' | xargs -0 -r shfmt -w",
 ]
 
 [tasks.verify]
