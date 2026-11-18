@@ -192,7 +192,7 @@ import java.awt.datatransfer.DataFlavor;
 class ReadClipboard {
     public static void main(String[] args) throws Exception {
         Object clipboardData = Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
-        System.out.print(clipboardData = null ? "" : clipboardData.toString());
+        System.out.print(clipboardData == null ? "" : clipboardData.toString());
     }
 }
 EOF
