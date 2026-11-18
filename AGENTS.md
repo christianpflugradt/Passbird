@@ -23,7 +23,7 @@ Repository entrypoint for Passbird, an offline terminal password manager. Agent-
 - Hooks only check formatting. When a formatting check fails, run `mise run format` and retry.
 - Tests assert the observable contract (returned data, persisted artifact, emitted event, state change, approved output). They cover the happy path, each decision outcome and credible failures such as invalid or malformed input, I/O, authentication and conflicts, plus sensitive-data and cleanup guarantees where relevant. Never add tests only to raise coverage.
 - When a task is complete and suitable for release, commit, run `git pull -r` and push at once. Leave work uncommitted only when maintainer input is needed, the task is incomplete or it should not be released yet.
-- Never run `./gradlew dependencyCheckAnalyze` locally; OWASP runs in the scheduled audit workflow unless the maintainer asks.
+- Never run `./gradlew dependencyCheckAnalyze` locally; OWASP runs in the scheduled Dependency Audit workflow unless the maintainer asks.
 - Hooks cover their own checks: do not run them beforehand or repeat unchanged verification. Run only focused tests for the changed behavior.
 - Hooks and Gradle tasks may take minutes. Do not poll or narrate them; after 5 minutes, check at most once every 5 minutes.
 

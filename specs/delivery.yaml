@@ -55,7 +55,7 @@ quality_gates:
     - pre-push hook runs ./gradlew checkLicense
     - the dependency-license Rule intentionally runs ./gradlew --offline --no-configuration-cache --no-build-cache --rerun-tasks checkLicense because dependency-license-report tasks retain Gradle Project state and otherwise force configuration-cache discard at the end of the hook run
     - Gradle dependency verification uses gradle/verification-metadata.xml and the armored gradle/verification-keyring.keys file
-    - GitHub Actions OWASP dependency check workflows
+    - GitHub Actions Dependency Audit workflow
   dependency_maintenance:
     - Renovate groups the semantic-release changelog toolchain so its preset and writer update together
     - Renovate dependency dashboard stays enabled for pending and grouped dependency work
@@ -129,7 +129,8 @@ local_verification_policy:
     scan_scope:
       - Gradle runtimeClasspath and the existing src/main/resources and src/main/webapp resource roots
       - generated .dependency-check database files are ignored by Git and excluded from source snapshots; tracked source coverage is unchanged
-      - repository-local npm release tooling is not part of the shipped JVM runtime scan
+      - repository-local npm release tooling is not part of the OWASP scan; the same workflow audits it with npm audit
+      - findings from both scans are normalized into one report; the workflow fails from the severity in its AUDIT_FAIL_ON variable (initially medium), always for unknown severity, and a scan that cannot complete is a technical failure
     suppressions:
       - keep `owasp-suppressions.xml` limited to confirmed false positives, verified unreachable runtime findings, or verified build-time-only findings that do not affect shipped runtime artifacts
   dependency_verification:
@@ -149,8 +150,7 @@ local_verification_policy:
         - .github/workflows/statistics.yml
         - .github/workflows/ci.yml
         - .github/workflows/codeql.yml
-        - .github/workflows/owasp-audit.yml
-        - .github/workflows/owasp-purge.yml
+        - .github/workflows/dependency-audit.yml
         - .github/workflows/release.yml
     notes:
       - ci.yml uses check / Check with the published governor, preserving main pushes, Renovate PRs and manual dispatch
@@ -166,8 +166,8 @@ local_verification_policy:
       - CI builds one source/run/attempt-bound release-jar for payload comparison; Release Candidate builds the versioned JAR once and tests it on a Java 17/21/25 matrix with fail-fast disabled
       - PIT is the mutation Rule in the same Check invocation with unchanged high-risk targets, target tests, timeouts and report/line-coverage outputs
       - mutation runs at check but neither in local hooks nor again at release-readiness
-      - OWASP is not a Rule; owasp-audit.yml refreshes the database and analyzes main daily, keeping the existing secret names and cache prefix
-      - daily OWASP audit and weekly purge/rebuild retain manual dispatch and the shared maintenance lock; maintenance and analysis disable configuration caching
+      - OWASP is not a Rule; dependency-audit.yml is the single daily audit entry point, refreshes the database incrementally, rebuilds it on the first successful run of a month or on manual dispatch with rebuild, and keeps the existing secret names
+      - the Dependency Audit workflow serializes its runs and keeps manual dispatch; maintenance and analysis disable configuration caching; the shared Security ruleset only validates the workflow structure
       - CodeQL keeps security-extended queries and the nightly Kotlin toolchain
       - statistics.yml repeats coverage independently, counts production Kotlin lines of code with scc and tests from the allTests results, and sends these metrics to badges-and-stuff with the STATISTICS_TOKEN secret; badges-and-stuff renders the badges and owns GitHub Pages
       - coverage thresholds remain unchanged; the JaCoCo HTML report stays available as the test-coverage-report workflow artifact
@@ -284,7 +284,7 @@ recommended_validation_by_change_type:
       - .agent/scripts/agent-validate.sh security_or_persistence -- focused Gradle args chosen by the agent
       - run the focused persistence or workflow tests you changed or added
       - ./gradlew architecture
-      - review CI OWASP coverage instead of running dependency-check locally
+      - review Dependency Audit coverage instead of running dependency-check locally
   jar_or_terminal_smoke:
     run:
       - .agent/scripts/agent-validate.sh jar_or_terminal_smoke

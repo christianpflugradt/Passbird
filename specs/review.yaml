@@ -142,5 +142,5 @@ areas:
     focus:
       - CI workflow correctness, artifact flow, and scheduled or manual release behavior
       - semantic-release rules, tag creation, and GitHub release asset expectations
-      - coverage, tests, CodeQL, OWASP, and license checks that may look green while missing real regressions
+      - coverage, tests, CodeQL, dependency audit, and license checks that may look green while missing real regressions
       - changes that could break the Passbird-Updater contract around release discovery or passbird.jar delivery

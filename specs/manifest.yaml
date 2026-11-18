@@ -121,8 +121,7 @@ sources_reviewed:
     - .github/workflows/statistics.yml
     - .github/workflows/ci.yml
     - .github/workflows/codeql.yml
-    - .github/workflows/owasp-audit.yml
-    - .github/workflows/owasp-purge.yml
+    - .github/workflows/dependency-audit.yml
     - .github/workflows/release.yml
   code:
     - src/main/kotlin/de/pflugradts/passbird/application/Main.kt

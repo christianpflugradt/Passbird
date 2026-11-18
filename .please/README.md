@@ -131,16 +131,15 @@ badges-and-stuff, which renders the badges and owns GitHub Pages. Only `publish`
 Mutation testing is a blocking Rule at check, with no assignments to
 pre-commit or pre-push. CI invokes check once. Release Readiness relies on exact-source CI proof without scanning again.
 
-OWASP is not a Rule: its result depends on the day's advisory data, not on the commit. The scheduled `owasp-audit.yml` refreshes the advisory database daily and analyzes the default branch; a finding fails that workflow and uploads the report. Its explicit scan set retains the two runtime resource roots alongside
+OWASP is not a Rule: its result depends on the day's advisory data, not on the commit. The daily `dependency-audit.yml` is the single audit entry point; the imported Security Rule Set only verifies that it exists and follows the shared structure. It refreshes the OWASP advisory database incrementally each day and analyzes the default branch with one Dependency-Check scan and one `npm audit`, normalizes both into one findings report and renders it as a step summary. The first successful run of each month (or a manual dispatch with `rebuild`) discards the cached database and rebuilds it before analyzing. The workflow fails from the severity in its `AUDIT_FAIL_ON` variable; unknown severities always fail, and a scan that cannot complete fails as a technical error. Dependency-Check itself never fails the build (`failBuildOnCVSS = 11.0f`) and also writes a JSON report that is normalized. Its explicit scan set retains the two runtime resource roots alongside
 Gradle runtimeClasspath. The plugin's explicit setScanSet setter marks that configuration
 as intentional; assigning the file collection alone leaves its default scan active.
-Repository-local npm release tooling is outside that
-shipped-runtime scope; no vulnerability suppression or threshold is changed.
+Repository-local npm release tooling is outside the OWASP scan scope and covered by `npm audit`;
+no vulnerability suppression is changed.
 
 CodeQL retains its security-extended queries, nightly Kotlin toolchain and weekly
-schedule. The daily OWASP audit and weekly purge/rebuild retain their manual
-dispatch, shared maintenance lock and existing secret names. OWASP maintenance
-and analysis run without configuration caching. Renovate cooldowns, automerge policy and
+schedule. The Dependency Audit workflow keeps manual dispatch, serializes its runs and uses the
+existing OWASP secret names. OWASP maintenance and analysis run without configuration caching. Renovate cooldowns, automerge policy and
 Gradle metadata-refresh automation remain unchanged.
 
 ## Release contract

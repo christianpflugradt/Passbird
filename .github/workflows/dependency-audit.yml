@@ -1,0 +1,108 @@
+name: Dependency Audit
+run-name: "Dependency audit (${{ github.event_name }})"
+on:
+  schedule:
+    - cron: '17 3 * * *' # UTC: 05:17 in summer and 04:17 in winter in Europe/Berlin.
+  workflow_dispatch:
+    inputs:
+      rebuild:
+        description: Purge and rebuild the Dependency-Check database before auditing
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: dependency-audit
+  cancel-in-progress: false
+env:
+  MISE_AUTO_INSTALL: 'false' # Install tools explicitly before running tasks.
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  AUDIT_FAIL_ON: medium # Lowest severity that fails the run: low, medium, high or critical.
+  DEPENDENCY_CHECK_DATA_LOCATION: /home/runner/.gradle/dependency-check-data
+  DEPENDENCY_CHECK_DATA_KEY_PREFIX: linux-dependency-check-v3-data-
+  DEPENDENCY_CHECK_REBUILD_KEY_PREFIX: linux-dependency-check-v3-rebuilt-
+jobs:
+  audit:
+    name: Audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install project tools
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          install_args: java node python
+      - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
+      - id: month
+        name: Determine current month
+        run: echo "value=$(date -u +%Y-%m)" >> "$GITHUB_OUTPUT"
+      - id: rebuilt
+        name: Look up this month's rebuild marker
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ${{ runner.temp }}/dependency-check-rebuild-marker
+          key: ${{ env.DEPENDENCY_CHECK_REBUILD_KEY_PREFIX }}${{ steps.month.outputs.value }}
+      - id: maintenance
+        name: Decide whether the database is rebuilt
+        env:
+          FORCED: ${{ inputs.rebuild }}
+          MARKER_HIT: ${{ steps.rebuilt.outputs.cache-hit }}
+        run: |
+          if [ "$FORCED" = "true" ] || [ "$MARKER_HIT" != "true" ]; then
+            echo "rebuild=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "rebuild=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Restore Dependency-Check database
+        if: steps.maintenance.outputs.rebuild != 'true'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
+          key: ${{ env.DEPENDENCY_CHECK_DATA_KEY_PREFIX }}${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ${{ env.DEPENDENCY_CHECK_DATA_KEY_PREFIX }}
+      - name: Refresh Dependency-Check database
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
+          OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
+        run: ./gradlew --no-configuration-cache dependencyCheckUpdate --stacktrace
+      - name: Save Dependency-Check database
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ${{ env.DEPENDENCY_CHECK_DATA_LOCATION }}
+          key: ${{ env.DEPENDENCY_CHECK_DATA_KEY_PREFIX }}${{ github.run_id }}-${{ github.run_attempt }}
+      - name: Write rebuild marker
+        if: steps.maintenance.outputs.rebuild == 'true'
+        run: date -u +%Y-%m-%dT%H:%M:%SZ > "$RUNNER_TEMP/dependency-check-rebuild-marker"
+      - name: Save rebuild marker
+        if: steps.maintenance.outputs.rebuild == 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ${{ runner.temp }}/dependency-check-rebuild-marker
+          key: ${{ env.DEPENDENCY_CHECK_REBUILD_KEY_PREFIX }}${{ steps.month.outputs.value }}
+      - name: Analyze runtime dependencies
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
+          OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
+        run: ./gradlew --no-configuration-cache dependencyCheckAnalyze --stacktrace
+      - name: Scan and normalize findings
+        run: >-
+          python3 .github/scripts/dependency-audit.py scan
+          --owasp-report build/reports/dependency-check-report.json --report dependency-audit.json
+      - name: Report findings
+        if: ${{ !cancelled() && hashFiles('dependency-audit.json') != '' }}
+        run: python3 .github/scripts/dependency-audit.py report --report dependency-audit.json --fail-on "$AUDIT_FAIL_ON"
+      - name: Upload reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: dependency-audit
+          path: |
+            dependency-audit.json
+            build/reports/dependency-check-report.html
+          if-no-files-found: ignore
+          retention-days: 30

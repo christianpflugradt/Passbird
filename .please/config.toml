@@ -10,7 +10,7 @@ custom = ["release"]
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "rulesets/repository-conventions"
-ref = "a65baa4daaa8229bdcd342636b4f5606967548c5"
+ref = "22d69b50cdc1af622471fc88bf46ef7637476e97"
 
 [imports.rule_parameters.agents-size]
 max_tokens = "1500"
@@ -21,12 +21,12 @@ scopes_file = ".please/commit-scopes.txt"
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "rulesets/security"
-ref = "a65baa4daaa8229bdcd342636b4f5606967548c5"
+ref = "22d69b50cdc1af622471fc88bf46ef7637476e97"
 
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "rulesets/open-source-software"
-ref = "a65baa4daaa8229bdcd342636b4f5606967548c5"
+ref = "22d69b50cdc1af622471fc88bf46ef7637476e97"
 
 [imports.rule_parameters.license]
 target = "LICENSE"
@@ -34,7 +34,7 @@ target = "LICENSE"
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "rulesets/releasable-open-source-software"
-ref = "a65baa4daaa8229bdcd342636b4f5606967548c5"
+ref = "22d69b50cdc1af622471fc88bf46ef7637476e97"
 
 [imports.rule_parameters.semantic-release]
 tag_format = "${version}"

@@ -252,7 +252,8 @@ tasks.jacocoTestCoverageVerification {
 dependencyCheck {
     scanConfigurations = listOf("runtimeClasspath")
     setScanSet(listOf(file("src/main/resources"), file("src/main/webapp")))
-    failBuildOnCVSS = 0.0f
+    failBuildOnCVSS = 11.0f
+    formats = listOf("HTML", "JSON")
     nvd.apiKey = envOrNull("NVD_API_KEY")
     envOrNull("DEPENDENCY_CHECK_NVD_DATAFEED_URL")?.let { nvd.datafeedUrl = it }
     suppressionFile = "owasp-suppressions.xml"
