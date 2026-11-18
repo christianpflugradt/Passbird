@@ -21,7 +21,7 @@ scopes_file = ".please/commit-scopes.txt"
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "rulesets/security"
-ref = "e118a4dfd5eb2deb9f68d4c1c3c0337652983d3c"
+ref = "c9dedd752770fbac964dcb92474103e17ab21665"
 
 [imports.rule_parameters.dependency-audit-workflow]
 dependencies = "audited"
