@@ -1,8 +1,0 @@
-id = "format-shell"
-name = "Shell formatting"
-description = "Shell scripts are formatted with shfmt"
-run_at = ["pre-commit", "pre-push", "check"]
-
-[check]
-command = "sh @rule/check.sh"
-timeout_seconds = 120

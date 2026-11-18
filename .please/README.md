@@ -40,7 +40,7 @@ OWASP database under `.dependency-check/` is also ignored, so restoring it befor
 CI checks does not add a large database to the source snapshot. Tracked and
 nonignored source files remain covered.
 
-Git hooks are the final local gates. Pre-commit checks formatting (separate Kotlin, Python and shell rules), Detekt,
+Git hooks are the final local gates. Pre-commit checks formatting (separate Kotlin and Python rules), Detekt,
 compilation and agent-spec wiring (implemented in portable Python); pre-push runs the complete local gate.
 Do not manually repeat those gates before Git operations. Targeted diagnosis and
 `mise run format` (the rewriting counterpart of the formatting rules) remain available. Fix failures and retry Git; inspect
@@ -52,7 +52,7 @@ workflow monitoring belongs to the maintainer.
 
 | Rule | Execution points |
 | --- | --- |
-| format-python, format-shell, agent-specs | pre-commit, pre-push, check |
+| format-python, agent-specs | pre-commit, pre-push, check |
 | format-kotlin, static-analysis, compile, tests, coverage, dependency-license, jar-smoke | pre-push, check |
 | jar-build | pre-push, check, release |
 | python-tests | pre-push, check |

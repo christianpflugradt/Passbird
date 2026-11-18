@@ -31,7 +31,7 @@ quality_gates:
     - Git, Bash, desktop support, the published governor and credentials remain external prerequisites
   formatting_and_style:
     - Please Behave only checks formatting and never rewrites files; after a failed formatting check run mise run format, which rewrites Kotlin, Python and shell sources
-    - pre-commit hook checks Python and shell formatting through the separate format-python (ruff format --check) and format-shell (shfmt -d) rules; pre-push and check also run format-kotlin (./gradlew ktlintCheck)
+    - pre-commit hook checks Python formatting through the format-python rule (ruff format --check); shell scripts are verified by the imported shell-scripts rule; pre-push and check also run format-kotlin (./gradlew ktlintCheck)
     - pre-commit hook verifies .agent/scripts and specification wiring
     - pre-commit rules stay fast (about two seconds in total); slower gradle rules, including format-kotlin, run at pre-push and check
     - pre-push hook runs ./gradlew detekt, compileKotlin and compileTestKotlin
@@ -78,7 +78,6 @@ local_verification_policy:
     covers:
       - ./gradlew ktlintCheck
       - ruff format --check
-      - shfmt -d over tracked shell scripts
       - ./gradlew detekt
       - ./gradlew compileKotlin
       - ./gradlew compileTestKotlin
