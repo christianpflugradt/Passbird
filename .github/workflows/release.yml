@@ -151,7 +151,7 @@ jobs:
           name: passbird-build-${{ github.run_id }}-${{ github.run_attempt }}
           path: dist
       - name: Smoke exact versioned candidate
-        run: mise exec java@temurin-${{ matrix.java }} -- xvfb-run -a bash .github/scripts/smoke-candidate.sh "${{ matrix.java }}"
+        run: mise exec java@temurin-${{ matrix.java }} -- xvfb-run -a sh .github/scripts/smoke-candidate.sh "${{ matrix.java }}"
       - name: Record release candidate evidence
         run: python3 .github/scripts/release-evidence.py record
         env:

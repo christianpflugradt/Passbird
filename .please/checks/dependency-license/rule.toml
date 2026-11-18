@@ -4,6 +4,6 @@ description = "All dependencies use allowed licenses"
 run_at = ["pre-push", "check"]
 
 [check]
-command = "bash tools/gradle-check.sh checkLicense"
+command = "sh tools/gradle-check.sh checkLicense"
 timeout_seconds = 1800
 resource = "gradle"

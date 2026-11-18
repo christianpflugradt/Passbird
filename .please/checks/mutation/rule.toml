@@ -4,6 +4,6 @@ description = "High-risk code meets the mutation testing threshold"
 run_at = ["check"]
 
 [check]
-command = "bash tools/gradle-check.sh mutation --stacktrace --console=plain"
+command = "sh tools/gradle-check.sh mutation --stacktrace --console=plain"
 timeout_seconds = 3600
 resource = "gradle"

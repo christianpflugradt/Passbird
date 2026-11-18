@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 version="${1:?Java version is required}"
 # upload-artifact drops the empty smoke directory created by packaging
 mkdir -p dist/smoke

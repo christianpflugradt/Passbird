@@ -5,6 +5,6 @@ run_at = ["pre-push", "check"]
 depends_on = ["jar-build"]
 
 [check]
-command = "bash @rule/smoke.sh"
+command = "sh @rule/smoke.sh"
 timeout_seconds = 900
 resource = "gradle"

@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 cd "$(git rev-parse --show-toplevel)"
 mode="${1:-check}"
 case "$mode" in

@@ -4,6 +4,6 @@ description = "Production and test sources have no Detekt findings"
 run_at = ["pre-push", "check"]
 
 [check]
-command = "bash tools/gradle-check.sh detekt"
+command = "sh tools/gradle-check.sh detekt"
 timeout_seconds = 1800
 resource = "gradle"

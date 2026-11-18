@@ -4,6 +4,6 @@ description = "All unit, property, integration, architecture and clipboard tests
 run_at = ["pre-push", "check"]
 
 [check]
-command = "bash tools/gradle-check.sh allTests"
+command = "sh tools/gradle-check.sh allTests"
 timeout_seconds = 1800
 resource = "gradle"

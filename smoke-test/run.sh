@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 FLOW_FILE="$ROOT_DIR/smoke-test/flow.yaml"
 JAR_PATH="${PASSBIRD_JAR:-$ROOT_DIR/build/libs/passbird.jar}"
 TMP_ROOT="${PASSBIRD_SMOKE_TMPDIR:-$(mktemp -d /tmp/passbird-smoke.XXXXXX)}"
@@ -21,9 +21,9 @@ PIN_PASSWORD=""
 CAPTURED_CLIPBOARD=""
 
 cleanup() {
-  local status=$?
+  status=$?
   trap - EXIT
-  if [[ $status -eq 0 && "${PASSBIRD_SMOKE_KEEP_TMP:-0}" != "1" ]]; then
+  if [ "$status" -eq 0 ] && [ "${PASSBIRD_SMOKE_KEEP_TMP:-0}" != "1" ]; then
     rm -rf "$TMP_ROOT"
   else
     printf '[INFO] Smoke artifacts kept at %s\n' "$TMP_ROOT"
@@ -39,7 +39,7 @@ pass() {
 
 fail() {
   printf '[FAIL] %s\n' "$1" >&2
-  if [[ -n "$LAST_OUTPUT" && -f "$LAST_OUTPUT" ]]; then
+  if [ -n "$LAST_OUTPUT" ] && [ -f "$LAST_OUTPUT" ]; then
     printf '[FAIL] Last session log: %s\n' "$LAST_OUTPUT" >&2
     sed -n '1,220p' "$LAST_OUTPUT" >&2
   fi
@@ -55,18 +55,16 @@ slugify() {
 }
 
 reject_unexpected_errors() {
-  local step_name="$1"
-  local file="$2"
-  local markers=(
-    "SEVERE:"
-    "AEADBadTagException"
-    "Exception thrown by subscriber method"
-    "Command execution failed:"
-    "Operation aborted."
-    "could not be decrypted"
-  )
+  step_name="$1"
+  file="$2"
 
-  for marker in "${markers[@]}"; do
+  for marker in \
+    "SEVERE:" \
+    "AEADBadTagException" \
+    "Exception thrown by subscriber method" \
+    "Command execution failed:" \
+    "Operation aborted." \
+    "could not be decrypted"; do
     if grep -Fq "$marker" "$file"; then
       fail "$step_name: unexpected output marker '$marker' found."
     fi
@@ -74,8 +72,8 @@ reject_unexpected_errors() {
 }
 
 run_session() {
-  local step_name="$1"
-  local home="$2"
+  step_name="$1"
+  home="$2"
   shift 2
   SESSION_INDEX=$((SESSION_INDEX + 1))
   LAST_OUTPUT="$ARTIFACT_DIR/$(printf '%02d' "$SESSION_INDEX")-$(slugify "$step_name").log"
@@ -185,8 +183,8 @@ PY
 }
 
 ensure_java_clipboard_reader() {
-  local reader="$TMP_ROOT/ReadClipboard.java"
-  if [[ ! -f "$reader" ]]; then
+  reader="$TMP_ROOT/ReadClipboard.java"
+  if [ ! -f "$reader" ]; then
     cat >"$reader" <<'EOF'
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
@@ -194,7 +192,7 @@ import java.awt.datatransfer.DataFlavor;
 class ReadClipboard {
     public static void main(String[] args) throws Exception {
         Object clipboardData = Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
-        System.out.print(clipboardData == null ? "" : clipboardData.toString());
+        System.out.print(clipboardData = null ? "" : clipboardData.toString());
     }
 }
 EOF
@@ -203,10 +201,10 @@ EOF
 }
 
 run_clipboard_session() {
-  local step_name="$1"
-  local home="$2"
-  local clipboard_output=""
-  local clipboard_reader=""
+  step_name="$1"
+  home="$2"
+  clipboard_output=""
+  clipboard_reader=""
   shift 2
   CAPTURED_CLIPBOARD=""
   SESSION_INDEX=$((SESSION_INDEX + 1))
@@ -329,57 +327,56 @@ PY
   then
     fail "$step_name: Passbird exited with a non-zero status."
   fi
-  [[ -f "$clipboard_output" ]] || fail "$step_name: expected clipboard capture at '$clipboard_output'."
-  CAPTURED_CLIPBOARD="$(<"$clipboard_output")"
+  [ -f "$clipboard_output" ] || fail "$step_name: expected clipboard capture at '$clipboard_output'."
+  CAPTURED_CLIPBOARD="$(cat "$clipboard_output")"
   reject_unexpected_errors "$step_name" "$LAST_OUTPUT"
 }
 
 assert_file_exists() {
-  local path="$1"
-  [[ -f "$path" ]] || fail "$CURRENT_STEP: expected file '$path' to exist."
+  path="$1"
+  [ -f "$path" ] || fail "$CURRENT_STEP: expected file '$path' to exist."
 }
 
 assert_contains() {
-  local file="$1"
-  local needle="$2"
+  file="$1"
+  needle="$2"
   grep -Fq "$needle" "$file" || fail "$CURRENT_STEP: expected to find '$needle' in '$file'."
 }
 
 assert_not_contains() {
-  local file="$1"
-  local needle="$2"
+  file="$1"
+  needle="$2"
   if grep -Fq "$needle" "$file"; then
     fail "$CURRENT_STEP: did not expect to find '$needle' in '$file'."
   fi
 }
 
 assert_nonempty() {
-  local value="$1"
-  local label="$2"
-  [[ -n "$value" ]] || fail "$CURRENT_STEP: expected non-empty $label."
+  value="$1"
+  label="$2"
+  [ -n "$value" ] || fail "$CURRENT_STEP: expected non-empty $label."
 }
 
 assert_equals() {
-  local actual="$1"
-  local expected="$2"
-  local label="$3"
-  [[ "$actual" == "$expected" ]] || fail "$CURRENT_STEP: $label mismatch. Expected '$expected' but got '$actual'."
+  actual="$1"
+  expected="$2"
+  label="$3"
+  [ "$actual" = "$expected" ] || fail "$CURRENT_STEP: $label mismatch. Expected '$expected' but got '$actual'."
 }
 
 assert_matches() {
-  local value="$1"
-  local regex="$2"
-  local label="$3"
-  if [[ ! "$value" =~ $regex ]]; then
+  value="$1"
+  regex="$2"
+  label="$3"
+  if ! printf '%s\n' "$value" | grep -Eq -- "$regex"; then
     fail "$CURRENT_STEP: $label mismatch. Value '$value' does not match '$regex'."
   fi
 }
 
 assert_occurrence_at_least() {
-  local file="$1"
-  local literal="$2"
-  local minimum="$3"
-  local count
+  file="$1"
+  literal="$2"
+  minimum="$3"
   count="$(
     python3 - "$file" "$literal" "$minimum" <<'PY'
 from pathlib import Path
@@ -394,12 +391,12 @@ if count < minimum:
 print(count)
 PY
   )" || fail "$CURRENT_STEP: expected '$literal' to appear at least $minimum times in '$file'."
-  [[ -n "$count" ]] || fail "$CURRENT_STEP: could not count occurrences in '$file'."
+  [ -n "$count" ] || fail "$CURRENT_STEP: could not count occurrences in '$file'."
 }
 
 extract_inline_result() {
-  local file="$1"
-  local index="${2:-1}"
+  file="$1"
+  index="${2:-1}"
   python3 - "$file" "$index" <<'PY'
 from pathlib import Path
 import sys
@@ -421,7 +418,7 @@ PY
 }
 
 patch_config() {
-  local config_path="$1/passbird.yml"
+  config_path="$1/passbird.yml"
   python3 - "$config_path" <<'PY'
 from pathlib import Path
 import sys
@@ -460,7 +457,7 @@ PY
 }
 
 assert_smoke_config() {
-  local config_path="$1/passbird.yml"
+  config_path="$1/passbird.yml"
   assert_contains "$config_path" "promptOnExportFile: false"
   assert_contains "$config_path" "enabled: false"
   assert_contains "$config_path" "name: pin4"
@@ -468,15 +465,15 @@ assert_smoke_config() {
 }
 
 prepare_home() {
-  local home="$1"
+  home="$1"
   mkdir -p "$home"
 }
 
 CURRENT_STEP="preflight"
 require_tool java
 require_tool python3
-[[ -f "$JAR_PATH" ]] || fail "Jar artifact not found at '$JAR_PATH'."
-[[ -f "$FLOW_FILE" ]] || fail "Smoke flow file not found at '$FLOW_FILE'."
+[ -f "$JAR_PATH" ] || fail "Jar artifact not found at '$JAR_PATH'."
+[ -f "$FLOW_FILE" ] || fail "Smoke flow file not found at '$FLOW_FILE'."
 mkdir -p "$ARTIFACT_DIR"
 pass "preflight"
 

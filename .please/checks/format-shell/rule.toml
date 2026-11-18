@@ -4,5 +4,5 @@ description = "Shell scripts are formatted with shfmt"
 run_at = ["pre-commit", "pre-push", "check"]
 
 [check]
-command = "bash @rule/check.sh"
+command = "sh @rule/check.sh"
 timeout_seconds = 120

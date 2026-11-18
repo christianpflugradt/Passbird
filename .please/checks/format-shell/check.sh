@@ -1,23 +1,27 @@
-#!/usr/bin/env bash
-set -euo pipefail
-scripts=()
-while IFS= read -r -d '' file; do
-  [[ -f $file ]] || continue
+#!/bin/sh
+set -eu
+list=$(mktemp)
+errors=$(mktemp)
+trap 'rm -f "$list" "$errors"' EXIT
+git ls-files -- '*.sh' >"$list"
+while IFS= read -r file; do
+  [ -f "$file" ] || continue
   IFS= read -r first <"$file" || true
-  [[ $first == '#!'*zsh* ]] || scripts+=("$file")
-done < <(git ls-files -z -- '*.sh')
-if ((${#scripts[@]} == 0)); then
+  case "$first" in
+  '#!'*zsh*) ;;
+  *) set -- "$@" "$file" ;;
+  esac
+done <"$list"
+if [ "$#" -eq 0 ]; then
   echo "No shell scripts to check."
   exit 0
 fi
-errors=$(mktemp)
-trap 'rm -f "$errors"' EXIT
 status=0
-differences=$(shfmt -d "${scripts[@]}" 2>"$errors") || status=$?
-if ((status == 0)); then
+differences=$(shfmt -d "$@" 2>"$errors") || status=$?
+if [ "$status" -eq 0 ]; then
   exit 0
 fi
-if ((status == 1)) && [[ -n $differences ]]; then
+if [ "$status" -eq 1 ] && [ -n "$differences" ]; then
   printf '%s\n' "$differences"
   exit 1
 fi

@@ -19,7 +19,7 @@ def run(files):
         for name, content in files.items():
             (root / name).write_text(content)
         subprocess.run(["git", "add", "."], cwd=root, check=True)
-        return subprocess.run(["bash", str(SCRIPT)], cwd=root, capture_output=True, text=True).returncode
+        return subprocess.run(["sh", str(SCRIPT)], cwd=root, capture_output=True, text=True).returncode
 
 
 class FormatShellTests(unittest.TestCase):

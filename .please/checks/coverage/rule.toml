@@ -5,6 +5,6 @@ run_at = ["pre-push", "check"]
 depends_on = ["tests"]
 
 [check]
-command = "bash @rule/check.sh"
+command = "sh @rule/check.sh"
 timeout_seconds = 1800
 resource = "gradle"
