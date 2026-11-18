@@ -92,7 +92,7 @@ jobs:
       - name: Scan and normalize findings
         run: >-
           python3 .github/scripts/dependency-audit.py scan
-          --owasp-report build/reports/dependency-check-report.json --report dependency-audit.json
+          --owasp-report build/reports/dependency-check/dependency-check-report.json --report dependency-audit.json
       - name: Report findings
         if: ${{ !cancelled() && hashFiles('dependency-audit.json') != '' }}
         run: python3 .github/scripts/dependency-audit.py report --report dependency-audit.json --fail-on "$AUDIT_FAIL_ON"
@@ -103,6 +103,6 @@ jobs:
           name: dependency-audit
           path: |
             dependency-audit.json
-            build/reports/dependency-check-report.html
+            build/reports/dependency-check/dependency-check-report.html
           if-no-files-found: ignore
           retention-days: 30
