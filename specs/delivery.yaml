@@ -229,23 +229,7 @@ commit_messages:
     - style
     - test
     - config
-  optional_scopes:
-    - build
-    - clipboard
-    - config
-    - deps
-    - exchange
-    - favorites
-    - memory
-    - nests
-    - passwords
-    - proteins
-    - release
-    - security
-    - session
-    - storage
-    - ui
-    - yolks
+  scopes_source: .please/commit-scopes.txt
   guidance:
     - use scopes for localized product features or technical areas
     - session covers startup and inactivity

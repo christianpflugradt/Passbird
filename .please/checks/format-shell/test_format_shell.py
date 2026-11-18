@@ -1,4 +1,4 @@
-"""Verdicts of the shell formatting check: formatted, unformatted, zsh and syntax errors."""
+"""Verdicts of the shell formatting check: formatted, unformatted and syntax errors."""
 
 import subprocess
 import tempfile
@@ -29,9 +29,6 @@ class FormatShellTests(unittest.TestCase):
         self.assertEqual(run({"a.sh": UNFORMATTED}), 1)
         self.assertEqual(run({"a.sh": BROKEN}), 2)
         self.assertEqual(run({"a.sh": UNFORMATTED, "b.sh": BROKEN}), 1)
-
-    def test_zsh_scripts_are_skipped(self):
-        self.assertEqual(run({"a.sh": FORMATTED, "z.sh": UNFORMATTED.replace("bash", "zsh")}), 0)
 
 
 if __name__ == "__main__":

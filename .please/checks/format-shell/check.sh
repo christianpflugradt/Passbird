@@ -6,11 +6,7 @@ trap 'rm -f "$list" "$errors"' EXIT
 git ls-files -- '*.sh' >"$list"
 while IFS= read -r file; do
   [ -f "$file" ] || continue
-  IFS= read -r first <"$file" || true
-  case "$first" in
-  '#!'*zsh*) ;;
-  *) set -- "$@" "$file" ;;
-  esac
+  set -- "$@" "$file"
 done <"$list"
 if [ "$#" -eq 0 ]; then
   echo "No shell scripts to check."
