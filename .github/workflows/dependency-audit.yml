@@ -89,20 +89,9 @@ jobs:
           OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
           OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
         run: ./gradlew --no-configuration-cache dependencyCheckAnalyze --stacktrace
-      - name: Scan and normalize findings
-        run: >-
-          python3 .github/scripts/dependency-audit.py scan
-          --owasp-report build/reports/dependency-check/dependency-check-report.json --report dependency-audit.json
-      - name: Report findings
-        if: ${{ !cancelled() && hashFiles('dependency-audit.json') != '' }}
-        run: python3 .github/scripts/dependency-audit.py report --report dependency-audit.json --fail-on "$AUDIT_FAIL_ON"
-      - name: Upload reports
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+      - name: Audit the dependencies
+        uses: christianpflugradt/please-behave-governance/actions/dependency-audit@83bb5095593e4043176ea66e9229ec0e93ec6ad5 # updates/actions/dependency-audit
         with:
-          name: dependency-audit
-          path: |
-            dependency-audit.json
-            build/reports/dependency-check/dependency-check-report.html
-          if-no-files-found: ignore
-          retention-days: 30
+          owasp-report: build/reports/dependency-check/dependency-check-report.json
+          extra-report-paths: build/reports/dependency-check/dependency-check-report.html
+          fail-on: ${{ env.AUDIT_FAIL_ON }}
