@@ -10,7 +10,7 @@ custom = ["release"]
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "rulesets/repository-conventions"
-ref = "5f73567a8ada8439853d6e608192db89727f6453"
+ref = "f64fa639a6f288f893de5fba1eaeae7f61d19e64"
 
 [imports.rule_parameters.agents-size]
 max_tokens = "1500"
