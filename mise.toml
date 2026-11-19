@@ -1,6 +1,6 @@
 [task_config]
 includes = [
-  "git::https://github.com/christianpflugradt/please-behave-governance.git//mise-tasks/release?ref=77594ea24aa1ff14c624d3f8be2df0209fb6af0f",
+  "git::https://github.com/christianpflugradt/please-behave-governance.git//mise-tasks/release?ref=c37eb9268f0c159f35e2301712269d77c94ad300",
 ]
 
 [tools]
