@@ -28,7 +28,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
-    uses: christianpflugradt/please-behave-governance/.github/workflows/release-plan.yml@95293131bd2673933aa8b97348b90486e07e431e # updates/workflows/release
+    uses: christianpflugradt/please-behave-governance/.github/workflows/release-plan.yml@ef32fb94723c4e10822ef56c7fef36615d983f58 # updates/workflows/release
     with:
       mode: ${{ github.event_name == 'schedule' && 'release' || inputs.mode }}
       tag-format: '${version}'
@@ -41,11 +41,10 @@ jobs:
     permissions:
       contents: read
       actions: read
-    uses: christianpflugradt/please-behave-governance/.github/workflows/release-readiness.yml@95293131bd2673933aa8b97348b90486e07e431e # updates/workflows/release
+    uses: christianpflugradt/please-behave-governance/.github/workflows/release-readiness.yml@ef32fb94723c4e10822ef56c7fef36615d983f58 # updates/workflows/release
     with:
       source-sha: ${{ needs.plan.outputs.source_sha }}
       required-jobs: Check
-      timeout-minutes: 90
 
   release-candidate:
     name: Release Candidate
@@ -69,12 +68,7 @@ jobs:
       - name: Fetch candidate dependencies
         run: mise run setup:candidate
       - name: Verify the candidate at the release point
-        uses: christianpflugradt/please-behave-governance/actions/release/governance@e0d645d4cf3d5e462540eb184ee55b5ad7227889 # updates/actions/release
-        with:
-          extra-report-paths: |
-            build/reports/
-            build/test-results/
-            build/smoke-test-candidate-java-*/
+        uses: christianpflugradt/please-behave-governance/actions/release/governance@ef32fb94723c4e10822ef56c7fef36615d983f58 # updates/actions/release
       - name: Package verified candidate
         run: mise run package
       - name: Verify candidate archive
@@ -117,7 +111,7 @@ jobs:
       - name: Smoke exact versioned candidate
         run: mise exec java@temurin-${{ matrix.java }} -- xvfb-run -a sh .github/scripts/smoke-candidate.sh "${{ matrix.java }}"
       - name: Record release candidate evidence
-        uses: christianpflugradt/please-behave-governance/actions/release/evidence@e0d645d4cf3d5e462540eb184ee55b5ad7227889 # updates/actions/release
+        uses: christianpflugradt/please-behave-governance/actions/release/evidence@ef32fb94723c4e10822ef56c7fef36615d983f58 # updates/actions/release
         with:
           operation: record
           version: ${{ needs.plan.outputs.version }}
@@ -166,19 +160,20 @@ jobs:
           run-id: ${{ needs.release-readiness.outputs.ci_run_id }}
           github-token: ${{ github.token }}
       - name: Verify complete release candidate evidence
-        uses: christianpflugradt/please-behave-governance/actions/release/evidence@e0d645d4cf3d5e462540eb184ee55b5ad7227889 # updates/actions/release
+        uses: christianpflugradt/please-behave-governance/actions/release/evidence@ef32fb94723c4e10822ef56c7fef36615d983f58 # updates/actions/release
         with:
           operation: verify
           version: ${{ needs.plan.outputs.version }}
+      - name: Verify the release JAR is the one that CI built
+        run: python3 .github/scripts/release-artifacts.py verify-ci
       - name: Publish exact verified candidate without rebuilding
-        uses: christianpflugradt/please-behave-governance/actions/release/publish@e0d645d4cf3d5e462540eb184ee55b5ad7227889 # updates/actions/release
+        uses: christianpflugradt/please-behave-governance/actions/release/publish@ef32fb94723c4e10822ef56c7fef36615d983f58 # updates/actions/release
         with:
           version: ${{ needs.plan.outputs.version }}
           mode: ${{ needs.plan.outputs.mode }}
           tag-format: '${version}'
           force: ${{ inputs.force }}
           assets: |
-            dist/passbird.jar :: Passbird executable JAR
+            dist/passbird.jar
             dist/SHA256SUMS
             dist/metadata.json
-          verify-command: python3 .github/scripts/release-artifacts.py verify-ci
