@@ -7,7 +7,7 @@ agent_source_shell_env
 agent_cd_repo_root
 
 usage() {
-  printf '%s\n' "Usage: .agent/scripts/agent-validate.sh <change-type> [--run] [--release-version VERSION] [--verified-jar PATH] [--allow-local-owasp] [-- FOCUSED_GRADLE_ARGS...]"
+  printf '%s\n' "Usage: .agent/scripts/agent-validate.sh <change-type> [--run] [--release-version VERSION] [--allow-local-owasp] [-- FOCUSED_GRADLE_ARGS...]"
   printf '%s\n' "Change types: docs_only, kotlin_code_non_structural, architecture_or_wiring, config_or_user_workflow, ci_or_release_workflow, security_or_persistence, jar_or_terminal_smoke"
 }
 
@@ -21,7 +21,6 @@ shift
 run=0
 allow_local_owasp=0
 release_version=""
-verified_jar=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -41,12 +40,6 @@ while [ "$#" -gt 0 ]; do
     shift
     [ "$#" -gt 0 ] || agent_die "--release-version requires a value"
     release_version="$1"
-    shift
-    ;;
-  --verified-jar)
-    shift
-    [ "$#" -gt 0 ] || agent_die "--verified-jar requires a value"
-    verified_jar="$1"
     shift
     ;;
   --)
@@ -105,7 +98,6 @@ ci_or_release_workflow | ci | release)
   printf '%s\n' "Final workflow/release validation is managed by Git hooks."
   if [ -n "$release_version" ]; then
     set -- --version "$release_version"
-    [ -z "$verified_jar" ] || set -- "$@" --verified-jar "$verified_jar"
     [ "$run" = "0" ] || set -- "$@" --run
     .agent/scripts/agent-release-artifact-check.sh "$@"
   fi

@@ -11,7 +11,7 @@
 - `.agent/scripts/agent-review-preflight.sh`: gather deterministic review-area context and GitHub triage state.
 - `.agent/scripts/agent-review-finding.sh`: create or update a GitHub issue for a review finding.
 - `.agent/scripts/check-agent-specs.sh`: verify agent instruction and script wiring consistency.
-- `.agent/scripts/agent-release-artifact-check.sh`: verify existing release JAR manifest and payload without rebuilding.
+- `.agent/scripts/agent-release-artifact-check.sh`: verify the manifest of an existing release JAR without rebuilding.
 
 
 Git hooks are managed by the published governor in `mise.toml`. Prepare explicitly with `bash tools/prepare.sh`, install with `please sync --yes`, and inspect failures through `please status --details`. Do not repeat complete gates manually. See `.please/README.md` for the release and badge contracts.

@@ -182,32 +182,6 @@ class ReleaseArtifactsTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             artifacts.package()
 
-    def test_ci_jar_can_differ_only_in_manifest_and_must_match_producing_attempt(self):
-        self.package()
-        os.environ.update(VERIFIED_CI_RUN_ID="456", VERIFIED_CI_ATTEMPT="1")
-        directory = Path("verified-release-jar")
-        make_jar(directory / "passbird.jar", version="unspecified")
-        data = dict(
-            schema_version=1,
-            repository=artifacts.REPOSITORY,
-            source_sha=ENV["GITHUB_SHA"],
-            run_id="456",
-            run_attempt="1",
-            jar_sha256=artifacts.digest(directory / "passbird.jar"),
-        )
-        artifacts.write_json(directory / "ci.json", data)
-        artifacts.verify_ci()
-        data["run_attempt"] = "2"
-        artifacts.write_json(directory / "ci.json", data)
-        with self.assertRaises(ValueError):
-            artifacts.verify_ci()
-        data["run_attempt"] = "1"
-        make_jar(directory / "passbird.jar", version="unspecified", payload=b"different classes")
-        data["jar_sha256"] = artifacts.digest(directory / "passbird.jar")
-        artifacts.write_json(directory / "ci.json", data)
-        with self.assertRaisesRegex(ValueError, "payload differs"):
-            artifacts.verify_ci()
-
 
 if __name__ == "__main__":
     unittest.main()

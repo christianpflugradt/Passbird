@@ -160,7 +160,7 @@ local_verification_policy:
       - allTests covers unit, property, integration, architecture and desktop clipboard tests in one Rule; CI prepares Xvfb, xauth and xclip
       - coverage consumes nonempty allTests.exec only and retains 90 percent instruction and 85 percent branch thresholds plus HTML/XML diagnostics
       - native test diagnostics are consolidated into test-reports; lint, Detekt, license, mutation and smoke diagnostics remain available after failures
-      - CI builds one source/run/attempt-bound release-jar for payload comparison; Release Candidate builds the versioned JAR once and tests it on a Java 17/21/25 matrix with fail-fast disabled
+      - Release Candidate builds the versioned JAR once and tests it on a Java 17/21/25 matrix with fail-fast disabled
       - PIT is the mutation Rule in the same Check invocation with unchanged high-risk targets, target tests, timeouts and report/line-coverage outputs
       - mutation runs at check but neither in local hooks nor again at release-readiness
       - OWASP is not a Rule; dependency-audit.yml is the single daily audit entry point, refreshes the database incrementally, rebuilds it on the first successful run of a month or on manual dispatch with rebuild, and keeps the existing secret names

@@ -117,8 +117,8 @@ the Gradle task graph without executing build or quality tasks.
 `ci.yml` is CI with `check` / `Check`, retaining main pushes, Renovate PRs and
 manual dispatch. Check runs all deterministic governance checks and mutation tests
 through the SHA-pinned Please Behave Action with
-reviews and a Job Summary. Xvfb starts before the Action; Check uploads
-the source/attempt-bound `release-jar` artifact. Java compatibility is tested only on the versioned release candidate. Native test diagnostics are consolidated into
+reviews and a Job Summary. Xvfb starts before the Action.
+Java compatibility is tested only on the versioned release candidate. Native test diagnostics are consolidated into
 `test-reports`; lint, Detekt, dependency-license, PIT and smoke diagnostics
 remain available after failures, including dependency-verification diagnostics.
 

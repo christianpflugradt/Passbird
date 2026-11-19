@@ -145,48 +145,9 @@ def verify(directory=Path("dist"), without_smokes=False):
     return data
 
 
-def ci_receipt(directory=Path("build/ci-release-jar")):
-    directory.mkdir(parents=True, exist_ok=True)
-    jar = Path("build/libs/passbird.jar")
-    shutil.copyfile(jar, directory / "passbird.jar")
-    write_json(
-        directory / "ci.json",
-        dict(
-            schema_version=1,
-            repository=REPOSITORY,
-            source_sha=os.environ["GITHUB_SHA"],
-            run_id=os.environ["GITHUB_RUN_ID"],
-            run_attempt=os.environ["GITHUB_RUN_ATTEMPT"],
-            jar_sha256=digest(jar),
-        ),
-    )
-
-
-def verify_ci(directory=Path("verified-release-jar")):
-    candidate = verify()
-    require({p.name for p in directory.iterdir()} == {"passbird.jar", "ci.json"}, "Unexpected CI artifact file set")
-    digest(directory / "ci.json")
-    expected = dict(
-        schema_version=1,
-        repository=REPOSITORY,
-        source_sha=candidate["source_sha"],
-        run_id=os.environ["VERIFIED_CI_RUN_ID"],
-        run_attempt=os.environ["VERIFIED_CI_ATTEMPT"],
-        jar_sha256=digest(directory / "passbird.jar"),
-    )
-    data = json.loads((directory / "ci.json").read_text())
-    require(
-        isinstance(data, dict) and type(data.get("schema_version")) is int and data == expected,
-        "CI artifact identity differs from trusted evidence",
-    )
-    _, baseline = jar_contents(directory / "passbird.jar")
-    _, payload = jar_contents(Path("dist/passbird.jar"))
-    require(payload == baseline, "Candidate payload differs from the trusted CI JAR")
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["package", "verify", "receipt", "ci-receipt", "verify-ci"])
+    parser.add_argument("command", choices=["package", "verify", "receipt"])
     parser.add_argument("args", nargs="*")
     parser.add_argument("--without-smokes", action="store_true")
     args = parser.parse_args()
@@ -197,6 +158,6 @@ if __name__ == "__main__":
         elif args.command == "verify":
             verify(without_smokes=args.without_smokes)
         else:
-            {"package": package, "ci-receipt": ci_receipt, "verify-ci": verify_ci}[args.command]()
+            package()
     except (ValueError, OSError, KeyError, TypeError, zipfile.BadZipFile, subprocess.SubprocessError) as error:
         raise SystemExit(f"Release artifact verification failed: {error}") from None
