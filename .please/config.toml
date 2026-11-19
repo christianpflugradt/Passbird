@@ -37,7 +37,7 @@ target = "LICENSE"
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "rulesets/releasable-open-source-software"
-ref = "2d45945ac920552b37bb569f1d28930e93dddfcd"
+ref = "77594ea24aa1ff14c624d3f8be2df0209fb6af0f"
 
 [[provider_imports]]
 id = "gemini-flash-lite"
