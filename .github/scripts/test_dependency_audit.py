@@ -4,7 +4,6 @@ import importlib.util
 import json
 import os
 from pathlib import Path
-import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -32,24 +31,6 @@ OWASP = {
         {"fileName": "clean.jar"},
     ]
 }
-NPM = {
-    "vulnerabilities": {
-        "picomatch": {
-            "via": [
-                {
-                    "source": 1,
-                    "name": "picomatch",
-                    "title": "Flaw",
-                    "url": "https://github.com/advisories/GHSA-aaaa-bbbb-cccc",
-                    "severity": "high",
-                    "range": "<=4.0.7",
-                }
-            ]
-        },
-        "micromatch": {"via": ["picomatch"]},
-        "old": {"via": [{"source": 7, "name": "old", "title": "Legacy", "severity": "moderate"}]},
-    }
-}
 
 
 class NormalizationTests(unittest.TestCase):
@@ -67,23 +48,10 @@ class NormalizationTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             mod.owasp_findings(json.dumps({}))
 
-    def test_npm_findings_use_ghsa_ids_skip_propagated_entries_and_map_severity(self):
-        found = {f["id"]: f for f in mod.npm_findings(json.dumps(NPM))}
-        self.assertEqual(set(found), {"GHSA-aaaa-bbbb-cccc", "npm:7"})
-        self.assertEqual(found["GHSA-aaaa-bbbb-cccc"]["severity"], "high")
-        self.assertEqual(found["npm:7"]["severity"], "medium")
-
-    def test_npm_error_document_is_not_an_empty_result(self):
-        with self.assertRaises(ValueError):
-            mod.npm_findings(json.dumps({"error": {"code": "ENOTFOUND"}}))
-
 
 class ScanAndGateTests(unittest.TestCase):
-    def npm(self, stdout, code=1):
-        return subprocess.CompletedProcess([], code, stdout=stdout.encode(), stderr=b"")
-
-    def scan(self, owasp_text, npm_result):
-        with tempfile.TemporaryDirectory() as directory, patch.object(mod.subprocess, "run", return_value=npm_result):
+    def scan(self, owasp_text):
+        with tempfile.TemporaryDirectory() as directory:
             owasp = os.path.join(directory, "owasp.json")
             if owasp_text is not None:
                 with open(owasp, "w") as handle:
@@ -94,16 +62,14 @@ class ScanAndGateTests(unittest.TestCase):
                 return code, json.load(handle)
 
     def test_complete_scans_with_findings_exit_zero(self):
-        code, written = self.scan(json.dumps(OWASP), self.npm(json.dumps(NPM)))
+        code, written = self.scan(json.dumps(OWASP))
         self.assertEqual(code, 0)
-        self.assertEqual([item["ecosystem"] for item in written["scans"]], ["owasp", "npm"])
-
-    def test_missing_owasp_report_or_unparsable_npm_output_is_a_scan_error(self):
-        code, written = self.scan(None, self.npm(json.dumps(NPM)))
-        self.assertEqual((code, written["scans"][0]["status"]), (2, "error"))
-        code, written = self.scan(json.dumps(OWASP), self.npm("not json"))
-        self.assertEqual((code, written["scans"][1]["status"]), (2, "error"))
+        self.assertEqual([item["ecosystem"] for item in written["scans"]], ["owasp"])
         self.assertEqual(len(written["scans"][0]["findings"]), 3)
+
+    def test_missing_owasp_report_is_a_scan_error(self):
+        code, written = self.scan(None)
+        self.assertEqual((code, written["scans"][0]["status"]), (2, "error"))
 
     def test_threshold_and_unknown_severity(self):
         self.assertTrue(mod.reaches("medium", "medium"))
@@ -133,7 +99,7 @@ class ScanAndGateTests(unittest.TestCase):
         self.assertEqual(self.run_report(scans, "high")[0], 0)
 
     def test_report_with_failed_scan_exits_two_even_without_findings(self):
-        scans = [{"ecosystem": "npm", "status": "error", "error": "boom", "findings": []}]
+        scans = [{"ecosystem": "owasp", "status": "error", "error": "boom", "findings": []}]
         code, text = self.run_report(scans, "low")
         self.assertEqual(code, 2)
         self.assertIn("scan failed", text)

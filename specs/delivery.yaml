@@ -57,7 +57,6 @@ quality_gates:
     - Gradle dependency verification uses gradle/verification-metadata.xml and the armored gradle/verification-keyring.keys file
     - GitHub Actions Dependency Audit workflow
   dependency_maintenance:
-    - Renovate groups the semantic-release changelog toolchain so its preset and writer update together
     - Renovate dependency dashboard stays enabled for pending and grouped dependency work
     - Renovate standard dependency updates require a 7-day minimum release age before branch or pull-request creation
     - the shared external renovate-governor preset updates mise.toml to stable published Please Behave releases, including major versions, without a cooldown and auto-merges after green CI
@@ -128,7 +127,6 @@ local_verification_policy:
     scan_scope:
       - Gradle runtimeClasspath and the existing src/main/resources and src/main/webapp resource roots
       - generated .dependency-check database files are ignored by Git and excluded from source snapshots; tracked source coverage is unchanged
-      - repository-local npm release tooling is not part of the OWASP scan; the same workflow audits it with npm audit
       - findings from both scans are normalized into one report; the workflow fails from the severity in its AUDIT_FAIL_ON variable (initially medium), always for unknown severity, and a scan that cannot complete is a technical failure
     suppressions:
       - keep `owasp-suppressions.xml` limited to confirmed false positives, verified unreachable runtime findings, or verified build-time-only findings that do not affect shipped runtime artifacts
@@ -179,7 +177,7 @@ local_verification_policy:
       - release policies live under .github; local scripts verify source CI, artifact evidence and publication without cached governance modules
       - Plan does not prepare or publish; Readiness and Candidate build run in parallel; Publish requires both and the complete candidate runtime matrix
       - Candidate builds with the planned version and checks exact JAR bytes on Java 25, 17 and 21; Publish never rebuilds
-      - readiness runs .github/scripts/check-release-ci.py directly and exports its retained Check attempt for CI artifact binding
+      - readiness runs the shared check-ci release action and exports its retained Check attempt for CI artifact binding
       - artifacts, metadata, checksums and smoke receipts bind version, source, repository and workflow run/attempt; incomplete or foreign sets fail
       - partial CI reruns may retain successful jobs; Release reruns require the current attempt's complete candidate
       - monthly development-release purge retains its 30-day policy and tag cleanup
@@ -259,7 +257,7 @@ recommended_validation_by_change_type:
       - run only the focused unit, property, and integration tests that cover the changed workflow
   ci_or_release_workflow:
     run:
-      - review workflow, release config and artifact binding against .please/README.md
+      - review workflow, release action inputs and artifact binding against .please/README.md
       - use targeted offline helper tests for diagnosis; final full validation belongs to Git hooks
       - .agent/scripts/agent-release-artifact-check.sh verifies an already built JAR without rebuilding
       - inspect GitHub metadata with gh when remote facts matter, without triggering Release

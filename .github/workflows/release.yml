@@ -1,6 +1,16 @@
 name: Release
 on:
   workflow_dispatch:
+    inputs:
+      mode:
+        description: A manual run publishes a development prerelease unless an official release is chosen; the schedule always releases officially
+        type: choice
+        options: [prerelease, release]
+        default: prerelease
+      force:
+        description: Release a patch version even if no commit would raise the version, to test the release process
+        type: boolean
+        default: false
   schedule:
     - cron: '23 3 * * 1'
       timezone: Europe/Berlin
@@ -23,7 +33,7 @@ jobs:
     outputs:
       release: ${{ steps.plan.outputs.release }}
       version: ${{ steps.plan.outputs.version }}
-      source_sha: ${{ steps.plan.outputs.source_sha }}
+      source_sha: ${{ steps.plan.outputs.source-sha }}
       mode: ${{ steps.plan.outputs.mode }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -35,13 +45,13 @@ jobs:
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: node
-      - run: npm ci --ignore-scripts
       - name: Plan without tagging or publishing
         id: plan
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          GH_TOKEN: ${{ github.token }}
-        run: npm run release:plan
+        uses: christianpflugradt/please-behave-governance/actions/release/plan@c37eb9268f0c159f35e2301712269d77c94ad300 # updates/actions/release
+        with:
+          mode: ${{ github.event_name == 'schedule' && 'release' || inputs.mode }}
+          tag-format: '${version}'
+          force: ${{ inputs.force }}
 
   release-readiness:
     name: Release Readiness
@@ -53,8 +63,8 @@ jobs:
       contents: read
       actions: read
     outputs:
-      ci_run_id: ${{ steps.evidence.outputs.ci_run_id }}
-      ci_attempt: ${{ steps.evidence.outputs.ci_attempt }}
+      ci_run_id: ${{ steps.evidence.outputs.ci-run-id }}
+      ci_attempt: ${{ steps.evidence.outputs.ci-attempt }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -67,9 +77,9 @@ jobs:
           install_args: python
       - name: Verify exact-source CI prerequisites
         id: evidence
-        run: python3 .github/scripts/check-release-ci.py
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        uses: christianpflugradt/please-behave-governance/actions/release/check-ci@c37eb9268f0c159f35e2301712269d77c94ad300 # updates/actions/release
+        with:
+          required-jobs: Check
 
   release-candidate:
     name: Release Candidate
@@ -153,10 +163,11 @@ jobs:
       - name: Smoke exact versioned candidate
         run: mise exec java@temurin-${{ matrix.java }} -- xvfb-run -a sh .github/scripts/smoke-candidate.sh "${{ matrix.java }}"
       - name: Record release candidate evidence
-        run: python3 .github/scripts/release-evidence.py record
-        env:
-          EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
-          RELEASE_TARGET: java-${{ matrix.java }}
+        uses: christianpflugradt/please-behave-governance/actions/release/evidence@c37eb9268f0c159f35e2301712269d77c94ad300 # updates/actions/release
+        with:
+          operation: record
+          version: ${{ needs.plan.outputs.version }}
+          target: java-${{ matrix.java }}
       - name: Upload release candidate evidence
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
@@ -208,7 +219,6 @@ jobs:
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: python node
-      - run: npm ci --ignore-scripts
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: passbird-build-${{ github.run_id }}-${{ github.run_attempt }}
@@ -232,12 +242,19 @@ jobs:
           path: release-evidence
           merge-multiple: true
       - name: Verify complete release candidate evidence
-        run: python3 .github/scripts/release-evidence.py verify
-        env:
-          EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
+        uses: christianpflugradt/please-behave-governance/actions/release/evidence@c37eb9268f0c159f35e2301712269d77c94ad300 # updates/actions/release
+        with:
+          operation: verify
+          version: ${{ needs.plan.outputs.version }}
       - name: Publish exact verified candidate without rebuilding
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          GH_TOKEN: ${{ github.token }}
-        run: npm run release
-
+        uses: christianpflugradt/please-behave-governance/actions/release/publish@c37eb9268f0c159f35e2301712269d77c94ad300 # updates/actions/release
+        with:
+          version: ${{ needs.plan.outputs.version }}
+          mode: ${{ needs.plan.outputs.mode }}
+          tag-format: '${version}'
+          force: ${{ inputs.force }}
+          assets: |
+            dist/passbird.jar :: Passbird executable JAR
+            dist/SHA256SUMS
+            dist/metadata.json
+          verify-command: python3 .github/scripts/release-artifacts.py verify-ci

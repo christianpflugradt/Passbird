@@ -134,13 +134,12 @@ areas:
     review_question: Is the project still verifiable and releasable, with trustworthy automation, coverage, dependency checks, and updater-compatible assets?
     hotspots:
       - .github/workflows
-      - release.config.mjs
       - build.gradle.kts
       - settings.gradle.kts
       - scripts
       - README.md
     focus:
       - CI workflow correctness, artifact flow, and scheduled or manual release behavior
-      - semantic-release rules, tag creation, and GitHub release asset expectations
+      - shared release action inputs, tag creation, and GitHub release asset expectations
       - coverage, tests, CodeQL, dependency audit, and license checks that may look green while missing real regressions
       - changes that could break the Passbird-Updater contract around release discovery or passbird.jar delivery

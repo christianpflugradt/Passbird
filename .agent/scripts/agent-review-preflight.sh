@@ -57,7 +57,7 @@ behavior)
   set -- specs/interaction.yaml specs/capabilities.yaml specs/flows src/main/kotlin/de/pflugradts/passbird/application/commandhandling src/main/kotlin/de/pflugradts/passbird/application/boot src/main/kotlin/de/pflugradts/passbird/application/process src/main/kotlin/de/pflugradts/passbird/adapter/userinterface README.md CONFIGURATION.md
   ;;
 delivery)
-  set -- .github/workflows release.config.mjs build.gradle.kts settings.gradle.kts .agent/scripts README.md
+  set -- .github/workflows build.gradle.kts settings.gradle.kts .agent/scripts README.md
   ;;
 *)
   usage

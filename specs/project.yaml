@@ -109,7 +109,7 @@ release_model:
   automation:
     - ci.yml runs all deterministic Please Behave checks including PIT in one Check invocation, with compatibility smoke tests reserved for Release Candidate
     - CodeQL retains security-extended queries and the nightly Kotlin toolchain
-    - PIT runs at check but not local hooks; dependency-audit.yml refreshes the OWASP database, rebuilds it on the first successful run of each month and audits main daily together with npm audit
+    - PIT runs at check but not local hooks; dependency-audit.yml refreshes the OWASP database, rebuilds it on the first successful run of each month and audits main daily
     - statistics.yml independently calculates coverage and sends the metrics to badges-and-stuff, which renders the badges
     - release.yml retains manual development prereleases and Monday 03:23 Europe/Berlin stable releases
     - Plan does not publish; Readiness and Candidate run in parallel; Publish requires both

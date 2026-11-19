@@ -17,7 +17,7 @@ Run `mise run setup` explicitly before validation. It installs the locked
 release-tool dependencies and resolves Gradle verification dependencies. It then
 resolves the native task graph online with `--dry-run` to cache signature metadata
 before offline checks; this executes no build or test tasks. The `gradle` mode
-prepares only Gradle inputs when npm release dependencies are not needed. Gradle
+prepares only Gradle inputs. Gradle
 Wrapper and signed/checksummed dependency verification remain in use. Refresh
 preparation after dependency or toolchain changes. CI performs this preparation
 before checks. Tests and governed compilation/build commands run offline.
@@ -106,7 +106,7 @@ isolated environment; they never execute the installed live commit hook.
 
 CI and Candidate use the published Action with install false, sync true
 and summaries. The CLI pin remains solely in mise.toml. Readiness
-verifies exact-source CI through .github/scripts/check-release-ci.py; Plan and Publish
+verifies exact-source CI through the shared check-ci release action; Plan and Publish
 never install or invoke governance or Git hooks. The only custom point is release.
 Python and the default build JDK are exactly pinned in mise. Java 17/21/25 in the
 compatibility matrix intentionally select their latest supported patch versions;
@@ -131,11 +131,10 @@ badges-and-stuff, which renders the badges and owns GitHub Pages. Only `publish`
 Mutation testing is a blocking Rule at check, with no assignments to
 pre-commit or pre-push. CI invokes check once. Release Readiness relies on exact-source CI proof without scanning again.
 
-OWASP is not a Rule: its result depends on the day's advisory data, not on the commit. The daily `dependency-audit.yml` is the single audit entry point; the imported Security Rule Set only verifies that it exists and follows the shared structure. It refreshes the OWASP advisory database incrementally each day and analyzes the default branch with one Dependency-Check scan and one `npm audit`, normalizes both into one findings report and renders it as a step summary. The first successful run of each month (or a manual dispatch with `rebuild`) discards the cached database and rebuilds it before analyzing. The workflow fails from the severity in its `AUDIT_FAIL_ON` variable; unknown severities always fail, and a scan that cannot complete fails as a technical error. Dependency-Check itself never fails the build (`failBuildOnCVSS = 11.0f`) and also writes a JSON report that is normalized. Its explicit scan set retains the two runtime resource roots alongside
+OWASP is not a Rule: its result depends on the day's advisory data, not on the commit. The daily `dependency-audit.yml` is the single audit entry point; the imported Security Rule Set only verifies that it exists and follows the shared structure. It refreshes the OWASP advisory database incrementally each day and analyzes the default branch with one Dependency-Check scan, normalizes it into one findings report and renders it as a step summary. The first successful run of each month (or a manual dispatch with `rebuild`) discards the cached database and rebuilds it before analyzing. The workflow fails from the severity in its `AUDIT_FAIL_ON` variable; unknown severities always fail, and a scan that cannot complete fails as a technical error. Dependency-Check itself never fails the build (`failBuildOnCVSS = 11.0f`) and also writes a JSON report that is normalized. Its explicit scan set retains the two runtime resource roots alongside
 Gradle runtimeClasspath. The plugin's explicit setScanSet setter marks that configuration
 as intentional; assigning the file collection alone leaves its default scan active.
-Repository-local npm release tooling is outside the OWASP scan scope and covered by `npm audit`;
-no vulnerability suppression is changed.
+No vulnerability suppression is changed.
 
 CodeQL retains its security-extended queries, nightly Kotlin toolchain and weekly
 schedule. The Dependency Audit workflow keeps manual dispatch, serializes its runs and uses the
@@ -187,14 +186,14 @@ Release, publish artifacts or monitor remote runs without an explicit request.
 
 ## Shared release evidence
 
-Workflow policies live in .github/release-ci.json and .github/release-artifacts.json.
-The CI proof preserves retained successful jobs from partial reruns and exports
+The release plan, CI proof, candidate evidence and publication are the pinned release actions of the governance repository;
+.github/release-artifacts.json lists the candidate artifacts. The CI proof preserves retained successful jobs from partial reruns and exports
 the selected Check attempt for the trusted CI JAR download. Candidate packaging,
 JAR payload verification, Java runtime receipts and evidence recording run directly
-in Actions; .github/scripts/release-evidence.py verifies the complete current-attempt
+in Actions; the shared evidence action verifies the complete current-attempt
 manifest set before publication. Native build remains governance at release,
 with explicit build/smoke dependencies retained at ordinary points.
-The local Semantic Release plugin checks the version, source and current remote
+The shared publish action checks the version, source and current remote
 main without relying on imported caches. Stable and development publication retain
 their existing triggers, CI payload binding and runtime compatibility gates.
 

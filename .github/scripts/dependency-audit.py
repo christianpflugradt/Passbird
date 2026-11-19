@@ -1,6 +1,6 @@
-"""Normalize OWASP Dependency-Check and npm audit results into one shared report and render it.
+"""Normalize OWASP Dependency-Check results into one shared report and render it.
 
-`scan` reads the Dependency-Check JSON report, runs npm audit once and writes a JSON report; it exits 0 when
+`scan` reads the Dependency-Check JSON report and writes a JSON report; it exits 0 when
 every scan completed, even with findings, and 2 when a scan could not complete. `report` renders the GitHub
 step summary from that report and fails with 1 when a finding reaches the threshold; findings of unknown
 severity always reach it.
@@ -9,11 +9,9 @@ severity always reach it.
 import argparse
 import json
 import os
-import subprocess
 import sys
 
 SEVERITIES = ("low", "medium", "high", "critical")
-NPM_SEVERITIES = {"info": "low", "low": "low", "moderate": "medium", "high": "high", "critical": "critical"}
 
 
 def owasp_findings(text):
@@ -41,45 +39,9 @@ def owasp_findings(text):
     return list(found.values())
 
 
-def npm_findings(output):
-    """Normalize `npm audit --json`; entries that only propagate through dependencies add no advisory."""
-    report = json.loads(output)
-    if "error" in report:
-        raise ValueError("npm audit reported an error")
-    found = {}
-    for name, vulnerability in report["vulnerabilities"].items():
-        for via in vulnerability["via"]:
-            if not isinstance(via, dict):
-                continue
-            url = via.get("url") or ""
-            advisory_id = url.rsplit("/", 1)[-1] if "/advisories/GHSA-" in url else f"npm:{via['source']}"
-            entry = found.setdefault(
-                advisory_id,
-                {
-                    "id": advisory_id,
-                    "aliases": [],
-                    "severity": NPM_SEVERITIES.get(via.get("severity"), "unknown"),
-                    "description": via.get("title") or None,
-                    "url": url or None,
-                    "packages": [],
-                },
-            )
-            package = f"{via.get('name', name)} {via.get('range', '')}".strip()
-            if package not in entry["packages"]:
-                entry["packages"].append(package)
-    return list(found.values())
-
-
 def read_owasp(path):
     with open(path, encoding="utf-8") as handle:
         return owasp_findings(handle.read())
-
-
-def run_npm():
-    result = subprocess.run(["npm", "audit", "--json"], capture_output=True, check=False)
-    if result.returncode not in (0, 1):
-        raise RuntimeError(f"npm exited with {result.returncode}")
-    return npm_findings(result.stdout)
 
 
 def scan_one(name, produce):
@@ -91,7 +53,7 @@ def scan_one(name, produce):
 
 
 def scan(path, owasp_path):
-    report = {"scans": [scan_one("owasp", lambda: read_owasp(owasp_path)), scan_one("npm", run_npm)]}
+    report = {"scans": [scan_one("owasp", lambda: read_owasp(owasp_path))]}
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(report, handle, indent=2)
     failed = [item["ecosystem"] for item in report["scans"] if item["status"] != "complete"]

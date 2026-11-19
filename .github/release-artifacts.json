@@ -1,7 +1,4 @@
 {
-  "schema_version": 1,
-  "repository": "christianpflugradt/Passbird",
-  "workflow": ".github/workflows/release.yml",
   "root": "dist",
   "targets": {
     "java-17": [
