@@ -1,5 +1,5 @@
 [tools]
-"github:please-behave/cli" = "0.15.2"
+"github:please-behave/cli" = "0.15.3"
 java = "temurin-25.0.4+101.0.LTS"
 node = "26.13.1"
 python = "3.15.2"
