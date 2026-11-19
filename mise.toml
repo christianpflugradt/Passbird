@@ -45,5 +45,6 @@ description = "Package the verified versioned JAR without rebuilding"
 run = "python3 .github/scripts/release-artifacts.py package"
 
 [tasks.release]
-description = "Start the Release workflow for remote main"
-run = "gh workflow run release.yml --ref main"
+description = "Wait for CI on main, then start the Release workflow; --follow watches the run"
+usage = 'flag "--follow" help="Watch the dispatched release run until it finishes"'
+run = 'python3 .github/scripts/release-task.py ${usage_follow:+--follow}'
