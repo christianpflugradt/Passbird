@@ -46,7 +46,7 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ github.token }}
-        uses: please-behave/action@9a184e405e62a79154989de1e54c54869180751b # v1.5.0
+        uses: please-behave/action@8b4f3e3d0dc1aec1cd12661abbcc10a666506b96 # v1.5.1
         with:
           install: 'false'
           sync: 'true'
