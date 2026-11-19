@@ -172,7 +172,7 @@ local_verification_policy:
       - coverage thresholds remain unchanged; the JaCoCo HTML report stays available as the test-coverage-report workflow artifact
       - actionlint 1.7.12 supports timezone
       - release.yml retains Monday 03:23 Europe/Berlin stable releases, manual development prereleases and the existing preview entrypoints
-      - mise release runs .github/scripts/release-task.py: it waits until no ci.yml run on main is queued or in progress, dispatches release.yml on main and returns; with --follow it also watches the dispatched run
+      - mise release is the shared task from please-behave-governance, included in mise.toml and pinned to a commit: it waits until no ci.yml run on main is queued or in progress, dispatches release.yml on main and returns; with --follow it also watches the dispatched run
       - mise installs exactly pinned Python and the default Java build toolchain; the Java 17/21/25 compatibility matrix explicitly selects its runtime through mise exec
       - prepare resolves dependencies and dry-run task metadata only; packaging and release integrity belong to Actions
       - release is the only custom governance point and validates the versioned native build; Plan and Publish never install or invoke governance or Git hooks
