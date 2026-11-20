@@ -1,5 +1,9 @@
 #!/bin/sh
 set -eu
+offline=--offline
+if [ "${CI:-}" = true ]; then
+  offline=
+fi
 check_license=false
 if [ "${1:-}" = checkLicense ]; then
   check_license=true
@@ -13,6 +17,6 @@ if [ "$check_license" = true ]; then
   set -- --no-configuration-cache --no-build-cache --rerun-tasks "$@"
 fi
 if [ "${CI:-}" = true ] && [ -z "${DISPLAY:-}" ] && command -v xvfb-run >/dev/null 2>&1; then
-  exec xvfb-run --auto-servernum --server-args="-screen 0 1280x1024x24 -nolisten tcp" ./gradlew --offline --continue "$@"
+  exec xvfb-run --auto-servernum --server-args="-screen 0 1280x1024x24 -nolisten tcp" ./gradlew $offline --continue "$@"
 fi
-exec ./gradlew --offline --continue "$@"
+exec ./gradlew $offline --continue "$@"
