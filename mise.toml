@@ -1,13 +1,13 @@
 include = [
-  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/repository-conventions/mise.toml?ref=a7457cc17a1b95f8762e9ba3ddb45d9c9bd34b9d",
-  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/security/mise.toml?ref=a7457cc17a1b95f8762e9ba3ddb45d9c9bd34b9d",
-  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/open-source-software/mise.toml?ref=a7457cc17a1b95f8762e9ba3ddb45d9c9bd34b9d",
-  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/releasable-open-source-software/mise.toml?ref=a7457cc17a1b95f8762e9ba3ddb45d9c9bd34b9d",
+  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/repository-conventions/mise.toml?ref=c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f",
+  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/security/mise.toml?ref=c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f",
+  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/open-source-software/mise.toml?ref=c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f",
+  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/releasable-open-source-software/mise.toml?ref=c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f",
 ]
 
 [task_config]
 includes = [
-  "git::https://github.com/christianpflugradt/please-behave-governance.git//mise-tasks/release?ref=3c8ce48cb62d27c8c300d30f361e0832516fc860",
+  "git::https://github.com/christianpflugradt/please-behave-governance.git//mise-tasks/release?ref=c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f",
 ]
 
 [tools]
