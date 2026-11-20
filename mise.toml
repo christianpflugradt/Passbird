@@ -1,7 +1,7 @@
 include = [
   "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/repository-conventions/mise.toml?ref=c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f",
   "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/security/mise.toml?ref=c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f",
-  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/open-source-software/mise.toml?ref=c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f",
+  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/open-source-software/mise.toml?ref=7550c9f42d82ec2a0119b8db8a176544939ffd3f",
   "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/releasable-open-source-software/mise.toml?ref=c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f",
 ]
 
