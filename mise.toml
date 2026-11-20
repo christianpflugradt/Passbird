@@ -1,3 +1,10 @@
+include = [
+  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/repository-conventions/mise.toml?ref=a7457cc17a1b95f8762e9ba3ddb45d9c9bd34b9d",
+  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/security/mise.toml?ref=a7457cc17a1b95f8762e9ba3ddb45d9c9bd34b9d",
+  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/open-source-software/mise.toml?ref=a7457cc17a1b95f8762e9ba3ddb45d9c9bd34b9d",
+  "git::https://github.com/christianpflugradt/please-behave-governance.git//rulesets/releasable-open-source-software/mise.toml?ref=a7457cc17a1b95f8762e9ba3ddb45d9c9bd34b9d",
+]
+
 [task_config]
 includes = [
   "git::https://github.com/christianpflugradt/please-behave-governance.git//mise-tasks/release?ref=3c8ce48cb62d27c8c300d30f361e0832516fc860",
@@ -8,13 +15,8 @@ includes = [
 java = "temurin-25.0.4+101.0.LTS"
 node = "26.13.1"
 python = "3.15.2"
-actionlint = "1.7.12"
-yq = "4.54.3"
-gitleaks = "8.30.1"
-shellcheck = "0.11.0"
 gh = "2.104.0"
 ruff = "0.17.5"
-shfmt = "3.14.1"
 "aqua:boyter/scc" = "4.1.0"
 
 [tasks.format]
