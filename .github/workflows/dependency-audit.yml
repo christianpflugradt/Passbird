@@ -89,9 +89,13 @@ jobs:
           OSS_INDEX_USERNAME: ${{ secrets.OSS_INDEX_USERNAME }}
           OSS_INDEX_PASSWORD: ${{ secrets.OSS_INDEX_PASSWORD }}
         run: ./gradlew --no-configuration-cache dependencyCheckAnalyze --stacktrace
-      - name: Audit the dependencies
-        uses: christianpflugradt/please-behave-governance/actions/dependency-audit@83bb5095593e4043176ea66e9229ec0e93ec6ad5 # updates/actions/dependency-audit
+      - name: Audit the Dependency-Check report
+        uses: christianpflugradt/please-behave-governance/actions/dependency-audit/owasp@59733eeb16cb063211bd27db3a57ab95f720a1db # updates/actions/dependency-audit
         with:
-          owasp-report: build/reports/dependency-check/dependency-check-report.json
+          report: build/reports/dependency-check/dependency-check-report.json
+      - name: Report the findings
+        if: ${{ !cancelled() }}
+        uses: christianpflugradt/please-behave-governance/actions/dependency-audit/report@59733eeb16cb063211bd27db3a57ab95f720a1db # updates/actions/dependency-audit
+        with:
           extra-report-paths: build/reports/dependency-check/dependency-check-report.html
           fail-on: ${{ env.AUDIT_FAIL_ON }}
