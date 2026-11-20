@@ -16,7 +16,6 @@ Repository entrypoint for Passbird, an offline terminal password manager. Agent-
 - Add no fallbacks the maintainer did not ask for. If an important decision is not answered by the project documents, ask the maintainer.
 - Add no code comments unless the maintainer asks or an existing convention requires them. Never leave design commentary or agent-style annotations.
 - Get maintainer approval for the exact wording before changing any user-visible text.
-- Source `~/.zprofile` and `~/.zshrc` before shell commands, then prefer the `rtk` wrapper (`rtk gh` where supported).
 - Prefer the deterministic helpers in `.agent/scripts` (see `.agent/README.md`) over composing multi-step operations by hand.
 - Use GitHub CLI for GitHub-hosted work: issues, pull requests, workflow runs, releases and repository metadata. When creating an issue, apply the most specific existing type label, add `migration` for compatibility-preserving work and verify before retrying `gh issue create`.
 - Work directly on `main`. Create, switch to or push no other branch, and never use `git stash`. If unrelated workspace state blocks this, stop and explain.
