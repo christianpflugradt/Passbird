@@ -3,8 +3,10 @@
         "Standard dependency updates wait 7 days before Renovate creates branches or PRs.",
         "GitHub Actions and major-version updates wait 14 days."
     ],
-    "dependencyDashboard": true,
-    "dependencyDashboardOSVVulnerabilitySummary": "all",
+    "dependencyDashboard": {
+        "enabled": true,
+        "osvVulnerabilitySummary": "all"
+    },
     "minimumReleaseAge": "7 days",
     "minimumReleaseAgeBehaviour": "timestamp-required",
     "internalChecksFilter": "strict",
