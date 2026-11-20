@@ -47,13 +47,18 @@ jobs:
       required-jobs: Check
 
   release-candidate:
-    name: Release Candidate
+    name: Release Candidate (Java ${{ matrix.java }})
     needs: plan
     if: needs.plan.outputs.release == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['17', '21', '25']
     env:
       EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
+      MISE_JAVA_VERSION: temurin-${{ matrix.java }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -63,59 +68,33 @@ jobs:
       - name: Install project tools
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
-          install_args: python java node github:please-behave/cli
+          install_args: python java@temurin-${{ matrix.java }} node github:please-behave/cli
       - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
-      - name: Fetch candidate dependencies
-        run: mise run setup:candidate
-      - name: Verify the candidate at the release point
-        uses: christianpflugradt/please-behave-governance/actions/release/governance@f214b49bd33bf21fbea5c4a9a3214fa83df6fa1d # updates/actions/release
-      - name: Package verified candidate
-        run: mise run package
-      - name: Verify candidate archive
-        run: python3 .github/scripts/release-artifacts.py verify --without-smokes
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: passbird-build-${{ github.run_id }}-${{ github.run_attempt }}
-          path: dist/
-          if-no-files-found: error
-          retention-days: 7
-  release-smoke:
-    name: Release Candidate (Java ${{ matrix.java }})
-    needs: [plan, release-candidate]
-    if: needs.plan.outputs.release == 'true'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        java: ['17', '21', '25']
-    env:
-      EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: ${{ needs.plan.outputs.source_sha }}
-          persist-credentials: false
-      - name: Install project tools
-        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
-        with:
-          install_args: python java@temurin-${{ matrix.java }}
       - name: Prepare smoke desktop dependencies
         run: |
           sudo apt-get update
           sudo apt-get install --yes xauth xclip xvfb
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
-        with:
-          name: passbird-build-${{ github.run_id }}-${{ github.run_attempt }}
-          path: dist
-      - name: Smoke exact versioned candidate
-        run: mise exec java@temurin-${{ matrix.java }} -- xvfb-run -a sh .github/scripts/smoke-candidate.sh "${{ matrix.java }}"
+      - name: Fetch candidate dependencies
+        run: mise run setup:candidate
+      - name: Verify the candidate at the release point
+        uses: christianpflugradt/please-behave-governance/actions/release/governance@f214b49bd33bf21fbea5c4a9a3214fa83df6fa1d # updates/actions/release
+      - name: Verify the version of the JAR
+        run: sh .github/scripts/verify-release-jar-manifest.sh build/libs/passbird.jar "$EXPECTED_RELEASE_VERSION"
+      - name: Smoke the candidate on this Java version
+        run: mise exec -- xvfb-run -a sh smoke-test/run.sh
+        env:
+          PASSBIRD_SMOKE_TMPDIR: ${{ github.workspace }}/build/smoke-test-candidate-java-${{ matrix.java }}
+          PASSBIRD_SMOKE_KEEP_TMP: '1'
+      - name: Stage the JAR that is published
+        if: matrix.java == '17'
+        run: mkdir dist && cp build/libs/passbird.jar dist/
       - name: Record release candidate evidence
+        if: matrix.java == '17'
         uses: christianpflugradt/please-behave-governance/actions/release/evidence@f214b49bd33bf21fbea5c4a9a3214fa83df6fa1d # updates/actions/release
         with:
           operation: record
           version: ${{ needs.plan.outputs.version }}
-          target: java-${{ matrix.java }}
+          target: java-17
       - name: Upload smoke failure diagnostics
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
@@ -127,19 +106,15 @@ jobs:
 
   publish:
     name: Publish
-    needs: [plan, release-readiness, release-candidate, release-smoke]
+    needs: [plan, release-readiness, release-candidate]
     if: >-
       needs.plan.outputs.release == 'true' &&
       needs.release-readiness.result == 'success' &&
-      needs.release-candidate.result == 'success' &&
-      needs.release-smoke.result == 'success'
+      needs.release-candidate.result == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
       contents: write
-    env:
-      EXPECTED_RELEASE_VERSION: ${{ needs.plan.outputs.version }}
-      RELEASE_MODE: ${{ needs.plan.outputs.mode }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -155,6 +130,9 @@ jobs:
         with:
           operation: verify
           version: ${{ needs.plan.outputs.version }}
+      - name: Checksum the JAR
+        working-directory: dist
+        run: sha256sum -- passbird.jar > SHA256SUMS
       - name: Publish exact verified candidate without rebuilding
         uses: christianpflugradt/please-behave-governance/actions/release/publish-release@f214b49bd33bf21fbea5c4a9a3214fa83df6fa1d # updates/actions/release
         with:
@@ -165,4 +143,3 @@ jobs:
           assets: |
             dist/passbird.jar
             dist/SHA256SUMS
-            dist/metadata.json

@@ -160,7 +160,7 @@ local_verification_policy:
       - allTests covers unit, property, integration, architecture and desktop clipboard tests in one Rule; CI prepares Xvfb, xauth and xclip
       - coverage consumes nonempty allTests.exec only and retains 90 percent instruction and 85 percent branch thresholds plus HTML/XML diagnostics
       - native test diagnostics are consolidated into test-reports; lint, Detekt, license, mutation and smoke diagnostics remain available after failures
-      - Release Candidate builds the versioned JAR once and tests it on a Java 17/21/25 matrix with fail-fast disabled
+      - Release Candidate is a Java 17/21/25 matrix with fail-fast disabled; every entry builds the versioned JAR with its own Java version and smoke-tests it there
       - PIT is the mutation Rule in the same Check invocation with unchanged high-risk targets, target tests, timeouts and report/line-coverage outputs
       - mutation runs at check but neither in local hooks nor again at release-readiness
       - OWASP is not a Rule; dependency-audit.yml is the single daily audit entry point, refreshes the database incrementally, rebuilds it on the first successful run of a month or on manual dispatch with rebuild, and keeps the existing secret names
@@ -171,14 +171,14 @@ local_verification_policy:
       - actionlint 1.7.12 supports timezone
       - release.yml retains Monday 03:23 Europe/Berlin stable releases, manual development prereleases and the existing preview entrypoints
       - mise release is the shared task from please-behave-governance, included in mise.toml and pinned to a commit: it waits until no ci.yml run on main is queued or in progress, dispatches release.yml on main and returns; with --follow it also watches the dispatched run
-      - mise installs exactly pinned Python and the default Java build toolchain; the Java 17/21/25 compatibility matrix explicitly selects its runtime through mise exec
-      - prepare resolves dependencies and dry-run task metadata only; packaging and release integrity belong to Actions
+      - mise installs exactly pinned Python and the default Java build toolchain; the Java 17/21/25 Release Candidate matrix selects its Java version with MISE_JAVA_VERSION
+      - prepare resolves dependencies and dry-run task metadata only; the release candidate and its integrity belong to Actions
       - release is the only custom governance point and validates the versioned native build; Plan and Publish never install or invoke governance or Git hooks
-      - release policies live under .github; local scripts verify source CI, artifact evidence and publication without cached governance modules
-      - Plan does not prepare or publish; Readiness and Candidate build run in parallel; Publish requires both and the complete candidate runtime matrix
-      - Candidate builds with the planned version and checks exact JAR bytes on Java 25, 17 and 21; Publish never rebuilds
+      - the release artifact policy lives in .github/release-artifacts.json; source CI proof, candidate evidence and publication are shared actions of please-behave-governance
+      - Plan does not prepare or publish; Readiness and the Candidate matrix run in parallel; Publish requires both
+      - Candidate builds with the planned version on Java 17, 21 and 25 and smoke-tests each JAR on its Java version; only the Java 17 JAR is published and Publish never rebuilds
       - readiness runs the shared check-ci release action and exports its retained Check attempt for CI artifact binding
-      - artifacts, metadata, checksums and smoke receipts bind version, source, repository and workflow run/attempt; incomplete or foreign sets fail
+      - the shared evidence action binds the published JAR to version, source, repository and workflow run/attempt; SHA256SUMS is generated from that JAR
       - partial CI reruns may retain successful jobs; Release reruns require the current attempt's complete candidate
       - monthly development-release purge retains its 30-day policy and tag cleanup
 github_cli_usage:
@@ -284,12 +284,12 @@ release_and_history_notes:
     - test, ci, docs and style do not release unless breaking
     - scoped reverts cancel unreleased originals in analysis and notes; historical build(release) version commits are ignored
     - no generated version commit is created
-    - release assets retain passbird.jar for stable and opt-in development updater compatibility and add SHA256SUMS and metadata.json
+    - release assets retain passbird.jar for stable and opt-in development updater compatibility and add SHA256SUMS
     - Build-Date, Created-By, executable entrypoint, vendor/title and implementation/specification version attributes remain intact
   release_guardrail:
     - persistence or migration changes must be documented before release
-    - missing or mismatched manifests, unsafe JAR entries, incomplete smoke evidence and foreign source/version/run/attempt metadata fail before publication
-    - Publish compares candidate payload with the trusted CI JAR allowing only manifest differences and never rebuilds
+    - a JAR whose manifest version differs from the planned version fails the candidate, as do failing smoke tests on any Java version, and foreign source/version/run/attempt evidence fails before publication
+    - Publish never rebuilds
     - publication rechecks planned version, checkout source and unchanged remote main
     - tag, GitHub release and asset publication are not atomic; partial failures must be reported
     - agents do not publish releases, trigger Release or monitor remote workflows without explicit authorization
