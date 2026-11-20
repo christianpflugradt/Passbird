@@ -29,7 +29,7 @@ dependencies = "audited"
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "rulesets/open-source-software"
-ref = "c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f"
+ref = "568a19c2da4ed41ee623bcda088a40d504f69b3e"
 
 [imports.rule_parameters.license]
 target = "LICENSE"

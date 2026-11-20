@@ -68,27 +68,11 @@ jobs:
 
   publish:
     name: Publish statistics
-    runs-on: ubuntu-26.04
-    timeout-minutes: 10
     needs:
       - collect
     if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Download metrics
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
-        with:
-          name: statistics-metrics
-          path: metrics
-
-      - name: Send statistics to badges-and-stuff
-        env:
-          GH_TOKEN: ${{ secrets.STATISTICS_TOKEN }}
-        run: |
-          set -euo pipefail
-          jq --slurp \
-            --arg project passbird \
-            --arg commit "$GITHUB_SHA" \
-            --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            '{event_type: "statistics", client_payload: {project: $project, commit: $commit, timestamp: $timestamp, metrics: .}}' \
-            metrics/*.json >payload.json
-          gh api --method POST repos/christianpflugradt/badges-and-stuff/dispatches --input payload.json
+    uses: christianpflugradt/please-behave-governance/.github/workflows/statistics-publish.yml@19e626fc8f927a8d909d6d7c11761096294b22c0 # updates/workflows/statistics
+    with:
+      project: passbird
+    secrets:
+      STATISTICS_TOKEN: ${{ secrets.STATISTICS_TOKEN }}
