@@ -28,6 +28,8 @@ jobs:
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: aqua:boyter/scc
+          experimental: true
+          version: 2026.11.11
       - name: Prepare dependencies
         run: |
           sudo apt-get update

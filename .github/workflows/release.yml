@@ -69,6 +69,8 @@ jobs:
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: python java@temurin-${{ matrix.java }} node github:please-behave/cli
+          experimental: true
+          version: 2026.11.11
       - uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6
       - name: Prepare smoke desktop dependencies
         run: |
@@ -125,6 +127,8 @@ jobs:
         uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install_args: python node
+          experimental: true
+          version: 2026.11.11
       - name: Verify complete release candidate evidence
         uses: christianpflugradt/please-behave-governance/actions/release/evidence@f214b49bd33bf21fbea5c4a9a3214fa83df6fa1d # updates/actions/release
         with:
