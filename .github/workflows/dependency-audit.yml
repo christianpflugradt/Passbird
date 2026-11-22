@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 env:
   MISE_AUTO_INSTALL: 'false' # Install tools explicitly before running tasks.
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx3g"
   AUDIT_FAIL_ON: medium # Lowest severity that fails the run: low, medium, high or critical.
   DEPENDENCY_CHECK_DATA_LOCATION: /home/runner/.gradle/dependency-check-data
   DEPENDENCY_CHECK_DATA_KEY_PREFIX: linux-dependency-check-v3-data-
