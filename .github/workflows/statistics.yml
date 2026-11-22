@@ -73,7 +73,7 @@ jobs:
     needs:
       - collect
     if: github.ref == 'refs/heads/main'
-    uses: christianpflugradt/repository-catalog/.github/workflows/statistics-publish.yml@8d44e3ebb495ba1371e949bcc11b11597a632394 # updates/workflows/statistics
+    uses: christianpflugradt/repository-catalog/.github/workflows/statistics-publish.yml@19e626fc8f927a8d909d6d7c11761096294b22c0 # updates/workflows/statistics
     with:
       project: passbird
     secrets:
