@@ -13,7 +13,7 @@ custom = ["release"]
 [[imports]]
 git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/repository-conventions"
-ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
+ref = "0f47bb84ff5435cb6b692275fb6767f4f599abdb"
 
 [imports.rule_parameters.agents-size]
 max_tokens = "1500"
@@ -24,7 +24,7 @@ scopes_file = ".please/commit-scopes.txt"
 [[imports]]
 git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/security"
-ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
+ref = "0f47bb84ff5435cb6b692275fb6767f4f599abdb"
 
 [imports.rule_parameters.dependency-audit-workflow]
 dependencies = "audited"
@@ -32,7 +32,7 @@ dependencies = "audited"
 [[imports]]
 git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/open-source-software"
-ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
+ref = "0f47bb84ff5435cb6b692275fb6767f4f599abdb"
 
 [imports.rule_parameters.license]
 target = "LICENSE"
@@ -40,16 +40,16 @@ target = "LICENSE"
 [[imports]]
 git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/releasable-open-source-software"
-ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
+ref = "0f47bb84ff5435cb6b692275fb6767f4f599abdb"
 
 [[adapter_imports]]
 id = "gemini-flash-lite"
 git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "adapters/gemini-flash-lite"
-ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
+ref = "29b8b072e41158ab12cadafbda35e868642b224e"
 
 [[adapter_imports]]
 id = "gemini-flash"
 git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "adapters/gemini-flash"
-ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
+ref = "29b8b072e41158ab12cadafbda35e868642b224e"
