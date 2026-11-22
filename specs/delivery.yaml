@@ -152,7 +152,7 @@ local_verification_policy:
     notes:
       - ci.yml uses check / Check with the published governor, preserving main pushes, Renovate PRs and manual dispatch
       - CI and Candidate execute through SHA-pinned Please Behave Action with install false, sync true and summaries; mise.toml owns the CLI pin
-      - CI prepares Xvfb before source checks; release runtime matrix jobs use xvfb-run for candidate smoke tests
+      - in CI, source checks run under a virtual display through tools/with-display.sh, which tools/prepare.sh provides with xvfb; release runtime matrix jobs use xvfb-run for candidate smoke tests
       - preparation downloads locked dependencies and prepares tools before checks; governed tests remain offline with synthetic credentials and mocked services
       - preparation explicitly resolves runtime POM artifacts for offline license discovery; license report tasks bypass the build cache and rerun to reject stale incomplete reports
       - preparation resolves the native task graph online with --dry-run to cache signature metadata before offline checks without executing build or test tasks
