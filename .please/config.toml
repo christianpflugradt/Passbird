@@ -1,6 +1,9 @@
 project = "Passbird"
 max_display_files = 5
 
+[publish]
+key_env = "PLEASE_GATEWAY_KEY"
+
 [execution]
 fail_fast_terminate_running_instances = false
 
