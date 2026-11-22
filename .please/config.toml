@@ -21,7 +21,7 @@ scopes_file = ".please/commit-scopes.txt"
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "rulesets/security"
-ref = "c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f"
+ref = "0de24d29d6195adecb6806103e205a202793cc0b"
 
 [imports.rule_parameters.dependency-audit-workflow]
 dependencies = "audited"
@@ -29,7 +29,7 @@ dependencies = "audited"
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "rulesets/open-source-software"
-ref = "7550c9f42d82ec2a0119b8db8a176544939ffd3f"
+ref = "385ef5226fd84de42a1529f395469fb135e38e49"
 
 [imports.rule_parameters.license]
 target = "LICENSE"
@@ -37,7 +37,7 @@ target = "LICENSE"
 [[imports]]
 git = "https://github.com/christianpflugradt/please-behave-governance.git"
 path = "rulesets/releasable-open-source-software"
-ref = "c13b67c59b7ab4224fb2544a2de6fa2f49d36e2f"
+ref = "c85286b88d8fe1da760ba222c7d787a96c65019b"
 
 [[adapter_imports]]
 id = "gemini-flash-lite"
