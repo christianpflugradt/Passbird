@@ -24,7 +24,7 @@ agent_internal_scripts:
       use_for: running the release jar manifest and payload verification sequence
 quality_gates:
   tool_preparation:
-    - shared conventions, security, open-source license and release policies use full-commit pins from please-behave-governance in .please/config.toml
+    - shared conventions, security, open-source license and release policies use full-commit pins from repository-catalog in .please/config.toml
     - mise.toml pins Java, Node, Python, actionlint, Gitleaks, ShellCheck, GitHub CLI, Ruff and shfmt for local validation
     - run mise install and mise run setup explicitly before offline Git hooks; preparation does not run validation
     - use mise exec for manual Please Behave and Git commands without shell activation so hooks inherit the configured tool PATH
@@ -170,11 +170,11 @@ local_verification_policy:
       - coverage thresholds remain unchanged; the JaCoCo HTML report stays available as the test-coverage-report workflow artifact
       - actionlint 1.7.12 supports timezone
       - release.yml retains Monday 03:23 Europe/Berlin stable releases, manual development prereleases and the existing preview entrypoints
-      - mise release is the shared task from please-behave-governance, included in mise.toml and pinned to a commit: it waits until no ci.yml run on main is queued or in progress, dispatches release.yml on main and returns; with --follow it also watches the dispatched run
+      - mise release is the shared task from repository-catalog, included in mise.toml and pinned to a commit: it waits until no ci.yml run on main is queued or in progress, dispatches release.yml on main and returns; with --follow it also watches the dispatched run
       - mise installs exactly pinned Python and the default Java build toolchain; the Java 17/21/25 Release Candidate matrix selects its Java version with MISE_JAVA_VERSION
       - prepare resolves dependencies and dry-run task metadata only; the release candidate and its integrity belong to Actions
       - release is the only custom governance point and validates the versioned native build; Plan and Publish never install or invoke governance or Git hooks
-      - the release artifact policy lives in .github/release-artifacts.json; source CI proof, candidate evidence and publication are shared actions of please-behave-governance
+      - the release artifact policy lives in .github/release-artifacts.json; source CI proof, candidate evidence and publication are shared actions of repository-catalog
       - Plan does not prepare or publish; Readiness and the Candidate matrix run in parallel; Publish requires both
       - Candidate builds with the planned version on Java 17, 21 and 25 and smoke-tests each JAR on its Java version; only the Java 17 JAR is published and Publish never rebuilds
       - readiness runs the shared check-ci release action and exports its retained Check attempt for CI artifact binding

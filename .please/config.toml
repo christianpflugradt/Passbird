@@ -11,9 +11,9 @@ fail_fast_terminate_running_instances = false
 custom = ["release"]
 
 [[imports]]
-git = "https://github.com/christianpflugradt/please-behave-governance.git"
+git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/repository-conventions"
-ref = "29b8b072e41158ab12cadafbda35e868642b224e"
+ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
 
 [imports.rule_parameters.agents-size]
 max_tokens = "1500"
@@ -22,34 +22,34 @@ max_tokens = "1500"
 scopes_file = ".please/commit-scopes.txt"
 
 [[imports]]
-git = "https://github.com/christianpflugradt/please-behave-governance.git"
+git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/security"
-ref = "0de24d29d6195adecb6806103e205a202793cc0b"
+ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
 
 [imports.rule_parameters.dependency-audit-workflow]
 dependencies = "audited"
 
 [[imports]]
-git = "https://github.com/christianpflugradt/please-behave-governance.git"
+git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/open-source-software"
-ref = "385ef5226fd84de42a1529f395469fb135e38e49"
+ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
 
 [imports.rule_parameters.license]
 target = "LICENSE"
 
 [[imports]]
-git = "https://github.com/christianpflugradt/please-behave-governance.git"
+git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/releasable-open-source-software"
-ref = "c85286b88d8fe1da760ba222c7d787a96c65019b"
+ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
 
 [[adapter_imports]]
 id = "gemini-flash-lite"
-git = "https://github.com/christianpflugradt/please-behave-governance.git"
+git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "adapters/gemini-flash-lite"
-ref = "29b8b072e41158ab12cadafbda35e868642b224e"
+ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
 
 [[adapter_imports]]
 id = "gemini-flash"
-git = "https://github.com/christianpflugradt/please-behave-governance.git"
+git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "adapters/gemini-flash"
-ref = "29b8b072e41158ab12cadafbda35e868642b224e"
+ref = "8d44e3ebb495ba1371e949bcc11b11597a632394"
