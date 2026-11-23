@@ -1,4 +1,5 @@
 id = "compile"
+version = "1.0"
 name = "Compilation"
 description = "Production and test sources compile against the Java 17 APIs"
 run_at = ["pre-push", "check"]

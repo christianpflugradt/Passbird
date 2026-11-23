@@ -1,4 +1,5 @@
 id = "static-analysis"
+version = "1.0"
 name = "Static analysis"
 description = "Production and test sources have no Detekt findings"
 run_at = ["pre-push", "check"]

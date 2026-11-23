@@ -1,4 +1,5 @@
 id = "mutation"
+version = "1.0"
 name = "Mutation tests"
 description = "High-risk code meets the mutation testing threshold"
 run_at = ["check"]

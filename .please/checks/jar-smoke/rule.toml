@@ -1,4 +1,5 @@
 id = "jar-smoke"
+version = "1.0"
 name = "JAR smoke test"
 description = "The built JAR completes its interactive workflow"
 run_at = ["pre-push", "check"]

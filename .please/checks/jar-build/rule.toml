@@ -1,4 +1,5 @@
 id = "jar-build"
+version = "1.0"
 name = "JAR build"
 description = "The executable, platform-independent JAR builds"
 run_at = ["pre-push", "check", "release"]

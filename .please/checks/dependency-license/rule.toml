@@ -1,4 +1,5 @@
 id = "dependency-license"
+version = "1.0"
 name = "Dependency licenses"
 description = "All dependencies use allowed licenses"
 run_at = ["pre-push", "check"]

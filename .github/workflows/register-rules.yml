@@ -1,0 +1,25 @@
+name: Register rules
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.please/checks/**/rule.toml'
+      - '.please/checks/**/rule.yaml'
+      - '.please/config.toml'
+      - '.github/workflows/register-rules.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-caller-${{ github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  register:
+    uses: christianpflugradt/repository-catalog/.github/workflows/rule-registration.yml@6b7eb40dcec02efd229de38faab44106338706ce
+    secrets:
+      GATEWAY_URL: ${{ secrets.GATEWAY_URL }}
+      GATEWAY_KEY: ${{ secrets.GATEWAY_KEY }}

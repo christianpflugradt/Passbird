@@ -1,4 +1,5 @@
 id = "format-kotlin"
+version = "1.0"
 name = "Kotlin formatting"
 description = "Kotlin sources pass ktlint"
 run_at = ["pre-push", "check"]

@@ -1,4 +1,5 @@
 id = "format-python"
+version = "1.0"
 name = "Python formatting"
 description = "Python sources are formatted with Ruff"
 run_at = ["pre-commit", "pre-push", "check"]
