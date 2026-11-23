@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   check:
-    uses: christianpflugradt/repository-catalog/.github/workflows/ci-check.yml@0f47bb84ff5435cb6b692275fb6767f4f599abdb # updates/workflows/ci
+    uses: christianpflugradt/repository-catalog/.github/workflows/ci-check.yml@52f75f8c81b611b346a64c0d8d0c11f3ed124de1 # updates/workflows/ci
     secrets:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GATEWAY_URL: ${{ secrets.GATEWAY_URL }}
