@@ -13,7 +13,7 @@ custom = ["release"]
 [[imports]]
 git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/repository-conventions"
-ref = "0b01148cebac72b4563f8ebebce0c39b0a1431ea"
+ref = "5748e90e627c3f04496246da74578f62b7998f5e"
 
 [imports.rule_parameters.agents-size]
 max_tokens = "1500"
