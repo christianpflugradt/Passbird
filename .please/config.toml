@@ -2,7 +2,7 @@ project = "Passbird"
 max_display_files = 5
 
 [publish]
-key_env = "PLEASE_GATEWAY_KEY"
+auth = "github-oidc"
 
 [execution]
 fail_fast_terminate_running_instances = false
@@ -24,7 +24,7 @@ scopes_file = ".please/commit-scopes.txt"
 [[imports]]
 git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/security"
-ref = "0b01148cebac72b4563f8ebebce0c39b0a1431ea"
+ref = "2b098709773d0de78f6d03b597c03b15eff6e2d5"
 
 [imports.rule_parameters.dependency-audit-workflow]
 dependencies = "audited"
@@ -40,7 +40,7 @@ target = "LICENSE"
 [[imports]]
 git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/releasable-open-source-software"
-ref = "0b01148cebac72b4563f8ebebce0c39b0a1431ea"
+ref = "2b098709773d0de78f6d03b597c03b15eff6e2d5"
 
 [[adapter_imports]]
 id = "gemini-flash-lite"

@@ -19,7 +19,9 @@ concurrency:
 
 jobs:
   register:
-    uses: christianpflugradt/repository-catalog/.github/workflows/rule-registration.yml@6b7eb40dcec02efd229de38faab44106338706ce
+    permissions:
+      contents: read
+      id-token: write
+    uses: christianpflugradt/repository-catalog/.github/workflows/rule-registration.yml@2b098709773d0de78f6d03b597c03b15eff6e2d5
     secrets:
       GATEWAY_URL: ${{ secrets.GATEWAY_URL }}
-      GATEWAY_KEY: ${{ secrets.GATEWAY_KEY }}
