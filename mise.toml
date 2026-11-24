@@ -1,5 +1,5 @@
 include = [
-  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/repository-conventions/mise.toml?ref=0b01148cebac72b4563f8ebebce0c39b0a1431ea",
+  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/repository-conventions/mise.toml?ref=5748e90e627c3f04496246da74578f62b7998f5e",
   "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/security/mise.toml?ref=0b01148cebac72b4563f8ebebce0c39b0a1431ea",
   "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/open-source-software/mise.toml?ref=0b01148cebac72b4563f8ebebce0c39b0a1431ea",
   "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/releasable-open-source-software/mise.toml?ref=0b01148cebac72b4563f8ebebce0c39b0a1431ea",
