@@ -1,8 +1,8 @@
 include = [
-  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/repository-conventions/mise.toml?ref=2b098709773d0de78f6d03b597c03b15eff6e2d5",
-  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/security/mise.toml?ref=2b098709773d0de78f6d03b597c03b15eff6e2d5",
-  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/open-source-software/mise.toml?ref=2b098709773d0de78f6d03b597c03b15eff6e2d5",
-  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/releasable-open-source-software/mise.toml?ref=2b098709773d0de78f6d03b597c03b15eff6e2d5",
+  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/repository-conventions/mise.toml?ref=29f7071f4b285c228ea4206693a5c397f693a966",
+  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/security/mise.toml?ref=356256b67beed2419a0691611bb71aa3736c326e",
+  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/open-source-software/mise.toml?ref=356256b67beed2419a0691611bb71aa3736c326e",
+  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/releasable-open-source-software/mise.toml?ref=247434c51b05ace2163a53887595dd1eaa701fdf",
 ]
 
 [task_config]
