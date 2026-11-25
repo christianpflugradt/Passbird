@@ -79,7 +79,7 @@ jobs:
       - name: Fetch candidate dependencies
         run: mise run setup:candidate
       - name: Verify the candidate at the release point
-        uses: christianpflugradt/repository-catalog/actions/release/governance@52f75f8c81b611b346a64c0d8d0c11f3ed124de1 # updates/actions/release
+        uses: christianpflugradt/repository-catalog/actions/release/governance@247434c51b05ace2163a53887595dd1eaa701fdf # updates/actions/release
       - name: Verify the version of the JAR
         run: sh .github/scripts/verify-release-jar-manifest.sh build/libs/passbird.jar "$EXPECTED_RELEASE_VERSION"
       - name: Smoke the candidate on this Java version
@@ -92,7 +92,7 @@ jobs:
         run: mkdir dist && cp build/libs/passbird.jar dist/
       - name: Record release candidate evidence
         if: matrix.java == '17'
-        uses: christianpflugradt/repository-catalog/actions/release/evidence@52f75f8c81b611b346a64c0d8d0c11f3ed124de1 # updates/actions/release
+        uses: christianpflugradt/repository-catalog/actions/release/evidence@247434c51b05ace2163a53887595dd1eaa701fdf # updates/actions/release
         with:
           operation: record
           version: ${{ needs.plan.outputs.version }}
@@ -130,7 +130,7 @@ jobs:
           experimental: true
           version: 2026.11.11
       - name: Verify complete release candidate evidence
-        uses: christianpflugradt/repository-catalog/actions/release/evidence@52f75f8c81b611b346a64c0d8d0c11f3ed124de1 # updates/actions/release
+        uses: christianpflugradt/repository-catalog/actions/release/evidence@247434c51b05ace2163a53887595dd1eaa701fdf # updates/actions/release
         with:
           operation: verify
           version: ${{ needs.plan.outputs.version }}
@@ -138,7 +138,7 @@ jobs:
         working-directory: dist
         run: sha256sum -- passbird.jar > SHA256SUMS
       - name: Publish exact verified candidate without rebuilding
-        uses: christianpflugradt/repository-catalog/actions/release/publish-release@52f75f8c81b611b346a64c0d8d0c11f3ed124de1 # updates/actions/release
+        uses: christianpflugradt/repository-catalog/actions/release/publish-release@247434c51b05ace2163a53887595dd1eaa701fdf # updates/actions/release
         with:
           version: ${{ needs.plan.outputs.version }}
           mode: ${{ needs.plan.outputs.mode }}
