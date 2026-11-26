@@ -28,7 +28,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
-    uses: christianpflugradt/repository-catalog/.github/workflows/release-plan.yml@17644e4e43bd8934c5e9e902737706bdc47e5b91 # updates/workflows/release
+    uses: christianpflugradt/repository-catalog/.github/workflows/release-plan.yml@eb10e8f1e32932e24587919fb6b0d427271e0ed6 # updates/workflows/release
     with:
       mode: ${{ github.event_name == 'schedule' && 'release' || inputs.mode }}
       tag-format: '${version}'
@@ -41,7 +41,7 @@ jobs:
     permissions:
       contents: read
       actions: read
-    uses: christianpflugradt/repository-catalog/.github/workflows/release-readiness.yml@17644e4e43bd8934c5e9e902737706bdc47e5b91 # updates/workflows/release
+    uses: christianpflugradt/repository-catalog/.github/workflows/release-readiness.yml@eb10e8f1e32932e24587919fb6b0d427271e0ed6 # updates/workflows/release
     with:
       source-sha: ${{ needs.plan.outputs.source_sha }}
       required-jobs: check / Check
@@ -79,7 +79,7 @@ jobs:
       - name: Fetch candidate dependencies
         run: mise run setup:candidate
       - name: Verify the candidate at the release point
-        uses: christianpflugradt/repository-catalog/actions/release/governance@247434c51b05ace2163a53887595dd1eaa701fdf # updates/actions/release
+        uses: christianpflugradt/repository-catalog/actions/release/governance@74c1911d36c4f967b43040c5179e4ca5f6b0080b # updates/actions/release
       - name: Verify the version of the JAR
         run: sh .github/scripts/verify-release-jar-manifest.sh build/libs/passbird.jar "$EXPECTED_RELEASE_VERSION"
       - name: Smoke the candidate on this Java version
@@ -92,7 +92,7 @@ jobs:
         run: mkdir dist && cp build/libs/passbird.jar dist/
       - name: Record release candidate evidence
         if: matrix.java == '17'
-        uses: christianpflugradt/repository-catalog/actions/release/evidence@247434c51b05ace2163a53887595dd1eaa701fdf # updates/actions/release
+        uses: christianpflugradt/repository-catalog/actions/release/evidence@74c1911d36c4f967b43040c5179e4ca5f6b0080b # updates/actions/release
         with:
           operation: record
           version: ${{ needs.plan.outputs.version }}
@@ -131,7 +131,7 @@ jobs:
           experimental: true
           version: 2026.11.11
       - name: Verify complete release candidate evidence
-        uses: christianpflugradt/repository-catalog/actions/release/evidence@247434c51b05ace2163a53887595dd1eaa701fdf # updates/actions/release
+        uses: christianpflugradt/repository-catalog/actions/release/evidence@74c1911d36c4f967b43040c5179e4ca5f6b0080b # updates/actions/release
         with:
           operation: verify
           version: ${{ needs.plan.outputs.version }}
@@ -139,7 +139,7 @@ jobs:
         working-directory: dist
         run: sha256sum -- passbird.jar > SHA256SUMS
       - name: Publish exact verified candidate without rebuilding
-        uses: christianpflugradt/repository-catalog/actions/release/publish-release@247434c51b05ace2163a53887595dd1eaa701fdf # updates/actions/release
+        uses: christianpflugradt/repository-catalog/actions/release/publish-release@74c1911d36c4f967b43040c5179e4ca5f6b0080b # updates/actions/release
         with:
           version: ${{ needs.plan.outputs.version }}
           source-sha: ${{ needs.plan.outputs.source_sha }}
