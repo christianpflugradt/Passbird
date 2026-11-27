@@ -40,7 +40,7 @@ target = "LICENSE"
 [[imports]]
 git = "https://github.com/christianpflugradt/repository-catalog.git"
 path = "rulesets/releasable-open-source-software"
-ref = "247434c51b05ace2163a53887595dd1eaa701fdf"
+ref = "690f75c72c064425ab52e9a1454dc9839b2cf7d9"
 
 [[adapter_imports]]
 id = "gemini-flash-lite"

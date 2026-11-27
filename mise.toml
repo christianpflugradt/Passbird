@@ -2,7 +2,7 @@ include = [
   "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/repository-conventions/mise.toml?ref=29f7071f4b285c228ea4206693a5c397f693a966",
   "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/security/mise.toml?ref=356256b67beed2419a0691611bb71aa3736c326e",
   "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/open-source-software/mise.toml?ref=356256b67beed2419a0691611bb71aa3736c326e",
-  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/releasable-open-source-software/mise.toml?ref=247434c51b05ace2163a53887595dd1eaa701fdf",
+  "git::https://github.com/christianpflugradt/repository-catalog.git//rulesets/releasable-open-source-software/mise.toml?ref=690f75c72c064425ab52e9a1454dc9839b2cf7d9",
 ]
 
 [task_config]
